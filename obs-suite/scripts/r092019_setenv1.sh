@@ -1,7 +1,7 @@
 home_directory=/gws/nopw/j04/c3s311a_lot2/
 home_directory_smf=/gws/smf/j04/c3s311a_lot2/
-code_directory=$home_directory/code/marine_code/r092019/obs-suite
-code_directory_smf=$home_directory_smf/code/marine_code/r092019/obs-suite
+code_directory=$home_directory/code/marine_code/glamod-marine-processing/obs-suite
+code_directory_smf=$home_directory_smf/code/marine_code/glamod-marine-processing/obs-suite
 data_directory=$home_directory/data/marine
 pyTools_directory=$code_directory/modules/python
 scripts_directory=$code_directory/scripts
