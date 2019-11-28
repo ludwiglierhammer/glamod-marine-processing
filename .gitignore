@@ -1,0 +1,11 @@
+
+# Ignore pre-migration obs-stream SW while migrating and not deleted
+/configuration_files/
+/scripts/
+/dashboard/
+/modules/
+/pyenvs/
+/reports/
+
+# Ignore cgf-suite so far
+/cfg-suite/

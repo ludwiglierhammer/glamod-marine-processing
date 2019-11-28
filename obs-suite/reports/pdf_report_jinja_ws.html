@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="/Users/iregon/dessaps/r092019/reports/template"/>
+</head>
+
+<body class="A4">
+
+
+<section class="sheet padding-10mm frontpage">
+  <div>
+    <h1>WS summaries</h1>
+    <h2>All data qualities</h2>
+  </div>
+</section>
+
+{% for sid, values in sid_params.items() %}
+<section class="sheet padding-10mm content">
+  <div class="row">
+    <div class="column_2">
+      <h2>{{ sid }}</h2>
+      <figure>
+      <img src="{{ values["histogram"] }}" alt="unavailable" style="width:100%">
+      </figure>
+    </div>
+    <div class="column_2">
+      <h2>{{ ref["sid"] }}</h2>
+      <figure>
+      <img src="{{ ref["histogram"] }}" alt="unavailable" style="width:100%">
+      </figure>
+    </div>
+  </div>
+  <div class="row">
+    <div class="column_2">
+      <figure>
+      <img src="{{ values["histogram_log"] }}" alt="unavailable" style="width:100%">
+      </figure>
+    </div>
+    <div class="column_2">
+      <figure>
+      <img src="{{ ref["histogram_log"] }}" alt="unavailable" style="width:100%">
+      </figure>
+    </div>
+  </div>
+  <div class="row">
+    <div class="column_2">
+      <figure>
+      <img src="{{ values["ts"] }}" alt="unavailable" style="width:100%">
+      </figure>
+    </div>
+    <div class="column_2">
+      <figure>
+      <img src="{{ ref["ts"] }}" alt="unavailable" style="width:100%">
+      </figure>
+    </div>
+  </div>
+  <div class="row">
+    <div class="column_2">
+      <figure>
+      <img src="{{ values["map"] }}" alt="unavailable" style="width:100%">
+      </figure>
+    </div>
+    <div class="column_2">
+      <figure>
+      <img src="{{ ref["map"] }}" alt="unavailable" style="width:100%">
+      </figure>
+    </div>
+  </div>
+  <div class="row">
+    <div class="column_2">
+      <figure>
+      <img src="{{ values["map_counts"] }}" alt="unavailable" style="width:100%">
+      </figure>
+    </div>
+    <div class="column_2">
+      <figure>
+      <img src="{{ ref["map_counts"] }}" alt="unavailable" style="width:100%">
+      </figure>
+    </div>
+  </div>
+</section>
+{% endfor %}
+
+</body>
+</html>

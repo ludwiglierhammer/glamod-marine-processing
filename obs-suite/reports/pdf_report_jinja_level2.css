@@ -1,0 +1,145 @@
+body { margin: 0 }
+.sheet {
+  margin: 0;
+  overflow: hidden;
+  position: relative;
+  box-sizing: border-box;
+  page-break-after: always;
+}
+
+
+@page {
+  size: A4;
+  margin: 20mm 10mm 10mm 10mm;
+}
+/** Paper sizes **/
+body.A3           .sheet { width: 297mm; height: 419mm }
+body.A3.landscape .sheet { width: 420mm; height: 296mm }
+body.A4           .sheet { width: 210mm; height: 296mm; }
+body.A4.landscape .sheet { width: 297mm; height: 209mm }
+body.A5           .sheet { width: 148mm; height: 209mm }
+body.A5.landscape .sheet { width: 210mm; height: 147mm }
+
+/** Padding area **/
+.sheet.padding-10mm { padding: 10mm }
+.sheet.padding-15mm { padding: 15mm }
+.sheet.padding-20mm { padding: 20mm }
+.sheet.padding-25mm { padding: 25mm }
+
+/** For screen preview **/
+@media screen {
+  body { background: #e0e0e0 }
+  .sheet {
+    background: white;
+    box-shadow: 0 .5mm 2mm rgba(0,0,0,.3);
+    margin: 5mm;
+  }
+}
+
+/** Fix for Chrome issue #273306 **/
+@media print {
+           body.A3.landscape { width: 420mm }
+  body.A3, body.A4.landscape { width: 297mm }
+  body.A4, body.A5.landscape { width: 210mm }
+  body.A5                    { width: 148mm }
+}
+
+
+* {
+    font-family: Arial;
+    margin: 0;
+    padding: 0;
+    padding-bottom: 10px;
+}
+
+.frontpage {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.frontpage > * {
+  text-align: center;
+}
+
+.frontpage footer {
+  align-self: flex-end;
+}
+
+.content {
+  display: block;
+  justify-content: center;
+  align-items: top;
+}
+.content > * {
+  text-align: center;
+}
+.content footer {
+  align-self: flex-end;
+}
+
+figure {
+  float: center;
+  width: 90%;
+  text-align: center;
+  font-style: italic;
+  font-size: 9px;
+  text-indent: 0;
+  padding-top: 2em;
+  padding-bottom: 4em;
+}
+
+.img {
+  display: block;
+  margin-left: auto;
+  margin-right: auto;
+  width: 90%;
+}
+
+.img_w60 {
+  display: block;
+  margin-left: auto;
+  margin-right: auto;
+  width: 60%;
+}
+
+.img_w75 {
+  display: block;
+  margin-left: auto;
+  margin-right: auto;
+  width: 75%;
+}
+
+.img_w70 {
+  display: block;
+  margin-left: auto;
+  margin-right: auto;
+  width: 70%;
+}
+.img_w85 {
+  display: block;
+  margin-left: auto;
+  margin-right: auto;
+  width: 85%;
+}
+
+/* Three image containers (use 25% for four, and 50% for two, etc) */
+.column_2 {
+  float: left;
+  width: 45.00%;
+  padding: 5px;
+}
+
+/* Clear floats after image containers */
+.row::after {
+  content: "";
+  clear: both;
+  display: table;
+}
+
+.justitalic{
+    font-weight:italic;
+}​
+.normal{
+    font-weight:normal;
+}​
