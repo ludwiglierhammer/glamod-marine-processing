@@ -16,7 +16,7 @@
 #
 # sid_deck_list_file is: sid-dck yyyy-mm yyyy-mm
 #
-# Usage: ./L1c_launcher.sh release update source_dataset list_file clean_previous(y|n)
+# Usage: ./L1c_launcher.sh release update source_dataset list_file l1b_config_file clean_previous(y|n)
 
 
 # Get JOB
@@ -32,7 +32,8 @@ release=$1
 update=$2
 source=$3
 sid_deck_list_file=$4
-clean_previous_level=$5
+l1b_config_file=$5
+clean_previous_level=$6
 
 
 ffs="-"
@@ -89,7 +90,7 @@ do
 	 done
 	 ((counter--))
 
-	 jobid=$(nk_jobid bsub -J $sid_deck'L1Cm'"[1-$counter]" -oo $sid_deck_scratch_dir/"%I.o_main" -eo $sid_deck_scratch_dir/"%I.e_main" -q short-serial -W $job_time -M $job_memo -R "rusage[mem=$job_memo]" $scripts_directory/L1c_main_job.sh $sid_deck $release $update $source)
+	 jobid=$(nk_jobid bsub -J $sid_deck'L1Cm'"[1-$counter]" -oo $sid_deck_scratch_dir/"%I.o_main" -eo $sid_deck_scratch_dir/"%I.e_main" -q short-serial -W $job_time -M $job_memo -R "rusage[mem=$job_memo]" $scripts_directory/L1c_main_job.sh $sid_deck $release $update $source $l1b_config_file)
 	 bsub -J L1Cm_ok"[1-$counter]" -w "done($jobid[*])" -oo $sid_deck_scratch_dir/"b%I.oo" -eo $sid_deck_scratch_dir/"b%I.oe" -q short-serial -W 00:01 -M 10 -R "rusage[mem=10]" $scripts_directory/bsub_array_output_hdlr.sh 0 $sid_deck_scratch_dir 'main' 0 $level
    bsub -J L1Cm_er"[1-$counter]" -w "exit($jobid[*])" -oo $sid_deck_scratch_dir/"b%I.eo" -eo $sid_deck_scratch_dir/"b%I.ee" -q short-serial -W 00:01 -M 10 -R "rusage[mem=10]" $scripts_directory/bsub_array_output_hdlr.sh 1 $sid_deck_scratch_dir 'main' 0 $level
    if [ $clean_previous_level == 'y' ]

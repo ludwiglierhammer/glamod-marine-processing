@@ -5,7 +5,7 @@
 #
 # Remove pre-exiting products for the same file-id before processing.
 #
-# usage: ./L1c_main_job.sh sid_deck release update source
+# usage: ./L1c_main_job.sh sid_deck release update source l1b_config_file
 
 source r092019_setenv0.sh
 
@@ -13,6 +13,8 @@ sid_deck=$1
 release=$2
 update=$3
 source=$4
+l1b_config_file=$5
+
 level=level1c
 level_dir=$data_directory/$release/$source/$level/$sid_deck
 sid_deck_scratch_dir=$scratch_directory/$level/$sid_deck
@@ -33,6 +35,6 @@ rm $level_dir/*$ffs$file_id.* 2>/dev/null
 rm $invalid_dir/*$ffs$file_id.* 2>/dev/null
 
 echo "Launching line:"
-echo "python $scripts_directory/L1c_main.py $data_directory $sid_deck $yr $mo $release $update $source"
+echo "python $scripts_directory/L1c_main.py $data_directory $sid_deck $yr $mo $release $update $source $l1b_config_file"
 
-python $scripts_directory/L1c_main.py $data_directory $sid_deck $yr $mo $release $update $source
+python $scripts_directory/L1c_main.py $data_directory $sid_deck $yr $mo $release $update $source $l1b_config_file
