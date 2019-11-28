@@ -55,6 +55,7 @@ month: data file month (mm)
 release: release identifier
 update: release update identifier
 source: source dataset identifier
+config_file: l1b corrections configuration file
 
 Notes on validations:
 --------------------
@@ -100,6 +101,7 @@ the end it was decided to set umask 002 to the ./bashrc file
 import sys
 import os
 import simplejson
+import json
 import datetime
 import cdm
 import numpy as np
@@ -122,7 +124,7 @@ class script_setup:
         self.release = inargs[5]
         self.update = inargs[6]
         self.source = inargs[7]
-
+        self.config_file = inargs[8]
 # This is for json to handle dates
 date_handler = lambda obj: (
     obj.isoformat()
@@ -182,7 +184,15 @@ else:
     sys.exit(1)
 
 params = script_setup(args)
-    
+
+if not os.path.isfile(params.config_file):
+    logging.error('Level1b configuration file {} not found'.format(params.config_file))
+    sys.exit(1)  
+else:
+    with open(params.config_file) as fileO:
+        corrections = json.load(fileO)
+    version_corrections = corrections.get('version')
+
 filename_field_sep = '-' 
 delimiter = '|'
 cor_ext = '.txt.gz'
@@ -196,7 +206,7 @@ release_id = filename_field_sep.join([params.release,params.update ])
 fileID = filename_field_sep.join([str(params.year),str(params.month).zfill(2),release_id ])
 fileID_date = filename_field_sep.join([str(params.year),str(params.month)])
 
-cor_id_path = os.path.join(release_path,level_prev,'linkage')
+cor_id_path = os.path.join(params.data_path,params.release,'NOC_corrections',version_corrections)
 prev_level_path = os.path.join(release_path,level_prev,params.sid_dck)  
 level_path = os.path.join(release_path,level,params.sid_dck)
 level_ql_path = os.path.join(release_path,level,'quicklooks',params.sid_dck)
@@ -265,8 +275,8 @@ mask_df.loc[nocallsigns,field]  = validate_id.validate(table_df.loc[nocallsigns]
 table_df.columns = [ x[1] for x in table_df.columns ]
 
 # And now set back to True all that the linkage provided
-logging.info('Restoring pre-corrected ids')
-idcor_file = os.path.join(cor_id_path, '_'.join(['id',params.release,params.update]), fileID_date + cor_ext)
+idcor_file = os.path.join(cor_id_path, 'id', fileID_date + cor_ext)
+logging.info('Restoring pre-corrected ids in {}'.format(idcor_file))
 if not os.path.isfile(idcor_file):
     logging.error('id correction file {} not found'.format(idcor_file))
     sys.exit(1)
