@@ -202,7 +202,7 @@ for table in cdm.properties.cdm_tables:
     for correction,element in table_corrections.items():
         correction_dict[table]['corrections'][element] = {'applied':1,'number':0}
         logging.info('Applying corrections for element {}'.format(element))
-        cor_path = os.path.join(L1b_main_corrections, '_'.join([correction,params.release,params.update]), fileID_date + cor_ext)
+        cor_path = os.path.join(L1b_main_corrections,correction, fileID_date + cor_ext)
         if not os.path.isfile(cor_path):
             logging.warning('Correction file {} not found'.format(cor_path))
             continue
