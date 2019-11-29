@@ -56,13 +56,13 @@ month: data file month (mm)
 release: release identifier
 update: release update identifier
 source: source dataset identifier
-level_aux_path: path to directory with yearly subdirs with monthly QC files
 
 
 On expected format and content of QC files:
 ------------------------------------------
-- qc monthly files in <level_aux_path>/yyyy/mm/<id>_qc_yyyymm_CCIrun.csv
-with id: POS,SST,AT,SLP,DPT,W
+
+- qc monthly files in <data_path/<release>/<source>/metoffice_qc/base/<yyyy>/<mm>/<id>_qc_yyyymm_CCIrun.csv
+with id in [POS,SST,AT,SLP,DPT,W]
 - qc monthly files assumed to have 1 hdr line (first) with column names
 - qc monthly files with FS=','
 - qc field names assumed as those listed in qc_columns below
@@ -112,6 +112,11 @@ Dev NOTES:
 There are some hardcoding for ICOADS_R3.0.0.T: we are looking for report_id in CDM
 adding 'ICOADS_30' to the UID in the QC flags!!!!!
 
+Maybe should pass a QC version configuration file, with the path
+of the QC files relative to a set path (i.e. informing of the QC version)
+and info like first and last date of QC, to solve dirty things like the 
+IMPORTANT NOTE issue above
+
 .....
 
 @author: iregon
@@ -141,7 +146,6 @@ class script_setup:
         self.release = inargs[5]
         self.update = inargs[6]
         self.source = inargs[7]
-        self.level_aux_path = inargs[8]
 
 # This is for json to handle dates
 date_handler = lambda obj: (
@@ -155,7 +159,7 @@ def get_qc_flags(qc,qc_df_full):
     qc_avail = True
     bad_flag = '1' if qc != 'POS' else '2'
     good_flag = '0'
-    qc_filename = os.path.join(params.level_aux_path,params.year,params.month,"_".join([qc,'qc',params.year+params.month,'CCIrun.csv']))
+    qc_filename = os.path.join(qc_path,params.year,params.month,"_".join([qc,'qc',params.year+params.month,'CCIrun.csv']))
     logging.info('Reading {0} qc file: {1}'.format(qc,qc_filename))
     qc_df = pd.read_csv(qc_filename,dtype = qc_dtype,usecols=qc_columns.get(qc),
                           delimiter = qc_delimiter, error_bad_lines = False, warn_bad_lines = True )
@@ -346,14 +350,17 @@ level_path = os.path.join(release_path,level,params.sid_dck)
 level_ql_path = os.path.join(release_path,level,'quicklooks',params.sid_dck)
 level_log_path = os.path.join(release_path,level,'log',params.sid_dck)
 
+qc_path = os.path.join(release_path,'metoffice_qc','base')
+
 # Check we have all the dirs!
-data_paths = [prev_level_path, level_path, level_ql_path, level_log_path, params.level_aux_path ]
+data_paths = [prev_level_path, level_path, level_ql_path, level_log_path, qc_path ]
 if any([ not os.path.isdir(x) for x in data_paths ]):
     logging.error('Could not find data paths: {}'.format(','.join([ x for x in data_paths if not os.path.isdir(x)])))
     sys.exit(1)
 
 # Check we have QC files!
-qc_pos_filename = os.path.join(params.level_aux_path,params.year,params.month,"_".join(['POS','qc',params.year+params.month,'CCIrun.csv']))
+logging.info('Using qc files in {}'.format(qc_path))
+qc_pos_filename = os.path.join(qc_path,params.year,params.month,"_".join(['POS','qc',params.year+params.month,'CCIrun.csv']))
 qc_avail = True
 if not os.path.isfile(qc_pos_filename):
     if int(params.year) == 2014 and int(params.month) == 12:

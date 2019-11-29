@@ -6,7 +6,6 @@ data_directory=$home_directory/data/marine
 pyTools_directory=$code_directory/modules/python
 scripts_directory=$code_directory/scripts
 pyEnvironment_directory=$code_directory_smf/pyenvs/env1
-MO_QC_flags_directory=$data_directory/r092019/MetOffice_QC_output
 MD_directory=$data_directory/r092019/Pub47
 
 # Activate python environment and add jaspy3.7 path to LD_LIBRARY_PATH so that cartopy and other can find the geos library
@@ -24,6 +23,3 @@ then
 else
   echo "Scratch directory is $scratch_directory"
 fi
-
-
-
