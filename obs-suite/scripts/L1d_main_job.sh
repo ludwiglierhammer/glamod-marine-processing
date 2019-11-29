@@ -5,8 +5,6 @@
 #
 # Remove pre-exiting products for the same file-id before processing.
 #
-# MD directory is in setenv0.sh as it was not included in the release directory tree
-#
 # usage: ./L1d_main_job.sh sid_deck release update source
 
 source setenv0.sh
@@ -34,6 +32,6 @@ rm $outlooks_dir/$file_id.* 2>/dev/null
 rm $level_dir/*$ffs$file_id.* 2>/dev/null
 
 echo "Launching line:"
-echo "python $scripts_directory/L1d_main.py $data_directory $sid_deck $yr $mo $release $update $source $MD_directory"
+echo "python $scripts_directory/L1d_main.py $data_directory $sid_deck $yr $mo $release $update $source"
 
-python $scripts_directory/L1d_main.py $data_directory $sid_deck $yr $mo $release $update $source $MD_directory
+python $scripts_directory/L1d_main.py $data_directory $sid_deck $yr $mo $release $update $source
