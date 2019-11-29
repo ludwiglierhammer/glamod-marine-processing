@@ -14,7 +14,7 @@
 # - job_index.e: date_release_update.log
 #
 # Usage: ./bsub_array_output_hdlr.sh exit_status sid_deck_scratch_dir suffix_loggers rm_input_files
-source r092019_setenv0.sh
+source setenv0.sh
 
 exit_status=$1
 sid_deck_scratch_dir=$2

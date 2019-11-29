@@ -24,7 +24,7 @@
 # DEV NOTES:
 #
 #
-source r092019_setenv0.sh
+source setenv0.sh
 
 datepos () {
   echo 'Processing DATEPOS files'

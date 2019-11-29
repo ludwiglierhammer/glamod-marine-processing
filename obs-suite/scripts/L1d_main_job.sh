@@ -5,11 +5,11 @@
 #
 # Remove pre-exiting products for the same file-id before processing.
 #
-# MD directory is in r092019_setenv0.sh as it was not included in the release directory tree
+# MD directory is in setenv0.sh as it was not included in the release directory tree
 #
 # usage: ./L1d_main_job.sh sid_deck release update source
 
-source r092019_setenv0.sh
+source setenv0.sh
 
 sid_deck=$1
 release=$2

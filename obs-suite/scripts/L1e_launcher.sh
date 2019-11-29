@@ -25,7 +25,7 @@ function nk_jobid {
 }
 
 
-source r092019_setenv0.sh
+source setenv0.sh
 
 release=$1
 update=$2

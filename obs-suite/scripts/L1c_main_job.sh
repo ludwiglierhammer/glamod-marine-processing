@@ -7,7 +7,7 @@
 #
 # usage: ./L1c_main_job.sh sid_deck release update source l1b_config_file
 
-source r092019_setenv0.sh
+source setenv0.sh
 
 sid_deck=$1
 release=$2

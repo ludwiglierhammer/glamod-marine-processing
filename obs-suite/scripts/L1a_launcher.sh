@@ -15,7 +15,7 @@
 #
 # Usage: ./L1a_launcher.sh release update source_dataset list_file sid_deck_jobs_file
 
-source r092019_setenv0.sh
+source setenv0.sh
 
 release=$1
 update=$2

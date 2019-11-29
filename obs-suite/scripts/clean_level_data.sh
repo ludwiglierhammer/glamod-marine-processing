@@ -4,7 +4,7 @@
 #
 # usage: ./clean_level_data.sh sid_deck release update source level
 
-source r092019_setenv0.sh
+source setenv0.sh
 
 sid_deck=$1
 release=$2
