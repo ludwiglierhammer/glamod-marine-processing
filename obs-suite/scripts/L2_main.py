@@ -31,10 +31,9 @@ sid_dck: source-deck partition (sss-ddd)
 release: release identifier
 update: release update identifier
 source: source dataset identifier
-level2_list: path to file with per sid-dck info of inclusions/exclusions from level1e to level2
 
-level2_list:
-------------
+Uses level2_list:
+----------------
 json file as created by L2_list_create.py, with:
 
 {
@@ -79,7 +78,6 @@ class script_setup:
         self.release = inargs[3]
         self.update = inargs[4]
         self.source = inargs[5]
-        self.level2_list = inargs[6]
 
 # This is for json to handle dates
 date_handler = lambda obj: (
@@ -132,9 +130,12 @@ if any([ not os.path.isdir(x) for x in data_paths ]):
     logging.error('Could not find data paths: {}'.format(','.join([ x for x in data_paths if not os.path.isdir(x)])))
     sys.exit(1)
 
-if not os.path.isfile(params.level2_list):
-    logging.error('Could not level2 list file: {}'.format(params.level2_list))
-    sys.exit(1)    
+level2_list = os.path.join(release_path,'level2',filename_field_sep.join([params.release,params.update,'selection.json']))
+
+if not os.path.isfile(level2_list):
+    logging.error('Level2 selection file {} not found'.format(level2_list))
+    sys.exit(1)
+
  
 # Clean previous L2 products and side files -----------------------------------
 clean_level()
@@ -143,11 +144,11 @@ clean_level()
 # -----------------------------------------------------------------------------
 cdm_tables = cdm.lib.tables.tables_hdlr.load_tables()
 obs_tables = [ x for x in cdm_tables if x != 'header' ]
-with open(params.level2_list,'r') as fileObj:
+with open(level2_list,'r') as fileObj:
     include_list = json.load(fileObj)
 
 if not include_list.get(params.sid_dck):
-    logging.error('sid-dck {0} not registered in level2 list {1}'.format(params.sid_dck,params.level2_list))
+    logging.error('sid-dck {0} not registered in level2 list {1}'.format(params.sid_dck,level2_list))
     sys.exit(1)     
        
 exclude_sid_dck = include_list.get(params.sid_dck,{}).get('exclude')  
