@@ -7,9 +7,12 @@ This is a temporary script file.
 
 import sys
 import os
+import logging
 import json
 import jinja2
 from weasyprint import HTML,CSS
+
+logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s', level=logging.DEBUG)
 
 try:
     data_path = sys.argv[1]
@@ -19,9 +22,9 @@ try:
     sid_dck = sys.argv[5]
     y_init = sys.argv[6]
     y_end = sys.argv[7]   
-except Exception as e:
-    print("Error processing line argument input to script: ", e)
-    exit(1)
+except:
+    logging.error("Error processing line argument input to script", exc_info = True)
+    sys.exit(1)
 
 #https://stackoverflow.com/questions/45760789/flexbox-centering-within-paper-css-a4-page
 
