@@ -6,7 +6,7 @@
 # all: all data in level
 # qcr0-qc0: only report_quality and param quality_flag passed
 #
-# Main paths are set with the configuration file run at the beginning (r092009_setenv0.sh)
+# Main paths are set with the configuration file run at the beginning (setenv1.sh)
 #
 # sid_deck_list_file is: sid-dck yyyy-mm yyyy-mm
 #

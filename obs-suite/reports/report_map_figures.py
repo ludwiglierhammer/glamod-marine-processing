@@ -4,20 +4,32 @@
 Created on Thu Sep 20 11:43:22 2018
 
 
+Inargs:
+------
+data_path: data release parent path (i.e./gws/nopw/c3s311_lot2/data/marine)
+sid_dck: source-deck partition (sss-ddd)
+release: release identifier
+update: release update identifier
+source: source dataset identifier
+level: data processing level (level1e|level2)
+mode: see below
+
+
 Modes:
-    qcr0-qc0-um: this is the 'user recommended use' case
-        data values: qcr0-qc0.nc
-        axis: saturated to common max/min. Color? for those above saturation
-    all: all data in C3S
-        data values: .nc
-        axis: unbounded
-    qcr0-qc0: this is for QA purposes, to compare the effect of the parameter quality control
-        data values: qcr0-qc0.nc
-        data counts: total reports, unchecked quality report, failed quality report, failed param quality, passed param quality
-        axis: unbounded
-    qcr0: this is for QA purposes, to compare the effect of the parameter quality control
-        data values: qcr0-qc0_qc1.nc
-        axis: unbounded  
+-----
+qcr0-qc0-um: this is the 'user recommended use' case
+    data values: qcr0-qc0.nc
+    axis: saturated to common max/min. Color? for those above saturation
+all: all data in C3S
+    data values: .nc
+    axis: unbounded
+qcr0-qc0: this is for QA purposes, to compare the effect of the parameter quality control
+    data values: qcr0-qc0.nc
+    data counts: total reports, unchecked quality report, failed quality report, failed param quality, passed param quality
+    axis: unbounded
+qcr0: this is for QA purposes, to compare the effect of the parameter quality control
+    data values: qcr0-qc0_qc1.nc
+    axis: unbounded  
 
 
 @author: iregon
