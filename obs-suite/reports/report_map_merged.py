@@ -3,6 +3,27 @@
 """
 Created on Mon Sep  9 15:25:03 2019
 
+Creates gridded aggregations of all the available CDM tables per table per sid-dck.
+
+Aggregations are:
+    header table: counts
+    observation tables: counts,max,min,mean
+
+Data is first filtered according to inargs qcr and qc
+
+
+Inargs:
+------
+data_path: data release parent path (i.e./gws/nopw/c3s311_lot2/data/marine)
+sid_dck: source-deck partition (sss-ddd)
+release: release identifier
+update: release update identifier
+source: source dataset identifier
+level: data processing level (level1e|level2)
+table: CDM table to process (header or observations-[sst|slp|at|wd|ws|wbt|dpt])
+qcr: all or any single or comma separated combination of CDM table quality_flag keys
+qc: all or any single or comma separated combination of CDM table quality_flag keys
+scratch_dir: directory to save (and remove) intermediate files to
 
 @author: iregon
 """
@@ -18,8 +39,8 @@ def main():
         release = sys.argv[2]
         update = sys.argv[3]
         source = sys.argv[4]
-        sid_dck = sys.argv[5]
-        level = sys.argv[6]
+        level = sys.argv[5]
+        sid_dck = sys.argv[6]
         table = sys.argv[7]
         qcr = sys.argv[8]
         qc = sys.argv[9]

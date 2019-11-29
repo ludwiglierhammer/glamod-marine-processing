@@ -1,16 +1,16 @@
 #!/bin/bash
-# Sends a the corresponding bsub jobs for every sid-deck listed in a the input file
+# Sends the corresponding bsub jobs for every sid-deck listed in a the input file
 # to create summary maps on the CDM data in the input level and its corresponding png images
 #
 # The summary maps are performed on the following report_quality - param quality_flag combinations:
 # all: all data in level
 # qcr0-qc0: only report_quality and param quality_flag passed
 #
-# Main paths are set with the configuration file run at the beginning (r092009_setenv0.sh)
+# Main paths are set with the configuration file run at the beginning (setenv1.sh)
 #
 # sid_deck_list_file is: sid-dck yyyy-mm yyyy-mm
 #
-# Usage: ./report_maps_launcher.sh release update datasource list_file
+# Usage: ./report_map_merged_launcher.sh release update datasource list_file
 
 source ../scripts/setenv1.sh
 
@@ -60,7 +60,7 @@ do
   rm -rf $sid_deck_scratch_dir;mkdir -p $sid_deck_scratch_dir
   for table in header observations-sst observations-slp observations-at observations-wd observations-ws observations-wbt observations-dpt
   do
-	   bsub -J $sid_deck$table'allM' -oo $sid_deck_scratch_dir/$table'M.o' -eo $sid_deck_scratch_dir/$table'M.e' -q short-serial -W $job_time -M $job_memo -R "rusage[mem=$job_memo]" python $code_directory/reports/report_maps_merge.py $data_directory $release $update $source $sid_deck $level $table all all $sid_deck_scratch_dir/$table
+	   bsub -J $sid_deck$table'allM' -oo $sid_deck_scratch_dir/$table'M.o' -eo $sid_deck_scratch_dir/$table'M.e' -q short-serial -W $job_time -M $job_memo -R "rusage[mem=$job_memo]" python $code_directory/reports/report_map_merged.py $data_directory $release $update $source $level $sid_deck $table all all $sid_deck_scratch_dir/$table
   done
 
 
@@ -70,6 +70,6 @@ do
   rm -rf $sid_deck_scratch_dir;mkdir -p $sid_deck_scratch_dir
   for table in header observations-sst observations-slp observations-at observations-wd observations-ws observations-wbt observations-dpt
   do
-	   bsub -J $sid_deck$table'bestM' -oo $sid_deck_scratch_dir/$table'M.o' -eo $sid_deck_scratch_dir/$table'M.e' -q short-serial -W $job_time -M $job_memo -R "rusage[mem=$job_memo]" python $code_directory/reports/report_maps_merge.py $data_directory $release $update $source $sid_deck $level $table 0 0 $sid_deck_scratch_dir/$table
+	   bsub -J $sid_deck$table'bestM' -oo $sid_deck_scratch_dir/$table'M.o' -eo $sid_deck_scratch_dir/$table'M.e' -q short-serial -W $job_time -M $job_memo -R "rusage[mem=$job_memo]" python $code_directory/reports/report_map_merged.py $data_directory $release $update $source $level $sid_deck $table 0 0 $sid_deck_scratch_dir/$table
   done
 done
