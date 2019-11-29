@@ -12,7 +12,7 @@
 #
 # Usage: ./report_maps_launcher.sh release update datasource list_file
 
-source ../scripts/r092019_setenv1.sh
+source ../scripts/setenv1.sh
 
 # Get JOB
 function nk_jobid {

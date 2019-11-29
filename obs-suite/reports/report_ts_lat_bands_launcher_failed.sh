@@ -6,7 +6,7 @@
 #
 # Usage: ./report_ts_launcher.sh release update datasource
 
-source ../scripts/r092019_setenv0.sh
+source ../scripts/setenv0.sh
 
 release=$1
 update=$2

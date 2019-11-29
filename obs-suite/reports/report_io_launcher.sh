@@ -8,7 +8,7 @@
 #
 # Usage: ./report_io_launcher.sh release update datasource list_file
 
-source ../scripts/r092019_setenv0.sh
+source ../scripts/setenv0.sh
 
 release=$1
 update=$2
