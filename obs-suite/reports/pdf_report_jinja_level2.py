@@ -10,7 +10,11 @@ import os
 import glob
 import json
 import jinja2
+import logging
 from weasyprint import HTML,CSS
+
+
+logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s', level=logging.DEBUG)
 
 try:
     data_path = sys.argv[1]
@@ -20,10 +24,9 @@ try:
     sid_dck = sys.argv[5]
     y_init = sys.argv[6]
     y_end = sys.argv[7] 
-    level2_list = sys.argv[8]
-except Exception as e:
-    print("Error processing line argument input to script: ", e)
-    exit(1)
+except:
+    logging.error("Error processing line argument input to script ", exc_info = True)
+    sys.exit(1)
 
 #https://stackoverflow.com/questions/45760789/flexbox-centering-within-paper-css-a4-page
 FFS = '-'
@@ -33,6 +36,11 @@ io_path = reports_path
 ts_path = os.path.join(data_path,release,source,'level1e','reports',sid_dck)
 maps_path = ts_path
 script_path = os.path.dirname(os.path.realpath(__file__))
+level2_list = os.path.join(data_path,release,source,'level2',FFS.join([release,update,'selection.json']))
+
+if not os.path.isfile(level2_list):
+    logging.error('Level2 selection file {} not found'.format(level2_list))
+    sys.exit(1)
 # PARAMS ----------------------------------------------------------------------
 
 with open(os.path.join(script_path,'sid_properties.json'),'r') as f:
@@ -46,14 +54,15 @@ with open(os.path.join(script_path,'var_properties.json'),'r') as f:
     
 params_cdm = ['at','sst','dpt','wbt','slp','wd','ws']
 
+
 with open(level2_list,'r') as fileObj:
     include_list = json.load(fileObj)
 
 exclude_sid_dck = include_list.get(sid_dck,{}).get('exclude')
 if exclude_sid_dck == False:
-    print('Include')
+    logging.info('Include')
 else:
-    print('Excluded or not included in list')
+    logging.warning('Excluded or not included in list')
     sys.exit(0)
     
 exclude_param_global_list = include_list.get('params_exclude')
