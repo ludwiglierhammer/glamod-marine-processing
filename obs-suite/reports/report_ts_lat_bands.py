@@ -61,7 +61,7 @@ font_size_legend = 11
 axis_label_size = 11
 tick_label_size = 9
 title_label_size = 14
-markersize = 2
+markersize = 3
 figsize=(12, 14)
     
 plt.rc('legend',**{'fontsize':font_size_legend})        # controls default text sizes
@@ -161,7 +161,7 @@ def plot_lat_bands(mode,param,param_latitude_band_aggs,counts_latitude_band,max_
             ax[ax_count].plot(param_lat_df.index,param_lat_df['min'],marker = '.',linestyle=' ',color='OrangeRed',label='min/max',markersize = markersize,zorder=7)
             if mode == 'qcr0-qc0-um':
                 ax[ax_count].plot(param_lat_df.index,param_lat_df['max-sat'],marker = '*',linestyle=' ',color='Red',label='_nolegend_',markersize = markersize + 2,zorder=7)
-                ax[ax_count].plot(param_lat_df.index,param_lat_df['min-sat'],marker = '*',linestyle=' ',color='Red',label='outlier',markersize = markersize + 2,zorder=7)
+                ax[ax_count].plot(param_lat_df.index,param_lat_df['min-sat'],marker = '*',linestyle=' ',color='Red',label='off-plot',markersize = markersize + 2,zorder=7)
             ax[ax_count].plot(param_lat_df.index,param_lat_df['mean'],linestyle ='-',color='black',label='mean',zorder=6)
             ax[ax_count].set_ylabel(param_units, color='k')
             ax[ax_count].grid(linestyle=':',which='major')
