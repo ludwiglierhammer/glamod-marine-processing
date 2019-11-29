@@ -2,7 +2,7 @@
 # Sends a bsub job for every sid-deck listed in a the input file
 # to run the io timeseries
 #
-# Main paths are set with the configuration file run at the beginning (r092009_setenv0.sh)
+# Main paths are set with the configuration file run at the beginning (setenv0.sh)
 #
 # sid_deck_list_file is: sid-dck yyyy-mm yyyy-mm
 #
