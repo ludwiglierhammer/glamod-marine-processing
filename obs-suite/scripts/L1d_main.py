@@ -42,8 +42,6 @@ month: data file month (mm)
 release: release identifier
 update: release update identifier
 source: source dataset identifier
-level_aux_path: path to directory with monthly MD files
-md: metadata source identifier/tag. Currently only 'pub47' supported
 
 On input data:
 -------------
@@ -68,7 +66,7 @@ DIRTY LAST MINUTE HARDCODE FOR RELEASE1 (AUTUMN 2019):
 Dev notes:
 ---------
 
-1) md inarg mainly to provide in the future for MD sources other than pub47...
+1) md param mainly to provide in the future for MD sources other than pub47, and maybe parameterize this...
         
 2) Mapping of MD is performed here in a quite dirty way, using, on top of it, a dict
 to make it usable for eventual future new MD sources, that anyway would probably fail to do the job!!!!
@@ -88,12 +86,9 @@ import simplejson
 import datetime
 import cdm
 from collections import Counter
-import numpy as np
 import glob
 import logging
 import pandas as pd
-import re
-from metmetpy.station_id import validate as validate_id
 from imp import reload
 reload(logging)  # This is to override potential previous config of logging
 
@@ -109,8 +104,6 @@ class script_setup:
         self.release = inargs[5]
         self.update = inargs[6]
         self.source = inargs[7]
-        self.level_aux_path = inargs[8]
-        self.md = 'pub47'
 
 # This is for json to handle dates
 date_handler = lambda obj: (
@@ -136,9 +129,9 @@ def select_cols(df,cols):
     return s
 
 def map_to_cdm():
-    meta_cdm_columns = [ ('header',x) for x in metadata.get(params.md).get('header') ]
+    meta_cdm_columns = [ ('header',x) for x in metadata.get(md).get('header') ]
     for obs_table in obs_tables:
-        meta_cdm_columns.extend([ (obs_table,x) for x in metadata.get(params.md).get('observations') ])
+        meta_cdm_columns.extend([ (obs_table,x) for x in metadata.get(md).get('observations') ])
 
     meta_cdm = pd.DataFrame(index = meta_df.index, columns = meta_cdm_columns)
     # First the direct mappings to the header table elements
@@ -196,7 +189,7 @@ def process_table(table_df,table_name):
         if table_name == 'header':
             missing_ids = [ x for x in table_df.index if x not in meta_table.index ]
             if len(missing_ids)>0:
-                meta_dict['non ' + params.md + ' ids'] = {k:v for k,v in Counter(missing_ids).items()}
+                meta_dict['non ' + md + ' ids'] = {k:v for k,v in Counter(missing_ids).items()}
             history_add = ';{0}. {1}'.format(history_tstmp,history_explain)
             locs = table_df['primary_station_id'].isin(updated_locs)
             table_df['history'].loc[locs] = table_df['history'].loc[locs] + history_add
@@ -218,6 +211,33 @@ def clean_level(file_id):
             os.remove(filename)
         except:
             pass
+
+# END FUNCTIONS ---------------------------------------------------------------
+            
+# MD parameterization, this should go to outer file ---------------------------
+metadata = {}
+metadata['pub47'] = {}
+metadata['pub47']['history'] = 'WMO Publication 47 metadata added'
+metadata['pub47']['header'] = ['station_name','platform_sub_type','primary_station_id','station_record_number','report_duration']
+metadata['pub47']['observations'] = ['z_coordinate','observation_height_above_station_surface','sensor_id','sensor_automation_status']
+metadata['pub47']['heights'] = {
+        'observations-at':['thmH1','platH','brmH1'],
+        'observations-dpt':['thmH1','brmH1','platH'],
+        'observations-wbt':['thmH1','brmH1','platH'],
+        'observations-sst':['sstD1'],
+        'observations-slp':['brmH1','platH'],
+        'observations-wd':['anmH','anHL1','platH'],
+        'observations-ws':['anmH','anHL1','platH']
+        }
+metadata['pub47']['sensor_id'] = {
+        'observations-at':'th1',
+        'observations-dpt':'hy1',
+        'observations-wbt':'hy1',
+        'observations-sst':'st1',
+        'observations-slp':'bm1',
+        'observations-wd':'an1',
+        'observations-ws':'an1'
+        }
 
 # MAIN ------------------------------------------------------------------------
 
@@ -251,7 +271,9 @@ level_path = os.path.join(release_path,level,params.sid_dck)
 level_ql_path = os.path.join(release_path,level,'quicklooks',params.sid_dck)
 level_log_path = os.path.join(release_path,level,'log',params.sid_dck)
 
-data_paths = [prev_level_path, level_path, level_ql_path, level_log_path ]
+md_path = os.path.join(params.data_path,params.release,'Pub47')
+
+data_paths = [prev_level_path, level_path, level_ql_path, level_log_path, md_path ]
 if any([ not os.path.isdir(x) for x in data_paths ]):
     logging.error('Could not find data paths: {}'.format(','.join([ x for x in data_paths if not os.path.isdir(x)])))
     sys.exit(1)
@@ -261,7 +283,7 @@ if not os.path.isfile(prev_level_filename):
     logging.error('L1c header file not found: {}'.format(prev_level_filename))
     sys.exit(1)
 
-metadata_filename = os.path.join(params.level_aux_path, params.year + filename_field_sep + params.month + '-01.csv')
+metadata_filename = os.path.join(md_path, params.year + filename_field_sep + params.month + '-01.csv')
 md_avail = True
 if not os.path.isfile(metadata_filename):
     if int(params.year) > 2010 or int(params.year) < 1956:
@@ -271,40 +293,15 @@ if not os.path.isfile(metadata_filename):
         logging.error('Metadata file not found: {}'.format(metadata_filename))
         sys.exit(1)
         
-# metadata parameterization, maybe should go to outer file --------------------
-metadata = {}
-metadata['pub47'] = {}
-metadata['pub47']['history'] = 'WMO Publication 47 metadata added'
-metadata['pub47']['header'] = ['station_name','platform_sub_type','primary_station_id','station_record_number','report_duration']
-metadata['pub47']['observations'] = ['z_coordinate','observation_height_above_station_surface','sensor_id','sensor_automation_status']
-metadata['pub47']['heights'] = {
-        'observations-at':['thmH1','platH','brmH1'],
-        'observations-dpt':['thmH1','brmH1','platH'],
-        'observations-wbt':['thmH1','brmH1','platH'],
-        'observations-sst':['sstD1'],
-        'observations-slp':['brmH1','platH'],
-        'observations-wd':['anmH','anHL1','platH'],
-        'observations-ws':['anmH','anHL1','platH']
-        }
-metadata['pub47']['sensor_id'] = {
-        'observations-at':'th1',
-        'observations-dpt':'hy1',
-        'observations-wbt':'hy1',
-        'observations-sst':'st1',
-        'observations-slp':'bm1',
-        'observations-wd':'an1',
-        'observations-ws':'an1'
-        }
-
 # Clean previous L1a products and side files ----------------------------------
 clean_level(fileID)
 meta_dict = {}
 
 # DO THE DATA PROCESSING ------------------------------------------------------
 # -----------------------------------------------------------------------------
-
+md = 'pub47'
 history_tstmp = datetime.datetime.utcnow().strftime('%Y-%m-%d %H:%M:%S')
-history_explain = metadata.get(params.md).get('history')
+history_explain = metadata.get(md).get('history')
 cdm_tables = cdm.lib.tables.tables_hdlr.load_tables()
 obs_tables = [ x for x in cdm_tables.keys() if x != 'header' ]
 
