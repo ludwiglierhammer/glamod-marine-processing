@@ -6,7 +6,6 @@ data_directory=$home_directory/data/marine
 pyTools_directory=$code_directory/modules/python
 scripts_directory=$code_directory/scripts
 pyEnvironment_directory=$code_directory_smf/pyenvs/env1
-MD_directory=$data_directory/r092019/Pub47
 
 # Activate python environment and add jaspy3.7 path to LD_LIBRARY_PATH so that cartopy and other can find the geos library
 echo "Python environment loaded from gws: $pyEnvironment_directory"
