@@ -76,6 +76,12 @@ Due to various reasons, the validation is done in 3 stages and using different m
 
 Dev notes:
 ----------
+
+0) 'dataset' parameter for ID validation in metmetpy harcoded here as icoads_3000.
+This is because this feature was added in metmetpy after developing L1c_main.
+Will have to see if we include here a configruation file like in L1a_main.py,
+ adding dataset and maybe other processing options
+
 1) This script is fully tailored to the idea of how validation and cleaning should
 be at the time of developing it. It is not parameterized and is hardly flexible.
 
@@ -229,7 +235,7 @@ validation_dict = { table:{} for table in cdm.properties.cdm_tables}
 
 # DO THE DATA PROCESSING ------------------------------------------------------
 # -----------------------------------------------------------------------------
-
+dataset = 'icoads_3000'
 validated = ['report_timestamp','primary_station_id']
 history_tstmp = datetime.datetime.utcnow().strftime('%Y-%m-%d %H:%M:%S')
 history_explain = 'Performed report_timestamp (date_time) and primary_station_id validation'
@@ -271,7 +277,7 @@ mask_df.loc[callsigns,field] = table_df.loc[callsigns,field].str.match(callre,na
 # Then the rest according to general validation rules
 logging.info('Applying general id validation')
 table_df.columns = [ ('header',x) for x in table_df.columns ]
-mask_df.loc[nocallsigns,field]  = validate_id.validate(table_df.loc[nocallsigns],'cdm',params.sid_dck.split('-')[1], blank=True) 
+mask_df.loc[nocallsigns,field]  = validate_id.validate(table_df.loc[nocallsigns],dataset,'cdm',params.sid_dck.split('-')[1], blank=True) 
 table_df.columns = [ x[1] for x in table_df.columns ]
 
 # And now set back to True all that the linkage provided
