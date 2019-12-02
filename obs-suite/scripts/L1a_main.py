@@ -193,6 +193,7 @@ clean_L1a(L1a_id)
 
 # DO THE DATA PROCESSING ------------------------------------------------------
 data_model = params.main_data_model
+dataset = params.dataset
 io_dict = {}
 
 #1. Read input file to dataframe
@@ -215,8 +216,8 @@ io_dict['read'] = {'total':inspect.get_length(data_in['data'])}
 
 # 2. PT fixing, filtering and invalid rejection
 # 2.1. Fix platform type
-logging.info('Fixing platform type')
-data_in['data'] = metmetpy.correct_pt.correct(data_in['data'],data_model,params.dck)
+logging.info('Applying platform type fixtures')
+data_in['data'] = metmetpy.correct_pt.correct(data_in['data'],dataset,data_model,params.dck)
 
 # 2.2. Apply record selection (filter by) criteria: PT types.....
 if hasattr(params, 'filter_by'):
