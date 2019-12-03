@@ -26,20 +26,8 @@ header: no
 delimiter: tab
 columns: sid-dck, yr-mo (init), yr-mo (end)
 
-dev notes:
+dev notes: to gitlab issues
 ---------
-For this release, file format is only IMMA1 and therefore source
-filename patterns are here hard-parameterized as 'yyyy-mm.imma'
-
-This can be quite slow for a full release, maybe better to run at the sid-dck
-level from a launcher script in a future version, somethin like:
-    L0_main.py source_path level0_path sid-dck yr mo yr mo
-       
-This works at 'monthly' precission, do we want just to do the years?    
-
-Mmm, do we better add datapath, release and source to inargs instead of level0_path and
-build this from datapath,release and source like in the rest of levels?
-
 .....
 
 @author: iregon
