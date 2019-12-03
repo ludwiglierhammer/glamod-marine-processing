@@ -58,21 +58,11 @@ settings:
     - processing options: supplemental replacements,
     record selection/filtering by field (i.e. PT....)
 
-dev notes:
+dev notes: to gitlab issues
 ---------
 
-1) Currently still slightly tunned for ICOADS/IMMA only:
-    - level0 data sought before beginning is *.imma
-
-2) Chunksize is hardcoded here to 200000
-
-3) The way the invalid data tracking is done is awfull, partly because of the
-chunking....find cleaner way to do it
-
-4) Also there is an error in the binning of the numeric invalids. This was
-also found and solved in another level (see L1b_merge.py). Have to incorporate this here.
  
-5) Initially, file permission where changed to rwxrwxr-- to all output at
+Initially, file permission where changed to rwxrwxr-- to all output at
 the end of the script with the lines below, however, it seemed that a user not
 being the user that initially created the file could not do this...?? so in
 the end it was decided to set umask 002 to the ./bashrc file
