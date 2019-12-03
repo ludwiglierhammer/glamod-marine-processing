@@ -235,7 +235,7 @@ validation_dict = { table:{} for table in cdm.properties.cdm_tables}
 
 # DO THE DATA PROCESSING ------------------------------------------------------
 # -----------------------------------------------------------------------------
-dataset = 'icoads_3000'
+dataset = 'icoads_r3000'
 validated = ['report_timestamp','primary_station_id']
 history_tstmp = datetime.datetime.utcnow().strftime('%Y-%m-%d %H:%M:%S')
 history_explain = 'Performed report_timestamp (date_time) and primary_station_id validation'
