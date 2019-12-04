@@ -8,20 +8,21 @@ inspection of data.
 
 The processing unit is the source-deck.
 
-Outputs data to /<data_path>/<release>/<source>/level2/<sid-dck>/table[i]-fileID.psv
-Outputs data to /<data_path>/<release>/<source>/level2/excluded/<sid-dck>/table[i]-fileID.psv
+Outputs included data to /<data_path>/<release>/<source>/level2/<sid-dck>/table[i]-fileID.psv
+Outputs exluded data to /<data_path>/<release>/<source>/level2/excluded/<sid-dck>/table[i]-fileID.psv
+If included, creates dir /<data_path>/<release>/<source>/level2/reports/<sid-dck>/
 
 where fileID is yyyy-mm-release_tag-update_tag
 
 Before processing starts:
-    - checks the existence of all io subdirectories in level1e|2 -> exits if fails
+    - checks the existence of input data subdirectory in level1e -> exits if fails
     - checks the existence of the level2 selection file (level2_list) and that
-    sid-dck is registered within -> exits if fails
+    sid-dck is registered in it -> exits if fails
     - checks that a sid-dck to be included has at least an observation table
     registered to be included  -> exits if fails
-    - removes level2 products on input file resulting from previous runs
+    - removes level2 sid-dck subdirs (except log/sid-dck)
     
-If at any point during copying an exception is raised, cleans all sid-dck level2
+If at any point during copying an exception is raised, cleans sid-dck level2
 before exiting.
 
 Inargs:
@@ -65,6 +66,7 @@ import datetime
 import cdm
 import glob
 import logging
+import shutil
 from subprocess import call
 from imp import reload
 reload(logging)  # This is to override potential previous config of logging
@@ -87,13 +89,11 @@ date_handler = lambda obj: (
 )
 
 def clean_level():
-    level_prods = glob.glob(os.path.join(level_path,'*.psv'))
-    level_reports = glob.glob(os.path.join(level_reports_path, '*.json'))
-    level_excluded = glob.glob(os.path.join(level_excluded_path,'*.psv'))
-    for filename in level_prods + level_reports + level_excluded:
+    for dirname in [level_path,level_reports_path,level_excluded_path]:
         try:
-            logging.info('Removing previous file: {}'.format(filename))
-            os.remove(filename)
+            if os.path.isdir(dirname):
+                logging.info('Removing directory {}'.format(dirname))
+                shutil.rmtree(dirname)
         except:
             pass
 
@@ -125,7 +125,7 @@ level_path = os.path.join(release_path,level,params.sid_dck)
 level_excluded_path = os.path.join(release_path,level,'excluded',params.sid_dck)
 level_reports_path = os.path.join(release_path,level,'reports',params.sid_dck)
 
-data_paths = [prev_level_path, level_path, level_excluded_path]
+data_paths = [prev_level_path]
 if any([ not os.path.isdir(x) for x in data_paths ]):
     logging.error('Could not find data paths: {}'.format(','.join([ x for x in data_paths if not os.path.isdir(x)])))
     sys.exit(1)
@@ -137,7 +137,7 @@ if not os.path.isfile(level2_list):
     sys.exit(1)
 
  
-# Clean previous L2 products and side files -----------------------------------
+# Clean previous L2 data and report subdirs -----------------------------------
 clean_level()
 
 # DO THE DATA SELECTION -------------------------------------------------------
@@ -168,14 +168,21 @@ try:
     include_param_list.append('header')
     if exclude_sid_dck:
         logging.info('Full dataset {} excluded from level2'.format(params.sid_dck))
+        os.mkdir(level_excluded_path)
         for table in cdm_tables:
             files = os.path.join(prev_level_path,table + '*.psv')
             call(' '.join(['cp',files,level_excluded_path]),shell=True)
     else:
+        os.mkdir(level_path)
+        os.mkdir(level_reports_path)
         for table in exclude_param_list:
             logging.info('{} excluded from level2'.format(table))
             files = os.path.join(prev_level_path,table + '*.psv')
-            call(' '.join(['cp',files,level_excluded_path]),shell=True)
+            file_list = glob.glob(files)
+            if len(file_list)>0:
+                if not os.path.isdir(level_excluded_path):
+                    os.mkdir(level_excluded_path)
+                call(' '.join(['cp',files,level_excluded_path]),shell=True)
         for table in include_param_list:
             logging.info('{} included in level2'.format(table))
             files = os.path.join(prev_level_path,table + '*.psv')
