@@ -1,7 +1,8 @@
 /**/*.bkp
 /**/.DS_Store
 /dashboard/
-/configuration_files/*_list_[db]*.txt
+/configuration_files/*/*_list_[db]*.txt
+/configuration_files/rMigration*
 
 # Created by https://www.gitignore.io/api/python
 # Edit at https://www.gitignore.io/?templates=python
