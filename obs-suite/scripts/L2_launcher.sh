@@ -38,7 +38,7 @@ log_file=$log_dir/${filebase%.*}$ffs$(date +'%Y%m%d_%H%M').log
 exec > $log_file 2>&1
 
 # These are default, maybe should be parameterized to boost job submission when small sid-dcks....
-job_time_cp=03:00
+job_time_cp=10:00
 job_memo_cp=500
 job_time_io=02:00
 job_memo_io=10000
@@ -61,7 +61,8 @@ do
   rm -rf $sid_deck_scratch_dir;mkdir -p $sid_deck_scratch_dir
 
   jobid_cp=$(nk_jobid bsub -J $sid_deck'L2c' -oo $sid_deck_scratch_dir/"L2_copy.o" -eo $sid_deck_scratch_dir/"L2_copy.e" -q short-serial -W $job_time_cp -M $job_memo_cp -R "rusage[mem=$job_memo_cp]" python $scripts_directory/L2_main.py $data_directory $sid_deck $release $update $source)
-  jobid_io=$(nk_jobid bsub -J $sid_deck'L2io' -w "done($jobid_cp)" -oo $sid_deck_scratch_dir/"L2_io.o" -eo $sid_deck_scratch_dir/"L2_io.e" -q short-serial -W $job_time_io -M $job_memo_io -R "rusage[mem=$job_memo_io]" python $code_directory/reports/report_io.py $data_directory $release $update $source $level $sid_deck $y_init $y_end)
+  jobid_de=$(nk_jobid bsub -J $sid_deck'L2de' -w "done($jobid_cp)" -oo $sid_deck_scratch_dir/"L2_de.o" -eo $sid_deck_scratch_dir/"L2_de.e" -q short-serial -W 00:05 -M 2 $scripts_directory/dir_exists.sh $data_directory/$release/$source/$level/$sid_deck)
+  jobid_io=$(nk_jobid bsub -J $sid_deck'L2io' -w "done($jobid_de)" -oo $sid_deck_scratch_dir/"L2_io.o" -eo $sid_deck_scratch_dir/"L2_io.e" -q short-serial -W $job_time_io -M $job_memo_io -R "rusage[mem=$job_memo_io]" python $code_directory/reports/report_io.py $data_directory $release $update $source $level $sid_deck $y_init $y_end)
   bsub -J $sid_deck'L2REP' -w "done($jobid_io)" -oo $sid_deck_scratch_dir/"L2_rep.o" -eo $sid_deck_scratch_dir/"L2_rep.e" -q short-serial -W $job_time_rep -M $job_memo_rep -R "rusage[mem=$job_memo_rep]" python $code_directory/reports/pdf_report_jinja_$level.py $data_directory $release $update $source $sid_deck $y_init $y_end
 
 done
