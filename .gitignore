@@ -7,5 +7,7 @@
 /pyenvs/
 /reports/
 
-# Ignore cgf-suite so far
+# Ignore cgf-suite for the time being
 /cfg-suite/
+/metadata-suite/
+/qc-suite/
