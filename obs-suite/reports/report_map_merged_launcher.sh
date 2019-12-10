@@ -34,7 +34,7 @@ log_file=$log_dir/maps$ffs${filebase%.*}$ffs$(date +'%Y%m%d_%H%M').log
 exec > $log_file 2>&1
 # These are default, maybe should be parameterized to boost job submission when small sid-dcks....
 job_time=04:00
-job_memo=16000
+job_memo=20000
 # Now loop through the list of sid-dks in the list, find its l1a config and
 # send jobs for the monthly files
 for p in $(awk '{printf "%s,%s,%s\n",$1,$2,$3}' $sid_deck_list_file)
