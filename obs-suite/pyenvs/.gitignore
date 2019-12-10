@@ -1,0 +1,7 @@
+# Ignore whats inside this directory, as this needs to be populated with
+# the corresponding python environments
+# Just keep the requirements files
+*
+*/
+!.gitignore
+!requirements*.txt
