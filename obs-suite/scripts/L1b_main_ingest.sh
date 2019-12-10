@@ -28,10 +28,10 @@ source setenv0.sh
 
 datepos () {
   echo 'Processing DATEPOS files'
-  origin_dir=$data_directory/$release/NOC_corrections/$version/origin/CHANGED_DATEPOS
-  date_dir=$data_directory/$release/NOC_corrections/$version/timestamp
-  latitude_dir=$data_directory/$release/NOC_corrections/$version/latitude
-  longitude_dir=$data_directory/$release/NOC_corrections/$version/longitude
+  origin_dir=$origin_parent/CHANGED_DATEPOS
+  date_dir=$destination_parent/timestamp
+  latitude_dir=$destination_parent/latitude
+  longitude_dir=$destination_parent/longitude
 
   if [ ! -d $date_dir ];then mkdir $date_dir;fi
   if [ ! -d $latitude_dir ];then mkdir $latitude_dir;fi
@@ -55,8 +55,8 @@ datepos () {
 
 id () {
   echo "Processing ID files"
-  origin_dir=$data_directory/$release/NOC_corrections/$version/origin/CHANGED_IDS_UPDATE2
-  id_dir=$data_directory/$release/NOC_corrections/$version/id
+  origin_dir=$origin_parent/CHANGED_IDS_UPDATE2
+  id_dir=$destination_parent/id
 
   if [ ! -d $id_dir ];then mkdir $id_dir;fi
 
@@ -70,10 +70,10 @@ id () {
 
 duplicates () {
   echo "Processing DUPLICATES files"
-  origin_dir=$data_directory/$release/NOC_corrections/$version/origin/DUP_FILES
-  origin_dir2=$data_directory/$release/NOC_corrections/$version/origin/DUP_FILES_ID
-  dup_dir=$data_directory/$release/NOC_corrections/$version/duplicates
-  flags_dir=$data_directory/$release/NOC_corrections/$version/duplicate_flags
+  origin_dir=$origin_parent/DUP_FILES
+  origin_dir2=$origin_parent/DUP_FILES_ID
+  dup_dir=$destination_parent/duplicates
+  flags_dir=$destination_parent/duplicate_flags
 
   if [ ! -d $dup_dir ];then mkdir $dup_dir;fi
   if [ ! -d $flags_dir ];then mkdir $flags_dir;fi
@@ -89,6 +89,15 @@ duplicates () {
 
 release=$1
 version=$2
+
+origin_parent=$data_directory/datasets/NOC_corrections/$version
+destination_parent=$data_directory/$release/NOC_corrections/$version
+
+if [ ! -d $destination_parent ]
+then
+        echo 'Creating corrections destination directory '$destination_parent
+	mkdir -p $destination_parent
+fi
 
 what=$3
 case $what
