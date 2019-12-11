@@ -5,7 +5,7 @@ Created on Mon Jun 17 14:24:10 2019
 
 See IMPORTANT NOTE!!!!
 
-Script to generate the C3S CDM Marine level1c data: add external MD (pub47...):
+Script to generate the C3S CDM Marine level1d data: add external MD (pub47...):
 
     - Read header table and MD and see if there is anything to merge
     
@@ -144,7 +144,8 @@ def map_to_cdm():
     field = 'sensor_id'
     for table in  obs_tables:
         meta_field = metadata['pub47']['sensor_id'].get(table)
-        meta_cdm[(table,field)] = join_cols(meta_df,['uid','record',meta_field])
+        #meta_cdm[(table,field)] = join_cols(meta_df,['uid','record',meta_field])
+        meta_cdm[(table,field)] = meta_df[meta_field]
 
     field = 'z_coordinate'
     for table in obs_tables:
@@ -271,7 +272,9 @@ level_path = os.path.join(release_path,level,params.sid_dck)
 level_ql_path = os.path.join(release_path,level,'quicklooks',params.sid_dck)
 level_log_path = os.path.join(release_path,level,'log',params.sid_dck)
 
-md_path = os.path.join(params.data_path,params.release,'Pub47')
+md_path = os.path.join(params.data_path,params.release,'wmo_publication_47','monthly')
+
+logging.info('Setting MD path to {}'.format(md_path))
 
 data_paths = [prev_level_path, level_path, level_ql_path, level_log_path, md_path ]
 if any([ not os.path.isdir(x) for x in data_paths ]):
