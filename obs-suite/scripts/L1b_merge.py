@@ -154,6 +154,7 @@ L1b_ql_path = os.path.join(release_path,'level1b','quicklooks',params.sid_dck)
 
 L1b_main_corrections = os.path.join(params.data_path,params.release,'NOC_corrections',version_corrections)
 
+logging.info('Setting corrections path to {}'.format(L1b_main_corrections))
 
 data_paths = [L1a_path, L1b_path, L1b_ql_path, L1b_main_corrections ]
 if any([ not os.path.isdir(x) for x in data_paths ]):
