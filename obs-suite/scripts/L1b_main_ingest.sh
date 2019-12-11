@@ -19,13 +19,14 @@
 # more than just separating columns
 #
 # Origin directories are hardcoded and assumed to be there, obviously,
-# while output directories (../NOC_corrections/version/<correction>) are created if they don’t exist.
+# while output directories (<release>/NOC_corrections/version/<correction>) are created if they don’t exist.
 #
 # DEV NOTES:
 #
 #
 source setenv0.sh
 
+# FUNCTIONS -------------------------------------------------------------------
 datepos () {
   echo 'Processing DATEPOS files'
   origin_dir=$origin_parent/CHANGED_DATEPOS
@@ -87,6 +88,7 @@ duplicates () {
   done
 }
 
+# MAIN -------------------------------------------------------------------
 release=$1
 version=$2
 
