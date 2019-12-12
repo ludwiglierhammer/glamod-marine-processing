@@ -13,7 +13,7 @@
 #
 # sid_deck_list_file is: sid-dck yyyy-mm yyyy-mm
 #
-# Usage: ./L2_launcher.sh release update source_dataset list_file
+# Usage: ./L2_launcher.sh release update source_dataset list_file level2_file
 
 # Get JOB
 function nk_jobid {
@@ -28,6 +28,7 @@ release=$1
 update=$2
 source=$3
 sid_deck_list_file=$4
+l2_file=$5
 
 ffs="-"
 level=level2
@@ -60,7 +61,7 @@ do
   echo "Setting deck L1e scratch directory: $sid_deck_scratch_dir"
   rm -rf $sid_deck_scratch_dir;mkdir -p $sid_deck_scratch_dir
 
-  jobid_cp=$(nk_jobid bsub -J $sid_deck'L2c' -oo $sid_deck_scratch_dir/"L2_copy.o" -eo $sid_deck_scratch_dir/"L2_copy.e" -q short-serial -W $job_time_cp -M $job_memo_cp -R "rusage[mem=$job_memo_cp]" python $scripts_directory/L2_main.py $data_directory $sid_deck $release $update $source)
+  jobid_cp=$(nk_jobid bsub -J $sid_deck'L2c' -oo $sid_deck_scratch_dir/"L2_copy.o" -eo $sid_deck_scratch_dir/"L2_copy.e" -q short-serial -W $job_time_cp -M $job_memo_cp -R "rusage[mem=$job_memo_cp]" python $scripts_directory/L2_main.py $data_directory $sid_deck $release $update $source $l2_file)
   jobid_de=$(nk_jobid bsub -J $sid_deck'L2de' -w "done($jobid_cp)" -oo $sid_deck_scratch_dir/"L2_de.o" -eo $sid_deck_scratch_dir/"L2_de.e" -q short-serial -W 00:05 -M 2 $scripts_directory/dir_exists.sh $data_directory/$release/$source/$level/$sid_deck)
   jobid_io=$(nk_jobid bsub -J $sid_deck'L2io' -w "done($jobid_de)" -oo $sid_deck_scratch_dir/"L2_io.o" -eo $sid_deck_scratch_dir/"L2_io.e" -q short-serial -W $job_time_io -M $job_memo_io -R "rusage[mem=$job_memo_io]" python $code_directory/reports/report_io.py $data_directory $release $update $source $level $sid_deck $y_init $y_end)
   bsub -J $sid_deck'L2REP' -w "done($jobid_io)" -oo $sid_deck_scratch_dir/"L2_rep.o" -eo $sid_deck_scratch_dir/"L2_rep.e" -q short-serial -W $job_time_rep -M $job_memo_rep -R "rusage[mem=$job_memo_rep]" python $code_directory/reports/pdf_report_jinja_$level.py $data_directory $release $update $source $sid_deck $y_init $y_end

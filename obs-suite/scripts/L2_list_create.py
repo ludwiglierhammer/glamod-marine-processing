@@ -5,14 +5,14 @@ Created on Wed Nov 13 16:18:36 2019
 
 Create initial level2 product list from the initial source-data list
 
-Outputs file to /<data_path>/<release>/<source>/level2/<release>-<update>-selection.json
+Outputs file to /<data_path>/<release>/<source>/level2/L2-config.json
 
 Inargs:
 ------
 data_path: data release parent path (i.e./gws/nopw/c3s311_lot2/data/marine)
 release: release identifier
 update: release update identifier
-source: source dataset identifier
+dataset:  dataset directory identifier (ie.e ICOADS_R3.0.0T)
 config_file: path to release/update list
 
 @author: iregon
@@ -36,7 +36,7 @@ release_path = os.path.join(data_path,release,source)
 filename_field_sep = '-'  
   
 level_path = os.path.join(release_path,level)  
-level_filename = os.path.join(level_path,filename_field_sep.join([release,update,'selection.json']))
+level_filename = os.path.join(level_path,'L2-config.json')
 
 
 sid_dck_list = pd.read_csv(release_file,names= ['sid-dck','init','end'],header = None,delimiter='\t')
