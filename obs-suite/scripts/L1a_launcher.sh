@@ -24,7 +24,7 @@ sid_deck_list_file=$4
 sid_deck_jobs_file=$5
 
 l0a_dir=$data_directory/$release/$source/level0
-config_dir=$code_directory/configuration_files/$release'_'$update
+config_dir=$code_directory/configuration_files/$release'_'$update/$source
 
 ffs="-"
 level=level1a

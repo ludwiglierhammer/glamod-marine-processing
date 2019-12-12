@@ -12,8 +12,6 @@
 #
 # sid_deck_list_file is: sid-dck yyyy-mm yyyy-mm
 #
-# Uses configuration file in ../configuration_files/<release>_<update>_l1b_corrections.json
-#
 # Usage: ./L1b_launcher.sh release update datasource sid_deck_list_file l1b_config_file
 #
 # Devel notes:
