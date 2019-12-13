@@ -161,7 +161,8 @@ if not params.flag:
 release_path = os.path.join(params.data_path,params.release,params.source)
 
 filename_field_sep = '-'    
-L0_path = os.path.join(release_path,'level0',params.sid_dck)   
+#L0_path = os.path.join(release_path,'level0',params.sid_dck)
+L0_path = os.path.join(params.data_path,'datasets',params.source,'level0',params.sid_dck)   
 L1a_path = os.path.join(release_path,'level1a',params.sid_dck)
 L1a_ql_path = os.path.join(release_path,'level1a','quicklooks',params.sid_dck)
 L1a_excluded_path = os.path.join(release_path,'level1a','excluded',params.sid_dck)

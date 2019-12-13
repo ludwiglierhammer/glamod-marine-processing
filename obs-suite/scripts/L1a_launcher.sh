@@ -23,7 +23,8 @@ source=$3
 sid_deck_list_file=$4
 sid_deck_jobs_file=$5
 
-l0a_dir=$data_directory/$release/$source/level0
+#l0a_dir=$data_directory/$release/$source/level0
+l0a_dir=$data_directory/datasets/$source/level0
 config_dir=$code_directory/configuration_files/$release'_'$update/$source
 
 ffs="-"
@@ -33,6 +34,9 @@ log_dir=$data_directory/$release/$source/$level/log
 log_file=$log_dir/${filebase%.*}$ffs$(date +'%Y%m%d_%H%M').log
 
 exec > $log_file 2>&1
+
+echo 'Source dataset directory is '$l0a_dir
+
 
 # Get JOB
 function nk_jobid {
@@ -54,7 +58,7 @@ do
 	sid_deck=${process[0]}
 	inidate=${process[1]}
 	enddate=${process[2]}
-
+        echo 'Source deck: '$sid_deck
 	l1a_config_file=$(awk -v sid_deck=$sid_deck '$1==sid_deck {print $2}' $sid_deck_jobs_file)
 	memo_=$(awk -v sid_deck=$sid_deck '$1==sid_deck {print $3}' $sid_deck_jobs_file)
 	time_=$(awk -v sid_deck=$sid_deck '$1==sid_deck {print $4}' $sid_deck_jobs_file)
@@ -63,12 +67,12 @@ do
 
 	sid_deck_log_dir=$log_dir/$sid_deck
 	sid_deck_l0a_dir=$l0a_dir/$sid_deck
-
+  	echo 'Source sid-dck data directoy is '$sid_deck_l0a_dir 
   # Re-initialize scratch directory for deck
   sid_deck_scratch_dir=$scratch_directory/$level/$sid_deck
   echo "Setting deck L1a scratch directory: $sid_deck_scratch_dir"
   rm -rf $sid_deck_scratch_dir;mkdir -p $sid_deck_scratch_dir
-
+  
 	d=$inidate'-01'
 	enddate=$enddate'-01'
 	counter=1
