@@ -105,8 +105,8 @@ def create_lat_bands(dataset,agg=None):
 
 def plot_lat_bands(mode,param,param_latitude_band_aggs,counts_latitude_band,max_value,min_value,fig_path):
     logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s', level=logging.DEBUG)
-    start = param_latitude_band_aggs['time'].isel(time=0).values
-    end = param_latitude_band_aggs['time'].isel(time=-1).values
+    start = param_latitude_band_aggs['time'].min().values#isel(time=0).values
+    end = param_latitude_band_aggs['time'].max().values#isel(time=-1).values
     index = pd.date_range(start=start,end=end,freq='MS') 
     
     start = counts_latitude_band['time'].isel(time=0).values
