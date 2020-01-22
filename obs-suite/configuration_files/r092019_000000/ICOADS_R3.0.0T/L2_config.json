@@ -346,7 +346,7 @@
     },
     "063-714": {
         "exclude": false,
-        "params_exclude": []
+        "params_exclude": ["observations-at","observations-dpt","observations-wd","observations-ws"]
     },
     "161-720": {
         "exclude": false,
