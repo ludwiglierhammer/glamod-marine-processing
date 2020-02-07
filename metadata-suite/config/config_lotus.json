@@ -1,0 +1,30 @@
+{
+  "data_path"        : "/group_workspaces/jasmin2/glamod_marine/data/datasets/WMO_Publication_47/",
+  "config_path"      : "/gws/smf/j04/c3s311a_lot2/code/marine_code/glamod-marine-processing/metadata-suite/config/",
+  "verbose"          : true,
+  "output_path"      : "/group_workspaces/jasmin2/glamod_marine/data/r092019/wmo_publication_47/",
+  "corrections_file" : "corrections.json",
+  "mapping_path"     : "/gws/smf/j04/c3s311a_lot2/code/marine_code/glamod-marine-processing/metadata-suite/config/mapping/",
+  "duplicateChecks":[
+    "anemometer1_calibration_date","anemometer1_distance_bow","anemometer1_distance_centreline",
+    "anemometer1_height_deck","anemometer1_height_loadline","anemometer1_location","anemometer1_make_model",
+    "anemometer1_side","anemometer1_type",
+    "anemometer2_calibration_date","anemometer2_distance_bow","anemometer2_distance_centreline",
+    "anemometer2_height_deck","anemometer2_height_loadline","anemometer2_location","anemometer2_make_model",
+    "anemometer2_side","anemometer2_type",
+    "anemometer_usage",
+    "automation","baseline_check","aws_display_software","aws_model","aws_processing_software","electronic_logbook",
+    "barograph1_type","barometer1_calibration_date","barometer1_height","barometer1_location","barometer1_make_model","barometer1_type","barometer1_units",
+    "barograph2_type","barometer2_calibration_date","barometer2_height","barometer2_location","barometer2_make_model","barometer2_type","barometer2_units",
+    "callsign","country_of_registry","imo_number","vessel_type",
+    "distance_bow_to_bridge","vessel_breadth","vessel_draught", "vessel_freeboard","vessel_length","vessel_max_cargo_height","windwave_observing_height",
+    "meteorological_vessel_type","recruiting_country","vos_derecruitment_date","vos_recruitment_date","vosclim_derecruitment_date","vosclim_recruitment_date", "prepared",
+    "hygrometer1_exposure","hygrometer1_type",
+    "hygrometer2_exposure","hygrometer2_type",
+    "observing_frequency",
+    "sst1_depth","sst1_method",
+    "sst2_depth","sst2_method","sstM3",
+    "thermometer1_exposure","thermometer1_height","thermometer1_location","thermometer1_make_model","thermometer1_scale","thermometer1_type",
+    "thermometer2_exposure","thermometer2_height","thermometer2_location","thermometer2_make_model","thermometer2_scale","thermometer2_type"
+    ]
+}

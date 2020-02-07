@@ -1,0 +1,27 @@
+{
+	"field":"barm",
+	"map":[
+		{"- AN":"AN"},
+		{"A":"AN"},
+		{"AH":"AN"},
+		{"AN":"AN"},
+		{"AN A":"AN AN"},
+		{"AN MER":"AN MER"},
+		{"AN MER -":"AN MER"},
+		{"AN*":"AN"},
+		{"AN/MER":"AN MER"},
+		{"DA":"DA"},
+		{"ELE":"ELE"},
+		{"ME R":"MER"},
+		{"MER":"MER"},
+		{"MER AN":"MER AN"},
+		{"MER*":"MER"},
+		{"MER,AN":"MER AN"},
+		{"MSNG":"NULL"},
+		{"NA*":"AN"},
+		{"OT":"OT"},
+		{"SA":"SAN"},
+		{"SAN":"SAN"},
+		{"SS":"SS"}
+	]
+}

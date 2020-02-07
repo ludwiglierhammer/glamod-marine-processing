@@ -1,0 +1,13 @@
+{
+	"field":"freq",
+	"map":[
+		{"1RR":"IRR"},
+		{"EPD":"EPD"},
+		{"FPD":"FPD"},
+		{"HLY":"HLY"},
+		{"IRR":"IRR"},
+		{"MSNG":"NULL"},
+		{"OPD":"OPD"},
+		{"TPD":"TPD"}
+	]
+}
