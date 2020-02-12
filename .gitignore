@@ -9,6 +9,6 @@
 
 # Ignore cgf-suite for the time being
 /cfg-suite/
-/metadata-suite/
+#/metadata-suite/
 /qc-suite/
 /data_migration/
