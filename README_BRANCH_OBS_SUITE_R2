@@ -1,0 +1,36 @@
+
+-> There were uncommited changes in master when this branch was created, reason
+why I did not do a git pull prior to creating the branch, as recommended.
+
+Probably won't be able to push the new branch to GitLab?
+
+Hopefully I'll be able to merge the branch locally with master once it is tagged...
+
+[iregon@jasmin-sci1 glamod-marine-processing]$ git status
+# On branch master
+# Changes not staged for commit:
+#   (use "git add <file>..." to update what will be committed)
+#   (use "git checkout -- <file>..." to discard changes in working directory)
+#
+#	modified:   metadata-suite/modules/__pycache__/pub47.cpython-37.pyc
+#	modified:   metadata-suite/modules/__pycache__/soundex.cpython-37.pyc
+#	modified:   metadata-suite/scripts/split_pub47.py
+#	modified:   obs-suite/compare_migration.sh
+#
+# Untracked files:
+#   (use "git add <file>..." to include in what will be committed)
+#
+#	config-suite/
+#	obs-suite/c3s_dashboard/
+#	obs-suite/configuration_files/r092019_000000/ICOADS_R3.0.0T/source_deck_list_drifters.txt
+#	obs-suite/configuration_files/r092019_000000/ICOADS_R3.0.0T/source_deck_list_no_drifters.txt
+#	obs-suite/pyenvs/requirements_env2.txt
+#	obs-suite/reports/user_manual_global/
+no changes added to commit (use "git add" and/or "git commit -a")
+[iregon@jasmin-sci1 glamod-marine-processing]$ git checkout -b obs_suite_R2
+M	metadata-suite/modules/__pycache__/pub47.cpython-37.pyc
+M	metadata-suite/modules/__pycache__/soundex.cpython-37.pyc
+M	metadata-suite/scripts/split_pub47.py
+M	obs-suite/compare_migration.sh
+Switched to a new branch 'obs_suite_R2'
+

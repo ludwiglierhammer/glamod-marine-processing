@@ -36,7 +36,7 @@ io_path = reports_path
 ts_path = os.path.join(data_path,release,source,'level1e','reports',sid_dck)
 maps_path = ts_path
 script_path = os.path.dirname(os.path.realpath(__file__))
-level2_list = os.path.join(data_path,release,source,'level2',FFS.join([release,update,'selection.json']))
+level2_list = os.path.join(os.path.dirname(script_path),'configuration_files',release+'_'+update,source,'L2_config.json')
 
 if not os.path.isfile(level2_list):
     logging.error('Level2 selection file {} not found'.format(level2_list))
