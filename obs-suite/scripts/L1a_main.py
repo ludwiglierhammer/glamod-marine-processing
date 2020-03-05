@@ -5,7 +5,7 @@ Created on Mon Jun 17 14:24:10 2019
 
 Script to generate the C3S CDM Marine level1a data. 
 
-    - Reads source data (and supp if avail) file with modeule mdf_reader. This 
+    - Reads dataset data (and supp if avail) file with modeule mdf_reader. This 
     includes a data model validation mask.
     - fixes known PT type errors in source dataset with module metmetpy
     - selects data reports according to filtering requests
@@ -15,11 +15,11 @@ Script to generate the C3S CDM Marine level1a data.
 
 The processing unit is the source-deck monthly file.
 
-Outputs data to /<data_path>/<release>/<source>/level1a/<sid-dck>/table[i]-fileID.psv
-Outputs invalid data to /<data_path>/<release>/<source>/level1a/invalid/<sid-dck>/fileID-data|mask.psv
-Outputs exluded data to /<data_path>/<release>/<source>/level1a/excluded/<sid-dck>/fileID-<filterfield>.psv
-Outputs quicklook info to:  /<data_path>/<release>/<source>/level1a/quicklooks/<sid-dck>/fileID.json
-Outputs quicklook info to:  /<data_path>/<release>/<source>/level1a/quicklooks/<sid-dck>/table[i]-fileID.nc
+Outputs data to /<data_path>/<release>/<dataset>/level1a/<sid-dck>/table[i]-fileID.psv
+Outputs invalid data to /<data_path>/<release>/<dataset>/level1a/invalid/<sid-dck>/fileID-data|mask.psv
+Outputs exluded data to /<data_path>/<release>/<dataset>/level1a/excluded/<sid-dck>/fileID-<filterfield>.psv
+Outputs quicklook info to:  /<data_path>/<release>/<dataset>/level1a/quicklooks/<sid-dck>/fileID.json
+Outputs quicklook info to:  /<data_path>/<release>/<dataset>/level1a/quicklooks/<sid-dck>/table[i]-fileID.nc
 
 where fileID is year-month-release-update
 
@@ -46,7 +46,7 @@ year: data file year (yyyy)
 month: data file month (mm)
 release: release identifier
 update: release update identifier
-source: source dataset identifier
+dataset: source dataset identifier
 configfile: path to configuration file with processing options
 
 configfile:
@@ -79,6 +79,9 @@ the end it was decided to set umask 002 to the ./bashrc file
 @author: iregon
 """
 import sys
+
+print(sys.path)
+
 import os
 import json
 from io import StringIO
@@ -98,23 +101,30 @@ from imp import reload
 reload(logging)  # This is to override potential previous config of logging
 
 
+FFS = '-'
 # FUNCTIONS -------------------------------------------------------------------
 class script_setup:
     def __init__(self, inargs):
         self.data_path = inargs[1]
-        self.sid_dck = inargs[2]
+        self.release = inargs[2]
+        self.update = inargs[3]
+        self.dataset = inargs[4]
+        self.sid_dck = inargs[5]
         self.dck = self.sid_dck.split("-")[1]
-        self.year = inargs[3]
-        self.month = inargs[4]
-        self.release = inargs[5]
-        self.update = inargs[6]
-        self.source = inargs[7]
+        self.year = inargs[6]
+        self.month = inargs[7]
         self.configfile =  inargs[8]
+        process_options = ['data_model', 'read_sections','filter_reports_by',
+                           'cdm_map']
         try:
             with open(self.configfile) as fileObj:
                 config = json.load(fileObj)
-            for k,v in config.items():
-                setattr(self, k, v)
+            
+            for opt in process_options: 
+                if not config.get(self.sid_dck,{}).get(opt):
+                    setattr(self, opt, config.get(opt))
+                else:
+                    setattr(self, opt, config.get(self.sid_dck).get(opt))
             self.flag = True
         except Exception:
             logging.error('Parsing configuration from file :{}'.format(self.configfile), exc_info=True)
@@ -158,11 +168,11 @@ if not params.flag:
     logging.error('Error parsing initial configuration')
     sys.exit(1)
     
-release_path = os.path.join(params.data_path,params.release,params.source)
+release_path = os.path.join(params.data_path,params.release,params.dataset)
 
-filename_field_sep = '-'    
+FFS = '-'    
 #L0_path = os.path.join(release_path,'level0',params.sid_dck)
-L0_path = os.path.join(params.data_path,'datasets',params.source,'level0',params.sid_dck)   
+L0_path = os.path.join(params.data_path,'datasets',params.dataset,'level0',params.sid_dck)   
 L1a_path = os.path.join(release_path,'level1a',params.sid_dck)
 L1a_ql_path = os.path.join(release_path,'level1a','quicklooks',params.sid_dck)
 L1a_excluded_path = os.path.join(release_path,'level1a','excluded',params.sid_dck)
@@ -172,76 +182,81 @@ data_paths = [L0_path, L1a_path, L1a_ql_path, L1a_excluded_path, L1a_invalid_pat
 if any([ not os.path.isdir(x) for x in data_paths ]):
     logging.error('Could not find data paths: '.format(','.join([ x for x in data_paths if not os.path.isdir(x)])))
 
-L0_filename = os.path.join(L0_path,filename_field_sep.join([params.year,params.month]) + '.imma')
+L0_filename = os.path.join(L0_path,FFS.join([params.year,params.month]) + '.imma')
 if not os.path.isfile(L0_filename):
     logging.error('L0 file not found: {}'.format(L0_filename))
     
-release_id = filename_field_sep.join([params.release,params.update ])   
-L1a_id = filename_field_sep.join([str(params.year),str(params.month).zfill(2),release_id ])
+release_id = FFS.join([params.release,params.update ])   
+L1a_id = FFS.join([str(params.year),str(params.month).zfill(2),release_id ])
 
 # CLEAN PREVIOUS L1A PRODUCTS AND SIDE FILES ----------------------------------
 clean_L1a(L1a_id)
 
 # DO THE DATA PROCESSING ------------------------------------------------------
-data_model = params.main_data_model
+data_model = params.data_model
 dataset = params.dataset
 io_dict = {}
 
 #1. Read input file to dataframe
-logging.info('Reading source data')
+logging.info('Reading dataset data')
 
-process_kwargs = {'data_model':params.main_data_model,
+read_kwargs = {'data_model':params.data_model,
                   'sections':params.read_sections,
                   'chunksize':200000}
 
-if hasattr(params,'supp_section'):
-    if not hasattr(params,'supp_data_model'):
-        logging.error('Data model for supplemental section {} not provided'.format(params.supp_section))
-    else:
-        process_kwargs.update({'supp_section':params.supp_section})
-        process_kwargs.update({'supp_model':params.supp_data_model})
-        
-data_in = mdf_reader.read(L0_filename, **process_kwargs)
+print(read_kwargs)
 
-io_dict['read'] = {'total':inspect.get_length(data_in['data'])}
+data_in = mdf_reader.read(L0_filename, **read_kwargs)
+
+io_dict['read'] = {'total':inspect.get_length(data_in.data)}
 
 # 2. PT fixing, filtering and invalid rejection
 # 2.1. Fix platform type
+
+# dataset = ICOADS_R3.0.0T is not "registered" in metmetpy, but icoads_r3000
+# Modify metmetpy so that it maps ICOADS_R3.0.0T to its own alliaeses
+# we now do the dirty trick here: dataset_metmetpy = icoads_r3000
+
 logging.info('Applying platform type fixtures')
-data_in['data'] = metmetpy.correct_pt.correct(data_in['data'],dataset,data_model,params.dck)
+dataset_metmetpy = 'icoads_r3000'
+data_model_metmetpy = 'imma1'
+data_in.data = metmetpy.correct_pt.correct(data_in.data,dataset_metmetpy,data_model_metmetpy,params.dck)
 
 # 2.2. Apply record selection (filter by) criteria: PT types.....
-if hasattr(params, 'filter_by'):
+if hasattr(params, 'filter_reports_by'):
     logging.info('Applying selection filters')
     io_dict['not_selected'] = {}
     data_excluded = {}
-    data_excluded['atts'] = data_in['atts'].copy()
+    data_excluded['atts'] = data_in.atts.copy()
     data_excluded['data'] = {}
-    # 3.1. Select by filter_by options
-    for k,v in params.filter_by.items():
+    # 3.1. Select by report_filters options
+    for k,v in params.filter_reports_by.items():
         io_dict['not_selected'][k] = {}
-        logging.info('Selecting {0} values: {1}'.format(k,','.join(v.get('values'))))
-        col = (v.get('section'),v.get('element')) if v.get('section') else v.get('element')
-        values = v.get('values')
+        logging.info('Selecting {0} values: {1}'.format(k,','.join(v)))
+        filter_location = tuple(k.split('.'))
+        col = filter_location[0] if len(filter_location) == 1 else filter_location
+        values = v
         selection={col:values}
-        data_in['data'],data_excluded['data'][k],index = select.select_from_list(data_in['data'],selection,out_rejected = True,in_index = True)
-        data_in['valid_mask']= select.select_from_index(data_in['valid_mask'],index)
+        data_in.data,data_excluded['data'][k],index = select.select_from_list(data_in.data,selection,out_rejected = True,in_index = True)
+        data_in.mask= select.select_from_index(data_in.mask,index)
         io_dict['not_selected'][k]['total'] = inspect.get_length(data_excluded['data'][k])
         if io_dict['not_selected'][k]['total'] > 0:
-            if data_in['atts'][col]['column_type'] in ['str','object','key']:
+            if data_in.atts[col]['column_type'] in ['str','object','key']:
                 io_dict['not_selected'][k].update(inspect.count_by_cat(data_excluded['data'][k],col))
     io_dict['not_selected']['total'] = sum([ v.get('total') for k,v in io_dict['not_selected'].items()])
 
-io_dict['pre_selected'] = {'total':inspect.get_length(data_in['data'])}    
+io_dict['pre_selected'] = {'total':inspect.get_length(data_in.data)}    
+
 
 # 2.3. Keep track of invalid data 
 # First create a global mask and count failure occurrences
 newmask_buffer = StringIO()
 logging.info('Removing invalid data')
-for data,mask in zip(data_in['data'],data_in['valid_mask']):
+for data,mask in zip(data_in.data,data_in.mask):
     # 2.3.1. Global mask
     mask['global_mask'] = mask.all(axis=1)
     mask.to_csv(newmask_buffer,header = False, mode = 'a', encoding = 'utf-8',index = False)
+    
     # 2.3.2. Invalid reports counts and values
     # Initialize counters if first chunk
     masked_columns = [ x for x in mask if not all(mask[x].isna()) and x!=('global_mask','') ]
@@ -254,16 +269,14 @@ for data,mask in zip(data_in['data'],data_in['valid_mask']):
             io_dict['invalid'][k]['values'].extend(data[col].loc[~mask[col]].values)
 
 newmask_buffer.seek(0)   
-chunksize = None if isinstance(data_in['valid_mask'],pd.DataFrame) else data_in['valid_mask'].orig_options['chunksize']
-data_in['valid_mask'] = pd.read_csv(newmask_buffer,names = [ x for x in mask ], chunksize = chunksize)    
-data_in['data'] = TextParser_hdlr.restore(data_in['data'])
+chunksize = None if isinstance(data_in.mask,pd.DataFrame) else data_in.mask.orig_options['chunksize']
+data_in.mask = pd.read_csv(newmask_buffer,names = [ x for x in mask ], chunksize = chunksize)    
+data_in.data = TextParser_hdlr.restore(data_in.data)
 # Now see what fails
 for col in masked_columns:
-    object_types = ['str','object','key']
-    numeric_types = ['int8','int16','int32','int64','uint8','uint16','uint32','uint64','float16','float32','float64']
     k = '.'.join(col)
     if io_dict['invalid'][k]['total'] > 0:
-        if data_in['atts'].get(col,{}).get('column_type') in object_types:
+        if data_in.atts.get(col,{}).get('column_type') in mdf_reader.properties.object_types:
             ivalues = list(set(io_dict['invalid'][k]['values']))
             # This is because sorting fails on strings if nan
             if np.nan in ivalues:
@@ -274,7 +287,7 @@ for col in masked_columns:
                 ivalues.sort()
             io_dict['invalid'][k].update({i:io_dict['invalid'][k]['values'].count(i) for i in ivalues})
             sush = io_dict['invalid'][k].pop('values',None)
-        elif data_in['atts'].get(col,{}).get('column_type') in numeric_types:
+        elif data_in.atts.get(col,{}).get('column_type') in mdf_reader.properties.numeric_types:
             values = io_dict['invalid'][k]['values']
             values = np.array(values)[~np.isnan(np.array(values))]
             if len(values>0):
@@ -290,13 +303,13 @@ for col in masked_columns:
 
 # 2.4. Discard invalid data. 
 data_invalid = {}
-data_invalid['atts'] = data_in['atts'].copy()
+data_invalid['atts'] = data_in.atts.copy()
 col = 'global_mask'            
-data_in['data'],data_invalid['data'] = select.select_true(data_in['data'],data_in['valid_mask'],col,out_rejected = True)
-data_in['valid_mask'],data_invalid['valid_mask'] = select.select_true(data_in['valid_mask'],data_in['valid_mask'],col,out_rejected = True)
+data_in.data,data_invalid['data'] = select.select_true(data_in.data,data_in.mask,col,out_rejected = True)
+data_in.mask,data_invalid['valid_mask'] = select.select_true(data_in.mask,data_in.mask,col,out_rejected = True)
             
 io_dict['invalid']['total'] = inspect.get_length(data_invalid['data'])         
-io_dict['processed'] = {'total':inspect.get_length(data_in['data'])}
+io_dict['processed'] = {'total':inspect.get_length(data_in.data)}
 
 process = True
 if io_dict['processed']['total'] == 0:
@@ -311,7 +324,7 @@ if process:
     obs_tables = tables[1:]
     io_dict.update({table:{} for table in tables})
     mapping = params.cdm_map
-    cdm_tables = cdm.map_model(mapping, data_in['data'], data_in['atts'],
+    cdm_tables = cdm.map_model(mapping, data_in.data, data_in.atts,
                                log_level = 'INFO')
     
     logging.info('Printing tables to psv files')
@@ -335,7 +348,7 @@ with open(L1a_io_filename,'w') as fileObj:
     
 # Output exluded and invalid ---------------------------------------------
 def write_out_junk(dataObj,filename):
-    v = [dataObj] if not process_kwargs.get('chunksize') else dataObj
+    v = [dataObj] if not read_kwargs.get('chunksize') else dataObj
     c = 0
     for df in v:
         wmode = 'a' if c > 0 else 'w'
@@ -343,18 +356,17 @@ def write_out_junk(dataObj,filename):
         df.to_csv(filename, sep = '|', mode = wmode, header = header)
         c += 1    
     
-if hasattr(params, 'filter_by'):
+if hasattr(params, 'report_filters'):
     for k,v in data_excluded['data'].items():
         if inspect.get_length(data_excluded['data'][k]) > 0:
-            excluded_filename = os.path.join(L1a_excluded_path,L1a_id + filename_field_sep + k + '.psv')  
+            excluded_filename = os.path.join(L1a_excluded_path,L1a_id + FFS + k + '.psv')  
             logging.info('Writing {0} excluded data to file {1}'.format(k,excluded_filename))
             write_out_junk(v,excluded_filename)
 
 if inspect.get_length(data_invalid['data']) > 0:
-    invalid_data_filename = os.path.join(L1a_invalid_path,L1a_id + filename_field_sep + 'data.psv')
-    invalid_mask_filename = os.path.join(L1a_invalid_path,L1a_id + filename_field_sep + 'mask.psv')
+    invalid_data_filename = os.path.join(L1a_invalid_path,L1a_id + FFS + 'data.psv')
+    invalid_mask_filename = os.path.join(L1a_invalid_path,L1a_id + FFS + 'mask.psv')
     logging.info('Writing invalid data to file {}'.format(invalid_data_filename))
     write_out_junk(data_invalid['data'],invalid_data_filename)
     logging.info('Writing invalid data mask to file {}'.format(invalid_mask_filename))
     write_out_junk(data_invalid['valid_mask'],invalid_mask_filename)
-
