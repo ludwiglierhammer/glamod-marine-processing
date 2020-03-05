@@ -16,16 +16,14 @@ release_file: path to text file with individual sid-dck
 
 release_file format:
 -------------------
-header: no   
-delimiter: tab
-columns: sid-dck, yr-mo (init), yr-mo (end)
+json with sid-dck as primary keys   
 
 @author: iregon
 """
 
 import os
 import sys
-import pandas as pd
+import json
 
 # This just to ease playing in local ------------------------------------------
 #data_path = '/Users/iregon/dessaps/data/'
@@ -58,14 +56,15 @@ level_subdirs['level1b'] = ['log','quicklooks']
 level_subdirs['level1c'] = ['log','quicklooks','invalid']
 level_subdirs['level1d'] = ['log','quicklooks']
 level_subdirs['level1e'] = ['log','quicklooks','reports']
-level_subdirs['level2'] = ['log','excluded','reports','configuration']
+level_subdirs['level2'] = ['log','quicklooks','excluded','reports','configuration']
 deep_sublevels = ['log','quicklooks','invalid','excluded','reports']
 os.umask(0)
 # READ LIST OF SID-DCKS FOR RELEASE
-sid_dck_list = pd.read_csv(release_file,names= ['sid-dck','init','end'],header = None,delimiter='\t')
+with open(release_file,'r') as fileO:
+    sid_dck_dict = json.load(fileO)
 
 for level in levels:
-    level_subdirs[level].extend(sid_dck_list['sid-dck'])
+    level_subdirs[level].extend(sid_dck_dict.keys())
 
 # CREATE DIR FOR RELEASE
 release_tag = release_name
@@ -86,4 +85,4 @@ for level in levels:
 
     for sublevel in deep_sublevels:
         if sublevel in level_subdirs.get(level):
-            create_subdir(os.path.join(level_subdir,sublevel),sid_dck_list['sid-dck'])
+            create_subdir(os.path.join(level_subdir,sublevel),sid_dck_dict.keys())
