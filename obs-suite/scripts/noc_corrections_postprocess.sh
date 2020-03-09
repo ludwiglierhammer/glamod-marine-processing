@@ -84,7 +84,7 @@ duplicates () {
       echo $filename
       base_name=$(basename $filename1)
       filename2=$origin_dir2/$base_name
-      python $scripts_directory/L1b_main_dup_merge.py $filename1 $filename2 $flags_dir $dup_dir
+      python $scripts_directory/noc_duplicates_merge.py $filename1 $filename2 $flags_dir $dup_dir
   done
 }
 
