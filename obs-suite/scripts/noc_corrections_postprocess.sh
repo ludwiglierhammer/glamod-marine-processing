@@ -15,7 +15,7 @@
 #
 # as initially agreed and provided for...
 #
-# Reformatting of duplicate info needs script L1b_main_dup_merge.py as requires
+# Reformatting of duplicate info needs script noc_duplicates_merge.py as requires
 # more than just separating columns
 #
 # Origin directories are hardcoded and assumed to be there, obviously,
