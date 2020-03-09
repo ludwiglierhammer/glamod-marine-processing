@@ -24,7 +24,8 @@
 # DEV NOTES:
 #
 #
-source setenv0.sh
+source ../setpaths.sh
+source ../setenv0.sh
 
 # FUNCTIONS -------------------------------------------------------------------
 datepos () {
