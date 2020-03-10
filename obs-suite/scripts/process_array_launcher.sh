@@ -239,7 +239,7 @@ do
     test -e $sid_dck_log_dir/$log_basenamei.failed
     failed=$?
     if [ "$failed" == 0 ];then failed=true;else failed=false;fi
-		if [ -e $source_filename ]
+    if [ 0 -lt $(ls $source_filename 2>/dev/null | wc -w) ]
 		then
       if $failed_only && ! $failed
       then
@@ -268,7 +268,7 @@ do
 
    bsub -J OK"[1-$counter]" -w "done($jobid[*])" -oo $sid_dck_scratch_dir/"%I.ho" -eo $sid_dck_scratch_dir/"%I.ho" -q short-serial -W 00:01 -M 10 -R "rusage[mem=10]" \
    python $scripts_directory/process_array_output_hdlr.py $scratch_directory $data_directory $release $update $dataset $process $data_level $sid_dck 0 1
-   
+
    bsub -J ER"[1-$counter]" -w "exit($jobid[*])" -oo $sid_dck_scratch_dir/"%I.ho" -eo $sid_dck_scratch_dir/"%I.ho" -q short-serial -W 00:01 -M 10 -R "rusage[mem=10]" \
    python $scripts_directory/process_array_output_hdlr.py $scratch_directory $data_directory $release $update $dataset $process $data_level $sid_dck 1 1
 
