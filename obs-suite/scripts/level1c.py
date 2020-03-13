@@ -226,12 +226,11 @@ else:
 params = script_setup(args)
 
 if not os.path.isfile(params.configfile):
-    logging.error('Level1b configuration file {} not found'.format(params.configfile))
+    logging.error('Configuration file {} not found'.format(params.configfile))
     sys.exit(1)  
 else:
     with open(params.configfile) as fileO:
-        corrections = json.load(fileO)
-    version_corrections = corrections.get('version')
+        config = json.load(fileO)
 
 filename_field_sep = '-' 
 delimiter = '|'
@@ -246,6 +245,7 @@ release_id = filename_field_sep.join([params.release,params.update ])
 fileID = filename_field_sep.join([str(params.year),str(params.month).zfill(2),release_id ])
 fileID_date = filename_field_sep.join([str(params.year),str(params.month)])
 
+version_corrections = config.get('noc_corrections_version')
 cor_id_path = os.path.join(params.data_path,params.release,'NOC_corrections',version_corrections)
 prev_level_path = os.path.join(release_path,level_prev,params.sid_dck)  
 level_path = os.path.join(release_path,level,params.sid_dck)
@@ -270,11 +270,11 @@ validation_dict = { table:{} for table in cdm.properties.cdm_tables}
 # DO THE DATA PROCESSING ------------------------------------------------------
 
 # -----------------------------------------------------------------------------
-# Move this settings to configuration file
-dataset = 'icoads_r3000'
-validated = ['report_timestamp','primary_station_id']
+# Settings in configuration file
+dataset = config.get('dataset_id')
+validated = config.get('validated')
+history_explain = config.get('history_explain')
 history_tstmp = datetime.datetime.utcnow().strftime('%Y-%m-%d %H:%M:%S')
-history_explain = 'Performed report_timestamp (date_time) and primary_station_id validation'
 cdm_tables = cdm.lib.tables.tables_hdlr.load_tables()
 
 # 1. READ THE DATA-------------------------------------------------------------
@@ -319,6 +319,8 @@ mask_df.loc[nocallsigns,field]  = validate_id.validate(table_df.loc[nocallsigns]
 table_df.columns = [ x[1] for x in table_df.columns ]
 
 # And now set back to True all that the linkage provided
+# Instead, read in the header history field and check if it contains
+# 'Corrected primary_station_id'
 idcor_file = os.path.join(cor_id_path, 'id', fileID_date + cor_ext)
 logging.info('Restoring pre-corrected ids in {}'.format(idcor_file))
 
