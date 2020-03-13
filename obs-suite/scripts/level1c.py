@@ -35,11 +35,17 @@ of tables, rejecting reports not validating any of these two fields.
 
 The processing unit is the source-deck monthly set of CDM tables.
 
+On reading the table files from the source level (1b), it read:
+    1. master table file (table-yyyy-mm-release-update.psv)
+    2. datetime leak files (table-yyyy-mm-release-update-YYYY-MM.psv), where 
+    YYYY-MM indicates the initial yyyy-mm stamp of the reports contained in that
+    leak file upon arrival to level1b. 
+
 Outputs data to /<data_path>/<release>/<source>/level1c/<sid-dck>/table[i]-fileID.psv
 Outputs invlid data to /<data_path>/<release>/<source>/level1c/invalid/<sid-dck>/table[i]-fileID-invalid_field.psv
 Outputs quicklook info to:  /<data_path>/<release>/<source>/level1c/quicklooks/<sid-dck>/fileID.json
 
-where fileID is yyyy-mm-release_tag-update_tag
+where fileID is yyyy-mm-release-update
 
 Before processing starts:
     - checks the existence of all io subdirectories in level1b|c -> exits if fails
@@ -55,7 +61,7 @@ month: data file month (mm)
 release: release identifier
 update: release update identifier
 source: source dataset identifier
-config_file: l1b corrections configuration file
+configfile: l1b corrections configuration file
 
 Notes on validations:
 --------------------
@@ -123,14 +129,15 @@ reload(logging)  # This is to override potential previous config of logging
 class script_setup:
     def __init__(self, inargs):
         self.data_path = inargs[1]
-        self.sid_dck = inargs[2]
+        self.release = inargs[2]
+        self.update = inargs[3]
+        self.dataset = inargs[4]
+        self.sid_dck = inargs[5]
         self.dck = self.sid_dck.split("-")[1]
-        self.year = inargs[3]
-        self.month = inargs[4]
-        self.release = inargs[5]
-        self.update = inargs[6]
-        self.source = inargs[7]
-        self.config_file = inargs[8]
+        self.year = inargs[6]
+        self.month = inargs[7]
+        self.configfile =  inargs[8]
+
 # This is for json to handle dates
 date_handler = lambda obj: (
     obj.isoformat()
@@ -162,7 +169,8 @@ def read_table_files(table):
                 sys.exit(1)
             validation_dict[table]['leaks_in'] += len(table_dfi)
             table_df = pd.concat([table_df ,table_dfi],axis=1,sort=False)
-
+            
+    validation_dict[table]['ini'] = len(table_df)
     return table_df   
   
 def process_table(table_df,table_name):
@@ -217,11 +225,11 @@ else:
 
 params = script_setup(args)
 
-if not os.path.isfile(params.config_file):
-    logging.error('Level1b configuration file {} not found'.format(params.config_file))
+if not os.path.isfile(params.configfile):
+    logging.error('Level1b configuration file {} not found'.format(params.configfile))
     sys.exit(1)  
 else:
-    with open(params.config_file) as fileO:
+    with open(params.configfile) as fileO:
         corrections = json.load(fileO)
     version_corrections = corrections.get('version')
 
