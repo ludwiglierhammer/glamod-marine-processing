@@ -1,0 +1,19 @@
+{
+  "job":
+  {
+      "data_level": "level1c",
+      "source_level": "level1b",
+      "source_file_ext":"psv",
+      "source_filename_prefix":"header",
+      "source_filename_suffix":"",
+      "environment": "0",
+      "job_memo_mb": 4000,
+      "job_time_hr": "01",
+      "job_time_min": "30",
+      "script_name":"level1c.py"
+  },
+    "noc_corrections_version":"v1x2019",
+    "dataset_id" : "icoads_r3000",
+    "validated" : ["report_timestamp","primary_station_id"],
+    "history_explain" : "Performed report_timestamp (date_time) and primary_station_id validation"
+}
