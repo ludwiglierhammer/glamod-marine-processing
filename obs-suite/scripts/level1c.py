@@ -13,8 +13,6 @@ of tables, rejecting reports not validating any of these two fields.
     
     - Validate header.report_timestamp (see Notes below)
     - Validate header.primary_station_id (see Notes below)
-    This process will fail and exit if the corresponding id corrections file
-    is not found in level1b
     
     - Output all reports not validating timestamp to:
         -> /level1c/invalid/sid-dck/header-fileID-report_timsetamp.psv
@@ -76,9 +74,10 @@ datetime corrections......
 Due to various reasons, the validation is done in 3 stages and using different methods:
     1. Callsign IDs: use set of validation patterns harcoded here
     2. Rest of IDs: use set of per dck validation patterns in metmetpy module
-    3. All: read Liz's ID replacement files (level1b) and make sure all the IDs
-    that were modified in this process validate to True. This is this crappy because
-    there is no clean way to find out if the id was modified from the CDM fields.
+    3. All: set all that Liz's ID linkage modief to True. We are parsing the
+    history field for a "Corrected primary_station_id" text...maybe it should 
+    read this from the level1b config file? But then we need to give this
+    file as an argument....
 
 Dev notes:
 ----------
@@ -94,17 +93,6 @@ be at the time of developing it. It is not parameterized and is hardly flexible.
 2) Why don't we just pick the NaN dates as invalid, instead of looking where conversion
 fails?
 
-3) Initially, file permission where changed to rwxrwxr-- to all output at
-the end of the script with the lines below, however, it seemed that a user not
-being the user that initially created the file could not do this...?? so in
-the end it was decided to set umask 002 to the ./bashrc file
-
-    out_paths = [L1b_path,L1b_ql_path]
-    logging.info('Changing output file permissions')
-    for out_path in out_paths:
-        outfiles = glob.glob(os.path.join(out_path,'*' + fileID + '*'))
-        for outfile in outfiles:
-            os.chmod(outfile,0o664)
 
 .....
 
@@ -246,8 +234,6 @@ release_id = filename_field_sep.join([params.release,params.update ])
 fileID = filename_field_sep.join([str(params.year),str(params.month).zfill(2),release_id ])
 fileID_date = filename_field_sep.join([str(params.year),str(params.month)])
 
-version_corrections = config.get('noc_corrections_version')
-cor_id_path = os.path.join(params.data_path,params.release,'NOC_corrections',version_corrections)
 prev_level_path = os.path.join(release_path,level_prev,params.sid_dck)  
 level_path = os.path.join(release_path,level,params.sid_dck)
 level_ql_path = os.path.join(release_path,level,'quicklooks',params.sid_dck)
@@ -322,26 +308,16 @@ table_df.columns = [ x[1] for x in table_df.columns ]
 # And now set back to True all that the linkage provided
 # Instead, read in the header history field and check if it contains
 # 'Corrected primary_station_id'
-idcor_file = os.path.join(cor_id_path, 'id', fileID_date + cor_ext)
-logging.info('Restoring pre-corrected ids in {}'.format(idcor_file))
+logging.info('Restoring linked IDs')
+linked_history = 'Corrected primary_station_id'
+linked_IDs = table_df['history'].str.contains(linked_history) & \
+    table_df['history'].str.contains('ID identification').notna()
 
-if not os.path.isfile(idcor_file):
-    logging.error('id correction file {} not found'.format(idcor_file))
-    sys.exit(1)
-    
-columns = ['report_id','applied']
-idcor_df =  pd.read_csv(idcor_file, delimiter = delimiter, dtype = 'object',
-                           header = None, usecols=[0,2], names = columns,
-                           quotechar=None,quoting=3,index_col = ['report_id'])
+linked_IDs_no = (linked_IDs).sum()
 
-try:
-    idcor_df = idcor_df.loc[table_df.index]
-    idcor_df = idcor_df.loc[idcor_df['applied'] == '1' ]
-    mask_df.loc[idcor_df.index,field] = True
-    validation_dict['id_validation_rules']['idcorrected'] = len(np.where(idcor_df)[0])
-except:
-    logging.warning(logging.warning('No ID corrections applied'))
-    validation_dict['id_validation_rules']['idcorrected'] = 0
+if linked_IDs_no > 0:
+    mask_df.loc[linked_IDs,field] = True
+    validation_dict['id_validation_rules']['idcorrected'] = linked_IDs_no
 
 validation_dict['id_validation_rules']['callsign'] = len(np.where(callsigns)[0])
 validation_dict['id_validation_rules']['noncallsign'] = len(np.where(~callsigns)[0])
