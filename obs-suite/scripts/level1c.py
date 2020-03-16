@@ -158,10 +158,9 @@ def read_table_files(table):
                 sys.exit(1)
             leaks_in += len(table_dfi)
             table_df = pd.concat([table_df ,table_dfi],axis=0,sort=False)
-
     if len(table_df) > 0:
         validation_dict[table] = {'leaks_in':leaks_in}        
-    return table_df   
+    return table_df
   
 def process_table(table_df,table_name):
     if isinstance(table_df,str):
@@ -348,8 +347,11 @@ logging.info('Cleaning table header')
 process_table(table_df,table)
 obs_tables = [ x for x in cdm_tables.keys() if x != 'header' ]
 for table in obs_tables:
-    logging.info('Cleaning table {}'.format(table))   
-    process_table(table,table)
+    table_pattern = filename_field_sep.join([table,fileID]) + '*.psv'
+    table_files = glob.glob(os.path.join(prev_level_path,table_pattern))
+    if len(table_files) > 0:
+        logging.info('Cleaning table {}'.format(table))   
+        process_table(table,table)
     
 logging.info('Saving json quicklook')
 L1b_io_filename = os.path.join(level_ql_path,fileID + '.json')
