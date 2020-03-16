@@ -39,9 +39,9 @@ On reading the table files from the source level (1b), it read:
     YYYY-MM indicates the initial yyyy-mm stamp of the reports contained in that
     leak file upon arrival to level1b. 
 
-Outputs data to /<data_path>/<release>/<source>/level1c/<sid-dck>/table[i]-fileID.psv
-Outputs invlid data to /<data_path>/<release>/<source>/level1c/invalid/<sid-dck>/table[i]-fileID-invalid_field.psv
-Outputs quicklook info to:  /<data_path>/<release>/<source>/level1c/quicklooks/<sid-dck>/fileID.json
+Outputs data to /<data_path>/<release>/<dataset>/level1c/<sid-dck>/table[i]-fileID.psv
+Outputs invlid data to /<data_path>/<release>/<dataset>/level1c/invalid/<sid-dck>/table[i]-fileID-invalid_field.psv
+Outputs quicklook info to:  /<data_path>/<release>/<dataset>/level1c/quicklooks/<sid-dck>/fileID.json
 
 where fileID is yyyy-mm-release-update
 
@@ -58,7 +58,7 @@ year: data file year (yyyy)
 month: data file month (mm)
 release: release identifier
 update: release update identifier
-source: source dataset identifier
+dataset: dataset identifier
 configfile: l1b corrections configuration file
 
 Notes on validations:
@@ -229,7 +229,7 @@ level_prev = 'level1b'
 header = True 
 wmode = 'w'
     
-release_path = os.path.join(params.data_path,params.release,params.source)
+release_path = os.path.join(params.data_path,params.release,params.dataset)
 release_id = filename_field_sep.join([params.release,params.update ]) 
 fileID = filename_field_sep.join([str(params.year),str(params.month).zfill(2),release_id ])
 fileID_date = filename_field_sep.join([str(params.year),str(params.month)])
