@@ -136,6 +136,7 @@ date_handler = lambda obj: (
 def read_table_files(table):
     logging.info('Reading data from {} table files'.format(table))
     table_df = pd.DataFrame()
+
     # First read the master file, if any, then append leaks
     # If no yyyy-mm master file, can still have reports from datetime leaks
     # On reading 'header' read null as NaN so that we can validate null ids as NaN easily
@@ -143,11 +144,10 @@ def read_table_files(table):
     if len(table_df) == 0:
         logging.warning('Empty or non-existing master {} table. Attempting \
                         to read datetime leak files'.format(table))
-    
     leak_pattern = filename_field_sep.join([table,fileID,'????' + filename_field_sep + '??.psv'])
     leak_files = glob.glob(os.path.join(prev_level_path,leak_pattern))
+    leaks_in = 0
     if len(leak_files)>0:
-        validation_dict[table]['leaks_in'] = 0
         for leak_file in leak_files:
             logging.info('Reading datetime leak file {}'.format(leak_file))
             file_base = os.path.splitext(os.path.basename(leak_file))[0]
@@ -156,10 +156,11 @@ def read_table_files(table):
             if len(table_dfi) == 0:
                 logging.error('Could not read leak file or is empty {}'.format(leak_file)) 
                 sys.exit(1)
-            validation_dict[table]['leaks_in'] += len(table_dfi)
-            table_df = pd.concat([table_df ,table_dfi],axis=1,sort=False)
-            
-    validation_dict[table]['ini'] = len(table_df)
+            leaks_in += len(table_dfi)
+            table_df = pd.concat([table_df ,table_dfi],axis=0,sort=False)
+
+    if len(table_df) > 0:
+        validation_dict[table] = {'leaks_in':leaks_in}        
     return table_df   
   
 def process_table(table_df,table_name):
@@ -184,7 +185,6 @@ def process_table(table_df,table_name):
     else:
         logging.warning('Table {} is empty. No file will be produced'.format(table_name))
      
-    validation_dict[table_name] = {}
     validation_dict[table_name]['total'] = len(table_df[table_mask['all']])
     return
 
