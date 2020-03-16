@@ -161,6 +161,7 @@ def read_table_files(table):
     if len(leak_files)>0:
         validation_dict[table]['leak_in'] = 0
         for leak_file in leak_files:
+            logging.info('Reading datetime leak file {}'.format(leak_file))
             file_base = os.path.splitext(os.path.basename(leak_file))[0]
             fileIDi = '-'.join(file_base.split('-')[-6:])
             table_dfi = cdm.read_tables(prev_level_path,fileIDi,cdm_subset=[table],na_values='null')
