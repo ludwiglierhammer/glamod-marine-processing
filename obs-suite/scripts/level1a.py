@@ -329,7 +329,7 @@ with open(L1a_io_filename,'w') as fileObj:
 if hasattr(params, 'report_filters'):
     for k,v in data_excluded['data'].items():
         if inspect.get_length(data_excluded['data'][k]) > 0:
-            excluded_filename = os.path.join(L1a_excluded_path,L1a_id + FFS + k + '.psv')  
+            excluded_filename = os.path.join(L1a_excluded_path,L1a_id + FFS + '_'.join(k.split('.')) + '.psv')  
             logging.info('Writing {0} excluded data to file {1}'.format(k,excluded_filename))
             write_out_junk(v,excluded_filename)
 
