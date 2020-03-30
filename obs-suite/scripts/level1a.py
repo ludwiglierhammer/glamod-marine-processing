@@ -17,7 +17,7 @@ The processing unit is the source-deck monthly file.
 
 Outputs data to /<data_path>/<release>/<dataset>/level1a/<sid-dck>/table[i]-fileID.psv
 Outputs invalid data to /<data_path>/<release>/<dataset>/level1a/invalid/<sid-dck>/fileID-data|mask.psv
-Outputs exluded data to /<data_path>/<release>/<dataset>/level1a/excluded/<sid-dck>/fileID-<filterfield>.psv
+Outputs exluded data to /<data_path>/<release>/<dataset>/level1a/excluded/<sid-dck>/fileID-<element>.psv
 Outputs quicklook info to:  /<data_path>/<release>/<dataset>/level1a/quicklooks/<sid-dck>/fileID.json
 
 where fileID is year-month-release-update

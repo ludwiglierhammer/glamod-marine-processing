@@ -6,7 +6,7 @@ Created on Mon Jun 17 14:24:10 2019
 Script to generate the C3S CDM Marine level1b data:
     
     - read linkage and duplicate identification output (previously pre-processed)
-    - merge with CDM tables via record_id
+    - merge with CDM tables on record_id
     - re-assign dates
     - save tables to ascii
 
@@ -46,21 +46,6 @@ json file with the following mappings:
 - CDM tables elements with subdirectory prefix where corrections are in release/NOC_corrections/version
 - subdirectory prefix with history event to append to history field
 
-
-dev notes:
----------
-
-1) Initially, file permission where changed to rwxrwxr-- to all output at
-the end of the script with the lines below, however, it seemed that a user not
-being the user that initially created the file could not do this...?? so in
-the end it was decided to set umask 002 to the ./bashrc file
-
-    out_paths = [L1b_path,L1b_ql_path]
-    logging.info('Changing output file permissions')
-    for out_path in out_paths:
-        outfiles = glob.glob(os.path.join(out_path,'*' + fileID + '*'))
-        for outfile in outfiles:
-            os.chmod(outfile,0o664)
 .....
 
 @author: iregon
