@@ -3,34 +3,29 @@
 """
 Created on Mon Jun 17 14:24:10 2019
 
-See IMPORTANT NOTE!!!!
-
 Script to generate the C3S CDM Marine level1d data: add external MD (pub47...):
 
     - Read header table and MD and see if there is anything to merge
     
-    - Map MD to CDM with function map_to_cdm()
+    - Map MD to CDM with module cdm
     
-    - Merge mapped MD with CDM tables and save to file with function process_table()
+    - Merge mapped MD with CDM tables by primary_station_id and
+    save to file with function process_table()
     (if nothing to merge, just save the file to level1d...)
     
-    - read metadata (currently only pub47, should be easily parameterizable,
-    well, not the mappings...... maybe should use cdm module in future, that's its place!)
-    - merge by primary_station_id
     - log, per table, total number of records and those with MD added/updated
 
 The processing unit is the source-deck monthly set of CDM tables.
 
-Outputs data to /<data_path>/<release>/<source>/level1d/<sid-dck>/table[i]-fileID.psv
-Outputs quicklook info to:  /<data_path>/<release>/<source>/level1d/quicklooks/<sid-dck>/fileID.json
+Outputs data to /<data_path>/<release>/<dataset>/level1d/<sid-dck>/table[i]-fileID.psv
+Outputs quicklook info to:  /<data_path>/<release>/<dataset>/level1d/quicklooks/<sid-dck>/fileID.json
 where fileID is yyyy-mm-release_tag-update_tag
 
 Before processing starts:
     - checks the existence of all io subdirectories in level1c|d -> exits if fails
     - checks the existence of the source table to be converted (header only) -> exits if fails
-    - checks the existence of the monthly MD file -> exits if fails. See IMPORTANT NOTE!!!!
+    - checks the existence of the monthly MD file -> exits if fails
     - removes all level1d products on input file resulting from previous runs
-
 
 
 Inargs:
@@ -41,7 +36,8 @@ year: data file year (yyyy)
 month: data file month (mm)
 release: release identifier
 update: release update identifier
-source: source dataset identifier
+dataset: source dataset identifier
+configfile: path to configuration file with processing options
 
 On input data:
 -------------
@@ -54,34 +50,13 @@ pub47 field names assumed: call;record;name;freq;vsslM;vssl;automation;rcnty;
                            valid_from;valid_to;uid;thmH1;platH;brmH1;
                            anmH;anHL1;wwH;sstD1;th1;hy1;st1;bm1;an1
 
-
-IMPORTANT NOTE:
---------------
-DIRTY LAST MINUTE HARDCODE FOR RELEASE1 (AUTUMN 2019):
-    
-    NO MD EXPECTED AFTER 2010 OR BEFORE 1956: 
-    -> DO NOT FAIL IF NO MD: JUST CONTINUE WITH NO MERGING
-    
-
-Dev notes:
----------
-
-1) md param mainly to provide in the future for MD sources other than pub47, and maybe parameterize this...
-        
-2) Mapping of MD is performed here in a quite dirty way, using, on top of it, a dict
-to make it usable for eventual future new MD sources, that anyway would probably fail to do the job!!!!
-A new funtion like the current map_to_cdm() would be needed for every new MD source: if any!
-
-So basically: add this mappings to the CDM module: that's what it is meant for:
-    1. Read MD file to DF, using column names and datatypes as reflected in the mapping set up in CDM module
-    2. Map MD to CDM with cdm module
-    3. Then merge to the CDM obs tables: probably as we already do here with process_table()
 .....
 
 @author: iregon
 """
 import sys
 import os
+import json
 import simplejson
 import datetime
 import cdm
@@ -95,15 +70,35 @@ reload(logging)  # This is to override potential previous config of logging
 
 # FUNCTIONS -------------------------------------------------------------------
 class script_setup:
-    def __init__(self, inargs):
+    def __init__(self, inargs):        
         self.data_path = inargs[1]
-        self.sid_dck = inargs[2]
+        self.release = inargs[2]
+        self.update = inargs[3]
+        self.dataset = inargs[4]
+        self.sid_dck = inargs[5]
         self.dck = self.sid_dck.split("-")[1]
-        self.year = inargs[3]
-        self.month = inargs[4]
-        self.release = inargs[5]
-        self.update = inargs[6]
-        self.source = inargs[7]
+        self.year = inargs[6]
+        self.month = inargs[7]
+        self.configfile =  inargs[8]
+        # However md_subdir is then nested in monthly....and inside monthly files
+        # Other MD sources would stick to this? Force it otherwise?
+        process_options = ['md_model','md_subdir', 'history_explain',
+                           'md_first_yr_avail', 'md_last_yr_avail',
+                           'md_not_avail']
+        try:
+            with open(self.configfile) as fileObj:
+                config = json.load(fileObj)
+            
+            # Get sid-dck specfic options, default otherwise
+            for opt in process_options: 
+                if not config.get(self.sid_dck,{}).get(opt):
+                    setattr(self, opt, config.get(opt))
+                else:
+                    setattr(self, opt, config.get(self.sid_dck).get(opt))
+            self.flag = True
+        except Exception:
+            logging.error('Parsing configuration from file :{}'.format(self.configfile), exc_info=True)
+            self.flag = False
 
 # This is for json to handle dates
 date_handler = lambda obj: (
@@ -112,49 +107,17 @@ date_handler = lambda obj: (
     else None
 )
 
-def join_cols(df,cols):
-    s = df[cols[0]]
-    if len(cols) > 1:
-        for c in cols[1:]:
-            s = s + '-' + df[c]
-    return s
-
-def select_cols(df,cols):
-    c = cols.copy()
-    c.reverse()
-    s = df[c[0]].copy()
-    if len(c)> 1:
-        for ci in c[1:]:
-            s.update(df[ci])
-    return s
-
-def map_to_cdm():
-    meta_cdm_columns = [ ('header',x) for x in metadata.get(md).get('header') ]
-    for obs_table in obs_tables:
-        meta_cdm_columns.extend([ (obs_table,x) for x in metadata.get(md).get('observations') ])
-
-    meta_cdm = pd.DataFrame(index = meta_df.index, columns = meta_cdm_columns)
-    # First the direct mappings to the header table elements
+def map_to_cdm(md_model,meta_df):
+    # Atts is a minimum info on vars the cdm mocule requires
+    atts = {k:{'column_type':'object'} for k in meta_df.columns}
+    meta_cdm_dict = cdm.map_model(md_model, meta_df, atts)
+    meta_cdm = pd.DataFrame()
     table = 'header'
-    meta_cdm[[ x for x in meta_cdm if x[0] == table ]] = meta_df[['name','vssl','call','record','freq']]
-    # Now the table-wise, element wise mappings to the observations tables
-    field ='sensor_automation_status'
-    meta_cdm.loc[:,[ (x,field) for x in obs_tables ]] = meta_df[['automation']]
-
-    field = 'sensor_id'
-    for table in  obs_tables:
-        meta_field = metadata['pub47']['sensor_id'].get(table)
-        #meta_cdm[(table,field)] = join_cols(meta_df,['uid','record',meta_field])
-        meta_cdm[(table,field)] = meta_df[meta_field]
-
-    field = 'z_coordinate'
+    meta_cdm_columns = [ (table,x) for x in meta_cdm_dict[table]['data'].columns ]
+    meta_cdm[meta_cdm_columns] = meta_cdm_dict[table]['data']
     for table in obs_tables:
-        meta_fields = metadata['pub47']['heights'].get(table)
-        meta_cdm[(table,field)] = select_cols(meta_df,meta_fields)
-        if table == 'observations-sst':
-            meta_cdm[(table,field)] = '-' +  meta_cdm[(table,field)]   
-        meta_cdm[(table,'observation_height_above_station_surface')] = meta_cdm[(table,field)]
-        
+        meta_cdm_columns = [ (table,x) for x in meta_cdm_dict[table]['data'].columns ]
+        meta_cdm[meta_cdm_columns] = meta_cdm_dict[table]['data']
     return meta_cdm
 
 
@@ -190,8 +153,8 @@ def process_table(table_df,table_name):
         if table_name == 'header':
             missing_ids = [ x for x in table_df.index if x not in meta_table.index ]
             if len(missing_ids)>0:
-                meta_dict['non ' + md + ' ids'] = {k:v for k,v in Counter(missing_ids).items()}
-            history_add = ';{0}. {1}'.format(history_tstmp,history_explain)
+                meta_dict['non ' + params.md_model + ' ids'] = {k:v for k,v in Counter(missing_ids).items()}
+            history_add = ';{0}. {1}'.format(history_tstmp,params.history_explain)
             locs = table_df['primary_station_id'].isin(updated_locs)
             table_df['history'].loc[locs] = table_df['history'].loc[locs] + history_add
 
@@ -214,31 +177,7 @@ def clean_level(file_id):
             pass
 
 # END FUNCTIONS ---------------------------------------------------------------
-            
-# MD parameterization, this should go to outer file ---------------------------
-metadata = {}
-metadata['pub47'] = {}
-metadata['pub47']['history'] = 'WMO Publication 47 metadata added'
-metadata['pub47']['header'] = ['station_name','platform_sub_type','primary_station_id','station_record_number','report_duration']
-metadata['pub47']['observations'] = ['z_coordinate','observation_height_above_station_surface','sensor_id','sensor_automation_status']
-metadata['pub47']['heights'] = {
-        'observations-at':['thmH1','platH','brmH1'],
-        'observations-dpt':['thmH1','brmH1','platH'],
-        'observations-wbt':['thmH1','brmH1','platH'],
-        'observations-sst':['sstD1'],
-        'observations-slp':['brmH1','platH'],
-        'observations-wd':['anmH','anHL1','platH'],
-        'observations-ws':['anmH','anHL1','platH']
-        }
-metadata['pub47']['sensor_id'] = {
-        'observations-at':'th1',
-        'observations-dpt':'hy1',
-        'observations-wbt':'hy1',
-        'observations-sst':'st1',
-        'observations-slp':'bm1',
-        'observations-wd':'an1',
-        'observations-ws':'an1'
-        }
+
 
 # MAIN ------------------------------------------------------------------------
 
@@ -262,7 +201,7 @@ level_prev = 'level1c'
 header = True
 wmode = 'w'
 
-release_path = os.path.join(params.data_path,params.release,params.source)
+release_path = os.path.join(params.data_path,params.release,params.dataset)
 release_id = filename_field_sep.join([params.release,params.update ])
 fileID = filename_field_sep.join([str(params.year),str(params.month).zfill(2),release_id ])
 fileID_date = filename_field_sep.join([str(params.year),str(params.month)])
@@ -272,7 +211,7 @@ level_path = os.path.join(release_path,level,params.sid_dck)
 level_ql_path = os.path.join(release_path,level,'quicklooks',params.sid_dck)
 level_log_path = os.path.join(release_path,level,'log',params.sid_dck)
 
-md_path = os.path.join(params.data_path,params.release,'wmo_publication_47','monthly')
+md_path = os.path.join(params.data_path,params.release,params.md_subdir,'monthly')
 
 logging.info('Setting MD path to {}'.format(md_path))
 
@@ -287,14 +226,21 @@ if not os.path.isfile(prev_level_filename):
     sys.exit(1)
 
 metadata_filename = os.path.join(md_path, params.year + filename_field_sep + params.month + '-01.csv')
-md_avail = True
-if not os.path.isfile(metadata_filename):
-    if int(params.year) > 2010 or int(params.year) < 1956:
+md_avail = True if not params.md_not_avail else False
+
+if not os.path.isfile(metadata_filename) and md_avail:
+    if int(params.year) > params.md_last_yr_avail or int(params.year) < params.md_last_yr_avail:
         md_avail = False
-        logging.warning('Metadata not available after 2010. Creating level1d product with no merging')
+        logging.warning('Metadata source available only in period {0}-{1}'
+                        .format(str(params.md_last_yr_avail),str(params.md_last_yr_avail)))
+        logging.warning('level1d data will be created with no merging') 
     else:
         logging.error('Metadata file not found: {}'.format(metadata_filename))
         sys.exit(1)
+        
+elif not md_avail:
+    logging.info('Metadata not available for data source-deck {}'.format(params.sid_dck))
+    logging.info('level1d data will be created with no merging')
         
 # Clean previous L1a products and side files ----------------------------------
 clean_level(fileID)
@@ -302,9 +248,7 @@ meta_dict = {}
 
 # DO THE DATA PROCESSING ------------------------------------------------------
 # -----------------------------------------------------------------------------
-md = 'pub47'
 history_tstmp = datetime.datetime.utcnow().strftime('%Y-%m-%d %H:%M:%S')
-history_explain = metadata.get(md).get('history')
 cdm_tables = cdm.lib.tables.tables_hdlr.load_tables()
 obs_tables = [ x for x in cdm_tables.keys() if x != 'header' ]
 
@@ -339,7 +283,7 @@ if md_avail:
 # 2. MAP PUB47 MD TO CDM FIELDS -----------------------------------------------
 if merge:
     logging.info('Mapping metadata to CDM')
-    meta_cdm = map_to_cdm()
+    meta_cdm = map_to_cdm(params.md_model,meta_df)
 
 # 3. UPDATE CDM WITH PUB47 OR JUST COPY PREV LEVEL TO CURRENT -----------------
 # This is only valid for the header
