@@ -5,7 +5,7 @@ Created on Mon Jun 17 14:24:10 2019
 
 Script to generate the C3S CDM Marine level1a data. 
 
-    - Reads dataset data (and supp if avail) file with modeule mdf_reader. This 
+    - Reads dataset data (and supp if avail) file with module mdf_reader. This 
     includes a data model validation mask.
     - fixes known PT type errors in source dataset with module metmetpy
     - selects data reports according to filtering requests
@@ -19,7 +19,6 @@ Outputs data to /<data_path>/<release>/<dataset>/level1a/<sid-dck>/table[i]-file
 Outputs invalid data to /<data_path>/<release>/<dataset>/level1a/invalid/<sid-dck>/fileID-data|mask.psv
 Outputs exluded data to /<data_path>/<release>/<dataset>/level1a/excluded/<sid-dck>/fileID-<filterfield>.psv
 Outputs quicklook info to:  /<data_path>/<release>/<dataset>/level1a/quicklooks/<sid-dck>/fileID.json
-Outputs quicklook info to:  /<data_path>/<release>/<dataset>/level1a/quicklooks/<sid-dck>/table[i]-fileID.nc
 
 where fileID is year-month-release-update
 
@@ -30,11 +29,9 @@ Before processing starts:
 
 On input data:
 -------------
-Records of input data (main body and optionally, supplemental data)
-assumed to be in the sid-deck monthly partitions which imply:
+Records of input data assumed to be in sid-dck monthly partitions which imply:
     - data for same month-year period
-    - body/main data from a unique data model
-    - supplemental data (optionally) from a unique data model
+    - data from a unique data model
     
 
 Inargs:
@@ -57,31 +54,12 @@ settings:
     - supplemental data model
     - processing options: supplemental replacements,
     record selection/filtering by field (i.e. PT....)
-
-dev notes: to gitlab issues
----------
-
- 
-Initially, file permission where changed to rwxrwxr-- to all output at
-the end of the script with the lines below, however, it seemed that a user not
-being the user that initially created the file could not do this...?? so in
-the end it was decided to set umask 002 to the ./bashrc file
-
-    out_paths = [L1a_path,L1a_ql_path,L1a_excluded_path,L1a_invalid_path]
-    logging.info('Changing output file permissions')
-    for out_path in out_paths:
-        outfiles = glob.glob(os.path.join(out_path,'*' + L1a_id + '*'))
-        for outfile in outfiles:
-            os.chmod(outfile,0o664)
         
 .....
 
 @author: iregon
 """
 import sys
-
-print(sys.path)
-
 import os
 import json
 from io import StringIO
@@ -138,18 +116,25 @@ date_handler = lambda obj: (
 )
 
 def clean_L1a(L1a_id):
-    L1a_prods = glob.glob(os.path.join(L1a_path,'*-' + L1a_id + '.psv'))
-    L1a_prods_idate = glob.glob(os.path.join(L1a_path,'*' + '-'.join([str(params.year),str(params.month).zfill(2)]) + '.psv'))
-    L1a_ql = glob.glob(os.path.join(L1a_ql_path, L1a_id + '.*'))
-    L1a_excluded = glob.glob(os.path.join(L1a_excluded_path, L1a_id + '-*.psv'))
-    L1a_invalid = glob.glob(os.path.join(L1a_invalid_path, L1a_id + '-*.psv'))
-    for filename in L1a_prods + L1a_prods_idate + L1a_ql + L1a_excluded + L1a_invalid:
+    L1a_prods = glob.glob(os.path.join(L1a_path,'*' + FFS + L1a_id + '.psv'))
+    L1a_ql = glob.glob(os.path.join(L1a_ql_path, L1a_id + '.json'))
+    L1a_excluded = glob.glob(os.path.join(L1a_excluded_path, L1a_id + FFS + '*.psv'))
+    L1a_invalid = glob.glob(os.path.join(L1a_invalid_path, L1a_id + FFS + '*.psv'))
+    for filename in L1a_prods + L1a_ql + L1a_excluded + L1a_invalid:
         try:
             logging.info('Removing previous file: {}'.format(filename))
             os.remove(filename)
         except:
             pass
 
+def write_out_junk(dataObj,filename):
+    v = [dataObj] if not read_kwargs.get('chunksize') else dataObj
+    c = 0
+    for df in v:
+        wmode = 'a' if c > 0 else 'w'
+        header = False if c > 0 else True
+        df.to_csv(filename, sep = '|', mode = wmode, header = header)
+        c += 1  
 # MAIN ------------------------------------------------------------------------
 
 # PROCESS INPUT AND MAKE SOME CHECKS ------------------------------------------
@@ -171,7 +156,6 @@ if not params.flag:
 release_path = os.path.join(params.data_path,params.release,params.dataset)
 
 FFS = '-'    
-#L0_path = os.path.join(release_path,'level0',params.sid_dck)
 L0_path = os.path.join(params.data_path,'datasets',params.dataset,'level0',params.sid_dck)   
 L1a_path = os.path.join(release_path,'level1a',params.sid_dck)
 L1a_ql_path = os.path.join(release_path,'level1a','quicklooks',params.sid_dck)
@@ -181,10 +165,12 @@ L1a_invalid_path = os.path.join(release_path,'level1a','invalid',params.sid_dck)
 data_paths = [L0_path, L1a_path, L1a_ql_path, L1a_excluded_path, L1a_invalid_path]
 if any([ not os.path.isdir(x) for x in data_paths ]):
     logging.error('Could not find data paths: '.format(','.join([ x for x in data_paths if not os.path.isdir(x)])))
+    sys.exit(1)
 
 L0_filename = os.path.join(L0_path,FFS.join([params.year,params.month]) + '.imma')
 if not os.path.isfile(L0_filename):
     logging.error('L0 file not found: {}'.format(L0_filename))
+    sys.exit(1)
     
 release_id = FFS.join([params.release,params.update ])   
 L1a_id = FFS.join([str(params.year),str(params.month).zfill(2),release_id ])
@@ -203,8 +189,6 @@ logging.info('Reading dataset data')
 read_kwargs = {'data_model':params.data_model,
                   'sections':params.read_sections,
                   'chunksize':200000}
-
-print(read_kwargs)
 
 data_in = mdf_reader.read(L0_filename, **read_kwargs)
 
@@ -333,11 +317,6 @@ if process:
         
     for table in tables:
         io_dict[table]['total'] = inspect.get_length(cdm_tables[table]['data'])
-        
-    # Do the quick stats and save ql ----------------------------------------------
-    logging.info('Computing gridded stats')
-    cdm.gridded_stats.from_cdm_monthly(L1a_path, cdm_id = L1a_id, region = 'Global', 
-                      resolution = 'lo_res', nc_dir = L1a_ql_path, qc=False)
 
 io_dict['date processed'] = datetime.datetime.now()
 logging.info('Saving json quicklook')
@@ -347,15 +326,6 @@ with open(L1a_io_filename,'w') as fileObj:
                      default = date_handler,indent=4,ignore_nan=True)
     
 # Output exluded and invalid ---------------------------------------------
-def write_out_junk(dataObj,filename):
-    v = [dataObj] if not read_kwargs.get('chunksize') else dataObj
-    c = 0
-    for df in v:
-        wmode = 'a' if c > 0 else 'w'
-        header = False if c > 0 else True
-        df.to_csv(filename, sep = '|', mode = wmode, header = header)
-        c += 1    
-    
 if hasattr(params, 'report_filters'):
     for k,v in data_excluded['data'].items():
         if inspect.get_length(data_excluded['data'][k]) > 0:
