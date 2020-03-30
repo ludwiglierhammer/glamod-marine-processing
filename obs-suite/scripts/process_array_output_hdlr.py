@@ -44,7 +44,7 @@ mm = job_config.get('mm')
 
 job_log_dir = os.path.join(data_path,release,dataset,data_level,'log',sid_dck)
 ext='ok' if exit_status == '0' else 'failed'
-job_log_file = FFS.join([str(yyyy),str(mm),release,update,process]) + '.' + ext
+job_log_file = FFS.join([str(yyyy),str(mm),release,update]) + '.' + ext
 
 job_log =  os.path.join(job_log_dir,job_log_file)
 

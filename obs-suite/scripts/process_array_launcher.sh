@@ -235,7 +235,7 @@ do
     yyyy=${file_date:0:4}
     mm=${file_date:5:8}
 		source_filename=$sid_dck_source_dir/$source_filename_prefix"*"$file_date"*"$source_filename_suffix.$source_file_ext
-    log_basenamei=$yyyy$FFS$mm$FFS$release$FFS$update$FFS$process
+    log_basenamei=$yyyy$FFS$mm$FFS$release$FFS$update
     test -e $sid_dck_log_dir/$log_basenamei.failed
     failed=$?
     if [ "$failed" == 0 ];then failed=true;else failed=false;fi
