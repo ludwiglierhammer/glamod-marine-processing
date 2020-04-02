@@ -92,14 +92,21 @@ class script_setup:
             self.flag = False 
             return
  
-        self.data_path = config.get('data_directory')
         self.release = config.get('release')
         self.update = config.get('update')
         self.dataset = config.get('dataset')
-        self.sid_dck = config.get('sid_dck')
+        if len(sys.argv) > 2:
+            self.data_path = inargs[2]
+            self.sid_dck = inargs[3]
+            self.year = inargs[4]
+            self.month = inargs[5]
+        else:
+            self.data_path = config.get('data_directory')
+            self.sid_dck = config.get('sid_dck')
+            self.year = config.get('yyyy')
+            self.month = config.get('mm') 
+            
         self.dck = self.sid_dck.split("-")[1]
-        self.year = config.get('yyyy')
-        self.month = config.get('mm')
         
         process_options = ['data_model', 'read_sections','filter_reports_by',
                            'cdm_map']
@@ -154,7 +161,6 @@ else:
     sys.exit(1)
 
 params = script_setup(args)
-
 attrs = vars(params)
 # {'kids': 0, 'name': 'Dog', 'color': 'Spotted', 'age': 10, 'legs': 2, 'smell': 'Alot'}
 # now dump this in some way or another
