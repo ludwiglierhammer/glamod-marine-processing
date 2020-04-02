@@ -85,12 +85,13 @@ class script_setup:
     def __init__(self, inargs):
         self.configfile =  inargs[1]
         try:
-            with open(self.configile) as fileObj:
+            with open(self.configfile) as fileObj:
                 config = json.load(fileObj)
         except:
             logging.error('Opening configuration file :{}'.format(self.configfile), exc_info=True)
             self.flag = False 
-            
+            return
+ 
         self.data_path = config.get('data_directory')
         self.release = config.get('release')
         self.update = config.get('update')
