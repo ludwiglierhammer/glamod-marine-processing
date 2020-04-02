@@ -12,7 +12,7 @@
 #
 # process_list is: sid-dck
 #
-# Usage: ./process_array_launcher.sh process_config_file release_periods_file list_file -f 0|1 -r 0|1 -s yyyy -e yyyy
+# Usage: ./process_array_launcher.sh process_config_file sid_dck_periods_file list_file -f 0|1 -r 0|1 -s yyyy -e yyyy
 # Optional kwargs:
 # -f: process only failed (0) | process all (1 or none)
 # -r: remove source level data (0) | do not remove source level data (1 or none)
@@ -83,7 +83,7 @@ FFS="-"
 #. INARGS ----------------------------------------------------------------------
 # Here make sure we are using fully expanded paths, as some may be passed to a config file
 process_config_file=$(readlink --canonicalize  $1)
-release_periods_file=$(readlink --canonicalize  $2)
+sid_dck_periods_file=$(readlink --canonicalize  $2)
 process_list=$(readlink --canonicalize $3)
 
 shift 3
@@ -110,7 +110,7 @@ if [ -z "$process_end" ];then process_end=99999;fi
 source ../setpaths.sh
 
 check_file process_config_file $process_config_file || exit 1
-check_file sid_dck_periods $sid_dck_periods || exit 1
+check_file sid_dck_periods_file $sid_dck_periods_file || exit 1
 
 
 process=$(basename $process_config_file ".json")
@@ -202,8 +202,8 @@ do
   job_time_hri=$job_time_hr
   job_time_mini=$job_time_min
   # Get processing period
-  year_init=$(jq -r --arg sid_dck "$sid_dck" '.[$sid_dck] | .year_init | select (.!=null)' $sid_dck_periods)
-  year_end=$(jq -r --arg sid_dck "$sid_dck" '.[$sid_dck] | .year_end | select (.!=null)' $sid_dck_periods)
+  year_init=$(jq -r --arg sid_dck "$sid_dck" '.[$sid_dck] | .year_init | select (.!=null)' $sid_dck_periods_file)
+  year_end=$(jq -r --arg sid_dck "$sid_dck" '.[$sid_dck] | .year_end | select (.!=null)' $sid_dck_periods_file)
   check_config year_init $year_init || exit 1
   check_config year_end $year_end || exit 1
   if (( process_start > year_init ));then year_init=$process_start;fi
