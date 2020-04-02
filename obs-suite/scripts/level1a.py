@@ -37,14 +37,12 @@ Records of input data assumed to be in sid-dck monthly partitions which imply:
 Inargs:
 ------
 
-data_path: data release parent path (i.e./gws/nopw/c3s311_lot2/data/marine)
-sid_dck: source-deck partition (sss-ddd)
-year: data file year (yyyy)
-month: data file month (mm)
-release: release identifier
-update: release update identifier
-dataset: source dataset identifier
-configfile: path to configuration file with processing options
+config_path: configuration file path
+data_path: general data path (optional, from config_file otherwise)
+sid_dck: source-deck data partition (optional, from config_file otherwise)
+year: data file year (yyyy) (optional, from config_file otherwise)
+month: data file month (mm) (optional, from config_file otherwise)
+
 
 configfile:
 ----------
@@ -161,11 +159,6 @@ else:
     sys.exit(1)
 
 params = script_setup(args)
-attrs = vars(params)
-# {'kids': 0, 'name': 'Dog', 'color': 'Spotted', 'age': 10, 'legs': 2, 'smell': 'Alot'}
-# now dump this in some way or another
-print(', '.join("%s: %s" % item for item in attrs.items()))
-sys.exit(0)
 
 if not params.flag:
     logging.error('Error parsing initial configuration')
