@@ -258,29 +258,20 @@ do
 	 ((counter--))
    jobid=$(nk_jobid bsub -J $sid_dck$data_level"[1-$counter]" -oo $sid_dck_scratch_dir/"%I.o" -eo $sid_dck_scratch_dir/"%I.o" -q short-serial -W $job_time_hhmm -M $job_memo_mbi -R "rusage[mem=$job_memo_mbi]" \
    python $scripts_directory/$script_name $sid_dck_scratch_dir/\$LSB_JOBINDEX.input)
-   #
-   # jobid=$(nk_jobid bsub -J $sid_dck$data_level"[1-$counter]" -oo $sid_dck_scratch_dir/"%I.o" -eo $sid_dck_scratch_dir/"%I.o" -q short-serial -W $job_time_hhmm -M $job_memo_mbi -R "rusage[mem=$job_memo_mbi]" \
-   # python $scripts_directory/process_array.py $scratch_directory $data_directory $release $update $dataset $process $data_level $sid_dck $process_config_file)
-   #
-   # bsub -J OK"[1-$counter]" -w "done($jobid[*])" -oo $sid_dck_scratch_dir/"%I.ho" -eo $sid_dck_scratch_dir/"%I.ho" -q short-serial -W 00:01 -M 10 -R "rusage[mem=10]" \
-   # python $scripts_directory/process_array_output_hdlr.py $scratch_directory $data_directory $release $update $dataset $data_level $data_level $sid_dck 0 1
-   #
-   # bsub -J ER"[1-$counter]" -w "exit($jobid[*])" -oo $sid_dck_scratch_dir/"%I.ho" -eo $sid_dck_scratch_dir/"%I.ho" -q short-serial -W 00:01 -M 10 -R "rusage[mem=10]" \
-   # python $scripts_directory/process_array_output_hdlr.py $scratch_directory $data_directory $release $update $dataset $data_level $data_level $sid_dck 1 1
-   #
+
    bsub -J OK"[1-$counter]" -w "done($jobid[*])" -oo $sid_dck_scratch_dir/"%I.ho" -eo $sid_dck_scratch_dir/"%I.ho" -q short-serial -W 00:01 -M 10 -R "rusage[mem=10]" \
    python $scripts_directory/process_array_output_hdlr.py $sid_dck_scratch_dir/\$LSB_JOBINDEX.input 0 1
 
    bsub -J ER"[1-$counter]" -w "exit($jobid[*])" -oo $sid_dck_scratch_dir/"%I.ho" -eo $sid_dck_scratch_dir/"%I.ho" -q short-serial -W 00:01 -M 10 -R "rusage[mem=10]" \
    python $scripts_directory/process_array_output_hdlr.py $sid_dck_scratch_dir/\$LSB_JOBINDEX.input 1 1
-   #
-   # if $remove_source_level
-   # then
-   #   echo 'Process source level data ('$source_level') removal requested'
-   #   jobid_c=$(nk_jobid bsub -J $sid_dck'remove' -w "done($jobid)" -oo $sid_dck_scratch_dir/"remove.co" -eo $sid_dck_scratch_dir/"remove.co" -q short-serial -W 00:15 -M 100 -R "rusage[mem=100]" $scripts_directory/remove_level_data.sh $sid_dck $release $update $dataset $source_level)
-   # else
-   #   echo 'Process source level data ('$source_level') removal not requested'
-   # fi
+
+   if $remove_source_level
+   then
+     echo 'Process source level data ('$source_level') removal requested'
+     jobid_c=$(nk_jobid bsub -J $sid_dck'remove' -w "done($jobid)" -oo $sid_dck_scratch_dir/"remove.co" -eo $sid_dck_scratch_dir/"remove.co" -q short-serial -W 00:15 -M 100 -R "rusage[mem=100]" $scripts_directory/remove_level_data.sh $sid_dck $release $update $dataset $source_level)
+   else
+     echo 'Process source level data ('$source_level') removal not requested'
+   fi
 
 done
 # END PROCESS ALL SID-DCKS FROM LIST -------------------------------------------
