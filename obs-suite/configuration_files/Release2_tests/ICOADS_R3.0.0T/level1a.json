@@ -10,7 +10,7 @@
     {
       "c1.PT": ["0","1","2","3","4","5"]
     },
-    "cdm_map": "icoads_r3000"
+    "cdm_map": "icoads_r3000",
     "063-714":
     {
       "data_model": "imma1_d714",
