@@ -12,7 +12,7 @@
 #
 # process_list is: sid-dck
 #
-# Usage: ./process_array_launcher.sh release update dataset process_config_file list_file -f 0|1 -r 0|1 -s yyyy -e yyyy
+# Usage: ./process_array_launcher.sh process_config_file release_periods_file list_file -f 0|1 -r 0|1 -s yyyy -e yyyy
 # Optional kwargs:
 # -f: process only failed (0) | process all (1 or none)
 # -r: remove source level data (0) | do not remove source level data (1 or none)
@@ -81,14 +81,12 @@ FFS="-"
 #. END PARAMS ------------------------------------------------------------------
 
 #. INARGS ----------------------------------------------------------------------
-release=$1
-update=$2
-dataset=$3
 # Here make sure we are using fully expanded paths, as some may be passed to a config file
-process_config_file=$(readlink --canonicalize  $4)
-process_list=$(readlink --canonicalize $5)
+process_config_file=$(readlink --canonicalize  $1)
+release_periods_file=$(readlink --canonicalize  $2)
+process_list=$(readlink --canonicalize $3)
 
-shift 5
+shift 3
 
 while getopts ":f:r:s:e:" opt; do
   case $opt in
@@ -111,27 +109,29 @@ if [ -z "$process_end" ];then process_end=99999;fi
 #. CONFIG FILES & ENVIRONMENT --------------------------------------------------
 source ../setpaths.sh
 
-sid_dck_periods=$code_directory/configuration_files/$release'_'$update/$dataset/source_deck_periods.json
-
-check_file sid_dck_periods $sid_dck_periods || exit 1
 check_file process_config_file $process_config_file || exit 1
+check_file sid_dck_periods $sid_dck_periods || exit 1
+
 
 process=$(basename $process_config_file ".json")
-env=$(jq -r '.["job"].environment | select (.!=null)' $process_config_file)
+env=$(jq -r '.["job_config"].environment | select (.!=null)' $process_config_file)
 source ../setenv$env.sh
 echo
 #. END INARGS, CONFIG FILES AND ENVIRONMENT ------------------------------------
 
 #. GET MAIN CONFIG -------------------------------------------------------------
-data_level=$(jq -r '.["job"].data_level | select (.!=null)' $process_config_file)
-source_level=$(jq -r '.["job"].source_level | select (.!=null)' $process_config_file)
-source_file_ext=$(jq -r '.["job"].source_file_ext | select (.!=null)' $process_config_file)
-source_filename_prefix=$(jq -r '.["job"].source_filename_prefix | select (.!=null)' $process_config_file)
-source_filename_suffix=$(jq -r '.["job"].source_filename_suffix | select (.!=null)' $process_config_file)
-job_time_hr=$(jq -r '.["job"].job_time_hr | select (.!=null)' $process_config_file)
-job_time_min=$(jq -r '.["job"].job_time_min | select (.!=null)' $process_config_file)
-job_memo_mb=$(jq -r '.["job"].job_memo_mb | select (.!=null)' $process_config_file)
-for confi in data_level source_level source_file_ext job_time_hr job_time_min job_memo_mb
+release=$(jq -r '.release | select (.!=null)' $process_config_file)
+update=$(jq -r '.update | select (.!=null)' $process_config_file)
+dataset=$(jq -r '.dataset | select (.!=null)' $process_config_file)
+data_level=$(jq -r '.["job_config"].data_level | select (.!=null)' $process_config_file)
+source_level=$(jq -r '.["job_config"].source_level | select (.!=null)' $process_config_file)
+source_file_ext=$(jq -r '.["job_config"].source_file_ext | select (.!=null)' $process_config_file)
+source_filename_prefix=$(jq -r '.["job_config"].source_filename_prefix | select (.!=null)' $process_config_file)
+source_filename_suffix=$(jq -r '.["job_config"].source_filename_suffix | select (.!=null)' $process_config_file)
+job_time_hr=$(jq -r '.["job_config"].job_time_hr | select (.!=null)' $process_config_file)
+job_time_min=$(jq -r '.["job_config"].job_time_min | select (.!=null)' $process_config_file)
+job_memo_mb=$(jq -r '.["job_config"].job_memo_mb | select (.!=null)' $process_config_file)
+for confi in release update dataset data_level source_level source_file_ext job_time_hr job_time_min job_memo_mb
 do
   check_config $confi "${!confi}"  || exit 1
 done
@@ -209,9 +209,9 @@ do
   if (( process_start > year_init ));then year_init=$process_start;fi
   if (( process_end < year_end ));then year_end=$process_end;fi
   # Set source-deck specific job settings and directories
-	job_memo_mb_=$(jq -r --arg sid_dck "$sid_dck" '.[$sid_dck] | .job_memo_mb | select (.!=null)' $process_config_file)
-  job_time_hr_=$(jq -r --arg sid_dck "$sid_dck" '.[$sid_dck] | .job_time_hr | select (.!=null)' $process_config_file)
-	job_time_min_=$(jq -r --arg sid_dck "$sid_dck" '.[$sid_dck] | .job_time_min | select (.!=null)' $process_config_file)
+	job_memo_mb_=$(jq -r --arg sid_dck "$sid_dck" '.["job_config"].[$sid_dck] | .job_memo_mb | select (.!=null)' $process_config_file)
+  job_time_hr_=$(jq -r --arg sid_dck "$sid_dck" '.["job_config"].[$sid_dck] | .job_time_hr | select (.!=null)' $process_config_file)
+	job_time_min_=$(jq -r --arg sid_dck "$sid_dck" '.["job_config"].[$sid_dck] | .job_time_min | select (.!=null)' $process_config_file)
 
   check_soft job_memo_mb_ $job_memo_mb_ && job_memo_mbi=$job_memo_mb_
   check_soft job_time_hr_ $job_time_hr_ && job_time_hri=$job_time_hr_
@@ -225,7 +225,7 @@ do
   echo "INFO: Setting deck $process scratch directory: $sid_dck_scratch_dir"
   rm -rf $sid_dck_scratch_dir;mkdir -p $sid_dck_scratch_dir
 
-  # Loop throuhg perdiod and send subjob only if source level file is available
+  # Loop throuhg period and send subjob only if source level file is available
 	d=$year_init'-01-01'
 	enddate=$year_end'-12-01'
 	counter=1
@@ -247,14 +247,8 @@ do
       else
         rm $sid_dck_log_dir/$log_basenamei.*
   			echo "INFO: $sid_dck, $file_date: $source_filename listed. BSUB idx: $counter"
-        printf "%s\n"  "{" >  $sid_dck_scratch_dir/$counter.input
-        for pro_param in yyyy mm
-        do
-          to_json $sid_dck_scratch_dir/$counter.input  $pro_param "${!pro_param}"
-        done
-        # Remove last comma
-        sed -i '$ s/.$//' $sid_dck_scratch_dir/$counter.input
-        printf "%s\n"  "}" >>  $sid_dck_scratch_dir/$counter.input
+        cp   $sid_dck_scratch_dir/$counter.input
+        python config_array.py $sid_dck_scratch_dir/$counter.input $data_directory $sid_dck $yyyy $mm
         ((counter++))
       fi
 		else
@@ -263,22 +257,22 @@ do
 		d=$(date -I -d "$d + 1 month")
 	 done
 	 ((counter--))
-   jobid=$(nk_jobid bsub -J $sid_dck$process"[1-$counter]" -oo $sid_dck_scratch_dir/"%I.o" -eo $sid_dck_scratch_dir/"%I.o" -q short-serial -W $job_time_hhmm -M $job_memo_mbi -R "rusage[mem=$job_memo_mbi]" \
-   python $scripts_directory/process_array.py $scratch_directory $data_directory $release $update $dataset $process $data_level $sid_dck $process_config_file)
-
-   bsub -J OK"[1-$counter]" -w "done($jobid[*])" -oo $sid_dck_scratch_dir/"%I.ho" -eo $sid_dck_scratch_dir/"%I.ho" -q short-serial -W 00:01 -M 10 -R "rusage[mem=10]" \
-   python $scripts_directory/process_array_output_hdlr.py $scratch_directory $data_directory $release $update $dataset $process $data_level $sid_dck 0 1
-
-   bsub -J ER"[1-$counter]" -w "exit($jobid[*])" -oo $sid_dck_scratch_dir/"%I.ho" -eo $sid_dck_scratch_dir/"%I.ho" -q short-serial -W 00:01 -M 10 -R "rusage[mem=10]" \
-   python $scripts_directory/process_array_output_hdlr.py $scratch_directory $data_directory $release $update $dataset $process $data_level $sid_dck 1 1
-
-   if $remove_source_level
-   then
-     echo 'Process source level data ('$source_level') removal requested'
-     jobid_c=$(nk_jobid bsub -J $sid_dck'remove' -w "done($jobid)" -oo $sid_dck_scratch_dir/"remove.co" -eo $sid_dck_scratch_dir/"remove.co" -q short-serial -W 00:15 -M 100 -R "rusage[mem=100]" $scripts_directory/remove_level_data.sh $sid_dck $release $update $dataset $source_level)
-   else
-     echo 'Process source level data ('$source_level') removal not requested'
-   fi
+   # jobid=$(nk_jobid bsub -J $sid_dck$process"[1-$counter]" -oo $sid_dck_scratch_dir/"%I.o" -eo $sid_dck_scratch_dir/"%I.o" -q short-serial -W $job_time_hhmm -M $job_memo_mbi -R "rusage[mem=$job_memo_mbi]" \
+   # python $scripts_directory/process_array.py $scratch_directory $data_directory $release $update $dataset $process $data_level $sid_dck $process_config_file)
+   #
+   # bsub -J OK"[1-$counter]" -w "done($jobid[*])" -oo $sid_dck_scratch_dir/"%I.ho" -eo $sid_dck_scratch_dir/"%I.ho" -q short-serial -W 00:01 -M 10 -R "rusage[mem=10]" \
+   # python $scripts_directory/process_array_output_hdlr.py $scratch_directory $data_directory $release $update $dataset $process $data_level $sid_dck 0 1
+   #
+   # bsub -J ER"[1-$counter]" -w "exit($jobid[*])" -oo $sid_dck_scratch_dir/"%I.ho" -eo $sid_dck_scratch_dir/"%I.ho" -q short-serial -W 00:01 -M 10 -R "rusage[mem=10]" \
+   # python $scripts_directory/process_array_output_hdlr.py $scratch_directory $data_directory $release $update $dataset $process $data_level $sid_dck 1 1
+   #
+   # if $remove_source_level
+   # then
+   #   echo 'Process source level data ('$source_level') removal requested'
+   #   jobid_c=$(nk_jobid bsub -J $sid_dck'remove' -w "done($jobid)" -oo $sid_dck_scratch_dir/"remove.co" -eo $sid_dck_scratch_dir/"remove.co" -q short-serial -W 00:15 -M 100 -R "rusage[mem=100]" $scripts_directory/remove_level_data.sh $sid_dck $release $update $dataset $source_level)
+   # else
+   #   echo 'Process source level data ('$source_level') removal not requested'
+   # fi
 
 done
 # END PROCESS ALL SID-DCKS FROM LIST -------------------------------------------
