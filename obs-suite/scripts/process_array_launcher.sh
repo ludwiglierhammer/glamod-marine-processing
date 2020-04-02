@@ -112,8 +112,6 @@ source ../setpaths.sh
 check_file process_config_file $process_config_file || exit 1
 check_file sid_dck_periods_file $sid_dck_periods_file || exit 1
 
-
-process=$(basename $process_config_file ".json")
 env=$(jq -r '.["job_config"].environment | select (.!=null)' $process_config_file)
 source ../setenv$env.sh
 echo
@@ -183,7 +181,7 @@ then
 fi
 
 filebase=$(basename $process_list)
-log_file=$log_dir/$process$FFS${filebase%.*}$FFS$(date +'%Y%m%d_%H%M').log
+log_file=$log_dir/${filebase%.*}$FFS$(date +'%Y%m%d_%H%M').log
 
 echo "LOGGING TO $log_file"
 
@@ -222,8 +220,8 @@ do
 	sid_dck_log_dir=$log_dir/$sid_dck
 	sid_dck_source_dir=$source_dir/$sid_dck
 
-  sid_dck_scratch_dir=$scratch_directory/$release/$dataset/$process/$sid_dck
-  echo "INFO: Setting deck $process scratch directory: $sid_dck_scratch_dir"
+  sid_dck_scratch_dir=$scratch_directory/$release/$dataset/$data_level/$sid_dck
+  echo "INFO: Setting deck $data_level scratch directory: $sid_dck_scratch_dir"
   rm -rf $sid_dck_scratch_dir;mkdir -p $sid_dck_scratch_dir
 
   # Loop throuhg period and send subjob only if source level file is available
@@ -258,17 +256,23 @@ do
 		d=$(date -I -d "$d + 1 month")
 	 done
 	 ((counter--))
-   jobid=$(nk_jobid bsub -J $sid_dck$process"[1-$counter]" -oo $sid_dck_scratch_dir/"%I.o" -eo $sid_dck_scratch_dir/"%I.o" -q short-serial -W $job_time_hhmm -M $job_memo_mbi -R "rusage[mem=$job_memo_mbi]" \
+   jobid=$(nk_jobid bsub -J $sid_dck$data_level"[1-$counter]" -oo $sid_dck_scratch_dir/"%I.o" -eo $sid_dck_scratch_dir/"%I.o" -q short-serial -W $job_time_hhmm -M $job_memo_mbi -R "rusage[mem=$job_memo_mbi]" \
    python $scripts_directory/$script_name $sid_dck_scratch_dir/\$LSB_JOBINDEX.input)
    #
-   # jobid=$(nk_jobid bsub -J $sid_dck$process"[1-$counter]" -oo $sid_dck_scratch_dir/"%I.o" -eo $sid_dck_scratch_dir/"%I.o" -q short-serial -W $job_time_hhmm -M $job_memo_mbi -R "rusage[mem=$job_memo_mbi]" \
+   # jobid=$(nk_jobid bsub -J $sid_dck$data_level"[1-$counter]" -oo $sid_dck_scratch_dir/"%I.o" -eo $sid_dck_scratch_dir/"%I.o" -q short-serial -W $job_time_hhmm -M $job_memo_mbi -R "rusage[mem=$job_memo_mbi]" \
    # python $scripts_directory/process_array.py $scratch_directory $data_directory $release $update $dataset $process $data_level $sid_dck $process_config_file)
    #
    # bsub -J OK"[1-$counter]" -w "done($jobid[*])" -oo $sid_dck_scratch_dir/"%I.ho" -eo $sid_dck_scratch_dir/"%I.ho" -q short-serial -W 00:01 -M 10 -R "rusage[mem=10]" \
-   # python $scripts_directory/process_array_output_hdlr.py $scratch_directory $data_directory $release $update $dataset $process $data_level $sid_dck 0 1
+   # python $scripts_directory/process_array_output_hdlr.py $scratch_directory $data_directory $release $update $dataset $data_level $data_level $sid_dck 0 1
    #
    # bsub -J ER"[1-$counter]" -w "exit($jobid[*])" -oo $sid_dck_scratch_dir/"%I.ho" -eo $sid_dck_scratch_dir/"%I.ho" -q short-serial -W 00:01 -M 10 -R "rusage[mem=10]" \
-   # python $scripts_directory/process_array_output_hdlr.py $scratch_directory $data_directory $release $update $dataset $process $data_level $sid_dck 1 1
+   # python $scripts_directory/process_array_output_hdlr.py $scratch_directory $data_directory $release $update $dataset $data_level $data_level $sid_dck 1 1
+   #
+   bsub -J OK"[1-$counter]" -w "done($jobid[*])" -oo $sid_dck_scratch_dir/"%I.ho" -eo $sid_dck_scratch_dir/"%I.ho" -q short-serial -W 00:01 -M 10 -R "rusage[mem=10]" \
+   python $scripts_directory/process_array_output_hdlr.py $sid_dck_scratch_dir/\$LSB_JOBINDEX.input 0 1
+
+   bsub -J ER"[1-$counter]" -w "exit($jobid[*])" -oo $sid_dck_scratch_dir/"%I.ho" -eo $sid_dck_scratch_dir/"%I.ho" -q short-serial -W 00:01 -M 10 -R "rusage[mem=10]" \
+   python $scripts_directory/process_array_output_hdlr.py $sid_dck_scratch_dir/\$LSB_JOBINDEX.input 1 1
    #
    # if $remove_source_level
    # then
