@@ -209,9 +209,9 @@ do
   if (( process_start > year_init ));then year_init=$process_start;fi
   if (( process_end < year_end ));then year_end=$process_end;fi
   # Set source-deck specific job settings and directories
-	job_memo_mb_=$(jq -r --arg sid_dck "$sid_dck" '.["job_config"].[$sid_dck] | .job_memo_mb | select (.!=null)' $process_config_file)
-  job_time_hr_=$(jq -r --arg sid_dck "$sid_dck" '.["job_config"].[$sid_dck] | .job_time_hr | select (.!=null)' $process_config_file)
-	job_time_min_=$(jq -r --arg sid_dck "$sid_dck" '.["job_config"].[$sid_dck] | .job_time_min | select (.!=null)' $process_config_file)
+	job_memo_mb_=$(jq -r --arg sid_dck "$sid_dck" '.["job_config"] | .[$sid_dck].job_memo_mb | select (.!=null)' $process_config_file)
+  job_time_hr_=$(jq -r --arg sid_dck "$sid_dck" '.["job_config"] | .[$sid_dck].job_time_hr | select (.!=null)' $process_config_file)
+	job_time_min_=$(jq -r --arg sid_dck "$sid_dck" '.["job_config"] | .[$sid_dck].job_time_min | select (.!=null)' $process_config_file)
 
   check_soft job_memo_mb_ $job_memo_mb_ && job_memo_mbi=$job_memo_mb_
   check_soft job_time_hr_ $job_time_hr_ && job_time_hri=$job_time_hr_
@@ -247,7 +247,7 @@ do
       else
         rm $sid_dck_log_dir/$log_basenamei.*
   			echo "INFO: $sid_dck, $file_date: $source_filename listed. BSUB idx: $counter"
-        cp   $sid_dck_scratch_dir/$counter.input
+        cp $process_config_file $sid_dck_scratch_dir/$counter.input
         python config_array.py $sid_dck_scratch_dir/$counter.input $data_directory $sid_dck $yyyy $mm
         ((counter++))
       fi
