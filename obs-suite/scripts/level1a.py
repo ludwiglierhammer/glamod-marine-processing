@@ -83,30 +83,35 @@ FFS = '-'
 # FUNCTIONS -------------------------------------------------------------------
 class script_setup:
     def __init__(self, inargs):
-#        self.data_path = inargs[1]
-#        self.release = inargs[2]
-#        self.update = inargs[3]
-#        self.dataset = inargs[4]
-#        self.sid_dck = inargs[5]
-#        self.dck = self.sid_dck.split("-")[1]
-#        self.year = inargs[6]
-#        self.month = inargs[7]
         self.configfile =  inargs[1]
-#        process_options = ['data_model', 'read_sections','filter_reports_by',
-#                           'cdm_map']
-#        try:
-#            with open(self.configfile) as fileObj:
-#                config = json.load(fileObj)
-#            
-#            for opt in process_options: 
-#                if not config.get(self.sid_dck,{}).get(opt):
-#                    setattr(self, opt, config.get(opt))
-#                else:
-#                    setattr(self, opt, config.get(self.sid_dck).get(opt))
-#            self.flag = True
-#        except Exception:
-#            logging.error('Parsing configuration from file :{}'.format(self.configfile), exc_info=True)
-#            self.flag = False
+        try:
+            with open(self.configile) as fileObj:
+                config = json.load(fileObj)
+        except:
+            logging.error('Opening configuration file :{}'.format(self.configfile), exc_info=True)
+            self.flag = False 
+            
+        self.data_path = config.get('data_directory')
+        self.release = config.get('release')
+        self.update = config.get('update')
+        self.dataset = config.get('dataset')
+        self.sid_dck = config.get('sid_dck')
+        self.dck = self.sid_dck.split("-")[1]
+        self.year = config.get('yyyy')
+        self.month = config.get('mm')
+        
+        process_options = ['data_model', 'read_sections','filter_reports_by',
+                           'cdm_map']
+        try:            
+            for opt in process_options: 
+                if not config.get('config').get(self.sid_dck,{}).get(opt):
+                    setattr(self, opt, config.get('config').get(opt))
+                else:
+                    setattr(self, opt, config.get('config').get(self.sid_dck).get(opt))
+            self.flag = True
+        except Exception:
+            logging.error('Parsing configuration from file :{}'.format(self.configfile), exc_info=True)
+            self.flag = False
 
 # This is for json to handle dates
 date_handler = lambda obj: (
@@ -149,7 +154,10 @@ else:
 
 params = script_setup(args)
 
-print(params.configfile)
+attrs = vars(params)
+# {'kids': 0, 'name': 'Dog', 'color': 'Spotted', 'age': 10, 'legs': 2, 'smell': 'Alot'}
+# now dump this in some way or another
+print(', '.join("%s: %s" % item for item in attrs.items()))
 sys.exit(0)
 
 if not params.flag:
