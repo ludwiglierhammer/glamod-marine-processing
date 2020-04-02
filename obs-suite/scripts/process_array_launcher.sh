@@ -259,7 +259,7 @@ do
 	 done
 	 ((counter--))
    jobid=$(nk_jobid bsub -J $sid_dck$process"[1-$counter]" -oo $sid_dck_scratch_dir/"%I.o" -eo $sid_dck_scratch_dir/"%I.o" -q short-serial -W $job_time_hhmm -M $job_memo_mbi -R "rusage[mem=$job_memo_mbi]" \
-   python $scripts_directory/$script_name $sid_dck_scratch_dir/$LSB_JOBINDEX.input)
+   python $scripts_directory/$script_name $sid_dck_scratch_dir/\$LSB_JOBINDEX.input)
    #
    # jobid=$(nk_jobid bsub -J $sid_dck$process"[1-$counter]" -oo $sid_dck_scratch_dir/"%I.o" -eo $sid_dck_scratch_dir/"%I.o" -q short-serial -W $job_time_hhmm -M $job_memo_mbi -R "rusage[mem=$job_memo_mbi]" \
    # python $scripts_directory/process_array.py $scratch_directory $data_directory $release $update $dataset $process $data_level $sid_dck $process_config_file)
