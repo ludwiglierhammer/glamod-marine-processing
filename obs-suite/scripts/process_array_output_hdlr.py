@@ -30,10 +30,10 @@ LSF_output_file = os.path.join(LSF_output_path,LSF_IDX + '.o')
 # GET INFO FROM CONFIG FILE
 with open(configfile,'r') as fO:
     config = json.load(fO) 
-    
+
 data_path = config.get('data_directory')
 release = config.get('release')
-update = config.get('udpate')
+update = config.get('update')
 dataset = config.get('dataset')
 data_level = config.get('job_config').get('data_level')
 sid_dck = config.get('sid_dck')
