@@ -48,6 +48,6 @@ job_log =  os.path.join(log_dir,job_log_file)
 shutil.copy(LSF_output_file,job_log)
 os.remove(LSF_output_file)
 
-# REMVE *.input FILE
-#if rm_input == '0':
-#    os.remove(configfile)
+# REMOVE *.input FILE
+if rm_input == '0':
+    os.remove(configfile)
