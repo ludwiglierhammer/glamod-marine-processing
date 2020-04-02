@@ -131,6 +131,7 @@ source_filename_suffix=$(jq -r '.["job_config"].source_filename_suffix | select 
 job_time_hr=$(jq -r '.["job_config"].job_time_hr | select (.!=null)' $process_config_file)
 job_time_min=$(jq -r '.["job_config"].job_time_min | select (.!=null)' $process_config_file)
 job_memo_mb=$(jq -r '.["job_config"].job_memo_mb | select (.!=null)' $process_config_file)
+script_name=$(jq -r '.["job_config"].script_name | select (.!=null)' $process_config_file)
 for confi in release update dataset data_level source_level source_file_ext job_time_hr job_time_min job_memo_mb
 do
   check_config $confi "${!confi}"  || exit 1
@@ -257,6 +258,9 @@ do
 		d=$(date -I -d "$d + 1 month")
 	 done
 	 ((counter--))
+   jobid=$(nk_jobid bsub -J $sid_dck$process"[1-$counter]" -oo $sid_dck_scratch_dir/"%I.o" -eo $sid_dck_scratch_dir/"%I.o" -q short-serial -W $job_time_hhmm -M $job_memo_mbi -R "rusage[mem=$job_memo_mbi]" \
+   python $scripts_directory/$script_name $process_config_file)
+   #
    # jobid=$(nk_jobid bsub -J $sid_dck$process"[1-$counter]" -oo $sid_dck_scratch_dir/"%I.o" -eo $sid_dck_scratch_dir/"%I.o" -q short-serial -W $job_time_hhmm -M $job_memo_mbi -R "rusage[mem=$job_memo_mbi]" \
    # python $scripts_directory/process_array.py $scratch_directory $data_directory $release $update $dataset $process $data_level $sid_dck $process_config_file)
    #
