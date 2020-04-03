@@ -52,14 +52,11 @@ Before processing starts:
 
 Inargs:
 ------
-data_path: data release parent path (i.e./gws/nopw/c3s311_lot2/data/marine)
-sid_dck: source-deck partition (sss-ddd)
-year: data file year (yyyy)
-month: data file month (mm)
-release: release identifier
-update: release update identifier
-dataset: dataset identifier
-configfile: l1b corrections configuration file
+config_path: configuration file path
+data_path: general data path (optional, from config_file otherwise)
+sid_dck: source-deck data partition (optional, from config_file otherwise)
+year: data file year (yyyy) (optional, from config_file otherwise)
+month: data file month (mm) (optional, from config_file otherwise)
 
 Notes on validations:
 --------------------
@@ -116,15 +113,42 @@ reload(logging)  # This is to override potential previous config of logging
 # FUNCTIONS -------------------------------------------------------------------
 class script_setup:
     def __init__(self, inargs):
-        self.data_path = inargs[1]
-        self.release = inargs[2]
-        self.update = inargs[3]
-        self.dataset = inargs[4]
-        self.sid_dck = inargs[5]
+        self.configfile =  inargs[1]
+        try:
+            with open(self.configfile) as fileObj:
+                config = json.load(fileObj)
+        except:
+            logging.error('Opening configuration file :{}'.format(self.configfile), exc_info=True)
+            self.flag = False 
+            return
+ 
+        self.release = config.get('release')
+        self.update = config.get('update')
+        self.dataset = config.get('dataset')
+        if len(sys.argv) > 2:
+            self.data_path = inargs[2]
+            self.sid_dck = inargs[3]
+            self.year = inargs[4]
+            self.month = inargs[5]
+        else:
+            self.data_path = config.get('data_directory')
+            self.sid_dck = config.get('sid_dck')
+            self.year = config.get('yyyy')
+            self.month = config.get('mm') 
+            
         self.dck = self.sid_dck.split("-")[1]
-        self.year = inargs[6]
-        self.month = inargs[7]
-        self.configfile =  inargs[8]
+
+        process_options = ['dataset_id', 'validated','history']
+        try:            
+            for opt in process_options: 
+                if not config.get('config').get(self.sid_dck,{}).get(opt):
+                    setattr(self, opt, config.get('config').get(opt))
+                else:
+                    setattr(self, opt, config.get('config').get(self.sid_dck).get(opt))
+            self.flag = True
+        except Exception:
+            logging.error('Parsing configuration from file :{}'.format(self.configfile), exc_info=True)
+            self.flag = False
 
 # This is for json to handle dates
 date_handler = lambda obj: (
@@ -175,7 +199,7 @@ def process_table(table_df,table_name):
     cdm_columns = cdm_tables.get(table_name).keys()
     table_mask = mask_df.loc[table_df.index]
     if table_name == 'header':
-            table_df['history'] = table_df['history'] + ';{0}. {1}'.format(history_tstmp,history_explain)
+            table_df['history'] = table_df['history'] + ';{0}. {1}'.format(history_tstmp,params.history)
             validation_dict['unique_ids'] = table_df.loc[table_mask['all'],'primary_station_id'].value_counts(dropna=False).to_dict()
     
     if len(table_df[table_mask['all']]) > 0:
@@ -212,16 +236,8 @@ else:
 
 params = script_setup(args)
 
-if not os.path.isfile(params.configfile):
-    logging.error('Configuration file {} not found'.format(params.configfile))
-    sys.exit(1)  
-else:
-    with open(params.configfile) as fileO:
-        config = json.load(fileO)
-
 FFS = '-'
 delimiter = '|'
-cor_ext = '.txt.gz'
 level = 'level1c'
 level_prev = 'level1b'
 header = True 
@@ -255,9 +271,6 @@ validation_dict = { table:{} for table in cdm.properties.cdm_tables}
 
 # -----------------------------------------------------------------------------
 # Settings in configuration file
-dataset = config.get('dataset_id')
-validated = config.get('validated')
-history_explain = config.get('history_explain')
 history_tstmp = datetime.datetime.utcnow().strftime('%Y-%m-%d %H:%M:%S')
 cdm_tables = cdm.lib.tables.tables_hdlr.load_tables()
 
@@ -276,8 +289,8 @@ if len(table_df) == 0:
 table_df.set_index('report_id', inplace = True, drop = False)
 
 # Initialize mask
-mask_df = pd.DataFrame(index = table_df.index,columns = validated + ['all'])
-mask_df[validated] = True
+mask_df = pd.DataFrame(index = table_df.index,columns = params.validated + ['all'])
+mask_df[params.validated] = True
 
 # 2. VALIDATE THE FIELDS-------------------------------------------------------
 # 2.1. Validate datetime
@@ -299,7 +312,7 @@ mask_df.loc[callsigns,field] = table_df.loc[callsigns,field].str.match(callre,na
 # Then the rest according to general validation rules
 logging.info('Applying general id validation')
 table_df.columns = [ ('header',x) for x in table_df.columns ]
-mask_df.loc[nocallsigns,field]  = validate_id.validate(table_df.loc[nocallsigns],dataset,'cdm',params.sid_dck.split('-')[1], blank=True) 
+mask_df.loc[nocallsigns,field]  = validate_id.validate(table_df.loc[nocallsigns],params.dataset_id,'cdm',params.sid_dck.split('-')[1], blank=True) 
 table_df.columns = [ x[1] for x in table_df.columns ]
 
 # And now set back to True all that the linkage provided
@@ -321,7 +334,7 @@ validation_dict['id_validation_rules']['noncallsign'] = len(np.where(~callsigns)
 
 # 3. OUTPUT INVALID REPORTS - HEADER ------------------------------------------
 cdm_columns = cdm_tables.get(table).keys()
-for field in validated:
+for field in params.validated:
     if False in mask_df[field].value_counts().index:
         idata_filename = os.path.join(level_invalid_path,FFS.join(['header',fileID,field]) + '.psv')
         table_df[~mask_df[field]].to_csv(idata_filename, index = False, sep = delimiter, columns = cdm_columns
@@ -335,7 +348,7 @@ mask_df['all'] = mask_df.all(axis=1)
 # Report invalids
 validation_dict['invalid'] = {} 
 validation_dict['invalid']['total'] = len(table_df[~mask_df['all']])
-for field in validated:
+for field in params.validated:
     validation_dict['invalid'][field] = len(mask_df[field].loc[~mask_df[field]])
 
 # 5. CLEAN AND OUTPUT TABLES  -------------------------------------------------
