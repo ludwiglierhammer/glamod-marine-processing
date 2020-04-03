@@ -29,19 +29,15 @@ Before processing starts:
 
 Inargs:
 ------
-data_path: data release parent path (i.e./gws/nopw/c3s311_lot2/data/marine)
-sid_dck: source-deck partition (sss-ddd)
-year: data file year (yyyy)
-month: data file month (mm)
-release: release identifier
-update: release update identifier
-dataset: dataset identifier
-configfile: path to configuration file with processing options
+config_path: configuration file path
+data_path: general data path (optional, from config_file otherwise)
+sid_dck: source-deck data partition (optional, from config_file otherwise)
+year: data file year (yyyy) (optional, from config_file otherwise)
+month: data file month (mm) (optional, from config_file otherwise)
 
 
-configfile:
------------
-json file with the following mappings:
+configfile includes:
+-------------------
 - NOC_corrections version
 - CDM tables elements with subdirectory prefix where corrections are in release/NOC_corrections/version
 - subdirectory prefix with history event to append to history field
@@ -69,15 +65,43 @@ reload(logging)  # This is to override potential previous config of logging
 # Functions--------------------------------------------------------------------
 class script_setup:
     def __init__(self, inargs):
-        self.data_path = inargs[1]
-        self.release = inargs[2]
-        self.update = inargs[3]
-        self.dataset = inargs[4]
-        self.sid_dck = inargs[5]
+        self.configfile =  inargs[1]
+        try:
+            with open(self.configfile) as fileObj:
+                config = json.load(fileObj)
+        except:
+            logging.error('Opening configuration file :{}'.format(self.configfile), exc_info=True)
+            self.flag = False 
+            return
+ 
+        self.release = config.get('release')
+        self.update = config.get('update')
+        self.dataset = config.get('dataset')
+        if len(sys.argv) > 2:
+            self.data_path = inargs[2]
+            self.sid_dck = inargs[3]
+            self.year = inargs[4]
+            self.month = inargs[5]
+        else:
+            self.data_path = config.get('data_directory')
+            self.sid_dck = config.get('sid_dck')
+            self.year = config.get('yyyy')
+            self.month = config.get('mm') 
+            
         self.dck = self.sid_dck.split("-")[1]
-        self.year = inargs[6]
-        self.month = inargs[7]
-        self.configfile =  inargs[8]
+        
+        process_options = ['correction_version', 'corrections','histories']
+        try:            
+            for opt in process_options: 
+                if not config.get('config').get(self.sid_dck,{}).get(opt):
+                    setattr(self, opt, config.get('config').get(opt))
+                else:
+                    setattr(self, opt, config.get('config').get(self.sid_dck).get(opt))
+            self.flag = True
+        except Exception:
+            logging.error('Parsing configuration from file :{}'.format(self.configfile), exc_info=True)
+            self.flag = False
+            
         
 # This is for json to handle dates
 date_handler = lambda obj: (
@@ -112,18 +136,7 @@ else:
     sys.exit(1)
 
 params = script_setup(args)
-
-
-if not os.path.isfile(params.configfile):
-    logging.error('Configuration file {} not found'.format(params.configfile))
-    sys.exit(1)  
-else:
-    with open(params.configfile) as fileO:
-        corrections = json.load(fileO)
-    version_corrections = corrections.get('version')
-    L1b_corrections = corrections.get('corrections')
-    correction_histories = corrections.get('history explain')
-    
+  
 filename_field_sep = '-' 
 delimiter = '|'
 cor_ext = '.txt.gz'
@@ -137,7 +150,7 @@ L1a_path = os.path.join(release_path,'level1a',params.sid_dck)
 L1b_path = os.path.join(release_path,'level1b',params.sid_dck)
 L1b_ql_path = os.path.join(release_path,'level1b','quicklooks',params.sid_dck)
 
-L1b_main_corrections = os.path.join(params.data_path,params.release,'NOC_corrections',version_corrections)
+L1b_main_corrections = os.path.join(params.data_path,params.release,'NOC_corrections',params.correction_version)
 
 logging.info('Setting corrections path to {}'.format(L1b_main_corrections))
 
@@ -176,7 +189,7 @@ for table in cdm.properties.cdm_tables:
     table_df.set_index('report_id', inplace = True, drop = False)
     correction_dict[table]['read'] = len(table_df)
     
-    table_corrections = L1b_corrections.get(table)
+    table_corrections = params.corrections.get(table)
     if len(table_corrections) == 0:
         logging.warning('No corrections defined for table {}'.format(table))
         continue
@@ -221,7 +234,7 @@ for table in cdm.properties.cdm_tables:
         # we only keep a lineage of the changes applied to the header
         # (some of these are shared with obs tables like position and datetime, although the name for the cdm element might not be the same....)
         if table == 'header':
-            table_df['history'].loc[replaced] = table_df['history'].loc[replaced] + ';{0}. {1}'.format(history_tstmp,correction_histories.get(correction))
+            table_df['history'].loc[replaced] = table_df['history'].loc[replaced] + ';{0}. {1}'.format(history_tstmp,params.histories.get(correction))
             
         table_df.drop(element + '.former',axis = 1)
         table_df.drop(element + '.isChange',axis = 1)
