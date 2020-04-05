@@ -4,8 +4,8 @@
   "dataset": "ICOADS_R3.0.0T",
   "config":
   {
-    "qc_first_date_avail" : '1950-01',
-    "qc_last_date_avail" : '2010-11',
+    "qc_first_date_avail" : "1950-01",
+    "qc_last_date_avail" :"2010-11",
     "history_explain" : "Position, tracking and parameter QC flags added"
   },
   "job_config":
