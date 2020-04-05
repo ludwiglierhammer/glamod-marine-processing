@@ -36,7 +36,7 @@ settings in the initial mappings (not all not-checked...) to not-checked with:
 The processing unit is the source-deck monthly set of CDM tables.
 
 Outputs data to /<data_path>/<release>/<source>/level1e/<sid-dck>/table[i]-fileID.psv
-Outputs quicklook info to:  /<data_path>/<release>/<source>/level1c/quicklooks/<sid-dck>/fileID.json/nc
+Outputs quicklook info to:  /<data_path>/<release>/<source>/level1c/quicklooks/<sid-dck>/fileID.json
 
 where fileID is yyyy-mm-release_tag-update_tag
 
@@ -49,13 +49,11 @@ Before processing starts:
 
 Inargs:
 ------
-data_path: data release parent path (i.e./gws/nopw/c3s311_lot2/data/marine)
-sid_dck: source-deck partition (sss-ddd)
-year: data file year (yyyy)
-month: data file month (mm)
-release: release identifier
-update: release update identifier
-source: source dataset identifier
+config_path: configuration file path
+data_path: general data path (optional, from config_file otherwise)
+sid_dck: source-deck data partition (optional, from config_file otherwise)
+year: data file year (yyyy) (optional, from config_file otherwise)
+month: data file month (mm) (optional, from config_file otherwise)
 
 
 On expected format and content of QC files:
@@ -99,12 +97,6 @@ report_quality flag rules:
                     all not checked     not checked
     ---------------------------------------------------
 
-IMPORTANT NOTE:
---------------
-DIRTY LAST MINUTE HARDCODE: NO QC FOR 2014-12: DO NOT FAIL IF NO QC AND YEAR == 2014 AND MONTH == 12
-It is likely that because of the nature of the QC, and how it is implemented...,
-there will never be QC files for the last month of a period. Need to find a clean
-way to check this...
 
 
 Dev NOTES:
@@ -114,8 +106,7 @@ adding 'ICOADS_30' to the UID in the QC flags!!!!!
 
 Maybe should pass a QC version configuration file, with the path
 of the QC files relative to a set path (i.e. informing of the QC version)
-and info like first and last date of QC, to solve dirty things like the 
-IMPORTANT NOTE issue above
+
 
 .....
 
@@ -125,6 +116,7 @@ IMPORTANT NOTE issue above
 import sys
 import os
 import simplejson
+import json
 import datetime
 import cdm
 import glob
@@ -138,14 +130,45 @@ reload(logging)  # This is to override potential previous config of logging
 # Functions--------------------------------------------------------------------
 class script_setup:
     def __init__(self, inargs):
-        self.data_path = inargs[1]
-        self.sid_dck = inargs[2]
+        self.configfile =  inargs[1]
+        try:
+            with open(self.configfile) as fileObj:
+                config = json.load(fileObj)
+        except:
+            logging.error('Opening configuration file :{}'.format(self.configfile), exc_info=True)
+            self.flag = False 
+            return
+ 
+        self.release = config.get('release')
+        self.update = config.get('update')
+        self.dataset = config.get('dataset')
+        if len(sys.argv) > 2:
+            self.data_path = inargs[2]
+            self.sid_dck = inargs[3]
+            self.year = inargs[4]
+            self.month = inargs[5]
+        else:
+            self.data_path = config.get('data_directory')
+            self.sid_dck = config.get('sid_dck')
+            self.year = config.get('yyyy')
+            self.month = config.get('mm') 
+            
         self.dck = self.sid_dck.split("-")[1]
-        self.year = inargs[3]
-        self.month = inargs[4]
-        self.release = inargs[5]
-        self.update = inargs[6]
-        self.source = inargs[7]
+
+        # However md_subdir is then nested in monthly....and inside monthly files
+        # Other MD sources would stick to this? Force it otherwise?
+        process_options = ['history_explain', 'qc_first_date_avail',
+                           'qc_last_date_avail']
+        try:            
+            for opt in process_options: 
+                if not config.get('config').get(self.sid_dck,{}).get(opt):
+                    setattr(self, opt, config.get('config').get(opt))
+                else:
+                    setattr(self, opt, config.get('config').get(self.sid_dck).get(opt))
+            self.flag = True
+        except Exception:
+            logging.error('Parsing configuration from file :{}'.format(self.configfile), exc_info=True)
+            self.flag = False
 
 # This is for json to handle dates
 date_handler = lambda obj: (
@@ -239,7 +262,7 @@ def process_table(table_df,table_name):
 
         if table_name == 'header':
             table_df.update(qc_df['report_quality'])
-            history_add = ';{0}. {1}'.format(history_tstmp,history_explain)
+            history_add = ';{0}. {1}'.format(history_tstmp,params.history_explain)
             table_df['report_time_quality'] = pass_time
             qc_dict[table_name]['location_quality_flags'] = table_df['location_quality'].value_counts(dropna=False).to_dict()
             qc_dict[table_name]['report_quality_flags'] = table_df['report_quality'].value_counts(dropna=False).to_dict()
@@ -323,7 +346,6 @@ cdm_tables = cdm.lib.tables.tables_hdlr.load_tables()
 obs_tables = [ x for x in cdm_tables.keys() if x != 'header' ]
 
 history_tstmp = datetime.datetime.utcnow().strftime('%Y-%m-%d %H:%M:%S')
-history_explain = 'Position, tracking and parameter QC flags added'
 # -----------------------------------------------------------------------------
 
 # MAIN ------------------------------------------------------------------------
@@ -363,9 +385,14 @@ logging.info('Using qc files in {}'.format(qc_path))
 qc_pos_filename = os.path.join(qc_path,params.year,params.month,"_".join(['POS','qc',params.year+params.month,'CCIrun.csv']))
 qc_avail = True
 if not os.path.isfile(qc_pos_filename):
-    if int(params.year) == 2014 and int(params.month) == 12:
+    file_date = datetime.datetime.strptime(str(params.year) + '-' + str(params.month),'%Y-%m')
+    last_date = datetime.datetime.strptime(params.qc_last_date_avail,'%Y-%m')
+    first_date = datetime.datetime.strptime(params.qc_first_date_avail,'%Y-%m')
+    if file_date > last_date or file_date < first_date:
         qc_avail = False
-        logging.warning('QC not available for period 2014-12. Creating level1e product with no QC flags')
+        logging.warning('QC only available in period {0} to {1}'
+                        .format(str(params.qc_first_date_avail),str(params.qc_last_date_avail)))
+        logging.warning('level1e data will be created with no merging') 
     else:
         logging.error('POSITION QC file not found: {}'.format(qc_pos_filename))
         sys.exit(1)
@@ -439,29 +466,7 @@ for table in obs_tables:
     flag = True if table in tables_in and qc_avail else False
     process_table(table,table)
 
-
-# 3. NOW DO THE GRIDDED STATS -------------------------------------------------
-
-logging.info('Computing gridded stats: all reports')
-cdm.gridded_stats.from_cdm_monthly(level_path, cdm_id = fileID, region = 'Global', 
-                      resolution = 'lo_res', nc_dir = level_ql_path)
-
-logging.info('Computing gridded stats: qced reports')
-cdm.gridded_stats.from_cdm_monthly(level_path, cdm_id = fileID, region = 'Global', 
-                      resolution = 'lo_res', nc_dir = level_ql_path,qc_report = [0,1])
-
-logging.info('Computing gridded stats: valid reports')
-cdm.gridded_stats.from_cdm_monthly(level_path, cdm_id = fileID, region = 'Global', 
-                      resolution = 'lo_res', nc_dir = level_ql_path,qc_report = [0])
-
-logging.info('Computing gridded stats: valid reports, qced qc_reports')
-cdm.gridded_stats.from_cdm_monthly(level_path, cdm_id = fileID, region = 'Global', 
-                      resolution = 'lo_res', nc_dir = level_ql_path, qc=[0,1],qc_report = [0])
-
-logging.info('Computing gridded stats: valid reports, valid qc_reports')
-cdm.gridded_stats.from_cdm_monthly(level_path, cdm_id = fileID, region = 'Global', 
-                      resolution = 'lo_res', nc_dir = level_ql_path, qc=[0],qc_report = [0])
-
+# CHECKOUT --------------------------------------------------------------------
 qc_dict['date processed'] = datetime.datetime.now()  
       
 logging.info('Saving json quicklook')
