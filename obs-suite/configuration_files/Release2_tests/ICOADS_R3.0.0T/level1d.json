@@ -6,7 +6,7 @@
   {
     "md_model" : "pub47_noc",
     "md_subdir" : "wmo_publication_47",
-    "md_first_yr_avail" : 1950,
+    "md_first_yr_avail" : 1956,
     "md_last_yr_avail" : 2010,
     "history_explain" : "WMO Publication 47 metadata added",
     "063-714" : {"md_not_avail":true}

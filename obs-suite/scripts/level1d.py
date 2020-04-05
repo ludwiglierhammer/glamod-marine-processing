@@ -238,10 +238,10 @@ metadata_filename = os.path.join(md_path, FFS.join([params.year,params.month,'01
 md_avail = True if not params.md_not_avail else False
 
 if not os.path.isfile(metadata_filename) and md_avail:
-    if int(params.year) > params.md_last_yr_avail or int(params.year) < params.md_last_yr_avail:
+    if int(params.year) > params.md_last_yr_avail or int(params.year) < params.md_first_yr_avail:
         md_avail = False
         logging.warning('Metadata source available only in period {0}-{1}'
-                        .format(str(params.md_last_yr_avail),str(params.md_last_yr_avail)))
+                        .format(str(params.md_first_yr_avail),str(params.md_last_yr_avail)))
         logging.warning('level1d data will be created with no merging') 
     else:
         logging.error('Metadata file not found: {}'.format(metadata_filename))
