@@ -362,7 +362,7 @@ else:
 
 params = script_setup(args)
 
-release_path = os.path.join(params.data_path,params.release,params.source)
+release_path = os.path.join(params.data_path,params.release,params.dataset)
 release_id = filename_field_sep.join([params.release,params.update ])
 fileID = filename_field_sep.join([str(params.year),str(params.month).zfill(2),release_id ])
 fileID_date = filename_field_sep.join([str(params.year),str(params.month)])
