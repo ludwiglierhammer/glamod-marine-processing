@@ -30,14 +30,11 @@ Before processing starts:
 
 Inargs:
 ------
-data_path: data release parent path (i.e./gws/nopw/c3s311_lot2/data/marine)
-sid_dck: source-deck partition (sss-ddd)
-year: data file year (yyyy)
-month: data file month (mm)
-release: release identifier
-update: release update identifier
-dataset: source dataset identifier
-configfile: path to configuration file with processing options
+config_path: configuration file path
+data_path: general data path (optional, from config_file otherwise)
+sid_dck: source-deck data partition (optional, from config_file otherwise)
+year: data file year (yyyy) (optional, from config_file otherwise)
+month: data file month (mm) (optional, from config_file otherwise)
 
 On input data:
 -------------
@@ -70,36 +67,48 @@ reload(logging)  # This is to override potential previous config of logging
 
 # FUNCTIONS -------------------------------------------------------------------
 class script_setup:
-    def __init__(self, inargs):        
-        self.data_path = inargs[1]
-        self.release = inargs[2]
-        self.update = inargs[3]
-        self.dataset = inargs[4]
-        self.sid_dck = inargs[5]
+    def __init__(self, inargs):
+        self.configfile =  inargs[1]
+        try:
+            with open(self.configfile) as fileObj:
+                config = json.load(fileObj)
+        except:
+            logging.error('Opening configuration file :{}'.format(self.configfile), exc_info=True)
+            self.flag = False 
+            return
+ 
+        self.release = config.get('release')
+        self.update = config.get('update')
+        self.dataset = config.get('dataset')
+        if len(sys.argv) > 2:
+            self.data_path = inargs[2]
+            self.sid_dck = inargs[3]
+            self.year = inargs[4]
+            self.month = inargs[5]
+        else:
+            self.data_path = config.get('data_directory')
+            self.sid_dck = config.get('sid_dck')
+            self.year = config.get('yyyy')
+            self.month = config.get('mm') 
+            
         self.dck = self.sid_dck.split("-")[1]
-        self.year = inargs[6]
-        self.month = inargs[7]
-        self.configfile =  inargs[8]
+
         # However md_subdir is then nested in monthly....and inside monthly files
         # Other MD sources would stick to this? Force it otherwise?
         process_options = ['md_model','md_subdir', 'history_explain',
                            'md_first_yr_avail', 'md_last_yr_avail',
                            'md_not_avail']
-        try:
-            with open(self.configfile) as fileObj:
-                config = json.load(fileObj)
-            
-            # Get sid-dck specfic options, default otherwise
+        try:            
             for opt in process_options: 
-                if not config.get(self.sid_dck,{}).get(opt):
-                    setattr(self, opt, config.get(opt))
+                if not config.get('config').get(self.sid_dck,{}).get(opt):
+                    setattr(self, opt, config.get('config').get(opt))
                 else:
-                    setattr(self, opt, config.get(self.sid_dck).get(opt))
+                    setattr(self, opt, config.get('config').get(self.sid_dck).get(opt))
             self.flag = True
         except Exception:
             logging.error('Parsing configuration from file :{}'.format(self.configfile), exc_info=True)
             self.flag = False
-
+            
 # This is for json to handle dates
 date_handler = lambda obj: (
     obj.isoformat()
@@ -159,7 +168,7 @@ def process_table(table_df,table_name):
             table_df['history'].loc[locs] = table_df['history'].loc[locs] + history_add
 
     cdm_columns = cdm_tables.get(table_name).keys()
-    odata_filename = os.path.join(level_path,filename_field_sep.join([table_name,fileID]) + '.psv')
+    odata_filename = os.path.join(level_path,FFS.join([table_name,fileID]) + '.psv')
     table_df.to_csv(odata_filename, index = False, sep = delimiter, columns = cdm_columns
                  ,header = header, mode = wmode, na_rep = 'null')
 
@@ -193,7 +202,7 @@ else:
 
 params = script_setup(args)
 
-filename_field_sep = '-'
+FFS = '-'
 delimiter = '|'
 md_delimiter = '|'
 level = 'level1d'
@@ -202,9 +211,9 @@ header = True
 wmode = 'w'
 
 release_path = os.path.join(params.data_path,params.release,params.dataset)
-release_id = filename_field_sep.join([params.release,params.update ])
-fileID = filename_field_sep.join([str(params.year),str(params.month).zfill(2),release_id ])
-fileID_date = filename_field_sep.join([str(params.year),str(params.month)])
+release_id = FFS.join([params.release,params.update ])
+fileID = FFS.join([str(params.year),str(params.month).zfill(2),release_id ])
+fileID_date = FFS.join([str(params.year),str(params.month)])
 
 prev_level_path = os.path.join(release_path,level_prev,params.sid_dck)
 level_path = os.path.join(release_path,level,params.sid_dck)
@@ -225,7 +234,7 @@ if not os.path.isfile(prev_level_filename):
     logging.error('L1c header file not found: {}'.format(prev_level_filename))
     sys.exit(1)
 
-metadata_filename = os.path.join(md_path, params.year + filename_field_sep + params.month + '-01.csv')
+metadata_filename = os.path.join(md_path, FFS.join([params.year,params.month,'01.csv']))
 md_avail = True if not params.md_not_avail else False
 
 if not os.path.isfile(metadata_filename) and md_avail:
