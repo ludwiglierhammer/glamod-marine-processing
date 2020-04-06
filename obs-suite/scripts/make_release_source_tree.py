@@ -25,11 +25,6 @@ import os
 import sys
 import json
 
-# This just to ease playing in local ------------------------------------------
-#data_path = '/Users/iregon/dessaps/data/'
-#release_name = 'rTest'
-#source_name = 'ICOADS_R3.1.0T'
-#release_file = '/Users/iregon/dessaps/r092019/configuration_files/r092019_000000_list.txt'
 
 # Find command line arguments -------------------------------------------------
 if len(sys.argv)>1:
@@ -47,15 +42,15 @@ def create_subdir(lpath,subdir_list):
             os.mkdir(subdir_dir,0o774)
 
 # Go --------------------------------------------------------------------------
-#levels = ['level0','level1a','level1b','level1c','level1d','level1e', 'level2']
-levels = ['level1a','level1b','level1c','level1d','level1e', 'level2']
+levels = ['level1a','level1b','level1c','level1d','level1e','level1f', 'level2']
 level_subdirs = {}
 #level_subdirs['level0'] = []
 level_subdirs['level1a'] = ['log','quicklooks','invalid','excluded']
 level_subdirs['level1b'] = ['log','quicklooks']
 level_subdirs['level1c'] = ['log','quicklooks','invalid']
 level_subdirs['level1d'] = ['log','quicklooks']
-level_subdirs['level1e'] = ['log','quicklooks','reports']
+level_subdirs['level1e'] = ['log','quicklooks']
+level_subdirs['level1f'] = ['log','quicklooks','reports']
 level_subdirs['level2'] = ['log','quicklooks','excluded','reports','configuration']
 deep_sublevels = ['log','quicklooks','invalid','excluded','reports']
 os.umask(0)
