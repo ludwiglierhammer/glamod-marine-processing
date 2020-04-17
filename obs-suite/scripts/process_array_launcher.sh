@@ -225,8 +225,10 @@ do
   rm -rf $sid_dck_scratch_dir;mkdir -p $sid_dck_scratch_dir
 
   # Loop throuhg period and send subjob only if source level file is available
-	d=$year_init'-01-01'
-	enddate=$year_end'-12-01'
+  # Added hours to below dates as this was failing for 1847-12-01. Adding the hours
+  # just did the trick...
+	d=$year_init'-01-01 01'
+	enddate=$year_end'-12-01 01'
 	counter=1
 	while [ "$(date -d "$d" +%Y%m)" -le "$(date -d "$enddate" +%Y%m)" ]
 	do
