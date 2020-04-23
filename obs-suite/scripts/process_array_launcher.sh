@@ -225,14 +225,15 @@ do
   rm -rf $sid_dck_scratch_dir;mkdir -p $sid_dck_scratch_dir
 
   # Loop throuhg period and send subjob only if source level file is available
-  # Added hours to below dates as this was failing for 1847-12-01. Adding the hours
+  # Added hours to below dates as this was failing for 1847-12-01 and also 1847-12-01 00
+  # had to set it to 1847-12-01 01.... Adding the hours
   # just did the trick...
 	d=$year_init'-01-01 01'
 	enddate=$year_end'-12-01 01'
 	counter=1
-	while [ "$(date -d "$d" +%Y%m)" -le "$(date -d "$enddate" +%Y%m)" ]
+	while [ "$(date -d "$d" +%Y%m%d%H)" -le "$(date -d "$enddate" +%Y%m%d%H)" ]
 	do
-		file_date=$(date -d "$d" +%Y-%m)
+		file_date=${d:0:7}
     yyyy=${file_date:0:4}
     mm=${file_date:5:8}
 		source_filename=$sid_dck_source_dir/$source_filename_prefix"*"$file_date"*"$source_filename_suffix.$source_file_ext
@@ -255,7 +256,9 @@ do
 		else
 			echo "WARNING: $sid_dck, $file_date: NO $source_filename found."
 		fi
-		d=$(date -I -d "$d + 1 month")
+                echo $d
+                d=$(date -u -d "$(date -u -d"$d +1 month")" +"%Y-%m-%d %H")
+		#d=$(date -I -d "$d + 1 month %Y-%m-%d %H")
 	 done
 	 ((counter--))
    jobid=$(nk_jobid bsub -J $sid_dck$data_level"[1-$counter]" -oo $sid_dck_scratch_dir/"%I.o" -eo $sid_dck_scratch_dir/"%I.o" -q short-serial -W $job_time_hhmm -M $job_memo_mbi -R "rusage[mem=$job_memo_mbi]" \
