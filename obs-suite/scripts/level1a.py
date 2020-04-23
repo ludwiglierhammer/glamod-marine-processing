@@ -337,7 +337,7 @@ with open(L1a_io_filename,'w') as fileObj:
                      default = date_handler,indent=4,ignore_nan=True)
     
 # Output exluded and invalid ---------------------------------------------
-if hasattr(params, 'report_filters'):
+if hasattr(params, 'filter_reports_by'):
     for k,v in data_excluded['data'].items():
         if inspect.get_length(data_excluded['data'][k]) > 0:
             excluded_filename = os.path.join(L1a_excluded_path,L1a_id + FFS + '_'.join(k.split('.')) + '.psv')  
