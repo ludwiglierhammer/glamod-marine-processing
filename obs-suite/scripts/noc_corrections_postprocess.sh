@@ -79,9 +79,9 @@ duplicates () {
   if [ ! -d $dup_dir ];then mkdir $dup_dir;fi
   if [ ! -d $flags_dir ];then mkdir $flags_dir;fi
 
-  for filename in $(eval ls $origin_dir/{$year_init..$year_end}-??.txt.gz)
+  for filename1 in $(eval ls $origin_dir/{$year_init..$year_end}-??.txt.gz)
   do
-      echo $filename
+      echo $filename1
       base_name=$(basename $filename1)
       filename2=$origin_dir2/$base_name
       python $scripts_directory/noc_duplicates_merge.py $filename1 $filename2 $flags_dir $dup_dir
