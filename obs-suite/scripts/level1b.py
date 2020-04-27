@@ -194,8 +194,7 @@ for table in cdm.properties.cdm_tables:
         logging.warning('No corrections defined for table {}'.format(table))
         continue
     
-    correction_dict[table]['date-misspositioned out'] =  {}
-    correction_dict[table]['date-misspositioned in'] =  {}
+    correction_dict[table]['date leak out'] =  {}
     correction_dict[table]['corrections'] =  {}
     
     for correction,element in table_corrections.items():
@@ -289,10 +288,10 @@ for table in cdm.properties.cdm_tables:
             table_df.drop(leak,inplace=True)
             len_df_i = len_df
             len_df = len(table_df)
-            correction_dict[table]['date-misspositioned out'][leak.strftime("%Y-%m")] = len_df_i - len_df  
-        correction_dict[table]['date-misspositioned out']['total'] = sum([ v for k,v in correction_dict[table]['date-misspositioned out'].items()])
+            correction_dict[table]['date leak out'][leak.strftime("%Y-%m")] = len_df_i - len_df  
+        correction_dict[table]['date leak out']['total'] = sum([ v for k,v in correction_dict[table]['date leak out'].items()])
     else:
-        correction_dict[table]['date-misspositioned out']['total'] = 0
+        correction_dict[table]['date leak out']['total'] = 0
 
 
 correction_dict['date processed'] = datetime.datetime.now()
