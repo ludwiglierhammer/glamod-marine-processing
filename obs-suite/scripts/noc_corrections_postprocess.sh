@@ -39,7 +39,7 @@ datepos () {
   if [ ! -d $latitude_dir ];then mkdir $latitude_dir;fi
   if [ ! -d $longitude_dir ];then mkdir $longitude_dir;fi
 
-  for filename in $(ls $origin_dir/????-??.txt.gz)
+  for filename in $(eval ls $origin_dir/{$year_init..$year_end}-??.txt.gz)
   do
       echo $filename
       out_name=$(basename $filename '.gz')
@@ -61,7 +61,6 @@ id () {
   id_dir=$destination_parent/id
 
   if [ ! -d $id_dir ];then mkdir $id_dir;fi
-  #for filename in $(ls $origin_dir/????-??.txt.gz)
   for filename in $(eval ls $origin_dir/{$year_init..$year_end}-??.txt.gz)
   do
       echo $filename
@@ -80,7 +79,7 @@ duplicates () {
   if [ ! -d $dup_dir ];then mkdir $dup_dir;fi
   if [ ! -d $flags_dir ];then mkdir $flags_dir;fi
 
-  for filename1 in $(ls $origin_dir/????-??.txt.gz)
+  for filename in $(eval ls $origin_dir/{$year_init..$year_end}-??.txt.gz)
   do
       echo $filename
       base_name=$(basename $filename1)
