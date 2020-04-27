@@ -19,7 +19,7 @@
 # more than just separating columns
 #
 # Origin directories are hardcoded and assumed to be there, obviously,
-# while output directories (<release>/NOC_corrections/version/<correction>) are created if they don’t exist.
+# while output directories (<release>/NOC_corrections/<version>/<correction>) are created if they don’t exist.
 #
 # DEV NOTES:
 #
@@ -61,8 +61,8 @@ id () {
   id_dir=$destination_parent/id
 
   if [ ! -d $id_dir ];then mkdir $id_dir;fi
-
-  for filename in $(ls $origin_dir/????-??.txt.gz)
+  #for filename in $(ls $origin_dir/????-??.txt.gz)
+  for filename in $(eval ls $origin_dir/{$year_init..$year_end}-??.txt.gz)
   do
       echo $filename
       base_name=$(basename $filename)
@@ -92,6 +92,8 @@ duplicates () {
 # MAIN -------------------------------------------------------------------
 release=$1
 version=$2
+year_init=$4
+year_end=$5
 
 origin_parent=$data_directory/datasets/NOC_corrections/$version
 destination_parent=$data_directory/$release/NOC_corrections/$version
