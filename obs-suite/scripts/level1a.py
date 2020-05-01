@@ -311,6 +311,21 @@ if io_dict['processed']['total'] == 0:
     process = False
     logging.warning('No data to map to CDM after selection and cleaning')
 
+
+# 2.9. Let's save reports with no observations...
+OBS_VALUES = [ ('core',x) for x in ['AT','SST','SLP','D','W','WBT','DPT'] ]
+no_obs_file = os.path.join(L1a_path,'no_obs',str(params.year) + FFS + str(params.month) + '.psv')
+c = 0
+for data_obs in data_in.data:
+    if len(data_obs[OBS_VALUES].isna().all(axis=1)) > 1:
+        if not os.path.isdir(os.path.join(L1a_path,'no_obs')):
+            os.mkdir(os.path.join(L1a_path,'no_obs'))
+        wmode = 'a' if c > 0 else 'w'
+        header = False if c > 0 else True
+        data_obs.to_csv(no_obs_file, sep = '|', mode = wmode, header = header)
+        c += 1  
+            
+data_in.data = TextParser_hdlr.restore(data_in.data)
 # 3. Map to common data model and output files
 if process:
     logging.info('Mapping to CDM')
