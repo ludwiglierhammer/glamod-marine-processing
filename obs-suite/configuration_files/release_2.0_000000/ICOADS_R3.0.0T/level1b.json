@@ -4,7 +4,7 @@
   "dataset": "ICOADS_R3.0.0T",
   "config":
   {
-    "correction_version":"v1x2020",
+    "correction_version":"v1x2019",
     "corrections":
     {
         "header":
