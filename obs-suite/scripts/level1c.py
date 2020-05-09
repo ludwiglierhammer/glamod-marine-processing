@@ -182,7 +182,9 @@ def read_table_files(table):
     # If no yyyy-mm master file, can still have reports from datetime leaks
     # On reading 'header' read null as NaN so that we can validate null ids as NaN easily
     table_df = cdm.read_tables(prev_level_path,fileID,cdm_subset=[table],na_values='null')
-    if len(table_df) == 0:
+    try:
+    	len(table_df)
+    except:
         logging.warning('Empty or non-existing master {} table. Attempting \
                         to read datetime leak files'.format(table))
     leak_pattern = FFS.join([table,fileID,'????' + FFS + '??.psv'])
