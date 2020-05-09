@@ -152,7 +152,8 @@ def validate_id(idSeries):
         logging.warning('NO noc ancillary info file {} available'.format(json_file))
         logging.warning('Adding match-all regex to validation patterns')
         patterns = ['.*?']
-    else:    
+    else:
+        logging.info('Reading ID validation patterns from NOC ANC FILE {}'.format(json_file))    
         try:
             with open(json_file) as fO:
                 jDict = json.load(fO)
@@ -160,7 +161,7 @@ def validate_id(idSeries):
             valid_patterns = jDict.get('patterns')
             patterns = list(valid_patterns.values()) 
         except:
-            logging.error('Error validating ID with NOC ANC FILE {}'.format(json_file),exc_info = True)
+            logging.error('Error reading NOC ANC FILE {}'.format(json_file),exc_info = True)
             sys.exit(1)
 
     # At some point we might expect acceptance of no IDs as valid to be
@@ -332,9 +333,7 @@ mask_df.loc[callsigns,field] = table_df.loc[callsigns,field].str.match(callre,na
 
 # Then the rest according to general validation rules
 logging.info('Applying general id validation')
-table_df.columns = [ ('header',x) for x in table_df.columns ]
-mask_df.loc[nocallsigns,field]  = validate_id(table_df.loc[nocallsigns]) 
-table_df.columns = [ x[1] for x in table_df.columns ]
+mask_df.loc[nocallsigns,field]  = validate_id(table_df.loc[nocallsigns,field]) 
 
 # And now set back to True all that the linkage provided
 # Instead, read in the header history field and check if it contains
