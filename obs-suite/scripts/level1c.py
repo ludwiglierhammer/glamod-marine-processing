@@ -20,7 +20,7 @@ of tables, rejecting reports not validating any of these two fields.
         -> /level1c/invalid/sid-dck/header-fileID-primary_station_id.psv
     
     - Merge report_timestamp and primary_station_id in a single validation rule
-    (fila if any fails)
+    (fail if any fails)
     - Drop corresponding records from all tables
     
     - Log to json dropped per table per validated field and final numer of 
@@ -67,22 +67,18 @@ And will be empty if during the mapping in level1a the report_timestamp could
 not be built from the source data, or if there was any kind of messing in level1b
 datetime corrections......
 
+
 ** HEADER.PRIMARY_STATION_ID VALIDATION **
 Due to various reasons, the validation is done in 3 stages and using different methods:
     1. Callsign IDs: use set of validation patterns harcoded here
-    2. Rest of IDs: use set of per dck validation patterns in metmetpy module
-    3. All: set all that Liz's ID linkage modief to True. We are parsing the
+    2. Rest of IDs: use set of valid patterns per dck in NOC_ANC_INFO json files
+    3. All: set all that Liz's ID linkage modified to True. We are parsing the
     history field for a "Corrected primary_station_id" text...maybe it should 
     read this from the level1b config file? But then we need to give this
     file as an argument....
 
 Dev notes:
 ----------
-
-0) 'dataset' parameter for ID validation in metmetpy harcoded here as icoads_3000.
-This is because this feature was added in metmetpy after developing L1c_main.
-Will have to see if we include here a configruation file like in L1a_main.py,
- adding dataset and maybe other processing options
 
 1) This script is fully tailored to the idea of how validation and cleaning should
 be at the time of developing it. It is not parameterized and is hardly flexible.
@@ -106,7 +102,6 @@ import glob
 import logging
 import pandas as pd
 import re
-from metmetpy.station_id import validate as validate_id
 from imp import reload
 reload(logging)  # This is to override potential previous config of logging
 
@@ -121,34 +116,28 @@ class script_setup:
             logging.error('Opening configuration file :{}'.format(self.configfile), exc_info=True)
             self.flag = False 
             return
- 
-        self.release = config.get('release')
-        self.update = config.get('update')
-        self.dataset = config.get('dataset')
-        if len(sys.argv) > 2:
-            self.data_path = inargs[2]
-            self.sid_dck = inargs[3]
-            self.year = inargs[4]
-            self.month = inargs[5]
-        else:
-            self.data_path = config.get('data_directory')
-            self.sid_dck = config.get('sid_dck')
-            self.year = config.get('yyyy')
-            self.month = config.get('mm') 
-            
-        self.dck = self.sid_dck.split("-")[1]
-
-        process_options = ['dataset_id', 'validated','history']
-        try:            
-            for opt in process_options: 
-                if not config.get('config').get(self.sid_dck,{}).get(opt):
-                    setattr(self, opt, config.get('config').get(opt))
-                else:
-                    setattr(self, opt, config.get('config').get(self.sid_dck).get(opt))
+        
+        try:   
+            self.release = config.get('release')
+            self.update = config.get('update')
+            self.dataset = config.get('dataset')
+            if len(sys.argv) > 2:
+                self.data_path = inargs[2]
+                self.sid_dck = inargs[3]
+                self.year = inargs[4]
+                self.month = inargs[5]
+            else:
+                self.data_path = config.get('data_directory')
+                self.sid_dck = config.get('sid_dck')
+                self.year = config.get('yyyy')
+                self.month = config.get('mm') 
+                
+            self.dck = self.sid_dck.split("-")[1]
             self.flag = True
         except Exception:
             logging.error('Parsing configuration from file :{}'.format(self.configfile), exc_info=True)
             self.flag = False
+
 
 # This is for json to handle dates
 date_handler = lambda obj: (
@@ -156,6 +145,33 @@ date_handler = lambda obj: (
     if isinstance(obj, (datetime.datetime, datetime.date))
     else None
 )
+
+def validate_id(idSeries):
+    json_file = os.path.join(id_validation_path,'dck' + params.dck + '.json')
+    if not os.path.isfile(json_file):
+        logging.warning('NO noc ancillary info file {} available'.format(json_file))
+        logging.warning('Adding match-all regex to validation patterns')
+        patterns = ['.*?']
+    else:    
+        try:
+            with open(json_file) as fO:
+                jDict = json.load(fO)
+                
+            valid_patterns = jDict.get('patterns')
+            patterns = list(valid_patterns.values()) 
+        except:
+            logging.error('Error validating ID with NOC ANC FILE {}'.format(json_file),exc_info = True)
+            sys.exit(1)
+
+    # At some point we might expect acceptance of no IDs as valid to be
+    # configurable...    
+    patterns.append('^$')
+    logging.warning('NaN values will validate to True')
+
+    na_values = True if '^$' in patterns else False
+    combined_compiled = re.compile('|'.join(patterns))
+
+    return idSeries.str.match(combined_compiled,na = na_values)
 
 def read_table_files(table):
     logging.info('Reading data from {} table files'.format(table))
@@ -199,7 +215,7 @@ def process_table(table_df,table_name):
     cdm_columns = cdm_tables.get(table_name).keys()
     table_mask = mask_df.loc[table_df.index]
     if table_name == 'header':
-            table_df['history'] = table_df['history'] + ';{0}. {1}'.format(history_tstmp,params.history)
+            table_df['history'] = table_df['history'] + ';{0}. {1}'.format(history_tstmp,history)
             validation_dict['unique_ids'] = table_df.loc[table_mask['all'],'primary_station_id'].value_counts(dropna=False).to_dict()
     
     if len(table_df[table_mask['all']]) > 0:
@@ -253,7 +269,9 @@ level_path = os.path.join(release_path,level,params.sid_dck)
 level_ql_path = os.path.join(release_path,level,'quicklooks',params.sid_dck)
 level_invalid_path = os.path.join(release_path,level,'invalid',params.sid_dck)
 
-data_paths = [prev_level_path, level_path, level_ql_path, level_invalid_path]
+id_validation_path = os.path.join(params.data_path,'datasets','NOC_ANC_INFO','json_files')
+
+data_paths = [prev_level_path, level_path, level_ql_path, level_invalid_path, id_validation_path]
 if any([ not os.path.isdir(x) for x in data_paths ]):
     logging.error('Could not find data paths: {}'.format(','.join([ x for x in data_paths if not os.path.isdir(x)])))
     sys.exit(1)
@@ -271,6 +289,9 @@ validation_dict = { table:{} for table in cdm.properties.cdm_tables}
 
 # -----------------------------------------------------------------------------
 # Settings in configuration file
+dataset_id = 'icoads_r3000'
+validated = ['report_timestamp','primary_station_id']
+history = 'Performed report_timestamp (date_time) and primary_station_id validation'
 history_tstmp = datetime.datetime.utcnow().strftime('%Y-%m-%d %H:%M:%S')
 cdm_tables = cdm.lib.tables.tables_hdlr.load_tables()
 
@@ -289,8 +310,8 @@ if len(table_df) == 0:
 table_df.set_index('report_id', inplace = True, drop = False)
 
 # Initialize mask
-mask_df = pd.DataFrame(index = table_df.index,columns = params.validated + ['all'])
-mask_df[params.validated] = True
+mask_df = pd.DataFrame(index = table_df.index,columns = validated + ['all'])
+mask_df[validated] = True
 
 # 2. VALIDATE THE FIELDS-------------------------------------------------------
 # 2.1. Validate datetime
@@ -312,7 +333,7 @@ mask_df.loc[callsigns,field] = table_df.loc[callsigns,field].str.match(callre,na
 # Then the rest according to general validation rules
 logging.info('Applying general id validation')
 table_df.columns = [ ('header',x) for x in table_df.columns ]
-mask_df.loc[nocallsigns,field]  = validate_id.validate(table_df.loc[nocallsigns],params.dataset_id,'cdm',params.sid_dck.split('-')[1], blank=True) 
+mask_df.loc[nocallsigns,field]  = validate_id(table_df.loc[nocallsigns]) 
 table_df.columns = [ x[1] for x in table_df.columns ]
 
 # And now set back to True all that the linkage provided
@@ -334,7 +355,7 @@ validation_dict['id_validation_rules']['noncallsign'] = len(np.where(~callsigns)
 
 # 3. OUTPUT INVALID REPORTS - HEADER ------------------------------------------
 cdm_columns = cdm_tables.get(table).keys()
-for field in params.validated:
+for field in validated:
     if False in mask_df[field].value_counts().index:
         idata_filename = os.path.join(level_invalid_path,FFS.join(['header',fileID,field]) + '.psv')
         table_df[~mask_df[field]].to_csv(idata_filename, index = False, sep = delimiter, columns = cdm_columns
@@ -348,7 +369,7 @@ mask_df['all'] = mask_df.all(axis=1)
 # Report invalids
 validation_dict['invalid'] = {} 
 validation_dict['invalid']['total'] = len(table_df[~mask_df['all']])
-for field in params.validated:
+for field in validated:
     validation_dict['invalid'][field] = len(mask_df[field].loc[~mask_df[field]])
 
 # 5. CLEAN AND OUTPUT TABLES  -------------------------------------------------
