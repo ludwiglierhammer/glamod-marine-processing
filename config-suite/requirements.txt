@@ -1,0 +1,5 @@
+pandas
+pathlib
+pandas-validation
+argparse
+configparser
