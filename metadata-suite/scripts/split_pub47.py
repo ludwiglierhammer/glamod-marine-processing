@@ -7,6 +7,7 @@ from soundex import *
 import argparse
 import sys
 
+tol = 0.01
 
 def main(argv):
 
@@ -199,7 +200,8 @@ def main(argv):
                                     print("Applying corrections to all values in {}".format(column)  , file = log)
                                     print("Factor = {}".format( f['factor'] ) , file = log)
                                 # getting non missing rows
-                                valid = tmp_data[column] != fmiss
+                                # valid = tmp_data[column] != fmiss
+                                valid = tmp_data[column].apply( lambda x: abs(x - fmiss) < tol )
                                 # apply to tmp data
                                 tmp_data.at[valid,column] = tmp_data.loc[valid,column] * f['factor']
                                 # apply to datain
@@ -209,7 +211,7 @@ def main(argv):
                                 valid = pv.validate_numeric(tmp_data[column], min_value=schema.column_valid_min[column],
                                                             max_value=schema.column_valid_max[column],
                                                             return_type='mask_series')
-                                valid = valid & ~ ( tmp_data[column] == fmiss  )
+                                valid = valid & ~ ( tmp_data[column].apply(lambda x: abs( x - fmiss) < tol ) )  
                                 if any(valid) :
                                     if verbose > 0:
                                         print("Applying corrections to invalid values in {}".format(column) , file = log)
@@ -246,7 +248,7 @@ def main(argv):
                         valid = pv.validate_numeric( tmp_data[column], min_value=schema.column_valid_min[column],
                                                      max_value=schema.column_valid_max[column],
                                                      return_type = 'mask_series')
-                        valid = valid & ~ ( tmp_data[column].apply(lambda x: x == fmiss ) )
+                        valid = valid & ~ ( tmp_data[column].apply(lambda x: abs( x - fmiss) < tol ) )
                     else:
                         valid = pd.Series( False * nrows )
 

@@ -45,6 +45,10 @@ def main(argv):
 
     # load data
     metadata = pd.read_csv(outputpath + './master/master_all.csv', sep='|', low_memory=False, dtype='object')
+
+    # drop rows with missing IDs
+    metadata = metadata.loc[ ~ pd.isnull( metadata.callsign) ]
+
     metadata['meteorological_vessel_type'] =  metadata['meteorological_vessel_type'].fillna(-1)
     metadata['meteorological_vessel_type'] = metadata['meteorological_vessel_type'].astype( int )
 
