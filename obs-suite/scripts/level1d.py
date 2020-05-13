@@ -220,11 +220,7 @@ level_path = os.path.join(release_path,level,params.sid_dck)
 level_ql_path = os.path.join(release_path,level,'quicklooks',params.sid_dck)
 level_log_path = os.path.join(release_path,level,'log',params.sid_dck)
 
-md_path = os.path.join(params.data_path,params.release,params.md_subdir,'monthly')
-
-logging.info('Setting MD path to {}'.format(md_path))
-
-data_paths = [prev_level_path, level_path, level_ql_path, level_log_path, md_path ]
+data_paths = [prev_level_path, level_path, level_ql_path, level_log_path]
 if any([ not os.path.isdir(x) for x in data_paths ]):
     logging.error('Could not find data paths: {}'.format(','.join([ x for x in data_paths if not os.path.isdir(x)])))
     sys.exit(1)
@@ -233,21 +229,24 @@ prev_level_filename = os.path.join(prev_level_path, 'header-' + fileID + '.psv')
 if not os.path.isfile(prev_level_filename):
     logging.error('L1c header file not found: {}'.format(prev_level_filename))
     sys.exit(1)
-
-metadata_filename = os.path.join(md_path, FFS.join([params.year,params.month,'01.csv']))
+    
 md_avail = True if not params.md_not_avail else False
 
-if not os.path.isfile(metadata_filename) and md_avail:
-    if int(params.year) > params.md_last_yr_avail or int(params.year) < params.md_first_yr_avail:
-        md_avail = False
-        logging.warning('Metadata source available only in period {0}-{1}'
-                        .format(str(params.md_first_yr_avail),str(params.md_last_yr_avail)))
-        logging.warning('level1d data will be created with no merging') 
-    else:
-        logging.error('Metadata file not found: {}'.format(metadata_filename))
-        sys.exit(1)
-        
-elif not md_avail:
+if md_avail:
+    md_path = os.path.join(params.data_path,params.release,params.md_subdir,'monthly')
+    logging.info('Setting MD path to {}'.format(md_path))
+    metadata_filename = os.path.join(md_path, FFS.join([params.year,params.month,'01.csv']))
+
+    if not os.path.isfile(metadata_filename):
+        if int(params.year) > params.md_last_yr_avail or int(params.year) < params.md_first_yr_avail:
+            md_avail = False
+            logging.warning('Metadata source available only in period {0}-{1}'
+                            .format(str(params.md_first_yr_avail),str(params.md_last_yr_avail)))
+            logging.warning('level1d data will be created with no merging') 
+        else:
+            logging.error('Metadata file not found: {}'.format(metadata_filename))
+            sys.exit(1)
+else:
     logging.info('Metadata not available for data source-deck {}'.format(params.sid_dck))
     logging.info('level1d data will be created with no merging')
         
