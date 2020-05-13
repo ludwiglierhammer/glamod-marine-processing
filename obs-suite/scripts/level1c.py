@@ -279,9 +279,10 @@ if any([ not os.path.isdir(x) for x in data_paths ]):
     logging.error('Could not find data paths: {}'.format(','.join([ x for x in data_paths if not os.path.isdir(x)])))
     sys.exit(1)
 
-prev_level_filename = os.path.join(prev_level_path, 'header-' + fileID + '.psv')
-if not os.path.isfile(prev_level_filename):
-    logging.error('L1b header file not found: {}'.format(prev_level_filename))
+
+prev_level_filename = os.path.join(prev_level_path, 'header-*' + '-'.join([str(params.year),str(params.month)]) + '*.psv')
+if len(glob.glob(prev_level_filename)) == 0:
+    logging.error('L1b header files not found: {}'.format(prev_level_filename))
     sys.exit(1)
  
 # Clean previous L1c products and side files ----------------------------------

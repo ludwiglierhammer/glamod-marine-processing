@@ -259,6 +259,10 @@ for table in cdm.properties.cdm_tables:
     table_df['monthly_period'] = pd.to_datetime(table_df[datetime_col],errors='coerce',utc=True).dt.to_period('M')
     monthly_periods = list(table_df['monthly_period'].dropna().unique())
     source_mon_period = pd.Series(data=[datetime.datetime(int(params.year),int(params.month),1)]).dt.to_period('M').iloc[0]
+    # This is to account for files with no datetime and no datetime correction: we have to assume it pertains to
+    # the date in the file
+    if len(monthly_periods) == 0:
+        monthly_periods.append(source_mon_period)
     table_df['monthly_period'].fillna(source_mon_period,inplace=True)
     table_df.set_index('monthly_period',inplace=True,drop=True)
     
