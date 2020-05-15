@@ -272,7 +272,7 @@ level_path = os.path.join(release_path,level,params.sid_dck)
 level_ql_path = os.path.join(release_path,level,'quicklooks',params.sid_dck)
 level_invalid_path = os.path.join(release_path,level,'invalid',params.sid_dck)
 
-id_validation_path = os.path.join(params.data_path,'datasets','NOC_ANC_INFO','json_files')
+id_validation_path = os.path.join(params.data_path,'datasets',params.dataset,'NOC_ANC_INFO','json_files')
 
 data_paths = [prev_level_path, level_path, level_ql_path, level_invalid_path, id_validation_path]
 if any([ not os.path.isdir(x) for x in data_paths ]):
