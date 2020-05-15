@@ -231,12 +231,13 @@ do
 	d=$year_init'-01-01 01'
 	enddate=$year_end'-12-01 01'
 	counter=1
+        # Loop through actual files! if ((201001 >= 200801 && 201001 <= 201001));then echo 'in';else echo 'out';fi
 	while [ "$(date -d "$d" +%Y%m%d%H)" -le "$(date -d "$enddate" +%Y%m%d%H)" ]
 	do
 		file_date=${d:0:7}
     yyyy=${file_date:0:4}
     mm=${file_date:5:8}
-		source_filename=$sid_dck_source_dir/$source_filename_prefix"*"$file_date"*"$source_filename_suffix.$source_file_ext
+		source_filename=$sid_dck_source_dir/$source_filename_prefix"-"$file_date"*"$source_filename_suffix.$source_file_ext
     log_basenamei=$yyyy$FFS$mm$FFS$release$FFS$update
     test -e $sid_dck_log_dir/$log_basenamei.failed
     failed=$?
