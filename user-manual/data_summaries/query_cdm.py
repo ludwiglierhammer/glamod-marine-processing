@@ -98,7 +98,7 @@ def get_data_from_file(table, year, month, dir_data, **kwargs):
         cols, query = build_pd_query(table,
                                     filter_by_values = kwargs.get('filter_by_values'),
                                     filter_by_range = kwargs.get('filter_by_range'))
-        cols.extend(['latitude','longitude',FILTER_PIVOT])
+        cols.extend([FILTER_PIVOT])
         if kwargs.get('columns'):
             cols.append(kwargs.get('columns'))
             cols = list(set(cols))
