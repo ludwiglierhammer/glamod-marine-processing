@@ -100,7 +100,7 @@ def get_data_from_file(table, year, month, dir_data, **kwargs):
                                     filter_by_range = kwargs.get('filter_by_range'))
         cols.extend([FILTER_PIVOT])
         if kwargs.get('columns'):
-            cols.append(kwargs.get('columns'))
+            cols.extend(kwargs.get('columns'))
             cols = list(set(cols))
         else: # if not specified, read all
             cols = None   
