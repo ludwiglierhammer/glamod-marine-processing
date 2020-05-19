@@ -40,7 +40,8 @@ DEVS:
 
 import os
 import pandas as pd
-import properties
+from . import properties
+
 
 
 # SOME COMMON PARAMS ----------------------------------------------------------
@@ -110,6 +111,7 @@ def get_data_from_file(table, year, month, dir_data, **kwargs):
                 chunk = chunk.loc[chunk[FILTER_PIVOT].isin(df_filter)]
             if len(query) > 0:
                 chunk = chunk.query(query)
+            df_list.append(chunk)
         df = pd.concat(df_list)
     except Exception as e:
         print(e)
