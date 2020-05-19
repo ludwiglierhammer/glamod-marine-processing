@@ -30,7 +30,7 @@ DS_AGGREGATIONS = {'counts':ds.count,'max':ds.max,'min':ds.min, 'mean':ds.mean}
 
 # NC files properties
 # ------------------------------------------------------------------------------
-ENCODINGS = {'latitude': {'dtype': 'int16', 'scale_factor': 0.01,
+NC_ENCODINGS = {'latitude': {'dtype': 'int16', 'scale_factor': 0.01,
             '_FillValue': -99999},
              'longitude': {'dtype': 'int16', 'scale_factor': 0.01,
              '_FillValue': -99999},
