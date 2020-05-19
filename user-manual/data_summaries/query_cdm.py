@@ -59,7 +59,7 @@ def build_pd_query(table,**kwargs):
             filter_cols.extend([ x[1] for x in table_filter.keys() ])
             for k,v in table_filter.items():
                 values = [ '"' + x + '"' if type(x) == str else str(x) for x in v ]
-                query_list.append(k[1] + ' in (' + ','.join(values) + ')')            
+                query_list.append(k[1] + ' in [' + ','.join(values) + ']')            
     if kwargs.get('filter_by_range'):        
         if table in [ x[0] for x in kwargs['filter_by_range'].keys() ]:
             table_filter = { k:v for k,v in kwargs.get('filter_by_range').items() if table in k[0] }
@@ -90,7 +90,7 @@ def get_data_from_file(table, year, month, dir_data, **kwargs):
                 filter_cols = list(set(filter_cols))        
                 table_file = '-'.join(filter(None,[filter_table,str(year),str(month).zfill(2),kwargs.get('cdm_id')])) + '.psv'
                 table_path = os.path.join(dir_data,table_file)
-                iter_csv = pd.read_csv(table_path, usecols=filter_cols,iterator=True, chunksize=100000,delimiter='|')#properties.CDM_DELIMITER)
+                iter_csv = pd.read_csv(table_path, usecols=filter_cols,iterator=True, chunksize=300000,delimiter='|')#properties.CDM_DELIMITER)
                 df_filter = pd.concat([chunk.query(query)[FILTER_PIVOT] for chunk in iter_csv])
         else:
             df_filter = pd.Series()
@@ -105,8 +105,8 @@ def get_data_from_file(table, year, month, dir_data, **kwargs):
         else: # if not specified, read all
             cols = None   
         table_file = '-'.join(filter(None,[table,str(year),str(month).zfill(2),kwargs.get('cdm_id')])) + '.psv'
-        table_path = os.path.join(dir_data,table_file)  
-        iter_csv = pd.read_csv(table_path, usecols=cols,iterator=True, chunksize=100000,delimiter='|')#properties.CDM_DELIMITER)
+        table_path = os.path.join(dir_data,table_file)
+        iter_csv = pd.read_csv(table_path, usecols=cols,iterator=True, chunksize=300000,delimiter='|')#properties.CDM_DELIMITER)
         df_list = []
         for chunk in iter_csv:
             if len(df_filter) > 0:
