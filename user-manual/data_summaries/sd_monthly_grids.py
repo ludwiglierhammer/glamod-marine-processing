@@ -52,8 +52,8 @@ import glob
 import time
 import shutil
 
-from . import properties
-from . import query_cdm
+from data_summaries import properties
+from data_summaries import query_cdm
 
 
 
@@ -122,11 +122,6 @@ def main(year, month, dir_data = None, db_con = None,
     logging.basicConfig(format='%(levelname)s\t[%(asctime)s](%(filename)s)\t%(message)s',
                     level=logging.INFO,datefmt='%Y%m%d %H:%M:%S',filename=None)
     
-    
-    if not dir_data:
-        logging.error('Need data directory. Data base query not implemented')
-        sys.exit(1)    
-
     # Get data in DF.
     # Prepare data query. Minimum elements for aggregation appended
     try:
@@ -143,7 +138,8 @@ def main(year, month, dir_data = None, db_con = None,
         logging.error('Error querying data', exc_info=True)
         sys.exit(1)
 
-    df.head()    
+    print(df.head())    
+
     #canvas = create_canvas(properties.REGIONS.get(region),properties.DEGREE_FACTOR_RESOLUTION.get(resolution))
         
 #    try:
@@ -220,12 +216,16 @@ if __name__ == "__main__":
     config_file = sys.argv[4]
     
     with open(config_file) as cf:
-        kwargs = json.load(config_file)
-    
+        kwargs = json.load(cf)
+  
+    if not kwargs.get('dir_data'):
+        logging.error('Need data directory. Data base query not implemented')
+        sys.exit(1)
+ 
+    kwargs['dir_data'] = os.path.join(kwargs['dir_data'],sid_dck) 
     # Make table specs in json files (table.element) tuples
     for filter_type in ['filter_by_values','filter_by_range'] :
         if kwargs.get(filter_type):
             for kv in list(kwargs.get(filter_type).items()):
                 kwargs[filter_type][(kv[0].split('.')[0],kv[0].split('.')[1])] = kwargs[filter_type].pop(kv[0])
-        
     main(year, month, **kwargs)
