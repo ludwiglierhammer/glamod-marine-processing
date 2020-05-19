@@ -99,9 +99,11 @@ def get_data_from_file(table, year, month, dir_data, **kwargs):
                                     filter_by_values = kwargs.get('filter_by_values'),
                                     filter_by_range = kwargs.get('filter_by_range'))
         cols.extend(['latitude','longitude',FILTER_PIVOT])
-        if kwargs.get('element'):
-            cols.append(kwargs.get('element'))
-        cols = list(set(cols))    
+        if kwargs.get('columns'):
+            cols.append(kwargs.get('columns'))
+            cols = list(set(cols))
+        else: # if not specified, read all
+            cols = None   
         table_file = '-'.join(filter(None,[table,str(year),str(month).zfill(2),kwargs.get('cdm_id')])) + '.psv'
         table_path = os.path.join(dir_data,table_file)  
         iter_csv = pd.read_csv(table_path, usecols=cols,iterator=True, chunksize=100000,delimiter='|')#properties.CDM_DELIMITER)
@@ -113,6 +115,9 @@ def get_data_from_file(table, year, month, dir_data, **kwargs):
                 chunk = chunk.query(query)
             df_list.append(chunk)
         df = pd.concat(df_list)
+        # Subset to requested
+        if kwargs.get('columns'):
+            df = df[kwargs.get('columns')]
     except Exception as e:
         print(e)
         
@@ -124,10 +129,10 @@ def get_data_from_db():
 
 # FUNCTIONS TO DO WHAT WE WANT ------------------------------------------------
 def query_monthly_table(table, year, month, dir_data = None,
-                        db_con = None, cdm_id = None, element = None,
+                        db_con = None, cdm_id = None, columns = None,
                         filter_by_values = None, 
                         filter_by_range = None):
-    """Aggregate data from a monthly CDM table into a geographic grid.
+    """Read monthly table from the marine CDM filesystem or db (not implemented).
 
     
     Arguments
@@ -148,8 +153,8 @@ def query_monthly_table(table, year, month, dir_data = None,
     cdm_id : str, optional
         String with the CDM table partition identifier (if any)
         (<table>-<year>-<month>-<cdm_id>.psv)
-    element : str, optional
-        CDM table element to aggregate. If None, only aggregation is counts.
+    columns : list
+        CDM elements to read. Defaults to all.
     filter_by_values : dict, optional
         Dictionary with the {(table,element) :[values]} pairs to filter the data
         with. 
@@ -163,7 +168,7 @@ def query_monthly_table(table, year, month, dir_data = None,
     # we'd benefit here with larger files or column selection...? With all
     # columns did not seem to be much different....
     if dir_data:
-        kwargs = {'cdm_id' : cdm_id,'element' : element, 
+        kwargs = {'cdm_id' : cdm_id,'columns' : columns, 
                   'filter_by_values' : filter_by_values, 
                   'filter_by_range' : filter_by_range }
                      
