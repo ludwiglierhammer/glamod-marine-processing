@@ -125,8 +125,7 @@ def main(year, month, dir_data = None, db_con = None,
     # Get data in DF.
     # Prepare data query. Minimum elements for aggregation appended
     try:
-        element = element if element else 'report_id'
-        elements = [element]
+        elements = [element] if element else ['report_id']
         datetime_element = 'report_timestamp' if table == 'header' else 'date_time'
         elements.extend(['latitude','longitude',datetime_element])
         # Make sure we don't repeat something requested by user
@@ -145,36 +144,33 @@ def main(year, month, dir_data = None, db_con = None,
     canvas = create_canvas(properties.REGIONS.get(region),properties.DEGREE_FACTOR_RESOLUTION.get(resolution))
     if not element:
         aggregations = ['counts']
+        element = 'latitude' # Count methid in ds.aggregations not working with no element
     
     date_time = datetime.datetime(int(year),int(month),1)
     
     # Aggregations to dict
     xarr_dict = { x:'' for x in aggregations }
-    
+    summary_kwargs = {}
     for agg in aggregations:
-        xarr_dict[agg] = canvas.points(df, 'longitude','latitude',
-                         properties.DS_AGGREGATIONS.get(agg)(element))
-    # Merge aggs in a single xarr
-    xarr = xr.merge([ v.rename(k) for k,v in xarr_dict.items()])
+        summary_kwargs[agg] = properties.DS_AGGREGATIONS.get(agg)(element)
+
+    xarr = canvas.points(df, 'longitude','latitude',
+                         ds.summary(**summary_kwargs))    
     xarr = xarr.expand_dims(**{'time':[date_time]})
-    print(xarr)
+
     dims = ['latitude','longitude']
     dims.extend(aggregations)
     encodings = { x:properties.NC_ENCODINGS.get(x) for x in dims }
     xarr.encoding = encodings 
     # Save to nc
-     
-    nc_name = '-'.join(filter(bool,[table,str(year),str(month).zfill(2),out_id])) + '.nc'
-    xarr.to_netcdf(os.path.join(out_dir,nc_name),encoding = encodings,mode='w')
-
-#        try:
-#            xarr.to_netcdf(os.path.join(nc_dir,nc_name),encoding = ENCODINGS,mode='w')
-#        except Exception as e:
-#            logging.info('Error saving nc:')
-#            logging.info(e)
-#            logging.info('Retrying in 6 seconds...')
-#            time.sleep(6)
-#            xarr.to_netcdf(os.path.join(nc_dir,nc_name),encoding = ENCODINGS,mode='w')
+    try: 
+    	nc_name = '-'.join(filter(bool,[table,str(year),str(month).zfill(2),out_id])) + '.nc'
+    	xarr.to_netcdf(os.path.join(out_dir,nc_name),encoding = encodings,mode='w')
+    except:
+        logging.info('Error saving nc:',exc_inc=True)
+        logging.info('Retrying in 6 seconds...')
+        time.sleep(6)
+        xarr.to_netcdf(os.path.join(out_dir,nc_name),encoding = encodings,mode='w')
             
     return
 
