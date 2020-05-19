@@ -94,10 +94,10 @@ def main(year, month, dir_data = None, db_con = None,
     table : str
         CDM table to aggregate
     element : str, optional
-        CDM table element to aggregate. If None, only aggregation is counts.
+        CDM table element to aggregate. If None, only aggregation possible
+        is counts.
     aggregations : list, optional
-        List of aggregations to apply to the data element. If element is None,
-        then defaults to counts.
+        List of aggregations to apply to the data element. 
         See properties.DS_AGGREGATIONS
     filter_by_values : dict, optional
         Dictionary with the {(table,element) :[values]} pairs to filter the data
@@ -125,9 +125,12 @@ def main(year, month, dir_data = None, db_con = None,
     # Get data in DF.
     # Prepare data query. Minimum elements for aggregation appended
     try:
-        elements = [element] if element else []
-        date_time = 'report_timestamp' if table == 'header' else 'date_time'
-        elements.extend(['latitude','longitude',date_time])
+        element = element if element else 'report_id'
+        elements = [element]
+        datetime_element = 'report_timestamp' if table == 'header' else 'date_time'
+        elements.extend(['latitude','longitude',datetime_element])
+        # Make sure we don't repeat something requested by user
+        elements = list(set(elements))
         
         kwargs = {'dir_data' : dir_data, 'db_con' : db_con,'cdm_id' : cdm_id,
                   'columns' : elements,'filter_by_values' : filter_by_values, 
@@ -137,67 +140,32 @@ def main(year, month, dir_data = None, db_con = None,
     except:
         logging.error('Error querying data', exc_info=True)
         sys.exit(1)
+    
+    # Prepare aggregation
+    canvas = create_canvas(properties.REGIONS.get(region),properties.DEGREE_FACTOR_RESOLUTION.get(resolution))
+    if not element:
+        aggregations = ['counts']
+    
+    date_time = datetime.datetime(int(year),int(month),1)
+    
+    # Aggregations to dict
+    xarr_dict = { x:'' for x in aggregations }
+    
+    for agg in aggregations:
+        xarr_dict[agg] = canvas.points(df, 'longitude','latitude',
+                         properties.DS_AGGREGATIONS.get(agg)(element))
+    # Merge aggs in a single xarr
+    xarr = xr.merge([ v.rename(k) for k,v in xarr_dict.items()])
+    xarr.expand_dims(**{'time':[date_time]})
+    dims = ['latitude','longitude']
+    dims.extend(aggregations)
+    encodings = { x:properties.NC_ENCODINGS.get(x) for x in dims }
+    xarr.encoding = encodings 
+    # Save to nc
+     
+    nc_name = '-'.join(filter(bool,[table,str(year),str(month).zfill(2),out_id])) + '.nc'
+    xarr.to_netcdf(os.path.join(out_dir,nc_name),encoding = encodings,mode='w')
 
-    print(df.head())    
-
-    #canvas = create_canvas(properties.REGIONS.get(region),properties.DEGREE_FACTOR_RESOLUTION.get(resolution))
-        
-#    try:
-#        date_time = datetime.datetime(df_header['report_timestamp'][0].year,df_header['report_timestamp'][0].month,1)
-#    except Exception:
-#        fields = cdm_id.split('-')
-#        date_time = datetime.datetime(int(fields[0]),int(fields[1]),1)
-#    # Aggregate on to and aggregate to a dict
-#    xarr_dict = { x:'' for x in AGGREGATIONS_HDR }
-#    for agg in AGGREGATIONS_HDR:
-#        xarr_dict[agg] = canvas.points(df_header, 'longitude','latitude',
-#                         DS_AGGREGATIONS_HDR.get(agg)('crs'))
-#    # Merge aggs in a single xarr
-#    xarr = xr.merge([ v.rename(k) for k,v in xarr_dict.items()])
-#    xarr.expand_dims(**{'time':[date_time]})
-#    xarr.encoding = ENCODINGS_HDR 
-#    # Save to nc
-#    
-#    nc_dir = dir_data if not nc_dir else nc_dir 
-#    nc_name = '-'.join(filter(bool,[table,cdm_id,qc_report_extensions])) + '.nc'
-#    xarr.to_netcdf(os.path.join(nc_dir,nc_name),encoding = ENCODINGS_HDR,mode='w')
-#        
-#    obs_tables = [ x for x in properties.CDM_TABLES if x != 'header' ]
-#    for table in obs_tables:
-#        logging.info('Processing table {}'.format(table))
-#        table_file = os.path.join(dir_data,'-'.join([table,cdm_id]) + '.psv')
-#        if not os.path.isfile(table_file):
-#            logging.warning('Table file not found {}'.format(table_file))
-#            continue
-#        # Read the data
-#        df = pd.read_csv(table_file,delimiter=DELIMITER,usecols = READ_COLS,
-#                         parse_dates=['date_time'],dtype=DTYPES)
-#        
-#        df.set_index('report_id',inplace=True,drop=True)
-#        
-#        if qc_report:
-#            #was giving werror ...df.loc[df_header['report_quality'].isin([ int(x) for x in qc_report ]))]
-#            df = df.loc[[ x for x in df_header.index if x in df.index ]]
-#        
-#        if qc:
-#            df = df.loc[df['quality_flag'].isin([ int(x) for x in qc ])]
-#        try:
-#            date_time = datetime.datetime(df['date_time'][0].year,df['date_time'][0].month,1)
-#        except Exception:
-#            fields = cdm_id.split('-')
-#            date_time = datetime.datetime(int(fields[0]),int(fields[1]),1)
-#        # Aggregate on to and aggregate to a dict
-#        xarr_dict = { x:'' for x in AGGREGATIONS }
-#        for agg in AGGREGATIONS:
-#            xarr_dict[agg] = canvas.points(df, 'longitude','latitude',
-#                             DS_AGGREGATIONS.get(agg)('observation_value'))
-#        # Merge aggs in a single xarr
-#        xarr = xr.merge([ v.rename(k) for k,v in xarr_dict.items()])
-#        xarr.expand_dims(**{'time':[date_time]})
-#        xarr.encoding = ENCODINGS 
-#        # Save to nc
-#        nc_dir = dir_data if not nc_dir else nc_dir 
-#        nc_name = '-'.join(filter(bool,[table,cdm_id,qc_report_extensions,qc_extensions])) + '.nc' 
 #        try:
 #            xarr.to_netcdf(os.path.join(nc_dir,nc_name),encoding = ENCODINGS,mode='w')
 #        except Exception as e:
