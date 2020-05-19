@@ -156,7 +156,8 @@ def main(year, month, dir_data = None, db_con = None,
                          properties.DS_AGGREGATIONS.get(agg)(element))
     # Merge aggs in a single xarr
     xarr = xr.merge([ v.rename(k) for k,v in xarr_dict.items()])
-    xarr.expand_dims(**{'time':[date_time]})
+    xarr = xarr.expand_dims(**{'time':[date_time]})
+    print(xarr)
     dims = ['latitude','longitude']
     dims.extend(aggregations)
     encodings = { x:properties.NC_ENCODINGS.get(x) for x in dims }
