@@ -90,7 +90,7 @@ def get_data_from_file(table, year, month, dir_data, **kwargs):
                 filter_cols = list(set(filter_cols))        
                 table_file = '-'.join(filter(None,[filter_table,str(year),str(month).zfill(2),kwargs.get('cdm_id')])) + '.psv'
                 table_path = os.path.join(dir_data,table_file)
-                iter_csv = pd.read_csv(table_path, usecols=filter_cols,iterator=True, chunksize=300000,delimiter='|')#properties.CDM_DELIMITER)
+                iter_csv = pd.read_csv(table_path, usecols=filter_cols,iterator=True, chunksize=300000,delimiter=properties.CDM_DELIMITER)
                 df_filter = pd.concat([chunk.query(query)[FILTER_PIVOT] for chunk in iter_csv])
         else:
             df_filter = pd.Series()
@@ -106,7 +106,7 @@ def get_data_from_file(table, year, month, dir_data, **kwargs):
             cols = None   
         table_file = '-'.join(filter(None,[table,str(year),str(month).zfill(2),kwargs.get('cdm_id')])) + '.psv'
         table_path = os.path.join(dir_data,table_file)
-        iter_csv = pd.read_csv(table_path, usecols=cols,iterator=True, chunksize=300000,delimiter='|')#properties.CDM_DELIMITER)
+        iter_csv = pd.read_csv(table_path, usecols=cols,iterator=True, chunksize=300000,delimiter=properties.CDM_DELIMITER)
         df_list = []
         for chunk in iter_csv:
             if len(df_filter) > 0:
