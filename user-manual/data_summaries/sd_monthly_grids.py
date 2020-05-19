@@ -148,8 +148,7 @@ def main(year, month, dir_data = None, db_con = None,
     
     date_time = datetime.datetime(int(year),int(month),1)
     
-    # Aggregations to dict
-    xarr_dict = { x:'' for x in aggregations }
+    # Aggregations directly to xr.dataset with method ds.summary()
     summary_kwargs = {}
     for agg in aggregations:
         summary_kwargs[agg] = properties.DS_AGGREGATIONS.get(agg)(element)
