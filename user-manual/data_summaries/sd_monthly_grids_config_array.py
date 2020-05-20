@@ -43,7 +43,7 @@ script_config.update({'dir_out':dir_out})
 
 for sid_dck in process_list: 
     print(sid_dck)
-    ai = 0
+    ai = 1
     sid_dck_data_dir = os.path.join(level_dir,sid_dck)
     sid_dck_log_dir = os.path.join(dir_log,sid_dck)
     i_files = glob.glob(os.path.join(sid_dck_log_dir,'*-' + run_id + '.input'))
