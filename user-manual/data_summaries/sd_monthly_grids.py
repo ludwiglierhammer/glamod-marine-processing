@@ -67,7 +67,7 @@ def create_canvas(bbox,degree_factor):
     return ds.Canvas(plot_width=plot_width, plot_height=plot_height, **bounds(*bbox))
  
 # FUNCTIONS TO DO WHAT WE WANT ------------------------------------------------
-def main(year, month, dir_data = None, db_con = None, 
+def main(sid_dck, year, month, dir_data = None, db_con = None, 
                      cdm_id = None, table = None, element = None,
                      aggregations = None, filter_by_values = None, 
                      filter_by_range = None, region = 'Global', 
@@ -77,6 +77,8 @@ def main(year, month, dir_data = None, db_con = None,
     
     Arguments
     ---------
+    sid_dck : str
+        Source and deck ID (sourceID-deckID)
     year : int
         Year to aggregate
     month : int
@@ -85,7 +87,7 @@ def main(year, month, dir_data = None, db_con = None,
     Keyword arguments
     -----------------
     dir_data : str, optional
-        The path to the level directory of the data release
+        The path to the data level in the data release directory
     db_con : object, optional
         db_con to tables (not avail yet, nor its other filters: year, month...)
     cdm_id : str, optional
@@ -114,7 +116,7 @@ def main(year, month, dir_data = None, db_con = None,
     out_id : str
         String with the output nc file identifier (<table>-<out_id>.nc)
     dir_out : str
-        Directory to ouput the aggregation to
+        The parent path to the sid_dck subdirectory on output
     """
     
     
@@ -135,7 +137,7 @@ def main(year, month, dir_data = None, db_con = None,
                   'columns' : elements,'filter_by_values' : filter_by_values, 
                   'filter_by_range' : filter_by_range }
                       
-        df = query_cdm.query_monthly_table(table, year, month, **kwargs)
+        df = query_cdm.query_monthly_table(sid_dck, table, year, month, **kwargs)
     except:
         logging.error('Error querying data', exc_info=True)
         sys.exit(1)
@@ -164,29 +166,38 @@ def main(year, month, dir_data = None, db_con = None,
     # Save to nc
     try: 
     	nc_name = '-'.join(filter(bool,[table,str(year),str(month).zfill(2),out_id])) + '.nc'
-    	xarr.to_netcdf(os.path.join(dir_out,nc_name),encoding = encodings,mode='w')
+    	xarr.to_netcdf(os.path.join(dir_out,sid_dck,nc_name),encoding = encodings,mode='w')
     except:
         logging.info('Error saving nc:',exc_inc=True)
         logging.info('Retrying in 6 seconds...')
         time.sleep(6)
-        xarr.to_netcdf(os.path.join(dir_out,nc_name),encoding = encodings,mode='w')
+        xarr.to_netcdf(os.path.join(dir_out,sid_dck,nc_name),encoding = encodings,mode='w')
             
     return
 
 if __name__ == "__main__":
-    sid_dck = sys.argv[1]
-    year = sys.argv[2]
-    month = sys.argv[3]
-    config_file = sys.argv[4]
+    
+    if len(sys.argv) == 2:
+        config_file = sys.argv[1]
+    else:
+        dir_data = sys.argv[1]
+        dir_out = sys.argv[2]
+        sid_dck = sys.argv[3]
+        year = sys.argv[4]
+        month = sys.argv[5]
+        config_file = sys.argv[6]
     
     with open(config_file) as cf:
         kwargs = json.load(cf)
   
-    if not kwargs.get('dir_data'):
-        logging.error('Need data directory. Data base query not implemented')
-        sys.exit(1)
- 
-    kwargs['dir_data'] = os.path.join(kwargs['dir_data'],sid_dck) 
+    if len(sys.argv) > 2:
+        kwargs['dir_data'] = dir_data
+        kwargs['dir_out'] = dir_out
+    else:
+        sid_dck = kwargs['sid_dck'], kwargs['sid_dck'].pop('sid_dck')
+        year = kwargs['year'], kwargs['year'].pop('year')
+        month = kwargs['month'], kwargs['month'].pop('month')
+     
     # Make table specs in json files (table.element) tuples
     for filter_type in ['filter_by_values','filter_by_range'] :
         if kwargs.get(filter_type):

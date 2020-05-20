@@ -12,10 +12,14 @@ from dateutil import rrule
 from datetime import datetime
 
 # GET INPUT ARGUMENTS
-script_config_file = sys.argv[1]
-data_periods_file = sys.argv[2]
-process_list_file = sys.argv[3]
-failed_only = sys.argv[4]
+data_path = sys.argv[1]
+release = sys.argv[2]
+dataset = sys.argv[3]
+level = sys.argv[4]
+script_config_file = sys.argv[5]
+data_periods_file = sys.argv[6]
+process_list_file = sys.argv[7]
+failed_only = sys.argv[8]
 
 failed_only = True if failed_only == 'y' else False
 
@@ -28,16 +32,18 @@ with open(data_periods_file,'r') as fO:
 with open(process_list_file,'r') as fO:
     process_list = fO.read().splitlines()
     
-dir_data = script_config.get('dir_data')
+level_dir = os.path.join(data_path,release,dataset,level)
 table = script_config.get('table')
-dir_out = script_config.get('dir_out')
+dir_out = os.path.join(data_path,'user_manual','release_summaries',release)
 dir_log = os.path.join(dir_out,'log')
 run_id = os.path.basename(script_config_file).split('.')[0]
 
+script_config.update({'dir_data':level_dir})
+script_config.update({'dir_out':level_dir})
 
 for sid_dck in process_list: 
     ai = 0
-    sid_dck_data_dir = os.path.join(dir_data,sid_dck)
+    sid_dck_data_dir = os.path.join(level_dir,sid_dck)
     sid_dck_log_dir = os.path.join(dir_log,sid_dck)
     i_files = glob.glob(os.path.join(sid_dck_log_dir,'*-' + run_id + '.input'))
     for i_file in i_files:

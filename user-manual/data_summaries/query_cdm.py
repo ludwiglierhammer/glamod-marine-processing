@@ -69,7 +69,7 @@ def build_pd_query(table,**kwargs):
       
     return filter_cols,' & '.join(query_list)
 
-def get_data_from_file(table, year, month, dir_data, **kwargs):
+def get_data_from_file(sid_dck, table, year, month, dir_data, **kwargs):
     # See if there is an external table to filter from 
     try:
         tables = []  
@@ -89,7 +89,7 @@ def get_data_from_file(table, year, month, dir_data, **kwargs):
                 filter_cols.append(FILTER_PIVOT)
                 filter_cols = list(set(filter_cols))        
                 table_file = '-'.join(filter(None,[filter_table,str(year),str(month).zfill(2),kwargs.get('cdm_id')])) + '.psv'
-                table_path = os.path.join(dir_data,table_file)
+                table_path = os.path.join(dir_data,sid_dck,table_file)
                 iter_csv = pd.read_csv(table_path, usecols=filter_cols,iterator=True, chunksize=300000,delimiter=properties.CDM_DELIMITER)
                 df_filter = pd.concat([chunk.query(query)[FILTER_PIVOT] for chunk in iter_csv])
         else:
@@ -105,7 +105,7 @@ def get_data_from_file(table, year, month, dir_data, **kwargs):
         else: # if not specified, read all
             cols = None   
         table_file = '-'.join(filter(None,[table,str(year),str(month).zfill(2),kwargs.get('cdm_id')])) + '.psv'
-        table_path = os.path.join(dir_data,table_file)
+        table_path = os.path.join(dir_data,sid_dck,table_file)
         iter_csv = pd.read_csv(table_path, usecols=cols,iterator=True, chunksize=300000,delimiter=properties.CDM_DELIMITER)
         df_list = []
         for chunk in iter_csv:
@@ -128,7 +128,7 @@ def get_data_from_db():
     return
 
 # FUNCTIONS TO DO WHAT WE WANT ------------------------------------------------
-def query_monthly_table(table, year, month, dir_data = None,
+def query_monthly_table(sid_dck, table, year, month, dir_data = None,
                         db_con = None, cdm_id = None, columns = None,
                         filter_by_values = None, 
                         filter_by_range = None):
@@ -137,6 +137,8 @@ def query_monthly_table(table, year, month, dir_data = None,
     
     Arguments
     ---------
+    sid_dck : str
+        Source and deck ID (sourceID-deckID)
     table : str
         CDM table to aggregate
     year : int
@@ -147,7 +149,7 @@ def query_monthly_table(table, year, month, dir_data = None,
     Keyword arguments
     -----------------
     dir_data : str
-        The path to the CDM table file(s)(filesystem query)
+        The path to the data level in the data release directory (filesystem query)
     db_con : object, optional
         db_con to tables (not avail yet, nor its other filters: source,deck...)
     cdm_id : str, optional
@@ -172,7 +174,7 @@ def query_monthly_table(table, year, month, dir_data = None,
                   'filter_by_values' : filter_by_values, 
                   'filter_by_range' : filter_by_range }
                      
-        return get_data_from_file(table, year, month, dir_data, **kwargs)  
+        return get_data_from_file(sid_dck, table, year, month, dir_data, **kwargs)  
     elif db_con:
         return 'Not implemented'
     
