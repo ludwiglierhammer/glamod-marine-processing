@@ -42,19 +42,18 @@ for sid_dck in process_list:
     i_files = glob.glob(os.path.join(sid_dck_log_dir,'*-' + run_id + '.input'))
     for i_file in i_files:
         os.remove(i_file)
-    init = datetime(data_periods.get().get('year_init'),1,1)
-    end = datetime(data_periods.get().get('year_end'),1,1)
+    init = datetime(int(data_periods.get(sid_dck).get('year_init')),1,1)
+    end = datetime(int(data_periods.get(sid_dck).get('year_end')),12,1)
     for dt in rrule.rrule(rrule.MONTHLY, dtstart=init, until=end):
         yyyy = str(dt.year)
-        mm = str(dt.month.zfill(2))
-        if failed_only and os.path.isfile('-'.join([yyyy,mm,run_id]) + '.ok'):
+        mm = str(dt.month).zfill(2)
+        if failed_only and os.path.isfile(os.path.join(sid_dck_log_dir,'-'.join([yyyy,mm,run_id]) + '.ok')):
             continue
-        if os.path.isfile(os.path.join(sid_dck_data_dir),'-'.join([table,yyyy,mm,'*'.psv])):    
+        if len(glob.glob(os.path.join(sid_dck_data_dir,'-'.join([table,yyyy,mm,'*']) + '.psv'))) > 0:    
             script_config.update({'sid_dck':sid_dck})
             script_config.update({'yyyy':yyyy})
             script_config.update({'mm':mm})
             ai_config_file = os.path.join(sid_dck_log_dir,str(ai) + '-' + run_id + '.input')
-
             with open(ai_config_file,'w') as fO:
                 json.dump(script_config,fO,indent = 4)
             ai +=1
