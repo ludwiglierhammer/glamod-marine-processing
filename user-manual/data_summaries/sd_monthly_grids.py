@@ -71,7 +71,7 @@ def main(year, month, dir_data = None, db_con = None,
                      cdm_id = None, table = None, element = None,
                      aggregations = None, filter_by_values = None, 
                      filter_by_range = None, region = 'Global', 
-                     resolution = 'lo_res', out_id = None, out_dir = None):
+                     resolution = 'lo_res', out_id = None, dir_out = None):
     """Aggregate data from a monthly CDM table into a geographic grid.
 
     
@@ -113,7 +113,7 @@ def main(year, month, dir_data = None, db_con = None,
         See properties.DEGREE_FACTOR_RESOLUTION
     out_id : str
         String with the output nc file identifier (<table>-<out_id>.nc)
-    out_dir : str
+    dir_out : str
         Directory to ouput the aggregation to
     """
     
@@ -164,12 +164,12 @@ def main(year, month, dir_data = None, db_con = None,
     # Save to nc
     try: 
     	nc_name = '-'.join(filter(bool,[table,str(year),str(month).zfill(2),out_id])) + '.nc'
-    	xarr.to_netcdf(os.path.join(out_dir,nc_name),encoding = encodings,mode='w')
+    	xarr.to_netcdf(os.path.join(dir_out,nc_name),encoding = encodings,mode='w')
     except:
         logging.info('Error saving nc:',exc_inc=True)
         logging.info('Retrying in 6 seconds...')
         time.sleep(6)
-        xarr.to_netcdf(os.path.join(out_dir,nc_name),encoding = encodings,mode='w')
+        xarr.to_netcdf(os.path.join(dir_out,nc_name),encoding = encodings,mode='w')
             
     return
 
