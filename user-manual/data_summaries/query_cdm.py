@@ -39,6 +39,7 @@ DEVS:
 """
 
 import os
+import sys
 import pandas as pd
 from . import properties
 
@@ -119,7 +120,9 @@ def get_data_from_file(sid_dck, table, year, month, dir_data, **kwargs):
         if kwargs.get('columns'):
             df = df[kwargs.get('columns')]
     except Exception as e:
-        print(e)
+        exc_type, exc_obj, exc_tb = sys.exc_info()
+        fname = os.path.split(exc_tb.tb_frame.f_code.co_filename)[1]
+        print(exc_type, fname, exc_tb.tb_lineno)
         
     return df
     

@@ -194,13 +194,16 @@ if __name__ == "__main__":
         kwargs['dir_data'] = dir_data
         kwargs['dir_out'] = dir_out
     else:
-        sid_dck = kwargs['sid_dck'], kwargs['sid_dck'].pop('sid_dck')
-        year = kwargs['year'], kwargs['year'].pop('year')
-        month = kwargs['month'], kwargs['month'].pop('month')
+        sid_dck = kwargs['sid_dck']
+        kwargs.pop('sid_dck')
+        year = kwargs['year']
+        kwargs.pop('year')
+        month = kwargs['month']
+        kwargs.pop('month')
      
     # Make table specs in json files (table.element) tuples
     for filter_type in ['filter_by_values','filter_by_range'] :
         if kwargs.get(filter_type):
             for kv in list(kwargs.get(filter_type).items()):
                 kwargs[filter_type][(kv[0].split('.')[0],kv[0].split('.')[1])] = kwargs[filter_type].pop(kv[0])
-    main(year, month, **kwargs)
+    main(sid_dck,year, month, **kwargs)
