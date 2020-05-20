@@ -51,12 +51,13 @@ with open(release_file,'r') as fileO:
 
 subdirs.extend(sid_dck_dict.keys())
 
+summaries_path = os.path.join(data_path,'release_summaries')
 # CREATE DIR FOR RELEASE
 release_tag = release_name
-create_subdir(data_path,release_tag)
+create_subdir(summaries_path,release_tag)
 
 # CREATE DIR FOR SOURCE
-release_path = os.path.join(data_path,release_tag)
+release_path = os.path.join(summaries_path,release_tag)
 create_subdir(release_path, source_name)
 
 # POPULATE LEVELS WITH SID-DCK AND LOG SUBDIRECTORIES
