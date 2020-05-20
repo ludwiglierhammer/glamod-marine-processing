@@ -42,7 +42,7 @@ do
    bsub -J OK"[1-$arrl]" -w "done($jobid[*])" -oo $sid_dck_log_dir/"%I-"$run_id".ho" -eo $sid_dck_log_dir/"%I-"$run_id".ho" -q short-serial -W 00:01 -M 10 -R "rusage[mem=10]" \
    python $pyhdlr $sid_dck_log_dir/\$LSB_JOBINDEX"-"$run_id".input" 0 1
 
-   bsub -J OK"[1-$arrl]" -w "exit($jobid[*])" -oo $sid_dck_log_dir/"%I-"$run_id".ho" -eo $sid_dck_log_dir/"%I-"$run_id".ho" -q short-serial -W 00:01 -M 10 -R "rusage[mem=10]" \
+   bsub -J ER"[1-$arrl]" -w "exit($jobid[*])" -oo $sid_dck_log_dir/"%I-"$run_id".ho" -eo $sid_dck_log_dir/"%I-"$run_id".ho" -q short-serial -W 00:01 -M 10 -R "rusage[mem=10]" \
    python $pyhdlr $sid_dck_log_dir/\$LSB_JOBINDEX"-"$run_id".input" 1 1
 
 done
