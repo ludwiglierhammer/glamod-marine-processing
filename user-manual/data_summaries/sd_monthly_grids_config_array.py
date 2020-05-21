@@ -34,6 +34,9 @@ failed_only = sys.argv[8]
 
 failed_only = True if failed_only == 'y' else False
 
+if failed_only:
+    print('Configuration using failed only mode')
+
 with open(script_config_file,'r') as fO:
     script_config = json.load(fO)
     
@@ -63,9 +66,9 @@ for sid_dck in process_list:
     init = datetime(int(data_periods.get(sid_dck).get('year_init')),1,1)
     end = datetime(int(data_periods.get(sid_dck).get('year_end')),12,1)
     if failed_only:
-        print('Configuration using failed only mode')
         failed_files = glob.glob(os.path.join(sid_dck_log_dir,'*-' + run_id + '.failed'))
         if len(failed_files) > 0:
+            print('{0}: found {1} failed jobs'.format(sid_dck,str(len(failed_files))))
             for failed_file in failed_files:
                 yyyy,mm = os.path.basename(failed_file).split('-')[0:2]
                 dt = datetime(int(yyyy),int(mm),1)
@@ -74,7 +77,8 @@ for sid_dck in process_list:
                     ai += 1
         else:
             print(sid_dck,': no failed files')
-    else:            
+    else:
+        print(sid_dck)            
         for dt in rrule.rrule(rrule.MONTHLY, dtstart=init, until=end):
             yyyy = str(dt.year)
             mm = str(dt.month).zfill(2)
