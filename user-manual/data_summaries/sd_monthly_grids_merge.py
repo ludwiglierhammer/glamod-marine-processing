@@ -51,6 +51,7 @@ def main(dir_data, nc_prefix = None, nc_suffix = None, start = None, stop = None
         sys.exit(1)
         
     nc_files.sort()
+
     # Read all files to a single dataset
     dataset = xr.open_mfdataset(nc_files,concat_dim='time')
     # See how to provde for open periods (either start or stop)
@@ -58,7 +59,8 @@ def main(dir_data, nc_prefix = None, nc_suffix = None, start = None, stop = None
         dataset = dataset.sel(time=slice(start.strftime('%Y-%m-%d'), stop.strftime('%Y-%m-%d')))
     # Aggregate each aggregation correspondingly....
     merged = {}
-    for aggregate in dataset.data_vars.keys(): # see if this works like this...might also appear lat/lon....
+    aggregations = list(dataset.data_vars.keys())
+    for aggregate in aggregations: # see if this works like this...might also appear lat/lon....
         if aggregate == 'max':
             merged[aggregate] = dataset[aggregate].max(dim='time',skipna=True)
         elif aggregate == 'min':
@@ -72,9 +74,8 @@ def main(dir_data, nc_prefix = None, nc_suffix = None, start = None, stop = None
    
     # Merge aggregations to a single xarr
     xarr = xr.merge([ v.rename(k) for k,v in merged.items()])
-    dims = list(dataset.data_vars.keys()) # This is good if it includes lat/lon, but time?
-    #dims = ['latitude','longitude']
-    #dims.extend(aggregations)
+    dims = ['latitude','longitude']
+    dims.extend(aggregations)
     encodings = { x:properties.NC_ENCODINGS.get(x) for x in dims }
     xarr.encoding = encodings 
     # Save to nc
@@ -97,13 +98,14 @@ if __name__ == "__main__":
     kwargs.pop('dir_data')
     kwargs.pop('sid_dck')
     
-    if kwargs['start']:
+    if kwargs.get('start'):
         kwargs['start'] = datetime.datetime(kwargs['start'],1,1)
-    if kwargs['stop']:
+    if kwargs.get('stop'):
         kwargs['stop'] = datetime.datetime(kwargs['stop'],12,1)
 
-    
-    
+    if not kwargs.get('dir_out'):
+        kwargs['dir_out'] = dir_data
+
     main(dir_data, **kwargs)
     
     
