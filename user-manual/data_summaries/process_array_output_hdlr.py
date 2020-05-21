@@ -25,7 +25,7 @@ rm_input = sys.argv[3]
 input_basename = os.path.basename(configfile).split('.')[0]
 LSF_output_path = os.path.dirname(configfile)
 LSF_output_file = os.path.join(LSF_output_path,input_basename + '.o')
-run_id = input_basename.split('-')[1]
+run_id = '-'.join(input_basename.split('-')[1:])
 
 # GET INFO FROM CONFIG FILE
 with open(configfile,'r') as fO:
