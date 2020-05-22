@@ -24,7 +24,7 @@ pyhdlr=$um_code_directory/data_summaries/process_output_hdlr.py
 run_id=$(basename $script_config_file .json)
 nc_dir=$data_directory/user_manual/release_summaries/$release/$dataset
 
-job_time_hhmm=00:20
+job_time_hhmm=02:00
 job_memo_mbi=8000
 
 
