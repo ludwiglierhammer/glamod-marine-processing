@@ -43,6 +43,16 @@ do
      sid_dck_log_dir=$out_dir/log/$sid_dck
      arrl=$(ls -1q $sid_dck_log_dir/*-$run_id"-"$table".input" 2> /dev/null | wc -l)
 
+     scratch_sid=$scratch_directory/$run_id/$sid
+     echo "Scratch directory is $scratch_sid"
+     if [ ! -d $scratch_sid ]
+     then
+       mkdir $scratch_sid
+     else
+       rm -rf $scratch_sid
+       mkdir $scratch_sid
+     fi
+
      if [[ "$arrl" == '0' ]]
      then
           echo "No jobs found for $sid_dck"
@@ -53,10 +63,10 @@ do
 
      jobid=$(nk_jobid bsub -J $sid_dck"[1-$arrl]" -oo $sid_dck_log_dir/"%I-"$run_id"-"$table".o" -eo $sid_dck_log_dir/"%I-"$run_id"-"$table".o" -q short-serial -W $job_time_hhmm -M $job_memo_mbi -R "rusage[mem=$job_memo_mbi]" python $pyscript $sid_dck_log_dir/\$LSB_JOBINDEX"-"$run_id"-"$table".input")
 
-     bsub -J OK"[1-$arrl]" -w "done($jobid[*])" -oo $sid_dck_log_dir/"%I-"$run_id"-"$table".ho" -eo $sid_dck_log_dir/"%I-"$run_id"-"$table".ho" -q short-serial -W 00:01 -M 10 -R "rusage[mem=10]" \
+     bsub -J OK"[1-$arrl]" -w "done($jobid[*])" -oo $scratch_sid/"%I-"$run_id"-"$table".ho" -eo $scratch_sid/"%I-"$run_id"-"$table".ho" -q short-serial -W 00:01 -M 10 -R "rusage[mem=10]" \
      python $pyhdlr $sid_dck_log_dir/\$LSB_JOBINDEX"-"$run_id"-"$table".input" 0 0
 
-     bsub -J ER"[1-$arrl]" -w "exit($jobid[*])" -oo $sid_dck_log_dir/"%I-"$run_id"-"$table".ho" -eo $sid_dck_log_dir/"%I-"$run_id"-"$table".ho" -q short-serial -W 00:01 -M 10 -R "rusage[mem=10]" \
+     bsub -J ER"[1-$arrl]" -w "exit($jobid[*])" -oo $scratch_sid/"%I-"$run_id"-"$table".ho" -eo $scratch_sid/"%I-"$run_id"-"$table".ho" -q short-serial -W 00:01 -M 10 -R "rusage[mem=10]" \
      python $pyhdlr $sid_dck_log_dir/\$LSB_JOBINDEX"-"$run_id"-"$table".input" 1 0
   done
 done
