@@ -117,7 +117,7 @@ if __name__ == "__main__":
         kwargs_table['out_id'] =kwargs.get(table).get('out_id')
 
         status,xarr = main(dir_data, **kwargs_table)
-        non_avail_tables += 1
+        non_avail_tables += status
 
     if non_avail_tables == no_tables:
         logging.error('No nc files found for tables: {}'.format(','.join(kwargs.get('tables'))))
