@@ -50,20 +50,22 @@ for sid_dck in process_list:
     i_files = glob.glob(os.path.join(sid_dck_log_dir, run_id + '.input'))
     for i_file in i_files:
         os.remove(i_file)
-
+        
+    failed_files = glob.glob(os.path.join(sid_dck_log_dir,run_id + '.failed'))
     if failed_only:
-        failed_files = glob.glob(os.path.join(sid_dck_log_dir,run_id + '.failed'))
         if len(failed_files) > 0:
-            for x in failed_files:
-                os.remove(x)
             print('{0}: found failed job'.format(sid_dck))
             config_element()
-
         else:
             print(sid_dck,': not failed job')
     else:
         print(sid_dck)               
         config_element()
+        
+    if len(failed_files) > 0:
+            for x in failed_files:
+                os.remove(x)
+    
             
 sys.exit(0)
 
