@@ -70,8 +70,8 @@ for sid_dck in process_list:
         os.remove(i_file)
     init = datetime(int(data_periods.get(sid_dck).get('year_init')),1,1)
     end = datetime(int(data_periods.get(sid_dck).get('year_end')),12,1)
+    failed_files = glob.glob(os.path.join(sid_dck_log_dir,'*-' + run_id + '.failed'))
     if failed_only:
-        failed_files = glob.glob(os.path.join(sid_dck_log_dir,'*-' + run_id + '.failed'))
         if len(failed_files) > 0:
             print('{0}: found {1} failed jobs'.format(sid_dck,str(len(failed_files))))
             for failed_file in failed_files:
