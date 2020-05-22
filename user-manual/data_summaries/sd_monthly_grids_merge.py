@@ -8,6 +8,7 @@ import xarray as xr
 import datetime
 import logging
 import glob
+from copy import deepcopy
 
 from data_summaries import properties
  
@@ -105,7 +106,14 @@ if __name__ == "__main__":
 
     if not kwargs.get('dir_out'):
         kwargs['dir_out'] = dir_data
+        
+    
+    for table in kwargs.get('tables'):
+        kwargs_table = { kwargs.get(x) for x in ['nc_prefix','nc_suffix','start','stop','out_id','dir_out']}
+        kwargs_table['nc_prefix'] =kwargs.get(table).get('nc_prefix')
+        kwargs_table['nc_suffix'] =kwargs.get(table).get('nc_suffix')
+        kwargs_table['out_id'] =kwargs.get(table).get('out_id')
 
-    main(dir_data, **kwargs)
+        main(dir_data, **kwargs_table)
     
     

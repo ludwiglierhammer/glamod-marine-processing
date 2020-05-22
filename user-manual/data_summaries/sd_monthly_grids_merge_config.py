@@ -22,10 +22,9 @@ def config_element():
     
 # GET INPUT ARGUMENTS
 data_path = sys.argv[1]
-table = sys.argv[2]
-script_config_file = sys.argv[3]
-process_list_file = sys.argv[4]
-failed_only = sys.argv[5]
+script_config_file = sys.argv[2]
+process_list_file = sys.argv[3]
+failed_only = sys.argv[4]
 
 failed_only = True if failed_only == 'y' else False
 
@@ -33,17 +32,14 @@ if failed_only:
     print('Configuration using failed only mode')
 
 with open(script_config_file,'r') as fO:
-    main_config = json.load(fO)
+    script_config = json.load(fO)
 
-script_config = main_config.get(table)
-if not script_config:
-   print('Table {0} not found in configuration file {1}'.format(table,script_config_file)) 
     
 with open(process_list_file,'r') as fO:
     process_list = fO.read().splitlines()
     
 dir_log = os.path.join(data_path,'log')
-run_id = os.path.basename(script_config_file).split('.')[0] + '-' + table
+run_id = os.path.basename(script_config_file).split('.')[0]
 
 script_config.update({'dir_data':data_path})
 
