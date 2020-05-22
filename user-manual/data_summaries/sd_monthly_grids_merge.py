@@ -48,8 +48,8 @@ def main(dir_data, nc_prefix = None, nc_suffix = None, start = None, stop = None
     nc_files = glob.glob(os.path.join(dir_data,pattern))
 
     if len(nc_files) == 0:
-        logging.error('No nc files found {}'.format(pattern)) 
-        sys.exit(1)
+        logging.warning('No nc files found for files {}'.format(pattern)) 
+        return 1,1
         
     nc_files.sort()
 
@@ -84,7 +84,7 @@ def main(dir_data, nc_prefix = None, nc_suffix = None, start = None, stop = None
         nc_name = out_id + '.nc' 
         xarr.to_netcdf(os.path.join(dir_out,nc_name),encoding = encodings)
     
-    return xarr
+    return 0,xarr
 
 if __name__ == "__main__":
     
@@ -107,13 +107,21 @@ if __name__ == "__main__":
     if not kwargs.get('dir_out'):
         kwargs['dir_out'] = dir_data
         
-    
+    no_tables = len(kwargs.get('tables'))
+    non_avail_tables = 0
     for table in kwargs.get('tables'):
-        kwargs_table = { kwargs.get(x) for x in ['nc_prefix','nc_suffix','start','stop','out_id','dir_out']}
+        logging.info('Merging table: {}'.format(table))
+        kwargs_table = { x:kwargs.get(x) for x in ['nc_prefix','nc_suffix','start','stop','out_id','dir_out']}
         kwargs_table['nc_prefix'] =kwargs.get(table).get('nc_prefix')
         kwargs_table['nc_suffix'] =kwargs.get(table).get('nc_suffix')
         kwargs_table['out_id'] =kwargs.get(table).get('out_id')
 
-        main(dir_data, **kwargs_table)
-    
+        status,xarr = main(dir_data, **kwargs_table)
+        non_avail_tables += 1
+
+    if non_avail_tables == no_tables:
+        logging.error('No nc files found for tables: {}'.format(','.join(kwargs.get('tables'))))
+        sys.exit(1)
+    else:
+        sys.exit(0)
     
