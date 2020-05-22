@@ -43,7 +43,7 @@ do
      sid_dck_log_dir=$out_dir/log/$sid_dck
      arrl=$(ls -1q $sid_dck_log_dir/*-$run_id"-"$table".input" 2> /dev/null | wc -l)
 
-     scratch_sid=$scratch_directory/$run_id/$sid
+     scratch_sid=$scratch_directory/$run_id/$sid_dck
      echo "Scratch directory is $scratch_sid"
      if [ ! -d $scratch_sid ]
      then
