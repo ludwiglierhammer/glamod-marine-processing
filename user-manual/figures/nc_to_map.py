@@ -220,7 +220,7 @@ def map_mosaic(dataset,variables,out_file,**kwargs):
         var_kwargs = deepcopy(kwargs)
         var_kwargs['colorpalette'] = kwargs['colorpalette'].get(var,'jet')
         var_kwargs['colorbar_title'] = kwargs['colorbar_title'].get(var,' ')
-        var_kwargs['colorbar_orien'] = kwargs.get('colorbar_title','h')
+        var_kwargs['colorbar_orien'] = kwargs.get('colorbar_orien','h')
         var_kwargs['cmin_value'] = kwargs.get('cmin_value').get(var)
         var_kwargs['cmax_value'] = kwargs.get('cmax_value').get(var)
         var_kwargs['normalization'] = kwargs.get('normalization').get(var,'linear')
