@@ -29,4 +29,3 @@ job_log_file = run_id + '.' + ext
 job_log =  os.path.join(LSF_output_path,job_log_file)
 shutil.copy(LSF_output_file,job_log)
 os.remove(LSF_output_file)
-
