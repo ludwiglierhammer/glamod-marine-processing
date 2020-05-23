@@ -12,15 +12,16 @@
 # however outdir depends on the plots being on a release or a merge of releases
 # We will probably change all this to a json when we have to merge releases!
 
+source ../setpaths.sh
 source ../setenv0.sh
 
 release=$1
 update=$2
 dataset=$3
 level=$4
-outdir=$5
-sid_deck_periods_file=$6
-sid_deck_list_file=$7
+outdir=$(readlink --canonicalize  $5)
+sid_deck_periods_file=$(readlink --canonicalize  $6)
+sid_deck_list_file=$(readlink --canonicalize  $7)
 
 ffs="-"
 filebase=$(basename $sid_deck_list_file)
@@ -45,6 +46,6 @@ do
 
   echo $sid_deck
 	echo $sid_deck_scratch_dir
-	#bsub -J $sid_deck'IO' -oo $sid_deck_scratch_dir/'IO.o' -eo $sid_deck_scratch_dir/'IO.e' -q short-serial -W $job_time -M $job_memo -R "rusage[mem=$job_memo]" python $um_code_directory/data_summaries/report_io.py $data_directory $release $update $dataset $level $sid_deck $sid_deck_periods_file $outdir/$sid_deck
+	bsub -J $sid_deck'IO' -oo $sid_deck_scratch_dir/'IO.o' -eo $sid_deck_scratch_dir/'IO.o' -q short-serial -W $job_time -M $job_memo -R "rusage[mem=$job_memo]" python $um_code_directory/data_summaries/report_io.py $data_directory $release $update $dataset $level $sid_deck $sid_deck_periods_file $outdir/$sid_deck
 
 done
