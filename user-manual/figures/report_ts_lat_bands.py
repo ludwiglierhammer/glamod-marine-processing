@@ -42,7 +42,7 @@ font_size_legend = 11
 axis_label_size = 11
 tick_label_size = 9
 title_label_size = 14
-markersize = 3
+markersize = 4
 figsize=(12, 14)
     
 plt.rc('legend',**{'fontsize':font_size_legend})        # controls default text sizes
@@ -159,13 +159,13 @@ def plot_lat_bands(mode,param,param_latitude_band_aggs,counts_latitude_band,max_
         
         if mode == 'optimal':
             ax2[ax_count] = ax[ax_count].twinx()
-            ax2[ax_count].fill_between(counts_lat_df.index,0,counts_lat_df['counts optimal'].astype('float'), facecolor='Gray',alpha=0.25,interpolate=False,label='no.reports',zorder=1)
+            ax2[ax_count].fill_between(counts_lat_df.index,0,counts_lat_df['counts optimal'].astype('float'), facecolor='Gray',alpha=0.15,interpolate=False,label='no.reports',zorder=1)
             ax2[ax_count].set_ylabel('counts', color='k')
         else:
             ax2[ax_count] = ax[ax_count].twinx()
-            ax2[ax_count].fill_between(counts_lat_df.index,0,counts_lat_df['counts optimal'].astype('float'), facecolor='Gray',alpha=0.25,interpolate=False,label='qc passed',zorder=1)
-            ax2[ax_count].fill_between(counts_lat_df.index,counts_lat_df['counts optimal'].astype('float'),counts_lat_df['counts all'].astype('float'), facecolor='OrangeRed',alpha=0.25,interpolate=False,label='qc failed',zorder=2)
-            ax2[ax_count].plot(counts_lat_df.index,counts_lat_df['counts all'],linestyle=':',color='Grey',marker = '.',label='all reports',markersize = markersize,linewidth=1,zorder=4)
+            ax2[ax_count].fill_between(counts_lat_df.index,0,counts_lat_df['counts optimal'].astype('float'), facecolor='Gray',alpha=0.15,interpolate=False,label='qc passed',zorder=1)
+            ax2[ax_count].fill_between(counts_lat_df.index,counts_lat_df['counts optimal'].astype('float'),counts_lat_df['counts all'].astype('float'), facecolor='OrangeRed',alpha=0.35,interpolate=False,label='qc failed',zorder=2)
+            ax2[ax_count].plot(counts_lat_df.index,counts_lat_df['counts all'],linestyle=':',color='Grey',marker = '.',label='all reports',markersize = 2,linewidth=1,zorder=4)
             ax2[ax_count].set_ylabel('counts', color='k')
          # Now send the histogram to the back
         ax[ax_count].set_zorder(ax2[ax_count].get_zorder()+1) # put ax in front of ax2
@@ -177,7 +177,7 @@ def plot_lat_bands(mode,param,param_latitude_band_aggs,counts_latitude_band,max_
         
         ax_count += 1
 
-    ncols_leg = 4
+    ncols_leg = 5
     if lines is not None:      
         ax[len(bin_tags)-1].legend(flip(lines + lines2,ncols_leg),flip(labels + labels2,ncols_leg),loc='center', bbox_to_anchor=(0.5, -0.35),ncol=ncols_leg)
     else:
@@ -247,7 +247,7 @@ def main():
         counts_latitude_band = xr.merge(counts_datasets)
         
         nc_path = os.path.join(out_dir,'-'.join(['observations',param,'ts',mode]) + '.nc')
-        fig_path = os.path.join(out_dir,'-'.join(['observations',param,release,'ts',mode]) + '.png')
+        fig_path = os.path.join(out_dir,'-'.join(['observations',param,'ts',mode]) + '.png')
         
         logging.info('Plotting mode {}'.format(mode))
         logging.info('With dataset values {}'.format(mode))
@@ -258,7 +258,7 @@ def main():
         param_latitude_band_aggs = xr.merge(params_datasets)
         
         # Set the y-axis max-min values
-        total_counts = np.asscalar(counts_latitude_band['counts reports [0] param [0]'].sum(skipna=True).values)
+        total_counts = np.asscalar(counts_latitude_band['counts optimal'].sum(skipna=True).values)
         if mode == 'optimal':
             logging.info('Plotting mode {} with bounded axis'.format(mode))
             max_value = var_properties['saturation'].get(param)[1]
