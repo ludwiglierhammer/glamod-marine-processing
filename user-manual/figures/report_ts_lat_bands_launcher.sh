@@ -41,11 +41,10 @@ do
   echo "Setting deck reports scratch directory: $sid_deck_scratch_dir"
   rm -rf $sid_deck_scratch_dir;mkdir -p $sid_deck_scratch_dir
   for param in sst at slp ws wd dpt wbt
+      do
+        for mode in all optimal
 	do
-	for mode in all optimal
-	do
-			bsub -J $sid_deck$mode$param'TS' -oo $sid_deck_scratch_dir/$mode$param'.o' -eo $sid_deck_scratch_dir/$mode$param'.e' -q short-serial -W $job_time -M $job_memo -R "rusage[mem=$job_memo]" python $um_code_directory/figures/report_ts_lat_bands.py $data_directory/user-manual/release_summaries $release $dataset $sid_deck $mode $param $out_dir
-    done
-  done
-
+	bsub -J $sid_deck$mode$param'TS' -oo $sid_deck_scratch_dir/$mode$param'.o' -eo $sid_deck_scratch_dir/$mode$param'.o' -q short-serial -W $job_time -M $job_memo -R "rusage[mem=$job_memo]" python $um_code_directory/figures/report_ts_lat_bands.py $data_directory/user_manual/release_summaries $release $dataset $sid_deck $mode $param $outdir/$sid_deck
+        done
+     done
 done
