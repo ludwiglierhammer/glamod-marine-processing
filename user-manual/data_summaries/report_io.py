@@ -130,7 +130,7 @@ def plot_no_reports(data,x0,x1,title,out_file):
     # to in a different way...
     if no_df['header'].sum()>0:
         #ax.fill_between(no_df.loc[no_df['header']>0].index,0,no_df['header'].loc[no_df['header']>0].astype('float'), facecolor='LightGray',alpha=0.25,interpolate=False,label='total reports',zorder=0) 
-        ax.fill_between(no_df.index,0,no_df['header'].astype('float'), facecolor='Linen',alpha=0.25,interpolate=False,label='total reports',zorder=0)
+        ax.fill_between(no_df.index,0,no_df['header'].astype('float'), facecolor='Linen',alpha=0.8,interpolate=False,label='total reports',zorder=0)
     
     ax2 = ax.twinx()
     for i,table in enumerate(plot_tables): 
