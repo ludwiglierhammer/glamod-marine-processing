@@ -194,30 +194,27 @@ def plot_lat_bands(mode,param,param_latitude_band_aggs,counts_latitude_band,max_
 def main():   
     logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s', level=logging.DEBUG)
     try:
-        data_path = sys.argv[1]
+        data_summaries_path = sys.argv[1]
         release = sys.argv[2]
         dataset = sys.argv[3]
-        level = sys.argv[4]
-        sid_dck = sys.argv[5] 
-        mode = sys.argv[6]
-        param = sys.argv[7] # ['at','sst',....]
+        sid_dck = sys.argv[4] 
+        mode = sys.argv[5]
+        param = sys.argv[6] # ['at','sst',....]
+        out_dir = sys.argv[7]
     except Exception as e:
         logging.error(e, exc_info=True)
         return
 
 
-#    DIRTY WAY OF DOING THINGS        
-    level_data = 'level1e'
-        
-    level_ql_path = os.path.join(data_path,release,dataset,level_data,'quicklooks',sid_dck)
-    reports_path = os.path.join(data_path,release,dataset,level,'reports',sid_dck)
-
-    logging.info('Data path is {}'.format(level_ql_path))
-    logging.info('Reports path is {}'.format(reports_path))
+#    DIRTY WAY OF DOING THINGS                
+    nc_path = os.path.join(data_summaries_path,release,dataset,sid_dck)
+   
+    logging.info('Data path is {}'.format(nc_path))
+    logging.info('Reports path is {}'.format(out_dir))
  
     logging.info('Plotting {}'.format(param))
-    all_patterns = os.path.join(level_ql_path,'-'.join(['observations',param,'????-??-all.nc']))
-    optimal_patterns = os.path.join(level_ql_path,'-'.join(['observations',param,'????-??-optimal.nc']))
+    all_patterns = os.path.join(nc_path,'-'.join(['observations',param,'????-??-all.nc']))
+    optimal_patterns = os.path.join(nc_path,'-'.join(['observations',param,'????-??-optimal.nc']))
 
     logging.info('Searching pattern {}'.format(all_patterns))
     all_files = glob.glob(all_patterns)
@@ -249,8 +246,8 @@ def main():
         counts_datasets = [all_latitude_band_counts,optimal_latitude_band_counts]
         counts_latitude_band = xr.merge(counts_datasets)
         
-        nc_path = os.path.join(reports_path,'-'.join(['observations',param,'ts',mode]) + '.nc')
-        fig_path = os.path.join(reports_path,'-'.join(['observations',param,release,'ts',mode]) + '.png')
+        nc_path = os.path.join(out_dir,'-'.join(['observations',param,'ts',mode]) + '.nc')
+        fig_path = os.path.join(out_dir,'-'.join(['observations',param,release,'ts',mode]) + '.png')
         
         logging.info('Plotting mode {}'.format(mode))
         logging.info('With dataset values {}'.format(mode))
