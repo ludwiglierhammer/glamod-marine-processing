@@ -75,7 +75,6 @@ for sid_dck in process_list:
         if len(failed_files) > 0:
             print('{0}: found {1} failed jobs'.format(sid_dck,str(len(failed_files))))
             for failed_file in failed_files:
-                os.remove(failed_file)
                 yyyy,mm = os.path.basename(failed_file).split('-')[0:2]
                 dt = datetime(int(yyyy),int(mm),1)
                 if dt >= init and dt <= end:
