@@ -8,8 +8,6 @@ Created on Tue Oct 15 10:18:42 2019
 """
 
 import cdm
-
-import xarray as xr
 import glob
 import datetime
 import pandas as pd
@@ -19,13 +17,7 @@ import json
 import numpy as np
 import logging
 import sys
-import cartopy.crs as ccrs
-import matplotlib
-from matplotlib.colors import LogNorm
-from mpl_toolkits.axes_grid1 import make_axes_locatable
-import matplotlib as mpl
 import matplotlib.pyplot as plt
-from c3s_dashboard_db import db_hdlr
 #plt.switch_backend('agg')
 
 
@@ -138,7 +130,7 @@ def plot_no_reports(data,x0,x1,title,out_file):
     # to in a different way...
     if no_df['header'].sum()>0:
         #ax.fill_between(no_df.loc[no_df['header']>0].index,0,no_df['header'].loc[no_df['header']>0].astype('float'), facecolor='LightGray',alpha=0.25,interpolate=False,label='total reports',zorder=0) 
-        ax.fill_between(no_df.index,0,no_df['header'].astype('float'), facecolor='LightGray',alpha=0.25,interpolate=False,label='total reports',zorder=0)
+        ax.fill_between(no_df.index,0,no_df['header'].astype('float'), facecolor='Linen',alpha=0.25,interpolate=False,label='total reports',zorder=0)
     
     ax2 = ax.twinx()
     for i,table in enumerate(plot_tables): 
@@ -195,7 +187,7 @@ def main():
     with open(sid_periods_file) as fO:
         periods = json.load(fO)
     
-    yr_ini = periods.get(sid_dck).get('year_ini')   
+    yr_ini = periods.get(sid_dck).get('year_init')   
     yr_end = periods.get(sid_dck).get('year_end') 
     
     # Initialize the structure where the TSs is stored
@@ -211,6 +203,7 @@ def main():
         yr_mo = date.strftime('%Y-%m') 
         # First final product we are looking at (inarg level)
         hdr_path = os.path.join(paths.get(level),'-'.join(['header',str(yr),str(mm).zfill(2),release,update]) + '.psv')
+        print(hdr_path)
         if len(glob.glob(hdr_path)) > 0:
             level_data = True
             mon_table = cdm.table_reader.table_reader.read_tables(paths.get(level),'-'.join([str(yr),str(mm).zfill(2),release,update]),col_subset=cdm_columns)
