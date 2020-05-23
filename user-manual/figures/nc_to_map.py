@@ -20,7 +20,7 @@ from mpl_toolkits.axes_grid1 import make_axes_locatable
 import xarray as xr
 import cartopy.crs as ccrs
 
-from . import map_properties
+from figures import map_properties
 
 logging.getLogger('plt').setLevel(logging.INFO)
 logging.getLogger('mpl').setLevel(logging.INFO)
@@ -38,15 +38,15 @@ plt.rc('figure', titlesize=map_properties.title_label_size)  # fontsize of the f
 def read_dataset(file_path,var_properties):
     dataset = xr.open_dataset(file_path,autoclose=True)
     for var in var_properties['scale'].keys():
-        scale = var_properties['scale']
-        offset = var_properties['offset']
-        dataset[var] = offset + scale*dataset[var]           
+        scale = var_properties['scale'].get(var)
+        offset = var_properties['offset'].get(var)
+        dataset[var] = offset + scale*dataset[var]
     return dataset
 
-def map_on_subplot(f,subplot_ax,z,lons,lats,colormap = 'jet',colorbar_show = True,
+def map_on_subplot(f,subplot_ax,z,lons,lats,colorpalette = 'jet',colorbar_show = True,
                    colorbar_title = '', colorbar_title_size = 9, 
                    colorbar_label_size = 7, colorbar_orien = 'v', 
-                   colorbar_width = 4, cmin_value = None, cmax_value = None, 
+                   colorbar_w = 4, cmin_value = None, cmax_value = None, 
                    normalization = 'linear', grid_width = 0.7,
                    grid_label_size = 12, coastline_width = 0.7):
     
@@ -80,7 +80,7 @@ def map_on_subplot(f,subplot_ax,z,lons,lats,colormap = 'jet',colorbar_show = Tru
         The colorbar labels' font size
     colorbar_orien : str
         The colorbar orientation (h/v)
-    colorbar_width : integer
+    colorbar_w : integer
         Width of the colorbar. Defaults to 4
     cmin_value : numeric, optional
         Min value to use in colorbar normalization. Defaults to xarray min
@@ -116,7 +116,7 @@ def map_on_subplot(f,subplot_ax,z,lons,lats,colormap = 'jet',colorbar_show = Tru
         normalization_f = mpl.colors.Normalize(vmin = cmin_value,
                                              vmax = cmax_value)
         
-    cmap = plt.get_cmap(colormap)    
+    cmap = plt.get_cmap(colorpalette)    
     subplot_ax.pcolormesh(lons,lats,z,transform = ccrs.PlateCarree(),
                           cmap = cmap, norm = normalization_f, vmin = cmin_value, 
                           vmax = cmax_value)
@@ -136,7 +136,7 @@ def map_on_subplot(f,subplot_ax,z,lons,lats,colormap = 'jet',colorbar_show = Tru
     # we need to set axes_class=plt.Axes, else it attempts to create
     # a GeoAxes as colorbar
     divider = make_axes_locatable(subplot_ax)
-    new_axis_w = str(colorbar_width) + '%'
+    new_axis_w = str(colorbar_w) + '%'
     if colorbar_orien == 'v':
         cax = divider.new_horizontal(size = new_axis_w, pad = 0.08,
                                      axes_class=plt.Axes)
@@ -204,7 +204,7 @@ def map_mosaic(dataset,variables,out_file,**kwargs):
 
     # Complete the kwargs
     # The actual projection is set here in the subplots declaration!!!!
-    proj = map_properties.get(kwargs['projection']) if kwargs.get('projection') else map_properties.get('PlateCarree')
+    proj = map_properties.projections.get(kwargs['projection']) if kwargs.get('projection') else map_properties.projections.get('PlateCarree')
 
     kwargs['colorbar_show'] = True
     kwargs['colorbar_w'] = map_properties.mosaic_map['colorbar_width']
@@ -214,9 +214,10 @@ def map_mosaic(dataset,variables,out_file,**kwargs):
     kwargs['colorbar_title_size'] = map_properties.mosaic_map.get('colorbar_title_size')
     kwargs['coastline_width'] = map_properties.mosaic_map.get('coastline_width')
     
-    f, ax = plt.subplots(1, len(variables), subplot_kw=dict(projection=proj),figsize=(14,7),dpi = 180)
+    f, ax = plt.subplots(1, len(variables), subplot_kw=dict(projection=proj),figsize=(14,7))#,dpi = 180)
     c = 0
-    for var in variables:   
+    for var in variables: 
+        print('Mapping {}'.format(var))  
         var_kwargs = deepcopy(kwargs)
         var_kwargs['colorpalette'] = kwargs['colorpalette'].get(var,'jet')
         var_kwargs['colorbar_title'] = kwargs['colorbar_title'].get(var,' ')
@@ -228,14 +229,17 @@ def map_mosaic(dataset,variables,out_file,**kwargs):
         z = dataset[var].values
         lons = dataset[var]['longitude']
         lats = dataset[var]['latitude']
-        map_on_subplot.map_on_subplot(f,ax[c],z,lons,lats,**kwargs)
+        map_on_subplot(f,ax[c],z,lons,lats,**var_kwargs)
         c += 1
-
+    print('Done')
     wspace = 0.08# if qc_mode else 0.05
-    dpi = 400 #if qc_mode else 300
+    dpi = 200 #if qc_mode else 300
     plt.subplots_adjust(wspace=wspace,hspace=0.05)#  Force small separation (default is .2, to keep in mind "transparent" colorbar between subplots....THIS WILL DEPEND ON THE FIGURE WIDTH
-    plt.savefig(out_file,bbox_inches='tight',dpi = dpi)# 'tight' here, not in plt.tight_layout: here it realizes the new size because of add_axes, but not in plt.tight_layout..
+    print('Saving')
+    plt.savefig(out_file,bbox_inches='tight')#,dpi = dpi)# 'tight' here, not in plt.tight_layout: here it realizes the new size because of add_axes, but not in plt.tight_layout..
+    print('Done')
     plt.close()
+    return 0
 
 
 if __name__ == "__main__":
@@ -259,11 +263,11 @@ if __name__ == "__main__":
     figures = list(kwargs.get('figures').keys())
     no_figures = len(figures)
     non_avail_figures = 0
-    
-    for figure in figures:
-        logging.info('Figure: {}'.format(figure))
+   
+    for figurei in figures:
+        logging.info('Figure: {}'.format(figurei))
         
-        figure_kwargs = kwargs.get(figure)
+        figure_kwargs = kwargs['figures'].get(figurei)
         dataset_path = os.path.join(dir_data,figure_kwargs.get('nc_file'))
         out_file = os.path.join(dir_out,figure_kwargs.get('out_file'))
         variables = figure_kwargs.get('vars')
