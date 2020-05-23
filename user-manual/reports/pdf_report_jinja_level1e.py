@@ -18,7 +18,7 @@ try:
     data_path = sys.argv[1]
     release = sys.argv[2]
     update = sys.argv[3]
-    source = sys.argv[4]
+    dataset = sys.argv[4]
     sid_dck = sys.argv[5]
     y_init = sys.argv[6]
     y_end = sys.argv[7]   
@@ -28,7 +28,7 @@ except:
 
 #https://stackoverflow.com/questions/45760789/flexbox-centering-within-paper-css-a4-page
 
-reports_path = os.path.join(data_path,release,source,'level1e','reports',sid_dck)
+reports_path = os.path.join(data_path,release,dataset,sid_dck)
 script_path = os.path.dirname(os.path.realpath(__file__))
 # PARAMS ----------------------------------------------------------------------
 
@@ -47,7 +47,7 @@ params = ['at','sst','dpt','wbt','slp','wd','ws']
 # Figures and captions general sections =======================================
 
 figures_best = {}
-figures_best['C3S_tables'] = os.path.join(reports_path,'-'.join(['no_reports',release,update,'qcr0-qc0-ts.png']))
+figures_best['C3S_tables'] = os.path.join(reports_path,'-'.join(['no_reports',release,update,'level1e','optimal-ts.png']))
 figures_best['C3S_map'] = os.path.join(reports_path,"-".join(['header',release,update,'qcr0-um-map.png']))
 
 
@@ -56,7 +56,7 @@ captions_best['C3S_tables'] = 'Shaded area: number of reports with passed report
 captions_best['C3S_map'] = 'Spatial distibution of reports. Reports included are those with passed report_quality flag.'
 
 figures_all = {}
-figures_all['C3S_tables'] = os.path.join(reports_path,'-'.join(['no_reports',release,update,'all-ts.png']))
+figures_all['C3S_tables'] = os.path.join(reports_path,'-'.join(['no_reports',release,update,'level1e','all-ts.png']))
 figures_all['C3S_map'] = os.path.join(reports_path,"-".join(['header',release,update,'all-map.png']))
 figures_all['DUP_status'] = os.path.join(reports_path,'-'.join(['duplicate_status',release,update,'ts.png'])) 
 figures_all['QC_status'] = os.path.join(reports_path,'-'.join(['report_quality',release,update,'ts.png']))
@@ -88,12 +88,12 @@ param_items_all = {}
 for param in params:
     param_items_best[param]= {}
     param_items_best[param]['long_name'] = properties_var['long_name_upper'].get(param)
-    param_items_best[param]['ts'] = os.path.join(reports_path,"-".join(['observations',param,release,update,'qcr0-qc0-um-ts.png']))
-    param_items_best[param]['map'] = os.path.join(reports_path,"-".join(['observations',param,release,update,'qcr0-qc0-um-mosaic.png']))
+    param_items_best[param]['ts'] = os.path.join(reports_path,"-".join(['observations',param,'ts-optimal.png']))
+    param_items_best[param]['map'] = os.path.join(reports_path,"-".join(['observations',param,'map-mosaic-optimal.png']))
     param_items_all[param]= {}
     param_items_all[param]['long_name'] = properties_var['long_name_upper'].get(param)
-    param_items_all[param]['ts'] = os.path.join(reports_path,"-".join(['observations',param,release,update,'all-ts.png']))
-    param_items_all[param]['map'] = os.path.join(reports_path,"-".join(['observations',param,release,update,'all-mosaic.png']))
+    param_items_all[param]['ts'] = os.path.join(reports_path,"-".join(['observations',param,'ts-all.png']))
+    param_items_all[param]['map'] = os.path.join(reports_path,"-".join(['observations',param,'map-mosaic-all.png']))
     if not os.path.isfile(param_items_best[param]['ts']):
         param_items_best[param]['caption'] = ''
     else:
@@ -120,7 +120,7 @@ HTMLText = template.render(sid_dck=sid_dck,release = release, update = update,
             param_items_all = param_items_all)
 
 
-pdf_file = os.path.join(reports_path,'-'.join([sid_dck,release,update,'report.pdf']))
+pdf_file = os.path.join(reports_path,'-'.join([sid_dck,'report.pdf']))
 
 HTML(string=HTMLText,base_url=__file__).write_pdf(pdf_file,stylesheets=[CSS(stylesheet)], presentational_hints=True)
 
