@@ -179,8 +179,8 @@ def main():
         source = sys.argv[4]
         level = sys.argv[5]
         sid_dck = sys.argv[6] 
-        out_path = sys.argv[7]
-        sid_periods_file = sys.argv[8] # either release initial or level2 config file
+        sid_periods_file = sys.argv[7] # either release initial or level2 config file
+        out_path = sys.argv[8]
     except Exception as e:
         logging.error(e, exc_info=True)
         return
