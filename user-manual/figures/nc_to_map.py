@@ -233,10 +233,10 @@ def map_mosaic(dataset,variables,out_file,**kwargs):
         c += 1
     print('Done')
     wspace = 0.08# if qc_mode else 0.05
-    dpi = 200 #if qc_mode else 300
+    dpi = 300 #if qc_mode else 300
     plt.subplots_adjust(wspace=wspace,hspace=0.05)#  Force small separation (default is .2, to keep in mind "transparent" colorbar between subplots....THIS WILL DEPEND ON THE FIGURE WIDTH
     print('Saving')
-    plt.savefig(out_file,bbox_inches='tight')#,dpi = dpi)# 'tight' here, not in plt.tight_layout: here it realizes the new size because of add_axes, but not in plt.tight_layout..
+    plt.savefig(out_file,bbox_inches='tight',dpi = dpi)# 'tight' here, not in plt.tight_layout: here it realizes the new size because of add_axes, but not in plt.tight_layout..
     print('Done')
     plt.close()
     return 0
@@ -244,20 +244,12 @@ def map_mosaic(dataset,variables,out_file,**kwargs):
 
 if __name__ == "__main__":
     
-    config_file = sys.argv[1]
+    dir_data = sys.argv[1]
+    dir_out = sys.argv[2]
+    config_file = sys.argv[3]
     
     with open(config_file) as cf:
         kwargs = json.load(cf)
-        
-    dir_data = os.path.join(kwargs['dir_data'],kwargs['sid_dck'])
-    
-    kwargs.pop('dir_data')
-    kwargs.pop('sid_dck')
-
-    if not kwargs.get('dir_out'):
-        dir_out = dir_data
-    else:
-        dir_out = kwargs.get('dir_out')
      
     layout = kwargs.get('layout')
     figures = list(kwargs.get('figures').keys())
