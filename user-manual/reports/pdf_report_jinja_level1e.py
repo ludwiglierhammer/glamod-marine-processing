@@ -48,7 +48,7 @@ params = ['at','sst','dpt','wbt','slp','wd','ws']
 
 figures_best = {}
 figures_best['C3S_tables'] = os.path.join(reports_path,'-'.join(['no_reports',release,update,'level1e','optimal-ts.png']))
-figures_best['C3S_map'] = os.path.join(reports_path,"-".join(['header',release,update,'qcr0-um-map.png']))
+figures_best['C3S_map'] = os.path.join(reports_path,"-".join(['header','counts-map-optimal.png']))
 
 
 captions_best = {}
@@ -57,7 +57,7 @@ captions_best['C3S_map'] = 'Spatial distibution of reports. Reports included are
 
 figures_all = {}
 figures_all['C3S_tables'] = os.path.join(reports_path,'-'.join(['no_reports',release,update,'level1e','all-ts.png']))
-figures_all['C3S_map'] = os.path.join(reports_path,"-".join(['header',release,update,'all-map.png']))
+figures_all['C3S_map'] = os.path.join(reports_path,"-".join(['header','counts-map-all.png']))
 figures_all['DUP_status'] = os.path.join(reports_path,'-'.join(['duplicate_status',release,update,'ts.png'])) 
 figures_all['QC_status'] = os.path.join(reports_path,'-'.join(['report_quality',release,update,'ts.png']))
 figures_all['IO_flow'] = os.path.join(reports_path,'-'.join(['io_history',release,update,'ts.png']))
@@ -89,11 +89,11 @@ for param in params:
     param_items_best[param]= {}
     param_items_best[param]['long_name'] = properties_var['long_name_upper'].get(param)
     param_items_best[param]['ts'] = os.path.join(reports_path,"-".join(['observations',param,'ts-optimal.png']))
-    param_items_best[param]['map'] = os.path.join(reports_path,"-".join(['observations',param,'map-mosaic-optimal.png']))
+    param_items_best[param]['map'] = os.path.join(reports_path,"-".join(['observations',param,'mosaic-optimal.png']))
     param_items_all[param]= {}
     param_items_all[param]['long_name'] = properties_var['long_name_upper'].get(param)
     param_items_all[param]['ts'] = os.path.join(reports_path,"-".join(['observations',param,'ts-all.png']))
-    param_items_all[param]['map'] = os.path.join(reports_path,"-".join(['observations',param,'map-mosaic-all.png']))
+    param_items_all[param]['map'] = os.path.join(reports_path,"-".join(['observations',param,'mosaic-all.png']))
     if not os.path.isfile(param_items_best[param]['ts']):
         param_items_best[param]['caption'] = ''
     else:
