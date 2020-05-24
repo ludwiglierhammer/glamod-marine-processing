@@ -1,0 +1,108 @@
+{ 
+  "dir_data":"/group_workspaces/jasmin2/glamod_marine/data/user_manual/release_summaries/release_2.0/ICOADS_R3.0.0T/",
+  "sid_dck":"001-110",
+  "dir_out":"/gws/smf/j04/c3s311a_lot2/code/marine_code/glamod-marine-processing_ipg/user-manual/figures",
+  "layout" : "mosaic",
+  "projection" : "PlateCarree",
+  "figures":
+  {
+  "observations-at":
+    {
+      "nc_file":"observations-at-all.nc",
+      "out_file":"observations-at-all.png",
+      "vars":["counts","max","min"],
+      "scale":{"counts":1,"max":1,"min":1},
+      "offset":{"counts":0,"max":-273.15,"min":-273.15},
+      "colorpalette":{"counts":"winter","max":"jet","min":"jet"},
+      "normalization":{"counts":"log","max":"linear","min":"linear"},
+      "colorbar_title":{"counts":"no. obs.","max":"max ($^\\circ$C)","min":"min ($^\\circ$C)"},
+      "colorbar_orien":"h",
+      "cmax_value":{"counts":null,"max":50,"min":50},
+      "cmin_value":{"counts":1,"max":-30,"min":-30}
+    },
+    "observations-sst":
+      {
+        "nc_file":"observations-sst-all.nc",
+        "out_file":"observations-sst-all.png",
+        "vars":["counts","max","min"],
+        "scale":{"counts":1,"max":1,"min":1},
+        "offset":{"counts":0,"max":-273.15,"min":-273.15},
+        "colorpalette":{"counts":"winter","max":"jet","min":"jet"},
+        "normalization":{"counts":"log","max":"linear","min":"linear"},
+        "colorbar_title":{"counts":"no. obs.","max":"max ($^\\circ$C)","min":"min ($^\\circ$C)"},
+        "colorbar_orien":"h",
+        "cmax_value":{"counts":null,"max":35,"min":35},
+        "cmin_value":{"counts":1,"max":-5,"min":-5}
+    },
+    "observations-dpt":
+      {
+        "nc_file":"observations-dpt-all.nc",
+        "out_file":"observations-dpt-all.png",
+        "vars":["counts","max","min"],
+        "scale":{"counts":1,"max":1,"min":1},
+        "offset":{"counts":0,"max":-273.15,"min":-273.15},
+        "colorpalette":{"counts":"winter","max":"jet","min":"jet"},
+        "normalization":{"counts":"log","max":"linear","min":"linear"},
+        "colorbar_title":{"counts":"no. obs.","max":"max ($^\\circ$C)","min":"min ($^\\circ$C)"},
+        "colorbar_orien":"h",
+        "cmax_value":{"counts":null,"max":50,"min":50},
+        "cmin_value":{"counts":1,"max":-30,"min":-30}
+    },
+    "observations-wbt":
+      {
+        "nc_file":"observations-wbt-all.nc",
+        "out_file":"observations-wbt-all.png",
+        "vars":["counts","max","min"],
+        "scale":{"counts":1,"max":1,"min":1},
+        "offset":{"counts":0,"max":-273.15,"min":-273.15},
+        "colorpalette":{"counts":"winter","max":"jet","min":"jet"},
+        "normalization":{"counts":"log","max":"linear","min":"linear"},
+        "colorbar_title":{"counts":"no. obs.","max":"max ($^\\circ$C)","min":"min ($^\\circ$C)"},
+        "colorbar_orien":"h",
+        "cmax_value":{"counts":null,"max":50,"min":50},
+        "cmin_value":{"counts":1,"max":-30,"min":-30}
+    },
+    "observations-slp":
+      {
+        "nc_file":"observations-slp-all.nc",
+        "out_file":"observations-slp-all.png",
+        "vars":["counts","max","min"],
+        "scale":{"counts":1,"max":0.01,"min":0.01},
+        "offset":{"counts":0,"max":0,"min":0},
+        "colorpalette":{"counts":"winter","max":"jet","min":"jet"},
+        "normalization":{"counts":"log","max":"linear","min":"linear"},
+        "colorbar_title":{"counts":"no. obs.","max":"max (hPa)","min":"min (hPa)"},
+        "colorbar_orien":"h",
+        "cmax_value":{"counts":null,"max":1060,"min":1060},
+        "cmin_value":{"counts":1,"max":870,"min":870}
+    },
+    "observations-ws":
+      {
+        "nc_file":"observations-ws-all.nc",
+        "out_file":"observations-ws-all.png",
+        "vars":["counts","max","min"],
+        "scale":{"counts":1,"max":1,"min":1},
+        "offset":{"counts":0,"max":0,"min":0},
+        "colorpalette":{"counts":"winter","max":"jet","min":"jet"},
+        "normalization":{"counts":"log","max":"linear","min":"linear"},
+        "colorbar_title":{"counts":"no. obs.","max":"max (ms$^{-1}$)","min":"min (ms$^{-1}$)"},
+        "colorbar_orien":"h",
+        "cmax_value":{"counts":null,"max":70,"min":70},
+        "cmin_value":{"counts":1,"max":0,"min":0}
+    },
+    "observations-wd":
+      {
+        "nc_file":"observations-wd-all.nc",
+        "out_file":"observations-wd-all.png",
+        "vars":["counts","max","min"],
+        "scale":{"counts":1,"max":1,"min":1},
+        "offset":{"counts":0,"max":0,"min":0},
+        "colorpalette":{"counts":"winter","max":"twilight","min":"twilight"},
+        "normalization":{"counts":"log","max":"linear","min":"linear"},
+        "colorbar_title":{"counts":"no. obs.","max":"max (degrees)","min":"min (degrees)"},
+        "colorbar_orien":"h",
+        "cmax_value":{"counts":null,"max":370,"min":370},
+        "cmin_value":{"counts":1,"max":0,"min":0}
+    }
+  }
+}
