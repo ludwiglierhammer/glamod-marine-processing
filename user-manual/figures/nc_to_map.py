@@ -42,11 +42,13 @@ def read_dataset(file_path,var_properties):
         for var in var_properties['scale'].keys():
             scale = var_properties['scale'].get(var,1)
             offset = var_properties['offset'].get(var,0)
+            print('{0}. Applying scale {1}, offset {2}'.format(var,str(scale),str(offset)))
             dataset[var] = offset + scale*dataset[var]
     else:
         var = var_properties.get('vars')
         scale = var_properties.get('scale',1)
         offset = var_properties.get('offset',0)
+        print('{0}. Applying scale {1}, offset {2}'.format(var,str(scale),str(offset)))
         dataset[var] = offset + scale*dataset[var]    
     return dataset
 
@@ -345,7 +347,6 @@ if __name__ == "__main__":
     with open(config_file) as cf:
         kwargs = json.load(cf)
      
-    layout = kwargs.get('layout')
     figures = list(kwargs.get('figures').keys())
     no_figures = len(figures)
     non_avail_figures = 0
@@ -357,6 +358,7 @@ if __name__ == "__main__":
         dataset_path = os.path.join(dir_data,figure_kwargs.get('nc_file'))
         out_file = os.path.join(dir_out,figure_kwargs.get('out_file'))
         variables = figure_kwargs.get('vars')
+        layout = 'mosaic' if isinstance(variables,list) else 'single'
        
         if not os.path.isfile(dataset_path):
             non_avail_figures += 1
@@ -377,12 +379,10 @@ if __name__ == "__main__":
                 logging.error('On map {}'.format(figurei))
                 sys.exit(1)
         else:
-            #status = map_single(dataset,variables,out_file, **figure_kwargs)
-            #if status != 0:
-            #    logging.error('On map {}'.format(figurei))
-            #    sys.exit(1)
-            logging.error('Not implemented')
-            sys.exit(1)
+            status = map_single(dataset,variables,out_file, **figure_kwargs)
+            if status != 0:
+                logging.error('On map {}'.format(figurei))
+                sys.exit(1)
 
     if non_avail_figures == no_figures:
         logging.error('No nc files found for figures: {}'.format(','.join(figures)))
