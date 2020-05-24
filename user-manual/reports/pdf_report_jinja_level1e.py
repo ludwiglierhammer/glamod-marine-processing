@@ -20,8 +20,7 @@ try:
     update = sys.argv[3]
     dataset = sys.argv[4]
     sid_dck = sys.argv[5]
-    y_init = sys.argv[6]
-    y_end = sys.argv[7]   
+    periods_file = sys.argv[6]   
 except:
     logging.error("Error processing line argument input to script", exc_info = True)
     sys.exit(1)
@@ -40,6 +39,9 @@ with open(os.path.join(script_path,'deck_properties.json'),'r') as f:
     
 with open(os.path.join(script_path,'var_properties.json'),'r') as f:
     properties_var = json.load(f)
+    
+with open(periods_file,'r') as f:
+    periods = json.load(f)
     
 params = ['at','sst','dpt','wbt','slp','wd','ws']
 #=============================== to print....==================================
@@ -75,7 +77,7 @@ deck = sid_dck.split("-")[1]
 # Get common titles and figures
 sid_name = properties_sid.get(str(sid),str(sid) + ' name: not available')
 dck_name = properties_dck.get(str(deck),str(sid) + ' name: not available')
-period = ' to '.join([str(y_init),str(y_end)]) 
+period = ' to '.join([str(periods.get(sid_dck).get('year_init')),str(periods.get(sid_dck).get('year_end'))]) 
 
 # Get observed param titles, figures and captions: check if the figures are 
 # there, otherwise set caption to empty
