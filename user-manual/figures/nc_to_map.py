@@ -233,7 +233,7 @@ def map_mosaic(dataset,variables,out_file,**kwargs):
         c += 1
     print('Done')
     wspace = 0.08# if qc_mode else 0.05
-    dpi = 300 #if qc_mode else 300
+    dpi = 200 #if qc_mode else 300
     plt.subplots_adjust(wspace=wspace,hspace=0.05)#  Force small separation (default is .2, to keep in mind "transparent" colorbar between subplots....THIS WILL DEPEND ON THE FIGURE WIDTH
     print('Saving')
     plt.savefig(out_file,bbox_inches='tight',dpi = dpi)# 'tight' here, not in plt.tight_layout: here it realizes the new size because of add_axes, but not in plt.tight_layout..
