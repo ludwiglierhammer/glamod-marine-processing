@@ -106,9 +106,9 @@ def map_on_subplot(f,subplot_ax,z,lons,lats,colorpalette = 'jet',colorbar_show =
     #
     # Could potentially, more or less easily, choose to have an horiontal colorbar...just a couple of parameters more....
     
-    # Make sure we know what z is
-    cmin_value = np.nanmin(z) if cmin_value is None else cmin_value
-    cmax_value = np.nanmax(z) if cmax_value is None else cmax_value
+    # Make sure we know what z is. Now we control this from the caller
+    #cmin_value = np.nanmin(z) if cmin_value is None else cmin_value
+    #cmax_value = np.nanmax(z) if cmax_value is None else cmax_value
 
     if normalization== 'log':
         normalization_f = LogNorm(vmin = cmin_value,vmax = cmax_value)
@@ -229,6 +229,14 @@ def map_mosaic(dataset,variables,out_file,**kwargs):
         z = dataset[var].values
         lons = dataset[var]['longitude']
         lats = dataset[var]['latitude']
+
+        if not kwargs['cmin_value']:
+            kwargs['cmin_value'] = np.nanmin(z)
+        if not kwargs['cmax_value']:
+            kwargs['cmax_value'] = np.nanmax(z)
+        if kwargs['cmin_value'] == kwargs['cmax_value']: # see if we get these from a common var_properties
+            kwargs['cmin_value'] = 0
+            kwargs['cmax_value'] = 1
         map_on_subplot(f,ax[c],z,lons,lats,**var_kwargs)
         c += 1
     print('Done')
@@ -243,7 +251,8 @@ def map_mosaic(dataset,variables,out_file,**kwargs):
 
 
 if __name__ == "__main__":
-    
+
+    #logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s', level=logging.DEBUG)
     dir_data = sys.argv[1]
     dir_out = sys.argv[2]
     config_file = sys.argv[3]
@@ -263,7 +272,12 @@ if __name__ == "__main__":
         dataset_path = os.path.join(dir_data,figure_kwargs.get('nc_file'))
         out_file = os.path.join(dir_out,figure_kwargs.get('out_file'))
         variables = figure_kwargs.get('vars')
-        
+       
+        if not os.path.isfile(dataset_path):
+            non_avail_figures += 1
+            logging.warning('No nc file for figure {0}: {1}'.format(figurei,dataset_path))
+            continue
+ 
         dataset = read_dataset(dataset_path,figure_kwargs)
         
         figure_kwargs.pop('nc_file')
@@ -274,10 +288,14 @@ if __name__ == "__main__":
         
         if layout == 'mosaic':
             status = map_mosaic(dataset,variables,out_file, **figure_kwargs)
-            non_avail_figures += status
+            if status != 0:
+                logging.error('On map {}'.format(figurei))
+                sys.exit(1)
         else:
-            status = map_single(dataset,variables,out_file, **figure_kwargs)
-            non_avail_figures += status
+            #status = map_single(dataset,variables,out_file, **figure_kwargs)
+            #if status != 0:
+            #    logging.error('On map {}'.format(figurei))
+            #    sys.exit(1)
             logging.error('Not implemented')
             sys.exit(1)
 
