@@ -38,7 +38,7 @@ plt.rc('figure', titlesize=map_properties.title_label_size)  # fontsize of the f
 def read_dataset(file_path,var_properties):
     dataset = xr.open_dataset(file_path,autoclose=True)
         
-    if isinstance(var_properties['scale'],dict):
+    if isinstance(var_properties.get('scale'),dict):
         for var in var_properties['scale'].keys():
             scale = var_properties['scale'].get(var,1)
             offset = var_properties['offset'].get(var,0)
@@ -233,9 +233,9 @@ def map_single(dataset,variable,out_file,**kwargs):
     lons = dataset[variable]['longitude']
     lats = dataset[variable]['latitude']
 
-    if not kwargs['cmin_value']:
+    if not kwargs.get('cmin_value'):
         kwargs['cmin_value'] = np.nanmin(z)
-    if not kwargs['cmax_value']:
+    if not kwargs.get('cmax_value'):
         kwargs['cmax_value'] = np.nanmax(z)
     if kwargs['cmin_value'] == kwargs['cmax_value']: # see if we get these from a common var_properties
         kwargs['cmin_value'] = 0
@@ -317,9 +317,9 @@ def map_mosaic(dataset,variables,out_file,**kwargs):
         lons = dataset[var]['longitude']
         lats = dataset[var]['latitude']
 
-        if not kwargs['cmin_value']:
+        if not kwargs.get('cmin_value'):
             kwargs['cmin_value'] = np.nanmin(z)
-        if not kwargs['cmax_value']:
+        if not kwargs.get('cmax_value'):
             kwargs['cmax_value'] = np.nanmax(z)
         if kwargs['cmin_value'] == kwargs['cmax_value']: # see if we get these from a common var_properties
             kwargs['cmin_value'] = 0
@@ -370,8 +370,8 @@ if __name__ == "__main__":
         figure_kwargs.pop('nc_file')
         figure_kwargs.pop('out_file')
         figure_kwargs.pop('vars')
-        figure_kwargs.pop('scale')
-        figure_kwargs.pop('offset')
+        figure_kwargs.pop('scale',None)
+        figure_kwargs.pop('offset',None)
         
         if layout == 'mosaic':
             status = map_mosaic(dataset,variables,out_file, **figure_kwargs)
