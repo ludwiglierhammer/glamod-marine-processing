@@ -37,10 +37,17 @@ plt.rc('figure', titlesize=map_properties.title_label_size)  # fontsize of the f
 
 def read_dataset(file_path,var_properties):
     dataset = xr.open_dataset(file_path,autoclose=True)
-    for var in var_properties['scale'].keys():
-        scale = var_properties['scale'].get(var)
-        offset = var_properties['offset'].get(var)
-        dataset[var] = offset + scale*dataset[var]
+        
+    if isinstance(var_properties['scale'],dict):
+        for var in var_properties['scale'].keys():
+            scale = var_properties['scale'].get(var,1)
+            offset = var_properties['offset'].get(var,0)
+            dataset[var] = offset + scale*dataset[var]
+    else:
+        var = var_properties.get('vars')
+        scale = var_properties.get('scale',1)
+        offset = var_properties.get('offset',0)
+        dataset[var] = offset + scale*dataset[var]    
     return dataset
 
 def map_on_subplot(f,subplot_ax,z,lons,lats,colorpalette = 'jet',colorbar_show = True,
@@ -157,9 +164,87 @@ def map_on_subplot(f,subplot_ax,z,lons,lats,colorpalette = 'jet',colorbar_show =
     else:
         cax.axis('off')
 
-def map_single(dataset,variables,out_file,**kwargs):
+def map_single(dataset,variable,out_file,**kwargs):
+    """Plot xarray on to a map.
+ 
+    Arguments
+    ---------
+    dataset : xarray.dataset
+       xarray dataset with data to map
+    variables : list
+        List of dataset variables to map, in order.
+    out_file : str
+        Path to the output file
     
-    return
+    Keyword arguments
+    -----------------
+    colorpalette : dict
+        The names of the matplolib color pallette to use for each variable        
+    colorbar_title : dictionary
+        The colorbar titles
+    colorbar_orien : str
+        h|v 
+    cmin_value : dict (numeric), optional
+        Min value to use in colorbar normalization for each variable.
+        Defaults to variable min.
+    cmax_value : dict (numeric), optional
+        Max value to use in colorbar normalization for each variable.
+        Defaults to variable max.
+    normalization : dict
+        Normalization for colormap. Defaults to linear
+    projection : str
+        Projection name to use in map. See map_properties.projections for options.
+        Defaults to PlateCarree
+
+    """
+    # HOW ARE WE PLOTTING:
+    # We plot using matplotlib (not xarray direct plotting) on a cartopy axis
+    # Have to do some adjustments to matplotlib because of cartopy.
+    # Why cartopy, and not basemap?:   https://github.com/SciTools/cartopy/issues/920
+    # But we might face the need of a projection not yet in cartopy......
+
+
+    # Complete the kwargs
+    # The actual projection is set here in the subplots declaration!!!!
+    proj = map_properties.projections.get(kwargs['projection']) if kwargs.get('projection') else map_properties.projections.get('PlateCarree')
+
+    kwargs['colorbar_show'] = True
+    kwargs['colorbar_w'] = map_properties.single_map['colorbar_width']
+    kwargs['grid_label_size'] = map_properties.single_map.get('grid_label_size')
+    kwargs['grid_width'] = map_properties.single_map.get('grid_width')
+    kwargs['colorbar_label_size'] = map_properties.single_map.get('colorbar_label_size')
+    kwargs['colorbar_title_size'] = map_properties.single_map.get('colorbar_title_size')
+    kwargs['coastline_width'] = map_properties.single_map.get('coastline_width')
+    
+    f, ax = plt.subplots(1, 1, subplot_kw=dict(projection=proj),figsize=(14,7))#,dpi = 180)
+
+    print('Mapping {}'.format(variable))  
+    var_kwargs = deepcopy(kwargs)
+    var_kwargs['colorpalette'] = kwargs.get('colorpalette','jet')
+    var_kwargs['colorbar_title'] = kwargs.get('colorbar_title',' ')
+    var_kwargs['colorbar_orien'] = kwargs.get('colorbar_orien','h')
+    var_kwargs['cmin_value'] = kwargs.get('cmin_value')
+    var_kwargs['cmax_value'] = kwargs.get('cmax_value')
+    var_kwargs['normalization'] = kwargs.get('normalization','linear')
+
+    z = dataset[variable].values
+    lons = dataset[variable]['longitude']
+    lats = dataset[variable]['latitude']
+
+    if not kwargs['cmin_value']:
+        kwargs['cmin_value'] = np.nanmin(z)
+    if not kwargs['cmax_value']:
+        kwargs['cmax_value'] = np.nanmax(z)
+    if kwargs['cmin_value'] == kwargs['cmax_value']: # see if we get these from a common var_properties
+        kwargs['cmin_value'] = 0
+        kwargs['cmax_value'] = 1
+    map_on_subplot(f,ax,z,lons,lats,**var_kwargs)
+    dpi = 200
+    plt.savefig(out_file,bbox_inches='tight',dpi = dpi)
+    plt.close()
+    print('Done')
+
+    return 0
 
 
 def map_mosaic(dataset,variables,out_file,**kwargs):
@@ -219,8 +304,8 @@ def map_mosaic(dataset,variables,out_file,**kwargs):
     for var in variables: 
         print('Mapping {}'.format(var))  
         var_kwargs = deepcopy(kwargs)
-        var_kwargs['colorpalette'] = kwargs['colorpalette'].get(var,'jet')
-        var_kwargs['colorbar_title'] = kwargs['colorbar_title'].get(var,' ')
+        var_kwargs['colorpalette'] = kwargs.get('colorpalette',{}).get(var,'jet')
+        var_kwargs['colorbar_title'] = kwargs.get('colorbar_title',{}).get(var,' ')
         var_kwargs['colorbar_orien'] = kwargs.get('colorbar_orien','h')
         var_kwargs['cmin_value'] = kwargs.get('cmin_value').get(var)
         var_kwargs['cmax_value'] = kwargs.get('cmax_value').get(var)

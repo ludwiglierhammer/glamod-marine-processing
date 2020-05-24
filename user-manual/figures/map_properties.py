@@ -17,13 +17,13 @@ mosaic_map['colorbar_title_size'] = 9
 mosaic_map['colorbar_label_size'] = 7
 mosaic_map['colorbar_width'] = 6
 
-individual_map = {}
-individual_map['coastline_width'] = 1
-individual_map['grid_width']  = 0.7
-individual_map['grid_label_size']  = 12
-individual_map['colorbar_title_size']  = 11
-individual_map['colorbar_label_size']  = 12
-individual_map['colorbar_width'] = 4
+single_map = {}
+single_map['coastline_width'] = 1
+single_map['grid_width']  = 0.7
+single_map['grid_label_size']  = 12
+single_map['colorbar_title_size']  = 11
+single_map['colorbar_label_size']  = 12
+single_map['colorbar_width'] = 4
 
 projections = {}
 projections['PlateCarree'] = ccrs.PlateCarree()
