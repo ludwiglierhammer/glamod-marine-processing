@@ -13,11 +13,14 @@ release=$1
 update=$2
 source=$3
 level=$4
-sid_deck_list_file=$5
+periods_file=$5
+sid_deck_list_file=$6
+
+user_manual_dir=$data_directory/user-manual/release_summaries
 
 ffs="-"
 filebase=$(basename $sid_deck_list_file)
-log_dir=$data_directory/$release/$source/$level/reports
+log_dir=$user_manual_dir/$release/$source/log
 log_file=$log_dir/pdf$ffs${filebase%.*}$ffs$(date +'%Y%m%d_%H%M').log
 
 echo $log_file
@@ -46,9 +49,9 @@ do
   fi
 
   # Re-initialize scratch directory for deck
-  sid_deck_scratch_dir=$scratch_directory/$level/reports/$sid_deck/pdf
+  sid_deck_scratch_dir=$scratch_directory/reports/$sid_deck
   echo "Setting deck reports scratch directory: $sid_deck_scratch_dir"
   rm -rf $sid_deck_scratch_dir;mkdir -p $sid_deck_scratch_dir
 
-	bsub -J $sid_deck'REP' -oo $sid_deck_scratch_dir/'REP.o' -eo $sid_deck_scratch_dir/'REP.e' -q short-serial -W $job_time -M $job_memo -R "rusage[mem=$job_memo]" python $code_directory/reports/pdf_report_jinja_$level.py $data_directory $release $update $source $sid_deck $y_init $y_end
+	bsub -J $sid_deck'REP' -oo $sid_deck_scratch_dir/'REP.o' -eo $sid_deck_scratch_dir/'REP.e' -q short-serial -W $job_time -M $job_memo -R "rusage[mem=$job_memo]" python $um_code_directory/reports/pdf_report_jinja_$level.py $user_manual_dir $release $update $source $sid_deck $periods_file
 done
