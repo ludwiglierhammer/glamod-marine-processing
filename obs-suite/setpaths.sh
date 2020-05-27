@@ -9,7 +9,7 @@ echo 'Data directory is '$data_directory
 echo 'Code directory is '$code_directory
 
 # Create the scratch directory for the user
-scratch_directory=/scratch-nopw/$(whoami)
+scratch_directory=/work/scratch-nopw/$(whoami)
 if [ ! -d $scratch_directory ]
 then
   echo "Creating user $(whoami) scratch directory $scratch_directory"
