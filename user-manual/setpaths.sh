@@ -11,7 +11,7 @@ echo 'Data directory is '$data_directory
 echo 'User manual code directory is '$um_code_directory
 
 # Create the scratch directory for the user
-scratch_directory=/work/scratch-nompiio/$(whoami)/user-manual
+scratch_directory=/work/scratch-nopw/$(whoami)/user-manual
 if [ ! -d $scratch_directory ]
 then
   echo "Creating user $(whoami) scratch directory $scratch_directory"
