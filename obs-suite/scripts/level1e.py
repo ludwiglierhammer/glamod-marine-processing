@@ -43,7 +43,8 @@ where fileID is yyyy-mm-release_tag-update_tag
 Before processing starts:
     - checks the existence of all io subdirectories in level1d|e -> exits if fails
     - checks availability of the source header table -> exits if fails
-    - checks existence of source observation tables -> exits if no obs tables
+    - checks existence of source observation tables -> exits if no obs tables -> requirement removed to
+    give way to sid-dck monthly partitions with no obs tables
     - checks of existence of the monthly QC (POS) file -> exits if fails. See IMPORTANT NOTE!!!!
     - removes all level1e products on input file resulting from previous runs
 
@@ -419,9 +420,7 @@ for table in obs_tables:
         tables_in.append(table)
 
 if len(tables_in) == 1:
-    logging.warning('NO OBS TABLES TO FLAG')
-    logging.warning('NO LEVEL1E PRODUCT GENERATED FOR {0}, period {1}-{2}'.format(params.sid_dck,params.year,params.month))
-    sys.exit(0)
+    logging.warning('NO OBS TABLES AVAILABLE: {0}, period {1}-{2}'.format(params.sid_dck,params.year,params.month))
 
 # DO THE DATA PROCESSING ------------------------------------------------------
 header_df.set_index('report_id', inplace=True,drop=False)   
