@@ -614,7 +614,7 @@
     "168-246": {
         "year_init": "1850",
         "year_end": "1851",
-        "exclude": false,
+        "exclude": true,
         "params_exclude": []
     },
     "171-711": {
@@ -624,6 +624,6 @@
         "params_exclude": []
     },
     "params_exclude": ["observations-wbt"],
-    "year_init": 1875,
-    "year_end": 1940
+    "year_init": 1851,
+    "year_end": null
 }
