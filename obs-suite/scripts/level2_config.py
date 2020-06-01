@@ -38,7 +38,7 @@ level_path = os.path.join(release_path,level)
 level_filename = os.path.join(level_path,'level2.json')
 
 with open(release_periods_file,'r') as fO:
-    level2_dict = json.read(fO)
+    level2_dict = json.load(fO)
 
 
 for k in level2_dict.keys():

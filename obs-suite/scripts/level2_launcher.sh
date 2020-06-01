@@ -32,5 +32,5 @@ job_memo_cp=500
 for sid_deck in $(awk '{print $1}' $sid_deck_list_file)
 do
 	sid_deck_log_dir=$log_dir/$sid_deck
-  bsub -J $sid_deck'L2c' -oo $sid_deck_log_dir/"level2.o" -eo $sid_deck_log_dir/"level2.o" -q short-serial -W $job_time_cp -M $job_memo_cp -R "rusage[mem=$job_memo_cp]" python $scripts_directory/level2.py $data_directory $sid_deck $release $update $source $l2_file
+  bsub -J $sid_deck'L2c' -oo $sid_deck_log_dir/"level2.o" -eo $sid_deck_log_dir/"level2.o" -q short-serial -W $job_time_cp -M $job_memo_cp -R "rusage[mem=$job_memo_cp]" python $scripts_directory/level2.py $data_directory $release $update $source $sid_deck $l2_file
 done

@@ -76,11 +76,11 @@ reload(logging)  # This is to override potential previous config of logging
 class script_setup:
     def __init__(self, inargs):
         self.data_path = inargs[1]
-        self.sid_dck = inargs[2]
+        self.release = inargs[2]
+        self.update = inargs[3]
+        self.source = inargs[4]
+        self.sid_dck = inargs[5]
         self.dck = self.sid_dck.split("-")[1]
-        self.release = inargs[3]
-        self.update = inargs[4]
-        self.source = inargs[5]
         self.level2_list = inargs[6]
 # This is for json to handle dates
 date_handler = lambda obj: (
@@ -155,15 +155,17 @@ if not include_list.get(params.sid_dck):
 
 
 # See if global release period has been changed for level 2 and apply to sid-dck
-year_init = include_list.get(params.sid_dck,{}).get('year_init')
-year_end = include_list.get(params.sid_dck,{}).get('year_end')
+# For some strange reason the years are strings in the periods files...
+year_init = int(include_list.get(params.sid_dck,{}).get('year_init'))
+year_end = int(include_list.get(params.sid_dck,{}).get('year_end'))
 
 init_global = include_list.get('year_init')
 end_global = include_list.get('year_end')
 
-year_init = year_init if year_init >= init_global else init_global
-year_end = year_end if year_end <= end_global else end_global
-
+if init_global:
+    year_init = year_init if year_init >= int(init_global) else int(init_global)
+if end_global:
+    year_end = year_end if year_end <= int(end_global) else int(end_global)
        
 exclude_sid_dck = include_list.get(params.sid_dck,{}).get('exclude')  
   
