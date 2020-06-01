@@ -7,7 +7,8 @@
 #
 # Usage: ./level2.sh release update source_dataset list_file level2_file
 
-source setenv0.sh
+source ../setpaths.sh
+source ../setenv0.sh
 
 release=$1
 update=$2
