@@ -49,7 +49,7 @@ json file as created by L2_list_create.py, with:
 !!!!:
 ----
 If not all the observation tables from a sid-dck are included in level2 from level1e,
-then the header table needs to be check as some reports may stay orphan and
+then the header table needs to be checked as some reports may stay orphan and
 should not progress to level2.
 
 Once the above is implemented, for consistency, in the excluded directory a header table
@@ -112,14 +112,17 @@ else:
 
 params = script_setup(args)
     
-filename_field_sep = '-' 
+FFS = '-' 
 level = 'level2'
 level_prev = 'level1e'
 header = True 
 wmode = 'w'
+# These to build the brace expansions for the out of release periods
+left_min_period = 1600
+right_max_period = 2100
     
 release_path = os.path.join(params.data_path,params.release,params.source)
-release_id = filename_field_sep.join([params.release,params.update ]) 
+release_id = FFS.join([params.release,params.update ]) 
 
 prev_level_path = os.path.join(release_path,level_prev,params.sid_dck)  
 level_path = os.path.join(release_path,level,params.sid_dck)
@@ -149,6 +152,18 @@ with open(params.level2_list,'r') as fileObj:
 if not include_list.get(params.sid_dck):
     logging.error('sid-dck {0} not registered in level2 list {1}'.format(params.sid_dck,params.level2_list))
     sys.exit(1)     
+
+
+# See if global release period has been changed for level 2 and apply to sid-dck
+year_init = include_list.get(params.sid_dck,{}).get('year_init')
+year_end = include_list.get(params.sid_dck,{}).get('year_end')
+
+init_global = include_list.get('year_init')
+end_global = include_list.get('year_end')
+
+year_init = year_init if year_init >= init_global else init_global
+year_end = year_end if year_end <= end_global else end_global
+
        
 exclude_sid_dck = include_list.get(params.sid_dck,{}).get('exclude')  
   
@@ -170,10 +185,13 @@ try:
         os.mkdir(level_excluded_path)
         for table in cdm_tables:
             files = os.path.join(prev_level_path,table + '*.psv')
-            call(' '.join(['cp',files,level_excluded_path]),shell=True)
+            call(' '.join(['cp',files,level_excluded_path,'2>/dev/null']),shell=True)
     else:
         os.mkdir(level_path)
         os.mkdir(level_reports_path)
+        period_brace = '{' + str(year_init) + '..' + str(year_end) + '}'
+        left_period_brace = '{' + str(left_min_period) + '..' + str(year_init-1) + '}'
+        right_period_brace = '{' + str(year_end + 1) + '..' + str(right_max_period) + '}'
         for table in exclude_param_list:
             logging.info('{} excluded from level2'.format(table))
             files = os.path.join(prev_level_path,table + '*.psv')
@@ -181,11 +199,18 @@ try:
             if len(file_list)>0:
                 if not os.path.isdir(level_excluded_path):
                     os.mkdir(level_excluded_path)
-                call(' '.join(['cp',files,level_excluded_path]),shell=True)
+                call(' '.join(['cp',files,level_excluded_path, '2>/dev/null']),shell=True)
         for table in include_param_list:
             logging.info('{} included in level2'.format(table))
-            files = os.path.join(prev_level_path,table + '*.psv')
-            call(' '.join(['cp',files,level_path]),shell=True)
+            files = os.path.join(prev_level_path,table + FFS + period_brace + FFS + '*.psv')
+            call(' '.join(['cp',files,level_path,'2>/dev/null']),shell=True)
+        # Send out of release period to excluded
+        if not os.path.isdir(level_excluded_path):
+                    os.mkdir(level_excluded_path)
+        files = os.path.join(prev_level_path,table + FFS + left_period_brace + FFS + '*.psv')
+        call(' '.join(['cp',files,level_excluded_path,'2>/dev/null']),shell=True)
+        files = os.path.join(prev_level_path,table + FFS + right_period_brace + FFS + '*.psv')
+        call(' '.join(['cp',files,level_excluded_path,'2>/dev/null']),shell=True)
     logging.info('Level2 data succesfully created')
 except Exception:
     logging.error('Error creating level2 data',exc_info = True)

@@ -3,9 +3,9 @@
 """
 Created on Wed Nov 13 16:18:36 2019
 
-Create initial level2 product list from the initial source-data list
+Create initial level2 product list from the initial source-deck periods list
 
-Outputs file to /<data_path>/<release>/<source>/level2/L2_config.json
+Outputs file to /<data_path>/<release>/<source>/level2/level.json
 
 Inargs:
 ------
@@ -20,7 +20,6 @@ config_file: path to release/update list
 
 import os
 import sys
-import pandas as pd
 import json
 
 # Find command line arguments -------------------------------------------------
@@ -29,22 +28,25 @@ if len(sys.argv)>1:
      release = sys.argv[2]
      update = sys.argv[3]
      source = sys.argv[4]
-     release_file = sys.argv[5]
+     release_periods_file = sys.argv[5]
 # -----------------------------------------------------------------------------   
 level = 'level2'
 release_path = os.path.join(data_path,release,source)
 filename_field_sep = '-'  
   
 level_path = os.path.join(release_path,level)  
-level_filename = os.path.join(level_path,'L2_config.json')
+level_filename = os.path.join(level_path,'level2.json')
+
+with open(release_periods_file,'r') as fO:
+    level2_dict = json.read(fO)
 
 
-sid_dck_list = pd.read_csv(release_file,names= ['sid-dck','init','end'],header = None,delimiter='\t')
-
-level2_dict = {}
-level2_dict = {'params_exclude':[]}
-for sid_dck in sid_dck_list['sid-dck']:
-    level2_dict[sid_dck] = {'exclude':False,'params_exclude':[]}
+for k in level2_dict.keys():
+    level2_dict[k].update({'exclude':False,'params_exclude':[]})
+    
+level2_dict['params_exclude'] = []
+level2_dict['year_init'] = None
+level2_dict['year_end'] = None
 
 with open(level_filename,'w') as fileObj:
     json.dump(level2_dict,fileObj,indent=4)    
