@@ -209,9 +209,9 @@ try:
         # Send out of release period to excluded
         if not os.path.isdir(level_excluded_path):
                     os.mkdir(level_excluded_path)
-        files = os.path.join(prev_level_path,table + FFS + left_period_brace + FFS + '*.psv')
+        files = os.path.join(prev_level_path,FFS.join(['*',left_period_brace,'??','*.psv']))
         call(' '.join(['cp',files,level_excluded_path,'2>/dev/null']),shell=True)
-        files = os.path.join(prev_level_path,table + FFS + right_period_brace + FFS + '*.psv')
+        files = os.path.join(prev_level_path,FFS.join(['*',right_period_brace,'??','*.psv']))
         call(' '.join(['cp',files,level_excluded_path,'2>/dev/null']),shell=True)
     logging.info('Level2 data succesfully created')
 except Exception:
