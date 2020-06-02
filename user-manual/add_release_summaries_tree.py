@@ -1,24 +1,26 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-"""
-Created on Mon Jul  8 12:29:06 2019
+"""Creates the directory tree for a new C3S data release and source 
+or for a new source in a pre-existing release in the user manual subspace
 
-Creates the directory tree for a new C3S data release and source or for a new
-source in a pre-existing release
-
-Inargs:
-------
-
-user_manual_path: directory where user_manual is
-release_name: name for release directory
-source_name: name for data source in directory tree
-release_file: path to file with individual sid-dck
-
-release_file format:
--------------------
-json with sid-dck as primary keys
-
-@author: iregon
+    
+    Arguments
+    ---------
+    user_manual_path : str
+        Path to the user manual space
+    release_name : string
+        Name for release directory
+    source_name : string
+        Name for data source in directory tree
+    release_file : string
+        Path to file with individual sid-dck
+        
+    
+    release_file format:
+    -------------------
+    json with sid-dck as primary keys
+    
+        
 """
 
 import os
