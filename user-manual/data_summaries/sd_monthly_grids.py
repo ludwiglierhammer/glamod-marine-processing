@@ -177,33 +177,28 @@ def main(sid_dck, year, month, dir_data = None, db_con = None,
 
 if __name__ == "__main__":
     
-    if len(sys.argv) == 2:
-        config_file = sys.argv[1]
-    else:
-        dir_data = sys.argv[1]
-        dir_out = sys.argv[2]
-        sid_dck = sys.argv[3]
-        year = sys.argv[4]
-        month = sys.argv[5]
-        config_file = sys.argv[6]
+
+    config_file = sys.argv[1]
+
     
     with open(config_file) as cf:
-        kwargs = json.load(cf)
-  
-    if len(sys.argv) > 2:
-        kwargs['dir_data'] = dir_data
-        kwargs['dir_out'] = dir_out
-    else:
-        sid_dck = kwargs['sid_dck']
-        kwargs.pop('sid_dck')
-        year = kwargs['year']
-        kwargs.pop('year')
-        month = kwargs['month']
-        kwargs.pop('month')
-     
-    # Make table specs in json files (table.element) tuples
-    for filter_type in ['filter_by_values','filter_by_range'] :
-        if kwargs.get(filter_type):
-            for kv in list(kwargs.get(filter_type).items()):
-                kwargs[filter_type][(kv[0].split('.')[0],kv[0].split('.')[1])] = kwargs[filter_type].pop(kv[0])
-    main(sid_dck,year, month, **kwargs)
+        config = json.load(cf)
+
+    sid_dck = config['sid_dck']
+    year = config['year']
+    month = config['month']
+    dir_data = config['dir_data']
+    dir_out = config['dir_out']
+    
+    tables = config.get('tables')
+    for table in tables:
+        logging.info('Aggregating table {}'.format(table))
+        # Make table specs in json files (table.element) tuples
+        kwargs = config.get(table)
+        kwargs.update({'dir_data':dir_data})
+        kwargs.update({'dir_out':dir_out})
+        for filter_type in ['filter_by_values','filter_by_range'] :
+            if kwargs.get(filter_type):
+                for kv in list(kwargs.get(filter_type).items()):
+                    kwargs[filter_type][(kv[0].split('.')[0],kv[0].split('.')[1])] = kwargs[filter_type].pop(kv[0])
+        main(sid_dck,year, month, **kwargs)

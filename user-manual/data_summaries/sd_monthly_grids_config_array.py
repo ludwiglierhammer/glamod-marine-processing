@@ -27,11 +27,10 @@ data_path = sys.argv[1]
 release = sys.argv[2]
 dataset = sys.argv[3]
 level = sys.argv[4]
-table = sys.argv[5]
-script_config_file = sys.argv[6]
-data_periods_file = sys.argv[7]
-process_list_file = sys.argv[8]
-failed_only = sys.argv[9]
+script_config_file = sys.argv[5]
+data_periods_file = sys.argv[6]
+process_list_file = sys.argv[7]
+failed_only = sys.argv[8]
 
 failed_only = True if failed_only == 'y' else False
 
@@ -39,12 +38,8 @@ if failed_only:
     print('Configuration using failed only mode')
 
 with open(script_config_file,'r') as fO:
-    main_config = json.load(fO)
+    script_config = json.load(fO)
 
-script_config = main_config.get(table)
-if not script_config:
-   print('Table {0} not found in configuration file {1}'.format(table,script_config_file)) 
-    
 with open(data_periods_file,'r') as fO:
     data_periods = json.load(fO)
     
@@ -55,7 +50,7 @@ level_dir = os.path.join(data_path,release,dataset,level)
 #table = script_config.get('table')
 dir_out = os.path.join(data_path,'user_manual','release_summaries',release,dataset)
 dir_log = os.path.join(dir_out,'log')
-run_id = os.path.basename(script_config_file).split('.')[0] + '-' + table
+run_id = os.path.basename(script_config_file).split('.')[0]
 
 script_config.update({'dir_data':level_dir})
 script_config.update({'dir_out':dir_out})
@@ -87,7 +82,7 @@ for sid_dck in process_list:
         for dt in rrule.rrule(rrule.MONTHLY, dtstart=init, until=end):
             yyyy = str(dt.year)
             mm = str(dt.month).zfill(2)
-            if len(glob.glob(os.path.join(sid_dck_data_dir,'-'.join([table,yyyy,mm,'*']) + '.psv'))) > 0:    
+            if len(glob.glob(os.path.join(sid_dck_data_dir,'-'.join(['header',yyyy,mm,'*']) + '.psv'))) > 0:    
                 config_element()
                 ai +=1
     if len(failed_files) > 0:
