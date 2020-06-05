@@ -123,7 +123,7 @@ def main(sid_dck, year, month, dir_data = None, db_con = None,
     # qc is the list of flags we want to keep, as integers, ideally, ok, include conversion just in case
     logging.basicConfig(format='%(levelname)s\t[%(asctime)s](%(filename)s)\t%(message)s',
                     level=logging.INFO,datefmt='%Y%m%d %H:%M:%S',filename=None)
-    
+   
     # Get data in DF.
     # Prepare data query. Minimum elements for aggregation appended
     try:
@@ -136,11 +136,11 @@ def main(sid_dck, year, month, dir_data = None, db_con = None,
         kwargs = {'dir_data' : dir_data, 'db_con' : db_con,'cdm_id' : cdm_id,
                   'columns' : elements,'filter_by_values' : filter_by_values, 
                   'filter_by_range' : filter_by_range }
-                      
+
         df = query_cdm.query_monthly_table(sid_dck, table, year, month, **kwargs)
     except:
         logging.error('Error querying data', exc_info=True)
-        sys.exit(1)
+        return 1
     
     # Prepare aggregation
     canvas = create_canvas(properties.REGIONS.get(region),properties.DEGREE_FACTOR_RESOLUTION.get(resolution))
@@ -173,7 +173,7 @@ def main(sid_dck, year, month, dir_data = None, db_con = None,
         time.sleep(6)
         xarr.to_netcdf(os.path.join(dir_out,sid_dck,nc_name),encoding = encodings,mode='w')
             
-    return
+    return 0
 
 if __name__ == "__main__":
     
@@ -191,6 +191,8 @@ if __name__ == "__main__":
     dir_out = config['dir_out']
     
     tables = config.get('tables')
+    no_tables = len(tables)
+    no_failed = 0
     for table in tables:
         logging.info('Aggregating table {}'.format(table))
         # Make table specs in json files (table.element) tuples
@@ -201,4 +203,12 @@ if __name__ == "__main__":
             if kwargs.get(filter_type):
                 for kv in list(kwargs.get(filter_type).items()):
                     kwargs[filter_type][(kv[0].split('.')[0],kv[0].split('.')[1])] = kwargs[filter_type].pop(kv[0])
-        main(sid_dck,year, month, **kwargs)
+        status = main(sid_dck,year, month, **kwargs)
+        if status == 1:
+            logging.warning('No summarie produced for table: {}'.format(table))
+        no_failed += status
+    if no_failed == no_tables:
+        logging.error('No table files found')
+        sys.exit(1)
+    else:
+        sys.exit(0)
