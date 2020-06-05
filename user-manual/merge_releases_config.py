@@ -24,7 +24,7 @@ def get_releases():
         dataset_name_list.append(dataset_name)
         release_level2  = input('Input path to level2 configuration file: ')
         release_level2_list.append(release_level2)
-e
+
     print('Release and dataset names and level2 configuration paths are:')
     print(release_name_list)
     print(dataset_name_list)
@@ -44,22 +44,29 @@ out_path = input('Input filename and path for output: ')
 
 merge_dicts = {}
 for release_name,level2_path in zip(release_names,release_level2_list):
-    merge_dicts[release_name] = json.load(level2_path)
+    with open(level2_path,'r') as f0:
+        merge_dicts[release_name] = json.load(f0)
 
 merged_dict = {"release_names" : release_names,"dataset_names" : dataset_names}
-
-global_init = min([ v.get('year_init') for v in merge_dicts.values() ])
-global_end = max([ v.get('year_end') for v in merge_dicts.values() ])
+try:
+    global_init = min(filter(None,[ int(v.get('year_init')) for v in merge_dicts.values() ]))
+except:
+    global_init = None
+try:
+    global_end = max(filter(None,[ int(v.get('year_end')) for v in merge_dicts.values() ]))
+except:
+    global_end = None
 
 merged_dict['year_init'] = global_init
 merged_dict['year_end'] = global_end
 
-params_exlude = { k:v.get('params_exclude') for k,v in merge_dicts }
+params_exclude = { k:v.get('params_exclude') for k,v in merge_dicts.items() }
+merged_dict['params_exclude'] =  params_exclude
 
-for k,v in merge_dicts:
-    k.pop('year_init')
-    k.pop('year_end')
-    k.pop('params_exclude')
+for k,v in merge_dicts.items():
+    v.pop('year_init',None)
+    v.pop('year_end',None)
+    v.pop('params_exclude',None)
 
 global_sd_list = []
 for k,v in merge_dicts.items():
@@ -69,11 +76,13 @@ global_sd = list(set(global_sd_list))
 
 for sd in global_sd:
     merged_dict[sd] = {}
-    release_in = [ x for x in release_names if merge_dicts[release_names].get(sd) ]
-    merged_dict[sd]['year_init'] = { release:merge_dicts[release][sd]['year_init'] for release in release_in }
-    merged_dict[sd]['year_end'] = { release:merge_dicts[release][sd]['year_end'] for release in release_in }
+    release_in = [ x for x in release_names if merge_dicts[x].get(sd) ]
+    merged_dict[sd]['year_init'] = { release:int(merge_dicts[release][sd]['year_init']) for release in release_in }
+    merged_dict[sd]['year_end'] = { release:int(merge_dicts[release][sd]['year_end']) for release in release_in }
     merged_dict[sd]['exclude'] = { release:merge_dicts[release][sd]['exclude'] for release in release_in }
     merged_dict[sd]['params_exclude'] = { release:merge_dicts[release][sd]['params_exclude'] for release in release_in }
+    if len(list(set(merged_dict[sd]['exclude'].values()))) > 1:
+        print('WARNING, EXCLUDE OPTION DIFFERS BETWEEN DATA RELEASES SID-DCK {}'.format(sd))
   
 with open(out_path,'w') as fO:
     json.dump(merged_dict,fO,indent=4)
