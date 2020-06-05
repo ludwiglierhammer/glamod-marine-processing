@@ -302,13 +302,13 @@
     "064-735": {
         "year_init": "1936",
         "year_end": "1949",
-        "exclude": false,
+        "exclude": true,
         "params_exclude": []
     },
     "065-735": {
         "year_init": "1947",
         "year_end": "1949",
-        "exclude": false,
+        "exclude": true,
         "params_exclude": []
     },
     "069-701": {
