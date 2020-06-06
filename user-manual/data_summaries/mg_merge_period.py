@@ -76,7 +76,8 @@ def main(dir_data, nc_prefix = None, nc_suffix = None, start = None, stop = None
         logging.warning('No nc files found for files {}'.format(pattern)) 
         return 1,1   
 
-    dataset = xr.concat(dataset_list,'time')      
+    dataset = xr.concat(dataset_list,'time')
+    dataset = dataset.sortby('time')      
     # Aggregate each aggregation correspondingly....
     merged = {}
     aggregations = list(dataset.data_vars.keys())
