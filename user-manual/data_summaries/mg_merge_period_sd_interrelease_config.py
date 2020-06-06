@@ -58,9 +58,9 @@ for sid_dck in process_list:
     
     sd_params_exclude = deepcopy(params_exclude_global)
     sd_params_exclude.extend(level2_config.get(sid_dck).get('params_exclude',[]))
-    sd_params_exclude = list(set(sd_params_exclude))   
+    sd_params_exclude = list(set(sd_params_exclude))
     for param in sd_params_exclude:
-        sd_config.tables.remove('param')
+        sd_config['tables'].remove(param)
         
     dir_out = os.path.join(sd_config.get('dir_out'),sid_dck)
     
