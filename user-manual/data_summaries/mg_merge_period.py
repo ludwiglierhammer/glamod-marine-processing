@@ -21,8 +21,9 @@ def main(dir_data, nc_prefix = None, nc_suffix = None, start = None, stop = None
     
     Arguments
     ---------
-    dir_data : str
-        The path to the nc monthly files
+    dir_data : str,list
+        The path to the nc monthly files. For aggregations on data periods from
+        multiple datapaths insert as list.
     
     Keyword arguments
     -----------------
@@ -30,9 +31,9 @@ def main(dir_data, nc_prefix = None, nc_suffix = None, start = None, stop = None
         The nc filename field preceding the monthly id (prefix-yyyy-mm*)
     nc_suffix : str, optional
         The nc filename field after the monthly id (*yyyy-mm-suffix)
-    start: datetime, optional
+    start: datetime,list of datetimes, optional
         First month to include
-    stop: datetime, optional
+    stop: datetime, list of datetimes,optional
         Last month to include
     out_id : str
         Basename for output filename
@@ -44,20 +45,38 @@ def main(dir_data, nc_prefix = None, nc_suffix = None, start = None, stop = None
                     level=logging.INFO,datefmt='%Y%m%d %H:%M:%S',filename=None)
 
     
-    pattern = '-'.join(filter(None,[nc_prefix,'????-??',nc_suffix])) + '.nc'      
-    nc_files = glob.glob(os.path.join(dir_data,pattern))
+    pattern = '-'.join(filter(None,[nc_prefix,'????-??',nc_suffix])) + '.nc'  
 
-    if len(nc_files) == 0:
-        logging.warning('No nc files found for files {}'.format(pattern)) 
-        return 1,1
+    dir_data = dir_data if isinstance(dir_data,list) else [dir_data]
+    start = start if isinstance(start,list) else [start]
+    stop = stop if isinstance(stop,list) else [stop]
+
+    dataset_list = []
+    nc_files_counter = 0
+    for dir_datai,starti,stopi in zip(dir_data,start,stop): 
         
-    nc_files.sort()
+        nc_files = glob.glob(os.path.join(dir_datai,pattern))
+        nc_files_counter += len(nc_files)
+        
+        if len(nc_files) == 0:
+            continue
+            
+        nc_files.sort()
+        # Read all files to a single dataset
+        dataseti = xr.open_mfdataset(nc_files,concat_dim='time')
+        # See how to provde for open periods (either start or stop)
+        # Because there is no direct brace expansion in python, in glob, we do
+        # the time slice selection, is any, here....
+        if starti and stopi:
+            dataseti = dataseti.sel(time=slice(start.strftime('%Y-%m-%d'), stop.strftime('%Y-%m-%d')))
+        
+        dataset_list.append(dataseti)
+  
+    if len(nc_files_counter) == 0:
+        logging.warning('No nc files found for files {}'.format(pattern)) 
+        return 1,1   
 
-    # Read all files to a single dataset
-    dataset = xr.open_mfdataset(nc_files,concat_dim='time')
-    # See how to provde for open periods (either start or stop)
-    if start and stop:
-        dataset = dataset.sel(time=slice(start.strftime('%Y-%m-%d'), stop.strftime('%Y-%m-%d')))
+    dataset = xr.concat(dataset_list,'time')      
     # Aggregate each aggregation correspondingly....
     merged = {}
     aggregations = list(dataset.data_vars.keys())
@@ -88,21 +107,28 @@ def main(dir_data, nc_prefix = None, nc_suffix = None, start = None, stop = None
 
 if __name__ == "__main__":
     
-
+    # Dir data is now the direct path to the files to merge
+    # It can be either a str (a release), or a dictionary 
+    # (appending from different releases)
     config_file = sys.argv[1]
     
     with open(config_file) as cf:
         kwargs = json.load(cf)
         
-    dir_data = os.path.join(kwargs['dir_data'],kwargs['sid_dck'])
+    dir_data = kwargs['dir_data']
     
-    kwargs.pop('dir_data')
-    kwargs.pop('sid_dck')
-    
+    # Start | stop now either integer or list, depending on dir_data
     if kwargs.get('start'):
-        kwargs['start'] = datetime.datetime(kwargs['start'],1,1)
+        if isinstance(kwargs.get('start'),list):
+            kwargs['start'] = [ datetime.datetime(x,1,1) for x in kwargs['start'] ]
+        else:
+            kwargs['start'] = datetime.datetime(kwargs['start'],1,1)
     if kwargs.get('stop'):
-        kwargs['stop'] = datetime.datetime(kwargs['stop'],12,1)
+        if isinstance(kwargs.get('stop'),list):
+            kwargs['stop'] = [ datetime.datetime(x,1,1) for x in kwargs['stop'] ]
+        else:
+            kwargs['stop'] = datetime.datetime(kwargs['stop'],12,31)
+        
 
     if not kwargs.get('dir_out'):
         kwargs['dir_out'] = dir_data
