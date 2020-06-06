@@ -12,8 +12,8 @@ from copy import deepcopy
 
 # FUNCTIONS -------------------------------------------------------------------
 def config_element():
-    sd_config.update({'dir_data':dir_data,'dir_out':dir_out,
-                      'start':start,'stop':stop})
+    sd_config.update({'dir_data':sd_dir_data,'dir_out':sd_dir_out,
+                      'start':sd_start,'stop':sd_stop})
     
     config_file = os.path.join(sd_log_dir,run_id + '.input')
     with open(config_file,'w') as fO:
@@ -62,16 +62,16 @@ for sid_dck in process_list:
     for param in sd_params_exclude:
         sd_config['tables'].remove(param)
         
-    dir_out = os.path.join(sd_config.get('dir_out'),sid_dck)
+    sd_dir_out = os.path.join(sd_config.get('dir_out'),sid_dck)
     
-    sd_data_dir = []
+    sd_dir_data = []
     sd_start = []
     sd_stop = []
     for release in sd_release:
         dir_data = sd_config.get('dir_data').get(release)
-        start = level2_config.get(sid_dck).get('year_init')
-        stop = level2_config.get(sid_dck).get('year_end')
-        sd_data_dir.append(os.path.join(dir_data,sid_dck))
+        start = level2_config.get(sid_dck).get('year_init').get(release)
+        stop = level2_config.get(sid_dck).get('year_end').get(release)
+        sd_dir_data.append(os.path.join(dir_data,sid_dck))
         sd_start.append(start)
         sd_stop.append(stop)
     
