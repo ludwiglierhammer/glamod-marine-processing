@@ -60,7 +60,10 @@ except:
 merged_dict['year_init'] = global_init
 merged_dict['year_end'] = global_end
 
-params_exclude = { k:v.get('params_exclude') for k,v in merge_dicts.items() }
+params_exclude = []
+for k,v in merge_dicts.items():
+    params_exclude.extend(v.get('params_exclude'),[])
+params_exclude = list(set(params_exclude))
 merged_dict['params_exclude'] =  params_exclude
 
 for k,v in merge_dicts.items():
@@ -80,9 +83,14 @@ for sd in global_sd:
     merged_dict[sd]['year_init'] = { release:int(merge_dicts[release][sd]['year_init']) for release in release_in }
     merged_dict[sd]['year_end'] = { release:int(merge_dicts[release][sd]['year_end']) for release in release_in }
     merged_dict[sd]['exclude'] = { release:merge_dicts[release][sd]['exclude'] for release in release_in }
-    merged_dict[sd]['params_exclude'] = { release:merge_dicts[release][sd]['params_exclude'] for release in release_in }
+    merged_dict[sd]['params_exclude'] = []
+    for release in release_in:
+        merged_dict[sd]['params_exclude'].extend(merge_dicts[release][sd].get('params_exclude',[]))    
+    merged_dict[sd]['params_exclude'] = list(set(merged_dict[sd]['params_exclude']))
     if len(list(set(merged_dict[sd]['exclude'].values()))) > 1:
         print('WARNING, EXCLUDE OPTION DIFFERS BETWEEN DATA RELEASES SID-DCK {}'.format(sd))
+    else:
+        merged_dict[sd]['exclude'] = list(merged_dict[sd]['exclude'].values())[0]
   
 with open(out_path,'w') as fO:
     json.dump(merged_dict,fO,indent=4)
