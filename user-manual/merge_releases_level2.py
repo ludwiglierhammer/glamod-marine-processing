@@ -48,21 +48,15 @@ for release_name,level2_path in zip(release_names,release_level2_list):
         merge_dicts[release_name] = json.load(f0)
 
 merged_dict = {"release_names" : release_names,"dataset_names" : dataset_names}
-try:
-    global_init = min(filter(None,[ int(v.get('year_init')) for v in merge_dicts.values() ]))
-except:
-    global_init = None
-try:
-    global_end = max(filter(None,[ int(v.get('year_end')) for v in merge_dicts.values() ]))
-except:
-    global_end = None
+global_init = min([ int(v.get('year_init')) for v in merge_dicts.values() ])
+global_end = max([ int(v.get('year_end')) for v in merge_dicts.values() ])
 
 merged_dict['year_init'] = global_init
 merged_dict['year_end'] = global_end
 
 params_exclude = []
 for k,v in merge_dicts.items():
-    params_exclude.extend(v.get('params_exclude'),[])
+    params_exclude.extend(v.get('params_exclude',[]))
 params_exclude = list(set(params_exclude))
 merged_dict['params_exclude'] =  params_exclude
 
