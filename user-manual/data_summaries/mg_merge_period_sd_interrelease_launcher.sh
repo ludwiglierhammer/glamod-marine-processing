@@ -21,7 +21,7 @@ pyscript=$um_code_directory/data_summaries/mg_merge_period.py
 pyhdlr=$um_code_directory/data_summaries/process_output_hdlr.py
 run_id=$(basename $script_config_file .json)
 
-job_time_hhmm=02:00
+job_time_hhmm=03:00
 job_memo_mbi=8000
 
 
