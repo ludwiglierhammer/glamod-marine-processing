@@ -625,5 +625,5 @@
     },
     "params_exclude": ["observations-wbt"],
     "year_init": 1851,
-    "year_end": null
+    "year_end": 1949
 }
