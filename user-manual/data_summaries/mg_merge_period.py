@@ -110,9 +110,6 @@ def main(dir_data, nc_prefix = None, nc_suffix = None, start = None, stop = None
         nc_name = out_id + '.nc' 
         xarr.to_netcdf(os.path.join(dir_out,nc_name),encoding = encodings)
     
-    if dir_out:
-        nc_name = out_id + '_dataset.nc'
-        dataset.to_netcdf(os.path.join(dir_out,nc_name),encoding = encodings)    
     return 0,xarr
 
 if __name__ == "__main__":
