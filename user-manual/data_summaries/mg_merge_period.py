@@ -48,8 +48,14 @@ def main(dir_data, nc_prefix = None, nc_suffix = None, start = None, stop = None
     pattern = '-'.join(filter(None,[nc_prefix,'????-??',nc_suffix])) + '.nc'  
 
     dir_data = dir_data if isinstance(dir_data,list) else [dir_data]
-    start = start if isinstance(start,list) else [start]
-    stop = stop if isinstance(stop,list) else [stop]
+    if not start:
+        start = [None]*len(dir_data)
+    else:
+        start = start if isinstance(start,list) else [start]
+    if not stop:
+        stop = [None]*len(dir_data)
+    else:
+        stop = stop if isinstance(stop,list) else [stop]
 
     dataset_list = []
     nc_files_counter = 0
@@ -68,11 +74,11 @@ def main(dir_data, nc_prefix = None, nc_suffix = None, start = None, stop = None
         # Because there is no direct brace expansion in python, in glob, we do
         # the time slice selection, is any, here....
         if starti and stopi:
-            dataseti = dataseti.sel(time=slice(start.strftime('%Y-%m-%d'), stop.strftime('%Y-%m-%d')))
+            dataseti = dataseti.sel(time=slice(starti.strftime('%Y-%m-%d'), stopi.strftime('%Y-%m-%d')))
         
         dataset_list.append(dataseti)
   
-    if len(nc_files_counter) == 0:
+    if nc_files_counter == 0:
         logging.warning('No nc files found for files {}'.format(pattern)) 
         return 1,1   
 
@@ -104,6 +110,9 @@ def main(dir_data, nc_prefix = None, nc_suffix = None, start = None, stop = None
         nc_name = out_id + '.nc' 
         xarr.to_netcdf(os.path.join(dir_out,nc_name),encoding = encodings)
     
+    if dir_out:
+        nc_name = out_id + '_dataset.nc'
+        dataset.to_netcdf(os.path.join(dir_out,nc_name),encoding = encodings)    
     return 0,xarr
 
 if __name__ == "__main__":
@@ -115,7 +124,7 @@ if __name__ == "__main__":
     
     with open(config_file) as cf:
         kwargs = json.load(cf)
-        
+    
     dir_data = kwargs['dir_data']
     
     # Start | stop now either integer or list, depending on dir_data
@@ -126,7 +135,7 @@ if __name__ == "__main__":
             kwargs['start'] = datetime.datetime(kwargs['start'],1,1)
     if kwargs.get('stop'):
         if isinstance(kwargs.get('stop'),list):
-            kwargs['stop'] = [ datetime.datetime(x,1,1) for x in kwargs['stop'] ]
+            kwargs['stop'] = [ datetime.datetime(x,12,31) for x in kwargs['stop'] ]
         else:
             kwargs['stop'] = datetime.datetime(kwargs['stop'],12,31)
         
@@ -138,7 +147,7 @@ if __name__ == "__main__":
     non_avail_tables = 0
     for table in kwargs.get('tables'):
         logging.info('Merging table: {}'.format(table))
-        kwargs_table = { x:kwargs.get(x) for x in ['nc_prefix','nc_suffix','start','stop','out_id','dir_out']}
+        kwargs_table = { x:kwargs.get(x) for x in ['start','stop','dir_out']}
         kwargs_table['nc_prefix'] =kwargs.get(table).get('nc_prefix')
         kwargs_table['nc_suffix'] =kwargs.get(table).get('nc_suffix')
         kwargs_table['out_id'] =kwargs.get(table).get('out_id')
