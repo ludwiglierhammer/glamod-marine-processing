@@ -92,7 +92,8 @@ def main(sid_dck, year, month, dir_data = None, db_con = None,
         db_con to tables (not avail yet, nor its other filters: year, month...)
     cdm_id : str, optional
         String with the CDM table partition identifier (if any)
-        (<table>-<year>-<month>-<cdm_id>.psv)
+        (<table>-<year>-<month>-<cdm_id>.psv).Can take wildcards but will fail 
+        if more than 1 file found with pattern
     table : str
         CDM table to aggregate
     element : str, optional
@@ -205,7 +206,7 @@ if __name__ == "__main__":
                     kwargs[filter_type][(kv[0].split('.')[0],kv[0].split('.')[1])] = kwargs[filter_type].pop(kv[0])
         status = main(sid_dck,year, month, **kwargs)
         if status == 1:
-            logging.warning('No summarie produced for table: {}'.format(table))
+            logging.warning('No summary produced for table: {}'.format(table))
         no_failed += status
     if no_failed == no_tables:
         logging.error('No table files found')
