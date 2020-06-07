@@ -78,7 +78,8 @@ for sid_dck in process_list:
     i_files = glob.glob(os.path.join(sd_log_dir, run_id + '.input'))
     for i_file in i_files:
         os.remove(i_file)
-        
+    
+    ok_files = glob.glob(os.path.join(sd_log_dir,run_id + '.ok'))    
     failed_files = glob.glob(os.path.join(sd_log_dir,run_id + '.failed'))
     if failed_only:
         if len(failed_files) > 0:
@@ -87,6 +88,9 @@ for sid_dck in process_list:
         else:
             print(sid_dck,': not failed job')
     else:
+        if len(ok_files) > 0:
+            for x in ok_files:
+                os.remove(x)
         print(sid_dck)               
         config_element()
         
