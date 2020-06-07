@@ -91,7 +91,14 @@ def get_data_from_file(sid_dck, table, year, month, dir_data, **kwargs):
                 filter_cols.append(FILTER_PIVOT)
                 filter_cols = list(set(filter_cols))        
                 table_file = '-'.join(filter(None,[filter_table,str(year),str(month).zfill(2),kwargs.get('cdm_id')])) + '.psv'
-                table_path = os.path.join(dir_data,sid_dck,table_file)
+                table_paths = glob.glob(os.path.join(dir_data,sid_dck,table_file))
+                if len(table_paths) > 1:
+                    print('ERROR: Multiple files found for table partition {}'.format(table_file))
+                    return pd.DataFrame()
+                elif len(table_paths) == 0:
+                    print('ERROR: No files found for table partition {}'.format(table_file))
+                    return pd.DataFrame()
+                table_path = table_paths[0]
                 iter_csv = pd.read_csv(table_path, usecols=filter_cols,iterator=True, chunksize=300000,delimiter=properties.CDM_DELIMITER)
                 df_filter = pd.concat([chunk.query(query)[FILTER_PIVOT] for chunk in iter_csv])
         else:
@@ -110,7 +117,10 @@ def get_data_from_file(sid_dck, table, year, month, dir_data, **kwargs):
         table_paths = glob.glob(os.path.join(dir_data,sid_dck,table_file))
         if len(table_paths) > 1:
             print('ERROR: Multiple files found for table partition {}'.format(table_file))
-            sys.exit(1)
+            return pd.DataFrame()
+        elif len(table_paths) == 0:
+            print('ERROR: No files found for table partition {}'.format(table_file))
+            return pd.DataFrame()
         table_path = table_paths[0]
         iter_csv = pd.read_csv(table_path, usecols=cols,iterator=True, chunksize=300000,delimiter=properties.CDM_DELIMITER)
         df_list = []
