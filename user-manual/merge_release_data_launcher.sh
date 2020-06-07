@@ -20,7 +20,7 @@ pyscript="$um_code_directory/merge_release_data.py $data_directory $um_version $
 pyhdlr=$um_code_directory/process_output_hdlr.py
 run_id=$(basename $0 .sh)
 log_dir=$data_directory"/user_manual/"$um_version"/log/merge_release_data"
-if [ ! -d $logdir ]; then mkdir -p $log_dir; fi
+if [ ! -d $log_dir ]; then mkdir -p $log_dir; fi
 
 job_time_hhmm=00:30
 job_memo_mbi=500
@@ -28,7 +28,7 @@ job_memo_mbi=500
 for sid_dck in $(awk '{print $1}' $process_list_file)
 do
    sid_dck_log_dir=$log_dir/$sid_dck
-   if [ ! -d $sid_dck_log_dir ]; then mkdir $sid_dck_log_dir; fi
+   if [ ! -d $sid_dck_log_dir ]; then mkdir -p $sid_dck_log_dir; fi
 
    jobid=$(nk_jobid bsub -J $sid_dck -oo $sid_dck_log_dir/$run_id".o" -eo $sid_dck_log_dir/$run_id".o" -q short-serial -W $job_time_hhmm -M $job_memo_mbi -R "rusage[mem=$job_memo_mbi]" python $pyscript $sid_dck)
 
