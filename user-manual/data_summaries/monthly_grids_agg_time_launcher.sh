@@ -16,9 +16,9 @@ script_config_file=$(readlink --canonicalize  $2)
 process_list_file=$(readlink --canonicalize  $3)
 failed_only=$4
 
-pyconfig=$um_code_directory/data_summaries/mg_merge_period_sd_interrelease_config.py
-pyscript=$um_code_directory/data_summaries/mg_merge_period.py
-pyhdlr=$um_code_directory/data_summaries/process_output_hdlr.py
+pyconfig=$um_code_directory/data_summaries/monthly_grids_agg_time_config.py
+pyscript=$um_code_directory/data_summaries/monthly_grids_agg_time.py
+pyhdlr=$um_code_directory/process_output_hdlr.py
 run_id=$(basename $script_config_file .json)
 
 job_time_hhmm=06:00

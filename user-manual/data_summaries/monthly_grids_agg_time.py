@@ -8,7 +8,6 @@ import xarray as xr
 import datetime
 import logging
 import glob
-from copy import deepcopy
 
 from data_summaries import properties
  
@@ -21,9 +20,8 @@ def main(dir_data, nc_prefix = None, nc_suffix = None, start = None, stop = None
     
     Arguments
     ---------
-    dir_data : str,list
-        The path to the nc monthly files. For aggregations on data periods from
-        multiple datapaths insert as list.
+    dir_data : str
+        The path to the nc monthly files. 
     
     Keyword arguments
     -----------------
@@ -31,9 +29,9 @@ def main(dir_data, nc_prefix = None, nc_suffix = None, start = None, stop = None
         The nc filename field preceding the monthly id (prefix-yyyy-mm*)
     nc_suffix : str, optional
         The nc filename field after the monthly id (*yyyy-mm-suffix)
-    start: datetime,list of datetimes, optional
+    start: datetime, optional
         First month to include
-    stop: datetime, list of datetimes,optional
+    stop: datetime, optional
         Last month to include
     out_id : str
         Basename for output filename
@@ -47,42 +45,22 @@ def main(dir_data, nc_prefix = None, nc_suffix = None, start = None, stop = None
     
     pattern = '-'.join(filter(None,[nc_prefix,'????-??',nc_suffix])) + '.nc'  
 
-    dir_data = dir_data if isinstance(dir_data,list) else [dir_data]
-    if not start:
-        start = [None]*len(dir_data)
-    else:
-        start = start if isinstance(start,list) else [start]
-    if not stop:
-        stop = [None]*len(dir_data)
-    else:
-        stop = stop if isinstance(stop,list) else [stop]
-
-    dataset_list = []
-    nc_files_counter = 0
-    for dir_datai,starti,stopi in zip(dir_data,start,stop): 
         
-        nc_files = glob.glob(os.path.join(dir_datai,pattern))
-        nc_files_counter += len(nc_files)
-        
-        if len(nc_files) == 0:
-            continue
-            
-        nc_files.sort()
-        # Read all files to a single dataset
-        dataseti = xr.open_mfdataset(nc_files,concat_dim='time')
-        # See how to provde for open periods (either start or stop)
-        # Because there is no direct brace expansion in python, in glob, we do
-        # the time slice selection, is any, here....
-        if starti and stopi:
-            dataseti = dataseti.sel(time=slice(starti.strftime('%Y-%m-%d'), stopi.strftime('%Y-%m-%d')))
-        
-        dataset_list.append(dataseti)
-  
-    if nc_files_counter == 0:
+    nc_files = glob.glob(os.path.join(dir_data,pattern))
+    
+    if len(nc_files) == 0:
         logging.warning('No nc files found for files {}'.format(pattern)) 
-        return 1,1   
+        return 1,1
+            
+    nc_files.sort()
+    # Read all files to a single dataset
+    dataset = xr.open_mfdataset(nc_files,concat_dim='time')
+    # See how to provde for open periods (either start or stop)
+    # Because there is no direct brace expansion in python, in glob, we do
+    # the time slice selection, is any, here....
+    if start and stop:
+        dataset = dataset.sel(time=slice(start.strftime('%Y-%m-%d'), stop.strftime('%Y-%m-%d')))
 
-    dataset = xr.concat(dataset_list,'time')
     dataset = dataset.sortby('time')      
     # Aggregate each aggregation correspondingly....
     merged = {}
@@ -126,17 +104,10 @@ if __name__ == "__main__":
     
     # Start | stop now either integer or list, depending on dir_data
     if kwargs.get('start'):
-        if isinstance(kwargs.get('start'),list):
-            kwargs['start'] = [ datetime.datetime(x,1,1) for x in kwargs['start'] ]
-        else:
-            kwargs['start'] = datetime.datetime(kwargs['start'],1,1)
+        kwargs['start'] = datetime.datetime(kwargs['start'],1,1)
     if kwargs.get('stop'):
-        if isinstance(kwargs.get('stop'),list):
-            kwargs['stop'] = [ datetime.datetime(x,12,31) for x in kwargs['stop'] ]
-        else:
-            kwargs['stop'] = datetime.datetime(kwargs['stop'],12,31)
+        kwargs['stop'] = datetime.datetime(kwargs['stop'],12,31)
         
-
     if not kwargs.get('dir_out'):
         kwargs['dir_out'] = dir_data
         
