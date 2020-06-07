@@ -108,7 +108,7 @@ def get_data_from_file(sid_dck, table, year, month, dir_data, **kwargs):
             cols = None   
         table_file = '-'.join(filter(None,[table,str(year),str(month).zfill(2),kwargs.get('cdm_id')])) + '.psv'
         table_paths = glob.glob(os.path.join(dir_data,sid_dck,table_file))
-        if len(table_paths)>0:
+        if len(table_paths) > 1:
             print('ERROR: Multiple files found for table partition {}'.format(table_file))
             sys.exit(1)
         table_path = table_paths[0]
