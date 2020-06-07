@@ -143,6 +143,9 @@ def main(sid_dck, year, month, dir_data = None, db_con = None,
         logging.error('Error querying data', exc_info=True)
         return 1
     
+    if len(df) == 0:
+        logging.error('Query returned no data', exc_info=True)
+        return 1 
     # Prepare aggregation
     canvas = create_canvas(properties.REGIONS.get(region),properties.DEGREE_FACTOR_RESOLUTION.get(resolution))
     if not element:
