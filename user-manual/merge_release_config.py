@@ -13,8 +13,8 @@ from datetime import datetime
 
 def get_releases():
     release_name_list = []
-    dataset_name_dict = []
-    release_level2_dict = []
+    dataset_name_dict = {}
+    release_level2_dict = {}
     while True:
         release_name = input('Input name for release: ')
         if release_name == '':
