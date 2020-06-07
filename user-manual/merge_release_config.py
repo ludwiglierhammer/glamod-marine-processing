@@ -13,41 +13,42 @@ from datetime import datetime
 
 def get_releases():
     release_name_list = []
-    dataset_name_list = []
-    release_level2_list = []
+    dataset_name_dict = []
+    release_level2_dict = []
     while True:
         release_name = input('Input name for release: ')
         if release_name == '':
             break
         release_name_list.append(release_name)
         dataset_name  = input('Input dataset name: ')
-        dataset_name_list.append(dataset_name)
+        dataset_name_dict[release_name] = dataset_name
         release_level2  = input('Input path to level2 configuration file: ')
-        release_level2_list.append(release_level2)
+        release_level2_dict[release_name] = release_level2
 
     print('Release and dataset names and level2 configuration paths are:')
     print(release_name_list)
-    print(dataset_name_list)
-    print(release_level2_list)
+    print(dataset_name_dict)
+    print(release_level2_dict)
     i = input('Is this correct? Continue? (y/n)')
     if i == 'y':
-        return release_name_list, dataset_name_list, release_level2_list
+        return release_name_list, dataset_name_dict, release_level2_dict
     else:
         return sys.exit(1)
 
   
 # GET INPUT ARGUMENTS
-release_names,dataset_names,release_level2_list = get_releases()
+release_names,dataset_names_dict,release_level2_dict = get_releases()
 
 # GET OUTPUT PATH
 out_path = input('Input filename and path for output: ')
 
 merge_dicts = {}
-for release_name,level2_path in zip(release_names,release_level2_list):
+for release_name in release_names:
+    level2_path = release_level2_dict[release_name]
     with open(level2_path,'r') as f0:
         merge_dicts[release_name] = json.load(f0)
 
-merged_dict = {"release_names" : release_names,"dataset_names" : dataset_names}
+merged_dict = {"release_names" : release_names,"dataset_names" : dataset_names_dict}
 global_init = min([ int(v.get('year_init')) for v in merge_dicts.values() ])
 global_end = max([ int(v.get('year_end')) for v in merge_dicts.values() ])
 
