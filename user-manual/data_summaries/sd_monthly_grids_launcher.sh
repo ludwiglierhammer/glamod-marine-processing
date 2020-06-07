@@ -26,13 +26,15 @@ job_memo_mbi=8000
 
 python $pyconfig $dir_log $script_config_file $process_list_file $failed_only
 
+echo "LOG DIR IS $dir_log"
+echo "SCRATCH DIR IS $scratch_directory/$run_id"
+
 for sid_dck in $(awk '{print $1}' $process_list_file)
 do
   sid_dck_log_dir=$dir_log/$sid_dck
   arrl=$(ls -1q $sid_dck_log_dir/*-$run_id".input" 2> /dev/null | wc -l)
 
-  scratch_sid=$scratch_directory/$release/$dataset/$run_id/$sid_dck
-  echo "Scratch directory is $scratch_sid"
+  scratch_sid=$scratch_directory/$run_id/$sid_dck
   if [ ! -d $scratch_sid ]
   then
     mkdir -p $scratch_sid
