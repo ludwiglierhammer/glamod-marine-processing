@@ -53,12 +53,15 @@ sd_level2_paths = { k:os.path.join(params.data_path,k,v,'level2',params.sd,'*.ps
 # Make a clean level2 version in user manual
 sd_level2_path_um = os.path.join(params.data_path,'user_manual',params.um_version,'level2',params.sd)
 sd_level2_log_path_um = os.path.join(params.data_path,'user_manual',params.um_version,'level2','log',params.sd)
+sd_level2_ql_path_um = os.path.join(params.data_path,'user_manual',params.um_version,'level2','quicklooks',params.sd)
 if os.path.isdir(sd_level2_path_um):
     shutil.rmtree(sd_level2_path_um)
     shutil.rmtree(sd_level2_log_path_um)
+    shutil.rmtree(sd_level2_ql_path_um)
     
 os.makedirs(sd_level2_path_um, exist_ok=True)
 os.makedirs(sd_level2_log_path_um, exist_ok=True)
+os.makedirs(sd_level2_ql_path_um, exist_ok=True)
 # Now link from all releases there
 for release in sd_release_list:
     call(' '.join(['cp -s',sd_level2_paths.get(release),sd_level2_path_um]),shell=True)    
