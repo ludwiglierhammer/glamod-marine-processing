@@ -13,8 +13,8 @@ from datetime import datetime
 # FUNCTIONS -------------------------------------------------------------------
 def config_element():
     script_config.update({'sid_dck':sid_dck})
-    script_config.update({'year':yyyy})
-    script_config.update({'month':mm})
+    script_config.update({'year':int(yyyy)})
+    script_config.update({'month':int(mm)})
     ai_config_file = os.path.join(sid_dck_log_dir,str(ai) + '-' + run_id + '.input')
     with open(ai_config_file,'w') as fO:
         json.dump(script_config,fO,indent = 4)
@@ -53,13 +53,12 @@ for sid_dck in process_list:
 
     ok_files = glob.glob(os.path.join(sid_dck_log_dir,'*-' + run_id + '.ok'))
     failed_files = glob.glob(os.path.join(sid_dck_log_dir,'*-' + run_id + '.failed'))
-    header_files = glob.glob(os.path.join(script_config.dir_data,sid_dck,'-'.join(['header','????','??','*']) + '.psv'))
+    header_files = glob.glob(os.path.join(script_config['dir_data'],sid_dck,'-'.join(['header','????','??','*']) + '.psv'))
     if failed_only:
         if len(failed_files) > 0:
             print('{0}: found {1} failed jobs'.format(sid_dck,str(len(failed_files))))
             for failed_file in failed_files:
                 yyyy,mm = os.path.basename(failed_file).split('-')[0:2]
-                dt = datetime(int(yyyy),int(mm),1)
                 config_element()
                 ai += 1
         else:
