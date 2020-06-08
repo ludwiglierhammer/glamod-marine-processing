@@ -29,6 +29,8 @@ if len(sys.argv)>1:
      update = sys.argv[3]
      source = sys.argv[4]
      release_periods_file = sys.argv[5]
+     year_init = int(sys.argv[6])
+     year_end = int(sys.argv[7])
 # -----------------------------------------------------------------------------   
 level = 'level2'
 release_path = os.path.join(data_path,release,source)
@@ -43,10 +45,18 @@ with open(release_periods_file,'r') as fO:
 
 for k in level2_dict.keys():
     level2_dict[k].update({'exclude':False,'params_exclude':[]})
+    # This is because the current version of the periods file has the periods
+    # in strings!!!!
+    level2_dict[k]['year_init'] = int(level2_dict[k]['year_init'])
+    level2_dict[k]['year_end'] = int(level2_dict[k]['year_end'])
+    if level2_dict[k]['year_init'] < year_init:
+        level2_dict[k]['year_init'] = year_init 
+    if level2_dict[k]['year_end'] > year_end:
+        level2_dict[k]['year_end'] = year_end 
     
 level2_dict['params_exclude'] = []
-level2_dict['year_init'] = None
-level2_dict['year_end'] = None
+level2_dict['year_init'] = year_init
+level2_dict['year_end'] = year_end
 
 with open(level_filename,'w') as fileObj:
     json.dump(level2_dict,fileObj,indent=4)    
