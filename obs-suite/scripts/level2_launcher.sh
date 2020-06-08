@@ -13,8 +13,8 @@ source ../setenv0.sh
 release=$1
 update=$2
 source=$3
-sid_deck_list_file=$4
-l2_file=$5
+l2_file=$4
+sid_deck_list_file=$5
 
 ffs="-"
 level=level2
