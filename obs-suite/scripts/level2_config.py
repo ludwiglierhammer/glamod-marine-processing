@@ -24,20 +24,12 @@ import json
 
 # Find command line arguments -------------------------------------------------
 if len(sys.argv)>1:
-     data_path = sys.argv[1]
-     release = sys.argv[2]
-     update = sys.argv[3]
-     source = sys.argv[4]
-     release_periods_file = sys.argv[5]
-     year_init = int(sys.argv[6])
-     year_end = int(sys.argv[7])
+     release_periods_file = sys.argv[1]
+     year_init = int(sys.argv[2])
+     year_end = int(sys.argv[3])
 # -----------------------------------------------------------------------------   
-level = 'level2'
-release_path = os.path.join(data_path,release,source)
-filename_field_sep = '-'  
-  
-level_path = os.path.join(release_path,level)  
-level_filename = os.path.join(level_path,'level2.json')
+ 
+level_filename = os.path.join('level2.json')
 
 with open(release_periods_file,'r') as fO:
     level2_dict = json.load(fO)
