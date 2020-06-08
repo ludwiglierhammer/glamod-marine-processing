@@ -180,7 +180,8 @@ def main(sid_dck, year, month, dir_data = None, db_con = None,
     return 0
 
 if __name__ == "__main__":
-    
+    logging.basicConfig(format='%(levelname)s\t[%(asctime)s](%(filename)s)\t%(message)s',
+                    level=logging.INFO,datefmt='%Y%m%d %H:%M:%S',filename=None)    
 
     config_file = sys.argv[1]
 
