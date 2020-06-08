@@ -84,8 +84,12 @@ for sd in global_sd:
     merged_dict[sd]['params_exclude'] = list(set(merged_dict[sd]['params_exclude']))
     if len(list(set(merged_dict[sd]['exclude'].values()))) > 1:
         print('WARNING, EXCLUDE OPTION DIFFERS BETWEEN DATA RELEASES SID-DCK {}'.format(sd))
+        print('SOLVE MANUALLY ON OUTPUT FILE')
     else:
         merged_dict[sd]['exclude'] = list(merged_dict[sd]['exclude'].values())[0]
+    if merged_dict[sd]['exclude']:
+        print('Removing from config file excluded source-deck excluded from data release(s): {}'.format(sd))
+        merged_dict.pop(sd)
   
 with open(out_path,'w') as fO:
     json.dump(merged_dict,fO,indent=4)
