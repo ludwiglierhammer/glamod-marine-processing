@@ -42,6 +42,7 @@ import os
 import sys
 import pandas as pd
 import glob
+import logging
 from . import properties
 
 
@@ -53,6 +54,8 @@ FILTER_PIVOT = 'report_id'
 # SOME FUNCTIONS THAT HELP ----------------------------------------------------
 
 def build_pd_query(table,**kwargs):
+    logging.basicConfig(format='%(levelname)s\t[%(asctime)s](%(filename)s)\t%(message)s',
+                    level=logging.INFO,datefmt='%Y%m%d %H:%M:%S',filename=None)
     filter_cols = []
     query_list = []
     if kwargs.get('filter_by_values'):
@@ -72,6 +75,8 @@ def build_pd_query(table,**kwargs):
     return filter_cols,' & '.join(query_list)
 
 def get_data_from_file(sid_dck, table, year, month, dir_data, **kwargs):
+    logging.basicConfig(format='%(levelname)s\t[%(asctime)s](%(filename)s)\t%(message)s',
+                    level=logging.INFO,datefmt='%Y%m%d %H:%M:%S',filename=None)
     # See if there is an external table to filter from 
     try:
         tables = []  
@@ -82,8 +87,10 @@ def get_data_from_file(sid_dck, table, year, month, dir_data, **kwargs):
         filter_tables = list(set(tables))
         if table in filter_tables:
             tables.remove(table)
-            
+
+        external_filter = False    
         if len(tables) > 0:
+            external_filter = True
             for filter_table in tables:
                 filter_cols, query = build_pd_query(filter_table,
                                     filter_by_values = kwargs.get('filter_by_values'),
@@ -93,16 +100,14 @@ def get_data_from_file(sid_dck, table, year, month, dir_data, **kwargs):
                 table_file = '-'.join(filter(None,[filter_table,str(year),str(month).zfill(2),kwargs.get('cdm_id')])) + '.psv'
                 table_paths = glob.glob(os.path.join(dir_data,sid_dck,table_file))
                 if len(table_paths) > 1:
-                    print('ERROR: Multiple files found for table partition {}'.format(table_file))
-                    return pd.DataFrame()
+                    logging.error('Multiple files found for table partition {}'.format(table_file))
+                    return 1
                 elif len(table_paths) == 0:
-                    print('ERROR: No files found for table partition {}'.format(table_file))
-                    return pd.DataFrame()
+                    logging.error('No files found for table partition {}'.format(table_file))
+                    return 1
                 table_path = table_paths[0]
                 iter_csv = pd.read_csv(table_path, usecols=filter_cols,iterator=True, chunksize=300000,delimiter=properties.CDM_DELIMITER)
                 df_filter = pd.concat([chunk.query(query)[FILTER_PIVOT] for chunk in iter_csv])
-        else:
-            df_filter = pd.Series()
             
         cols, query = build_pd_query(table,
                                     filter_by_values = kwargs.get('filter_by_values'),
@@ -116,16 +121,16 @@ def get_data_from_file(sid_dck, table, year, month, dir_data, **kwargs):
         table_file = '-'.join(filter(None,[table,str(year),str(month).zfill(2),kwargs.get('cdm_id')])) + '.psv'
         table_paths = glob.glob(os.path.join(dir_data,sid_dck,table_file))
         if len(table_paths) > 1:
-            print('ERROR: Multiple files found for table partition {}'.format(table_file))
-            return pd.DataFrame()
+            logging.error('Multiple files found for table partition {}'.format(table_file))
+            return 1
         elif len(table_paths) == 0:
-            print('ERROR: No files found for table partition {}'.format(table_file))
-            return pd.DataFrame()
+            logging.error('ERROR: No files found for table partition {}'.format(table_file))
+            return 1
         table_path = table_paths[0]
         iter_csv = pd.read_csv(table_path, usecols=cols,iterator=True, chunksize=300000,delimiter=properties.CDM_DELIMITER)
         df_list = []
         for chunk in iter_csv:
-            if len(df_filter) > 0:
+            if external_filter:
                 chunk = chunk.loc[chunk[FILTER_PIVOT].isin(df_filter)]
             if len(query) > 0:
                 chunk = chunk.query(query)
@@ -138,6 +143,7 @@ def get_data_from_file(sid_dck, table, year, month, dir_data, **kwargs):
         exc_type, exc_obj, exc_tb = sys.exc_info()
         fname = os.path.split(exc_tb.tb_frame.f_code.co_filename)[1]
         print(exc_type, fname, exc_tb.tb_lineno)
+        logging.error('Querying data from file', exc_info=True)
         
     return df
     
@@ -182,7 +188,8 @@ def query_monthly_table(sid_dck, table, year, month, dir_data = None,
         Dictionary with the {(table,element) :[ini, end]} pairs to filter the 
         data with. 
     """
-    
+    logging.basicConfig(format='%(levelname)s\t[%(asctime)s](%(filename)s)\t%(message)s',
+                    level=logging.INFO,datefmt='%Y%m%d %H:%M:%S',filename=None) 
     # See this approach to read the data. With this for buoy data large file
     # the normal approach took more or less thes same. But probably
     # we'd benefit here with larger files or column selection...? With all
