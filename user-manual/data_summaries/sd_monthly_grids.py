@@ -139,13 +139,13 @@ def main(sid_dck, year, month, dir_data = None, db_con = None,
                   'filter_by_range' : filter_by_range }
 
         df = query_cdm.query_monthly_table(sid_dck, table, year, month, **kwargs)
+        if len(df) == 0:
+            logging.error('Query returned no data', exc_info=True)
+            return 2	
     except:
         logging.error('Error querying data', exc_info=True)
         return 1
     
-    if len(df) == 0:
-        logging.error('Query returned no data', exc_info=True)
-        return 1 
     # Prepare aggregation
     canvas = create_canvas(properties.REGIONS.get(region),properties.DEGREE_FACTOR_RESOLUTION.get(resolution))
     if not element:
@@ -198,6 +198,7 @@ if __name__ == "__main__":
     tables = config.get('tables')
     no_tables = len(tables)
     no_failed = 0
+    no_empty = 0
     for table in tables:
         logging.info('Aggregating table {}'.format(table))
         # Make table specs in json files (table.element) tuples
@@ -211,7 +212,10 @@ if __name__ == "__main__":
         status = main(sid_dck,year, month, **kwargs)
         if status == 1:
             logging.warning('No summary produced for table: {}'.format(table))
-        no_failed += status
+            no_failed += 1
+        elif status == 2:
+            logging.warning('No summary produced for table: {}'.format(table))
+            no_empty += 1
     if no_failed == no_tables:
         logging.error('No table files found')
         sys.exit(1)
