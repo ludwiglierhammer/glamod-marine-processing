@@ -21,7 +21,7 @@ pyscript=$um_code_directory/data_summaries/monthly_grids_agg_time.py
 pyhdlr=$um_code_directory/process_output_hdlr.py
 run_id=$(basename $script_config_file .json)
 
-job_time_hhmm=06:00
+job_time_hhmm=10:00
 job_memo_mbi=10000
 
 
@@ -34,10 +34,10 @@ do
 
    if [[ "$arrl" == '0' ]]
    then
-        echo "No jobs found for $sid_dck"
+        echo "No job found for $sid_dck"
    	continue
    else
-        echo "Launching $sid_dck array"
+        echo "Launching $sid_dck job"
    fi
 
    jobid=$(nk_jobid bsub -J $sid_dck -oo $sid_dck_log_dir/$run_id".o" -eo $sid_dck_log_dir/$run_id".o" -q short-serial -W $job_time_hhmm -M $job_memo_mbi -R "rusage[mem=$job_memo_mbi]" python $pyscript $sid_dck_log_dir/$run_id".input")
