@@ -87,7 +87,8 @@ for dt in rrule.rrule(rrule.MONTHLY, dtstart=start, until=stop):
     date_file = dt.strftime('%Y-%m')
     logging.info('PROCESSING TIME PARTITION: {}'.format(date_file))
     parq_path = os.path.join(dir_out,'-'.join([date_file,table,'.data.parq.tmp']))
-    
+    logging.info('PARQUET PATH: {}'.format(parq_path))
+    logging.info('SEARCH PATH: {}'.format(os.path.join(dir_data,'*','-'.join([table,date_file]) + '*.psv' )))
     files_list = glob.glob(os.path.join(dir_data,'*','-'.join([table,date_file]) + '*.psv' ))
     if len(files_list) > 0:
         logging.warning('No data files for time partition {}'.format(date_file))
