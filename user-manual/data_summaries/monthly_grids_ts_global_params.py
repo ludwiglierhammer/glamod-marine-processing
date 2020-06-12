@@ -38,10 +38,10 @@ def aggs_counts(qc = False):
 #        month_data = month_par.loc[month_par['quality_flag']==0].compute()
 #    else:
 #        month_data = df.get_partition(i).compute()
-    if qc == True:
-        return canvas.points(cdm_table.loc[(cdm_table['report_quality']==0) & (cdm_table['quality_flag'] == 0)],'longitude','latitude',ds.count('report_quality'))     
-    else:
-        return canvas.points(cdm_table,'longitude','latitude',ds.count('report_quality'))      
+    #if qc == True:
+    #    return canvas.points(cdm_table.loc[(cdm_table['report_quality']==0) & (cdm_table['quality_flag'] == 0)],'longitude','latitude',ds.count('report_quality'))     
+    #else:
+    return canvas.points(cdm_table,'longitude','latitude',ds.count('observation_value'))      
 
 def aggs_value(qc = False):
 #    if qc:
@@ -49,10 +49,10 @@ def aggs_value(qc = False):
 #        month_data = month_par.loc[month_par['quality_flag']==0].compute()
 #    else:
 #        month_data = df.get_partition(i).compute()
-    if qc == True:
-        return canvas.points(cdm_table.loc[(cdm_table['report_quality']==0) & (cdm_table['quality_flag'] == 0)],'longitude','latitude',ds.mean('observation_value'))     
-    else:
-        return canvas.points(cdm_table,'longitude','latitude',ds.mean('observation_value'))
+    #if qc == True:
+    #    return canvas.points(cdm_table.loc[(cdm_table['report_quality']==0) & (cdm_table['quality_flag'] == 0)],'longitude','latitude',ds.mean('observation_value'))     
+    #else:
+    return canvas.points(cdm_table,'longitude','latitude',ds.mean('observation_value'))
 
 # END FUNCTIONS ---------------------------------------------------------------
         
@@ -75,7 +75,7 @@ kwargs = {}
 kwargs['dir_data'] = dir_data
 kwargs['cdm_id'] = '*'
 kwargs['columns'] = ['latitude','longitude','date_time','observation_value']
-kwargs['filter_by_values'] = {('header','report_quality'):[0],('observations-at','quality_flag'):[0]}
+kwargs['filter_by_values'] = {('header','report_quality'):[0],('observations-sst','quality_flag'):[0]}
 
 canvas = create_canvas(properties.REGIONS.get(region),properties.DEGREE_FACTOR_RESOLUTION.get(resolution))
 
@@ -90,10 +90,13 @@ for dt in rrule.rrule(rrule.MONTHLY, dtstart=start, until=stop):
     logging.info('PARQUET PATH: {}'.format(parq_path))
     logging.info('SEARCH PATH: {}'.format(os.path.join(dir_data,'*','-'.join([table,date_file]) + '*.psv' )))
     files_list = glob.glob(os.path.join(dir_data,'*','-'.join([table,date_file]) + '*.psv' ))
-    if len(files_list) > 0:
+    if len(files_list) == 0:
         logging.warning('No data files for time partition {}'.format(date_file))
         continue
-    sid_dck_list = [ os.path.basename(os.path.basename(x)) for x in files_list ]
+
+    print(files_list)
+    sid_dck_list = [ os.path.basename(os.path.dirname(x)) for x in files_list ]
+    print(sid_dck_list)
     cdm_table_ym = pd.DataFrame()
     for sid_dck in sid_dck_list:
         logging.info('Aggregating sd {}'.format(sid_dck))
@@ -113,8 +116,8 @@ for dt in rrule.rrule(rrule.MONTHLY, dtstart=start, until=stop):
     print('From parquet')
     cdm_table = dd.read_parquet(parq_path)
     
-    nreports_arr = aggs_counts(qc = True).assign_coords(time=dt).rename('counts')
-    mean_arr = aggs_value(qc = True).assign_coords(time=dt).rename('mean')
+    nreports_arr = aggs_counts().assign_coords(time=dt).rename('counts')
+    mean_arr = aggs_value().assign_coords(time=dt).rename('mean')
     nreports_list.append(nreports_arr)
     mean_list.append(mean_arr)
 
@@ -127,9 +130,9 @@ nreports_agg = xr.concat(nreports_list,dim = 'time')
 mean_agg = xr.concat(mean_list,dim = 'time')
 
 dims_mean = ['latitude','longitude','mean']
-encodings_mean = { k:v for k,v in properties.ENCODINGS.items() if k in dims_mean } 
+encodings_mean = { k:v for k,v in properties.NC_ENCODINGS.items() if k in dims_mean } 
 dims_counts = ['latitude','longitude','counts']
-encodings_counts = { k:v for k,v in properties.ENCODINGS.items() if k in dims_counts } 
+encodings_counts = { k:v for k,v in properties.NC_ENCODINGS.items() if k in dims_counts } 
 
 out_file = os.path.join(dir_out,'-'.join([table,'total_no_reports_grid_ts.nc']))
 nreports_agg.encoding =  encodings_counts
