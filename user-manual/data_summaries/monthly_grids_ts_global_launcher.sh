@@ -14,9 +14,9 @@ source ../setenv2.sh
 log_dir=$1
 script_config_file=$2
 
-pyscript=$um_code_directory/data_summaries/monthly_grids_ts_global_params.py
+pyscript=$um_code_directory/data_summaries/monthly_grids_ts_global.py
 
-job_time_hhmm=15:00
+job_time_hhmm=16:00
 job_memo_mbi=5000
 for table in header observations-sst observations-at observations-dpt observations-wd observations-ws observations-slp
 do
