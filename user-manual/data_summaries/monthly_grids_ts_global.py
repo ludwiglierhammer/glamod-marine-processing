@@ -54,8 +54,8 @@ kwargs = {}
 kwargs['dir_data'] = config['dir_data']
 kwargs['cdm_id'] = '*'
 if table == 'header':
-    kwargs['columns'] = ['latitude','longitude','report_id']
-    count_param = 'report_id'
+    kwargs['columns'] = ['latitude','longitude']
+    count_param = 'latitude'
 else:
     kwargs['columns'] = ['latitude','longitude','observation_value']
     count_param = 'observation_value'
