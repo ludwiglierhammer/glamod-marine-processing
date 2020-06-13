@@ -53,7 +53,13 @@ with open(config_file,'r') as fO:
 kwargs = {}
 kwargs['dir_data'] = config['dir_data']
 kwargs['cdm_id'] = '*'
-kwargs['columns'] = ['latitude','longitude','date_time','observation_value']
+if table == 'header':
+    kwargs['columns'] = ['latitude','longitude','report_id']
+    count_param = 'report_id'
+else:
+    kwargs['columns'] = ['latitude','longitude','observation_value']
+    count_param = 'observation_value'
+    
 kwargs['filter_by_values'] = config[table]['filter_by_values']
 for kv in list(kwargs.get('filter_by_values').items()):
                     kwargs['filter_by_values'][(kv[0].split('.')[0],kv[0].split('.')[1])] = kwargs['filter_by_values'].pop(kv[0])
@@ -100,12 +106,11 @@ for dt in rrule.rrule(rrule.MONTHLY, dtstart=start, until=stop):
         logging.info('Time parition from parquet')
         cdm_table_ym = dd.read_parquet(parq_path)
     logging.info('Canvas aggregation')
-    nreports_arr = canvas.points(cdm_table_ym,'longitude','latitude',ds.count('observation_value')).assign_coords(time=dt).rename('counts')
-    mean_arr = canvas.points(cdm_table_ym,'longitude','latitude',ds.mean('observation_value')).assign_coords(time=dt).rename('mean')
+    nreports_arr = canvas.points(cdm_table_ym,'longitude','latitude',ds.count(count_param)).assign_coords(time=dt).rename('counts')
     nreports_list.append(nreports_arr)
-    logging.info(nreports_arr.max())
-    mean_list.append(mean_arr)
-    logging.info(mean_arr.max())
+    if table != 'header':
+        mean_arr = canvas.points(cdm_table_ym,'longitude','latitude',ds.mean('observation_value')).assign_coords(time=dt).rename('mean')
+        mean_list.append(mean_arr)
 
 #    Now this seems different with pandas to parquet, is it the engine choice?
 #    shutil.rm(parq_path)
@@ -114,7 +119,8 @@ for dt in rrule.rrule(rrule.MONTHLY, dtstart=start, until=stop):
 
     
 nreports_agg = xr.concat(nreports_list,dim = 'time')
-mean_agg = xr.concat(mean_list,dim = 'time')
+if table != 'header':
+    mean_agg = xr.concat(mean_list,dim = 'time')
 
 dims_mean = ['latitude','longitude','mean']
 encodings_mean = { k:v for k,v in properties.NC_ENCODINGS.items() if k in dims_mean } 
@@ -124,7 +130,7 @@ encodings_counts = { k:v for k,v in properties.NC_ENCODINGS.items() if k in dims
 out_file = os.path.join(config['dir_out'],'-'.join([table,'no_reports_grid_ts',config['id_out'] + '.nc']))
 nreports_agg.encoding =  encodings_counts
 nreports_agg.to_netcdf(out_file,encoding = encodings_counts,mode='w')
-
-out_file = os.path.join(config['dir_out'],'-'.join([table,'mean_grid_ts',config['id_out'] + '.nc']))
-mean_agg.encoding =  encodings_mean
-mean_agg.to_netcdf(out_file,encoding = encodings_mean,mode='w')
+if table != 'header':
+    out_file = os.path.join(config['dir_out'],'-'.join([table,'mean_grid_ts',config['id_out'] + '.nc']))
+    mean_agg.encoding =  encodings_mean
+    mean_agg.to_netcdf(out_file,encoding = encodings_mean,mode='w')

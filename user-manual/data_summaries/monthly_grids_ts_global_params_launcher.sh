@@ -18,7 +18,7 @@ pyscript=$um_code_directory/data_summaries/monthly_grids_ts_global_params.py
 
 job_time_hhmm=15:00
 job_memo_mbi=5000
-for table in observations-sst observations-at observations-dpt observations-wd observations-ws observations-slp
+for table in header observations-sst observations-at observations-dpt observations-wd observations-ws observations-slp
 do
 
    jobid=$(nk_jobid bsub -J $table -oo $log_dir/$table"_grid_ts.log" -eo $log_dir/$table"_grid_ts.log" -q short-serial -W $job_time_hhmm -M $job_memo_mbi -R "rusage[mem=$job_memo_mbi]" python $pyscript $table $script_config_file )
