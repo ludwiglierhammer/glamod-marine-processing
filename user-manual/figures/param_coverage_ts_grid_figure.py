@@ -39,7 +39,7 @@ if __name__ == "__main__":
 #    dir_data = sys.argv[1]
 #    dir_out = sys.argv[2]
 #    
-    dir_data = '/Users/iregou/C3S/data'
+    dir_data = '/group_workspaces/jasmin2/glamod_marine/data/user_manual/v4/level2/quicklooks/'
     dir_out = dir_data
     file_in_id = '-no_reports_grid_ts-optimal.nc'
     file_out = 'params_no_reports_coverage_ts.pdf'
@@ -69,7 +69,7 @@ if __name__ == "__main__":
     ax2 = ax.copy()
     for i,table in enumerate(observation_tables):
         var = table.split('-')[1]
-        title = var_properties['long_name_upper'][var]
+        title = var_properties.var_properties['long_name_upper'][var]
         c = 0 if i%2 == 0 else 1
         r = int(i/2)
         file_pattern = table + file_in_id

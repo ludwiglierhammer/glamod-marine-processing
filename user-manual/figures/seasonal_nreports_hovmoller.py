@@ -43,7 +43,7 @@ if __name__ == "__main__":
 #    dir_data = sys.argv[1]
 #    dir_out = sys.argv[2]
     
-    dir_data = '/Users/iregou/C3S/data'
+    dir_data = '/group_workspaces/jasmin2/glamod_marine/data/user_manual/v4/level2/quicklooks/'
     dir_out = dir_data
     file_in_id = '-no_reports_grid_ts-optimal.nc'
     file_out = 'nreports_hovmoller.png'
@@ -54,11 +54,12 @@ if __name__ == "__main__":
                       'observations-dpt','observations-wd','observations-ws']
     
     for table in tables:
+        logging.info('Plotting table {}'.format(table))
         if table == 'header':
             cbar_label = '#reports'   
         else:
             param = table.split('-')[1]
-            cbar_label = '#Observations ' + var_properties['short_name_upper'][param]
+            cbar_label = '#Observations ' + var_properties.var_properties['short_name_upper'][param]
         
         file_pattern = table + file_in_id
         dataset = xr.open_dataset(os.path.join(dir_data,file_pattern))
