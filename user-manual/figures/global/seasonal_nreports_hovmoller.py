@@ -46,12 +46,14 @@ if __name__ == "__main__":
     dir_data = '/group_workspaces/jasmin2/glamod_marine/data/user_manual/v4/level2/quicklooks/'
     dir_out = dir_data
     file_in_id = '-no_reports_grid_ts-optimal.nc'
-    file_out = 'nreports_hovmoller.png'
+    file_out_sea = 'nreports_hovmoller_seasonal.png'
+    file_out_mon = 'nreports_hovmoller.png'
     start = datetime.datetime(1851,1,1)
     stop = datetime.datetime(2010,12,31)
     
     tables = ['header','observations-at','observations-sst','observations-slp',
                       'observations-dpt','observations-wd','observations-ws']
+
     
     for table in tables:
         logging.info('Plotting table {}'.format(table))
@@ -64,24 +66,38 @@ if __name__ == "__main__":
         file_pattern = table + file_in_id
         dataset = xr.open_dataset(os.path.join(dir_data,file_pattern))
         
+        dataset['monthly'] = dataset['counts'].sum(dim='longitude')
         dataset['3_mon_counts'] = dataset['counts'].rolling(time=3, center=True).sum()
+        #try (to resample to yearly): da.resample(time="AS").sum() -> not straighforward to keep x,y dims 
         for season in ['DJF','MAM','JJA','SON']:
             dataset[season] = dataset['3_mon_counts'].sel(time=is_season_center(dataset['time.month'],season)).sum(dim='longitude')
             
         min_counts = 1
         if table == 'header': # Use same scale for all params
-            max_counts = dataset['3_mon_counts'].max().data.tolist()
-            normalization_f = LogNorm(vmin = min_counts,vmax = max_counts)
+            max_counts_sea = dataset['3_mon_counts'].sum(dim='longitude').max().data.tolist()
+            normalization_f_sea = LogNorm(vmin = min_counts,vmax = max_counts_sea)
+            max_counts_mon = dataset['monthly'].max().data.tolist()
+            normalization_f_mon = LogNorm(vmin = min_counts,vmax = max_counts_mon)
         
         f, axes = plt.subplots(nrows=2, ncols=2, figsize=figsize)
         for i, season in enumerate(['DJF','MAM','JJA','SON']):
             c = 0 if i%2 == 0 else 1
             r = int(i/2)
             dataset[season].sel(time=is_season_center(dataset['time.month'],season)).where(dataset[season]>0).plot.pcolormesh(x = 'time', y = 'latitude',vmin=min_counts,
-                       vmax=max_counts, cmap='viridis',norm = normalization_f,add_colorbar=True,
+                       vmax=max_counts_sea, cmap='viridis',norm = normalization_f_sea,add_colorbar=True,
                        extend='both',ax=axes[c,r],cbar_kwargs={'label':cbar_label})
             axes[c,r].set_title(season)
         f.tight_layout(rect=[0, 0.03, 1, 0.95])
-        fig_path = os.path.join(dir_out,table + '-' + file_out)
+        fig_path = os.path.join(dir_out,table + '-' + file_out_sea)
+        plt.savefig(fig_path,bbox_inches='tight',dpi = 150)
+        plt.close(f)
+        
+        f, axes = plt.subplots(nrows=1, ncols=1, figsize=(3,3))
+        dataset['monthly'].where(dataset['monthly']>0).plot.pcolormesh(x = 'time', y = 'latitude',vmin=min_counts,
+             vmax=max_counts_mon, cmap='viridis',norm = normalization_f_mon,add_colorbar=True,
+             extend='both',ax=axes,cbar_kwargs={'label':cbar_label})
+        axes.set_title('Monthly counts')
+        f.tight_layout(rect=[0, 0.03, 1, 0.95])
+        fig_path = os.path.join(dir_out,table + '-' + file_out_mon)
         plt.savefig(fig_path,bbox_inches='tight',dpi = 150)
         plt.close(f)
