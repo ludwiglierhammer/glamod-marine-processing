@@ -110,9 +110,15 @@ def map_on_subplot(f,subplot_ax,z,lons,lats,colorpalette = 'jet',
                           cmap = cmap, norm = normalization_f, vmin = cmin_value, 
                           vmax = cmax_value)
     
-    gl = subplot_ax.gridlines(crs=ccrs.PlateCarree(),color = 'k',
-                              linestyle = ':', linewidth = map_properties['grid_width'], 
-                              alpha=0.3, draw_labels=True)
+    try:
+        gl = subplot_ax.gridlines(crs=ccrs.PlateCarree(),color = 'k',
+                               linestyle = ':', linewidth = map_properties['grid_width'], 
+                               alpha=0.3, draw_labels=True)
+    
+    except:
+        gl = subplot_ax.gridlines(crs=ccrs.PlateCarree(),color = 'k',
+                              linestyle = ':', linewidth = map_properties['grid_width'],
+                              alpha=0.3, draw_labels=False)
     
     subplot_ax.coastlines(linewidth = map_properties['coastline_width'])
     
