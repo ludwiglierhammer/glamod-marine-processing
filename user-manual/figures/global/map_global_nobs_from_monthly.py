@@ -254,9 +254,9 @@ if __name__ == "__main__":
         kwargs['normalization'] = 'linear'
         
         if tablei == 'header':
-            config['cmin_value_nobs'] = global_nobs.min()
+            config['cmin_value_nobs'] = 1
             config['cmax_value_nobs'] = global_nobs.max()
-            config['cmin_value_nmonths'] = global_nmonths.min()
+            config['cmin_value_nmonths'] = 1
             config['cmax_value_nmonths'] = global_nmonths.max()
 
         logging.info('Plotting')
