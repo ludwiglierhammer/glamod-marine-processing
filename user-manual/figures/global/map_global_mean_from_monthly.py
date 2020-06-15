@@ -20,19 +20,31 @@ from mpl_toolkits.axes_grid1 import make_axes_locatable
 import xarray as xr
 import cartopy.crs as ccrs
 
-from figures import map_properties
-
 logging.getLogger('plt').setLevel(logging.INFO)
 logging.getLogger('mpl').setLevel(logging.INFO)
 
 # PARAMS ----------------------------------------------------------------------
 # Set plotting defaults
-plt.rc('legend',**{'fontsize':map_properties.font_size_legend})        # controls default text sizes
-plt.rc('axes', titlesize=map_properties.axis_label_size)     # fontsize of the axes title
-plt.rc('axes', labelsize=map_properties.axis_label_size)    # fontsize of the x and y labels
-plt.rc('xtick', labelsize=map_properties.tick_label_size)    # fontsize of the tick labels
-plt.rc('ytick', labelsize=map_properties.tick_label_size)    # fontsize of the tick labels
-plt.rc('figure', titlesize=map_properties.title_label_size)  # fontsize of the figure title
+plt.rc('legend',**{'fontsize':11})        # controls default text sizes
+plt.rc('axes', titlesize=11)     # fontsize of the axes title
+plt.rc('axes', labelsize=11)    # fontsize of the x and y labels
+plt.rc('xtick', labelsize=9)    # fontsize of the tick labels
+plt.rc('ytick', labelsize=9)    # fontsize of the tick labels
+plt.rc('figure', titlesize=14)  # fontsize of the figure title
+
+map_properties = {}
+map_properties['figsize'] = (4,4)
+map_properties['colorbar_show'] = True
+map_properties['colorbar_w'] = 5
+map_properties['grid_label_size'] = 9
+map_properties['grid_width'] = 0.7
+map_properties['colorbar_label_size'] = 10
+map_properties['colorbar_title_size'] = 9
+map_properties['coastline_width'] = 0.7
+
+projections = {}
+projections['PlateCarree'] = ccrs.PlateCarree()
+projections['Robinson'] = ccrs.Robinson()
 # END PARAMS ------------------------------------------------------------------
 
 def read_dataset(file_path,scale,offset):
@@ -43,12 +55,10 @@ def read_dataset(file_path,scale,offset):
     dataset[var] = offset + scale*dataset[var]    
     return dataset
 
-def map_on_subplot(f,subplot_ax,z,lons,lats,colorpalette = 'jet',colorbar_show = True,
-                   colorbar_title = '', colorbar_title_size = 9, 
-                   colorbar_label_size = 7, colorbar_orien = 'v', 
-                   colorbar_w = 4, cmin_value = None, cmax_value = None, 
-                   normalization = 'linear', grid_width = 0.7,
-                   grid_label_size = 12, coastline_width = 0.7):
+def map_on_subplot(f,subplot_ax,z,lons,lats,colorpalette = 'jet',
+                   colorbar_title = '', colorbar_orien = 'v', 
+                   cmin_value = None, cmax_value = None, 
+                   normalization = 'linear'):
     
     """Plots a map on subplot cartopy axis.
  
@@ -70,30 +80,16 @@ def map_on_subplot(f,subplot_ax,z,lons,lats,colorpalette = 'jet',colorbar_show =
      
     colorpalette : str
         The name of the matplolib color palette to use. Defaults to jet
-    colorbar_show : bool
-        Whether colorbar is plotted (True/False)
     colorbar_title : str
         The colorbar title
-    colorbar_title_size : int
-        The colorbar title font size
-    colorbar_label_size : int
-        The colorbar labels' font size
     colorbar_orien : str
         The colorbar orientation (h/v)
-    colorbar_w : integer
-        Width of the colorbar. Defaults to 4
     cmin_value : numeric, optional
         Min value to use in colorbar normalization. Defaults to xarray min
     cmax_value : numeric, optional
         Max value to use in colorbar normalization. Defaults to xarray max 
     normalization : str
         Normalization to apply to colorbar (linear/log). Defaults to linear 
-    grid_width : numeric
-        Width of the lat/lon grid line
-    grid_label_size : integer
-        Font size of the grid labels
-    coastline_width : numeric
-        Width of the coastline
     
     """
     # Plots a map on subplot cartopy axis
@@ -122,21 +118,21 @@ def map_on_subplot(f,subplot_ax,z,lons,lats,colorpalette = 'jet',colorbar_show =
                           vmax = cmax_value)
     
     gl = subplot_ax.gridlines(crs=ccrs.PlateCarree(),color = 'k',
-                              linestyle = ':', linewidth = grid_width, 
+                              linestyle = ':', linewidth = map_properties['grid_width'], 
                               alpha=0.3, draw_labels=True)
     
-    subplot_ax.coastlines(linewidth = coastline_width)
+    subplot_ax.coastlines(linewidth = map_properties['coastline_width'])
     
     gl.xlabels_bottom = False
     gl.ylabels_right = False
-    gl.xlabel_style = {'size': grid_label_size}
-    gl.ylabel_style = {'size': grid_label_size}
+    gl.xlabel_style = {'size': map_properties['grid_label_size']}
+    gl.ylabel_style = {'size': map_properties['grid_label_size']}
     
     # following https://matplotlib.org/2.0.2/mpl_toolkits/axes_grid/users/overview.html#colorbar-whose-height-or-width-in-sync-with-the-master-axes
     # we need to set axes_class=plt.Axes, else it attempts to create
     # a GeoAxes as colorbar
     divider = make_axes_locatable(subplot_ax)
-    new_axis_w = str(colorbar_w) + '%'
+    new_axis_w = str(map_properties['colorbar_w']) + '%'
     if colorbar_orien == 'v':
         cax = divider.new_horizontal(size = new_axis_w, pad = 0.08,
                                      axes_class=plt.Axes)
@@ -148,12 +144,12 @@ def map_on_subplot(f,subplot_ax,z,lons,lats,colorpalette = 'jet',colorbar_show =
         
     f.add_axes(cax)
     
-    if colorbar_show:
+    if map_properties['colorbar_show']:
         #cb_v = plt.colorbar(t1, cax=cax) could do it this way and would work: would just have to add label and tick as 2 last lines below. But would have to do arrangements anyway if we wanted it to be horizontal. So we keep as it is...
         cb = mpl.colorbar.ColorbarBase(cax, cmap = cmap,norm = normalization_f, 
                                        orientation = orientation, extend='both')
-        cb.set_label(colorbar_title, size = colorbar_title_size)
-        cb.ax.tick_params(labelsize = colorbar_label_size)
+        cb.set_label(colorbar_title, size = map_properties['colorbar_title_size'])
+        cb.ax.tick_params(labelsize = map_properties['colorbar_label_size'])
     else:
         cax.axis('off')
 
@@ -197,17 +193,10 @@ def map_single(dataarray,out_file,**kwargs):
 
     # Complete the kwargs
     # The actual projection is set here in the subplots declaration!!!!
-    proj = map_properties.projections.get(kwargs['projection']) if kwargs.get('projection') else map_properties.projections.get('PlateCarree')
+    proj = projections.get(kwargs['projection']) if kwargs.get('projection') else projections.get('PlateCarree')
     kwargs.pop('projection',None)
-    kwargs['colorbar_show'] = True
-    kwargs['colorbar_w'] = map_properties.single_map['colorbar_width']
-    kwargs['grid_label_size'] = map_properties.single_map.get('grid_label_size')
-    kwargs['grid_width'] = map_properties.single_map.get('grid_width')
-    kwargs['colorbar_label_size'] = map_properties.single_map.get('colorbar_label_size')
-    kwargs['colorbar_title_size'] = map_properties.single_map.get('colorbar_title_size')
-    kwargs['coastline_width'] = map_properties.single_map.get('coastline_width')
     
-    f, ax = plt.subplots(1, 1, subplot_kw=dict(projection=proj),figsize=(4,4))#,dpi = 180)
+    f, ax = plt.subplots(1, 1, subplot_kw=dict(projection=proj),figsize=map_properties['figsize'])#,dpi = 180)
  
     var_kwargs = deepcopy(kwargs)
     var_kwargs['colorpalette'] = kwargs.get('colorpalette','jet')
@@ -221,13 +210,13 @@ def map_single(dataarray,out_file,**kwargs):
     lons = dataarray['longitude']
     lats = dataarray['latitude']
 
-    if not kwargs.get('cmin_value'):
-        kwargs['cmin_value'] = np.nanmin(z)
-    if not kwargs.get('cmax_value'):
-        kwargs['cmax_value'] = np.nanmax(z)
-    if kwargs['cmin_value'] == kwargs['cmax_value']: # see if we get these from a common var_properties
-        kwargs['cmin_value'] = 0
-        kwargs['cmax_value'] = 1
+    if not var_kwargs.get('cmin_value'):
+        var_kwargs['cmin_value'] = np.nanmin(z)
+    if not var_kwargs.get('cmax_value'):
+        var_kwargs['cmax_value'] = np.nanmax(z)
+    if var_kwargs['cmin_value'] == var_kwargs['cmax_value']: # see if we get these from a common var_properties
+        var_kwargs['cmin_value'] = 0
+        var_kwargs['cmax_value'] = 1
     map_on_subplot(f,ax,z,lons,lats,**var_kwargs)
     dpi = 200
     plt.savefig(out_file,bbox_inches='tight',dpi = dpi)
