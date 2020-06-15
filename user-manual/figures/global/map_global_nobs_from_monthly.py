@@ -265,6 +265,7 @@ if __name__ == "__main__":
         kwargs['colorbar_title'] = config['colorbar_title_nobs']
         kwargs['cmin_value'] = config['cmin_value_nobs']
         kwargs['cmax_value'] = config['cmax_value_nobs']
+        kwargs['normalization'] = config['normalization_nobs']
         status = map_single(global_nobs,out_file , **kwargs)
         
         out_file = os.path.join(dir_out,config['tables'][tablei]['out_file_nmonths'])
@@ -272,6 +273,7 @@ if __name__ == "__main__":
         kwargs['colorbar_title'] = config['colorbar_title_nmonths']
         kwargs['cmin_value'] = config['cmin_value_nmonths']
         kwargs['cmax_value'] = config['cmax_value_nmonths']
+        kwargs['normalization'] = config['normalization_nmonths']
         status = map_single(global_nmonths,out_file, **kwargs)
 
 
