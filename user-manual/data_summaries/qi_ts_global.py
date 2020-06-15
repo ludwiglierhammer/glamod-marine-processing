@@ -41,10 +41,10 @@ logging.basicConfig(format='%(levelname)s\t[%(asctime)s](%(filename)s)\t%(messag
 #dir_data = sys.argv[1]
 #dir_out = sys.argv[2]
 
-dir_data = '/Users/iregou/C3S/data'
-dir_out = dir_data
-start_int = 1990
-stop_int = 1990
+dir_data = '/group_workspaces/jasmin2/glamod_marine/data/user_manual/v4/level2/'
+dir_out = '/group_workspaces/jasmin2/glamod_marine/data/user_manual/v4/level2/'
+start_int = 1851
+stop_int = 2010
 
 # KWARGS FOR CDM FILE QUERY----------------------------------------------------
 kwargs = {}
@@ -60,7 +60,7 @@ report_quality = pd.DataFrame()
 
 start = datetime.datetime(start_int,1,1)
 stop = datetime.datetime(stop_int,12,31)
-for dt in rrule.rrule(rrule.MONTHLY, dtstart=start, until=stop):
+for i,dt in enumerate(rrule.rrule(rrule.MONTHLY, dtstart=start, until=stop)):
     date_file = dt.strftime('%Y-%m')
     files_list = glob.glob(os.path.join(dir_data,'*','-'.join([table,date_file]) + '*.psv' ))
     if len(files_list) == 0:
@@ -82,9 +82,17 @@ for dt in rrule.rrule(rrule.MONTHLY, dtstart=start, until=stop):
     duplicate_status = pd.concat([duplicate_status,pd.DataFrame(data=[ds.values],index=[dt],columns = ds.index.values)])
     rq = value_counts('report_quality')    
     report_quality = pd.concat([report_quality,pd.DataFrame(data=[rq.values],index=[dt],columns = rq.index.values)])
+    
+    if i%120 == 0:
+        out_file = os.path.join(dir_out,'report_quality_ts_global_part.psv')
+        report_quality.to_csv(out_file,sep='|')
 
+        out_file = os.path.join(dir_out,'duplicate_status_ts_global_part.psv')
+        duplicate_status.to_csv(out_file,sep='|')
+        
 out_file = os.path.join(dir_out,'report_quality_ts_global.psv')    
 report_quality.to_csv(out_file,sep='|')
 
 out_file = os.path.join(dir_out,'duplicate_status_ts_global.psv')    
 duplicate_status.to_csv(out_file,sep='|')
+
