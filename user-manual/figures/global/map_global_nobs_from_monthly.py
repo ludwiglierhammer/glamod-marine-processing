@@ -254,24 +254,24 @@ if __name__ == "__main__":
         kwargs['normalization'] = 'linear'
         
         if tablei == 'header':
-            kwargs['cbar_min_nobs'] = global_nobs.min()
-            kwargs['cbar_max_nobs'] = global_nobs.max()
-            kwargs['cbar_min_nmonths'] = global_nmonths.min()
-            kwargs['cbar_max_nmonths'] = global_nmonths.max()
+            config['cmin_value_nobs'] = global_nobs.min()
+            config['cmax_value_nobs'] = global_nobs.max()
+            config['cmin_value_nmonths'] = global_nmonths.min()
+            config['cmax_value_nmonths'] = global_nmonths.max()
 
         logging.info('Plotting')
         out_file = os.path.join(dir_out,config['tables'][tablei]['out_file_nobs'])
         kwargs['colorpalette'] = config['colorpalette_nobs']
         kwargs['colorbar_title'] = config['colorbar_title_nobs']
-        kwargs['cbar_min'] = kwargs['cbar_min_nobs']
-        kwargs['cbar_max'] = kwargs['cbar_max_nobs']
+        kwargs['cmin_value'] = config['cmin_value_nobs']
+        kwargs['cmax_value'] = config['cmax_value_nobs']
         status = map_single(global_nobs,out_file , **kwargs)
         
         out_file = os.path.join(dir_out,config['tables'][tablei]['out_file_nmonths'])
         kwargs['colorpalette'] = config['colorpalette_nmonths']
         kwargs['colorbar_title'] = config['colorbar_title_nmonths']
-        kwargs['cbar_min'] = kwargs['cbar_min_nmonths']
-        kwargs['cbar_max'] = kwargs['cbar_max_nmonths']
+        kwargs['cmin_value'] = config['cmin_value_nmonths']
+        kwargs['cmax_value'] = config['cmax_value_nmonths']
         status = map_single(global_nmonths,out_file, **kwargs)
 
 
