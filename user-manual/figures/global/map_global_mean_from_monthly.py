@@ -38,6 +38,7 @@ plt.rc('figure', titlesize=map_properties.title_label_size)  # fontsize of the f
 def read_dataset(file_path,scale,offset):
     
     dataset = xr.open_dataset(file_path,autoclose=True)
+    print(dataset)
     var = 'mean'
     dataset[var] = offset + scale*dataset[var]    
     return dataset
@@ -197,7 +198,7 @@ def map_single(dataarray,out_file,**kwargs):
     # Complete the kwargs
     # The actual projection is set here in the subplots declaration!!!!
     proj = map_properties.projections.get(kwargs['projection']) if kwargs.get('projection') else map_properties.projections.get('PlateCarree')
-
+    kwargs.pop('projection',None)
     kwargs['colorbar_show'] = True
     kwargs['colorbar_w'] = map_properties.single_map['colorbar_width']
     kwargs['grid_label_size'] = map_properties.single_map.get('grid_label_size')
@@ -206,7 +207,7 @@ def map_single(dataarray,out_file,**kwargs):
     kwargs['colorbar_title_size'] = map_properties.single_map.get('colorbar_title_size')
     kwargs['coastline_width'] = map_properties.single_map.get('coastline_width')
     
-    f, ax = plt.subplots(1, 1, subplot_kw=dict(projection=proj),figsize=(14,7))#,dpi = 180)
+    f, ax = plt.subplots(1, 1, subplot_kw=dict(projection=proj),figsize=(4,4))#,dpi = 180)
  
     var_kwargs = deepcopy(kwargs)
     var_kwargs['colorpalette'] = kwargs.get('colorpalette','jet')
@@ -252,23 +253,24 @@ if __name__ == "__main__":
    
     for tablei in tables:
         logging.info('Figure: {}'.format(tablei))
-        dataset_path = os.path.join(dir_data,config.get('nc_file'))
-        out_file = os.path.join(dir_out,config.get('out_file'))
+        dataset_path = os.path.join(dir_data,config['tables'][tablei]['nc_file'])
+        out_file = os.path.join(dir_out,config['tables'][tablei]['out_file'])
         
         figure_kwargs = config['tables'].get(tablei)
 
         dataset = read_dataset(dataset_path,figure_kwargs.get('scale',1),figure_kwargs.get('offset',0))
-        
+       
         figure_kwargs.pop('nc_file')
         figure_kwargs.pop('out_file')
         figure_kwargs.pop('scale',None)
         figure_kwargs.pop('offset',None)
         
-
+        logging.info('Aggregating over time dim...')
         global_mean = dataset['mean'].mean(dim='time')
         
         figure_kwargs['normalization'] = 'linear'
         figure_kwargs['projection'] = projection
+        logging.info('Plotting')
         status = map_single(global_mean,out_file, **figure_kwargs)
 
 
