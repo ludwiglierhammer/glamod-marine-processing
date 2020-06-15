@@ -36,15 +36,16 @@ map_properties = {}
 map_properties['figsize'] = (4,4)
 map_properties['colorbar_show'] = True
 map_properties['colorbar_w'] = 5
-map_properties['grid_label_size'] = 9
-map_properties['grid_width'] = 0.7
-map_properties['colorbar_label_size'] = 10
-map_properties['colorbar_title_size'] = 9
-map_properties['coastline_width'] = 0.7
+map_properties['grid_label_size'] = 7
+map_properties['grid_width'] = 0.6
+map_properties['colorbar_label_size'] = 9
+map_properties['colorbar_title_size'] = 8
+map_properties['coastline_width'] = 0.5
 
 projections = {}
 projections['PlateCarree'] = ccrs.PlateCarree()
 projections['Robinson'] = ccrs.Robinson()
+projections['Mollweide'] = ccrs.Mollweide()
 # END PARAMS ------------------------------------------------------------------
 
 def read_dataset(file_path,scale,offset):
@@ -117,10 +118,15 @@ def map_on_subplot(f,subplot_ax,z,lons,lats,colorpalette = 'jet',
                           cmap = cmap, norm = normalization_f, vmin = cmin_value, 
                           vmax = cmax_value)
     
-    gl = subplot_ax.gridlines(crs=ccrs.PlateCarree(),color = 'k',
+    try:
+        gl = subplot_ax.gridlines(crs=ccrs.PlateCarree(),color = 'k',
                               linestyle = ':', linewidth = map_properties['grid_width'], 
                               alpha=0.3, draw_labels=True)
-    
+    except:
+        gl = subplot_ax.gridlines(crs=ccrs.PlateCarree(),color = 'k',
+                              linestyle = ':', linewidth = map_properties['grid_width'],
+                              alpha=0.3, draw_labels=False)
+
     subplot_ax.coastlines(linewidth = map_properties['coastline_width'])
     
     gl.xlabels_bottom = False
