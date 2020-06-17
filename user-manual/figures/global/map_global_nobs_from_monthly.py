@@ -235,6 +235,7 @@ if __name__ == "__main__":
     
     dir_data = config['dir_data']
     dir_out = config['dir_out']
+    min_obs = config.get('min_obs',0)
     
     tables = list(config.get('tables').keys())
    
@@ -246,7 +247,7 @@ if __name__ == "__main__":
                
         logging.info('Aggregating over time dim...')
         global_nobs = dataset['counts'].sum(dim='time')
-        global_nmonths = (dataset['counts']>0).sum(dim = 'time')
+        global_nmonths = (dataset['counts']>=min_obs).sum(dim = 'time')
 
         kwargs = {}
         kwargs['projection'] = config['projection']
