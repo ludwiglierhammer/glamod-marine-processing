@@ -235,7 +235,7 @@ if __name__ == "__main__":
     
     dir_data = config['dir_data']
     dir_out = config['dir_out']
-    min_obs = config.get('min_obs',0)
+    min_obs = config.get('min_obs',1)
     
     tables = list(config.get('tables').keys())
    
