@@ -243,7 +243,7 @@ if __name__ == "__main__":
     dir_data = config['dir_data']
     dir_out = config['dir_out']
     projection = config['projection']
-    min_obs = config.get('min_obs',0)
+    min_obs = config.get('min_obs')
     
     tables = list(config.get('tables').keys())
    
@@ -253,7 +253,7 @@ if __name__ == "__main__":
         out_file = os.path.join(dir_out,config['tables'][tablei]['out_file'])
         obs_file = config['tables'][tablei].get('nc_file_nobs',None)
         
-        if min_obs > 0 and not obs_file:
+        if min_obs and not obs_file:
             logging.error('Path to nobs data file needs to be provided for min_obs != 0')
             sys.exit(1)
         
@@ -261,7 +261,7 @@ if __name__ == "__main__":
 
         dataset = read_dataset(dataset_path,figure_kwargs.get('scale',1),figure_kwargs.get('offset',0))
         
-        if min_obs > 0:
+        if min_obs:
             dataset_obs = xr.open_dataset(os.path.join(dir_data,obs_file),autoclose=True)
        
         figure_kwargs.pop('nc_file')
@@ -271,7 +271,7 @@ if __name__ == "__main__":
         figure_kwargs.pop('offset',None)
         
         logging.info('Aggregating over time dim...')
-        if min_obs > 0:
+        if min_obs:
             global_mean = dataset['mean'].where(dataset_obs['counts'] > min_obs).mean(dim='time')
         else:
             global_mean = dataset['mean'].mean(dim='time')
