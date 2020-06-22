@@ -61,7 +61,7 @@ if __name__ == "__main__":
             cbar_label = '#reports'   
         else:
             param = table.split('-')[1]
-            cbar_label = '#Observations ' + var_properties.var_properties['short_name_upper'][param]
+            cbar_label = '#Observations'
         
         file_pattern = table + file_in_id
         dataset = xr.open_dataset(os.path.join(dir_data,file_pattern))
@@ -84,7 +84,7 @@ if __name__ == "__main__":
             c = 0 if i%2 == 0 else 1
             r = int(i/2)
             dataset[season].sel(time=is_season_center(dataset['time.month'],season)).where(dataset[season]>0).plot.pcolormesh(x = 'time', y = 'latitude',vmin=min_counts,
-                       vmax=max_counts_sea, cmap='viridis',norm = normalization_f_sea,add_colorbar=True,
+                       vmax=max_counts_sea, cmap='magma',norm = normalization_f_sea,add_colorbar=True,
                        extend='both',ax=axes[c,r],cbar_kwargs={'label':cbar_label})
             axes[c,r].set_title(season)
         f.tight_layout(rect=[0, 0.03, 1, 0.95])
@@ -92,11 +92,15 @@ if __name__ == "__main__":
         plt.savefig(fig_path,bbox_inches='tight',dpi = 150)
         plt.close(f)
         
-        f, axes = plt.subplots(nrows=1, ncols=1, figsize=(3,3))
+        f, axes = plt.subplots(nrows=1, ncols=1, figsize=(7,2))
         dataset['monthly'].where(dataset['monthly']>0).plot.pcolormesh(x = 'time', y = 'latitude',vmin=min_counts,
-             vmax=max_counts_mon, cmap='viridis',norm = normalization_f_mon,add_colorbar=True,
-             extend='both',ax=axes,cbar_kwargs={'label':cbar_label})
-        axes.set_title('Monthly counts')
+             vmax=max_counts_mon, cmap='magma',norm = normalization_f_mon,add_colorbar=True,
+             extend='both',ax=axes,cbar_kwargs={'label':cbar_label,'pad':0.01})
+        if table == 'header':
+            axes.set_title('Reports')
+        else:
+            axes.set_title(var_properties.var_properties['short_name_upper'][param])
+        axes.tick_params(axis='x',labelbottom=True,labelrotation=0) 
         f.tight_layout(rect=[0, 0.03, 1, 0.95])
         fig_path = os.path.join(dir_out,table + '-' + file_out_mon)
         plt.savefig(fig_path,bbox_inches='tight',dpi = 150)
