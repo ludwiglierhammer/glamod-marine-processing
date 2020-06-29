@@ -22,7 +22,7 @@ process_level() {
   done
 }
 
-source setenv0.sh
+source ../setpaths.sh
 
 release=$1
 update=$2
@@ -30,15 +30,6 @@ source=$3
 sid_dck=$4
 
 source_dir=$data_directory/$release/$source
-
-level=level0
-echo ""
-echo "PROCESSING LEVEL $level"
-level_dir=$source_dir/$level
-declare -a level_subdirs
-level_subdirs=($level_dir/$sid_dck)
-
-process_level "${level_subdirs[@]}"
 
 level=level1a
 echo ""
@@ -77,6 +68,14 @@ echo ""
 echo "PROCESSING LEVEL $level"
 level_dir=$source_dir/$level
 declare -a level_subdirs
+level_subdirs=($level_dir/$sid_dck $level_dir/quicklooks/$sid_dck $level_dir/log/$sid_dck)
+process_level "${level_subdirs[@]}"
+
+level=level1f
+echo ""
+echo "PROCESSING LEVEL $level"
+level_dir=$source_dir/$level
+declare -a level_subdirs
 level_subdirs=($level_dir/$sid_dck $level_dir/quicklooks/$sid_dck $level_dir/log/$sid_dck $level_dir/reports/$sid_dck)
 process_level "${level_subdirs[@]}"
 
@@ -85,5 +84,5 @@ echo ""
 echo "PROCESSING LEVEL $level"
 level_dir=$source_dir/$level
 declare -a level_subdirs
-level_subdirs=($level_dir/$sid_dck $level_dir/exluded/$sid_dck $level_dir/log/$sid_dck $level_dir/reports/$sid_dck)
+level_subdirs=($level_dir/$sid_dck $level_dir/quicklooks/$sid_dck $level_dir/excluded/$sid_dck $level_dir/log/$sid_dck $level_dir/reports/$sid_dck)
 process_level "${level_subdirs[@]}"
