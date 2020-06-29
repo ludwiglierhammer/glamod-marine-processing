@@ -171,30 +171,31 @@ def plot_no_reports(data,x0,x1,title,out_file):
 def main():   
     logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s', level=logging.DEBUG)
     try:
-        data_path = sys.argv[1]
-        release = sys.argv[2]
-        update = sys.argv[3]
-        source = sys.argv[4]
-        level = sys.argv[5]
-        sid_dck = sys.argv[6] 
-        sid_periods_file = sys.argv[7] # either release initial or level2 config file
-        out_path = sys.argv[8]
+        config_file = sys.argv[1]
+#        data_path = sys.argv[1]
+#        release = sys.argv[2]
+#        update = sys.argv[3]
+#        source = sys.argv[4]
+#        level = sys.argv[5]
+#        sid_dck = sys.argv[6] 
+#        sid_periods_file = sys.argv[7] # either release initial or level2 config file
+#        out_path = sys.argv[8]
     except Exception as e:
         logging.error(e, exc_info=True)
         return
-
-    paths = {}
-    paths[level] = os.path.join(data_path,release,source,level,sid_dck)
-    paths['reports'] = out_path
-    paths['level1a_ql'] = os.path.join(data_path,release,source,'level1a','quicklooks',sid_dck)
-    paths['level1c_ql'] = os.path.join(data_path,release,source,'level1c','quicklooks',sid_dck)
-     
-    # Get periods for sid-dck (year_init, year_end)
-    with open(sid_periods_file) as fO:
-        periods = json.load(fO)
     
-    yr_ini = periods.get(sid_dck).get('year_init')   
-    yr_end = periods.get(sid_dck).get('year_end') 
+    with open(config_file,'r') as fO:
+        config = json.load(fO)  
+        
+    paths = {}
+    paths['data'] = os.path.join(config['dir_data'],config['sid_dck'])
+    paths['reports'] = os.path.join(config['dir_out'],config['sid_dck'])
+    paths['level1a_ql'] = os.path.join(config['dir_level1a_ql'],config['sid_dck'])
+    paths['level1c_ql'] = os.path.join(config['dir_level1a_ql'],config['sid_dck'])
+    # Get periods for sid-dck (year_init, year_end)    
+    yr_ini = config['start'] 
+    yr_end = config['stop'] 
+    sid_dck = config['sid_dck']
     
     # Initialize the structure where the TSs is stored
     index = pd.date_range(start=datetime.datetime(int(yr_ini),1,1),end=datetime.datetime(int(yr_end),12,1),freq='MS')
@@ -208,11 +209,16 @@ def main():
         mm = date.month
         yr_mo = date.strftime('%Y-%m') 
         # First final product we are looking at (inarg level)
-        hdr_path = os.path.join(paths.get(level),'-'.join(['header',str(yr),str(mm).zfill(2),release,update]) + '.psv')
-        print(hdr_path)
-        if len(glob.glob(hdr_path)) > 0:
+        hdr_path = os.path.join(paths['data'],'-'.join(['header',str(yr),str(mm).zfill(2)]) + '-*.psv')
+        hdr_files = glob.glob(hdr_path)
+        if len(hdr_files) > 1:
+            logging.error('Multiple files found for {0}-{1}'.format(str(yr),str(mm).zfill(2))) 
+            logging.error('{}'.format(','.join(hdr_files)))
+            sys.exit(1)
+        if len(hdr_files) == 1:
+            hdr_file = hdr_files[0]
             level_data = True
-            mon_table = cdm.table_reader.table_reader.read_tables(paths.get(level),'-'.join([str(yr),str(mm).zfill(2),release,update]),col_subset=cdm_columns)
+            mon_table = cdm.table_reader.table_reader.read_tables(hdr_file,col_subset=cdm_columns)
                
             for status in status_list:
                 counts = mon_table['header'][status].value_counts()
@@ -232,8 +238,8 @@ def main():
             logging.warning('No level data found for {0}-{1}'.format(str(yr),str(mm).zfill(2)))    
         # Now io history
         # 1. Source data, what we selected from there and waht was invalid at source: level1a
-        file = glob.glob(os.path.join(paths.get('level1a_ql'),'-'.join([str(yr),str(mm).zfill(2),release,update]) + '.json'))
-        if len(file) > 0:
+        file = glob.glob(os.path.join(paths['level1a_ql'],'-'.join([str(yr),str(mm).zfill(2)]) + '-*.json'))
+        if len(file) == 1:
             with open(file[0]) as fileObj:
                 level_dict = json.load(fileObj)  
             level_dict = level_dict.get(yr_mo)
@@ -241,7 +247,7 @@ def main():
             df_dict['io_history'].loc[date,'PT selection'] = level_dict.get('pre_selected',{}).get('total')
             df_dict['io_history'].loc[date,'md-invalid'] = level_dict.get('invalid',{}).get('total')
         # 2. Now data that was dropped because it was invalid: level1c
-        file = glob.glob(os.path.join(paths.get('level1c_ql'),'-'.join([str(yr),str(mm).zfill(2),release,update]) + '.json'))
+        file = glob.glob(os.path.join(paths.get('level1c_ql'),'-'.join([str(yr),str(mm).zfill(2)]) + '-*.json'))
         if len(file) > 0:
             with open(file[0]) as fileObj:
                 level_dict = json.load(fileObj)
@@ -291,31 +297,31 @@ def main():
           
             plt.title(sid_dck + ' ' + status)
             plt.tight_layout();
-            out_file = os.path.join(paths.get('reports'), '-'.join([status,release,update,'ts.png']))
+            out_file = os.path.join(paths.get('reports'), '-'.join([status,'ts.png']))
             plt.savefig(out_file,bbox_inches='tight',dpi = 300)
-            out_file = os.path.join(paths.get('reports'), '-'.join([status,release,update,'ts.psv']))
+            out_file = os.path.join(paths.get('reports'), '-'.join([status,'ts.psv']))
             status_df.to_csv(out_file,sep='|',index_label='yr-mo')
     
     
     #2.- io history plots 
     title = sid_dck + ' main IO flow'
-    out_file = os.path.join(paths.get('reports'), '-'.join(['io_history',release,update,'ts.png']))
+    out_file = os.path.join(paths.get('reports'), '-'.join(['io_history','ts.png']))
     plot_io(df_dict['io_history'],index[0],index[-1],title,out_file)
-    out_file = os.path.join(paths.get('reports'), '-'.join(['io_history',release,update,'ts.psv']))
+    out_file = os.path.join(paths.get('reports'), '-'.join(['io_history','ts.psv']))
     df_dict['io_history'].dropna(how='all',axis=1).to_csv(out_file,sep='|',index_label='yr-mo')    
     
     #3.- No.reports plot
     if level_data:
-        out_file = os.path.join(paths.get('reports'), '-'.join(['no_reports',release,update,level,'all-ts.png']))
+        out_file = os.path.join(paths.get('reports'), '-'.join(['no_reports','all-ts.png']))
         title = sid_dck + ' C3S data (all qualities)'
         plot_no_reports(df_dict['report_no_all'],index[0], index[-1],title,out_file)
-        out_file = os.path.join(paths.get('reports'), '-'.join(['no_reports',release,update,level,'all-ts.psv']))
+        out_file = os.path.join(paths.get('reports'), '-'.join(['no_reports','all-ts.psv']))
         df_dict['report_no_all'].dropna(how='all',axis=1).to_csv(out_file,sep='|',index_label='yr-mo')
 
-        out_file = os.path.join(paths.get('reports'), '-'.join(['no_reports',release,update,level,'optimal-ts.png']))
+        out_file = os.path.join(paths.get('reports'), '-'.join(['no_reports','optimal-ts.png']))
         title = sid_dck + ' C3S data (recommended quality)'
         plot_no_reports(df_dict['report_no_best'],index[0], index[-1],title,out_file)
-        out_file = os.path.join(paths.get('reports'), '-'.join(['no_reports',release,update,level,'optimal-ts.psv']))
+        out_file = os.path.join(paths.get('reports'), '-'.join(['no_reports','optimal-ts.psv']))
         df_dict['report_no_best'].dropna(how='all',axis=1).to_csv(out_file,sep='|',index_label='yr-mo')
 
 if __name__ == '__main__':

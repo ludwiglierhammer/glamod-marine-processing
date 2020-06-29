@@ -3,7 +3,7 @@
 """
 Created on Tue Oct 15 10:18:42 2019
 
-Aggregates info from monthly nc maps in /level1e/quicklooks/ to generate time series in latitudinal bands  
+Aggregates info from monthly nc maps to generate time series in latitudinal bands  
 
 @author: iregon
 """

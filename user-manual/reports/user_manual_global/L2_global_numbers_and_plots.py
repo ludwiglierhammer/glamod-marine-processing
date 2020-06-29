@@ -28,7 +28,6 @@ release_end = 2010
 
 
 level2_config_path = '/gws/smf/j04/c3s311a_lot2/code/marine_code/glamod-marine-processing/obs-suite/configuration_files/r092019_000000/ICOADS_R3.0.0T/L2_config.json' 
-
 level2_data_path = '/group_workspaces/jasmin2/glamod_marine/data/r092019/ICOADS_R3.0.0T/level2'
 
 
