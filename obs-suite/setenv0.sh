@@ -1,6 +1,4 @@
 
-# WATCH THIS HARCODING UNTIL WE DECIDE WHAT TO DO WITH REPOS AND ENVS!
-
 pyEnvironment_directory=$home_directory_smf/code/marine_code/glamod-marine-processing/obs-suite/pyenvs/env0
 # Activate python environment and add jaspy3.7 path to LD_LIBRARY_PATH so that cartopy and other can find the geos library
 source $pyEnvironment_directory/bin/activate
