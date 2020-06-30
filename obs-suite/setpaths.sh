@@ -1,6 +1,6 @@
 home_directory=/group_workspaces/jasmin2/glamod_marine
 home_directory_smf=/gws/smf/j04/c3s311a_lot2
-code_directory=$home_directory_smf/code/marine_code/glamod-marine-processing_ipg/obs-suite
+code_directory=$home_directory_smf/code/marine_code/glamod-marine-processing/obs-suite
 pyTools_directory=$code_directory/modules/python
 scripts_directory=$code_directory/scripts
 data_directory=$home_directory/data
