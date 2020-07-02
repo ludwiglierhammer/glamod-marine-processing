@@ -5,7 +5,7 @@
 #
 # sid_deck_list_file is: sid-dck yyyy-mm yyyy-mm
 #
-# Usage: ./level2.sh release update source_dataset list_file level2_file
+# Usage: ./level2.sh release update source_dataset level2_file list_file
 
 source ../setpaths.sh
 source ../setenv0.sh
