@@ -132,9 +132,10 @@ Level 1a
 ========
 
 Level 1a contains the initial data converted from the input data sources
-(level0) to files compatible with the CDM. For the ICOADS / IMMA formatted files
-processed for the first data release the files are converted with the following
-commands:
+(level0) to files compatible with the CDM.
+
+Every monthly file of the individual source-deck ICOADS dataset partitions is
+converted with the following command:
 
 .. code:: bash
 
@@ -150,7 +151,10 @@ where:
 * update: release update identifier in file system
 * dataset: dataset identifier in file system
 * level1a_config: filename in *release_config_dir* with the list of partitions to process
-* failed_only: optional (yes/no). Defaults to no
+* sid-dck: source-deck identifier
+* year: file year, format yyyy
+* month: file month, format mm
+
 
 To facilitate the processing of a large number of files level1a.py can be run
 in batch mode:
