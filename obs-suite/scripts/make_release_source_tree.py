@@ -49,7 +49,7 @@ level_subdirs['level1c'] = ['log','quicklooks','invalid']
 level_subdirs['level1d'] = ['log','quicklooks']
 level_subdirs['level1e'] = ['log','quicklooks']
 level_subdirs['level1f'] = ['log','quicklooks','reports']
-level_subdirs['level2'] = ['log','quicklooks','excluded','reports','configuration']
+level_subdirs['level2'] = ['log','quicklooks','excluded','reports']
 deep_sublevels = ['log','quicklooks','invalid','excluded','reports']
 os.umask(0)
 # READ LIST OF SID-DCKS FOR RELEASE
