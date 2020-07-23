@@ -144,10 +144,10 @@ for sid_dck in process_list:
         fh.writelines('#SBATCH --open-mode=truncate\n')
         fh.writelines('{0} {1}/$SLURM_ARRAY_TASK_ID.input\n'.format(pycommand,log_diri))
     
-    process = "jid=$(sbatch {} | cut -f 4 -d' ')".format(job_file)
-    print(process)
-    proc = subprocess.Popen([process],shell=True)
-    print(proc)
+    process = "jid=$(sbatch {} | cut -f 4 -d' ') && echo $jid".format(job_file)
+    proc = subprocess.Popen([process],shell=True,stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+    jid_by, err = proc.communicate()    
+    jid = jid_by.decode('UTF-8').rstrip()
 
 
         
