@@ -45,6 +45,7 @@ def main(source_dir,source_pattern,log_dir,script_config,release_periods,
         sid_dck_log_dir = os.path.join(log_dir,sid_dck)
         job_file = glob.glob(os.path.join(sid_dck_log_dir,sid_dck + '.slurm'))
         if len(job_file) > 0:
+            logging.info('Removing previous job file {}'.format(job_file[0]))
             os.remove(job_file[0])
             
         logging.info('Configuring data partition: {}'.format(sid_dck))
@@ -77,6 +78,7 @@ def main(source_dir,source_pattern,log_dir,script_config,release_periods,
             # Clean previous ok logs
             if len(ok_files) > 0:
                 for x in ok_files:
+                    logging.info('Removing previous {} logs'.format(len(ok_files)))
                     os.remove(x)              
             for source_file in source_files:
                 yyyy,mm = get_yyyymm(source_file)
@@ -87,6 +89,7 @@ def main(source_dir,source_pattern,log_dir,script_config,release_periods,
                 
         if len(failed_files) > 0:
             for x in failed_files:
+                logging.info('Removing previous {} failed logs'.format(len(failed_files)))
                 os.remove(x)    
                 
     return 0
