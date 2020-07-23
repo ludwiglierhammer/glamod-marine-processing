@@ -81,7 +81,12 @@ FFS = '-'
 # FUNCTIONS -------------------------------------------------------------------
 class script_setup:
     def __init__(self, inargs):
-        self.configfile =  inargs[1]
+        self.data_path = inargs[1]
+        self.release = inargs[2]
+        self.update = inargs[3]
+        self.dataset = inargs[4]
+        self.configfile = inargs[5]
+        
         try:
             with open(self.configfile) as fileObj:
                 config = json.load(fileObj)
@@ -89,17 +94,12 @@ class script_setup:
             logging.error('Opening configuration file :{}'.format(self.configfile), exc_info=True)
             self.flag = False 
             return
- 
-        self.release = config.get('release')
-        self.update = config.get('update')
-        self.dataset = config.get('dataset')
-        if len(sys.argv) > 2:
-            self.data_path = inargs[2]
-            self.sid_dck = inargs[3]
-            self.year = inargs[4]
-            self.month = inargs[5]
+        
+        if len(sys.argv) > 6:
+            self.sid_dck = inargs[6]
+            self.year = inargs[7]
+            self.month = inargs[8]    
         else:
-            self.data_path = config.get('data_directory')
             self.sid_dck = config.get('sid_dck')
             self.year = config.get('yyyy')
             self.month = config.get('mm') 
