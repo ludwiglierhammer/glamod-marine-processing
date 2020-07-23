@@ -55,8 +55,8 @@ Common paths
 ------------
 
 * *obs-suite*: path of the observations suite in the marine processing repository
-* *config_dir*: path to the obs-suite directory in the configuration repository
-* *data_dir*: path to general data directory in the marine file system
+* *config_directory*: path to the obs-suite directory in the configuration repository
+* *data_directory*: path to general data directory in the marine file system
 
 Create the configuration files for the release and dataset
 ----------------------------------------------------------
@@ -67,7 +67,7 @@ Every data release is identified in the file system with the following tags:
 * update: udpate tag
 * dataset: dataset name (eg. ICOADS_R3.0.0T)
 
-Create a new directory *release*-*update*/*dataset*/ in the obs-suite configuration directory (*config_dir*)
+Create a new directory *release*-*update*/*dataset*/ in the obs-suite configuration directory (*config_directory*)
 of the configuration repository. We will now refer to this directory as *release_config_dir*.
 
 Release periods file
@@ -106,7 +106,7 @@ directory structure initialised in the file system:
   source setpaths.sh
   source setenv0.sh
   cd scripts
-  python make_release_source_tree.py data_dir config_dir release update dataset
+  python make_release_source_tree.py data_directory config_directory release update dataset
 
 where:
 
