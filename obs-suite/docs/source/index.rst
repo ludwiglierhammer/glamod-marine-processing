@@ -57,6 +57,8 @@ Common paths
 * *obs-suite*: path of the observations suite in the marine processing repository
 * *config_directory*: path to the obs-suite directory in the configuration repository
 * *data_directory*: path to general data directory in the marine file system
+* *release_config_dir*: full path to the configuration of a specific data release
+  within *config_directory*
 
 Create the configuration files for the release and dataset
 ----------------------------------------------------------
@@ -93,6 +95,13 @@ can later be subsetted if a given process is to be run in batches.
 A sample of this file can be found in the appendix: :ref:`process_list_file`
 
 
+Level 1a configuration file
+^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+Create file *release_config_dir*/level1a.json
+
+
+
 Set up the release data directory
 ---------------------------------
 
@@ -106,7 +115,7 @@ directory structure initialised in the file system:
   source setpaths.sh
   source setenv0.sh
   cd scripts
-  python make_release_source_tree.py data_directory config_directory release update dataset
+  python make_release_source_tree.py $data_directory $config_directory release update dataset
 
 where:
 
@@ -115,11 +124,36 @@ where:
 * dataset: dataset identifier in file system
 
 
-This script does not overwrite existing directories and is safe to run on an existing directory structure.
+This script does not overwrite existing directories and is safe to run on an
+existing directory structure if new source-decks have to be added.
 
 
 Level 1a
 ========
+
+Level 1a contains the initial data converted from the input data sources
+(level0) to files compatible with the CDM. For the ICOADS / IMMA formatted files
+processed for the first data release the files are converted with the following
+commands:
+
+.. code:: bash
+
+  cd obs-suite
+  source setpaths.sh
+  source setenv0.sh
+  cd scripts
+  python level1a.py data_directory release update dataset level1a_config sid-dck year month
+
+where:
+
+* release: release identifier in file system
+* update: release update identifier in file system
+* dataset: dataset identifier in file system
+* level1a_config: filename in *release_config_dir* with the list of partitions to process
+* failed_only: optional (yes/no). Defaults to no
+
+To facilitate the processing of a large number of files level1a.py can be run
+in batch mode:
 
 .. code:: bash
 
@@ -127,15 +161,14 @@ Level 1a
   source setpaths.sh
   source setenv0.sh
   cd lotus_scripts
-  python level1a_slurm.py release udpate dataset config_path process_list failed_only
+  python level1a_slurm.py release update dataset $config_directory process_list failed_only
 
 where:
 
 * release: release identifier in file system
 * update: release update identifier in file system
 * dataset: dataset identifier in file system
-* config_path: path to obs-suite configuration directory
-* process_list: filename in *config_path*/*release*/*dataset* with the list of partitions to process
+* process_list: filename in *release_config_dir* with the list of partitions to process
 * failed_only: optional (yes/no). Defaults to no
 
 

@@ -19,7 +19,7 @@
 
 project = 'Marine observations suite'
 copyright = '2020, IPG'
-author = 'IPG'
+author = 'DYB, IPG'
 
 # The full version, including alpha/beta/rc tags
 release = 'v1.2'
