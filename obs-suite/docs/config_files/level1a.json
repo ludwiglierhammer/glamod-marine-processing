@@ -1,0 +1,26 @@
+{
+    "job_memo_mb": 4000,
+    "job_time_hr": "01",
+    "job_time_min": "30",
+    "data_model": "imma1",
+    "read_sections": ["core","c1","c98"],
+    "filter_reports_by":
+    {
+      "c1.PT": ["0","1","2","3","4","5"]
+    },
+    "cdm_map": "icoads_r3000"
+    ,
+    "063-714":
+    {
+      "job_memo_mb": 16000,
+      "job_time_hr": "03",
+      "job_time_min": "30",
+      "data_model": "imma1_d714",
+      "read_sections": ["core","c1","c98","c99"],
+      "filter_reports_by":
+      {
+        "c1.PT": ["7"]
+      },
+      "cdm_map": "icoads_r3000_d714"
+    }
+}

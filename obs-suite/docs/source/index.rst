@@ -60,6 +60,7 @@ Common paths
 * *release_config_dir*: full path to the configuration of a specific data release
   within *config_directory*
 
+
 Create the configuration files for the release and dataset
 ----------------------------------------------------------
 
@@ -80,7 +81,9 @@ Create file *release_config_dir*/source_deck_periods.json
 This file is a json file with each of the source-deck partitions to be included
 in the release, and its associated periods (year resolution) to process.
 
-A sample of this file can be found in the appendix: :ref:`periods_file`
+The figure below shows a sample of this file:
+
+.. literalinclude:: ../config_files/source_deck_periods.json
 
 
 Process list file
@@ -92,14 +95,29 @@ This is a simple ascii file with the list of source-deck partitions to process.
 Create the master list with the keys of file source_deck_periods.json. This file
 can later be subsetted if a given process is to be run in batches.
 
-A sample of this file can be found in the appendix: :ref:`process_list_file`
+The figure below shows a sample of this file:
+
+.. literalinclude:: ../config_files/source_deck_list.txt
 
 
 Level 1a configuration file
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Create file *release_config_dir*/level1a.json
+Create file *release_config_dir*/level1a.json. This file includes information on
+the input files data model, filters used to select reports and the mapping to
+apply convert the data to the CDM.
 
+The figure below shows a sample of this file:
+
+.. literalinclude:: ../config_files/level1a.json
+
+This file has its default configuration in the outer keys, with source-deck
+specific configuration under the *sid-dck* keys. In the sample given, all the
+source and decks will be processed with the default configuration, but 063-714,
+that will use its own parameters.
+
+Configuration parameters job* are only used by the slurm launchers, while the
+rest by the corresponding level1a.py script.
 
 
 Set up the release data directory
@@ -143,14 +161,13 @@ converted with the following command:
   source setpaths.sh
   source setenv0.sh
   cd scripts
-  python level1a.py data_directory release update dataset level1a_config sid-dck year month
+  python level1a.py $data_directory release update dataset release_config_dir/level1a.json sid-dck year month
 
 where:
 
 * release: release identifier in file system
 * update: release update identifier in file system
 * dataset: dataset identifier in file system
-* level1a_config: filename in *release_config_dir* with the list of partitions to process
 * sid-dck: source-deck identifier
 * year: file year, format yyyy
 * month: file month, format mm
@@ -174,22 +191,3 @@ where:
 * dataset: dataset identifier in file system
 * process_list: filename in *release_config_dir* with the list of partitions to process
 * failed_only: optional (yes/no). Defaults to no
-
-
-Appendix. Configuration files
-=============================
-
-.. _periods_file:
-
-Release periods file
---------------------
-
-.. literalinclude:: ../config_files/source_deck_periods.json
-
-
-.. _process_list_file:
-
-Process list file
------------------
-
-.. literalinclude:: ../config_files/source_deck_list.txt
