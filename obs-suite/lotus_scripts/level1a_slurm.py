@@ -24,6 +24,8 @@ SOURCE_PATTERN = '????-??.imma'
 PYSCRIPT = 'level1a.py'
 CONFIG_FILE = 'level1a.json'
 PERIODS_FILE = 'source_deck_periods.json'
+PYCLEAN = 'array_output_hdlr.py'
+QUEUE = 'short-serial'
 #------------------------------------------------------------------------------
 
 #------------------------------------------------------------------------------
@@ -42,6 +44,7 @@ def check_dir_exit(dirs):
             logging.error('Directory {} does not exist. Exiting'.format(diri))
             sys.exit(1)
     return
+
 #------------------------------------------------------------------------------
 
 
@@ -105,6 +108,7 @@ if status != 0:
     
 # Build jobs ------------------------------------------------------------------    
 py_path = os.path.join(scripts_dir,PYSCRIPT)
+py_clean_path = os.path.join(scripts_dir,PYCLEAN)
 pycommand='python {0} {1} {2} {3} {4}'.format(py_path,data_dir,release,update,
                   dataset)
 
@@ -136,7 +140,8 @@ for sid_dck in process_list:
     with open(job_file,'w') as fh:
         fh.writelines('#!/bin/bash\n')
         fh.writelines('#SBATCH --job-name={}.job\n'.format(sid_dck))
-        fh.writelines('#SBATCH --array=1-{}\n'.format(str(array_size))  )            
+        fh.writelines('#SBATCH --array=1-{}\n'.format(str(array_size)))
+        fh.writelines('#SBATCH --partition={}\n'.format(QUEUE))
         fh.writelines('#SBATCH --output={}/%a.out\n'.format(log_diri))
         fh.writelines('#SBATCH --error={}/%a.out\n'.format(log_diri))
         fh.writelines('#SBATCH --time={}\n'.format(ti))
@@ -144,10 +149,13 @@ for sid_dck in process_list:
         fh.writelines('#SBATCH --open-mode=truncate\n')
         fh.writelines('{0} {1}/$SLURM_ARRAY_TASK_ID.input\n'.format(pycommand,log_diri))
     
-    process = "jid=$(sbatch {} | cut -f 4 -d' ') && echo $jid".format(job_file)
+    process = 'jid=$(sbatch {} | cut -f 4 -d' ') && echo $jid'.format(job_file)
     proc = subprocess.Popen([process],shell=True,stdout=subprocess.PIPE, stderr=subprocess.PIPE)
     jid_by, err = proc.communicate()    
     jid = jid_by.decode('UTF-8').rstrip()
 
-
-        
+    
+    clean_ok = 'sbatch -d afterok:{0}_%a --kill-on-invalid-dep=yes -p {4} {1} {2}/$SLURM_ARRAY_TASK_ID.input 0 1'.format(jid,py_clean_path,log_diri,QUEUE)
+    print(clean_ok)
+    clean_failed = 'sbatch -d afternotok:{0}_%a --kill-on-invalid-dep=yes -p {4} {1} {2}/$SLURM_ARRAY_TASK_ID.input 1 1'.format(jid,py_clean_path,log_diri,QUEUE)
+    print(clean_failed)    
