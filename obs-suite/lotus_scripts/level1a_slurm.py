@@ -21,6 +21,26 @@ LEVEL = 'level1a'
 LEVEL_SOURCE = 'level0'
 SOURCE_PATTERN = '????-??.imma'
 PYSCRIPT = 'level1a.py'
+CONFIG_FILE = 'level1a.json'
+PERIODS_FILE = 'source_deck_periods.json'
+#------------------------------------------------------------------------------
+
+#------------------------------------------------------------------------------
+def check_file_exit(files):
+    files = [files] if not isinstance(files,list) else files
+    for filei in files:
+        if not os.path.isfile(filei):
+            logging.error('File {} does not exist. Exiting'.format(filei))
+            sys.exit(1)
+    return
+
+def check_dir_exit(dirs):
+    dirs = [dirs] if not isinstance(dirs,list) else dirs
+    for diri in dirs:
+        if not os.path.isdir(diri):
+            logging.error('Directory {} does not exist. Exiting'.format(diri))
+            sys.exit(1)
+    return
 #------------------------------------------------------------------------------
 
 
@@ -31,9 +51,20 @@ logging.basicConfig(format='%(levelname)s\t[%(asctime)s](%(filename)s)\t%(messag
 release = sys.argv[1]
 update = sys.argv[2]
 dataset = sys.argv[3]
-script_config_file = sys.argv[4]
-process_list_file = sys.argv[5]
-failed = sys.argv[6]
+config_path = sys.argv[4]
+process_list_filename = sys.argv[5]
+
+if len(sys.argv) > 6:
+    failed_only = sys.argv[6]
+    if failed_only == 'yes':
+        failed_only = True
+    elif failed_only == 'no':
+        failed_only = False
+    else:
+        logging.error('Please input correct value for failed_only argument (yes/no). Exiting')
+        sys.exit(1)
+else:
+    failed_only = False
 
 # Get lotus paths
 scripts_dir = lotus_paths.scripts_directory
@@ -41,9 +72,17 @@ data_dir = lotus_paths.data_directory
 scratch_dir = lotus_paths.scratch_directory
 
 # Build process specific paths
+release_tag = '-'.join([release,update])
+script_config_file = os.path.join(config_path,release_tag,dataset,CONFIG_FILE)
+release_periods_file = os.path.join(config_path,release_tag,dataset,PERIODS_FILE)
+process_list_file = os.path.join(config_path,release_tag,dataset,process_list_filename)
 level_dir = os.path.join(data_dir,release,dataset,LEVEL)
 level_source_dir = os.path.join(data_dir,'datasets',dataset,LEVEL_SOURCE)
 log_dir = os.path.join(level_dir,'log')
+
+# Check paths
+check_file_exit([script_config_file,release_periods_file,process_list_file])
+check_dir_exit([level_dir,level_source_dir,log_dir])
 
 # Get configuration -----------------------------------------------------------
 with open(script_config_file,'r') as fO:
@@ -52,16 +91,21 @@ with open(script_config_file,'r') as fO:
 with open(process_list_file,'r') as fO:
     process_list = fO.read().splitlines()
 
-
+with open(release_periods_file,'r') as fO:
+    release_periods = json.load(release_periods_file)
+    
 # Build array input files -----------------------------------------------------
-status = config_array.main(level_source_dir,SOURCE_PATTERN,log_dir,script_config,process_list,failed = failed) 
+status = config_array.main(level_source_dir,SOURCE_PATTERN,log_dir,
+                           script_config,release_periods,process_list,
+                           failed_only = failed_only) 
 if status != 0:
     logging.error('Creating array inputs')
     sys.exit(1)
     
-    
+# Build jobs ------------------------------------------------------------------    
 py_path = os.path.join(scripts_dir,PYSCRIPT)
-pycommand='python {0} {1} {2} {3} {4}'.format(py_path,release,update,dataset,data_dir)
+pycommand='python {0} {1} {2} {3} {4}'.format(py_path,data_dir,release,update,
+                  dataset)
 
 for sid_dck in process_list:
     log_diri = os.path.join(log_dir,sid_dck)
@@ -84,7 +128,7 @@ for sid_dck in process_list:
         fh.writelines('#SBATCH --mem={}\n'.format(mem))
         fh.writelines('#SBATCH --open-mode=truncate\n')
         fh.writelines('{0} {1}/%a.input\n'.format(pycommand,log_diri))
-
+#
 #    os.system("sbatch %s" %job_file)
 
         

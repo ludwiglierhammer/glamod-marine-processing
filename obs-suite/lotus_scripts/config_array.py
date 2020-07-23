@@ -16,8 +16,8 @@ DATE_REGEX="([1-2]{1}[0-9]{3}\-(0[1-9]{1}|1[1-2]{1}))"
 # FUNCTIONS -------------------------------------------------------------------
 def config_element(sid_dck_log_dir,ai,script_config,sid_dck,yyyy,mm):
     script_config.update({'sid_dck':sid_dck})
-    script_config.update({'year':int(yyyy)})
-    script_config.update({'month':int(mm)})
+    script_config.update({'year':yyyy})
+    script_config.update({'month':mm})
     ai_config_file = os.path.join(sid_dck_log_dir,str(ai) + '.input')
     with open(ai_config_file,'w') as fO:
         json.dump(script_config,fO,indent = 4)
@@ -29,7 +29,9 @@ def get_yyyymm(filename):
 # -----------------------------------------------------------------------------
 
 
-def main(source_dir,source_pattern,log_dir,script_config,process_list,failed_only = False): 
+def main(source_dir,source_pattern,log_dir,script_config,release_periods,
+         process_list,failed_only = False): 
+    
     logging.basicConfig(format='%(levelname)s\t[%(asctime)s](%(filename)s)\t%(message)s',
                     level=logging.INFO,datefmt='%Y%m%d %H:%M:%S',filename=None)
     if failed_only:
@@ -48,6 +50,8 @@ def main(source_dir,source_pattern,log_dir,script_config,process_list,failed_onl
             logging.error('Data partition log diretory does not exist: {}'.format(sid_dck_log_dir))
             sys.exit(1)
         
+        year_init = release_periods['sid_dck'].get('year_init')
+        year_end = release_periods['sid_dck'].get('year_end')
         # Make sure there are not previous input files
         i_files = glob.glob(os.path.join(sid_dck_log_dir,'*.input'))
         for i_file in i_files:
@@ -61,8 +65,9 @@ def main(source_dir,source_pattern,log_dir,script_config,process_list,failed_onl
                 logging.info('{0}: found {1} failed jobs'.format(sid_dck,str(len(failed_files))))
                 for failed_file in failed_files:
                     yyyy,mm = get_yyyymm(failed_file)
-                    config_element(sid_dck_log_dir,ai,script_config,sid_dck,yyyy,mm)
-                    ai += 1
+                    if int(yyyy) >= year_init and int(yyyy) <= year_end:
+                        config_element(sid_dck_log_dir,ai,script_config,sid_dck,yyyy,mm)
+                        ai += 1
             else:
                 logging.info('{}: no failed files'.format(sid_dck))
         else:
@@ -72,8 +77,9 @@ def main(source_dir,source_pattern,log_dir,script_config,process_list,failed_onl
                     os.remove(x)              
             for source_file in source_files:
                 yyyy,mm = get_yyyymm(source_file)
-                config_element(sid_dck_log_dir,ai,script_config,sid_dck,yyyy,mm)
-                ai +=1
+                if int(yyyy) >= year_init and int(yyyy) <= year_end:
+                    config_element(sid_dck_log_dir,ai,script_config,sid_dck,yyyy,mm)
+                    ai +=1
             logging.info('{0}: {1} elements configured'.format(sid_dck,str(ai)))
                 
         if len(failed_files) > 0:
