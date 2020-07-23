@@ -10,13 +10,10 @@ Inargs:
 ------
 
 data_path: parent directory where tree is to be created
-release_name: name for release directory
-source_name: name for data source in directory tree
-release_file: path to text file with individual sid-dck
-
-release_file format:
--------------------
-json with sid-dck as primary keys   
+config_path: path to the obs-suite config directory
+release: name for release directory
+update_tag: tag for the release update
+dataset: name for data source in directory tree
 
 @author: iregon
 """
@@ -25,13 +22,14 @@ import os
 import sys
 import json
 
-
+PERIODS_FILE = 'source_deck_periods.json'
 # Find command line arguments -------------------------------------------------
 if len(sys.argv)>1:
      data_path = sys.argv[1]
-     release_name = sys.argv[2]
-     source_name = sys.argv[3]
-     release_file = sys.argv[4]
+     config_path = sys.argv[2]
+     release = sys.argv[3]
+     update = sys.argv[4]
+     dataset = sys.argv[5]
 
 # Functions -------------------------------------------------------------------
 def create_subdir(lpath,subdir_list):
@@ -55,22 +53,24 @@ level_subdirs['level2'] = ['log','quicklooks','excluded','reports','configuratio
 deep_sublevels = ['log','quicklooks','invalid','excluded','reports']
 os.umask(0)
 # READ LIST OF SID-DCKS FOR RELEASE
-with open(release_file,'r') as fileO:
+release_tag = '-'.join([release,update])
+release_periods_file = os.path.join(config_path,release_tag,dataset,PERIODS_FILE)
+with open(release_periods_file,'r') as fileO:
     sid_dck_dict = json.load(fileO)
 
 for level in levels:
     level_subdirs[level].extend(sid_dck_dict.keys())
 
 # CREATE DIR FOR RELEASE
-release_tag = release_name
+release_tag = release
 create_subdir(data_path,release_tag)
 
 # CREATE DIR FOR SOURCE
 release_path = os.path.join(data_path,release_tag)
-create_subdir(release_path, source_name)
+create_subdir(release_path, dataset)
 
 # CREATE LEVELS
-source_path = os.path.join(release_path, source_name)
+source_path = os.path.join(release_path, dataset)
 create_subdir(source_path,levels)
 
 # POPULATE LEVELS WITH SID-DCK, LOG AND QL SUBDIRECTORIES
