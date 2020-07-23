@@ -9,7 +9,7 @@ data_directory=$home_directory/data
 
 echo 'Data directory is '$data_directory
 echo 'Code directory is '$code_directory
-
+echo 'Config directory is '$config_directory
 # Create the scratch directory for the user
 scratch_directory=/work/scratch-nopw/$(whoami)
 if [ ! -d $scratch_directory ]
