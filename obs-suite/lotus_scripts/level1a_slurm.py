@@ -141,7 +141,7 @@ for sid_dck in process_list:
         fh.writelines('#SBATCH --time={}\n'.format(ti))
         fh.writelines('#SBATCH --mem={}\n'.format(memi))
         fh.writelines('#SBATCH --open-mode=truncate\n')
-        fh.writelines('{0} {1}/%a.input\n'.format(pycommand,log_diri))
+        fh.writelines('{0} {1}/$SLURM_ARRAY_TASK_ID.input\n'.format(pycommand,log_diri))
 #
 #    os.system("sbatch %s" %job_file)
 

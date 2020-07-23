@@ -105,7 +105,8 @@ class script_setup:
             self.sid_dck = config.get('sid_dck')
             self.year = config.get('yyyy')
             self.month = config.get('mm') 
-            
+        
+        print(config)            
         self.dck = self.sid_dck.split("-")[1]
         
         process_options = ['data_model', 'read_sections','filter_reports_by',

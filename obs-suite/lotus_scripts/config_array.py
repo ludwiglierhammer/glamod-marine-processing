@@ -16,8 +16,8 @@ DATE_REGEX="([1-2]{1}[0-9]{3}\-(0[1-9]{1}|1[0-2]{1}))"
 # FUNCTIONS -------------------------------------------------------------------
 def config_element(sid_dck_log_dir,ai,script_config,sid_dck,yyyy,mm):
     script_config.update({'sid_dck':sid_dck})
-    script_config.update({'year':yyyy})
-    script_config.update({'month':mm})
+    script_config.update({'yyyy':yyyy})
+    script_config.update({'mm':mm})
     ai_config_file = os.path.join(sid_dck_log_dir,str(ai) + '.input')
     with open(ai_config_file,'w') as fO:
         json.dump(script_config,fO,indent = 4)
@@ -41,14 +41,13 @@ def main(source_dir,source_pattern,log_dir,script_config,release_periods,
         logging.info('Configuration using failed only mode')
     
     for sid_dck in process_list: 
-        
+        logging.info('Configuring data partition: {}'.format(sid_dck)) 
         sid_dck_log_dir = os.path.join(log_dir,sid_dck)
         job_file = glob.glob(os.path.join(sid_dck_log_dir,sid_dck + '.slurm'))
         if len(job_file) > 0:
             logging.info('Removing previous job file {}'.format(job_file[0]))
             os.remove(job_file[0])
             
-        logging.info('Configuring data partition: {}'.format(sid_dck))
         ai = 1
         if not os.path.isdir(sid_dck_log_dir):
             logging.error('Data partition log diretory does not exist: {}'.format(sid_dck_log_dir))
@@ -85,7 +84,7 @@ def main(source_dir,source_pattern,log_dir,script_config,release_periods,
                 if int(yyyy) >= year_init and int(yyyy) <= year_end:
                     config_element(sid_dck_log_dir,ai,script_config,sid_dck,yyyy,mm)
                     ai +=1
-            logging.info('{0}: {1} elements configured'.format(sid_dck,str(ai)))
+            logging.info('{} elements configured'.format(str(ai)))
                 
         if len(failed_files) > 0:
             for x in failed_files:
