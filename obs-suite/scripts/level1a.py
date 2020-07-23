@@ -110,10 +110,10 @@ class script_setup:
                            'cdm_map']
         try:            
             for opt in process_options: 
-                if not config.get('config').get(self.sid_dck,{}).get(opt):
-                    setattr(self, opt, config.get('config').get(opt))
+                if not config.get(self.sid_dck,{}).get(opt):
+                    setattr(self, opt, config.get(opt))
                 else:
-                    setattr(self, opt, config.get('config').get(self.sid_dck).get(opt))
+                    setattr(self, opt, config.get(self.sid_dck).get(opt))
             self.flag = True
         except Exception:
             logging.error('Parsing configuration from file :{}'.format(self.configfile), exc_info=True)
@@ -202,6 +202,8 @@ read_kwargs = {'data_model':params.data_model,
                   'chunksize':200000}
 
 data_in = mdf_reader.read(L0_filename, **read_kwargs)
+
+print(data_in)
 
 io_dict['read'] = {'total':inspect.get_length(data_in.data)}
 
