@@ -11,7 +11,7 @@ import glob
 import json
 import re
 
-DATE_REGEX="([1-2]{1}[0-9]{3}\-(0[1-9]{1}|1[1-2]{1}))"
+DATE_REGEX="([1-2]{1}[0-9]{3}\-(0[1-9]{1}|1[0-2]{1}))"
 
 # FUNCTIONS -------------------------------------------------------------------
 def config_element(sid_dck_log_dir,ai,script_config,sid_dck,yyyy,mm):
@@ -25,7 +25,10 @@ def config_element(sid_dck_log_dir,ai,script_config,sid_dck,yyyy,mm):
 
 def get_yyyymm(filename):
     yyyy_mm = re.search(DATE_REGEX,os.path.basename(filename))
-    return yyyy_mm.split('-')
+    if not (yyyy_mm):
+        logging.error('Could not extract date from filename {}'.format(filename))
+        sys.exit(1)
+    return yyyy_mm.group().split('-')
 # -----------------------------------------------------------------------------
 
 
@@ -41,8 +44,8 @@ def main(source_dir,source_pattern,log_dir,script_config,release_periods,
         
         sid_dck_log_dir = os.path.join(log_dir,sid_dck)
         job_file = glob.glob(os.path.join(sid_dck_log_dir,sid_dck + '.slurm'))
-        if os.path.isfile(job_file):
-            os.remove(job_file)
+        if len(job_file) > 0:
+            os.remove(job_file[0])
             
         logging.info('Configuring data partition: {}'.format(sid_dck))
         ai = 1
@@ -50,8 +53,8 @@ def main(source_dir,source_pattern,log_dir,script_config,release_periods,
             logging.error('Data partition log diretory does not exist: {}'.format(sid_dck_log_dir))
             sys.exit(1)
         
-        year_init = release_periods['sid_dck'].get('year_init')
-        year_end = release_periods['sid_dck'].get('year_end')
+        year_init = release_periods[sid_dck].get('year_init')
+        year_end = release_periods[sid_dck].get('year_end')
         # Make sure there are not previous input files
         i_files = glob.glob(os.path.join(sid_dck_log_dir,'*.input'))
         for i_file in i_files:

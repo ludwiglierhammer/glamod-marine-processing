@@ -86,13 +86,13 @@ check_dir_exit([level_dir,level_source_dir,log_dir])
 
 # Get configuration -----------------------------------------------------------
 with open(script_config_file,'r') as fO:
-    script_config = json.load(script_config_file)
+    script_config = json.load(fO)
     
 with open(process_list_file,'r') as fO:
     process_list = fO.read().splitlines()
 
 with open(release_periods_file,'r') as fO:
-    release_periods = json.load(release_periods_file)
+    release_periods = json.load(fO)
     
 # Build array input files -----------------------------------------------------
 status = config_array.main(level_source_dir,SOURCE_PATTERN,log_dir,
@@ -118,7 +118,7 @@ for sid_dck in process_list:
     t = '02:00:00'
     mem = '16000'
     
-    with open(job_file) as fh:
+    with open(job_file,'w') as fh:
         fh.writelines('#!/bin/bash\n')
         fh.writelines('#SBATCH --job-name={}.job\n'.format(sid_dck))
         fh.writelines('#SBATCH --array=1-{}\n'.format(str(array_size))  )            
