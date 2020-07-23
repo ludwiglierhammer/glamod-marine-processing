@@ -107,6 +107,12 @@ py_path = os.path.join(scripts_dir,PYSCRIPT)
 pycommand='python {0} {1} {2} {3} {4}'.format(py_path,data_dir,release,update,
                   dataset)
 
+# Set default job params
+mem = script_config['job_memo_mb']
+t_hh = script_config['job_time_hr']
+t_mm = script_config['job_time_min']
+t = ':'.join([t_hh,t_mm,'00'])
+
 for sid_dck in process_list:
     log_diri = os.path.join(log_dir,sid_dck)
     array_size = len(glob.glob(os.path.join(log_diri,'*.input')))
@@ -115,8 +121,16 @@ for sid_dck in process_list:
         continue
     
     job_file = os.path.join(log_diri,sid_dck + '.slurm')
-    t = '02:00:00'
-    mem = '16000'
+    
+    memi = script_config.get(sid_dck,{}).get('job_memo_mb')
+    memi = mem if not memi else memi
+    
+    t_hhi = script_config.get(sid_dck,{}).get('job_time_hr')
+    t_mmi = script_config.get(sid_dck,{}).get('job_time_min')
+    if t_hhi and t_mmi:
+        ti = ':'.join([t_hhi,t_mmi,'00'])
+    else:
+        ti = t
     
     with open(job_file,'w') as fh:
         fh.writelines('#!/bin/bash\n')
@@ -124,8 +138,8 @@ for sid_dck in process_list:
         fh.writelines('#SBATCH --array=1-{}\n'.format(str(array_size))  )            
         fh.writelines('#SBATCH --output={}/%a.out\n'.format(log_diri))
         fh.writelines('#SBATCH --error={}/%a.out\n'.format(log_diri))
-        fh.writelines('#SBATCH --time={}\n'.format(t))
-        fh.writelines('#SBATCH --mem={}\n'.format(mem))
+        fh.writelines('#SBATCH --time={}\n'.format(ti))
+        fh.writelines('#SBATCH --mem={}\n'.format(memi))
         fh.writelines('#SBATCH --open-mode=truncate\n')
         fh.writelines('{0} {1}/%a.input\n'.format(pycommand,log_diri))
 #
