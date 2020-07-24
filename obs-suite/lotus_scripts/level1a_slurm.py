@@ -69,7 +69,7 @@ release = sys.argv[1]
 update = sys.argv[2]
 dataset = sys.argv[3]
 config_path = sys.argv[4]
-process_list_filename = sys.argv[5]
+process_list_file = sys.argv[5]
 
 parser = argparse.ArgumentParser()
 parser.add_argument('positional', metavar='N', type=str, nargs='+')
@@ -92,7 +92,6 @@ scratch_dir = lotus_paths.scratch_directory
 release_tag = '-'.join([release,update])
 script_config_file = os.path.join(config_path,release_tag,dataset,CONFIG_FILE)
 release_periods_file = os.path.join(config_path,release_tag,dataset,PERIODS_FILE)
-process_list_file = os.path.join(config_path,release_tag,dataset,process_list_filename)
 level_dir = os.path.join(data_dir,release,dataset,LEVEL)
 level_source_dir = os.path.join(data_dir,'datasets',dataset,LEVEL_SOURCE)
 log_dir = os.path.join(level_dir,'log')
