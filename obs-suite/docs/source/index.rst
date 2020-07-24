@@ -7,7 +7,7 @@ Welcome to Marine observations suite's documentation!
 =====================================================
 
 .. toctree::
-   :maxdepth: 2
+   :maxdepth: 3
    :caption: Contents:
 
 
@@ -116,13 +116,59 @@ The figure below shows a sample of this file:
 
 .. literalinclude:: ../config_files/level1a.json
 
-This file has its default configuration in the outer keys, with source-deck
-specific configuration under the *sid-dck* keys. In the sample given, all the
+
+This file has its default configuration parameters in the outer keys.
+Source-deck specific configuration can be applied by specifying a configuration
+parameter under a *sid-dck* key. In the sample given, all the
 source and decks will be processed with the default configuration, but 063-714,
 that will use its own parameters.
 
 Configuration parameters job* are only used by the slurm launchers, while the
 rest by the corresponding level1a.py script.
+
+
+.. _level1b_config_file:
+
+Level 1b configuration file
+^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+Create file *release_config_dir*/level1b.json. This file contains information on
+the NOC corrections version to be used and the correspondences between the
+CDM tables fields on which the corrections are applied and the subdirectories
+where these corrections can be found. The CDM history stamp for every correction
+is also configured in this file.
+
+The figure below shows a sample of this file:
+
+.. literalinclude:: ../config_files/level1b.json
+
+This file has its default configuration parameters in the outer keys.
+Source-deck specific configuration can be applied by specifying a configuration
+parameter under a *sid-dck* key. In the sample above, only the default
+configuration is applied.
+
+Configuration parameters job* are only used by the slurm launchers, while the
+rest by the corresponding level1b.py script.
+
+
+.. _level1c_config_file:
+
+Level 1c configuration file
+^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+Create file *release_config_dir*/level1c.json. The only configuration parameters
+required in this file are those related to the slurm launchers, as the rest of
+the configuration of this process is basically hardcoded in the level1c.py
+script.
+
+The figure below shows a sample of this file:
+
+.. literalinclude:: ../config_files/level1c.json
+
+This file has its default configuration parameters in the outer keys.
+Source-deck specific configuration can be applied by specifying a configuration
+parameter under a *sid-dck* key. In the sample above, only the default
+configuration is applied.
 
 
 Set up the release data directory
@@ -198,16 +244,179 @@ where:
 * process_list: full path to file with the list of source-deck partitions to
   process. This file can be either :ref:`process_list_file` or a subset of it.
 * failed_only: optional (yes|no). Defaults to no. Setting this argument to 'yes'
-  means that only the data monthly files with a \*.failed log file will be processed.
+  means that only the monthly files with a \*.failed log file will be processed.
 
 This script executes an array of monthly subjobs per source and deck included in
-the process_list. The configuration for the process is directly fetched from
+the process_list. The configuration for the process is directly accessed from
 the release configuration directory: the data period processed is as configured
 per source and deck in the release periods file ( :ref:`release_periods_file`)
-and the level1a configuration from :ref:`level1a_config_file`.
+and the level1a configuration is retrieved from :ref:`level1a_config_file`.
 
 This script logs to *data_dir*/release/dataset/level1a/log/sid-dck/. Log files
 are yyyy-mm-<release>-<update>.ext with ext either ok or failed depending on the
 subjob termination status.
 
 List  \*.failed in the sid-dck level1a log directories to find if any went wrong.
+
+
+Level 1b
+========
+
+Level 1b integrates external files containing enhanced information on the
+duplicate status of the observations, corrected date/time and locations, and
+linked station IDs with the level1a data. As part of the integration a weather
+report may move between months if an error in the date had previously been
+identified and the correct data is for a different month. A description of the
+processing used to generate these external files is described in the marine
+duplication identification document (available upon request,
+to be published shortly). It should be noted that this processing is currently
+external to C3S311a_lot2 but will be integrated in a future release.
+
+The external files need to be copied to the datasets directory in the marine
+data directory prior to processing (datasets/NOC_corrections/*cor_version*).
+Once copied to the required directory structure the files need to be reformatted
+for integration with the level1a files. This is processing is done via python
+and shell scripts using the SLURM scheduler. The following block needs to be run
+once for each of the options id, datepos or duplicates:
+
+.. code:: bash
+
+  cd obs-suite
+  source setpaths.sh
+  source setenv0.sh
+  cd scripts
+  option=option
+  sbatch -J $option -o $option.out -e $option.out -p short-serial -t 03:00:00 --mem 1000 --open-mode truncate --wrap="python noc_corrections_postprocess.sh release cor_version $option year_init year_end"
+
+where:
+
+* release: release tag
+* option: id, datepos or duplicates
+* cor_version: NOC correction version (v1x2019 for release 1 and release 2)
+* year_init|end: first|last year of data release.
+
+This step places the reformatted correction files in the release directory in
+the marine data directory (*release*/NOC_corrections/*cor_version*) ready to be
+merged with the CDM data files.
+
+
+The reformatted files are merged with the level1a data by the following command:
+
+.. code:: bash
+
+  cd obs-suite
+  source setpaths.sh
+  source setenv0.sh
+  cd scripts
+  python level1b.py $data_directory release update dataset level1b_config sid-dck year month
+
+where:
+
+* release: release identifier in file system
+* update: release update identifier in file system
+* dataset: dataset identifier in file system
+* level1b_config: path to the level1b configuration file ( :ref:`level1b_config_file`)
+* sid-dck: source-deck identifier
+* year: file year, format yyyy
+* month: file month, format mm
+
+To facilitate the processing of a large number of files level1b.py can be run
+in batch mode:
+
+.. code:: bash
+
+  cd obs-suite
+  source setpaths.sh
+  source setenv0.sh
+  cd lotus_scripts
+  python level1b_slurm.py release update dataset $config_directory process_list --failed_only yes|no
+
+where:
+
+* release: release identifier in file system
+* update: release update identifier in file system
+* dataset: dataset identifier in file system
+* process_list: full path to file with the list of source-deck partitions to
+  process. This file can be either :ref:`process_list_file` or a subset of it.
+* failed_only: optional (yes|no). Defaults to no. Setting this argument to 'yes'
+  means that only the monthly files with a \*.failed log file will be processed.
+
+This script executes an array of monthly subjobs per source and deck included in
+the process_list. The configuration for the process is directly accessed from
+the release configuration directory: the data period processed is as configured
+per source and deck in the release periods file ( :ref:`release_periods_file`)
+and the level1b configuration is retrieved from :ref:`level1b_config_file`.
+
+This script logs to *data_dir*/release/dataset/level1b/log/sid-dck/. Log files
+are yyyy-mm-<release>-<update>.ext with ext either ok or failed depending on the
+subjob termination status.
+
+List  \*.failed in the sid-dck level1b log directories to find if any went wrong.
+
+
+Level 1c
+========
+
+The level1c files contain reports from level1b that have been further validated
+following corrections to the date/time, location and station ID. Those failing
+validation are rejected and archived for future analysis. Additionally, datetime
+corrections applied previously in level1b, can potentially result in reports
+being relocated to a different month. These reports are moved to their correct
+monthly file in this level.
+
+To generate level1c files, the individual sid-dck monthly files in level1b are
+processed with:
+
+.. code:: bash
+
+  cd obs-suite
+  source setpaths.sh
+  source setenv0.sh
+  cd scripts
+  python level1c.py $data_directory release update dataset level1c_config sid-dck year month
+
+where:
+
+* release: release identifier in file system
+* update: release update identifier in file system
+* dataset: dataset identifier in file system
+* level1c_config: path to the level1b configuration file ( :ref:`level1c_config_file`)
+* sid-dck: source-deck identifier
+* year: file year, format yyyy
+* month: file month, format mm
+
+To facilitate the processing of a large number of files level1c.py can be run
+in batch mode:
+
+.. code:: bash
+
+  cd obs-suite
+  source setpaths.sh
+  source setenv0.sh
+  cd lotus_scripts
+  python level1c_slurm.py release update dataset $config_directory process_list --failed_only yes|no --remove_source yes|no
+
+where:
+
+* release: release identifier in file system
+* update: release update identifier in file system
+* dataset: dataset identifier in file system
+* process_list: full path to file with the list of source-deck partitions to
+  process. This file can be either :ref:`process_list_file` or a subset of it.
+* failed_only: optional (yes|no). Defaults to no. Setting this argument to 'yes'
+  means that only the monthly files with a \*.failed log file will be processed.
+* remove_source: optional (yes|no). Defaults to no. Setting this argument to 'yes'
+  implies removal of the source level (level1b) data files if the full set of
+  monthly data files of a given source-deck is successfully processed.
+
+This script executes an array of monthly subjobs per source and deck included in
+the process_list. The configuration for the process is directly accessed from
+the release configuration directory: the data period processed is as configured
+per source and deck in the release periods file ( :ref:`release_periods_file`)
+and the level1c configuration is retrieved from :ref:`level1c_config_file`.
+
+This script logs to *data_dir*/release/dataset/level1c/log/sid-dck/. Log files
+are yyyy-mm-<release>-<update>.ext with ext either ok or failed depending on the
+subjob termination status.
+
+List  \*.failed in the sid-dck level1c log directories to find if any went wrong.
