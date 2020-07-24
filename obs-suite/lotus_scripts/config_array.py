@@ -79,8 +79,8 @@ def main(source_dir,source_pattern,log_dir,script_config,release_periods,
             
             # Clean previous ok logs
             if len(ok_files) > 0:
+                logging.info('Removing previous {} logs'.format(len(ok_files)))
                 for x in ok_files:
-                    logging.info('Removing previous {} logs'.format(len(ok_files)))
                     os.remove(x)              
             for source_file in source_files:
                 yyyy,mm = get_yyyymm(source_file)
