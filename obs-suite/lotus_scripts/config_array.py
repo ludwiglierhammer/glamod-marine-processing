@@ -44,9 +44,6 @@ def main(source_dir,source_pattern,log_dir,script_config,release_periods,
         logging.info('Configuring data partition: {}'.format(sid_dck)) 
         sid_dck_log_dir = os.path.join(log_dir,sid_dck)
         job_file = glob.glob(os.path.join(sid_dck_log_dir,sid_dck + '.slurm'))
-        if len(job_file) > 0:
-            logging.info('Removing previous job file {}'.format(job_file[0]))
-            os.remove(job_file[0])
             
         ai = 1
         if not os.path.isdir(sid_dck_log_dir):
@@ -57,8 +54,10 @@ def main(source_dir,source_pattern,log_dir,script_config,release_periods,
         year_end = release_periods[sid_dck].get('year_end')
         # Make sure there are not previous input files
         i_files = glob.glob(os.path.join(sid_dck_log_dir,'*.input'))
-        for i_file in i_files:
-            os.remove(i_file)
+        if len(i_files) > 0:
+            logging.info('Removing previous {} input files'.format(len(i_files)))
+            for i_file in i_files:
+                os.remove(i_file)
     
         ok_files = glob.glob(os.path.join(sid_dck_log_dir,'*.ok'))
         failed_files = glob.glob(os.path.join(sid_dck_log_dir,'*.failed'))
@@ -66,6 +65,9 @@ def main(source_dir,source_pattern,log_dir,script_config,release_periods,
         if failed_only:
             if len(failed_files) > 0:
                 logging.info('{0}: found {1} failed jobs'.format(sid_dck,str(len(failed_files))))
+                if len(job_file) > 0:
+                    logging.info('Removing previous job file {}'.format(job_file[0]))
+                    os.remove(job_file[0])
                 for failed_file in failed_files:
                     yyyy,mm = get_yyyymm(failed_file)
                     if int(yyyy) >= year_init and int(yyyy) <= year_end:
@@ -74,6 +76,7 @@ def main(source_dir,source_pattern,log_dir,script_config,release_periods,
             else:
                 logging.info('{}: no failed files'.format(sid_dck))
         else:
+            
             # Clean previous ok logs
             if len(ok_files) > 0:
                 for x in ok_files:
@@ -85,10 +88,13 @@ def main(source_dir,source_pattern,log_dir,script_config,release_periods,
                     config_element(sid_dck_log_dir,ai,script_config,sid_dck,yyyy,mm)
                     ai +=1
             logging.info('{} elements configured'.format(str(ai)))
-                
+            if len(job_file) > 0:
+                    logging.info('Removing previous job file {}'.format(job_file[0]))
+                    os.remove(job_file[0])
+    
         if len(failed_files) > 0:
+            logging.info('Removing previous {} failed logs'.format(len(failed_files)))
             for x in failed_files:
-                logging.info('Removing previous {} failed logs'.format(len(failed_files)))
                 os.remove(x)    
                 
     return 0

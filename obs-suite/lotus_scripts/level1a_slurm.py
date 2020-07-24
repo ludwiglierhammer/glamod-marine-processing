@@ -9,6 +9,7 @@ Created on Wed Jul 22 09:09:41 2020
 import sys
 import os
 import json
+import argparse
 import logging
 import glob
 import subprocess
@@ -45,6 +46,18 @@ def check_dir_exit(dirs):
             sys.exit(1)
     return
 
+def launch_process(process):
+
+    proc = subprocess.Popen([process],shell=True,stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+    jid_by, err = proc.communicate()
+    if len(err)>0:
+        logging.error('Error launching process. Exiting')
+        logging.info('Error is: {}'.format(err))
+        sys.exit(1)
+    jid = jid_by.decode('UTF-8').rstrip()
+
+    return jid
+
 #------------------------------------------------------------------------------
 
 
@@ -58,19 +71,19 @@ dataset = sys.argv[3]
 config_path = sys.argv[4]
 process_list_filename = sys.argv[5]
 
-if len(sys.argv) > 6:
-    failed_only = sys.argv[6]
-    if failed_only == 'yes':
-        failed_only = True
-    elif failed_only == 'no':
-        failed_only = False
-    else:
-        logging.error('Please input correct value for failed_only argument (yes/no). Exiting')
-        sys.exit(1)
+parser = argparse.ArgumentParser()
+parser.add_argument('positional', metavar='N', type=str, nargs='+')
+parser.add_argument('--failed_only')
+
+args = parser.parse_args()
+if args.failed_only:
+    failed_only = True if args.failed_only== 'yes' else False
 else:
     failed_only = False
 
+
 # Get lotus paths
+lotus_dir = lotus_paths.lotus_scripts_directory
 scripts_dir = lotus_paths.scripts_directory
 data_dir = lotus_paths.data_directory
 scratch_dir = lotus_paths.scratch_directory
@@ -99,6 +112,8 @@ with open(release_periods_file,'r') as fO:
     release_periods = json.load(fO)
     
 # Build array input files -----------------------------------------------------
+logging.info('CONFIGURING JOB ARRAYS...')
+
 status = config_array.main(level_source_dir,SOURCE_PATTERN,log_dir,
                            script_config,release_periods,process_list,
                            failed_only = failed_only) 
@@ -108,7 +123,7 @@ if status != 0:
     
 # Build jobs ------------------------------------------------------------------    
 py_path = os.path.join(scripts_dir,PYSCRIPT)
-py_clean_path = os.path.join(scripts_dir,PYCLEAN)
+py_clean_path = os.path.join(lotus_dir,PYCLEAN)
 pycommand='python {0} {1} {2} {3} {4}'.format(py_path,data_dir,release,update,
                   dataset)
 
@@ -118,11 +133,13 @@ t_hh = script_config['job_time_hr']
 t_mm = script_config['job_time_min']
 t = ':'.join([t_hh,t_mm,'00'])
 
+logging.info('SUBMITTING ARRAYS...')
+
 for sid_dck in process_list:
     log_diri = os.path.join(log_dir,sid_dck)
     array_size = len(glob.glob(os.path.join(log_diri,'*.input')))
     if array_size == 0:
-        logging.warning('No jobs for partition {}'.format(sid_dck))
+        logging.warning('{}: no jobs for partition'.format(sid_dck))
         continue
     
     job_file = os.path.join(log_diri,sid_dck + '.slurm')
@@ -149,13 +166,13 @@ for sid_dck in process_list:
         fh.writelines('#SBATCH --open-mode=truncate\n')
         fh.writelines('{0} {1}/$SLURM_ARRAY_TASK_ID.input\n'.format(pycommand,log_diri))
     
-    process = 'jid=$(sbatch {} | cut -f 4 -d' ') && echo $jid'.format(job_file)
-    proc = subprocess.Popen([process],shell=True,stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-    jid_by, err = proc.communicate()    
-    jid = jid_by.decode('UTF-8').rstrip()
+    logging.info('{}: launching array'.format(sid_dck)) 
+    process = "jid=$(sbatch {} | cut -f 4 -d' ') && echo $jid".format(job_file)
+    jid = launch_process(process)
 
-    
-    clean_ok = 'sbatch -d afterok:{0}_%a --kill-on-invalid-dep=yes -p {4} {1} {2}/$SLURM_ARRAY_TASK_ID.input 0 1'.format(jid,py_clean_path,log_diri,QUEUE)
-    print(clean_ok)
-    clean_failed = 'sbatch -d afternotok:{0}_%a --kill-on-invalid-dep=yes -p {4} {1} {2}/$SLURM_ARRAY_TASK_ID.input 1 1'.format(jid,py_clean_path,log_diri,QUEUE)
-    print(clean_failed)    
+    # Rename logs and clean inputs
+    clean_ok = "sbatch --dependency=afterok:{0}_* --kill-on-invalid-dep=yes --array=1-{1} -p {2} --output=/dev/null --wrap='python {3} {4} {5} {6}/$SLURM_ARRAY_TASK_ID.input 0 0'".format(jid,str(array_size),QUEUE,py_clean_path,release,update,log_diri)
+    _jid = launch_process(clean_ok)
+
+    clean_failed = "sbatch --dependency=afternotok:{0}_* --kill-on-invalid-dep=yes --array=1-{1} -p {2} --output=/dev/null --wrap='python {3} {4} {5} {6}/$SLURM_ARRAY_TASK_ID.input 1 0'".format(jid,str(array_size),QUEUE,py_clean_path,release,update,log_diri)
+    _jid = launch_process(clean_failed) 
