@@ -7,6 +7,7 @@ export config_directory=$home_directory_smf/code/marine_code/glamod-marine-confi
 
 export pyTools_directory=$code_directory/modules/python
 export scripts_directory=$code_directory/scripts
+export lotus_scripts_directory=$code_directory/lotus_scripts
 export data_directory=$home_directory/data
 
 echo 'Data directory is '$data_directory
