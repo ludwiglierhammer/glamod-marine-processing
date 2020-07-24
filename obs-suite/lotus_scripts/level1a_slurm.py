@@ -171,8 +171,12 @@ for sid_dck in process_list:
     jid = launch_process(process)
 
     # Rename logs and clean inputs
-    clean_ok = "sbatch --dependency=afterok:{0}_* --kill-on-invalid-dep=yes --array=1-{1} -p {2} --output=/dev/null --wrap='python {3} {4} {5} {6}/$SLURM_ARRAY_TASK_ID.input 0 0'".format(jid,str(array_size),QUEUE,py_clean_path,release,update,log_diri)
+    clean_ok = "sbatch --dependency=afterok:{0}_* --kill-on-invalid-dep=yes --array=1-{1}".format(jid,str(array_size))
+    clean_ok += " -p {0} --output=/dev/null --time=00:02:00 --mem=2".format(QUEUE)
+    clean_ok += " --wrap='python {0} {1} {2} {3}/$SLURM_ARRAY_TASK_ID.input 0 0'".format(py_clean_path,release,update,log_diri)
     _jid = launch_process(clean_ok)
-
-    clean_failed = "sbatch --dependency=afternotok:{0}_* --kill-on-invalid-dep=yes --array=1-{1} -p {2} --output=/dev/null --wrap='python {3} {4} {5} {6}/$SLURM_ARRAY_TASK_ID.input 1 0'".format(jid,str(array_size),QUEUE,py_clean_path,release,update,log_diri)
+    
+    clean_failed = "sbatch --dependency=afternotok:{0}_* --kill-on-invalid-dep=yes --array=1-{1}".format(jid,str(array_size))
+    clean_failed += " -p {0} --output=/dev/null --time=00:02:00 --mem=2".format(QUEUE)
+    clean_failed += " --wrap='python {0} {1} {2} {3}/$SLURM_ARRAY_TASK_ID.input 1 0'".format(py_clean_path,release,update,log_diri)
     _jid = launch_process(clean_failed) 
