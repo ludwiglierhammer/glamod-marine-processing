@@ -52,8 +52,11 @@ Before processing starts:
 
 Inargs:
 ------
+data_path: marine data path in file system
+release: release tag
+update: udpate tag
+dataset: dataset tag
 config_path: configuration file path
-data_path: general data path (optional, from config_file otherwise)
 sid_dck: source-deck data partition (optional, from config_file otherwise)
 year: data file year (yyyy) (optional, from config_file otherwise)
 month: data file month (mm) (optional, from config_file otherwise)
@@ -108,7 +111,12 @@ reload(logging)  # This is to override potential previous config of logging
 # FUNCTIONS -------------------------------------------------------------------
 class script_setup:
     def __init__(self, inargs):
-        self.configfile =  inargs[1]
+        self.data_path = inargs[1]
+        self.release = inargs[2]
+        self.update = inargs[3]
+        self.dataset = inargs[4]
+        self.configfile = inargs[5]
+        
         try:
             with open(self.configfile) as fileObj:
                 config = json.load(fileObj)
@@ -117,26 +125,21 @@ class script_setup:
             self.flag = False 
             return
         
-        try:   
-            self.release = config.get('release')
-            self.update = config.get('update')
-            self.dataset = config.get('dataset')
-            if len(sys.argv) > 2:
-                self.data_path = inargs[2]
-                self.sid_dck = inargs[3]
-                self.year = inargs[4]
-                self.month = inargs[5]
-            else:
-                self.data_path = config.get('data_directory')
+        if len(sys.argv) > 6:
+            self.sid_dck = inargs[6]
+            self.year = inargs[7]
+            self.month = inargs[8]    
+        else:
+            try:
                 self.sid_dck = config.get('sid_dck')
                 self.year = config.get('yyyy')
                 self.month = config.get('mm') 
+            except Exception:
+                logging.error('Parsing configuration from file :{}'.format(self.configfile), exc_info=True)
+                self.flag = False
                 
-            self.dck = self.sid_dck.split("-")[1]
-            self.flag = True
-        except Exception:
-            logging.error('Parsing configuration from file :{}'.format(self.configfile), exc_info=True)
-            self.flag = False
+        self.dck = self.sid_dck.split("-")[1]
+        self.flag = True
 
 
 # This is for json to handle dates

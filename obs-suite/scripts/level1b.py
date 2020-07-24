@@ -29,8 +29,11 @@ Before processing starts:
 
 Inargs:
 ------
+data_path: marine data path in file system
+release: release tag
+update: udpate tag
+dataset: dataset tag
 config_path: configuration file path
-data_path: general data path (optional, from config_file otherwise)
 sid_dck: source-deck data partition (optional, from config_file otherwise)
 year: data file year (yyyy) (optional, from config_file otherwise)
 month: data file month (mm) (optional, from config_file otherwise)
@@ -65,7 +68,12 @@ reload(logging)  # This is to override potential previous config of logging
 # Functions--------------------------------------------------------------------
 class script_setup:
     def __init__(self, inargs):
-        self.configfile =  inargs[1]
+        self.data_path = inargs[1]
+        self.release = inargs[2]
+        self.update = inargs[3]
+        self.dataset = inargs[4]
+        self.configfile = inargs[5]
+        
         try:
             with open(self.configfile) as fileObj:
                 config = json.load(fileObj)
@@ -73,30 +81,23 @@ class script_setup:
             logging.error('Opening configuration file :{}'.format(self.configfile), exc_info=True)
             self.flag = False 
             return
- 
-        self.release = config.get('release')
-        self.update = config.get('update')
-        self.dataset = config.get('dataset')
-        if len(sys.argv) > 2:
-            self.data_path = inargs[2]
-            self.sid_dck = inargs[3]
-            self.year = inargs[4]
-            self.month = inargs[5]
+        
+        if len(sys.argv) > 6:
+            self.sid_dck = inargs[6]
+            self.year = inargs[7]
+            self.month = inargs[8]    
         else:
-            self.data_path = config.get('data_directory')
             self.sid_dck = config.get('sid_dck')
             self.year = config.get('yyyy')
             self.month = config.get('mm') 
-            
-        self.dck = self.sid_dck.split("-")[1]
         
         process_options = ['correction_version', 'corrections','histories']
         try:            
             for opt in process_options: 
-                if not config.get('config').get(self.sid_dck,{}).get(opt):
-                    setattr(self, opt, config.get('config').get(opt))
+                if not config.get(self.sid_dck,{}).get(opt):
+                    setattr(self, opt, config.get(opt))
                 else:
-                    setattr(self, opt, config.get('config').get(self.sid_dck).get(opt))
+                    setattr(self, opt, config.get(self.sid_dck).get(opt))
             self.flag = True
         except Exception:
             logging.error('Parsing configuration from file :{}'.format(self.configfile), exc_info=True)
