@@ -73,6 +73,9 @@ Every data release is identified in the file system with the following tags:
 Create a new directory *release*-*update*/*dataset*/ in the obs-suite configuration directory (*config_directory*)
 of the configuration repository. We will now refer to this directory as *release_config_dir*.
 
+
+.. _release_periods_file:
+
 Release periods file
 ^^^^^^^^^^^^^^^^^^^^
 
@@ -85,6 +88,7 @@ The figure below shows a sample of this file:
 
 .. literalinclude:: ../config_files/source_deck_periods.json
 
+.. _process_list_file:
 
 Process list file
 ^^^^^^^^^^^^^^^^^
@@ -99,6 +103,7 @@ The figure below shows a sample of this file:
 
 .. literalinclude:: ../config_files/source_deck_list.txt
 
+.. _level1a_config_file:
 
 Level 1a configuration file
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -161,13 +166,14 @@ converted with the following command:
   source setpaths.sh
   source setenv0.sh
   cd scripts
-  python level1a.py $data_directory release update dataset release_config_dir/level1a.json sid-dck year month
+  python level1a.py $data_directory release update dataset level1a_config sid-dck year month
 
 where:
 
 * release: release identifier in file system
 * update: release update identifier in file system
 * dataset: dataset identifier in file system
+* level1a_config: path to the level1a configuration file ( :ref:`level1a_config_file`)
 * sid-dck: source-deck identifier
 * year: file year, format yyyy
 * month: file month, format mm
@@ -182,12 +188,26 @@ in batch mode:
   source setpaths.sh
   source setenv0.sh
   cd lotus_scripts
-  python level1a_slurm.py release update dataset $config_directory process_list failed_only
+  python level1a_slurm.py release update dataset $config_directory process_list --failed_only yes|no
 
 where:
 
 * release: release identifier in file system
 * update: release update identifier in file system
 * dataset: dataset identifier in file system
-* process_list: filename in *release_config_dir* with the list of partitions to process
-* failed_only: optional (yes/no). Defaults to no
+* process_list: full path to file with the list of source-deck partitions to
+  process. This file can be either :ref:`process_list_file` or a subset of it.
+* failed_only: optional (yes|no). Defaults to no. Setting this argument to 'yes'
+  means that only the data monthly files with a \*.failed log file will be processed.
+
+This script executes an array of monthly subjobs per source and deck included in
+the process_list. The configuration for the process is directly fetched from
+the release configuration directory: the data period processed is as configured
+per source and deck in the release periods file ( :ref:`release_periods_file`)
+and the level1a configuration from :ref:`level1a_config_file`.
+
+This script logs to *data_dir*/release/dataset/level1a/log/sid-dck/. Log files
+are yyyy-mm-<release>-<update>.ext with ext either ok or failed depending on the
+subjob termination status.
+
+List  \*.failed in the sid-dck level1a log directories to find if any went wrong.
