@@ -1,0 +1,33 @@
+{
+  "job_memo_mb": 4000,
+  "job_time_hr": "01",
+  "job_time_min": "30",
+  "correction_version":"v1x2019",
+  "corrections":
+  {
+      "header":
+      {
+          "id": "primary_station_id",
+          "timestamp": "report_timestamp",
+          "duplicate_flags": "duplicate_status",
+          "duplicates": "duplicates",
+          "longitude": "longitude",
+          "latitude": "latitude"
+      },
+      "observations-at":
+       {
+          "timestamp": "date_time",
+          "longitude": "longitude",
+          "latitude": "latitude"
+      }
+  },
+  "histories":
+  {
+    "id":"Corrected primary_station_id",
+    "timestamp":"Corrected report_timestamp and date_time",
+    "longitude":"Corrected longitude",
+    "latitude":"Corrected latitude",
+    "duplicate_flags":"Added duplicate information - flag",
+    "duplicates":"Added duplicate information - duplicates"
+  }
+}
