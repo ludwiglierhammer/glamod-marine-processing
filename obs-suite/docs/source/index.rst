@@ -171,6 +171,46 @@ parameter under a *sid-dck* key. In the sample above, only the default
 configuration is applied.
 
 
+.. _level1d_config_file:
+
+Level 1d configuration file
+^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+Create file *release_config_dir*/level1d.json. This file contains information
+on the metadata sources that are merged into the level1c data. Currently the
+only MD source is wmo_publication_47 and the full process is basically tailored
+to Pub47 as pre-processed in NOC.
+
+This file contains information of the subdirectory in the release data directory
+where the metadata can be found ("md_subdir") and the name of the mapping within the
+Common Data Model mapper module used to map pub47 to the CDM ("md_model").
+
+The level1d process will fail if it doesn't find a metadata file for a month
+partition. To account for periods where metadata are not available, the
+following optional keys can be used:
+
+* "md_not_avail": true indicates the process that for the full release period,
+  there is not metadata available. Defaults to false.
+* "md_first_yr_avail": indicates the first year for which metadata files should
+  be available in the release period. Defaults to first year in the release
+  period.
+* "md_last_yr_avail": indicates the last year for which metadata files should be
+  available in the release period. Defaults to last year in the release
+  period.
+
+By using the above keys, the process is indicated to securely progress data files
+to the next processing level without merging any metadata when it is not available.
+
+The figure below shows a sample of this file:
+
+.. literalinclude:: ../config_files/level1d.json
+
+This file has its default configuration parameters in the outer keys.
+Source-deck specific configuration can be applied by specifying a configuration
+parameter under a *sid-dck* key. In the sample above, only the default
+configuration is applied.
+
+
 Set up the release data directory
 ---------------------------------
 
@@ -286,7 +326,7 @@ once for each of the options id, datepos or duplicates:
   source setenv0.sh
   cd scripts
   option=option
-  sbatch -J $option -o $option.out -e $option.out -p short-serial -t 03:00:00 --mem 1000 --open-mode truncate --wrap="python noc_corrections_postprocess.sh release cor_version $option year_init year_end"
+  sbatch -J $option -o $option.out -e $option.out -p short-serial -t 03:00:00 --mem 1000 --open-mode truncate --wrap="./noc_corrections_postprocess.sh release cor_version $option year_init year_end"
 
 where:
 
@@ -297,7 +337,10 @@ where:
 
 This step places the reformatted correction files in the release directory in
 the marine data directory (*release*/NOC_corrections/*cor_version*) ready to be
-merged with the CDM data files.
+merged with the CDM data files. The time needed will depend on the period
+pre-processed. However if the job terminates due to insufficient time allocation,
+the period remaining to be pre-processed can be launched independently, and it
+will not affect the files already processed.
 
 
 The reformatted files are merged with the level1a data by the following command:
@@ -357,7 +400,7 @@ List  \*.failed in the sid-dck level1b log directories to find if any went wrong
 Level 1c
 ========
 
-The level1c files contain reports from level1b that have been further validated
+Level1c files contain reports from level1b that have been further validated
 following corrections to the date/time, location and station ID. Those failing
 validation are rejected and archived for future analysis. Additionally, datetime
 corrections applied previously in level1b, can potentially result in reports
@@ -380,7 +423,7 @@ where:
 * release: release identifier in file system
 * update: release update identifier in file system
 * dataset: dataset identifier in file system
-* level1c_config: path to the level1b configuration file ( :ref:`level1c_config_file`)
+* level1c_config: path to the level1c configuration file ( :ref:`level1c_config_file`)
 * sid-dck: source-deck identifier
 * year: file year, format yyyy
 * month: file month, format mm
@@ -420,3 +463,74 @@ are yyyy-mm-<release>-<update>.ext with ext either ok or failed depending on the
 subjob termination status.
 
 List  \*.failed in the sid-dck level1c log directories to find if any went wrong.
+
+
+Level 1d
+========
+
+The level1d files contain the level1c data merged with external metadata (where
+available). In the current marine processing implementation, the level1c are
+merged with WMO Publication 47 metadata to set instrument heights, station names
+and platform sub types (i.e. type of ship). Prior to merging, the WMO
+Publication 47 metadata are harmonised, quality controlled and pre-processed in
+a process that run independently to this data flow (add ref). After
+pre-processing, this info needs to be made available to the release in directory
+*data_directory*/*release*/wmo_publication_47/monthly/.
+
+
+To generate level1d files, the individual sid-dck monthly files in level1c are
+processed with:
+
+.. code:: bash
+
+  cd obs-suite
+  source setpaths.sh
+  source setenv0.sh
+  cd scripts
+  python level1d.py $data_directory release update dataset level1d_config sid-dck year month
+
+where:
+
+* release: release identifier in file system
+* update: release update identifier in file system
+* dataset: dataset identifier in file system
+* level1d_config: path to the level1d configuration file ( :ref:`level1d_config_file`)
+* sid-dck: source-deck identifier
+* year: file year, format yyyy
+* month: file month, format mm
+
+To facilitate the processing of a large number of files level1d.py can be run
+in batch mode:
+
+.. code:: bash
+
+  cd obs-suite
+  source setpaths.sh
+  source setenv0.sh
+  cd lotus_scripts
+  python level1d_slurm.py release update dataset $config_directory process_list --failed_only yes|no --remove_source yes|no
+
+where:
+
+* release: release identifier in file system
+* update: release update identifier in file system
+* dataset: dataset identifier in file system
+* process_list: full path to file with the list of source-deck partitions to
+  process. This file can be either :ref:`process_list_file` or a subset of it.
+* failed_only: optional (yes|no). Defaults to no. Setting this argument to 'yes'
+  means that only the monthly files with a \*.failed log file will be processed.
+* remove_source: optional (yes|no). Defaults to no. Setting this argument to 'yes'
+  implies removal of the source level (level1c) data files if the full set of
+  monthly data files of a given source-deck is successfully processed.
+
+This script executes an array of monthly subjobs per source and deck included in
+the process_list. The configuration for the process is directly accessed from
+the release configuration directory: the data period processed is as configured
+per source and deck in the release periods file ( :ref:`release_periods_file`)
+and the level1d configuration is retrieved from :ref:`level1d_config_file`.
+
+This script logs to *data_dir*/release/dataset/level1d/log/sid-dck/. Log files
+are yyyy-mm-<release>-<update>.ext with ext either ok or failed depending on the
+subjob termination status.
+
+List  \*.failed in the sid-dck level1d log directories to find if any went wrong.
