@@ -191,7 +191,6 @@ for sid_dck in process_list:
     if remove_source:
         remove = "sbatch --dependency=afterok:{0} --kill-on-invalid-dep=yes -p {1}".format(jid,QUEUE) 
         remove += " --time=00:10:00 --mem=2"
-        remove += " --output={}/remove_source.out --error={}/remove_source.out --open-mode=truncate".format(log_diri)
+        remove += " --output={0}/remove_source.out --error={0}/remove_source.out --open-mode=truncate".format(log_diri)
         remove += " --wrap='{0} {1} {2} {3} {4} {5}'".format(bsh_remove_path,sid_dck,release,update,dataset,LEVEL_SOURCE)
-        print(remove)
-        #_jid = launch_process(remove)    
+        _jid = launch_process(remove)    
