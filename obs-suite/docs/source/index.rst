@@ -210,6 +210,34 @@ Source-deck specific configuration can be applied by specifying a configuration
 parameter under a *sid-dck* key. In the sample above, only the default
 configuration is applied.
 
+.. _level1e_config_file:
+
+Level 1e configuration file
+^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+Create file *release_config_dir*/level1e.json. The level1e specific parameters
+included in this file are:
+
+* "qc_first_date_avail" : first monthly quality control file the process can
+  expect to find. If the data files to process are prior to this date, then
+  the data files will progress to the next level without quality flag merging
+  and without raising an error.
+* "qc_last_date_avail" : last monthly quality control file the process can
+  expect to find. If the data files to process are later to this date, then
+  the data files will progress to the next level without quality flag merging
+  and without raising an error.
+* "history_explain" : text added to the header file history field when flags are
+  merged.
+
+
+The figure below shows a sample of this file:
+
+.. literalinclude:: ../config_files/level1e.json
+
+This file has its default configuration parameters in the outer keys.
+Source-deck specific configuration can be applied by specifying a configuration
+parameter under a *sid-dck* key. In the sample above, only the default
+configuration is applied.
 
 Set up the release data directory
 ---------------------------------
@@ -534,3 +562,68 @@ are yyyy-mm-<release>-<update>.ext with ext either ok or failed depending on the
 subjob termination status.
 
 List  \*.failed in the sid-dck level1d log directories to find if any went wrong.
+
+
+Level 1e
+========
+
+The level1e processing merges the data quality flags from the Met Office QC
+suite (add red) with the data from level 1d. The QC software generates two sets
+of QC files, one basic QC of the observations from all platforms and an enhanced
+track and quality check for drifting buoy data. The basic QC flags are stored in
+*data_directory*/*release*/*dataset*/metoffice_qc/base/ and merged with the
+following script:
+
+.. code:: bash
+
+  cd obs-suite
+  source setpaths.sh
+  source setenv0.sh
+  cd scripts
+  python level1e.py $data_directory release update dataset level1e_config sid-dck year month
+
+where:
+
+* release: release identifier in file system
+* update: release update identifier in file system
+* dataset: dataset identifier in file system
+* level1e_config: path to the level1e configuration file ( :ref:`level1e_config_file`)
+* sid-dck: source-deck identifier
+* year: file year, format yyyy
+* month: file month, format mm
+
+To facilitate the processing of a large number of files level1e.py can be run
+in batch mode:
+
+.. code:: bash
+
+  cd obs-suite
+  source setpaths.sh
+  source setenv0.sh
+  cd lotus_scripts
+  python level1e_slurm.py release update dataset $config_directory process_list --failed_only yes|no --remove_source yes|no
+
+where:
+
+* release: release identifier in file system
+* update: release update identifier in file system
+* dataset: dataset identifier in file system
+* process_list: full path to file with the list of source-deck partitions to
+  process. This file can be either :ref:`process_list_file` or a subset of it.
+* failed_only: optional (yes|no). Defaults to no. Setting this argument to 'yes'
+  means that only the monthly files with a \*.failed log file will be processed.
+* remove_source: optional (yes|no). Defaults to no. Setting this argument to 'yes'
+  implies removal of the source level (level1d) data files if the full set of
+  monthly data files of a given source-deck is successfully processed.
+
+This script executes an array of monthly subjobs per source and deck included in
+the process_list. The configuration for the process is directly accessed from
+the release configuration directory: the data period processed is as configured
+per source and deck in the release periods file ( :ref:`release_periods_file`)
+and the level1d configuration is retrieved from :ref:`level1e_config_file`.
+
+This script logs to *data_dir*/release/dataset/level1e/log/sid-dck/. Log files
+are yyyy-mm-<release>-<update>.ext with ext either ok or failed depending on the
+subjob termination status.
+
+List  \*.failed in the sid-dck level1e log directories to find if any went wrong.
