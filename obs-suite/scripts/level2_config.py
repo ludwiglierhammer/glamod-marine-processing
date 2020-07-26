@@ -9,11 +9,10 @@ Outputs file to /<data_path>/<release>/<source>/level2/level.json
 
 Inargs:
 ------
-data_path: data release parent path (i.e./gws/nopw/c3s311_lot2/data/marine)
-release: release identifier
-update: release update identifier
-dataset:  dataset directory identifier (ie.e ICOADS_R3.0.0T)
-config_file: path to release/update list
+release_periods_file: full path to release periods file
+year_init: first year in release period to include in level2
+year_end: last year in release period to include in level2
+
 
 @author: iregon
 """

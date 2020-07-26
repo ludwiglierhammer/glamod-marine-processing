@@ -568,7 +568,7 @@ Level 1e
 ========
 
 The level1e processing merges the data quality flags from the Met Office QC
-suite (add red) with the data from level 1d. The QC software generates two sets
+suite (add ref) with the data from level 1d. The QC software generates two sets
 of QC files, one basic QC of the observations from all platforms and an enhanced
 track and quality check for drifting buoy data. The basic QC flags are stored in
 *data_directory*/*release*/*dataset*/metoffice_qc/base/ and merged with the
@@ -627,3 +627,56 @@ are yyyy-mm-<release>-<update>.ext with ext either ok or failed depending on the
 subjob termination status.
 
 List  \*.failed in the sid-dck level1e log directories to find if any went wrong.
+
+After the basic QC flags have been merged the enhanced drifting buoy flags need
+to be merged with the level1e data. This process is described under Quality
+control in 4.4.6 in the C3S Marine User Guide (but will be moved to the level1e
+processing in a future update).
+
+Once the drifting buoy flags have been merged the data files will no longer
+change and summary data reports need to be generated prior to the data moving to
+level2.
+
+Level 2
+========
+
+After visual inspection of the reports generated in level1e, only observation
+tables reaching a minimum quality standard proceed to level2: this might imply
+rejecting a full sid-dck dataset or an observational table or change the period
+of data to release. The level1e data composition that has been used to generate
+the level2 product of every release is configured in level2.json file available
+in the release configuration directory. Prior to first use this file needs to be
+created. This can be done using the following commands:
+
+.. code:: bash
+
+  cd obs-suite
+  source setpaths.sh
+  source setenv0.sh
+  cd scripts
+  python level2_config.py release_period_file year_ini year_end
+
+where:
+
+* release_periods_file: full path to the release periods file ( :ref:`release_periods_file` )
+* year_ini: first year in data release period.
+* year_end: last year in data release period.
+
+
+This script creates the selection file level2.json in the execution directory.
+The parameters year_init and year_end are used to set the final period of data
+release, that might be different to that initially processed. The data period of
+each of the individual source-deck data partitions is adjusted in the level2.json
+file according to these arguments. After checking data quality on the level1e
+reports, edit the data selection file as needed to create the final dataset
+composition:
+
+*	Remove a full sid-dck from level2 by setting to true the sid-dck ‘exclude’ tag.
+*	Remove an observation table from the full dataset by adding it to the list under the general ‘params_exclude’ tag.
+*	Remove an observation table from a sid-dck by adding it to the list under the sid-dck ‘params_exclude’ tag.
+*	Adjust the release period of a sid-dck by modifying the ‘year_init|end’ tags of the sid-dck
+*	Observation tables to be removed have to be named as observations-[at|sst|dpt|wbt|wd|ws|slp]
+*	All edits need to be consistent with JSON formatting rules.
+
+Once file level2.json has been edited the file needs to be copied to its
+directory in the configuration repository to be version controlled.
