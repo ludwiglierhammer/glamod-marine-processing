@@ -99,20 +99,19 @@ for sid_dck in process_list:
     level2_job = "sbatch -J {0} -p {1}".format(sid_dck,QUEUE)
     level2_job += " --output={0}/{1}.out --error={0}/{1}.out".format(log_diri,sid_dck)
     level2_job += " --open-mode=truncate --time={0} --mem={1}".format(JOB_TIME,str(JOB_MEMO))
-    level2_job += " --wrap='python {0} {1} {2}".format(py_path,pycommand,sid_dck)
+    level2_job += " --wrap='{0} {1}'".format(pycommand,sid_dck)
     
-    print(level2_job)
     logging.info('{}: launching job'.format(sid_dck)) 
-    process = "jid=$(sbatch {} | cut -f 4 -d' ') && echo $jid".format(level2_job)
-    #jid = launch_process(process)
-    jid='TEST'
+    process = "jid=$({} | cut -f 4 -d' ') && echo $jid".format(level2_job)
+    jid = launch_process(process)
+
     # Rename logs and clean inputs
     clean_ok = "sbatch --dependency=afterok:{0} --kill-on-invalid-dep=yes".format(jid)
     clean_ok += " -p {0} --output=/dev/null --time=00:02:00 --mem=2".format(QUEUE)
     clean_ok += " --wrap='mv {0}/{1}.out {0}/{1}-{2}-{3}.ok'".format(log_diri,sid_dck,release,update)
-    #_jid = launch_process(clean_ok)
-    
+    _jid = launch_process(clean_ok)
+
     clean_failed = "sbatch --dependency=afternotok:{0} --kill-on-invalid-dep=yes".format(jid)
     clean_failed += " -p {0} --output=/dev/null --time=00:02:00 --mem=2".format(QUEUE)
     clean_failed += " --wrap='mv {0}/{1}.out {0}/{1}-{2}-{3}.failed'".format(log_diri,sid_dck,release,update)
-    #_jid = launch_process(clean_failed)  
+    _jid = launch_process(clean_failed)
