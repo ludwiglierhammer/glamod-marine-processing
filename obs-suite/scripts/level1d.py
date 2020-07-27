@@ -30,8 +30,11 @@ Before processing starts:
 
 Inargs:
 ------
+data_path: marine data path in file system
+release: release tag
+update: udpate tag
+dataset: dataset tag
 config_path: configuration file path
-data_path: general data path (optional, from config_file otherwise)
 sid_dck: source-deck data partition (optional, from config_file otherwise)
 year: data file year (yyyy) (optional, from config_file otherwise)
 month: data file month (mm) (optional, from config_file otherwise)
