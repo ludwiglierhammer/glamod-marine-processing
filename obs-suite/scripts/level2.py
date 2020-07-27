@@ -10,7 +10,6 @@ The processing unit is the source-deck.
 
 Outputs included data to /<data_path>/<release>/<source>/level2/<sid-dck>/table[i]-fileID.psv
 Outputs exluded data to /<data_path>/<release>/<source>/level2/excluded/<sid-dck>/table[i]-fileID.psv
-If included, creates dir /<data_path>/<release>/<source>/level2/reports/<sid-dck>/
 
 where fileID is yyyy-mm-release_tag-update_tag
 
@@ -32,7 +31,7 @@ sid_dck: source-deck partition (sss-ddd)
 release: release identifier
 update: release update identifier
 source: source dataset identifier
-level2_list: path to file with level1e selection
+level2_list: path to file with level2 configuration
 
 Uses level2_list:
 ----------------
@@ -46,16 +45,7 @@ json file as created by L2_list_create.py, with:
 }
 
 
-!!!!:
-----
-If not all the observation tables from a sid-dck are included in level2 from level1e,
-then the header table needs to be checked as some reports may stay orphan and
-should not progress to level2.
 
-Once the above is implemented, for consistency, in the excluded directory a header table
-should reflect all the reports from all the excluded observation tables....
-
-Me explico?
 .....
 
 @author: iregon
@@ -79,9 +69,9 @@ class script_setup:
         self.release = inargs[2]
         self.update = inargs[3]
         self.source = inargs[4]
-        self.sid_dck = inargs[5]
+        self.level2_list = inargs[5]
+        self.sid_dck = inargs[6]
         self.dck = self.sid_dck.split("-")[1]
-        self.level2_list = inargs[6]
 # This is for json to handle dates
 date_handler = lambda obj: (
     obj.isoformat()

@@ -70,9 +70,10 @@ Every data release is identified in the file system with the following tags:
 * update: udpate tag
 * dataset: dataset name (eg. ICOADS_R3.0.0T)
 
-Create a new directory *release*-*update*/*dataset*/ in the obs-suite configuration directory (*config_directory*)
-of the configuration repository. We will now refer to this directory as *release_config_dir*.
-
+Create a new directory *release*-*update*/*dataset*/ in the obs-suite
+configuration directory (*config_directory*) of the configuration repository
+(note the hyphen as field separator between *release* and *udpate*). We will now
+refer to this directory as *release_config_dir*.
 
 .. _release_periods_file:
 
@@ -662,12 +663,13 @@ where:
 * year_ini: first year in data release period.
 * year_end: last year in data release period.
 
-
 This script creates the selection file level2.json in the execution directory.
 The parameters year_init and year_end are used to set the final period of data
 release, that might be different to that initially processed. The data period of
 each of the individual source-deck data partitions is adjusted in the level2.json
-file according to these arguments. After checking data quality on the level1e
+file according to these arguments.
+
+After checking data quality on the level1e
 reports, edit the data selection file as needed to create the final dataset
 composition:
 
@@ -680,3 +682,58 @@ composition:
 
 Once file level2.json has been edited the file needs to be copied to its
 directory in the configuration repository to be version controlled.
+
+In the file sample below, all observations-wbt table files will be retained for
+level2, while observations-at will be dropped from level2 only in source-deck
+063-714.
+
+.. literalinclude:: ../config_files/level2.json
+
+
+The level 2 processing is then run using:
+
+.. code:: bash
+
+  cd obs-suite
+  source setpaths.sh
+  source setenv0.sh
+  cd scripts
+  python level2.py data_directory release update dataset level2_config sid-dck
+
+where:
+
+* release: release identifier in file system
+* update: release update identifier in file system
+* dataset: dataset identifier in file system
+* level2_config: path to the level2 configuration file
+* sid-dck: source-deck identifier
+
+
+The launcher script for level2 is run with:
+
+.. code:: bash
+
+  cd obs-suite
+  source setpaths.sh
+  source setenv0.sh
+  cd lotus_scripts
+  python level2_slurm.py release update dataset $config_directory process_list
+
+where:
+
+* release: release identifier in file system
+* update: release update identifier in file system
+* dataset: dataset identifier in file system
+* process_list: full path to file with the list of source-deck partitions to
+  process. This file can be either :ref:`process_list_file` or a subset of it.
+
+
+This script executes a job per source and deck included in the process_list.
+The configuration file for the process (level2.json) is directly accessed from
+the release configuration directory.
+
+This script logs to *data_dir*/release/dataset/level2/log/sid-dck/. Log files
+are *sid-dck*-*release*-*update*.ext with ext either ok or failed depending on the
+subjob termination status.
+
+List  \*.failed in the sid-dck level2 log directories to find if any went wrong.
