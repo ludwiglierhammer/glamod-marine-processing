@@ -22,7 +22,7 @@ copyright = '2020, IPG'
 author = 'DYB, IPG'
 
 # The full version, including alpha/beta/rc tags
-release = 'v1.2'
+release = 'v1.1+'
 
 
 # -- General configuration ---------------------------------------------------
