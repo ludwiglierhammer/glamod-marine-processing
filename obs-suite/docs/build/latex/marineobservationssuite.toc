@@ -1,0 +1,28 @@
+\babel@toc {english}{}
+\contentsline {chapter}{\numberline {1}Indices and tables}{1}{chapter.1}% 
+\contentsline {chapter}{\numberline {2}Introduction}{3}{chapter.2}% 
+\contentsline {section}{\numberline {2.1}Note on versions}{4}{section.2.1}% 
+\contentsline {chapter}{\numberline {3}Processing levels}{5}{chapter.3}% 
+\contentsline {chapter}{\numberline {4}Marine file system}{7}{chapter.4}% 
+\contentsline {chapter}{\numberline {5}Tool set\sphinxhyphen {}up}{9}{chapter.5}% 
+\contentsline {section}{\numberline {5.1}Code repository}{9}{section.5.1}% 
+\contentsline {section}{\numberline {5.2}Setting paths and environments}{9}{section.5.2}% 
+\contentsline {section}{\numberline {5.3}Adding modules}{10}{section.5.3}% 
+\contentsline {chapter}{\numberline {6}Common paths}{11}{chapter.6}% 
+\contentsline {chapter}{\numberline {7}Initializing a new data release}{13}{chapter.7}% 
+\contentsline {section}{\numberline {7.1}Configuration repository}{13}{section.7.1}% 
+\contentsline {section}{\numberline {7.2}Create the configuration files for the release and dataset}{13}{section.7.2}% 
+\contentsline {subsection}{\numberline {7.2.1}Release periods file}{14}{subsection.7.2.1}% 
+\contentsline {subsection}{\numberline {7.2.2}Process list file}{14}{subsection.7.2.2}% 
+\contentsline {subsection}{\numberline {7.2.3}Level 1a configuration file}{14}{subsection.7.2.3}% 
+\contentsline {subsection}{\numberline {7.2.4}Level 1b configuration file}{15}{subsection.7.2.4}% 
+\contentsline {subsection}{\numberline {7.2.5}Level 1c configuration file}{16}{subsection.7.2.5}% 
+\contentsline {subsection}{\numberline {7.2.6}Level 1d configuration file}{16}{subsection.7.2.6}% 
+\contentsline {subsection}{\numberline {7.2.7}Level 1e configuration file}{17}{subsection.7.2.7}% 
+\contentsline {section}{\numberline {7.3}Set up the release data directory}{17}{section.7.3}% 
+\contentsline {chapter}{\numberline {8}Level 1a}{19}{chapter.8}% 
+\contentsline {chapter}{\numberline {9}Level 1b}{21}{chapter.9}% 
+\contentsline {chapter}{\numberline {10}Level 1c}{23}{chapter.10}% 
+\contentsline {chapter}{\numberline {11}Level 1d}{25}{chapter.11}% 
+\contentsline {chapter}{\numberline {12}Level 1e}{27}{chapter.12}% 
+\contentsline {chapter}{\numberline {13}Level 2}{29}{chapter.13}% 

@@ -60,7 +60,8 @@ This manual was written at the time of transition between glamod-marine-processi
 v1.1 and its migration to the SLURM scheduler.
 
 Consequently, this manual describes the Observations Suite as available in the
-HEAD of the repository (hence v1.1+), not in the v1.1 tag.
+HEAD of the repository (hence v1.1+), not in the last tagged version at that
+time (v1.1).
 
 
 Processing levels
@@ -237,7 +238,7 @@ Currently, the following configuration sets are available:
    :header-rows: 1
 
    * - Data release
-     - Repo directory
+     - Path in repo/obs-suite
      - Marine code version
    * - r092019
      - r092019-000000/ICOADS_R3.0.0T
@@ -246,14 +247,14 @@ Currently, the following configuration sets are available:
      - release_2.0-000000/ICOADS_R3.0.0T
      - v1.1
    * - Demo release
-     - release-demo/ICOADS_R3.0.0T
+     - release_demo-000000/ICOADS_R3.0.0T
      - v1.1+ (HEAD)
 
 Up until v1.1 (release_2.0), the configuration files where not maintained in
 the configuration repository, but in the code repository. They have been now
 included in the configuration repository for traceability. It is also worth
 noting, that some changes have been made to the configuration files after v1.1:
-the format in the Demo release files should be applied when running the observations
+the format in the Demo release files must be applied when running the observations
 suite.
 
 Create the configuration files for the release and dataset
@@ -262,7 +263,7 @@ Create the configuration files for the release and dataset
 Every data release is identified in the file system with the following tags:
 
 * release: release name (eg. release_2.0)
-* update: udpate tag
+* update: udpate tag (eg. 000000)
 * dataset: dataset name (eg. ICOADS_R3.0.0T)
 
 Create a new directory *release*-*update*/*dataset*/ in the obs-suite
@@ -278,7 +279,7 @@ Release periods file
 Create file *release_config_dir*/source_deck_periods.json
 
 This file is a json file with each of the source-deck partitions to be included
-in the release, and its associated periods (year resolution) to process.
+in the release, and the associated periods (year resolution) to process.
 
 The figure below shows a sample of this file:
 
@@ -305,8 +306,8 @@ Level 1a configuration file
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 Create file *release_config_dir*/level1a.json. This file includes information on
-the input files data model, filters used to select reports and the mapping to
-apply convert the data to the CDM.
+the initial dataset files data model(s), filters used to select reports and
+mapping to apply convert the data to the CDM.
 
 The figure below shows a sample of this file:
 
