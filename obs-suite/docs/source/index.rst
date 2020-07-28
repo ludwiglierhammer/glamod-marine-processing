@@ -20,39 +20,198 @@ Indices and tables
 * :ref:`search`
 
 
-Introduction (complete)
-=======================
+Introduction
+============
 
-Tool set-up (review)
-====================
+The Marine Observations Suite is part of the code implemented to produce the
+data deliveries for the C3S Marine In Situ Component. Instructions to run the
+full set of suites, including this one, are available in the C3S Technical
+Service Document. The present manual includes the set of instructions needed to
+run the observations suite, and also more detailed information on this branch of
+the marine code.
 
-Code set up
------------
+The Observation Suite is a set of python and shell scripts to harmonize and
+convert input observational data sources to CDM formatted files. This includes
+merging the CDM files with the output from the metadata and qc suites.
 
-Clone the remote repository:
+It is based on a set of chained processes, each step feeding into the next one
+and with the initial dataset (previously prepared for inclusion in the marine
+processing) transitioning through a series of levels from the first mapping to
+the CDM in level1a to the final set of curated observational CDM compatible
+files in level2 (header and observations-\*). Some levels are fed with data from
+additional external datasets or with the output of dedicated suites that run
+concurrently to the overall scheme (see figure below).
+
+.. figure:: ../figures/marine_data_flow.png
+    :width: 500px
+    :align: center
+    :alt: alternate text
+    :figclass: align-center
+
+    General marine data flow. The Observations Suite is highlighted in the red box.
+
+
+.. _versions:
+
+Note on versions
+----------------
+
+This manual was written at the time of transition between glamod-marine-processing
+v1.1 and its migration to the SLURM scheduler.
+
+Consequently, this manual describes the Observations Suite as available in the
+HEAD of the repository (hence v1.1+), not in the last tagged version at that
+time (v1.1).
+
+
+Processing levels
+=================
+
+As shown in the diagram below, the Observations Suite is a set of chained
+processes in which the source dataset transitions through the following levels:
+
+.. figure:: ../figures/obs_suite_levels.png
+    :width: 500px
+    :align: center
+    :alt: alternate text
+    :figclass: align-center
+
+    Observations Suite processing levels
+
+* level1a: is the first mapping of the dataset to the CDM. Prior to mapping,
+  the input data files are validated against the schema / data model and code
+  tables defining the input. Reports failing this validation are discarded. For
+  ICOADS, this includes also the rescue of any additional information from the
+  supplemental attachment that has been identified as adding value. At this
+  level the data are partitioned by date (monthly files), ICOADS source and card
+  deck information and observed parameter. For each month a set of files is
+  created containing the header and observation tables (header and
+  observations-[at|sst|dpt|wbt|slp|ws|wd]).
+* level1b: is the data improved with corrections and/or additional information
+  resulting from the linkage and duplicate identification process. Reassignment of
+  reports to different monthly files can result from this process after datetime
+  corrections.
+* level1c: is the data with metadata (currently primary station identification
+  and datetime) validation performed and applied.
+* level1d: data is enriched with external meta-data where available. For ship
+  data the additional meta data source is WMO Publication 47 metadata.
+* level1e: final quality control flags are added at this level, resulting from
+  the position, parameter and tracking quality control processes.
+* level2: data ready to ingest in the database. Data in level1e is inspected as
+  data filtering might apply and part of the initial data set might be rejected
+  to be inserted in the CDS database.
+
+
+
+Marine file system
+==================
+
+The Observations Suite code is integrated in the file system designed for the
+C3S data deliveries. The general directory structure that holds this file system
+is shown in the figure.
+
+.. figure:: ../figures/marine_file_system.png
+    :width: 600px
+    :align: center
+    :alt: alternate text
+    :figclass: align-center
+
+    General marine directory structure
+
+Tool set-up
+===========
+
+Code repository
+---------------
+
+The full set of suites that make up the marine code are integrated in the
+glamod-marine-processing repository. Thus, to install the observations suite,
+the repository needs to be cloned:
 
 .. code-block:: bash
 
-  git clone git@git.noc.ac.uk:iregon/marine-user-guide.git
+  git clone git@git.noc.ac.uk:iregon/glamod-marine-processing.git --branch version
 
-Build the python environment using the requirements.txt file in marine-user-guide/env. This
-step system dependent. The following code block described the steps to
-follow in CEDA JASMIN, using the Jaspy toolkit.
+where:
+
+* version: see repository tags. Last tagged version is v1.1, with this manual
+  currently describing the HEAD of the repository (See :ref:`versions`).
+
+Setting paths and environments
+------------------------------
+
+Script obs-suite/setpaths.sh sets the paths for the processing software and data
+files, including a scratch directory for the user running the software. Edit the
+script file and set the environment variables as indicated below:
+
+* code_directory: full path to the obs-suite code.
+* home_directory_smf: full path to the obs-suite configuration.
+* data_directory: full path to marine data file system.
+* scratch_directory: this is system dependent and is currently set as available in CEDA-JASMIN
+
+The obs-suite/setenv0.sh script initialises the processing environment. It needs
+to be edited and the pyEnvironment_directory environmental variable set to the
+path of the corresponding python environment installation (obs-suite/pyenvs/env0).
+It also needs to be modified to include the path to the system python libraries
+in the LD_LIBRARY_PATH variable.
+
+Once the these scripts have been modified, the python virtual environment needs
+to be initialised with the following block of code:
 
 .. code-block:: bash
 
-  cd marine-user-guide/env
+  cd obs-suite/env
   module load jaspy/3.7
-  virtualenv -–system-site-packages mug_env
-  source mug_env/bin/activate
-  pip install -r requirements.txt
+  virtualenv -–system-site-packages env0
+  source env0/bin/activate
+  pip install -r requirements_env0.txt
 
 
-Initializing a new data release
-===============================
+Adding modules
+--------------
+
+Four additional python modules have been developed for this suite. The table
+below lists these modules and which versions are compatible with the current
+marine code version (v1.1 and HEAD).
+
+.. list-table:: Title
+   :widths: 30 30 55 10
+   :header-rows: 1
+
+   * - module
+     - module_local
+     - module_repo_url
+     - version
+   * - CDM mapper
+     - cdm
+     - git@git.noc.ac.uk:iregon/cdm-mapper.git
+     - v1.2
+   * - Data reader
+     - mdf_reader
+     - git@git.noc.ac.uk:iregon/mdf_reader.git
+     - v1.2
+   * - Metadata fixes
+     - metmetpy
+     - git@git.noc.ac.uk:iregon/metmetpy.git
+     - v1.0
+   * - Pandas operations
+     - pandas_operations
+     - git@git.noc.ac.uk:iregon/pandas_operations.git
+     - v1.2
+
+For each module listed the following needs to be run:
+
+
+.. code-block:: bash
+
+  cd obs-suite/modules/python
+  git clone module_repo_url --branch version --single-branch module_local
+
 
 Common paths
-------------
+============
+
+The following path names are used throughout this manual:
 
 * *obs-suite*: path of the observations suite in the marine processing repository
 * *config_directory*: path to the obs-suite directory in the configuration repository
@@ -61,13 +220,50 @@ Common paths
   within *config_directory*
 
 
+Initializing a new data release
+===============================
+
+Configuration repository
+------------------------
+
+The glamod-marine-config repository serves as container for the configuration
+used to create the different data releases for C3S. The Observations Suite
+configuration files are stored in obs-suite/*release*-*update*/*dataset*
+directories whithin this repository.
+
+Currently, the following configuration sets are available:
+
+.. list-table:: Title
+   :widths: 20 30 10
+   :header-rows: 1
+
+   * - Data release
+     - Path in repo/obs-suite
+     - Marine code version
+   * - r092019
+     - r092019-000000/ICOADS_R3.0.0T
+     - v1.0
+   * - release_2.0
+     - release_2.0-000000/ICOADS_R3.0.0T
+     - v1.1
+   * - Demo release
+     - release_demo-000000/ICOADS_R3.0.0T
+     - v1.1+ (HEAD)
+
+Up until v1.1 (release_2.0), the configuration files where not maintained in
+the configuration repository, but in the code repository. They have been now
+included in the configuration repository for traceability. It is also worth
+noting, that some changes have been made to the configuration files after v1.1:
+the format in the Demo release files must be applied when running the observations
+suite.
+
 Create the configuration files for the release and dataset
 ----------------------------------------------------------
 
 Every data release is identified in the file system with the following tags:
 
 * release: release name (eg. release_2.0)
-* update: udpate tag
+* update: udpate tag (eg. 000000)
 * dataset: dataset name (eg. ICOADS_R3.0.0T)
 
 Create a new directory *release*-*update*/*dataset*/ in the obs-suite
@@ -83,7 +279,7 @@ Release periods file
 Create file *release_config_dir*/source_deck_periods.json
 
 This file is a json file with each of the source-deck partitions to be included
-in the release, and its associated periods (year resolution) to process.
+in the release, and the associated periods (year resolution) to process.
 
 The figure below shows a sample of this file:
 
@@ -110,8 +306,8 @@ Level 1a configuration file
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 Create file *release_config_dir*/level1a.json. This file includes information on
-the input files data model, filters used to select reports and the mapping to
-apply convert the data to the CDM.
+the initial dataset files data model(s), filters used to select reports and
+mapping to apply convert the data to the CDM.
 
 The figure below shows a sample of this file:
 
