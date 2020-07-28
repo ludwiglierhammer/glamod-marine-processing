@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.14159265-2.6-1.40.20 (TeX Live 2019) (preloaded format=pdflatex 2020.3.17)  27 JUL 2020 19:10
+This is pdfTeX, Version 3.14159265-2.6-1.40.20 (TeX Live 2019) (preloaded format=pdflatex 2020.3.17)  27 JUL 2020 22:41
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
@@ -863,7 +863,7 @@ File: t1pcr.fd 2001/06/04 font definitions for T1/pcr.
 File: marine_data_flow.png Graphic file (type png)
 <use marine_data_flow.png>
 Package pdftex.def Info: marine_data_flow.png  used on input line 132.
-(pdftex.def)             Requested size: 376.40381pt x 214.28802pt.
+(pdftex.def)             Requested size: 451.68457pt x 257.1508pt.
  [3 <./marine_data_flow.png>] [4]
 Chapter 3.
 <obs_suite_levels.png, id=187, 563.10374pt x 395.4775pt>
@@ -900,15 +900,11 @@ Chapter 6.
 ]
 Chapter 7.
 
-Underfull \hbox (badness 10000) in paragraph at lines 388--390
+Underfull \hbox (badness 10000) in paragraph at lines 389--391
 []|\T1/phv/m/n/10 Marine code
  []
 
-[13] [14]
-Overfull \vbox (2.43936pt too high) detected at line 580
- []
-
-[15] [16] [17] [18]
+[13] [14] [15] [16] [17] [18]
 Chapter 8.
 [19
 
@@ -933,22 +929,22 @@ Chapter 13.
 [29
 
 ] [30] (./marineobservationssuite.ind)
-Package atveryend Info: Empty hook `BeforeClearDocument' on input line 1414.
+Package atveryend Info: Empty hook `BeforeClearDocument' on input line 1432.
  [31]
-Package atveryend Info: Empty hook `AfterLastShipout' on input line 1414.
+Package atveryend Info: Empty hook `AfterLastShipout' on input line 1432.
  (./marineobservationssuite.aux)
-Package atveryend Info: Executing hook `AtVeryEndDocument' on input line 1414.
-Package atveryend Info: Executing hook `AtEndAfterFileList' on input line 1414.
+Package atveryend Info: Executing hook `AtVeryEndDocument' on input line 1432.
+Package atveryend Info: Executing hook `AtEndAfterFileList' on input line 1432.
 
 Package rerunfilecheck Info: File `marineobservationssuite.out' has not changed
 .
 (rerunfilecheck)             Checksum: 16DA168435474EEC261C66A023E9B22D;4197.
-Package atveryend Info: Empty hook `AtVeryVeryEnd' on input line 1414.
+Package atveryend Info: Empty hook `AtVeryVeryEnd' on input line 1432.
  ) 
 Here is how much of TeX's memory you used:
  13482 strings out of 492616
  189897 string characters out of 6129481
- 346452 words of memory out of 5000000
+ 345452 words of memory out of 5000000
  17037 multiletter control sequences out of 15000+600000
  51363 words of font info for 68 fonts, out of 8000000 for 9000
  1142 hyphenation exceptions out of 8191
@@ -963,10 +959,10 @@ nts/type1/urw/helvetic/uhvr8a.pfb></usr/local/texlive/2019/texmf-dist/fonts/typ
 e1/urw/times/utmb8a.pfb></usr/local/texlive/2019/texmf-dist/fonts/type1/urw/tim
 es/utmr8a.pfb></usr/local/texlive/2019/texmf-dist/fonts/type1/urw/times/utmri8a
 .pfb>
-Output written on marineobservationssuite.pdf (35 pages, 411733 bytes).
+Output written on marineobservationssuite.pdf (35 pages, 412675 bytes).
 PDF statistics:
- 395 PDF objects out of 1000 (max. 8388607)
- 334 compressed objects within 4 object streams
+ 399 PDF objects out of 1000 (max. 8388607)
+ 338 compressed objects within 4 object streams
  68 named destinations out of 1000 (max. 500000)
  252 words of extra memory for PDF output out of 10000 (max. 10000000)
 

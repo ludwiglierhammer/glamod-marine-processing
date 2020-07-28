@@ -129,7 +129,7 @@ concurrently to the overall scheme (see figure below).
 \centering
 \capstart
 
-\noindent\sphinxincludegraphics[width=500\sphinxpxdimen]{{marine_data_flow}.png}
+\noindent\sphinxincludegraphics[width=600\sphinxpxdimen]{{marine_data_flow}.png}
 \caption{General marine data flow. The Observations Suite is highlighted in the red box.}\label{\detokenize{index:id3}}\end{figure}
 
 
@@ -364,10 +364,11 @@ within \sphinxstyleemphasis{config\_directory}
 
 \section{Configuration repository}
 \label{\detokenize{index:configuration-repository}}
-The glamod\sphinxhyphen{}marine\sphinxhyphen{}config repository serves as container for the configuration
-used to create the different data releases for C3S. The Observations Suite
-configuration files are stored in obs\sphinxhyphen{}suite/\sphinxstyleemphasis{release}\sphinxhyphen{}\sphinxstyleemphasis{update}/\sphinxstyleemphasis{dataset}
-directories whithin this repository.
+The glamod\sphinxhyphen{}marine\sphinxhyphen{}config repository
+(\sphinxhref{mailto:git@git.noc.ac.uk}{git@git.noc.ac.uk}:iregon/glamod\sphinxhyphen{}marine\sphinxhyphen{}config.git) serves as container for the
+configuration used to create the different data releases for C3S. The
+Observations Suite configuration files are stored in
+obs\sphinxhyphen{}suite/\sphinxstyleemphasis{release}\sphinxhyphen{}\sphinxstyleemphasis{update}/\sphinxstyleemphasis{dataset} directories within this repository.
 
 Currently, the following configuration sets are available:
 
@@ -413,7 +414,7 @@ v1.1+ (HEAD)
 \par
 \sphinxattableend\end{savenotes}
 
-Up until v1.1 (release\_2.0), the configuration files where not maintained in
+Up until v1.1 (release\_2.0), the configuration files were not maintained in
 the configuration repository, but in the code repository. They have been now
 included in the configuration repository for traceability. It is also worth
 noting, that some changes have been made to the configuration files after v1.1:
@@ -440,6 +441,14 @@ Create a new directory \sphinxstyleemphasis{release}\sphinxhyphen{}\sphinxstylee
 configuration directory (\sphinxstyleemphasis{config\_directory}) of the configuration repository
 (note the hyphen as field separator between \sphinxstyleemphasis{release} and \sphinxstyleemphasis{udpate}). We will now
 refer to this directory as \sphinxstyleemphasis{release\_config\_dir}.
+
+The files described in the following sections need to be created, with the
+{\hyperref[\detokenize{index:release-periods-file}]{\sphinxcrossref{\DUrole{std,std-ref}{Release periods file}}}} and the {\hyperref[\detokenize{index:process-list-file}]{\sphinxcrossref{\DUrole{std,std-ref}{Process list file}}}} required from the
+setup of the new data release. The rest of the files can be generated as the
+processing gets to the corresponding level.
+
+The sample files in the following sections can be found in the release\_demo
+directory of the configuration repository.
 
 
 \subsection{Release periods file}
@@ -488,9 +497,10 @@ The figure below shows a sample of this file:
 
 \subsection{Level 1a configuration file}
 \label{\detokenize{index:level-1a-configuration-file}}\label{\detokenize{index:level1a-config-file}}
-Create file \sphinxstyleemphasis{release\_config\_dir}/level1a.json. This file includes information on
-the initial dataset files data model(s), filters used to select reports and
-mapping to apply convert the data to the CDM.
+Create file \sphinxstyleemphasis{release\_config\_dir}/level1a.json.
+
+This file includes information on the initial dataset files data model(s),
+filters used to select reports and mapping to apply convert the data to the CDM.
 
 The figure below shows a sample of this file:
 
@@ -535,7 +545,9 @@ rest by the corresponding level1a.py script.
 
 \subsection{Level 1b configuration file}
 \label{\detokenize{index:level-1b-configuration-file}}\label{\detokenize{index:level1b-config-file}}
-Create file \sphinxstyleemphasis{release\_config\_dir}/level1b.json. This file contains information on
+Create file \sphinxstyleemphasis{release\_config\_dir}/level1b.json.
+
+This file contains information on
 the NOC corrections version to be used and the correspondences between the
 CDM tables fields on which the corrections are applied and the subdirectories
 where these corrections can be found. The CDM history stamp for every correction
@@ -590,7 +602,9 @@ rest by the corresponding level1b.py script.
 
 \subsection{Level 1c configuration file}
 \label{\detokenize{index:level-1c-configuration-file}}\label{\detokenize{index:level1c-config-file}}
-Create file \sphinxstyleemphasis{release\_config\_dir}/level1c.json. The only configuration parameters
+Create file \sphinxstyleemphasis{release\_config\_dir}/level1c.json.
+
+The only configuration parameters
 required in this file are those related to the slurm launchers, as the rest of
 the configuration of this process is basically hardcoded in the level1c.py
 script.
@@ -613,7 +627,9 @@ configuration is applied.
 
 \subsection{Level 1d configuration file}
 \label{\detokenize{index:level-1d-configuration-file}}\label{\detokenize{index:level1d-config-file}}
-Create file \sphinxstyleemphasis{release\_config\_dir}/level1d.json. This file contains information
+Create file \sphinxstyleemphasis{release\_config\_dir}/level1d.json.
+
+This file contains information
 on the metadata sources that are merged into the level1c data. Currently the
 only MD source is wmo\_publication\_47 and the full process is basically tailored
 to Pub47 as pre\sphinxhyphen{}processed in NOC.
@@ -667,8 +683,9 @@ configuration is applied.
 
 \subsection{Level 1e configuration file}
 \label{\detokenize{index:level-1e-configuration-file}}\label{\detokenize{index:level1e-config-file}}
-Create file \sphinxstyleemphasis{release\_config\_dir}/level1e.json. The level1e specific parameters
-included in this file are:
+Create file \sphinxstyleemphasis{release\_config\_dir}/level1e.json.
+
+The level1e specific parameters included in this file are:
 \begin{itemize}
 \item {} 
 “qc\_first\_date\_avail” : first monthly quality control file the process can
@@ -1239,12 +1256,13 @@ List  *.failed in the sid\sphinxhyphen{}dck level1e log directories to find if a
 
 After the basic QC flags have been merged the enhanced drifting buoy flags need
 to be merged with the level1e data. This process is described under Quality
-control in 4.4.6 in the C3S Marine User Guide (but will be moved to the level1e
+control in 4.4.6 in the C3S Technical Service Document (but will be moved to the level1e
 processing in a future update).
 
 Once the drifting buoy flags have been merged the data files will no longer
 change and summary data reports need to be generated prior to the data moving to
-level2.
+level2. See documentation in \sphinxhref{mailto:git@git.noc.ac.uk}{git@git.noc.ac.uk}:iregon/marine\sphinxhyphen{}user\sphinxhyphen{}guide.git to
+create the reports.
 
 
 \chapter{Level 2}

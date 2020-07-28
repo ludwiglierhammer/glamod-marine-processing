@@ -43,7 +43,7 @@ additional external datasets or with the output of dedicated suites that run
 concurrently to the overall scheme (see figure below).
 
 .. figure:: ../figures/marine_data_flow.png
-    :width: 500px
+    :width: 600px
     :align: center
     :alt: alternate text
     :figclass: align-center
@@ -226,10 +226,11 @@ Initializing a new data release
 Configuration repository
 ------------------------
 
-The glamod-marine-config repository serves as container for the configuration
-used to create the different data releases for C3S. The Observations Suite
-configuration files are stored in obs-suite/*release*-*update*/*dataset*
-directories whithin this repository.
+The glamod-marine-config repository
+(git@git.noc.ac.uk:iregon/glamod-marine-config.git) serves as container for the
+configuration used to create the different data releases for C3S. The
+Observations Suite configuration files are stored in
+obs-suite/*release*-*update*/*dataset* directories within this repository.
 
 Currently, the following configuration sets are available:
 
@@ -250,7 +251,7 @@ Currently, the following configuration sets are available:
      - release_demo-000000/ICOADS_R3.0.0T
      - v1.1+ (HEAD)
 
-Up until v1.1 (release_2.0), the configuration files where not maintained in
+Up until v1.1 (release_2.0), the configuration files were not maintained in
 the configuration repository, but in the code repository. They have been now
 included in the configuration repository for traceability. It is also worth
 noting, that some changes have been made to the configuration files after v1.1:
@@ -270,6 +271,14 @@ Create a new directory *release*-*update*/*dataset*/ in the obs-suite
 configuration directory (*config_directory*) of the configuration repository
 (note the hyphen as field separator between *release* and *udpate*). We will now
 refer to this directory as *release_config_dir*.
+
+The files described in the following sections need to be created, with the
+:ref:`release_periods_file` and the :ref:`process_list_file` required from the
+setup of the new data release. The rest of the files can be generated as the
+processing gets to the corresponding level.
+
+The sample files in the following sections can be found in the release_demo
+directory of the configuration repository.
 
 .. _release_periods_file:
 
@@ -305,9 +314,10 @@ The figure below shows a sample of this file:
 Level 1a configuration file
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Create file *release_config_dir*/level1a.json. This file includes information on
-the initial dataset files data model(s), filters used to select reports and
-mapping to apply convert the data to the CDM.
+Create file *release_config_dir*/level1a.json.
+
+This file includes information on the initial dataset files data model(s),
+filters used to select reports and mapping to apply convert the data to the CDM.
 
 The figure below shows a sample of this file:
 
@@ -329,7 +339,9 @@ rest by the corresponding level1a.py script.
 Level 1b configuration file
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Create file *release_config_dir*/level1b.json. This file contains information on
+Create file *release_config_dir*/level1b.json.
+
+This file contains information on
 the NOC corrections version to be used and the correspondences between the
 CDM tables fields on which the corrections are applied and the subdirectories
 where these corrections can be found. The CDM history stamp for every correction
@@ -353,7 +365,9 @@ rest by the corresponding level1b.py script.
 Level 1c configuration file
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Create file *release_config_dir*/level1c.json. The only configuration parameters
+Create file *release_config_dir*/level1c.json.
+
+The only configuration parameters
 required in this file are those related to the slurm launchers, as the rest of
 the configuration of this process is basically hardcoded in the level1c.py
 script.
@@ -373,7 +387,9 @@ configuration is applied.
 Level 1d configuration file
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Create file *release_config_dir*/level1d.json. This file contains information
+Create file *release_config_dir*/level1d.json.
+
+This file contains information
 on the metadata sources that are merged into the level1c data. Currently the
 only MD source is wmo_publication_47 and the full process is basically tailored
 to Pub47 as pre-processed in NOC.
@@ -412,8 +428,9 @@ configuration is applied.
 Level 1e configuration file
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Create file *release_config_dir*/level1e.json. The level1e specific parameters
-included in this file are:
+Create file *release_config_dir*/level1e.json.
+
+The level1e specific parameters included in this file are:
 
 * "qc_first_date_avail" : first monthly quality control file the process can
   expect to find. If the data files to process are prior to this date, then
@@ -827,12 +844,13 @@ List  \*.failed in the sid-dck level1e log directories to find if any went wrong
 
 After the basic QC flags have been merged the enhanced drifting buoy flags need
 to be merged with the level1e data. This process is described under Quality
-control in 4.4.6 in the C3S Marine User Guide (but will be moved to the level1e
+control in 4.4.6 in the C3S Technical Service Document (but will be moved to the level1e
 processing in a future update).
 
 Once the drifting buoy flags have been merged the data files will no longer
 change and summary data reports need to be generated prior to the data moving to
-level2.
+level2. See documentation in git@git.noc.ac.uk:iregon/marine-user-guide.git to
+create the reports.
 
 Level 2
 ========
