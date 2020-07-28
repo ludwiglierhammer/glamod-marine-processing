@@ -50,7 +50,7 @@ def launch_process(process):
         sys.exit(1)
     jid = jid_by.decode('UTF-8').rstrip()
 
-    return jid
+    return jid.split(' ')[-1]
 
 #------------------------------------------------------------------------------
 

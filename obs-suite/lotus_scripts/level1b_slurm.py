@@ -56,7 +56,7 @@ def launch_process(process):
         sys.exit(1)
     jid = jid_by.decode('UTF-8').rstrip()
 
-    return jid
+    return jid.split(' ')[-1]
 
 #------------------------------------------------------------------------------
 
@@ -170,12 +170,13 @@ for sid_dck in process_list:
     jid = launch_process(process)
 
     # Rename logs and clean inputs
-    clean_ok = "sbatch --dependency=afterok:{0}_* --kill-on-invalid-dep=yes --array=1-{1}".format(jid,str(array_size))
+    # First rename with aftercorr succesfull array elements: aftercorr work on an element by element basis, if exit 0
+    clean_ok = "sbatch --dependency=aftercorr:{0} --kill-on-invalid-dep=yes --array=1-{1}".format(jid,str(array_size))
     clean_ok += " -p {0} --output=/dev/null --time=00:02:00 --mem=2".format(QUEUE)
     clean_ok += " --wrap='python {0} {1} {2} {3}/$SLURM_ARRAY_TASK_ID.input 0 0'".format(py_clean_path,release,update,log_diri)
-    _jid = launch_process(clean_ok)
-    
-    clean_failed = "sbatch --dependency=afternotok:{0}_* --kill-on-invalid-dep=yes --array=1-{1}".format(jid,str(array_size))
+    ok_jid = launch_process(clean_ok)
+    # There is no aftercorr"notok", so after successfull are renamed to ok, rename the rest to *.failed
+    clean_failed = "sbatch --dependency=afterany:{0} --kill-on-invalid-dep=yes --array=1-{1}".format(ok_jid,str(array_size))
     clean_failed += " -p {0} --output=/dev/null --time=00:02:00 --mem=2".format(QUEUE)
     clean_failed += " --wrap='python {0} {1} {2} {3}/$SLURM_ARRAY_TASK_ID.input 1 0'".format(py_clean_path,release,update,log_diri)
     _jid = launch_process(clean_failed)
