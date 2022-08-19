@@ -1,4 +1,4 @@
-﻿#!/usr/bin/env python3
+#!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
 Created on Wed Aug  3 09:37:04 2022
@@ -89,7 +89,7 @@ def main(argv):
         # 'DCK', 'SID', 'PT', 'UID', 'IRF', 'DS', 'VS'
         fn = os.path.join(in_dir, dl, 'header-'+str(yr)+'-' +
                           str("{:02d}").format(mo) +
-                          '-release_3.0.2-000000.psv') 
+                          '-release_5.0-000000.psv') 
         # fn = '/Users/sbiri/Desktop/transfers/C3S2/sample_data/ICOADS_NRT_trial/trial/level1a/103-792/header-2015-01-ICOADS-302.psv'
         if os.path.exists(fn):
             print("Reading header")
@@ -135,7 +135,7 @@ def main(argv):
         #%%from obsevations_at 'AT',
         fn = os.path.join(in_dir, dl, 'observations-at-'+str(yr)+'-' +
                           str("{:02d}").format(mo) +
-                          '-release_3.0.2-000000.psv')
+                          '-release_5.0-000000.psv')
         # fn = '/Users/sbiri/Desktop/transfers/C3S2/sample_data/ICOADS_NRT_trial/trial/level1a/103-792/observations-at-2015-01-ICOADS-302.psv'
         if os.path.exists(fn):
             print("Reading at data")
@@ -169,7 +169,7 @@ def main(argv):
         #%% from obsevations_sst 'SST',
         fn = os.path.join(in_dir, dl, 'observations-sst-'+str(yr)+'-' +
                           str("{:02d}").format(mo) +
-                          '-release_3.0.2-000000.psv')
+                          '-release_5.0-000000.psv')
         # fn = '/Users/sbiri/Desktop/transfers/C3S2/sample_data/ICOADS_NRT_trial/trial/level1a/103-792/observations-sst-2015-01-ICOADS-302.psv'
         if os.path.exists(fn):
             print("Reading sst data")
@@ -203,7 +203,7 @@ def main(argv):
         #%% from obsevations_dpt 'DPT', 
         fn = os.path.join(in_dir, dl, 'observations-dpt-'+str(yr)+'-' +
                           str("{:02d}").format(mo) +
-                          '-release_3.0.2-000000.psv')
+                          '-release_5.0-000000.psv')
         # fn = '/Users/sbiri/Desktop/transfers/C3S2/sample_data/ICOADS_NRT_trial/trial/level1a/103-792/observations-dpt-2015-01-ICOADS-302.psv'
         if os.path.exists(fn):
             print("Reading dpt data")
@@ -237,7 +237,7 @@ def main(argv):
         #%% from obsevations_slp 'SLP',
         fn = os.path.join(in_dir, dl, 'observations-slp-'+str(yr)+'-' +
                           str("{:02d}").format(mo) +
-                          '-release_3.0.2-000000.psv')
+                          '-release_5.0-000000.psv')
         # fn = '/Users/sbiri/Desktop/transfers/C3S2/sample_data/ICOADS_NRT_trial/trial/level1a/103-792/observations-slp-2015-01-ICOADS-302.psv'
         if os.path.exists(fn):
             print("Reading slp data")
@@ -271,7 +271,7 @@ def main(argv):
         #%% from obsevations_ws 'W',
         fn = os.path.join(in_dir, dl, 'observations-ws-'+str(yr)+'-' +
                           str("{:02d}").format(mo) +
-                          '-release_3.0.2-000000.psv')
+                          '-release_5.0-000000.psv')
         # fn = '/Users/sbiri/Desktop/transfers/C3S2/sample_data/ICOADS_NRT_trial/trial/level1a/103-792/observations-ws-2015-01-ICOADS-302.psv'
         if os.path.exists(fn):
             print("Reading W data")
@@ -305,7 +305,7 @@ def main(argv):
         #%% from obsevations_wd 'D',
         fn = os.path.join(in_dir, dl, 'observations-ws-'+str(yr)+'-' +
                           str("{:02d}").format(mo) +
-                          '-release_3.0.2-000000.psv')
+                          '-release_5.0-000000.psv')
         # fn = '/Users/sbiri/Desktop/transfers/C3S2/sample_data/ICOADS_NRT_trial/trial/level1a/103-792/observations-wd-2015-01-ICOADS-302.psv'
         if os.path.exists(fn):
             print("Reading WD data")
@@ -345,7 +345,7 @@ def main(argv):
         #%% load drifter data PT=7 from level1a excluded                
         fn = os.path.join(in_dir[:-8],'level1a/excluded', dl,
                           str(yr)+'-'+str("{:02d}").format(mo) +
-                          '-release_3.0.2-000000-c1_PT.psv') 
+                          '-release_5.0-000000-c1_PT.psv') 
         if os.path.exists(fn):
             print("Looking for drifters")
             rn = ['YR', 'MO', 'DY', 'HR', 'LAT', 'LON', 'IM',  'ATTC',

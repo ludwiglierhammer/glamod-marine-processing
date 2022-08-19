@@ -81,15 +81,17 @@ def main(argv):
             data = pd.DataFrame()     
             # %%
             for dl in dck_list:  
+                print(dl)
                 data_dl = pd.DataFrame()
                 # read tables from level1d 
                 # from header get YR, MO, 'DY', 'HR', 'LAT', 'LON', 'ID', 
                 # 'DCK', 'SID', 'PT', 'UID', 'IRF', 'DS', 'VS'
                 fn = os.path.join(in_dir, dl, 'header-'+str(yr)+'-' +
                                   str("{:02d}").format(mo) +
-                                  '-release_3.0.2-000000.psv') 
+                                  '-release_5.0-000000.psv') 
                 # fn = '/Users/sbiri/Desktop/transfers/C3S2/sample_data/ICOADS_NRT_trial/trial/level1a/103-792/header-2015-01-ICOADS-302.psv'
                 if os.path.exists(fn):
+                    print("Reading header")
                     rn = ['report_id', 'region', 'sub_region', 
                           'application_area',
                           'observing_programme', 'report_type', 'station_name',
@@ -132,9 +134,10 @@ def main(argv):
                 #%%from obsevations_at 'AT',
                 fn = os.path.join(in_dir, dl, 'observations-at-'+str(yr)+'-' +
                                   str("{:02d}").format(mo) +
-                                  '-release_3.0.2-000000.psv')
+                                  '-release_5.0-000000.psv')
                 # fn = '/Users/sbiri/Desktop/transfers/C3S2/sample_data/ICOADS_NRT_trial/trial/level1a/103-792/observations-at-2015-01-ICOADS-302.psv'
                 if os.path.exists(fn):
+                    print("Reading at data")
                     rn = ['observation_id', 'report_id', 'data_policy_licence',
                       'date_time', 'date_time_meaning', 'observation_duration',
                       'longitude', 'latitude', 'crs', 'z_coordinate', 
@@ -165,9 +168,10 @@ def main(argv):
                 #%% from obsevations_sst 'SST',
                 fn = os.path.join(in_dir, dl, 'observations-sst-'+str(yr)+'-' +
                                   str("{:02d}").format(mo) +
-                                  '-release_3.0.2-000000.psv')
+                                  '-release_5.0-000000.psv')
                 # fn = '/Users/sbiri/Desktop/transfers/C3S2/sample_data/ICOADS_NRT_trial/trial/level1a/103-792/observations-sst-2015-01-ICOADS-302.psv'
                 if os.path.exists(fn):
+                    print("Reading sst data")
                     rn = ['observation_id', 'report_id', 'data_policy_licence',
                           'date_time', 'date_time_meaning', 'observation_duration',
                           'longitude', 'latitude', 'crs', 'z_coordinate', 
@@ -198,9 +202,10 @@ def main(argv):
                 #%% from obsevations_dpt 'DPT', 
                 fn = os.path.join(in_dir, dl, 'observations-dpt-'+str(yr)+'-' +
                                   str("{:02d}").format(mo) +
-                                  '-release_3.0.2-000000.psv')
+                                  '-release_5.0-000000.psv')
                 # fn = '/Users/sbiri/Desktop/transfers/C3S2/sample_data/ICOADS_NRT_trial/trial/level1a/103-792/observations-dpt-2015-01-ICOADS-302.psv'
                 if os.path.exists(fn):
+                    print("Reading dpt data")
                     rn = ['observation_id', 'report_id', 'data_policy_licence',
                           'date_time', 'date_time_meaning', 'observation_duration',
                           'longitude', 'latitude', 'crs', 'z_coordinate', 
@@ -231,9 +236,10 @@ def main(argv):
                 #%% from obsevations_slp 'SLP',
                 fn = os.path.join(in_dir, dl, 'observations-slp-'+str(yr)+'-' +
                                   str("{:02d}").format(mo) +
-                                  '-release_3.0.2-000000.psv')
+                                  '-release_5.0-000000.psv')
                 # fn = '/Users/sbiri/Desktop/transfers/C3S2/sample_data/ICOADS_NRT_trial/trial/level1a/103-792/observations-slp-2015-01-ICOADS-302.psv'
                 if os.path.exists(fn):
+                    print("Reading slp data")
                     rn = ['observation_id', 'report_id', 'data_policy_licence',
                           'date_time', 'date_time_meaning', 'observation_duration',
                           'longitude', 'latitude', 'crs', 'z_coordinate', 
@@ -264,9 +270,10 @@ def main(argv):
                 #%% from obsevations_ws 'W',
                 fn = os.path.join(in_dir, dl, 'observations-ws-'+str(yr)+'-' +
                                   str("{:02d}").format(mo) +
-                                  '-release_3.0.2-000000.psv')
+                                  '-release_5.0-000000.psv')
                 # fn = '/Users/sbiri/Desktop/transfers/C3S2/sample_data/ICOADS_NRT_trial/trial/level1a/103-792/observations-ws-2015-01-ICOADS-302.psv'
                 if os.path.exists(fn):
+                    print("Reading W data")
                     rn = ['observation_id', 'report_id', 'data_policy_licence',
                           'date_time', 'date_time_meaning', 'observation_duration',
                           'longitude', 'latitude', 'crs', 'z_coordinate', 
@@ -297,9 +304,10 @@ def main(argv):
                 #%% from obsevations_wd 'D',
                 fn = os.path.join(in_dir, dl, 'observations-ws-'+str(yr)+'-' +
                                   str("{:02d}").format(mo) +
-                                  '-release_3.0.2-000000.psv')
+                                  '-release_5.0-000000.psv')
                 # fn = '/Users/sbiri/Desktop/transfers/C3S2/sample_data/ICOADS_NRT_trial/trial/level1a/103-792/observations-wd-2015-01-ICOADS-302.psv'
                 if os.path.exists(fn):
+                    print("Reading WD data")
                     rn = ['observation_id', 'report_id', 'data_policy_licence',
                           'date_time', 'date_time_meaning', 'observation_duration',
                           'longitude', 'latitude', 'crs', 'z_coordinate', 
@@ -328,15 +336,17 @@ def main(argv):
                     tmp = tmp[["UID", "D"]].set_index("UID")
                     data_dl = data_dl.merge(tmp, on ='UID', how ="left")
                 #%% 'bad_data' set to False
-                data_dl['bad_data'] = False
-                # #%% 'outfile' set to MSNG
-                data_dl['outfile'] = None
+                if not data_dl.empty:
+                    data_dl.loc[:,'bad_data'] = False
+                    # #%% 'outfile' set to MSNG
+                    data_dl.loc[:,'outfile'] = None
                 
                 #%% load drifter data PT=7 from level1a excluded                
                 fn = os.path.join(in_dir[:-8],'level1a/excluded', dl,
                                   str(yr)+'-'+str("{:02d}").format(mo) +
-                                  '-release_3.0.2-000000-c1_PT.psv') 
+                                  '-release_5.0-000000-c1_PT.psv') 
                 if os.path.exists(fn):
+                    print("Looking for drifters")
                     rn = ['YR', 'MO', 'DY', 'HR', 'LAT', 'LON', 'IM',  'ATTC',
                           'TI', 'LI', 'DS', 'VS', 'NID', 'II', 'ID', 'C1', 
                           'DI', 'D', 'WI', 'W', 'VI', 'VV', 'WW', 'W1', 'SLP',
@@ -351,39 +361,54 @@ def main(argv):
                           'ANC', 'GNC', 'DNC', 'SNC', 'CNC', 'ENC', 'FNC', 
                           'TNC', 'QCE', 'LZ', 'QCZ', 'c1_ATTI', 'c1_ATTL',
                           'UID', 'RN1', 'RN2', 'RN3', 'RSA', 'IRF']
-                    tmp = pd.read_csv(fn, delimiter="|", dtype="object", 
-                                      header=None, skiprows=2, names=rn)
-                    tmp = tmp[(tmp["PT"] == '7')]
-                    if not tmp.empty:
-                        drifters = tmp[['YR', 'MO', 'DY', 'HR', 'LAT', 'LON', 
-                                        'ID', 'DCK', 'SID', 'PT', 'UID', 'IRF',
-                                        'DS', 'VS', 'AT', 'SST', 'DPT', 'SLP',
-                                        'W', 'D']]
-                        drifters['bad_data'] = False
-                        drifters['outfile'] = None
+
+                    selcols = ['YR', 'MO', 'DY', 'HR', 'LAT', 'LON', 
+                               'ID', 'DCK', 'SID', 'PT', 'UID', 'IRF',
+                               'DS', 'VS', 'AT', 'SST', 'DPT', 'SLP',
+                               'W', 'D']
+                    
+                    drifters = pd.read_csv(fn, delimiter="|", dtype="object", 
+                                           header=None, skiprows=2,
+                                           names=rn,usecols=lambda c: c in set(selcols))
+
+                    drifters = drifters[drifters["PT"] == '7']
+
+                    if not drifters.empty:
+                        print("Adding drifters")
+                        # drifters = tmp[['YR', 'MO', 'DY', 'HR', 'LAT', 'LON', 
+                        #                 'ID', 'DCK', 'SID', 'PT', 'UID', 'IRF',
+                        #                 'DS', 'VS', 'AT', 'SST', 'DPT', 'SLP',
+                        #                 'W', 'D']].copy()
+                        drifters.loc[:,'bad_data'] = False
+                        drifters.loc[:,'outfile'] = None
                         # here UID is source_uid; add prepend
                         prepend = "ICOADS-302-"
-                        drifters["UID"] = drifters["UID"].apply(
-                            lambda x: f"{prepend+x}")
+                        #drifters.loc[:,"UID"] = drifters["UID"].apply(lambda x: f"{prepend+x}")
+                        drifters["UID"] = prepend + drifters.UID
                         drifters = drifters.set_index("UID")   
                         # add to data dataframe
                         data_dl = data_dl.append(drifters)
+                
+                if data_dl.empty:
+                    print("Dataframe is empty. Skipping")
+                    continue
+
                 # find duplicates in list
                 # duplicates = [name for name in names if names.count(name) > 1]
                 # unique_duplicates = list(set(duplicates))
                 # print(unique_duplicates)
                 #%% merge duplicate flags   
+                print("merging duplicate flags")
                 data_dl = data_dl.merge(dup_flags, how='left', left_index=True, 
                                   right_index=True, suffixes=(False, False))
                 # Need to replace NaNs in dup_flag column with 4s 
-                data_dl[['dup_flag']] = data_dl[['dup_flag']].fillna('4')
+                #data_dl[['dup_flag']] = data_dl[['dup_flag']].fillna('4')
                 #print(data_dl['PT'] == '7')
                 # For drifters we need to repalce dup with the IRF flag
+
                 data_dl.loc[(data_dl['PT'] == '7') & (data_dl['IRF'] == '1'), 'dup_flag'] = '0' # unique
-                # data_dl["dup_flag"] = np.where((data_dl["PT"] == '7') & 
-                #                                (data_dl["IRF"] == '1'), 0, 
-                #                                data_dl["dup_flag"])
                 data_dl.loc[(data_dl['PT'] == '7') & (data_dl['IRF'] != '1'), 'dup_flag'] = '3' # worst duplicate
+              
                 # convert to int
                 data_dl = data_dl.astype({'dup_flag': 'int32'})
                 data_dl = data_dl.astype({'PT': 'int32'})
@@ -391,6 +416,7 @@ def main(argv):
                 # -----------------------------------------------------------
                 # bad data_dl (that didn't validate against IMMA schema)       
                 bad_data = data_dl['bad_data']
+                
                 # ship only
                 ship = [np.nan, 0, 1, 2, 3, 4, 5, 7]
                 ship_mask = data_dl['PT'].apply(lambda x: x in ship)
@@ -400,22 +426,27 @@ def main(argv):
                 dup_field = 'dup_flag'
                 duplicate_mask = data_dl[dup_field].apply(lambda x: x in 
                                                           dups_to_use)
-                
+
                 # now apply masking to data frame
                 data_dl = data_dl[((~ bad_data) & ship_mask & duplicate_mask)]
-            data = pd.concat([data, data_dl])    
-    data = data.reset_index(drop=True)
-    data = data.sort_values(['YR', 'MO', 'DY', 'HR', 'UID' ], axis=0, 
-                            ascending=True)
-    data = data.reindex(columns=['YR', 'MO', 'DY', 'HR', 'LAT',
-                                 'LON', 'DS', 'VS', 'ID', 'AT',
-                                 'SST', 'DPT',  'DCK', 'SLP', 
-                                 'SID', 'PT', 'UID', 'W', 'D', 
-                                 'IRF', 'bad_data', 'outfile'], inplace=True)
-    data.to_csv(out_dir+'{:04d}-{:02d}.psv'.format(yr, mo), sep="|",
-                header=False, index=False, compression='infer')
+
+                data = pd.concat([data, data_dl])
+                print([(len(data_dl.index)),len(data.index)])
+
+            print(data.head())
+            data.reset_index(inplace=True)
+            print("Writing file")
+            print(data.head())
+            data = data.sort_values(['YR', 'MO', 'DY', 'HR', 'UID' ], axis=0, 
+                                    ascending=True)
+            data = data.reindex(columns=['YR', 'MO', 'DY', 'HR', 'LAT',
+                                         'LON', 'DS', 'VS', 'ID', 'AT',
+                                         'SST', 'DPT',  'DCK', 'SLP', 
+                                         'SID', 'PT', 'UID', 'W', 'D', 
+                                         'IRF', 'bad_data', 'outfile'])
+            data.to_csv(out_dir+'{:04d}-{:02d}.psv'.format(yr, mo), sep="|",
+                        header=False, index=False, compression='infer')
             
-    
 if __name__ == '__main__':
     main(sys.argv[1:])
     
