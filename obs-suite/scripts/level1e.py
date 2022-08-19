@@ -380,7 +380,8 @@ level_path = os.path.join(release_path,level,params.sid_dck)
 level_ql_path = os.path.join(release_path,level,'quicklooks',params.sid_dck)
 level_log_path = os.path.join(release_path,level,'log',params.sid_dck)
 
-qc_path = os.path.join(release_path,'metoffice_qc','base')
+#qc_path = os.path.join(release_path,'metoffice_qc','base')
+qc_path = os.path.join(params.data_path,params.release,'metoffice_qc','base')
 
 # Check we have all the dirs!
 data_paths = [prev_level_path, level_path, level_ql_path, level_log_path, qc_path ]

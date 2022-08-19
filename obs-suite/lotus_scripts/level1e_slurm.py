@@ -165,7 +165,7 @@ for sid_dck in process_list:
         fh.writelines('#SBATCH --array=1-{}\n'.format(str(array_size)))
         fh.writelines('#SBATCH --partition={}\n'.format(QUEUE))
         fh.writelines('#SBATCH --output={}/%a.out\n'.format(log_diri))
-        fh.writelines('#SBATCH --error={}/%a.out\n'.format(log_diri))
+        fh.writelines('#SBATCH --error={}/%a.err\n'.format(log_diri))
         fh.writelines('#SBATCH --time={}\n'.format(ti))
         fh.writelines('#SBATCH --mem={}\n'.format(memi))
         fh.writelines('#SBATCH --open-mode=truncate\n')

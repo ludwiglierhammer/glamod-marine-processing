@@ -40,7 +40,8 @@ def create_subdir(lpath,subdir_list):
             os.mkdir(subdir_dir,0o774)
 
 # Go --------------------------------------------------------------------------
-levels = ['level1a','level1b','level1c','level1d','level1e','level1f', 'level2']
+#levels = ['level1a','level1b','level1c','level1d','level1e','level1f', 'level2']
+levels = ['level1a', 'level1b', 'level1c', 'level1d', 'level1e', 'level2']
 level_subdirs = {}
 #level_subdirs['level0'] = []
 level_subdirs['level1a'] = ['log','quicklooks','invalid','excluded']
@@ -48,7 +49,7 @@ level_subdirs['level1b'] = ['log','quicklooks']
 level_subdirs['level1c'] = ['log','quicklooks','invalid']
 level_subdirs['level1d'] = ['log','quicklooks']
 level_subdirs['level1e'] = ['log','quicklooks','reports']
-level_subdirs['level1f'] = ['log','quicklooks','reports']
+#level_subdirs['level1f'] = ['log','quicklooks','reports']
 level_subdirs['level2'] = ['log','quicklooks','excluded','reports']
 deep_sublevels = ['log','quicklooks','invalid','excluded','reports']
 os.umask(0)

@@ -177,6 +177,7 @@ L1a_excluded_path = os.path.join(release_path,'level1a','excluded',params.sid_dc
 L1a_invalid_path = os.path.join(release_path,'level1a','invalid',params.sid_dck)
 
 data_paths = [L0_path, L1a_path, L1a_ql_path, L1a_excluded_path, L1a_invalid_path]
+print(data_paths)
 if any([ not os.path.isdir(x) for x in data_paths ]):
     logging.error('Could not find data paths: '.format(','.join([ x for x in data_paths if not os.path.isdir(x)])))
     sys.exit(1)

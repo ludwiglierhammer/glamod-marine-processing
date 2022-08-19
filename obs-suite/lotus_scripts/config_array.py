@@ -14,10 +14,12 @@ import re
 DATE_REGEX="([1-2]{1}[0-9]{3}\-(0[1-9]{1}|1[0-2]{1}))"
 
 # FUNCTIONS -------------------------------------------------------------------
-def config_element(sid_dck_log_dir,ai,script_config,sid_dck,yyyy,mm):
+def config_element(sid_dck_log_dir,ai,script_config,sid_dck,yyyy,mm,filename=None):
     script_config.update({'sid_dck':sid_dck})
     script_config.update({'yyyy':yyyy})
     script_config.update({'mm':mm})
+    if filename is not None:
+        script_config.update({'filename':filename})
     ai_config_file = os.path.join(sid_dck_log_dir,str(ai) + '.input')
     with open(ai_config_file,'w') as fO:
         json.dump(script_config,fO,indent = 4)
@@ -29,7 +31,7 @@ def get_yyyymm(filename):
         logging.error('Could not extract date from filename {}'.format(filename))
         sys.exit(1)
     return yyyy_mm.group().split('-')
-# -----------------------------------------------------------------------------
+#%% -----------------------------------------------------------------------------
 
 
 def main(source_dir,source_pattern,log_dir,script_config,release_periods,
@@ -39,11 +41,16 @@ def main(source_dir,source_pattern,log_dir,script_config,release_periods,
                     level=logging.INFO,datefmt='%Y%m%d %H:%M:%S',filename=None)
     if failed_only:
         logging.info('Configuration using failed only mode')
-    
+# %%    
     for sid_dck in process_list: 
-        logging.info('Configuring data partition: {}'.format(sid_dck)) 
+        # logging.info('Configuring data partition: {}'.format(sid_dck)) 
         sid_dck_log_dir = os.path.join(log_dir,sid_dck)
         job_file = glob.glob(os.path.join(sid_dck_log_dir,sid_dck + '.slurm'))
+
+        # check is seperate configuration for this source / deck
+        config = script_config.get(sid_dck)
+        if config is None:
+            config = script_config
             
         ai = 1
         if not os.path.isdir(sid_dck_log_dir):
@@ -70,8 +77,12 @@ def main(source_dir,source_pattern,log_dir,script_config,release_periods,
                     os.remove(job_file[0])
                 for failed_file in failed_files:
                     yyyy,mm = get_yyyymm(failed_file)
+                    source_file = re.sub("[?]{4}",yyyy,source_pattern)
+                    source_file = re.sub("[?]{2}",mm,source_file)
+                    source_file = os.path.join( source_dir, sid_dck, source_file )
                     if int(yyyy) >= year_init and int(yyyy) <= year_end:
-                        config_element(sid_dck_log_dir,ai,script_config,sid_dck,yyyy,mm)
+                        #config_element(sid_dck_log_dir,ai,script_config,sid_dck,yyyy,mm, source_file)
+                        config_element(sid_dck_log_dir,ai,config,sid_dck,yyyy,mm, source_file)
                         ai += 1
             else:
                 logging.info('{}: no failed files'.format(sid_dck))
@@ -83,9 +94,11 @@ def main(source_dir,source_pattern,log_dir,script_config,release_periods,
                 for x in ok_files:
                     os.remove(x)              
             for source_file in source_files:
+                #print(source_file)
                 yyyy,mm = get_yyyymm(source_file)
                 if int(yyyy) >= year_init and int(yyyy) <= year_end:
-                    config_element(sid_dck_log_dir,ai,script_config,sid_dck,yyyy,mm)
+                    #config_element(sid_dck_log_dir,ai,script_config,sid_dck,yyyy,mm, source_file)
+                    config_element(sid_dck_log_dir,ai,config,sid_dck,yyyy,mm, source_file)
                     ai +=1
             logging.info('{} elements configured'.format(str(ai)))
             if len(job_file) > 0:

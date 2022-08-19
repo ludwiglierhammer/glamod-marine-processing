@@ -151,6 +151,7 @@ L1a_path = os.path.join(release_path,'level1a',params.sid_dck)
 L1b_path = os.path.join(release_path,'level1b',params.sid_dck)
 L1b_ql_path = os.path.join(release_path,'level1b','quicklooks',params.sid_dck)
 
+print(params.data_path,params.release,params.correction_version)
 L1b_main_corrections = os.path.join(params.data_path,params.release,'NOC_corrections',params.correction_version)
 
 logging.info('Setting corrections path to {}'.format(L1b_main_corrections))
@@ -208,8 +209,8 @@ for table in cdm.properties.cdm_tables:
         
         columns = ['report_id',element,element + '.isChange']
         correction_df =  pd.read_csv(cor_path, delimiter = delimiter, dtype = 'object',
-                           header = None, usecols=[0,1,2], names = columns,
-                           quotechar=None,quoting=3)
+                            header = None, usecols=[0,1,2], names = columns,
+                            quotechar=None,quoting=3)
         if len(correction_df)>0:
             correction_df.set_index('report_id', inplace = True, drop = False)
             try:
@@ -222,7 +223,7 @@ for table in cdm.properties.cdm_tables:
         table_df[element + '.former'] = table_df[element]
         table_df[element + '.isChange'] = ''
         table_df = replace.replace_columns(table_df, correction_df, pivot_c = 'report_id',
-                   rep_c = [element,element + '.isChange'])
+                    rep_c = [element,element + '.isChange'])
         table_df.set_index('report_id', inplace = True, drop = False) # because it gets reindexed in every replacement....
         replaced = table_df[element + '.isChange'] == isChange
         
@@ -272,7 +273,7 @@ for table in cdm.properties.cdm_tables:
         logging.info('Writing {0} data to {1} table file'.format(source_mon_period.strftime('%Y-%m'),table))
         filename = os.path.join(L1b_path,filename_field_sep.join([table,fileID]) + '.psv')
         table_df.loc[[source_mon_period],:].to_csv(filename, index = False, sep = delimiter, columns = cdm_columns
-                 ,header = header, mode = wmode)
+                  ,header = header, mode = wmode)
         table_df.drop(source_mon_period,inplace=True)
         len_df_i = len_df
         len_df = len(table_df)
@@ -289,7 +290,7 @@ for table in cdm.properties.cdm_tables:
             L1b_idl = filename_field_sep.join([table,leak.strftime('%Y-%m'),release_id,source_mon_period.strftime('%Y-%m')])
             filename = os.path.join(L1b_path,L1b_idl + '.psv')
             table_df.loc[[leak],:].to_csv(filename, index = False, sep = delimiter, columns = cdm_columns
-                 ,header = header, mode = wmode)
+                  ,header = header, mode = wmode)
             table_df.drop(leak,inplace=True)
             len_df_i = len_df
             len_df = len(table_df)
@@ -305,5 +306,5 @@ logging.info('Saving json quicklook')
 L1b_io_filename = os.path.join(L1b_ql_path,fileID + '.json')
 with open(L1b_io_filename,'w') as fileObj:
     simplejson.dump({'-'.join([params.year,params.month]):correction_dict},fileObj,
-                     default = date_handler,indent=4,ignore_nan=True)
+                      default = date_handler,indent=4,ignore_nan=True)
 

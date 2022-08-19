@@ -1,12 +1,12 @@
 #!/bin/bash 
-#BSUB -J moqchr_[1-828]
-#BSUB -q short-serial 
-#BSUB -o ./logs_qc_hr/%J_%I.out 
-#BSUB -e ./logs_qc_hr/%J_%I.err 
-#BSUB -W 24:00
-#BSUB -R "rusage[mem=64000]"
-#BSUB -M 64000       
-
+#SBATCH --job-name=moqchr
+#SBATCH --array=643-645
+#SBATCH --partition=short-serial
+#SBATCH -o ./logs_qc_hr/%A_%a.out 
+#SBATCH -e ./logs_qc_hr/%A_%a.err 
+#SBATCH --time=12:00:00
+#SBATCH --mem=64000
+       
 source ./setenv0.sh
 if [ -f qc_hr_${LSB_JOBINDEX}.success ]
 then
