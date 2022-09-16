@@ -331,8 +331,8 @@ if io_dict['processed']['total'] == 0:
 #        c += 1  
 #%% extract NOC_corrections/duplicates
 #data_in.data = TextParser_hdlr.restore(data_in.data)
-logging.info('Generate files needed in level1b for corrections')
-corrections.corrections(data_in.data, dataset, correction_path, params.year, params.month)
+# logging.info('Generate files needed in level1b for corrections')
+# corrections.corrections(data_in.data, dataset, correction_path, params.year, params.month)
             
 #data_in.data = TextParser_hdlr.restore(data_in.data)		
 # 3. Map to common data model and output files
