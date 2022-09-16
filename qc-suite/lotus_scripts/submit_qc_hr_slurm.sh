@@ -1,6 +1,6 @@
 #!/bin/bash 
 #SBATCH --job-name=moqchr
-#SBATCH --array=84
+#SBATCH --array=1-84
 #SBATCH --partition=short-serial
 #SBATCH -o ./logs_qc_hr/%A_%a.out 
 #SBATCH -e ./logs_qc_hr/%A_%a.err 
@@ -15,7 +15,7 @@ then
     echo "Job previously successful, job not rerun. Remove file 'qc_hr_${SLURM_ARRAY_TASK_ID}.success' to force rerun."
     echo ""
 else
-    python3 /gws/smf/j04/c3s311a_lot2/code/marine_code/glamod-marine-processing/qc-suite/scripts/marine_qc_hires_sb.py -jobs /gws/smf/j04/c3s311a_lot2/code/marine_code/glamod-marine-processing/qc-suite/config/jobs2_sb.json -job_index ${SLURM_ARRAY_TASK_ID} \
+    python3 /gws/smf/j04/c3s311a_lot2/code/marine_code/glamod-marine-processing/qc-suite/scripts/marine_qc_hires.py -jobs /gws/smf/j04/c3s311a_lot2/code/marine_code/glamod-marine-processing/qc-suite/config/jobs2.json -job_index ${SLURM_ARRAY_TASK_ID} \
         -config /gws/smf/j04/c3s311a_lot2/code/marine_code/glamod-marine-processing/qc-suite/config/configuration_r3.0.2.txt -tracking
     if [ $? -eq 0 ] 
     then
