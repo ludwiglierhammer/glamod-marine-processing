@@ -22,7 +22,7 @@ import config_array
 LEVEL = 'level1b'
 LEVEL_SOURCE = 'level1a'
 SOURCE_PATTERN = 'header-????-??-*.psv'
-PYSCRIPT = 'level1b_sb.py'
+PYSCRIPT = 'level1b.py'
 CONFIG_FILE = 'level1b.json'
 PERIODS_FILE = 'source_deck_periods.json'
 PYCLEAN = 'array_output_hdlr.py'

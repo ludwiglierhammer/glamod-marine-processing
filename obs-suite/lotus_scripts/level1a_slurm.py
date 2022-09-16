@@ -22,7 +22,7 @@ import config_array
 LEVEL = 'level1a'
 LEVEL_SOURCE = 'level0'
 SOURCE_PATTERN = 'IMMA1_R3.0.2T_NRT_????-??' # '????-??.imma'
-PYSCRIPT = 'level1a_sb.py'
+PYSCRIPT = 'level1a.py'
 CONFIG_FILE = 'level1a.json'
 PERIODS_FILE = 'source_deck_periods.json'
 PYCLEAN = 'array_output_hdlr.py'
