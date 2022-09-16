@@ -148,6 +148,7 @@
       "filter_reports_by":
       {
         "c1.PT": ["0", "1", "2", "3", "4", "5"]
-      }
+      },
+	"cdm_map": "icoads_r3000_NRT"
     }
 }
