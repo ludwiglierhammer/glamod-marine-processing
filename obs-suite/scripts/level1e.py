@@ -196,7 +196,7 @@ def get_qc_flags(qc,qc_df_full):
                           delimiter = qc_delimiter, error_bad_lines = False, warn_bad_lines = True )
     # Map UID to CDM (harcoded source ICOADS_R3.0.0T here!!!!!)
     # and keep only reports from current monthly table
-    qc_df['UID'] = 'ICOADS-30-' + qc_df['UID']
+    #qc_df['UID'] = 'ICOADS-30-' + qc_df['UID']
     qc_df.set_index('UID',inplace=True,drop=True)
     qc_df = qc_df.reindex(header_df.index)
     if len(qc_df.dropna(how='all')) == 0:
