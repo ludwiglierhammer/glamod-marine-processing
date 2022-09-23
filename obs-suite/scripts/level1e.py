@@ -481,7 +481,3 @@ level_io_filename = os.path.join(level_ql_path,fileID + '.json')
 with open(level_io_filename,'w') as fileObj:
     simplejson.dump({'-'.join([params.year,params.month]):qc_dict},fileObj,
                      default = date_handler,indent=4,ignore_nan=True)
-
-    
-    
-    

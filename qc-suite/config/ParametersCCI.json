@@ -1,7 +1,7 @@
 {
   "runid": "CCIrun",
 
-  "icoads_dir": ["/group_workspaces/jasmin2/glamod_marine/working/r2.0/qc-suite/corrected_data/"],
+  "icoads_dir": ["/gws/nopw/j04/c3s311a_lot2/data/marine/release_5.0/metoffice_qc/corrected/"],
 
   "icoads_filenames": ["YYYY-MM.psv"],
 
@@ -10,26 +10,26 @@
   "background_filenames": ["YYYYMMMMDDDD120000-ESACCI-L4_GHRSST-SSTdepth-OSTIA-GLOB_CDR2.1-v02.0-fv01.0.nc"],
 
   "climatologies": [
-    ["SST", "mean",  "/gws/smf/j04/c3s311a_lot2/dyb/external_files/SST/HadSST2_daily_1x1_climatology.nc", "sst"],
-    ["AT",  "mean",  "/gws/smf/j04/c3s311a_lot2/dyb/external_files/ERAClimatologies/t2m_pentad_1by1marine_ERA-Interim_data_19792015.nc", "t2m_clims"],
-    ["AT99","mean",  "/gws/smf/j04/c3s311a_lot2/dyb/external_files/AT/HadNMAT2_daily_1x1_climatology.nc", "nmat"],
+    ["SST", "mean",  "/gws/nopw/j04/c3s311a_lot2/data/external/climatologies/HadSST2_daily_1x1_climatology.nc", "sst"],
+    ["AT",  "mean",  "/gws/nopw/j04/c3s311a_lot2/data/external/climatologies/t2m_pentad_1by1marine_ERA-Interim_data_19792015.nc", "t2m_clims"],
+    ["AT99","mean",  "/gws/nopw/j04/c3s311a_lot2/data/external/climatologies/HadNMAT2_daily_1x1_climatology.nc", "nmat"],
     ["DAT", "mean",  "/gws/smf/j04/c3s311a_lot2/dyb/external_files/AT/HadDAT_pentad_climatology.nc", "dmat"],
-    ["AT2", "mean",  "/gws/smf/j04/c3s311a_lot2/dyb/external_files/ERAClimatologies/t2m_pentad_1by1marine_ERA-Interim_data_19792015.nc", "t2m_clims"],
-    ["DPT", "mean",  "/gws/smf/j04/c3s311a_lot2/dyb/external_files/ERAClimatologies/td2m_pentad_1by1marine_ERA-Interim_data_19792015.nc", "td2m_clims"],
-    ["SHU", "mean",  "/gws/smf/j04/c3s311a_lot2/dyb/external_files/ERAClimatologies/q2m_pentad_1by1marine_ERA-Interim_data_19792015.nc", "q2m_clims"],
-    ["VAP", "mean",  "/gws/smf/j04/c3s311a_lot2/dyb/external_files/ERAClimatologies/e2m_pentad_1by1marine_ERA-Interim_data_19792015.nc", "e2m_clims"],
-    ["CRH", "mean",  "/gws/smf/j04/c3s311a_lot2/dyb/external_files/ERAClimatologies/rh2m_pentad_1by1marine_ERA-Interim_data_19792015.nc", "rh2m_clims"],
-    ["CWB", "mean",  "/gws/smf/j04/c3s311a_lot2/dyb/external_files/ERAClimatologies/tw2m_pentad_1by1marine_ERA-Interim_data_19792015.nc", "tw2m_clims"],
-    ["DPD", "mean",  "/gws/smf/j04/c3s311a_lot2/dyb/external_files/ERAClimatologies/dpd2m_pentad_1by1marine_ERA-Interim_data_19792015.nc", "dpd2m_clims"],
-    ["SLP2","mean",  "/gws/smf/j04/c3s311a_lot2/dyb/external_files/ERAClimatologies/p2m_pentad_1by1marine_ERA-Interim_data_19792015.nc", "p2m_clims"],
-    ["AT2", "stdev", "/gws/smf/j04/c3s311a_lot2/dyb/external_files/ERAClimatologies/t2m_pentad_1by1marine_ERA-Interim_data_19792015.nc",  "t2m_stdevs"],
-    ["DPT", "stdev", "/gws/smf/j04/c3s311a_lot2/dyb/external_files/ERAClimatologies/td2m_pentad_1by1marine_ERA-Interim_data_19792015.nc", "td2m_stdevs"], 
-    ["SLP", "mean",  "/gws/smf/j04/c3s311a_lot2/dyb/external_files/SLP/SLP_pentad_climatology.nc", "slp"], 
-    ["SLP", "stdev", "/gws/smf/j04/c3s311a_lot2/dyb/external_files/SLP/SLP_pentad_stdev_climatology.nc", "slp"] 
+    ["AT2", "mean",  "/gws/nopw/j04/c3s311a_lot2/data/external/climatologies/t2m_pentad_1by1marine_ERA-Interim_data_19792015.nc", "t2m_clims"],
+    ["DPT", "mean",  "/gws/nopw/j04/c3s311a_lot2/data/external/climatologies/td2m_pentad_1by1marine_ERA-Interim_data_19792015.nc", "td2m_clims"],
+    ["SHU", "mean",  "/gws/nopw/j04/c3s311a_lot2/data/external/climatologies/q2m_pentad_1by1marine_ERA-Interim_data_19792015.nc", "q2m_clims"],
+    ["VAP", "mean",  "/gws/nopw/j04/c3s311a_lot2/data/external/climatologies/e2m_pentad_1by1marine_ERA-Interim_data_19792015.nc", "e2m_clims"],
+    ["CRH", "mean",  "/gws/nopw/j04/c3s311a_lot2/data/external/climatologies/rh2m_pentad_1by1marine_ERA-Interim_data_19792015.nc", "rh2m_clims"],
+    ["CWB", "mean",  "/gws/nopw/j04/c3s311a_lot2/data/external/climatologies/tw2m_pentad_1by1marine_ERA-Interim_data_19792015.nc", "tw2m_clims"],
+    ["DPD", "mean",  "/gws/nopw/j04/c3s311a_lot2/data/external/climatologies/dpd2m_pentad_1by1marine_ERA-Interim_data_19792015.nc", "dpd2m_clims"],
+    ["SLP2","mean",  "/gws/nopw/j04/c3s311a_lot2/data/external/climatologies/p2m_pentad_1by1marine_ERA-Interim_data_19792015.nc", "p2m_clims"],
+    ["AT2", "stdev", "/gws/nopw/j04/c3s311a_lot2/data/external/climatologies/t2m_pentad_1by1marine_ERA-Interim_data_19792015.nc",  "t2m_stdevs"],
+    ["DPT", "stdev", "/gws/nopw/j04/c3s311a_lot2/data/external/climatologies/td2m_pentad_1by1marine_ERA-Interim_data_19792015.nc", "td2m_stdevs"], 
+    ["SLP", "mean",  "/gws/nopw/j04/c3s311a_lot2/data/external/climatologies/SLP_pentad_climatology.nc", "slp"], 
+    ["SLP", "stdev", "/gws/nopw/j04/c3s311a_lot2/data/external/climatologies/SLP_pentad_stdev_climatology.nc", "slp"] 
                    ],
 
   "hires_climatologies": [
-    ["SST", "mean", "/gws/smf/j04/c3s311a_lot2/dyb/external_files/SST/OIv2_clim_MDS_6190_0.25x0.25xdaily_365.nc"]
+    ["SST", "mean", "/gws/nopw/j04/c3s311a_lot2/data/external/climatologies/OIv2_clim_MDS_6190_0.25x0.25xdaily_365.nc"]
                          ],
 
   "base":{ 
@@ -50,15 +50,15 @@
 	        },
 
   "IQUAM_track_check":{
-                     "number_of_neighbours": 5,
-                     "buoy_speed_limit": 15.0,
+             "number_of_neighbours": 5,
+             "buoy_speed_limit": 15.0,
 		     "ship_speed_limit": 60.0,
 		     "delta_d": 1.11,
 		     "delta_t": 0.01
 		      },
 
   "IQUAM_spike_check":{
-                     "number_of_neighbours": 5,
+             "number_of_neighbours": 5,
 		     "max_gradient_space": 0.5,
 		     "max_gradient_time": 1.0,
 		     "ship_delta_t": 2.0,
@@ -66,22 +66,22 @@
 		      },
 
   "saturated_runs":{
-                       "min_time_threshold": 48.0,
+               "min_time_threshold": 48.0,
 		       "shortest_run": 4
 		        },
 
   "multiple_rounded_values":{
-                           "threshold": 0.5,
+               "threshold": 0.5,
 			   "min_count": 20
 			    },
 
   "find_repeated_values":{
-                        "threshold": 0.7,
+            "threshold": 0.7,
 			"min_count": 20
                          },
 
   "bayesian_buddy_check":{
-                        "prior_probability_of_gross_error": 0.05,
+            "prior_probability_of_gross_error": 0.05,
 			"quantization_interval": 0.1,
 			"limits": [2, 2, 4],
 			"noise_scaling": 3.0,
@@ -89,13 +89,13 @@
  			 },
 
   "mds_buddy_check":{
-	           "limits": [[1, 1, 2], [2, 2, 2], [1, 1, 4], [2, 2, 4]],
+	       "limits": [[1, 1, 2], [2, 2, 2], [1, 1, 4], [2, 2, 4]],
 		   "number_of_obs_thresholds": [[0, 5, 15, 100], [0], [0, 5, 15, 100], [0]],
 		   "multipliers": [[4.0, 3.5, 3.0, 2.5], [4.0], [4.0, 3.5, 3.0, 2.5], [4.0]]
 		    },
 
   "slp_buddy_check":{
-	           "limits": [[1, 1, 0], [2, 2, 0], [3, 3, 0], [4, 4, 0]],
+	       "limits": [[1, 1, 0], [2, 2, 0], [3, 3, 0], [4, 4, 0]],
 		   "number_of_obs_thresholds": [[0, 5, 15, 100], [0], [0, 5, 15, 100], [0]],
 		   "multipliers": [[4.0, 3.5, 3.0, 2.5], [4.0], [4.0, 3.5, 3.0, 2.5], [4.0]]
 		    },
