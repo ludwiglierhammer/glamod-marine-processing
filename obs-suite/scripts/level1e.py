@@ -261,6 +261,9 @@ def process_table(table_df, table_name):
         ["lz_"+params.year, params.month+".psv"]))
     df_lz = pd.read_csv(fn_lz, delimiter = '|', dtype = 'object', 
                         names=["UID"], quotechar=None, quoting=3)
+    
+            
+            
     if isinstance(table_df, str):
         # Assume 'header' and in a DF in table_df otherwise
         # Open table and reindex
@@ -285,20 +288,10 @@ def process_table(table_df, table_name):
         updated_locs = qc_table.loc[qc_table.notna().all(axis=1)].index
 
         if table_name != 'header':
-            if df_lz.UID.isin(table_df.report_id).any().any():
-                table_df['quality_flag'].loc[
-                    table_df.report_id.isin(df_lz.UID)] = '0'
             qc_dict[table_name]['quality_flags'] = table_df[
                 element].value_counts(dropna=False).to_dict()
 
         if table_name == 'header':
-            # set report quality to 2 for ids with partial match to TEST
-            if params.year >= '2015':
-                loc = (table_df.primary_station_id.str.contains('TEST')) & (table_df.duplicate_status == '4')
-                table_df.report_quality.loc[loc] = '2'
-            if df_lz.UID.isin(table_df.report_id).any().any():
-                table_df['report_quality'].loc[
-                    table_df.report_id.isin(df_lz.UID)] = '0'
             table_df.update(qc_df['report_quality'])
             history_add = ';{0}. {1}'.format(
                 history_tstmp, params.history_explain)
@@ -320,6 +313,20 @@ def process_table(table_df, table_name):
             table_df['report_time_quality'] = pass_time
             table_df['report_quality'] = not_checked_report
             table_df['location_quality'] = not_checked_location
+    
+    if table_name != 'header':
+        if df_lz.UID.isin(table_df.report_id).any().any():
+            table_df['quality_flag'].loc[
+                table_df.report_id.isin(df_lz.UID)] = '1'
+    
+    if table_name == 'header':
+        # set report quality to 2 for ids with partial match to TEST
+        if params.year >= '2015':
+            loc = (table_df.primary_station_id.str.contains('TEST')) & (table_df.duplicate_status == '4')
+            table_df.report_quality.loc[loc] = '2'
+        if df_lz.UID.isin(table_df.report_id).any().any():
+            table_df['report_quality'].loc[
+                table_df.report_id.isin(df_lz.UID)] = '1'
         
     cdm_columns = cdm_tables.get(table_name).keys()
     odata_filename = os.path.join(
@@ -327,6 +334,7 @@ def process_table(table_df, table_name):
     table_df.to_csv(odata_filename, index = False, sep = delimiter,
                     columns = cdm_columns, header = header, mode = wmode,
                     na_rep = 'null')
+    
 
     return
 
@@ -522,7 +530,3 @@ level_io_filename = os.path.join(level_ql_path,fileID + '.json')
 with open(level_io_filename,'w') as fileObj:
     simplejson.dump({'-'.join([params.year,params.month]):qc_dict},fileObj,
                      default = date_handler,indent=4,ignore_nan=True)
-
-    
-    
-    
