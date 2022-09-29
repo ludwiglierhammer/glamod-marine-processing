@@ -88,8 +88,7 @@ def main(argv):
                 # 'DCK', 'SID', 'PT', 'UID', 'IRF', 'DS', 'VS'
                 fn = os.path.join(in_dir, dl, 'header-'+str(yr)+'-' +
                                   str("{:02d}").format(mo) +
-                                  '-release_5.0-000000.psv') 
-                # fn = '/Users/sbiri/Desktop/transfers/C3S2/sample_data/ICOADS_NRT_trial/trial/level1a/103-792/header-2015-01-ICOADS-302.psv'
+                                  '-release_5.0-000000.psv')
                 if os.path.exists(fn):
                     print("Reading header")
                     rn = ['report_id', 'region', 'sub_region', 
@@ -130,12 +129,16 @@ def main(argv):
                     tmp["SID"] = tmp["source_id"].apply(lambda x: x[14:17])
                     data_dl = tmp[['YR', 'MO', 'DY', 'HR', 'LAT', 'LON', 'ID', 'DCK',
                                'SID', 'PT', 'UID', 'IRF', 'DS', 'VS']]
+                    # reset IRF as in imma before cdm
+                    loc0 = (data_dl.IRF != 1)
+                    loc1 = (data_dl.IRF == 1)
+                    data_dl.IRF.loc[loc0] = 1
+                    data_dl.IRF.loc[loc1] = 0
                     data_dl = data_dl.set_index("UID")
                 #%%from obsevations_at 'AT',
                 fn = os.path.join(in_dir, dl, 'observations-at-'+str(yr)+'-' +
                                   str("{:02d}").format(mo) +
                                   '-release_5.0-000000.psv')
-                # fn = '/Users/sbiri/Desktop/transfers/C3S2/sample_data/ICOADS_NRT_trial/trial/level1a/103-792/observations-at-2015-01-ICOADS-302.psv'
                 if os.path.exists(fn):
                     print("Reading at data")
                     rn = ['observation_id', 'report_id', 'data_policy_licence',
@@ -164,12 +167,12 @@ def main(argv):
                     tmp.rename(columns={"report_id": "UID"}, inplace=True)
                     tmp.rename(columns={"observation_value": "AT"}, inplace=True)
                     tmp = tmp[["UID", "AT"]].set_index("UID")
+                    tmp.AT = tmp.AT-273.15  # reset to Celsius
                     data_dl = data_dl.merge(tmp, on ='UID', how ="left")
                 #%% from obsevations_sst 'SST',
                 fn = os.path.join(in_dir, dl, 'observations-sst-'+str(yr)+'-' +
                                   str("{:02d}").format(mo) +
                                   '-release_5.0-000000.psv')
-                # fn = '/Users/sbiri/Desktop/transfers/C3S2/sample_data/ICOADS_NRT_trial/trial/level1a/103-792/observations-sst-2015-01-ICOADS-302.psv'
                 if os.path.exists(fn):
                     print("Reading sst data")
                     rn = ['observation_id', 'report_id', 'data_policy_licence',
@@ -198,12 +201,12 @@ def main(argv):
                     tmp.rename(columns={"report_id": "UID"}, inplace=True)
                     tmp.rename(columns={"observation_value": "SST"}, inplace=True)
                     tmp = tmp[["UID", "SST"]].set_index("UID")
+                    tmp.SST = tmp.SST-273.15  # reset to Celsius
                     data_dl = data_dl.merge(tmp, on ='UID', how ="left")
                 #%% from obsevations_dpt 'DPT', 
                 fn = os.path.join(in_dir, dl, 'observations-dpt-'+str(yr)+'-' +
                                   str("{:02d}").format(mo) +
                                   '-release_5.0-000000.psv')
-                # fn = '/Users/sbiri/Desktop/transfers/C3S2/sample_data/ICOADS_NRT_trial/trial/level1a/103-792/observations-dpt-2015-01-ICOADS-302.psv'
                 if os.path.exists(fn):
                     print("Reading dpt data")
                     rn = ['observation_id', 'report_id', 'data_policy_licence',
@@ -232,12 +235,12 @@ def main(argv):
                     tmp.rename(columns={"report_id": "UID"}, inplace=True)
                     tmp.rename(columns={"observation_value": "DPT"}, inplace=True)
                     tmp = tmp[["UID", "DPT"]].set_index("UID")
+                    tmp.DPT = tmp.DPT-273.15  # reset to Celsius
                     data_dl = data_dl.merge(tmp, on ='UID', how ="left")
                 #%% from obsevations_slp 'SLP',
                 fn = os.path.join(in_dir, dl, 'observations-slp-'+str(yr)+'-' +
                                   str("{:02d}").format(mo) +
                                   '-release_5.0-000000.psv')
-                # fn = '/Users/sbiri/Desktop/transfers/C3S2/sample_data/ICOADS_NRT_trial/trial/level1a/103-792/observations-slp-2015-01-ICOADS-302.psv'
                 if os.path.exists(fn):
                     print("Reading slp data")
                     rn = ['observation_id', 'report_id', 'data_policy_licence',
@@ -266,12 +269,12 @@ def main(argv):
                     tmp.rename(columns={"report_id": "UID"}, inplace=True)
                     tmp.rename(columns={"observation_value": "SLP"}, inplace=True)
                     tmp = tmp[["UID", "SLP"]].set_index("UID")
+                    tmp.SLP = tmp.SLP/100  # reset to hPa
                     data_dl = data_dl.merge(tmp, on ='UID', how ="left")
                 #%% from obsevations_ws 'W',
                 fn = os.path.join(in_dir, dl, 'observations-ws-'+str(yr)+'-' +
                                   str("{:02d}").format(mo) +
                                   '-release_5.0-000000.psv')
-                # fn = '/Users/sbiri/Desktop/transfers/C3S2/sample_data/ICOADS_NRT_trial/trial/level1a/103-792/observations-ws-2015-01-ICOADS-302.psv'
                 if os.path.exists(fn):
                     print("Reading W data")
                     rn = ['observation_id', 'report_id', 'data_policy_licence',
@@ -305,7 +308,6 @@ def main(argv):
                 fn = os.path.join(in_dir, dl, 'observations-ws-'+str(yr)+'-' +
                                   str("{:02d}").format(mo) +
                                   '-release_5.0-000000.psv')
-                # fn = '/Users/sbiri/Desktop/transfers/C3S2/sample_data/ICOADS_NRT_trial/trial/level1a/103-792/observations-wd-2015-01-ICOADS-302.psv'
                 if os.path.exists(fn):
                     print("Reading WD data")
                     rn = ['observation_id', 'report_id', 'data_policy_licence',
@@ -402,7 +404,7 @@ def main(argv):
                 data_dl = data_dl.merge(dup_flags, how='left', left_index=True, 
                                   right_index=True, suffixes=(False, False))
                 # Need to replace NaNs in dup_flag column with 4s 
-                #data_dl[['dup_flag']] = data_dl[['dup_flag']].fillna('4')
+                data_dl[['dup_flag']] = data_dl[['dup_flag']].fillna('4')
                 #print(data_dl['PT'] == '7')
                 # For drifters we need to repalce dup with the IRF flag
 
@@ -449,4 +451,3 @@ def main(argv):
             
 if __name__ == '__main__':
     main(sys.argv[1:])
-    

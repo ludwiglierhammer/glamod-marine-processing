@@ -144,7 +144,8 @@ class script_setup:
             with open(self.configfile) as fileObj:
                 config = json.load(fileObj)
         except:
-            logging.error('Opening configuration file :{}'.format(self.configfile), exc_info=True)
+            logging.error('Opening configuration file :{}'.format(
+                self.configfile), exc_info=True)
             self.flag = False 
             return
         
@@ -158,7 +159,8 @@ class script_setup:
                 self.year = config.get('yyyy')
                 self.month = config.get('mm') 
             except Exception:
-                logging.error('Parsing configuration from file :{}'.format(self.configfile), exc_info=True)
+                logging.error('Parsing configuration from file :{}'.format(
+                    self.configfile), exc_info=True)
                 self.flag = False
                 
         self.dck = self.sid_dck.split("-")[1]
@@ -175,7 +177,8 @@ class script_setup:
                     setattr(self, opt, config.get(self.sid_dck).get(opt))
             self.flag = True
         except Exception:
-            logging.error('Parsing configuration from file :{}'.format(self.configfile), exc_info=True)
+            logging.error('Parsing configuration from file :{}'.format(
+                self.configfile), exc_info=True)
             self.flag = False
 
 # This is for json to handle dates
@@ -190,14 +193,16 @@ def get_qc_flags(qc,qc_df_full):
     qc_avail = True
     bad_flag = '1' if qc != 'POS' else '2'
     good_flag = '0'
-    qc_filename = os.path.join(qc_path,params.year,params.month,"_".join([qc,'qc',params.year+params.month,'CCIrun.csv']))
+    qc_filename = os.path.join(qc_path,params.year,params.month,"_".join(
+        [qc,'qc',params.year+params.month,'CCIrun.csv']))
     logging.info('Reading {0} qc file: {1}'.format(qc,qc_filename))
-    qc_df = pd.read_csv(qc_filename,dtype = qc_dtype,usecols=qc_columns.get(qc),
-                          delimiter = qc_delimiter, error_bad_lines = False, warn_bad_lines = True )
+    qc_df = pd.read_csv(
+        qc_filename, dtype=qc_dtype, usecols=qc_columns.get(qc),
+        delimiter=qc_delimiter, error_bad_lines=False, warn_bad_lines=True)
     # Map UID to CDM (harcoded source ICOADS_R3.0.0T here!!!!!)
     # and keep only reports from current monthly table
     #qc_df['UID'] = 'ICOADS-30-' + qc_df['UID']
-    qc_df.set_index('UID',inplace=True,drop=True)
+    qc_df.set_index('UID', inplace=True, drop=True)
     qc_df = qc_df.reindex(header_df.index)
     if len(qc_df.dropna(how='all')) == 0:
         # We can have files with nothing other than duplicates (which are not qced):
@@ -208,7 +213,8 @@ def get_qc_flags(qc,qc_df_full):
 
     locs_notna = qc_df.notna().all(axis=1)
     qc_df.loc[locs_notna,'total'] = qc_df.loc[locs_notna].sum(axis=1)
-    qc_df.loc[locs_notna,'global'] = qc_df['total'].apply(lambda x: good_flag if x == 0 else bad_flag  )
+    qc_df.loc[locs_notna,'global'] = qc_df['total'].apply(
+        lambda x: good_flag if x == 0 else bad_flag)
     qc_df.rename({'global':qc},axis=1,inplace=True) 
     # For measured params, eliminate resulting quality_flag when that parameter
     # is not available in a report ('noval'==1)
@@ -230,28 +236,41 @@ def add_report_quality(qc_df_full):
     qc_param = [ x for x in qc_list if x!= 'POS' ]
     qc_param_applied = qc_df_full[qc_param].count(axis=1)
     qc_param_sum = qc_df_full[qc_param].astype(float).sum(axis=1)
-    qc_df_full.loc[(qc_param_sum >= qc_param_applied) & (qc_param_applied > 0),'report_quality'] = failed_report
+    qc_df_full.loc[(qc_param_sum >= qc_param_applied) & 
+                   (qc_param_applied > 0), 'report_quality'] = failed_report
     # Second: at least one observed param passed -> report_quality = '0'
-    qc_df_full.loc[qc_param_sum < qc_param_applied,'report_quality'] = pass_report
+    qc_df_full.loc[
+        qc_param_sum < qc_param_applied,'report_quality'] = pass_report
     # Third: POS qc fails, no matter how good the observed params are -> report_quality '1'
-    qc_df_full.loc[qc_df_full['POS'] == failed_location,'report_quality'] = failed_report
-    
+    qc_df_full.loc[
+        qc_df_full['POS'] == failed_location,'report_quality'] = failed_report    
     return qc_df_full
 
 # This is to apply the qc flags and write out fllgged tables
-def process_table(table_df,table_name):
+def process_table(table_df, table_name):
     pass_time = '2'
     not_checked_report = '2'
     not_checked_location = '3'
     not_checked_param = '2'
     logging.info('Processing table {}'.format(table_name))
-    if isinstance(table_df,str):
+    df_lz = pd.DataFrame()
+    # replace report quality to fail for LZ_UIDS
+    # path to LZ_UIDs for release 5.0
+    lzpath = "/gws/nopw/j04/c3s311a_lot2/data/marine/"+params.release+"/LZ_UIDS/"
+    fn_lz = os.path.join(lzpath, "-".join(
+        ["lz_"+params.year, params.month+".psv"]))
+    df_lz = pd.read_csv(fn_lz, delimiter = '|', dtype = 'object', 
+                        names=["UID"], quotechar=None, quoting=3)
+    if isinstance(table_df, str):
         # Assume 'header' and in a DF in table_df otherwise
         # Open table and reindex
-        table_df = pd.DataFrame()
-        table_df = cdm.read_tables(prev_level_path,fileID,cdm_subset=[table_name])
+        table_df = pd.DataFrame()        
+        table_df = cdm.read_tables(prev_level_path, fileID, 
+                                   cdm_subset=[table_name])
+            
         if table_df is None or len(table_df) == 0:
-            logging.warning('Empty or non existing table {}'.format(table_name))
+            logging.warning('Empty or non existing table {}'.format(
+                table_name))
             return
         table_df.set_index('report_id',inplace=True,drop=False)
 
@@ -260,23 +279,40 @@ def process_table(table_df,table_name):
         qc = table_qc.get(table_name).get('qc')
         element = table_qc.get(table_name).get('element')
         qc_table = qc_df[[qc]]
-        qc_table.rename({qc:element},axis=1,inplace=True) 
+        qc_table.rename({qc:element}, axis=1, inplace=True) 
         table_df.update(qc_table)
 
         updated_locs = qc_table.loc[qc_table.notna().all(axis=1)].index
 
         if table_name != 'header':
-            qc_dict[table_name]['quality_flags'] = table_df[element].value_counts(dropna=False).to_dict()
+            if df_lz.UID.isin(table_df.report_id).any().any():
+                table_df['quality_flag'].loc[
+                    table_df.report_id.isin(df_lz.UID)] = '0'
+            qc_dict[table_name]['quality_flags'] = table_df[
+                element].value_counts(dropna=False).to_dict()
 
         if table_name == 'header':
+            # set report quality to 2 for ids with partial match to TEST
+            if params.year >= '2015':
+                loc = (table_df.primary_station_id.str.contains('TEST')) & (table_df.duplicate_status == '4')
+                table_df.report_quality.loc[loc] = '2'
+            if df_lz.UID.isin(table_df.report_id).any().any():
+                table_df['report_quality'].loc[
+                    table_df.report_id.isin(df_lz.UID)] = '0'
             table_df.update(qc_df['report_quality'])
-            history_add = ';{0}. {1}'.format(history_tstmp,params.history_explain)
+            history_add = ';{0}. {1}'.format(
+                history_tstmp, params.history_explain)
             table_df['report_time_quality'] = pass_time
-            qc_dict[table_name]['location_quality_flags'] = table_df['location_quality'].value_counts(dropna=False).to_dict()
-            qc_dict[table_name]['report_quality_flags'] = table_df['report_quality'].value_counts(dropna=False).to_dict()
-            table_df['history'].loc[updated_locs] = table_df['history'].loc[updated_locs] + history_add
-    # Here very last minute change to account for reports not in QC files: need to make sure it is all not-checked!
-    # Test new things with 090-221. See 1984-03. What happens if not POS flags matching?
+            qc_dict[table_name]['location_quality_flags'] = table_df[
+                'location_quality'].value_counts(dropna=False).to_dict()
+            qc_dict[table_name]['report_quality_flags'] = table_df[
+                'report_quality'].value_counts(dropna=False).to_dict()
+            table_df['history'].loc[updated_locs] = table_df[
+                'history'].loc[updated_locs] + history_add
+    # Here very last minute change to account for reports not in QC files: 
+    # need to make sure it is all not-checked!
+    # Test new things with 090-221. See 1984-03. 
+    # What happens if not POS flags matching?
     else:
         if table_name != 'header':
             table_df['quality_flag'] = not_checked_param
@@ -286,9 +322,11 @@ def process_table(table_df,table_name):
             table_df['location_quality'] = not_checked_location
         
     cdm_columns = cdm_tables.get(table_name).keys()
-    odata_filename = os.path.join(level_path,filename_field_sep.join([table_name,fileID]) + '.psv')
-    table_df.to_csv(odata_filename, index = False, sep = delimiter, columns = cdm_columns
-                 ,header = header, mode = wmode, na_rep = 'null')
+    odata_filename = os.path.join(
+        level_path, filename_field_sep.join([table_name,fileID]) + '.psv')
+    table_df.to_csv(odata_filename, index = False, sep = delimiter,
+                    columns = cdm_columns, header = header, mode = wmode,
+                    na_rep = 'null')
 
     return
 
@@ -302,7 +340,8 @@ def clean_level(file_id):
             logging.info('Removing previous file: {}'.format(filename))
             os.remove(filename)
         except:
-            logging.warning('Could not remove previous file: {}'.format(filename))
+            logging.warning('Could not remove previous file: {}'.format(
+                filename))
             pass
 #------------------------------------------------------------------------------
 
@@ -321,12 +360,14 @@ qc_columns['W'] = ['UID','noval','hardlimit','consistency','wind_blacklist']
 
 # 2. This is to what table-element pair each qc file is pointing to
 qc_cdm = {'SST':('observations-sst','quality_flag'),
-            'SLP':('observations-slp','quality_flag'),
-            'AT':('observations-at','quality_flag'),
-            'DPT':[('observations-dpt','quality_flag'),('observations-wbt','quality_flag')],
-            'W':[('observations-ws','quality_flag'),('observations-wd','quality_flag')],
-            'POS':('header','location_quality')
-            }
+          'SLP':('observations-slp','quality_flag'),
+          'AT':('observations-at','quality_flag'),
+          'DPT':[('observations-dpt','quality_flag'),
+                 ('observations-wbt','quality_flag')],
+          'W':[('observations-ws','quality_flag'),
+               ('observations-wd','quality_flag')],
+          'POS':('header','location_quality')
+          }
 
 # 3. This is the same as above but with different indexing, 
 #to ease certain operations
@@ -481,3 +522,7 @@ level_io_filename = os.path.join(level_ql_path,fileID + '.json')
 with open(level_io_filename,'w') as fileObj:
     simplejson.dump({'-'.join([params.year,params.month]):qc_dict},fileObj,
                      default = date_handler,indent=4,ignore_nan=True)
+
+    
+    
+    
