@@ -259,7 +259,8 @@ def process_table(table_df, table_name):
     lzpath = "/gws/nopw/j04/c3s311a_lot2/data/marine/"+params.release+"/LZ_UIDS/"
     fn_lz = os.path.join(lzpath, "-".join(
         ["lz_"+params.year, params.month+".psv"]))
-    df_lz = pd.read_csv(fn_lz, delimiter = '|', dtype = 'object', 
+    if os.path.exists(fn_lz):
+        df_lz = pd.read_csv(fn_lz, delimiter = '|', dtype = 'object', 
                         names=["UID"], quotechar=None, quoting=3)
     
             
@@ -315,18 +316,20 @@ def process_table(table_df, table_name):
             table_df['location_quality'] = not_checked_location
     
     if table_name != 'header':
-        if df_lz.UID.isin(table_df.report_id).any().any():
-            table_df['quality_flag'].loc[
-                table_df.report_id.isin(df_lz.UID)] = '1'
+        if not df_lz.empty:
+            if df_lz.UID.isin(table_df.report_id).any().any():
+                table_df['quality_flag'].loc[
+                   table_df.report_id.isin(df_lz.UID)] = '1'
     
     if table_name == 'header':
         # set report quality to 2 for ids with partial match to TEST
         if params.year >= '2015':
             loc = (table_df.primary_station_id.str.contains('TEST')) & (table_df.duplicate_status == '4')
             table_df.report_quality.loc[loc] = '2'
-        if df_lz.UID.isin(table_df.report_id).any().any():
-            table_df['report_quality'].loc[
-                table_df.report_id.isin(df_lz.UID)] = '1'
+        if not df_lz.empty:
+            if df_lz.UID.isin(table_df.report_id).any().any():
+                table_df['report_quality'].loc[
+                   table_df.report_id.isin(df_lz.UID)] = '1'
         
     cdm_columns = cdm_tables.get(table_name).keys()
     odata_filename = os.path.join(
