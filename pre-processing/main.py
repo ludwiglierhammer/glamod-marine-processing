@@ -125,9 +125,10 @@ def main(argv):
     parser = argparse.ArgumentParser(description="Script to split ICOADS IMMA files as specified in split.json")
     parser.add_argument("-config", dest="config", required=False, help="Name of configuration file",
                         default="config.json")
+    args = parser.parse_args()
 
     # load configuration
-    with open('config.json') as fh:
+    with open(args.config) as fh:
         config = json.load(fh)
 
     # get number of directories to process
