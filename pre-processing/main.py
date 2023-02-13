@@ -164,11 +164,11 @@ def main(argv):
                 decks[tag].add_line(line)
             fh.close()
 
-    # now make sure all files are closed and write summaries to file
-    for dck in decks:
-        with open("{}.json".format(dck), 'w') as ofh:
-            json.dump(decks[dck].summary, ofh)
-        decks[dck].close()
+        # now make sure all files are closed and write summaries to file
+        for dck in decks:
+            with open("{}.json".format(dck), 'w') as ofh:
+                json.dump(decks[dck].summary, ofh)
+            decks[dck].close()
 
 
 if __name__ == '__main__':
