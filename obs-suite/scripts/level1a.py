@@ -167,8 +167,8 @@ release_path = os.path.join(params.data_path,params.release,params.dataset)
 correction_path = os.path.join(params.data_path, params.release, params.corrections)
 
 FFS = '-'    
-#L0_path = '/gws/nopw/j04/c3s311a_lot2/data/marine/release_5.0/tmp/'+params.sid_dck
-L0_path = os.path.join('/gws/nopw/j04/glamod_marine/data','datasets',params.dataset,'level0',params.sid_dck) # os.path.join(params.data_path,'datasets',params.dataset,'level0',params.sid_dck)   
+#L0_path = os.path.join('/gws/nopw/j04/glamod_marine/data','datasets',params.dataset,'level0',params.sid_dck) 
+L0_path = os.path.join(params.data_path,'datasets',params.dataset,'level0',params.sid_dck)   
 L1a_path = os.path.join(release_path,'level1a',params.sid_dck)
 L1a_ql_path = os.path.join(release_path,'level1a','quicklooks',params.sid_dck)
 L1a_excluded_path = os.path.join(release_path,'level1a','excluded',params.sid_dck)

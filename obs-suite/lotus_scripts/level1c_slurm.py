@@ -27,7 +27,8 @@ CONFIG_FILE = 'level1c.json'
 PERIODS_FILE = 'source_deck_periods.json'
 PYCLEAN = 'array_output_hdlr.py'
 BSH_REMOVE_FILES = 'remove_level_data.sh'
-QUEUE = 'short-serial'
+USER = 'glamod'
+NODES = 1
 #------------------------------------------------------------------------------
 
 #------------------------------------------------------------------------------
@@ -148,7 +149,12 @@ for sid_dck in process_list:
         continue
     
     job_file = os.path.join(log_diri,sid_dck + '.slurm')
-    
+    taskfarm_file = os.path.join(log_diri, sid_dck + '.tasks')
+    job_wrap1_file = os.path.join(log_diri, sid_dck + '_wrap1.slurm')
+    taskfarm_wrap1_file = os.path.join(log_diri, sid_dck + '_wrap1.tasks')
+    job_wrap2_file = os.path.join(log_diri, sid_dck + '_wrap2.slurm')
+    taskfarm_wrap2_file = os.path.join(log_diri, sid_dck + '_wrap2.tasks')
+
     memi = script_config.get(sid_dck,{}).get('job_memo_mb')
     memi = mem if not memi else memi
     
@@ -159,37 +165,118 @@ for sid_dck in process_list:
     else:
         ti = t
     
+    with open(taskfarm_file, 'w') as fh:
+        for i in range(array_size):
+            fh.writelines('{0} {1}/{2}.input > {3}/{4}.out\n'.format(pycommand, log_diri, i+1, log_diri, i+1))
+
     with open(job_file,'w') as fh:
         fh.writelines('#!/bin/bash\n')
         fh.writelines('#SBATCH --job-name={}.job\n'.format(sid_dck))
-        fh.writelines('#SBATCH --array=1-{}\n'.format(str(array_size)))
-        fh.writelines('#SBATCH --partition={}\n'.format(QUEUE))
-        fh.writelines('#SBATCH --output={}/%a.o\n'.format(log_diri))
-        fh.writelines('#SBATCH --error={}/%a.e\n'.format(log_diri))
+        fh.writelines('#SBATCH --nodes={}\n'.format(NODES))
+        fh.writelines('#SBATCH -A {}\n'.format(USER))
+        fh.writelines('#SBATCH --output={}/%a.out\n'.format(log_diri))
+        fh.writelines('#SBATCH --error={}/%a.err\n'.format(log_diri))
         fh.writelines('#SBATCH --time={}\n'.format(ti))
         fh.writelines('#SBATCH --mem={}\n'.format(memi))
         fh.writelines('#SBATCH --open-mode=truncate\n')
-        fh.writelines('{0} {1}/$SLURM_ARRAY_TASK_ID.input\n'.format(pycommand,log_diri))
+        #fh.writelines('{0} {1}/$SLURM_ARRAY_TASK_ID.input\n'.format(pycommand,log_diri))
+        fh.writelines('module load taskfarm\n')
+        fh.writelines('taskfarm {}\n'.format(taskfarm_file))
     
     logging.info('{}: launching array'.format(sid_dck)) 
     process = "jid=$(sbatch {} | cut -f 4 -d' ') && echo $jid".format(job_file)
     jid = launch_process(process)
 
-    # Rename logs and clean inputs
-    # First rename with aftercorr succesfull array elements: aftercorr work on an element by element basis, if exit 0
-    clean_ok = "sbatch --dependency=aftercorr:{0} --kill-on-invalid-dep=yes --array=1-{1}".format(jid,str(array_size))
-    clean_ok += " -p {0} --output=/dev/null --time=00:02:00 --mem=2".format(QUEUE)
-    clean_ok += " --wrap='python {0} {1} {2} {3}/$SLURM_ARRAY_TASK_ID.input 0 0'".format(py_clean_path,release,update,log_diri)
-    ok_jid = launch_process(clean_ok)
-    # There is no aftercorr"notok", so after successfull are renamed to ok, rename the rest to *.failed
-    clean_failed = "sbatch --dependency=afterany:{0} --kill-on-invalid-dep=yes --array=1-{1}".format(ok_jid,str(array_size))
-    clean_failed += " -p {0} --output=/dev/null --time=00:02:00 --mem=2".format(QUEUE)
-    clean_failed += " --wrap='python {0} {1} {2} {3}/$SLURM_ARRAY_TASK_ID.input 1 0'".format(py_clean_path,release,update,log_diri)
-    _jid = launch_process(clean_failed)
+    #cleaning/renameing------------------------------
+    with open(taskfarm_wrap1_file, 'w') as fh:
+        for i in range(array_size):
+            fh.writelines('python {0} {1} {2} {3}/{4}.input 0 0\n'.format(py_clean_path,release,update,log_diri, i+1))
+
+    with open(job_wrap1_file,'w') as fh:
+        fh.writelines('#!/bin/bash\n')
+        fh.writelines('#SBATCH --job-name={}.job\n'.format('clean'))
+        fh.writelines('#SBATCH --dependency=aftercorr:{0}\n'.format(jid))
+        fh.writelines('#SBATCH --kill-on-invalid-dep=yes\n')
+        fh.writelines('#SBATCH --output=/dev/null\n')
+        fh.writelines('#SBATCH --time=00:02:00\n')
+        fh.writelines('#SBATCH --mem=2\n')
+        fh.writelines('#SBATCH --nodes={}\n'.format(NODES))
+        fh.writelines('#SBATCH -A {}\n'.format(USER))
+        fh.writelines('module load taskfarm\n')
+        fh.writelines('taskfarm {}\n'.format(taskfarm_wrap1_file))
+
+    logging.info('{}: launching first cleanup'.format(sid_dck))
+    process = "jid=$(sbatch {} | cut -f 4 -d' ') && echo $jid".format(job_wrap1_file)
+    logging.info('process launching: {}'.format(process))
+    ok_jid = launch_process(process)
+
+    #cleaning/renameing, second round------------------------------
+    with open(taskfarm_wrap2_file, 'w') as fh:
+        for i in range(array_size):
+            fh.writelines('python {0} {1} {2} {3}/{4}.input 1 0\n'.format(py_clean_path,release,update,log_diri, i+1))
+
+    with open(job_wrap2_file,'w') as fh:
+        fh.writelines('#!/bin/bash\n')
+        fh.writelines('#SBATCH --job-name={}.job\n'.format('clean'))
+        fh.writelines('#SBATCH --dependency=afterany:{0}\n'.format(ok_jid))
+        fh.writelines('#SBATCH --kill-on-invalid-dep=yes\n')
+        fh.writelines('#SBATCH --output=/dev/null\n')
+        fh.writelines('#SBATCH --time=00:02:00\n')
+        fh.writelines('#SBATCH --mem=2\n')
+        fh.writelines('#SBATCH --nodes={}\n'.format(NODES))
+        fh.writelines('#SBATCH -A {}\n'.format(USER))
+        fh.writelines('module load taskfarm\n')
+        fh.writelines('taskfarm {}\n'.format(taskfarm_wrap2_file))
+
+    logging.info('{}: launching second cleanup'.format(sid_dck))
+    process = "jid=$(sbatch {} | cut -f 4 -d' ') && echo $jid".format(job_wrap2_file)
+    logging.info('process launching: {}'.format(process))
+    _jid = launch_process(process)
+
+
+    ## Rename logs and clean inputs
+    ## First rename with aftercorr succesfull array elements: aftercorr work on an element by element basis, if exit 0
+    #clean_ok = "sbatch --dependency=aftercorr:{0} --kill-on-invalid-dep=yes --array=1-{1}".format(jid,str(array_size))
+    #clean_ok += " -p {0} --output=/dev/null --time=00:02:00 --mem=2".format(QUEUE)
+    #clean_ok += " --wrap='python {0} {1} {2} {3}/$SLURM_ARRAY_TASK_ID.input 0 0'".format(py_clean_path,release,update,log_diri)
+    #ok_jid = launch_process(clean_ok)
+    ## There is no aftercorr"notok", so after successfull are renamed to ok, rename the rest to *.failed
+    #clean_failed = "sbatch --dependency=afterany:{0} --kill-on-invalid-dep=yes --array=1-{1}".format(ok_jid,str(array_size))
+    #clean_failed += " -p {0} --output=/dev/null --time=00:02:00 --mem=2".format(QUEUE)
+    #clean_failed += " --wrap='python {0} {1} {2} {3}/$SLURM_ARRAY_TASK_ID.input 1 0'".format(py_clean_path,release,update,log_diri)
+    #_jid = launch_process(clean_failed)
 
     
     # Remove source level if all OK and requested:
     if remove_source:
+        job_remove_file = os.path.join(log_diri,sid_dck + '.slurm')
+        taskfarm_remove_file = os.path.join(log_diri, sid_dck + '.tasks')
+        
+        with open(taskfarm_remove_file, 'w') as fh:
+            for i in range(array_size):
+                fh.writelines('python {0} {1} {2} {3} {4} {5} > {6}/remove_source.out'.format(bsh_remove_path,sid_dck,release,update,dataset,LEVEL_SOURCE, log_diri))
+
+        with open(job_remove_file,'w') as fh:
+            fh.writelines('#!/bin/bash\n')
+            fh.writelines('#SBATCH --job-name={}.job\n'.format('clean'))
+            fh.writelines('#SBATCH --dependency=afterok:{0}\n'.format(jid))
+            fh.writelines('#SBATCH --kill-on-invalid-dep=yes\n')
+            fh.writelines('#SBATCH --output={}/remove_source.out\n'.format(log_diri))
+            fh.writelines('#SBATCH --error={}/remove_source.out\n'.format(log_diri))
+            fh.writelines('#SBATCH --time=00:10:00\n')
+            fh.writelines('#SBATCH --mem=2\n')
+            fh.writelines('#SBATCH --nodes={}\n'.format(NODES))
+            fh.writelines('#SBATCH -A {}\n'.format(USER))
+            fh.writelines('#SBATCH --open-mode=truncate\n')
+            fh.writelines('module load taskfarm\n')
+            fh.writelines('taskfarm {}\n'.format(taskfarm_remove_file))
+
+        logging.info('{}: launching remove source'.format(sid_dck))
+        process = "jid=$(sbatch {} | cut -f 4 -d' ') && echo $jid".format(job_remove_file)
+        logging.info('process launching: {}'.format(process))
+        _jid = launch_process(process)
+
+
         remove = "sbatch --dependency=afterok:{0} --kill-on-invalid-dep=yes -p {1}".format(jid,QUEUE) 
         remove += " --time=00:10:00 --mem=2"
         remove += " --output={0}/remove_source.out --error={0}/remove_source.out --open-mode=truncate".format(log_diri)

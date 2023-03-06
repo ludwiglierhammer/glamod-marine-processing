@@ -94,7 +94,7 @@ def main(source_dir,source_pattern,log_dir,script_config,release_periods,
                 for x in ok_files:
                     os.remove(x)              
             for source_file in source_files:
-                #print(source_file)
+                print(source_file)
                 yyyy,mm = get_yyyymm(source_file)
                 if int(yyyy) >= year_init and int(yyyy) <= year_end:
                     #config_element(sid_dck_log_dir,ai,script_config,sid_dck,yyyy,mm, source_file)

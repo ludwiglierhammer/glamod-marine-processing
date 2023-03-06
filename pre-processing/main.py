@@ -125,20 +125,21 @@ def main(argv):
     parser = argparse.ArgumentParser(description="Script to split ICOADS IMMA files as specified in split.json")
     parser.add_argument("-config", dest="config", required=False, help="Name of configuration file",
                         default="config.json")
+    args = parser.parse_args()
 
     # load configuration
-    with open('config.json') as fh:
+    with open(args.config) as fh:
         config = json.load(fh)
 
     # get number of directories to process
     npaths = len(config["data-path"])
-
-    # iterate over paths
+        # iterate over paths
     for pathIdx in range(npaths):
         # get list of files to process
-        infiles = sorted(glob.glob("{}/IMMA1_R3.0.2*".format(config["data-path"][pathIdx])))
+        infiles = sorted(glob.glob("{}/IMMA1_R3.0.*".format(config["data-path"][pathIdx])))
         # get number of files
         nfiles = len(infiles)
+        print("{} files found in foler {}".format(nfiles, config["data-path"][pathIdx]))
         # initialise dictionary to store data
         decks = dict()
         # now iterate over files
@@ -163,11 +164,11 @@ def main(argv):
                 decks[tag].add_line(line)
             fh.close()
 
-    # now make sure all files are closed and write summaries to file
-    for dck in decks:
-        with open("{}.json".format(dck), 'w') as ofh:
-            json.dump(decks[dck].summary, ofh)
-        decks[dck].close()
+        # now make sure all files are closed and write summaries to file
+        for dck in decks:
+            with open("{}.json".format(dck), 'w') as ofh:
+                json.dump(decks[dck].summary, ofh)
+            decks[dck].close()
 
 
 if __name__ == '__main__':
