@@ -24,8 +24,9 @@
 # DEV NOTES:
 #
 #
-source ../setpaths.sh
-source ../setenv0.sh
+#Needs to be run before:
+#source ../setpaths.sh
+#source ../setenv0.sh
 
 # FUNCTIONS -------------------------------------------------------------------
 datepos () {

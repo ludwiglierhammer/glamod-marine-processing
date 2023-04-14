@@ -1,0 +1,166 @@
+{
+  "build": "py37h540881e_2",
+  "build_number": 2,
+  "channel": "https://conda.anaconda.org/conda-forge/linux-64",
+  "constrains": [],
+  "depends": [
+    "libgcc-ng >=10.3.0",
+    "python >=3.7,<3.8.0a0",
+    "python_abi 3.7.* *_cp37m"
+  ],
+  "extracted_package_dir": "/ichec/home/users/awerneck/.conda/pkgs/python-levenshtein-0.12.2-py37h540881e_2",
+  "features": "",
+  "files": [
+    "lib/python3.7/site-packages/Levenshtein/StringMatcher.py",
+    "lib/python3.7/site-packages/Levenshtein/__init__.py",
+    "lib/python3.7/site-packages/Levenshtein/__pycache__/StringMatcher.cpython-37.pyc",
+    "lib/python3.7/site-packages/Levenshtein/__pycache__/__init__.cpython-37.pyc",
+    "lib/python3.7/site-packages/Levenshtein/_levenshtein.c",
+    "lib/python3.7/site-packages/Levenshtein/_levenshtein.cpython-37m-x86_64-linux-gnu.so",
+    "lib/python3.7/site-packages/Levenshtein/_levenshtein.h",
+    "lib/python3.7/site-packages/python_Levenshtein-0.12.2.dist-info/COPYING",
+    "lib/python3.7/site-packages/python_Levenshtein-0.12.2.dist-info/INSTALLER",
+    "lib/python3.7/site-packages/python_Levenshtein-0.12.2.dist-info/METADATA",
+    "lib/python3.7/site-packages/python_Levenshtein-0.12.2.dist-info/RECORD",
+    "lib/python3.7/site-packages/python_Levenshtein-0.12.2.dist-info/REQUESTED",
+    "lib/python3.7/site-packages/python_Levenshtein-0.12.2.dist-info/WHEEL",
+    "lib/python3.7/site-packages/python_Levenshtein-0.12.2.dist-info/direct_url.json",
+    "lib/python3.7/site-packages/python_Levenshtein-0.12.2.dist-info/namespace_packages.txt",
+    "lib/python3.7/site-packages/python_Levenshtein-0.12.2.dist-info/top_level.txt"
+  ],
+  "fn": "python-levenshtein-0.12.2-py37h540881e_2.tar.bz2",
+  "license": "GPL-2.0-or-later",
+  "license_family": "GPL",
+  "link": {
+    "source": "/ichec/home/users/awerneck/.conda/pkgs/python-levenshtein-0.12.2-py37h540881e_2",
+    "type": 1
+  },
+  "md5": "ad622a5ed37f279c89e10c7b31c722d6",
+  "name": "python-levenshtein",
+  "package_tarball_full_path": "/ichec/home/users/awerneck/.conda/pkgs/python-levenshtein-0.12.2-py37h540881e_2.tar.bz2",
+  "paths_data": {
+    "paths": [
+      {
+        "_path": "lib/python3.7/site-packages/Levenshtein/StringMatcher.py",
+        "path_type": "hardlink",
+        "sha256": "f0ae94509d07414cceaab90ca8481693d096a592e489295a539cc320c7f8b82e",
+        "sha256_in_prefix": "f0ae94509d07414cceaab90ca8481693d096a592e489295a539cc320c7f8b82e",
+        "size_in_bytes": 2198
+      },
+      {
+        "_path": "lib/python3.7/site-packages/Levenshtein/__init__.py",
+        "path_type": "hardlink",
+        "sha256": "2c19b8da8bcaf7730c51bbb29b1545262d1e88148dbf281827cdeb961df12999",
+        "sha256_in_prefix": "2c19b8da8bcaf7730c51bbb29b1545262d1e88148dbf281827cdeb961df12999",
+        "size_in_bytes": 108
+      },
+      {
+        "_path": "lib/python3.7/site-packages/Levenshtein/__pycache__/StringMatcher.cpython-37.pyc",
+        "path_type": "hardlink",
+        "sha256": "09063b8ebd65de898ffe734ae26f5ffc4b0f1e92ce6ff64728e2ae0f1f585858",
+        "sha256_in_prefix": "09063b8ebd65de898ffe734ae26f5ffc4b0f1e92ce6ff64728e2ae0f1f585858",
+        "size_in_bytes": 2729
+      },
+      {
+        "_path": "lib/python3.7/site-packages/Levenshtein/__pycache__/__init__.cpython-37.pyc",
+        "path_type": "hardlink",
+        "sha256": "c1ddaebadc85a6591144e9d3170da12c759ebb74b941533ee95fe4ebc4d57d07",
+        "sha256_in_prefix": "c1ddaebadc85a6591144e9d3170da12c759ebb74b941533ee95fe4ebc4d57d07",
+        "size_in_bytes": 244
+      },
+      {
+        "_path": "lib/python3.7/site-packages/Levenshtein/_levenshtein.c",
+        "path_type": "hardlink",
+        "sha256": "1b56e05c950de27fb47e842816aaff64b94802b7969db855dec33f4ef99b2320",
+        "sha256_in_prefix": "1b56e05c950de27fb47e842816aaff64b94802b7969db855dec33f4ef99b2320",
+        "size_in_bytes": 192770
+      },
+      {
+        "_path": "lib/python3.7/site-packages/Levenshtein/_levenshtein.cpython-37m-x86_64-linux-gnu.so",
+        "path_type": "hardlink",
+        "sha256": "f67493b0448ad6de76c0a2505f0f2fbb314c2b0da845762cde02f394c83dabe1",
+        "sha256_in_prefix": "f67493b0448ad6de76c0a2505f0f2fbb314c2b0da845762cde02f394c83dabe1",
+        "size_in_bytes": 89952
+      },
+      {
+        "_path": "lib/python3.7/site-packages/Levenshtein/_levenshtein.h",
+        "path_type": "hardlink",
+        "sha256": "08bd736d2780a86f6413399cd048e4ee48fd4a354d39a5fd91bcd85ad7e58979",
+        "sha256_in_prefix": "08bd736d2780a86f6413399cd048e4ee48fd4a354d39a5fd91bcd85ad7e58979",
+        "size_in_bytes": 11227
+      },
+      {
+        "_path": "lib/python3.7/site-packages/python_Levenshtein-0.12.2.dist-info/COPYING",
+        "path_type": "hardlink",
+        "sha256": "87f1bd4a52b4029476b684fcdd51fed3c6b2540e462d3c2d3bfc9be4558b2825",
+        "sha256_in_prefix": "87f1bd4a52b4029476b684fcdd51fed3c6b2540e462d3c2d3bfc9be4558b2825",
+        "size_in_bytes": 18085
+      },
+      {
+        "_path": "lib/python3.7/site-packages/python_Levenshtein-0.12.2.dist-info/INSTALLER",
+        "path_type": "hardlink",
+        "sha256": "d0edee15f91b406f3f99726e44eb990be6e34fd0345b52b910c568e0eef6a2a8",
+        "sha256_in_prefix": "d0edee15f91b406f3f99726e44eb990be6e34fd0345b52b910c568e0eef6a2a8",
+        "size_in_bytes": 5
+      },
+      {
+        "_path": "lib/python3.7/site-packages/python_Levenshtein-0.12.2.dist-info/METADATA",
+        "path_type": "hardlink",
+        "sha256": "525dc8b99fb394c97166377ef00a6c7b1d45242d9c05945b6a8769909d45299b",
+        "sha256_in_prefix": "525dc8b99fb394c97166377ef00a6c7b1d45242d9c05945b6a8769909d45299b",
+        "size_in_bytes": 5048
+      },
+      {
+        "_path": "lib/python3.7/site-packages/python_Levenshtein-0.12.2.dist-info/RECORD",
+        "path_type": "hardlink",
+        "sha256": "04a76b27605f9f4ad2fde91f32aa73013dd6a2e000d81c85119d2b795904dd1a",
+        "sha256_in_prefix": "04a76b27605f9f4ad2fde91f32aa73013dd6a2e000d81c85119d2b795904dd1a",
+        "size_in_bytes": 1433
+      },
+      {
+        "_path": "lib/python3.7/site-packages/python_Levenshtein-0.12.2.dist-info/REQUESTED",
+        "path_type": "hardlink",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "sha256_in_prefix": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "size_in_bytes": 0
+      },
+      {
+        "_path": "lib/python3.7/site-packages/python_Levenshtein-0.12.2.dist-info/WHEEL",
+        "path_type": "hardlink",
+        "sha256": "6bcfa513c0836377d373ed90ec4299865e06602c57e6d9eeaf792c42eb315aee",
+        "sha256_in_prefix": "6bcfa513c0836377d373ed90ec4299865e06602c57e6d9eeaf792c42eb315aee",
+        "size_in_bytes": 104
+      },
+      {
+        "_path": "lib/python3.7/site-packages/python_Levenshtein-0.12.2.dist-info/direct_url.json",
+        "path_type": "hardlink",
+        "sha256": "e7680d4e03680637b0e127fa5d3dc4585cadd81da9d01ccc939bb1c9f1ee9c81",
+        "sha256_in_prefix": "e7680d4e03680637b0e127fa5d3dc4585cadd81da9d01ccc939bb1c9f1ee9c81",
+        "size_in_bytes": 114
+      },
+      {
+        "_path": "lib/python3.7/site-packages/python_Levenshtein-0.12.2.dist-info/namespace_packages.txt",
+        "path_type": "hardlink",
+        "sha256": "01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b",
+        "sha256_in_prefix": "01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b",
+        "size_in_bytes": 1
+      },
+      {
+        "_path": "lib/python3.7/site-packages/python_Levenshtein-0.12.2.dist-info/top_level.txt",
+        "path_type": "hardlink",
+        "sha256": "46f3ee3debe6ffb8f94b45419a30fb010afc4651d897609303fe06a855be81f0",
+        "sha256_in_prefix": "46f3ee3debe6ffb8f94b45419a30fb010afc4651d897609303fe06a855be81f0",
+        "size_in_bytes": 12
+      }
+    ],
+    "paths_version": 1
+  },
+  "requested_spec": "python-levenshtein",
+  "sha256": "28ad6e932bedffa8bc1ef2442cf14b565379ca5da0fac627a079c585361e8f6e",
+  "size": 81364,
+  "subdir": "linux-64",
+  "timestamp": 1649607006471,
+  "track_features": "",
+  "url": "https://conda.anaconda.org/conda-forge/linux-64/python-levenshtein-0.12.2-py37h540881e_2.tar.bz2",
+  "version": "0.12.2"
+}

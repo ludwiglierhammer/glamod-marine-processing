@@ -122,13 +122,16 @@ class deck_store():
 
 
 def main(argv):
-    parser = argparse.ArgumentParser(description="Script to split ICOADS IMMA files as specified in split.json")
-    parser.add_argument("-config", dest="config", required=False, help="Name of configuration file",
-                        default="config.json")
-    args = parser.parse_args()
+    #parser = argparse.ArgumentParser(description="Script to split ICOADS IMMA files as specified in split.json")
+    #parser.add_argument("-config", dest="config", required=False, help="Name of configuration file",
+    #                    default="config.json")
+    #args = parser.parse_args()
+    print(argv)
+    if len(argv)!=2:
+         sys.exit('Only one arguement (the config file) is expected')
 
     # load configuration
-    with open(args.config) as fh:
+    with open(argv[1]) as fh:
         config = json.load(fh)
 
     # get number of directories to process

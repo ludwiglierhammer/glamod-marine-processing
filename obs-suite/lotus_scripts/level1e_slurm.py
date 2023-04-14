@@ -27,7 +27,8 @@ CONFIG_FILE = 'level1e.json'
 PERIODS_FILE = 'source_deck_periods.json'
 PYCLEAN = 'array_output_hdlr.py'
 BSH_REMOVE_FILES = 'remove_level_data.sh'
-QUEUE = 'short-serial'
+NODES = 1
+
 #------------------------------------------------------------------------------
 
 #------------------------------------------------------------------------------
@@ -129,7 +130,7 @@ if status != 0:
 py_path = os.path.join(scripts_dir,PYSCRIPT)
 py_clean_path = os.path.join(lotus_dir,PYCLEAN)
 bsh_remove_path = os.path.join(scripts_dir,BSH_REMOVE_FILES)
-pycommand='python {0} {1} {2} {3} {4}'.format(py_path,data_dir,release,update,
+pycommand='python3 {0} {1} {2} {3} {4}'.format(py_path,data_dir,release,update,
                   dataset)
 
 # Set default job params
@@ -148,6 +149,7 @@ for sid_dck in process_list:
         continue
     
     job_file = os.path.join(log_diri,sid_dck + '.slurm')
+    task_file = os.path.join(log_diri,sid_dck + '.tasks')
     
     memi = script_config.get(sid_dck,{}).get('job_memo_mb')
     memi = mem if not memi else memi
@@ -159,22 +161,37 @@ for sid_dck in process_list:
     else:
         ti = t
     
+    with open(task_file, 'w') as fn:
+        for job_id in range(1,array_size+1):
+            if os.path.isfile(os.path.join(log_diri,'{}.failure'.format(job_id))):
+                 print('Deleting {}.failure file for a fresh start'.format(job_id))
+                 os.remove(os.path.join(log_diri,'{}.failure'.format(job_id)))
+
+            fn.writelines('{0} {1}/{2}.input > {1}/{2}.out 2> {1}/{2}.err; if [ $? -eq 0 ]; then touch {1}/{2}.success; else touch {1}/{2}.failure; fi \n'.format(pycommand, log_diri, job_id))
+
     with open(job_file,'w') as fh:
         fh.writelines('#!/bin/bash\n')
         fh.writelines('#SBATCH --job-name={}.job\n'.format(sid_dck))
-        fh.writelines('#SBATCH --array=1-{}\n'.format(str(array_size)))
-        fh.writelines('#SBATCH --partition={}\n'.format(QUEUE))
+        #fh.writelines('#SBATCH --array=1-{}\n'.format(str(array_size)))
+        #fh.writelines('#SBATCH --partition={}\n'.format(QUEUE))
         fh.writelines('#SBATCH --output={}/%a.out\n'.format(log_diri))
         fh.writelines('#SBATCH --error={}/%a.err\n'.format(log_diri))
         fh.writelines('#SBATCH --time={}\n'.format(ti))
-        fh.writelines('#SBATCH --mem={}\n'.format(memi))
+        #fh.writelines('#SBATCH --mem={}\n'.format(memi))
+        fh.writelines('#SBATCH --nodes={}\n'.format(NODES))
+        fh.writelines('#SBATCH -A glamod\n')
         fh.writelines('#SBATCH --open-mode=truncate\n')
-        fh.writelines('{0} {1}/$SLURM_ARRAY_TASK_ID.input\n'.format(pycommand,log_diri))
-    
+        #fh.writelines('{0} {1}/$SLURM_ARRAY_TASK_ID.input\n'.format(pycommand,log_diri))
+        fh.writelines('module load taskfarm\n')
+        fh.writelines('taskfarm {}\n'.format(task_file))
+
+
     logging.info('{}: launching array'.format(sid_dck)) 
     process = "jid=$(sbatch {} | cut -f 4 -d' ') && echo $jid".format(job_file)
     jid = launch_process(process)
 
+    #the remaining is replaces by .success / .failure files since .ok seems to be meaningless anways
+    '''
     # Rename logs and clean inputs
     # First rename with aftercorr succesfull array elements: aftercorr work on an element by element basis, if exit 0
     clean_ok = "sbatch --dependency=aftercorr:{0} --kill-on-invalid-dep=yes --array=1-{1}".format(jid,str(array_size))
@@ -195,3 +212,4 @@ for sid_dck in process_list:
         remove += " --output={0}/remove_source.out --error={0}/remove_source.out --open-mode=truncate".format(log_diri)
         remove += " --wrap='{0} {1} {2} {3} {4} {5}'".format(bsh_remove_path,sid_dck,release,update,dataset,LEVEL_SOURCE)
         _jid = launch_process(remove)    
+    '''

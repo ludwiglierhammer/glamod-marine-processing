@@ -18,9 +18,10 @@ LEVEL = 'level2'
 PYSCRIPT = 'level2.py'
 CONFIG_FILE = 'level2.json'
 
-QUEUE = 'short-serial'
-JOB_TIME = '10:00:00'
+#QUEUE = 'short-serial'
+JOB_TIME = '02:00:00'
 JOB_MEMO = 500
+NODES = 1
 #------------------------------------------------------------------------------
 
 #------------------------------------------------------------------------------
@@ -93,25 +94,34 @@ pycommand='python {0} {1} {2} {3} {4} {5}'.format(py_path,data_dir,release,updat
 
 logging.info('SUBMITTING JOBS...')
 
-for sid_dck in process_list:
-    log_diri = os.path.join(log_dir,sid_dck)
-    
-    level2_job = "sbatch -J {0} -p {1}".format(sid_dck,QUEUE)
-    level2_job += " --output={0}/{1}.out --error={0}/{1}.out".format(log_diri,sid_dck)
-    level2_job += " --open-mode=truncate --time={0} --mem={1}".format(JOB_TIME,str(JOB_MEMO))
-    level2_job += " --wrap='{0} {1}'".format(pycommand,sid_dck)
-    
-    logging.info('{}: launching job'.format(sid_dck)) 
-    process = "jid=$({} | cut -f 4 -d' ') && echo $jid".format(level2_job)
-    jid = launch_process(process)
+job_file = os.path.join(log_dir,'level2.slurm')
+task_file = os.path.join(log_dir,'level2.tasks')
 
-    # Rename logs and clean inputs
-    clean_ok = "sbatch --dependency=afterok:{0} --kill-on-invalid-dep=yes".format(jid)
-    clean_ok += " -p {0} --output=/dev/null --time=00:02:00 --mem=2".format(QUEUE)
-    clean_ok += " --wrap='mv {0}/{1}.out {0}/{1}-{2}-{3}.ok'".format(log_diri,sid_dck,release,update)
-    _jid = launch_process(clean_ok)
 
-    clean_failed = "sbatch --dependency=afternotok:{0} --kill-on-invalid-dep=yes".format(jid)
-    clean_failed += " -p {0} --output=/dev/null --time=00:02:00 --mem=2".format(QUEUE)
-    clean_failed += " --wrap='mv {0}/{1}.out {0}/{1}-{2}-{3}.failed'".format(log_diri,sid_dck,release,update)
-    _jid = launch_process(clean_failed)
+with open(task_file, 'w') as fn:
+    for sid_dck in process_list:
+        if os.path.isfile(os.path.join(log_dir,'{}-{}-{}.failed'.format(sid_dck, release, update))):
+             print('Deleting {}.failure file for a fresh start'.format(job_id))
+             os.remove(os.path.join(log_dir,'{}-{}-{}.failed'.format(sid_dck, release, update)))
+        fn.writelines('{0} {2} > {1}/{2}.out 2> {1}/{2}.err; if [ $? -eq 0 ]; then mv {1}/{2}.out {1}/{2}-{3}-{4}.ok; else mv {1}/{2}.out {1}/{2}-{3}-{4}.failed; fi \n'.format(pycommand, log_dir, sid_dck, release, update))
+
+with open(job_file,'w') as fh:
+    fh.writelines('#!/bin/bash\n')
+    fh.writelines('#SBATCH --job-name={}.job\n'.format('glamod_level2'))
+    #fh.writelines('#SBATCH --array=1-{}\n'.format(str(array_size)))
+    #fh.writelines('#SBATCH --partition={}\n'.format(QUEUE))
+    fh.writelines('#SBATCH --output={}/%a.out\n'.format(log_dir))
+    fh.writelines('#SBATCH --error={}/%a.err\n'.format(log_dir))
+    fh.writelines('#SBATCH --time={}\n'.format(JOB_TIME))
+    fh.writelines('#SBATCH --mem={}\n'.format(JOB_MEMO))
+    fh.writelines('#SBATCH --nodes={}\n'.format(NODES))
+    fh.writelines('#SBATCH -A glamod\n')
+    fh.writelines('#SBATCH --open-mode=truncate\n')
+    #fh.writelines('{0} {1}/$SLURM_ARRAY_TASK_ID.input\n'.format(pycommand,log_diri))
+    fh.writelines('module load taskfarm\n')
+    fh.writelines('taskfarm {}\n'.format(task_file))
+
+
+logging.info('{}: launching job'.format('level2')) 
+process = "jid=$(sbatch {} | cut -f 4 -d' ') && echo $jid".format(job_file)
+jid = launch_process(process)

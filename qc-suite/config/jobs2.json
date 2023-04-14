@@ -1,6 +1,6 @@
 {
-  "schema":"/gws/smf/j04/c3s311a_lot2/dyb/qc_code/schemas/imma/imma.json",
-  "code_tables":"/gws/smf/j04/c3s311a_lot2/dyb/qc_code/schemas/imma/code_tables/",
+  "schema":"/ichec/work/glamod/glamod-marine-processing.2022/qc-suite/imma/imma.json",
+  "code_tables":"/ichec/work/glamod/glamod-marine-processing.2022/qc-suite/imma/code_tables/",
   "jobs": [
     {
       "index": 1,

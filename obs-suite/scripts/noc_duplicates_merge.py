@@ -34,7 +34,7 @@ import os
 import logging
 import re
 import pandas as pd
-from imp import reload
+from importlib import reload
 reload(logging)  # This is to override potential previous config of logging
 
 

@@ -343,6 +343,7 @@ if process:
     obs_tables = tables[1:]
     io_dict.update({table:{} for table in tables})
     mapping = params.cdm_map
+    logging.debug('Mapping attributes: {}'.format(data_in.atts))
     cdm_tables = cdm.map_model(mapping, data_in.data, data_in.atts,
                                log_level = 'INFO')
     

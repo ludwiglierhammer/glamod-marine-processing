@@ -1,0 +1,19 @@
+#
+# Author: Lasse Collin
+#
+# This file has been put into the public domain.
+# You can do whatever you want with this file.
+#
+
+prefix=/ichec/work/glamod/glamod-marine-processing.2022/metadata-suite/myenv
+exec_prefix=/ichec/work/glamod/glamod-marine-processing.2022/metadata-suite/myenv
+libdir=/ichec/work/glamod/glamod-marine-processing.2022/metadata-suite/myenv/lib
+includedir=/ichec/work/glamod/glamod-marine-processing.2022/metadata-suite/myenv/include
+
+Name: liblzma
+Description: General purpose data compression library
+URL: https://tukaani.org/xz/
+Version: 5.2.6
+Cflags: -I${includedir}
+Libs: -L${libdir} -llzma
+Libs.private: -pthread -lrt  -lpthread

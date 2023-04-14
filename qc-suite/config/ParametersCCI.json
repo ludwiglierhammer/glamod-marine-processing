@@ -1,35 +1,36 @@
 {
   "runid": "CCIrun",
 
-  "icoads_dir": ["/gws/nopw/j04/c3s311a_lot2/data/marine/release_5.0/metoffice_qc/corrected/"],
+  "icoads_dir": ["/ichec/work/glamod/data/marine/release_5.1/metoffice_qc/corrected/"],
 
   "icoads_filenames": ["YYYY-MM.psv"],
 
-  "background_dir": ["/neodc/esacci/sst/data/CDR_v2/Analysis/L4/v2.1/YYYY/MMMM/DDDD/"],
+  "background_dir": ["/ichec/work/glamod/data/marine/external_files/SST_daily_CCI/gws-access.jasmin.ac.uk/ICDR_v2/Analysis/L4/v2.1/YYYY/MMMM/DDDD/"],
 
   "background_filenames": ["YYYYMMMMDDDD120000-ESACCI-L4_GHRSST-SSTdepth-OSTIA-GLOB_CDR2.1-v02.0-fv01.0.nc"],
 
+
   "climatologies": [
-    ["SST", "mean",  "/gws/nopw/j04/c3s311a_lot2/data/external/climatologies/HadSST2_daily_1x1_climatology.nc", "sst"],
-    ["AT",  "mean",  "/gws/nopw/j04/c3s311a_lot2/data/external/climatologies/t2m_pentad_1by1marine_ERA-Interim_data_19792015.nc", "t2m_clims"],
-    ["AT99","mean",  "/gws/nopw/j04/c3s311a_lot2/data/external/climatologies/HadNMAT2_daily_1x1_climatology.nc", "nmat"],
-    ["DAT", "mean",  "/gws/smf/j04/c3s311a_lot2/dyb/external_files/AT/HadDAT_pentad_climatology.nc", "dmat"],
-    ["AT2", "mean",  "/gws/nopw/j04/c3s311a_lot2/data/external/climatologies/t2m_pentad_1by1marine_ERA-Interim_data_19792015.nc", "t2m_clims"],
-    ["DPT", "mean",  "/gws/nopw/j04/c3s311a_lot2/data/external/climatologies/td2m_pentad_1by1marine_ERA-Interim_data_19792015.nc", "td2m_clims"],
-    ["SHU", "mean",  "/gws/nopw/j04/c3s311a_lot2/data/external/climatologies/q2m_pentad_1by1marine_ERA-Interim_data_19792015.nc", "q2m_clims"],
-    ["VAP", "mean",  "/gws/nopw/j04/c3s311a_lot2/data/external/climatologies/e2m_pentad_1by1marine_ERA-Interim_data_19792015.nc", "e2m_clims"],
-    ["CRH", "mean",  "/gws/nopw/j04/c3s311a_lot2/data/external/climatologies/rh2m_pentad_1by1marine_ERA-Interim_data_19792015.nc", "rh2m_clims"],
-    ["CWB", "mean",  "/gws/nopw/j04/c3s311a_lot2/data/external/climatologies/tw2m_pentad_1by1marine_ERA-Interim_data_19792015.nc", "tw2m_clims"],
-    ["DPD", "mean",  "/gws/nopw/j04/c3s311a_lot2/data/external/climatologies/dpd2m_pentad_1by1marine_ERA-Interim_data_19792015.nc", "dpd2m_clims"],
-    ["SLP2","mean",  "/gws/nopw/j04/c3s311a_lot2/data/external/climatologies/p2m_pentad_1by1marine_ERA-Interim_data_19792015.nc", "p2m_clims"],
-    ["AT2", "stdev", "/gws/nopw/j04/c3s311a_lot2/data/external/climatologies/t2m_pentad_1by1marine_ERA-Interim_data_19792015.nc",  "t2m_stdevs"],
-    ["DPT", "stdev", "/gws/nopw/j04/c3s311a_lot2/data/external/climatologies/td2m_pentad_1by1marine_ERA-Interim_data_19792015.nc", "td2m_stdevs"], 
-    ["SLP", "mean",  "/gws/nopw/j04/c3s311a_lot2/data/external/climatologies/SLP_pentad_climatology.nc", "slp"], 
-    ["SLP", "stdev", "/gws/nopw/j04/c3s311a_lot2/data/external/climatologies/SLP_pentad_stdev_climatology.nc", "slp"] 
+    ["SST", "mean",  "/ichec/work/glamod/data/marine/external_files/SST/HadSST2_daily_1x1_climatology.nc", "sst"],
+    ["AT",  "mean",  "/ichec/work/glamod/data/marine/external_files/ERAClimatologies/t2m_pentad_1by1marine_ERA-Interim_data_19792015.nc", "t2m_clims"],
+    ["AT99","mean",  "/ichec/work/glamod/data/marine/external_files/AT/HadNMAT2_daily_1x1_climatology.nc", "nmat"],
+    ["DAT", "mean",  "/ichec/work/glamod/data/marine/external_files/AT/HadDAT_pentad_climatology.nc", "dmat"],
+    ["AT2", "mean",  "/ichec/work/glamod/data/marine/external_files/ERAClimatologies/t2m_pentad_1by1marine_ERA-Interim_data_19792015.nc", "t2m_clims"],
+    ["DPT", "mean",  "/ichec/work/glamod/data/marine/external_files/ERAClimatologies/td2m_pentad_1by1marine_ERA-Interim_data_19792015.nc", "td2m_clims"],
+    ["SHU", "mean",  "/ichec/work/glamod/data/marine/external_files/ERAClimatologies/q2m_pentad_1by1marine_ERA-Interim_data_19792015.nc", "q2m_clims"],
+    ["VAP", "mean",  "/ichec/work/glamod/data/marine/external_files/ERAClimatologies/e2m_pentad_1by1marine_ERA-Interim_data_19792015.nc", "e2m_clims"],
+    ["CRH", "mean",  "/ichec/work/glamod/data/marine/external_files/ERAClimatologies/rh2m_pentad_1by1marine_ERA-Interim_data_19792015.nc", "rh2m_clims"],
+    ["CWB", "mean",  "/ichec/work/glamod/data/marine/external_files/ERAClimatologies/tw2m_pentad_1by1marine_ERA-Interim_data_19792015.nc", "tw2m_clims"],
+    ["DPD", "mean",  "/ichec/work/glamod/data/marine/external_files/ERAClimatologies/dpd2m_pentad_1by1marine_ERA-Interim_data_19792015.nc", "dpd2m_clims"],
+    ["SLP2","mean",  "/ichec/work/glamod/data/marine/external_files/ERAClimatologies/p2m_pentad_1by1marine_ERA-Interim_data_19792015.nc", "p2m_clims"],
+    ["AT2", "stdev", "/ichec/work/glamod/data/marine/external_files/ERAClimatologies/t2m_pentad_1by1marine_ERA-Interim_data_19792015.nc",  "t2m_stdevs"],
+    ["DPT", "stdev", "/ichec/work/glamod/data/marine/external_files/ERAClimatologies/td2m_pentad_1by1marine_ERA-Interim_data_19792015.nc", "td2m_stdevs"], 
+    ["SLP", "mean",  "/ichec/work/glamod/data/marine/external_files/SLP/SLP_pentad_climatology.nc", "slp"], 
+    ["SLP", "stdev", "/ichec/work/glamod/data/marine/external_files/SLP/SLP_pentad_stdev_climatology.nc", "slp"] 
                    ],
 
   "hires_climatologies": [
-    ["SST", "mean", "/gws/nopw/j04/c3s311a_lot2/data/external/climatologies/OIv2_clim_MDS_6190_0.25x0.25xdaily_365.nc"]
+    ["SST", "mean", "/ichec/work/glamod/data/marine/external_files/SST/OIv2_clim_MDS_6190_0.25x0.25xdaily_365.nc"]
                          ],
 
   "base":{ 

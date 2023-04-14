@@ -1,0 +1,5 @@
+# Ignore whats inside this directory, as this needs to be populated with
+# the appropriate files from the metadata/qc suits
+*
+*/
+!.gitignore

@@ -16,7 +16,8 @@ from pathlib import Path
 import numpy as np
 import os
 # %%
-def main(argv):
+#def main(argv):
+if 1:
     """
     simplified version of preprocess.py in qc_suite
     It reads in:
@@ -44,6 +45,11 @@ def main(argv):
                         help='Path to NOC correction data files', required=True)
     parser.add_argument('-destination', type=str, 
                         help='Path to output directory', required=True)
+    parser.add_argument('-release', type=str, 
+                        help='Release identifier, e.g. release_5.1', required=True)
+    parser.add_argument('-update', type=str, 
+                        help='Update identifyer, e.g. 000000', required=True)
+
     
 
     args = parser.parse_args()
@@ -53,7 +59,9 @@ def main(argv):
     corr = args.corrections
     dck_lst = args.dck_list
     dck_p = args.dck_period
-    
+    rel_id = args.release
+    upd_id = args.update
+
     with open(dck_lst, 'r') as fO:
          dck_list = fO.read().splitlines()
 
@@ -63,7 +71,9 @@ def main(argv):
     for dl in dck_list:
         y_init = np.minimum(dck_period[dl].get("year_init"), 2022)
         y_end = np.maximum(dck_period[dl].get("year_end"), 1948)
-        
+       
+
+    #infile_patt = '-{}-{}.psv'.format(rel_id, upd_id)
     # verbose = True  # need set to read as arg in future
 
     for yr in range(y_init, y_end+1):        
@@ -88,9 +98,9 @@ def main(argv):
                 # 'DCK', 'SID', 'PT', 'UID', 'IRF', 'DS', 'VS'
                 fn = os.path.join(in_dir, dl, 'header-'+str(yr)+'-' +
                                   str("{:02d}").format(mo) +
-                                  '-release_5.0-000000.psv')
+                                  '-{}-{}.psv'.format(rel_id, upd_id))
                 if os.path.exists(fn):
-                    print("Reading header")
+                    print("Reading header {}".format(fn))
                     rn = ['report_id', 'region', 'sub_region', 
                           'application_area',
                           'observing_programme', 'report_type', 'station_name',
@@ -113,6 +123,7 @@ def main(argv):
                           'source_id', 'source_record_id']
                     tmp = pd.read_csv(fn, delimiter="|", dtype="object", 
                                       header=None, skiprows=1, names=rn)
+                    #print("Reanaming")
                     tmp.rename(columns={"latitude": "LAT"}, inplace=True)
                     tmp.rename(columns={"longitude": "LON"}, inplace=True)
                     tmp.rename(columns={"primary_station_id": "ID"}, inplace=True)
@@ -121,6 +132,7 @@ def main(argv):
                     tmp.rename(columns={"report_quality": "IRF"}, inplace=True)
                     tmp.rename(columns={"station_course": "DS"}, inplace=True)
                     tmp.rename(columns={"station_speed": "VS"}, inplace=True)
+                    #print("splitting")
                     tmp["YR"] = tmp["report_timestamp"].apply(lambda x: x[0:4])
                     tmp["MO"] = tmp["report_timestamp"].apply(lambda x: x[5:7])
                     tmp["DY"] = tmp["report_timestamp"].apply(lambda x: x[8:10])
@@ -138,9 +150,9 @@ def main(argv):
                 #%%from obsevations_at 'AT',
                 fn = os.path.join(in_dir, dl, 'observations-at-'+str(yr)+'-' +
                                   str("{:02d}").format(mo) +
-                                  '-release_5.0-000000.psv')
+                                  '-{}-{}.psv'.format(rel_id, upd_id))
                 if os.path.exists(fn):
-                    print("Reading at data")
+                    print("Reading AT data {}".format(fn))
                     rn = ['observation_id', 'report_id', 'data_policy_licence',
                       'date_time', 'date_time_meaning', 'observation_duration',
                       'longitude', 'latitude', 'crs', 'z_coordinate', 
@@ -166,13 +178,14 @@ def main(argv):
                                       header=None, skiprows=1, names=rn)
                     tmp.rename(columns={"report_id": "UID"}, inplace=True)
                     tmp.rename(columns={"observation_value": "AT"}, inplace=True)
+                    tmp=tmp.astype({"AT": 'float'})
                     tmp = tmp[["UID", "AT"]].set_index("UID")
                     tmp.AT = tmp.AT-273.15  # reset to Celsius
                     data_dl = data_dl.merge(tmp, on ='UID', how ="left")
                 #%% from obsevations_sst 'SST',
                 fn = os.path.join(in_dir, dl, 'observations-sst-'+str(yr)+'-' +
                                   str("{:02d}").format(mo) +
-                                  '-release_5.0-000000.psv')
+                                  '-{}-{}.psv'.format(rel_id, upd_id))
                 if os.path.exists(fn):
                     print("Reading sst data")
                     rn = ['observation_id', 'report_id', 'data_policy_licence',
@@ -201,12 +214,13 @@ def main(argv):
                     tmp.rename(columns={"report_id": "UID"}, inplace=True)
                     tmp.rename(columns={"observation_value": "SST"}, inplace=True)
                     tmp = tmp[["UID", "SST"]].set_index("UID")
+                    tmp=tmp.astype({"SST": 'float'})
                     tmp.SST = tmp.SST-273.15  # reset to Celsius
                     data_dl = data_dl.merge(tmp, on ='UID', how ="left")
                 #%% from obsevations_dpt 'DPT', 
                 fn = os.path.join(in_dir, dl, 'observations-dpt-'+str(yr)+'-' +
                                   str("{:02d}").format(mo) +
-                                  '-release_5.0-000000.psv')
+                                  '-{}-{}.psv'.format(rel_id, upd_id))
                 if os.path.exists(fn):
                     print("Reading dpt data")
                     rn = ['observation_id', 'report_id', 'data_policy_licence',
@@ -235,12 +249,13 @@ def main(argv):
                     tmp.rename(columns={"report_id": "UID"}, inplace=True)
                     tmp.rename(columns={"observation_value": "DPT"}, inplace=True)
                     tmp = tmp[["UID", "DPT"]].set_index("UID")
+                    tmp=tmp.astype({"DPT": 'float'})
                     tmp.DPT = tmp.DPT-273.15  # reset to Celsius
                     data_dl = data_dl.merge(tmp, on ='UID', how ="left")
                 #%% from obsevations_slp 'SLP',
                 fn = os.path.join(in_dir, dl, 'observations-slp-'+str(yr)+'-' +
                                   str("{:02d}").format(mo) +
-                                  '-release_5.0-000000.psv')
+                                  '-{}-{}.psv'.format(rel_id, upd_id))
                 if os.path.exists(fn):
                     print("Reading slp data")
                     rn = ['observation_id', 'report_id', 'data_policy_licence',
@@ -269,12 +284,13 @@ def main(argv):
                     tmp.rename(columns={"report_id": "UID"}, inplace=True)
                     tmp.rename(columns={"observation_value": "SLP"}, inplace=True)
                     tmp = tmp[["UID", "SLP"]].set_index("UID")
+                    tmp=tmp.astype({"SLP": 'float'})
                     tmp.SLP = tmp.SLP/100  # reset to hPa
                     data_dl = data_dl.merge(tmp, on ='UID', how ="left")
                 #%% from obsevations_ws 'W',
                 fn = os.path.join(in_dir, dl, 'observations-ws-'+str(yr)+'-' +
                                   str("{:02d}").format(mo) +
-                                  '-release_5.0-000000.psv')
+                                  '-{}-{}.psv'.format(rel_id, upd_id))
                 if os.path.exists(fn):
                     print("Reading W data")
                     rn = ['observation_id', 'report_id', 'data_policy_licence',
@@ -307,7 +323,7 @@ def main(argv):
                 #%% from obsevations_wd 'D',
                 fn = os.path.join(in_dir, dl, 'observations-ws-'+str(yr)+'-' +
                                   str("{:02d}").format(mo) +
-                                  '-release_5.0-000000.psv')
+                                  '-{}-{}.psv'.format(rel_id, upd_id))
                 if os.path.exists(fn):
                     print("Reading WD data")
                     rn = ['observation_id', 'report_id', 'data_policy_licence',
@@ -346,7 +362,7 @@ def main(argv):
                 #%% load drifter data PT=7 from level1a excluded                
                 fn = os.path.join(in_dir[:-8],'level1a/excluded', dl,
                                   str(yr)+'-'+str("{:02d}").format(mo) +
-                                  '-release_5.0-000000-c1_PT.psv') 
+                                  '-{}-{}-c1_PT.psv'.format(rel_id, upd_id)) 
                 if os.path.exists(fn):
                     print("Looking for drifters")
                     rn = ['YR', 'MO', 'DY', 'HR', 'LAT', 'LON', 'IM',  'ATTC',
@@ -435,10 +451,10 @@ def main(argv):
                 data = pd.concat([data, data_dl])
                 print([(len(data_dl.index)),len(data.index)])
 
-            print(data.head())
+            #print(data.head())
             data.reset_index(inplace=True)
             print("Writing file")
-            print(data.head())
+            #print(data.head())
             data = data.sort_values(['YR', 'MO', 'DY', 'HR', 'UID' ], axis=0, 
                                     ascending=True)
             data = data.reindex(columns=['YR', 'MO', 'DY', 'HR', 'LAT',
@@ -449,5 +465,5 @@ def main(argv):
             data.to_csv(out_dir+'{:04d}-{:02d}.psv'.format(yr, mo), sep="|",
                         header=False, index=False, compression='infer')
             
-if __name__ == '__main__':
-    main(sys.argv[1:])
+#if __name__ == '__main__':
+#    main(sys.argv[1:])

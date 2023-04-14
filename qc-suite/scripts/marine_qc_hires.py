@@ -24,6 +24,8 @@ from noc_auxiliary import *
 from datetime import datetime
 import pandas as pd
 from pathlib import Path
+import logging
+
 
 def main(argv):
     """
@@ -45,9 +47,9 @@ def main(argv):
     neighbours
     """
 
-    print('########################')
-    print('Running make_and_full_qc')
-    print('########################')
+    logging.info('########################')
+    logging.info('Running make_and_full_qc')
+    logging.info('########################')
 
     parser = argparse.ArgumentParser(description='Marine QC system, main program')
     parser.add_argument('-config', type=str, default='configuration.txt', help='name of config file')
@@ -76,9 +78,9 @@ def main(argv):
     verbose = True # need set to read as arg in future
 
 
-    print('Input file is {}'.format(inputfile))
-    print('Running from {} {} to {} {}'.format(month1, year1, month2, year2))
-    print('')
+    logging.info('Input file is {}'.format(inputfile))
+    logging.info('Running from {} {} to {} {}'.format(month1, year1, month2, year2))
+    logging.info('')
 
     config = ConfigParser.ConfigParser()
     config.read(inputfile)
@@ -87,12 +89,12 @@ def main(argv):
     bad_id_file = config.get('Files', 'IDs_to_exclude')
     version = config.get('Icoads', 'icoads_version')
 
-    print('ICOADS directory = {}'.format(icoads_dir))
-    print('ICOADS version = {}'.format(version))
-    print('Output to {}'.format(out_dir))
-    print('List of bad IDs = {}'.format(bad_id_file))
-    print('Parameter file = {}'.format(config.get('Files', 'parameter_file')))
-    print('')
+    logging.info('ICOADS directory = {}'.format(icoads_dir))
+    logging.info('ICOADS version = {}'.format(version))
+    logging.info('Output to {}'.format(out_dir))
+    logging.info('List of bad IDs = {}'.format(bad_id_file))
+    logging.info('Parameter file = {}'.format(config.get('Files', 'parameter_file')))
+    logging.info('')
 
     ids_to_exclude = bf.process_bad_id_file(bad_id_file)
 
@@ -110,14 +112,14 @@ def main(argv):
     for entry in parameters['hires_climatologies']:
         if entry[0] == 'SST' and entry[1] == 'mean':
             sst_climatology_file = entry[2]
-            print("hires sst climatology file {}".format(sst_climatology_file))
+            logging.info("hires sst climatology file {}".format(sst_climatology_file))
 
     climlib = ex.ClimatologyLibrary()
     climlib.add_field('SST', 'mean', clim.Climatology.from_filename(sst_climatology_file, 'temperature'))
 
     for year, month in qc.year_month_gen(year1, month1, year2, month2):
 
-        print("{} {}".format(year, month))
+        logging.info("{} {}".format(year, month))
 
         last_year, last_month = qc.last_month_was(year, month)
         next_year, next_month = qc.next_month_is(year, month)
@@ -127,7 +129,7 @@ def main(argv):
 
         for readyear, readmonth in qc.year_month_gen(last_year, last_month, next_year, next_month):
 
-            print("{} {}".format(readyear, readmonth))
+            logging.info("{} {}".format(readyear, readmonth))
 
             #icoads_dir = '/gws/nopw/j04/c3s311a_lot2/data/level0/marine/sub_daily_data/IMMA1_R3.0.0T-QC/'
             filename = icoads_dir + '{:4d}-{:02d}.psv'.format(readyear, readmonth)
@@ -174,7 +176,7 @@ def main(argv):
 
             #icoads_file.close()
 
-        print("Read {} ICOADS records".format(count))
+        logging.info("Read {} ICOADS records".format(count))
 
         # filter the obs into passes and fails of basic positional QC
         filt = ex.QC_filter()
@@ -193,7 +195,7 @@ def main(argv):
             one_ship.find_repeated_values(parameters['find_repeated_values'], intype='SST')
             count_ships += 1
 
-        print("Track checked {} ships".format(count_ships))
+        logging.info("Track checked {} ships".format(count_ships))
 
         # SST buddy check
         filt = ex.QC_filter()

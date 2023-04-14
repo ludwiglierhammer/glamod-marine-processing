@@ -23,10 +23,9 @@ LEVEL = 'level1a'
 LEVEL_SOURCE = 'level0'
 SOURCE_PATTERN = 'IMMA1_R3.0.?T*_????-??' # '????-??.imma'
 PYSCRIPT = 'level1a.py'
-CONFIG_FILE = 'level1a.json'
-PERIODS_FILE = 'source_deck_periods.json'
+CONFIG_FILE = 'level1a.json'                 #unused?
+PERIODS_FILE = 'source_deck_periods.json'    #unused?
 PYCLEAN = 'array_output_hdlr.py'
-#QUEUE = 'short-serial'
 USER = 'glamod'
 NODES = 1
 #------------------------------------------------------------------------------
@@ -67,11 +66,21 @@ logging.basicConfig(format='%(levelname)s\t[%(asctime)s](%(filename)s)\t%(messag
                     level=logging.INFO,datefmt='%Y%m%d %H:%M:%S',filename=None)
 
 # Get process coordinates and build paths -------------------------------------
-release = sys.argv[1]
-update = sys.argv[2]
-dataset = sys.argv[3]
-config_path = sys.argv[4]
-process_list_file = sys.argv[5]
+#release = sys.argv[1]
+#update = sys.argv[2]
+#dataset = sys.argv[3]
+script_config_file = sys.argv[1]
+#process_list_file = sys.argv[5]
+
+check_file_exit([script_config_file])
+with open(script_config_file,'r') as fO:
+    script_config = json.load(fO)
+
+release = script_config['release']
+update = script_config['update']
+dataset = script_config['dataset']
+process_list_file = script_config['process_list_file']
+release_periods_file = script_config['release_periods_file']
 
 parser = argparse.ArgumentParser()
 parser.add_argument('positional', metavar='N', type=str, nargs='+')
@@ -92,9 +101,9 @@ scratch_dir = lotus_paths.scratch_directory
 
 # Build process specific paths
 release_tag = '-'.join([release,update])
-script_config_file = os.path.join(config_path,release_tag,dataset,CONFIG_FILE)
+#script_config_file = os.path.join(config_path,release_tag,dataset,CONFIG_FILE)
 print(script_config_file)
-release_periods_file = os.path.join(config_path,release_tag,dataset,PERIODS_FILE)
+#release_periods_file = os.path.join(config_path,release_tag,dataset,PERIODS_FILE)
 print(release_periods_file)
 level_dir = os.path.join(data_dir,release,dataset,LEVEL)
 print(level_dir)
@@ -166,7 +175,7 @@ for sid_dck in process_list:
         ti = t
     with open(taskfarm_file, 'w') as fh:
         for i in range(array_size):
-            fh.writelines('{0} {1}/{2}.input > {3}/{4}.out\n'.format(pycommand, log_diri, i+1, log_diri, i+1))
+            fh.writelines('{0} {1}/{2}.input > {1}/{2}.out 2> {1}/{2}.err \n'.format(pycommand, log_diri, i+1))
 
     with open(job_file,'w') as fh:
         fh.writelines('#!/bin/bash\n')

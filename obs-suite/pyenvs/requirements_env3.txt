@@ -1,0 +1,27 @@
+#Python 3.8
+matplotlib
+Cython
+numpy==1.19.*
+pandas==0.24.2
+requests==2.21.0
+dask==2021.1.0
+datashader==0.7.0
+xarray==0.20.2
+pyreadr==0.1.9
+unidecode==1.0.23
+holoviews==1.12.1
+bokeh==1.1.0
+geoviews==1.6.2
+panel==0.6.0
+jupyter==1.0.0
+pscript==0.7.1
+fpdf==1.7.2
+weasyprint==50
+jinja2==3.0.3
+pyarrow
+msgpack==0.5.6
+fastparquet==0.7.1
+importlib-metadata==4.*
+simplejson
+textdistance
+PyYAML==5.1

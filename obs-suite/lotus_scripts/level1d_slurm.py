@@ -168,7 +168,7 @@ for sid_dck in process_list:
     
     with open(taskfarm_file, 'w') as fh:
         for i in range(array_size):
-            fh.writelines('{0} {1}/{2}.input > {3}/{4}.out\n'.format(pycommand, log_diri, i+1, log_diri, i+1))
+            fh.writelines('{0} {1}/{2}.input > {3}/{4}.out 2> {3}/{4}.err \n'.format(pycommand, log_diri, i+1, log_diri, i+1))
 
     with open(job_file,'w') as fh:
         fh.writelines('#!/bin/bash\n')

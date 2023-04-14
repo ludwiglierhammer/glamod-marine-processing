@@ -85,18 +85,19 @@ class script_setup:
             self.flag = False 
             return
         
-        if len(sys.argv) > 6:
-            self.sid_dck = inargs[6]
-            self.year = inargs[7]
-            self.month = inargs[8]    
-        else:
-            try:
-                self.sid_dck = config.get('sid_dck')
-                self.year = config.get('yyyy')
-                self.month = config.get('mm') 
-            except Exception:
-                logging.error('Parsing configuration from file :{}'.format(self.configfile), exc_info=True)
-                self.flag = False
+        if len(sys.argv) >= 8:
+            logging.warning('Removed option to provide sid_dck, year and month as arguments. Use config file instead')
+            #self.sid_dck = inargs[6]
+            #self.year = inargs[7]
+            #self.month = inargs[8]    
+        #else:
+        try:
+            self.sid_dck = config.get('sid_dck')
+            self.year = config.get('yyyy')
+            self.month = config.get('mm') 
+        except Exception:
+            logging.error('Parsing configuration from file :{}'.format(self.configfile), exc_info=True)
+            self.flag = False
                 
         self.dck = self.sid_dck.split("-")[1]
 
@@ -123,10 +124,10 @@ date_handler = lambda obj: (
     else None
 )
 
-def map_to_cdm(md_model,meta_df):
+def map_to_cdm(md_model,meta_df, log_level='INFO'):
     # Atts is a minimum info on vars the cdm mocule requires
     atts = {k:{'column_type':'object'} for k in meta_df.columns}
-    meta_cdm_dict = cdm.map_model(md_model, meta_df, atts)
+    meta_cdm_dict = cdm.map_model(md_model, meta_df, atts, log_level=log_level)
     meta_cdm = pd.DataFrame()
     table = 'header'
     meta_cdm_columns = [ (table,x) for x in meta_cdm_dict[table]['data'].columns ]
@@ -199,7 +200,7 @@ def clean_level(file_id):
 
 # Process input and set up some things and make sure we can do something-------
 logging.basicConfig(format='%(levelname)s\t[%(asctime)s](%(filename)s)\t%(message)s',
-                    level=logging.INFO,datefmt='%Y%m%d %H:%M:%S',filename=None)
+                    level=logging.DEBUG,datefmt='%Y%m%d %H:%M:%S',filename=None)
 if len(sys.argv)>1:
     logging.info('Reading command line arguments')
     args = sys.argv
@@ -298,7 +299,7 @@ if md_avail:
 # 2. MAP PUB47 MD TO CDM FIELDS -----------------------------------------------
 if merge:
     logging.info('Mapping metadata to CDM')
-    meta_cdm = map_to_cdm(params.md_model,meta_df)
+    meta_cdm = map_to_cdm(params.md_model,meta_df, log_level='DEBUG')
 
 # 3. UPDATE CDM WITH PUB47 OR JUST COPY PREV LEVEL TO CURRENT -----------------
 # This is only valid for the header

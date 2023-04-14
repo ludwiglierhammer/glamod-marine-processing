@@ -1,4 +1,4 @@
-#!/usr/local/sci/bin/python2.7
+#!/usr/local/sci/bin/python3
 """
 marine_qc.py invoked by typing::
 
@@ -24,7 +24,10 @@ import gzip
 from datetime import datetime
 import pandas as pd
 from pathlib import Path
+import logging
 
+
+#reload(logging)
 
 
 def main(argv):
@@ -75,11 +78,11 @@ def main(argv):
 
     verbose = True  # need set to read as arg in future
 
-    print("running on ICOADS, this is not a test!")
+    logging.info("running on ICOADS, this is not a test!")
 
-    print('Input file is {}'.format(inputfile))
-    print('Running from {} {} to {} {}'.format(month1, year1, month2, year2))
-    print('')
+    logging.info('Input file is {}'.format(inputfile))
+    logging.info('Running from {} {} to {} {}'.format(month1, year1, month2, year2))
+    logging.info('')
 
     config = configparser.ConfigParser()
     config.read(inputfile)
@@ -88,12 +91,12 @@ def main(argv):
     bad_id_file = config.get('Files', 'IDs_to_exclude')
     version = config.get('Icoads', 'icoads_version')
 
-    print('ICOADS directory = {}'.format(icoads_dir))
-    print('ICOADS version = {}'.format(version))
-    print('Output to {}'.format(out_dir))
-    print('List of bad IDs = {}'.format(bad_id_file))
-    print('Parameter file = {}'.format(config.get('Files', 'parameter_file')))
-    print('')
+    logging.info('ICOADS directory = {}'.format(icoads_dir))
+    logging.info('ICOADS version = {}'.format(version))
+    logging.info('Output to {}'.format(out_dir))
+    logging.info('List of bad IDs = {}'.format(bad_id_file))
+    logging.info('Parameter file = {}'.format(config.get('Files', 'parameter_file')))
+    logging.info('')
 
     ids_to_exclude = bf.process_bad_id_file(bad_id_file)
 
@@ -107,15 +110,15 @@ def main(argv):
     with open(config.get('Files', 'parameter_file'), 'r') as f:
         parameters = json.load(f)
 
-    print("Reading climatologies from parameter file")
+    logging.info("Reading climatologies from parameter file")
     climlib = ex.ClimatologyLibrary()
     for entry in parameters['climatologies']:
-        print("{} {}".format(entry[0], entry[1]))
+        logging.info("{} {}".format(entry[0], entry[1]))
         climlib.add_field(entry[0], entry[1], clim.Climatology.from_filename(entry[2], entry[3]))
 
     for year, month in qc.year_month_gen(year1, month1, year2, month2):
 
-        print("INFO({}): {} {}".format(datetime.now().time().isoformat(timespec='milliseconds'), year, month))
+        logging.info("INFO({}): {} {}".format(datetime.now().time().isoformat(timespec='milliseconds'), year, month))
 
         last_year, last_month = qc.last_month_was(year, month)
         next_year, next_month = qc.next_month_is(year, month)
@@ -126,7 +129,7 @@ def main(argv):
 
         for readyear, readmonth in qc.year_month_gen(last_year, last_month, next_year, next_month):
 
-            print("INFO({}): {} {}".format(datetime.now().time().isoformat(timespec='milliseconds'), readyear, readmonth))
+            logging.info("INFO({}): {} {}".format(datetime.now().time().isoformat(timespec='milliseconds'), readyear, readmonth))
 
             ostia_bg_var = None
             if tracking:
@@ -147,7 +150,7 @@ def main(argv):
             data_index = imma_obj.index
 
             rec = IMMA()
-            print('INFO({}): Data read, applying first QC'.format(datetime.now().time().isoformat(timespec='milliseconds')))
+            logging.info('INFO({}): Data read, applying first QC'.format(datetime.now().time().isoformat(timespec='milliseconds')))
             dyb_count = 0
             for idx in data_index:
                 # set missing values to None
@@ -220,11 +223,11 @@ def main(argv):
                 rec = IMMA()
                 dyb_count += 1
                 if dyb_count % 1000 == 0 :
-                    print( 'INFO({}): {} out of {} processed'.format(datetime.now().time().isoformat(timespec='milliseconds'), dyb_count, imma_obj.index.size ) )
+                    logging.info( 'INFO({}): {} out of {} processed'.format(datetime.now().time().isoformat(timespec='milliseconds'), dyb_count, imma_obj.index.size ) )
 
                 # icoads_file.close()
 
-    print("INFO({}): Read {} ICOADS records".format(datetime.now().time().isoformat(timespec='milliseconds'), count))
+    logging.info("INFO({}): Read {} ICOADS records".format(datetime.now().time().isoformat(timespec='milliseconds'), count))
 
     # filter the obs into passes and fails of basic positional QC
     filt = ex.QC_filter()
@@ -236,7 +239,7 @@ def main(argv):
     reps.add_filter(filt)
 
     if verbose:
-        print('INFO ({}) .... Track checking individual ships'.format(
+        logging.info('INFO ({}) .... Track checking individual ships'.format(
             datetime.now().time().isoformat(timespec='milliseconds')))
 
         # track check the passes one ship at a time
@@ -254,12 +257,12 @@ def main(argv):
 
         count_ships += 1
 
-    print("Track checked {} ships".format(count_ships))
+    logging.info("Track checked {} ships".format(count_ships))
 
     if verbose:
-        print('INFO ({}) .... Applying buddy checks'.format(datetime.now().time().isoformat(timespec='milliseconds')))
+        logging.info('INFO ({}) .... Applying buddy checks'.format(datetime.now().time().isoformat(timespec='milliseconds')))
     if verbose:
-        print('INFO ({}) ........ SST'.format(datetime.now().time().isoformat(timespec='milliseconds')))
+        logging.info('INFO ({}) ........ SST'.format(datetime.now().time().isoformat(timespec='milliseconds')))
         # SST buddy check
     filt = ex.QC_filter()
     filt.add_qc_filter('POS', 'is780', 0)
@@ -279,7 +282,7 @@ def main(argv):
     reps.mds_buddy_check('SST', sst_pentad_stdev, parameters['mds_buddy_check'])
 
     if verbose:
-        print('INFO ({}) ........ NMAT'.format(datetime.now().time().isoformat(timespec='milliseconds')))
+        logging.info('INFO ({}) ........ NMAT'.format(datetime.now().time().isoformat(timespec='milliseconds')))
         # NMAT buddy check
     filt = ex.QC_filter()
     filt.add_qc_filter('POS', 'isship', 1)  # only do ships mat_blacklist
@@ -316,7 +319,7 @@ def main(argv):
     reps.mds_buddy_check('DPT', climlib.get_field('DPT', 'stdev'), parameters['mds_buddy_check'])
 
     if verbose:
-        print('INFO ({}) ........ SLP'.format(datetime.now().time().isoformat(timespec='milliseconds')))
+        logging.info('INFO ({}) ........ SLP'.format(datetime.now().time().isoformat(timespec='milliseconds')))
         # SLP buddy check
     filt = ex.QC_filter()
     filt.add_qc_filter('POS', 'date', 0)
@@ -338,7 +341,7 @@ def main(argv):
     if tracking:
 
         if verbose:
-            print('INFO ({}) .... Tracking'.format(datetime.now().time().isoformat(timespec='milliseconds')))
+            logging.info('INFO ({}) .... Tracking'.format(datetime.now().time().isoformat(timespec='milliseconds')))
 
             # set QC for output by ID - buoys only and passes base SST QC
         filt = ex.QC_filter()
@@ -361,4 +364,7 @@ def main(argv):
 
 
 if __name__ == '__main__':
+    logging.basicConfig(format='%(levelname)s\t[%(asctime)s](%(filename)s)\t%(message)s',
+                    level=logging.DEBUG,datefmt='%Y%m%d %H:%M:%S',filename=None)
+
     main(sys.argv[1:])
