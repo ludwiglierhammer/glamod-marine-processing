@@ -84,6 +84,10 @@ def main(source_dir,source_pattern,log_dir,script_config,release_periods,
                         #config_element(sid_dck_log_dir,ai,script_config,sid_dck,yyyy,mm, source_file)
                         config_element(sid_dck_log_dir,ai,config,sid_dck,yyyy,mm, source_file)
                         ai += 1
+                    elif (int(yyyy)==year_init-1 and int(mm)==12) or (int(yyyy)==year_end+1 and int(mm)==1):
+                        #include one month before and one after period to allow for qc within period
+                        config_element(sid_dck_log_dir,ai,config,sid_dck,yyyy,mm, source_file)
+                        ai += 1
             else:
                 logging.info('{}: no failed files'.format(sid_dck))
         else:
@@ -100,6 +104,11 @@ def main(source_dir,source_pattern,log_dir,script_config,release_periods,
                     #config_element(sid_dck_log_dir,ai,script_config,sid_dck,yyyy,mm, source_file)
                     config_element(sid_dck_log_dir,ai,config,sid_dck,yyyy,mm, source_file)
                     ai +=1
+                elif (int(yyyy)==year_init-1 and int(mm)==12) or (int(yyyy)==year_end+1 and int(mm)==1):
+                    #include one month before and one after period to allow for qc within period
+                    config_element(sid_dck_log_dir,ai,config,sid_dck,yyyy,mm, source_file)
+                    ai +=1
+
             logging.info('{} elements configured'.format(str(ai)))
             if len(job_file) > 0:
                     logging.info('Removing previous job file {}'.format(job_file[0]))
