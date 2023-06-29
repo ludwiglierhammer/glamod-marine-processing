@@ -2,7 +2,7 @@
     "release": "release_5.1",
     "update": "000000",
     "dataset": "ICOADS_R3.0.2T",
-    "process_list_file": "/ichec/work/glamod/glamod-marine-processing.2022/obs-suite/configuration_files/release_5.1-000000/ICOADS_R3.0.2T/source_deck_list.txt",
+    "process_list_file": "/ichec/work/glamod/glamod-marine-processing.2022/obs-suite/configuration_files/release_5.1-000000/ICOADS_R3.0.2T/source_deck_list_short.txt",
     "release_periods_file": "/ichec/work/glamod/glamod-marine-processing.2022/obs-suite/configuration_files/release_5.1-000000/ICOADS_R3.0.2T/source_deck_periods.json",
     "job_memo_mb": 4000,
     "job_time_hr": "01",

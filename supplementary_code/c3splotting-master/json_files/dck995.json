@@ -1,0 +1,9 @@
+{
+   "dck":995,
+   "patterns":{
+      "CMAN":"^[A-Z]{4}[0-9]{1}$"
+   },
+   "corrections":{
+      
+   }
+}

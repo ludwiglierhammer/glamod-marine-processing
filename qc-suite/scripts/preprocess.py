@@ -76,13 +76,21 @@ if 1:
     #infile_patt = '-{}-{}.psv'.format(rel_id, upd_id)
     # verbose = True  # need set to read as arg in future
 
-    for yr in range(y_init, y_end+1):        
-        for mo in range(1, 13): 
+    for yr in range(y_init-1, y_end+2):
+        #expanded to include dec of the privious year and jan of the following, for buddy checks (i think)
+        if yr == y_init-1: mos=[12]
+        elif yr == y_end+1: mos=[1]
+        else: mos=range(1, 13)
+
+        for mo in mos: 
             print(yr, mo)           
             #%% load duplicates flags
             dup_file = os.path.join(corr, "duplicate_flags",
                                     str(yr)+"-"+str("{:02d}").format(mo) +
                                     ".txt.gz")
+            if not os.path.isfile(dup_file):
+                print("No NOC_correction duplicate file found for {}-{} at {}".format(yr, mo, dup_file))
+                continue
             dup_flags = pd.read_csv(dup_file, delimiter = '|', dtype = 'object',
                              header = None, usecols=[0, 1, 2], 
                              names = ["UID", "dup_flag", "dups"], 

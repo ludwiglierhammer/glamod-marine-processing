@@ -10,9 +10,9 @@ export modules_directory=$code_directory/modules
 export data_directory=/ichec/work/glamod/data/marine/datasets/ICOADS_R3.0.2T/ORIGINAL
 #corrections_directory=${home_directory}/data/datasets/NOC_corrections/v1x2019/
 #export corrections_directory=${home_directory}/data/release_3.0.2/NOC_corrections/v1x2022/
-export corrections_directory=/ichec/work/glamod/data/marine/release_5.1/NOC_corrections
+export corrections_directory=/ichec/work/glamod/data/marine/release_6.0/NOC_corrections
 export config_directory=${code_directory}/config
-export working_directory=/ichec/work/glamod/glamod-marine-processing.2022/working/qc-suite
+export working_directory=/ichec/work/glamod/glamod-marine-processing.2022/working/qc-suite/release_6.0
 export qc_log_directory=${working_directory}/logs_qc
 export qc_hr_log_directory=${working_directory}/logs_qc_hr
 

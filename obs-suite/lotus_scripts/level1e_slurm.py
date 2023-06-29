@@ -23,11 +23,7 @@ LEVEL = 'level1e'
 LEVEL_SOURCE = 'level1d'
 SOURCE_PATTERN = 'header-????-??-*.psv'
 PYSCRIPT = 'level1e.py'
-CONFIG_FILE = 'level1e.json'
-PERIODS_FILE = 'source_deck_periods.json'
-PYCLEAN = 'array_output_hdlr.py'
-BSH_REMOVE_FILES = 'remove_level_data.sh'
-NODES = 1
+#NODES = 1
 
 #------------------------------------------------------------------------------
 
@@ -49,7 +45,6 @@ def check_dir_exit(dirs):
     return
 
 def launch_process(process):
-
     proc = subprocess.Popen([process],shell=True,stdout=subprocess.PIPE, stderr=subprocess.PIPE)
     jid_by, err = proc.communicate()
     if len(err)>0:
@@ -66,12 +61,22 @@ def launch_process(process):
 logging.basicConfig(format='%(levelname)s\t[%(asctime)s](%(filename)s)\t%(message)s',
                     level=logging.INFO,datefmt='%Y%m%d %H:%M:%S',filename=None)
 
+
+
+script_config_file = sys.argv[1]
+
+check_file_exit([script_config_file])
+with open(script_config_file,'r') as fO:
+    script_config = json.load(fO)
+
+release = script_config['release']
+update = script_config['update']
+dataset = script_config['dataset']
+process_list_file = script_config['process_list_file']
+release_periods_file = script_config['release_periods_file']
+
+
 # Get process coordinates and build paths -------------------------------------
-release = sys.argv[1]
-update = sys.argv[2]
-dataset = sys.argv[3]
-config_path = sys.argv[4]
-process_list_file = sys.argv[5]
 
 parser = argparse.ArgumentParser()
 parser.add_argument('positional', metavar='N', type=str, nargs='+')
@@ -80,11 +85,16 @@ parser.add_argument('--remove_source')
 
 args = parser.parse_args()
 if args.failed_only:
-    failed_only = True if args.failed_only== 'yes' else False
+    logging.warning('failed_only is currently deactivated, all data will be processed')
+    #failed_only = True if args.failed_only== 'yes' else False
+    failed_only = False
 else:
     failed_only = False
+
 if args.remove_source:
-    remove_source = True if args.remove_source== 'yes' else False
+    logging.warning('remove_source has been discontinued, source data will not be removed')
+    #remove_source = True if args.remove_source== 'yes' else False
+    remove_source = False
 else:
     remove_source = False
 
@@ -96,19 +106,15 @@ scratch_dir = lotus_paths.scratch_directory
 
 # Build process specific paths
 release_tag = '-'.join([release,update])
-script_config_file = os.path.join(config_path,release_tag,dataset,CONFIG_FILE)
-release_periods_file = os.path.join(config_path,release_tag,dataset,PERIODS_FILE)
 level_dir = os.path.join(data_dir,release,dataset,LEVEL)
 level_source_dir = os.path.join(data_dir,release,dataset,LEVEL_SOURCE)
 log_dir = os.path.join(level_dir,'log')
 
 # Check paths
-check_file_exit([script_config_file,release_periods_file,process_list_file])
+check_file_exit([release_periods_file,process_list_file])
 check_dir_exit([level_dir,level_source_dir,log_dir])
 
 # Get configuration -----------------------------------------------------------
-with open(script_config_file,'r') as fO:
-    script_config = json.load(fO)
     
 with open(process_list_file,'r') as fO:
     process_list = fO.read().splitlines()
@@ -117,7 +123,7 @@ with open(release_periods_file,'r') as fO:
     release_periods = json.load(fO)
     
 # Build array input files -----------------------------------------------------
-logging.info('CONFIGURING JOB ARRAYS...')
+logging.info('CONFIGURING JOBs ...')
 
 status = config_array.main(level_source_dir,SOURCE_PATTERN,log_dir,
                            script_config,release_periods,process_list,
@@ -128,8 +134,6 @@ if status != 0:
     
 # Build jobs ------------------------------------------------------------------    
 py_path = os.path.join(scripts_dir,PYSCRIPT)
-py_clean_path = os.path.join(lotus_dir,PYCLEAN)
-bsh_remove_path = os.path.join(scripts_dir,BSH_REMOVE_FILES)
 pycommand='python3 {0} {1} {2} {3} {4}'.format(py_path,data_dir,release,update,
                   dataset)
 
@@ -153,7 +157,9 @@ for sid_dck in process_list:
     
     memi = script_config.get(sid_dck,{}).get('job_memo_mb')
     memi = mem if not memi else memi
-    
+    TaskPNi = min(int(190000./float(memi)), 40)
+    nodesi = array_size // TaskPNi + (array_size % TaskPNi > 0)
+
     t_hhi = script_config.get(sid_dck,{}).get('job_time_hr')
     t_mmi = script_config.get(sid_dck,{}).get('job_time_min')
     if t_hhi and t_mmi:
@@ -164,52 +170,24 @@ for sid_dck in process_list:
     with open(task_file, 'w') as fn:
         for job_id in range(1,array_size+1):
             if os.path.isfile(os.path.join(log_diri,'{}.failure'.format(job_id))):
-                 print('Deleting {}.failure file for a fresh start'.format(job_id))
+                 #print('Deleting {}.failure file for a fresh start'.format(job_id))
                  os.remove(os.path.join(log_diri,'{}.failure'.format(job_id)))
-
-            fn.writelines('{0} {1}/{2}.input > {1}/{2}.out 2> {1}/{2}.err; if [ $? -eq 0 ]; then touch {1}/{2}.success; else touch {1}/{2}.failure; fi \n'.format(pycommand, log_diri, job_id))
+            fn.writelines('{0} {1}/{2}.input > {1}/{2}.out 2> {1}/{2}.out; if [ $? -eq 0 ]; then touch {1}/{2}.success; else touch {1}/{2}.failure; fi \n'.format(pycommand, log_diri, job_id))
 
     with open(job_file,'w') as fh:
         fh.writelines('#!/bin/bash\n')
         fh.writelines('#SBATCH --job-name={}.job\n'.format(sid_dck))
-        #fh.writelines('#SBATCH --array=1-{}\n'.format(str(array_size)))
-        #fh.writelines('#SBATCH --partition={}\n'.format(QUEUE))
         fh.writelines('#SBATCH --output={}/%a.out\n'.format(log_diri))
         fh.writelines('#SBATCH --error={}/%a.err\n'.format(log_diri))
         fh.writelines('#SBATCH --time={}\n'.format(ti))
-        #fh.writelines('#SBATCH --mem={}\n'.format(memi))
-        fh.writelines('#SBATCH --nodes={}\n'.format(NODES))
+        fh.writelines('#SBATCH --nodes={}\n'.format(nodesi))
         fh.writelines('#SBATCH -A glamod\n')
         fh.writelines('#SBATCH --open-mode=truncate\n')
-        #fh.writelines('{0} {1}/$SLURM_ARRAY_TASK_ID.input\n'.format(pycommand,log_diri))
         fh.writelines('module load taskfarm\n')
+        fh.writelines('export TASKFARM_PPN={}\n'.format(TaskPNi))
         fh.writelines('taskfarm {}\n'.format(task_file))
 
 
     logging.info('{}: launching array'.format(sid_dck)) 
     process = "jid=$(sbatch {} | cut -f 4 -d' ') && echo $jid".format(job_file)
     jid = launch_process(process)
-
-    #the remaining is replaces by .success / .failure files since .ok seems to be meaningless anways
-    '''
-    # Rename logs and clean inputs
-    # First rename with aftercorr succesfull array elements: aftercorr work on an element by element basis, if exit 0
-    clean_ok = "sbatch --dependency=aftercorr:{0} --kill-on-invalid-dep=yes --array=1-{1}".format(jid,str(array_size))
-    clean_ok += " -p {0} --output=/dev/null --time=00:02:00 --mem=2".format(QUEUE)
-    clean_ok += " --wrap='python {0} {1} {2} {3}/$SLURM_ARRAY_TASK_ID.input 0 0'".format(py_clean_path,release,update,log_diri)
-    ok_jid = launch_process(clean_ok)
-    # There is no aftercorr"notok", so after successfull are renamed to ok, rename the rest to *.failed
-    clean_failed = "sbatch --dependency=afterany:{0} --kill-on-invalid-dep=yes --array=1-{1}".format(ok_jid,str(array_size))
-    clean_failed += " -p {0} --output=/dev/null --time=00:02:00 --mem=2".format(QUEUE)
-    clean_failed += " --wrap='python {0} {1} {2} {3}/$SLURM_ARRAY_TASK_ID.input 1 0'".format(py_clean_path,release,update,log_diri)
-    _jid = launch_process(clean_failed)
-
-    
-    # Remove source level if all OK and requested:
-    if remove_source:
-        remove = "sbatch --dependency=afterok:{0} --kill-on-invalid-dep=yes -p {1}".format(jid,QUEUE) 
-        remove += " --time=00:10:00 --mem=2"
-        remove += " --output={0}/remove_source.out --error={0}/remove_source.out --open-mode=truncate".format(log_diri)
-        remove += " --wrap='{0} {1} {2} {3} {4} {5}'".format(bsh_remove_path,sid_dck,release,update,dataset,LEVEL_SOURCE)
-        _jid = launch_process(remove)    
-    '''

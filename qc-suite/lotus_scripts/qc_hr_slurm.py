@@ -30,16 +30,18 @@ logging.basicConfig(format='%(levelname)s\t[%(asctime)s](%(filename)s)\t%(messag
 #%%------------------------------------------------------------------------------
 
 SCRIPTFN = 'marine_qc_hires.py'
-JOBSFN = 'jobs2.json'
+JOBSFN   = 'jobs2.json'
 CONFIGFN = 'configuration_r3.0.2.txt'
 
 NODES = 1         #3
-TI = '3:30:00'   #'12:00:00'
+TI = '09:00:00'   #'12:00:00'
 #MEM = 64000      #64000
 TasksPN = 4
 
 #about 1:10h per data month (2021) per task
 #%%------------------------------------------------------------------------------
+
+configfile = os.path.abspath(sys.argv[1])
 
 
 #all including path
@@ -49,7 +51,7 @@ logdir = os.getenv('qc_hr_log_directory')
 
 pyscript = os.path.join(scripts_directory, SCRIPTFN)
 jobsfile = os.path.join(config_directory, JOBSFN)
-configfile = os.path.join(config_directory, CONFIGFN)
+#configfile = os.path.join(config_directory, CONFIGFN)
 
 if not os.path.isfile(pyscript):
     sys.exit('Python script not found at: {}'.format(pyscript))
@@ -67,7 +69,9 @@ if not os.path.isdir(logdir):
 #source ../setenv0.sh
 taskfile = os.path.join(logdir, 'qc_hr.tasks')
 slurmfile = os.path.join(logdir, 'qc_hr.slurm')
-job_ids = list(range(73,85))
+
+#job_ids = list(range(73,85))#2021
+job_ids = list(range(85,97))#2022
 
 for job_id in job_ids:
     if os.path.isfile(os.path.join(logdir,'{}.success'.format(job_id))):

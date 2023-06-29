@@ -23,11 +23,9 @@ LEVEL = 'level1a'
 LEVEL_SOURCE = 'level0'
 SOURCE_PATTERN = 'IMMA1_R3.0.?T*_????-??' # '????-??.imma'
 PYSCRIPT = 'level1a.py'
-CONFIG_FILE = 'level1a.json'                 #unused?
-PERIODS_FILE = 'source_deck_periods.json'    #unused?
-PYCLEAN = 'array_output_hdlr.py'
 USER = 'glamod'
 #NODES = 1
+#this scripts determines how many nodes it is requesting based on the size of the job, can be set to fixed value in line 157
 #------------------------------------------------------------------------------
 
 #%%------------------------------------------------------------------------------
@@ -48,7 +46,6 @@ def check_dir_exit(dirs):
     return
 
 def launch_process(process):
-
     proc = subprocess.Popen([process],shell=True,stdout=subprocess.PIPE, stderr=subprocess.PIPE)
     jid_by, err = proc.communicate()
     if len(err)>0:
@@ -66,13 +63,10 @@ logging.basicConfig(format='%(levelname)s\t[%(asctime)s](%(filename)s)\t%(messag
                     level=logging.INFO,datefmt='%Y%m%d %H:%M:%S',filename=None)
 
 # Get process coordinates and build paths -------------------------------------
-#release = sys.argv[1]
-#update = sys.argv[2]
-#dataset = sys.argv[3]
 script_config_file = sys.argv[1]
-#process_list_file = sys.argv[5]
 
 check_file_exit([script_config_file])
+print(script_config_file)
 with open(script_config_file,'r') as fO:
     script_config = json.load(fO)
 
@@ -89,9 +83,12 @@ parser.add_argument('--failed_only')
 args = parser.parse_args()
 if args.failed_only:
     failed_only = True if args.failed_only== 'yes' else False
+    logging.warning('failed_only is currently deactivated, all data will be processed')
+    #this is because of changes to the failed/success indicator used. config_array.main expects the 
+    #log files to be renamed to name.ok in case of success, instead of .success file created
+    failed_only = False
 else:
     failed_only = False
-
 
 # Get lotus paths
 lotus_dir = lotus_paths.lotus_scripts_directory
@@ -101,24 +98,17 @@ scratch_dir = lotus_paths.scratch_directory
 
 # Build process specific paths
 release_tag = '-'.join([release,update])
-#script_config_file = os.path.join(config_path,release_tag,dataset,CONFIG_FILE)
-print(script_config_file)
-#release_periods_file = os.path.join(config_path,release_tag,dataset,PERIODS_FILE)
 print(release_periods_file)
 level_dir = os.path.join(data_dir,release,dataset,LEVEL)
 print(level_dir)
-#level_source_dir = os.path.join('/gws/nopw/j04/glamod_marine/data', 'datasets',dataset,LEVEL_SOURCE)
 level_source_dir = os.path.join(data_dir,'datasets',dataset,LEVEL_SOURCE)
 log_dir = os.path.join(level_dir, 'log')
 
 # Check paths
-check_file_exit([script_config_file,release_periods_file,process_list_file])
+check_file_exit([release_periods_file,process_list_file])
 check_dir_exit([level_dir,level_source_dir,log_dir])
 
-# Get configuration -----------------------------------------------------------
-with open(script_config_file,'r') as fO:
-    script_config = json.load(fO)
-
+# Get further configuration -----------------------------------------------------------
 with open(process_list_file,'r') as fO:
     process_list = fO.read().splitlines()
 
@@ -139,7 +129,7 @@ print(status)
 
 # Build jobs ------------------------------------------------------------------
 py_path = os.path.join(scripts_dir,PYSCRIPT)
-py_clean_path = os.path.join(lotus_dir,PYCLEAN)
+#py_clean_path = os.path.join(lotus_dir,PYCLEAN)
 pycommand='python3 {0} {1} {2} {3} {4}'.format(py_path, data_dir, release,
                                                 update, dataset)
 
@@ -160,15 +150,11 @@ for sid_dck in process_list:
 
     job_file = os.path.join(log_diri, sid_dck + '.slurm')
     taskfarm_file = os.path.join(log_diri, sid_dck + '.tasks')
-    #job_wrap1_file = os.path.join(log_diri, sid_dck + '_wrap1.slurm')
-    #taskfarm_wrap1_file = os.path.join(log_diri, sid_dck + '_wrap1.tasks')
-    #job_wrap2_file = os.path.join(log_diri, sid_dck + '_wrap2.slurm')
-    #taskfarm_wrap2_file = os.path.join(log_diri, sid_dck + '_wrap2.tasks')
     memi = script_config.get(sid_dck,{}).get('job_memo_mb')
     memi = mem if not memi else memi
     TaskPNi = min(int(190000./float(memi)), 40)
     nodesi = array_size // TaskPNi + (array_size % TaskPNi > 0)
-
+    #nodesi = 1
     t_hhi = script_config.get(sid_dck,{}).get('job_time_hr')
     t_mmi = script_config.get(sid_dck,{}).get('job_time_min')
     if t_hhi and t_mmi:
@@ -177,6 +163,8 @@ for sid_dck in process_list:
         ti = t
     with open(taskfarm_file, 'w') as fh:
         for i in range(array_size):
+            if os.path.isfile('{0}/{1}.failure'.format(log_diri, i+1)):
+                os.remove('{0}/{1}.failure'.format(log_diri, i+1))
             fh.writelines('{0} {1}/{2}.input > {1}/{2}.out 2> {1}/{2}.out; if [ $? -eq 0 ]; then touch {1}/{2}.success; else touch {1}/{2}.failure; fi  \n'.format(pycommand, log_diri, i+1))
 
     with open(job_file,'w') as fh:
@@ -185,7 +173,6 @@ for sid_dck in process_list:
         fh.writelines('#SBATCH --output={}/%a.out\n'.format(log_diri))
         fh.writelines('#SBATCH --error={}/%a.err\n'.format(log_diri))
         fh.writelines('#SBATCH --time={}\n'.format(ti))
-        #fh.writelines('#SBATCH --mem={}\n'.format(memi))
         fh.writelines('#SBATCH --nodes={}\n'.format(nodesi))#request more nodes (or time) if array_size>num of jobs we can run at a time
         fh.writelines('#SBATCH --open-mode=truncate\n')
         fh.writelines('#SBATCH -A {}\n'.format(USER))
@@ -197,64 +184,3 @@ for sid_dck in process_list:
     process = "jid=$(sbatch {} | cut -f 4 -d' ') && echo $jid".format(job_file)
     logging.info('process launching: {}'.format(process))
     jid = launch_process(process)
-    '''
-    #cleaning/renameing------------------------------
-    with open(taskfarm_wrap1_file, 'w') as fh:
-        for i in range(array_size):
-            fh.writelines('python {0} {1} {2} {3}/{4}.input 0 0\n'.format(py_clean_path,release,update,log_diri, i+1))
-
-    with open(job_wrap1_file,'w') as fh:
-        fh.writelines('#!/bin/bash\n')
-        fh.writelines('#SBATCH --job-name={}.job\n'.format('clean'))
-        fh.writelines('#SBATCH --dependency=afterany:{0}\n'.format(jid))
-        fh.writelines('#SBATCH --kill-on-invalid-dep=yes\n')
-        fh.writelines('#SBATCH --output=/dev/null\n')
-        fh.writelines('#SBATCH --time=00:02:00\n')
-        fh.writelines('#SBATCH --mem=2\n')
-        fh.writelines('#SBATCH --nodes={}\n'.format(NODES))
-        fh.writelines('#SBATCH -A {}\n'.format(USER))
-        fh.writelines('module load taskfarm\n')
-        fh.writelines('taskfarm {}\n'.format(taskfarm_wrap1_file))
-
-    logging.info('{}: launching first cleanup'.format(sid_dck))
-    process = "jid=$(sbatch {} | cut -f 4 -d' ') && echo $jid".format(job_wrap1_file)
-    logging.info('process launching: {}'.format(process))
-    ok_jid = launch_process(process)
-
-    #cleaning/renameing, second round------------------------------
-    with open(taskfarm_wrap2_file, 'w') as fh:
-        for i in range(array_size):
-            fh.writelines('python {0} {1} {2} {3}/{4}.input 1 0\n'.format(py_clean_path,release,update,log_diri, i+1))
-
-    with open(job_wrap2_file,'w') as fh:
-        fh.writelines('#!/bin/bash\n')
-        fh.writelines('#SBATCH --job-name={}.job\n'.format('clean'))
-        fh.writelines('#SBATCH --dependency=afterany:{0}\n'.format(ok_jid))
-        fh.writelines('#SBATCH --kill-on-invalid-dep=yes\n')
-        fh.writelines('#SBATCH --output=/dev/null\n')
-        fh.writelines('#SBATCH --time=00:02:00\n')
-        fh.writelines('#SBATCH --mem=2\n')
-        fh.writelines('#SBATCH --nodes={}\n'.format(NODES))
-        fh.writelines('#SBATCH -A {}\n'.format(USER))
-        fh.writelines('module load taskfarm\n')
-        fh.writelines('taskfarm {}\n'.format(taskfarm_wrap2_file))
-
-    logging.info('{}: launching second cleanup'.format(sid_dck))
-    process = "jid=$(sbatch {} | cut -f 4 -d' ') && echo $jid".format(job_wrap2_file)
-    logging.info('process launching: {}'.format(process))
-    _jid = launch_process(process)
-
-
-    # Rename logs and clean inputs
-    # First rename with aftercorr succesfull array elements: aftercorr work on an element by element basis, if exit 0
-    #clean_ok = "sbatch --dependency=aftercorr:{0} --kill-on-invalid-dep=yes --array=1-{1}%1".format(jid,str(array_size))
-    #clean_ok += " --output={}tmp.log --time=00:02:00 --mem=2 --nodes=1 -A {}".format(log_diri, USER)
-    #clean_ok += " --wrap='python {0} {1} {2} {3}/$SLURM_ARRAY_TASK_ID.input 0 0'".format(py_clean_path,release,update,log_diri)
-    #ok_jid = launch_process(clean_ok)
-
-    # There is no aftercorr"notok", so after successfull are renamed to ok, rename the rest to *.failed
-    #clean_failed = "sbatch --dependency=afterany:{0} --kill-on-invalid-dep=yes --array=1-{1}%1".format(ok_jid,str(array_size))
-    #clean_failed += " --output=/dev/null --time=00:02:00 --mem=2 --nodes=1 -A {}".format(USER)
-    #clean_failed += " --wrap='python {0} {1} {2} {3}/$SLURM_ARRAY_TASK_ID.input 1 0'".format(py_clean_path,release,update,log_diri)
-    #_jid = launch_process(clean_failed)
-    '''

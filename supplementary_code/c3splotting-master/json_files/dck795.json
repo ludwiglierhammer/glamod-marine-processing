@@ -1,0 +1,10 @@
+{
+   "dck":795,
+   "patterns":{
+      "7digit_buoy_number":"^[0-9]{7}$",
+      "CMAN":"^[A-Z]{4}[0-9]{1}$"
+   },
+   "corrections":{
+      
+   }
+}

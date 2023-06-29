@@ -1,0 +1,49 @@
+---------------------
+setup
+---------------------
+runs in R, only package required is "config"
+
+module load jasr
+
+open a R session (type R at the command line) then
+install.packages("config")
+
+you'll need to select a mirror site to download from, maybe in a 
+pop-up window, then quit
+
+q()
+n
+
+---------------------
+change config
+---------------------
+look at config_level0.yml & config_level2.yml to see where files are read from 
+and written to edit if required
+
+---------------------
+test
+---------------------
+
+try running using a selected deck, e.g. 749
+
+Rscript do_level0.R 749 749
+Rscript do_level2.R 749 749
+
+---------------------
+submit via slurm
+---------------------
+
+for level0 edit the file sublev0ind.slurm so that one of the groups (or part
+of one of the groups) is selected (single # before sbatch)
+
+then:
+
+sbatch sublev0ind.slurm
+
+and see what is happening: https://help.jasmin.ac.uk/article/4892-how-to-monitor-slurm-jobs
+
+for level2 jobs are in 2 files:
+dosub2small.slurm
+dosub2big.slurm
+
+

@@ -1,0 +1,9 @@
+{
+   "dck":144,
+   "patterns":{
+      "5digit_buoy_number":"^[0-9]{5}$"
+   },
+   "corrections":{
+      
+   }
+}

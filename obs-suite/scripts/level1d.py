@@ -66,7 +66,7 @@ import logging
 import pandas as pd
 from imp import reload
 reload(logging)  # This is to override potential previous config of logging
-
+import subprocess
 
 #%% FUNCTIONS -------------------------------------------------------------------
 class script_setup:
@@ -144,7 +144,10 @@ def process_table(table_df,table_name):
         # Assume 'header' and in a DF in table_df otherwise
         # Open table and reindex
         table_df = pd.DataFrame()
-        table_df = cdm.read_tables(prev_level_path,fileID,cdm_subset=[table_name])
+        if local:
+            table_df = cdm.read_tables(scratch_path,fileID,cdm_subset=[table_name])
+        else:
+            table_df = cdm.read_tables(prev_level_path,fileID,cdm_subset=[table_name])
         if table_df is None or len(table_df) == 0:
             logging.warning('Empty or non existing table {}'.format(table_name))
             return
@@ -157,10 +160,15 @@ def process_table(table_df,table_name):
         meta_dict[table_name] = {'total':len(table_df),'updated':0}
         table_df.set_index('primary_station_id',drop=False,inplace=True)
 
-        meta_table = meta_cdm[[ x for x in meta_cdm if x[0] == table_name ]]
-        meta_table.columns = [ x[1] for x in meta_table ]
-        if table_name != 'header':
-            meta_table['primary_station_id'] = meta_cdm[('header', 'primary_station_id')]
+        if table_name == 'header':
+            meta_table = meta_cdm[[ x for x in meta_cdm if x[0] == table_name ]]
+            meta_table.columns = [ x[1] for x in meta_table ]
+            #which should be equivalent to: (but more felxible if table_name !=header)
+            #meta_table = meta_cdm.loc[:, table_name]
+        else:
+            meta_table = meta_cdm[[ x for x in meta_cdm if x[0] == table_name or (x[0]=='header' and x[1]=='primary_station_id')]]
+            meta_table.columns = [ x[1] for x in meta_table ]
+
         meta_table.set_index('primary_station_id', drop=False, inplace=True)
         table_df.update(meta_table[~meta_table.index.duplicated()])
 
@@ -190,7 +198,7 @@ def clean_level(file_id):
         try:
             logging.info('Removing previous file: {}'.format(filename))
             os.remove(filename)
-        except:
+        except FileNotFoundError:
             pass
 
 # END FUNCTIONS ---------------------------------------------------------------
@@ -218,6 +226,16 @@ level_prev = 'level1c'
 header = True
 wmode = 'w'
 
+local = True
+#copy files to local scratch to avoid high i/o stress on cluster (managed to bring down ICHEC before)
+
+#for testing only (if not run in SBATCH):
+#scratch_path = "/ichec/home/users/awerneck/scratch/local"
+#the real deal:
+scratch_path = os.path.join("/scratch/local", params.sid_dck)
+
+os.makedirs(scratch_path, exist_ok=True)
+
 release_path = os.path.join(params.data_path,params.release,params.dataset)
 release_id = FFS.join([params.release,params.update ])
 fileID = FFS.join([str(params.year),str(params.month).zfill(2),release_id ])
@@ -243,7 +261,9 @@ md_avail = True if not params.md_not_avail else False
 if md_avail:
     md_path = os.path.join(params.data_path,params.release,params.md_subdir,'monthly')
     logging.info('Setting MD path to {}'.format(md_path))
-    metadata_filename = os.path.join(md_path, FFS.join([params.year,params.month,'01.csv.gz']))
+    metadata_filename = os.path.join(md_path, FFS.join([params.year,params.month,'01.csv']))
+    #removed .gz to make sure unzipping is not causing high I/O (just a guess)
+    metadata_fn_scratch = os.path.join(scratch_path, FFS.join([params.year,params.month,'01.csv']))
 
     if not os.path.isfile(metadata_filename):
         if int(params.year) > params.md_last_yr_avail or int(params.year) < params.md_first_yr_avail:
@@ -272,16 +292,29 @@ obs_tables = [ x for x in cdm_tables.keys() if x != 'header' ]
 # MERGE AT ALL
 # Read the header table
 table = 'header'
+if local:
+    logging.info('cp -L {}/*{}.psv {}'.format(prev_level_path, fileID, scratch_path))
+    subprocess.call('cp -L {}/*{}.psv {}'.format(prev_level_path, fileID, scratch_path), shell=True)
 header_df = pd.DataFrame()
-header_df = cdm.read_tables(prev_level_path,fileID,cdm_subset=[table],na_values='null')
+if local:
+    header_df = cdm.read_tables(scratch_path,fileID,cdm_subset=[table],na_values='null')
+else:
+    header_df = cdm.read_tables(prev_level_path,fileID,cdm_subset=[table],na_values='null')
+
 if len(header_df) == 0:
     logging.error('Empty or non-existing header table')
     sys.exit(1)
 
 # Read the metadona
 if md_avail:
+    if local:
+        subprocess.call('cp -L {} {}'.format(metadata_filename, metadata_fn_scratch), shell=True)
     meta_df = pd.DataFrame()
-    meta_df = pd.read_csv(metadata_filename,delimiter = md_delimiter, dtype = 'object',
+    if local:
+        meta_df = pd.read_csv(metadata_fn_scratch,delimiter = md_delimiter, dtype = 'object',
+                               header = 0, na_values='MSNG')
+    else:
+        meta_df = pd.read_csv(metadata_filename,delimiter = md_delimiter, dtype = 'object',
                                header = 0, na_values='MSNG')
     if len(meta_df) == 0:
         logging.error('Empty or non-existing metadata file')
@@ -318,4 +351,20 @@ level_io_filename = os.path.join(level_ql_path,fileID + '.json')
 with open(level_io_filename,'w') as fileObj:
     simplejson.dump({'-'.join([params.year,params.month]):meta_dict},fileObj,
                      default = date_handler,indent=4,ignore_nan=True)
+
+# 5. clean scratch for comming tasks ------------------------------------------
+for table in obs_tables:
+    try:
+        os.remove('{}/{}-{}.psv'.format(scratch_path,table, fileID))
+    except FileNotFoundError:
+        pass
+try:
+    os.remove('{}/header-{}.psv'.format(scratch_path, fileID))
+except FileNotFoundError:
+    pass
+try:
+    os.remove(metadata_fn_scratch)
+except FileNotFoundError:
+    pass
+
 logging.info('End')

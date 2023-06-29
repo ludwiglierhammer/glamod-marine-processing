@@ -69,6 +69,8 @@ def main(source_dir,source_pattern,log_dir,script_config,release_periods,
         ok_files = glob.glob(os.path.join(sid_dck_log_dir,'*.ok'))
         failed_files = glob.glob(os.path.join(sid_dck_log_dir,'*.failed'))
         source_files = glob.glob(os.path.join(source_dir,sid_dck,source_pattern))
+        logging.info('Source dir: {}; sid_dck: {}; Pattern: {}'.format(source_dir,sid_dck,source_pattern))
+
         if failed_only:
             if len(failed_files) > 0:
                 logging.info('{0}: found {1} failed jobs'.format(sid_dck,str(len(failed_files))))
@@ -98,7 +100,7 @@ def main(source_dir,source_pattern,log_dir,script_config,release_periods,
                 for x in ok_files:
                     os.remove(x)              
             for source_file in source_files:
-                print(source_file)
+                #print(source_file)
                 yyyy,mm = get_yyyymm(source_file)
                 if int(yyyy) >= year_init and int(yyyy) <= year_end:
                     #config_element(sid_dck_log_dir,ai,script_config,sid_dck,yyyy,mm, source_file)

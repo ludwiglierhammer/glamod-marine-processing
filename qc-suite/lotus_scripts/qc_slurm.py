@@ -1,7 +1,7 @@
 #!/bin/bash python3
 
 #make sure setenv0.sh is sourced before
-#about 3,5h per data month (tested in 2021), 4 jobs per node (ca. 40Gb ram per job)
+#about 5h per data month (tested in 2021), 4 jobs per node (ca. 40Gb ram per job)
 
 import sys
 import os
@@ -33,24 +33,29 @@ logging.basicConfig(format='%(levelname)s\t[%(asctime)s](%(filename)s)\t%(messag
 
 SCRIPTFN = 'marine_qc.py'
 JOBSFN = 'jobs2.json'
-CONFIGFN = 'configuration_r3.0.2.txt'
+#CONFIGFN = 'configuration_r3.0.2.txt'
+#CONFIGFN = 'config_r3.0.2_release_6.0.txt'
 
-NODES = 1         #3
-TI = '08:00:00'   #'12:00:00'
+NODES = 2         #3
+TI = '06:00:00'   #'12:00:00'
 #MEM = 191999       #64000
 #memory request replaced by limiting tasks per node to 4
-TasksPN = 4
+TasksPN = 3
 #%%------------------------------------------------------------------------------
+
+configfile = os.path.abspath(sys.argv[1])
 
 
 #all including path
 scripts_directory = os.getenv('scripts_directory')
 config_directory = os.getenv('config_directory')
 logdir = os.getenv('qc_log_directory')
+#logdir='/ichec/work/glamod/glamod-marine-processing.2022/working/qc-suite/release_6.0/logs_qc'
+
 
 pyscript = os.path.join(scripts_directory, SCRIPTFN)
 jobsfile = os.path.join(config_directory, JOBSFN)
-configfile = os.path.join(config_directory, CONFIGFN)
+#configfile = os.path.join(config_directory, CONFIGFN)
 
 if not os.path.isfile(pyscript):
     sys.exit('Python script not found at: {}'.format(pyscript))
@@ -67,7 +72,9 @@ if not os.path.isdir(logdir):
 
 #source ../setenv0.sh
 
-job_ids = list(range(73,85))
+#job_ids = list(range(73,85))#2021
+job_ids = list(range(85,97))#2022
+
 
 taskfile = os.path.join(logdir, 'qc.tasks')
 slurmfile = os.path.join(logdir, 'qc.slurm')

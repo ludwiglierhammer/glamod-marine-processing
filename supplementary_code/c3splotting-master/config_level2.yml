@@ -1,0 +1,9 @@
+
+default:
+    release4_path: "/gws/nopw/j04/c3s311a_lot2/data/marine/release_4.0/ICOADS_R3.0.0T/level2/"
+    release5_path: "/gws/nopw/j04/c3s311a_lot2/data/marine/release_5.0/ICOADS_R3.0.2T_NRT/level2/"
+    json_files_path4: "/gws/nopw/j04/glamod_marine/data/datasets/OLD/ICOADS_R3.0.0T/NOC_ANC_INFO/json_files"
+    json_files_path5: "/gws/nopw/j04/c3s311a_lot2/data/marine/release_5.0/NOC_ANC_INFO/json_files"
+    output_path_data: "/work/scratch-nopw/eckent01/level2/"
+    output_path_pdf: "/gws/nopw/j04/c3s311a_lot2/data/marine/PDF/INVENTORYlev2/"
+    output_path_txt: "/gws/nopw/j04/c3s311a_lot2/data/marine/TXT/INVENTORYlev2/"
