@@ -1,5 +1,0 @@
-# Ignore whats inside this directory, as this needs to be populated with
-# the appropriate versions of the corresponding modules
-*
-*/
-!.gitignore
