@@ -15,8 +15,8 @@ then
     echo ""
 else
     python3 ${scripts_directory}/merge_countries.py -config ${code_directory}/config/config_lotus.json \
-        -jobs ${code_directory}/config/jobs.json -countries ${code_directory}/config/countries.json -index ${LSB_JOBINDEX} 
-    if [ $? -eq 0 ] 
+        -jobs ${code_directory}/config/jobs.json -countries ${code_directory}/config/countries.json -index ${LSB_JOBINDEX}
+    if [ $? -eq 0 ]
     then
 	    touch merge_${LSB_JOBINDEX}.success
         bsub -w "done(${LSB_JOBID})" mv ./merge_logs/${LSB_JOBID}_${LSB_JOBINDEX}.* ./merge_logs/successful/

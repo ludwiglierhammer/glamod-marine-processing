@@ -17,13 +17,12 @@ else
     python3 ${scripts_directory}/split_pub47.py -config ${code_directory}/config/config_lotus.json \
         -jobs ${code_directory}/config/jobs.json -start ${LSB_JOBINDEX} -tag split_${LSB_JOBINDEX} \
         -log ./logs2/
-    if [ $? -eq 0 ] 
+    if [ $? -eq 0 ]
     then
 	    touch split_${LSB_JOBINDEX}.success
         bsub -w "done(${LSB_JOBID})" mv ./logs/${LSB_JOBID}_${LSB_JOBINDEX}.* ./logs/successful/
     else
 	    touch split_${LSB_JOBINDEX}.failed
-        bsub -w "done(${LSB_JOBID})" mv ./logs/${LSB_JOBID}_${LSB_JOBINDEX}.* ./logs/failed/                
+        bsub -w "done(${LSB_JOBID})" mv ./logs/${LSB_JOBID}_${LSB_JOBINDEX}.* ./logs/failed/
 	fi
 fi
-

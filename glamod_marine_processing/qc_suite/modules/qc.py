@@ -1,17 +1,20 @@
 """
-The QC module contains a set of functions for performing the basic QC 
-checks on marine reports as well as some generally helpful functions 
+The QC module contains a set of functions for performing the basic QC
+checks on marine reports as well as some generally helpful functions
 for identifying which grid box or pentad an observations falls in
 """
 
-import numpy as np
-import math
-from datetime import datetime
-from datetime import timedelta
+from __future__ import annotations
+
 import calendar
+import math
+from datetime import datetime, timedelta
+
+import numpy as np
 
 
 def month_match(y1, m1, y2, m2):
+    """Check whether month matches."""
     if y1 == y2 and m1 == m2:
         return 1
     else:
@@ -21,7 +24,7 @@ def month_match(y1, m1, y2, m2):
 def yesterday(year, month, day):
     """'
     For specified year month and day return the year month and day of the day before.
-    
+
     :param year: year
     :param month: month
     :param day: day
@@ -37,58 +40,207 @@ def yesterday(year, month, day):
         delta = timedelta(-1)
         dt = dt + delta
         return dt.year, dt.month, dt.day
-    except:
+    except Exception:
         return None, None, None
 
 
 def season(month):
     """
     Return short season name for given month, None for months like 13 that do not exist
-    
+
     :param month: month
     :type month: integer
-    
+
     :return: DJF, MAM, JJA, or SON or None if the input month is non-existent (e.g. 13)
     :rtype: string
     """
     if month < 0 or month > 12:
         return None
-    ssnlist = ['DJF', 'DJF',
-               'MAM', 'MAM', 'MAM',
-               'JJA', 'JJA', 'JJA',
-               'SON', 'SON', 'SON',
-               'DJF']
+    ssnlist = [
+        "DJF",
+        "DJF",
+        "MAM",
+        "MAM",
+        "MAM",
+        "JJA",
+        "JJA",
+        "JJA",
+        "SON",
+        "SON",
+        "SON",
+        "DJF",
+    ]
     return ssnlist[month - 1]
 
 
 def pentad_to_month_day(p):
     """
     Given a pentad number, return the month and day of the first day in the pentad
-    
+
     :param p: pentad number from 1 to 73
     :type p: integer
-    
+
     :return: month and day of the first day of the pentad
-    :rtype: integer   
+    :rtype: integer
     """
-    assert 0 < p < 74, 'p outside allowed range 1-73 ' + str(p)
-    m = [1, 1, 1, 1, 1, 1, 1, 2, 2, 2, 2, 2,
-         3, 3, 3, 3, 3, 3, 4, 4, 4, 4, 4, 4,
-         5, 5, 5, 5, 5, 5, 5, 6, 6, 6, 6, 6, 6,
-         7, 7, 7, 7, 7, 7, 8, 8, 8, 8, 8, 8,
-         9, 9, 9, 9, 9, 9, 10, 10, 10, 10, 10, 10,
-         11, 11, 11, 11, 11, 11, 12, 12, 12, 12, 12, 12]
-    d = [1, 6, 11, 16, 21, 26, 31, 5, 10, 15, 20, 25, 2, 7, 12, 17, 22,
-         27, 1, 6, 11, 16, 21, 26, 1, 6, 11, 16, 21, 26, 31, 5, 10, 15, 20,
-         25, 30, 5, 10, 15, 20, 25, 30, 4, 9, 14, 19, 24, 29, 3, 8, 13, 18,
-         23, 28, 3, 8, 13, 18, 23, 28, 2, 7, 12, 17, 22, 27, 2, 7, 12, 17, 22, 27]
+    assert 0 < p < 74, "p outside allowed range 1-73 " + str(p)
+    m = [
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        2,
+        2,
+        2,
+        2,
+        2,
+        3,
+        3,
+        3,
+        3,
+        3,
+        3,
+        4,
+        4,
+        4,
+        4,
+        4,
+        4,
+        5,
+        5,
+        5,
+        5,
+        5,
+        5,
+        5,
+        6,
+        6,
+        6,
+        6,
+        6,
+        6,
+        7,
+        7,
+        7,
+        7,
+        7,
+        7,
+        8,
+        8,
+        8,
+        8,
+        8,
+        8,
+        9,
+        9,
+        9,
+        9,
+        9,
+        9,
+        10,
+        10,
+        10,
+        10,
+        10,
+        10,
+        11,
+        11,
+        11,
+        11,
+        11,
+        11,
+        12,
+        12,
+        12,
+        12,
+        12,
+        12,
+    ]
+    d = [
+        1,
+        6,
+        11,
+        16,
+        21,
+        26,
+        31,
+        5,
+        10,
+        15,
+        20,
+        25,
+        2,
+        7,
+        12,
+        17,
+        22,
+        27,
+        1,
+        6,
+        11,
+        16,
+        21,
+        26,
+        1,
+        6,
+        11,
+        16,
+        21,
+        26,
+        31,
+        5,
+        10,
+        15,
+        20,
+        25,
+        30,
+        5,
+        10,
+        15,
+        20,
+        25,
+        30,
+        4,
+        9,
+        14,
+        19,
+        24,
+        29,
+        3,
+        8,
+        13,
+        18,
+        23,
+        28,
+        3,
+        8,
+        13,
+        18,
+        23,
+        28,
+        2,
+        7,
+        12,
+        17,
+        22,
+        27,
+        2,
+        7,
+        12,
+        17,
+        22,
+        27,
+    ]
     return m[p - 1], d[p - 1]
 
 
 def which_pentad(inmonth, inday):
     """
     take month and day as inputs and return pentad in range 1-73.
-    
+
     :param inmonth: month containing the day for which we want to calculate the pentad
     :param inday: day for the day for which we want to calculate the pentad
     :type inmonth: integer
@@ -97,13 +249,13 @@ def which_pentad(inmonth, inday):
     :return: pentad (5-day period) containing input day, from 1 (1 Jan-5 Jan) to 73 (27-31 Dec)
     :rtype: integer
 
-    The calculation is rather simple. It just loops through the year and adds up days till it reaches 
+    The calculation is rather simple. It just loops through the year and adds up days till it reaches
     the day we are interested in. February 29th is treated as though it were March 1st in a regular year.
     """
     assert 12 >= inmonth >= 1
     assert 31 >= inday >= 1
 
-    pentad = int( (day_in_year(inmonth, inday) - 1) / 5 )
+    pentad = int((day_in_year(inmonth, inday) - 1) / 5)
     pentad = pentad + 1
 
     assert pentad >= 1
@@ -114,11 +266,11 @@ def which_pentad(inmonth, inday):
 
 def day_in_year(month, day):
     """
-    Find the day number of a particular day from Jan 1st which is 1 
+    Find the day number of a particular day from Jan 1st which is 1
     to Dec 31st which is 365.
-    
+
     :param month: month to be processed
-    :param day: day in the month 
+    :param day: day in the month
     :type month: integer
     :type day: integer
 
@@ -137,7 +289,7 @@ def day_in_year(month, day):
     elif month == 2 and day == 29:
         dindex = day_in_year(3, 1)
     else:
-        dindex = np.sum(month_lengths[0:month - 1]) + day
+        dindex = np.sum(month_lengths[0 : month - 1]) + day
 
     return dindex
 
@@ -181,9 +333,7 @@ def get_hires_sst(lat, lon, month, day, hires_field):
 
 
 def get_sst_daily(lat, lon, month, day, sst):
-    """
-    Get SST from pentad climatology interpolated to day
-    """
+    """Get SST from pentad climatology interpolated to day."""
     assert lat >= -90.0
     assert lat <= 90.0
     assert lon >= -185.00
@@ -213,9 +363,9 @@ def get_sst_daily(lat, lon, month, day, sst):
 
 def get_sst(lat, lon, month, day, sst):
     """
-    when given an array (sst) of appropriate type, extracts the value associated with that pentad, 
+    when given an array (sst) of appropriate type, extracts the value associated with that pentad,
     latitude and longitude.
-    
+
     :param lat: latitude of the point
     :param lon: longitude of the point
     :param month: month of the point
@@ -228,8 +378,8 @@ def get_sst(lat, lon, month, day, sst):
     :type sst: numpy array
     :return: value in array at this point
     :rtype: float
-    
-    The structure of the SST array has to be quite specific it assumes a grid that is 360 x 180 x 73 
+
+    The structure of the SST array has to be quite specific it assumes a grid that is 360 x 180 x 73
     i.e. one year of 1degree lat x 1degree lon data split up into pentads. The west-most box is at 180degrees with
     index 0 and the northern most box also has index zero.
     """
@@ -248,7 +398,6 @@ def get_sst(lat, lon, month, day, sst):
     if len(sst[:, 0, 0]) == 1:
         result = get_sst_single_field(lat, lon, sst)
     else:
-
         # read sst from grid
         pentad = which_pentad(month, day)
         yindex = lat_to_yindex(lat)
@@ -273,20 +422,18 @@ def get_sst(lat, lon, month, day, sst):
 def get_hires_clim(rep, clim):
     """
     Get the climatological value for this particular observation
-    
+
     :param rep: a MarineReport
     :param clim: a masked array containing the climatological averages
     :type rep: MarineReport
     :type clim: numpy array
     """
     try:
-        rep_clim = get_hires_sst(rep.lat(),
-                                 rep.lon(),
-                                 rep.getvar('MO'),
-                                 rep.getvar('DY'),
-                                 clim)
+        rep_clim = get_hires_sst(
+            rep.lat(), rep.lon(), rep.getvar("MO"), rep.getvar("DY"), clim
+        )
         rep_clim = float(rep_clim)
-    except:
+    except Exception:
         rep_clim = None
 
     return rep_clim
@@ -294,11 +441,10 @@ def get_hires_clim(rep, clim):
 
 def bilinear_interp(x1, x2, y1, y2, x, y, q11, q12, q21, q22):
     """
-    Perform a bilinear interpolation at the point x,y from the rectangular grid 
-    defined by x1,y1 and x2,y2 with values at the four corners equal to Q11, Q12, 
+    Perform a bilinear interpolation at the point x,y from the rectangular grid
+    defined by x1,y1 and x2,y2 with values at the four corners equal to Q11, Q12,
     Q21 and Q22.
     """
-
     assert x1 <= x <= x2
     assert y1 <= y <= y2
     assert x2 > x1
@@ -311,14 +457,17 @@ def bilinear_interp(x1, x2, y1, y2, x, y, q11, q12, q21, q22):
     val += q22 * (x - x1) * (y - y1)
     val /= (x2 - x1) * (y2 - y1)
 
-    assert val <= 0.0001 + max([q11, q12, q21, q22]), \
-        str(val) + ' ' + str(q11) + ' ' + str(q12) + ' ' + str(q21) + ' ' + str(q22)
-    assert val >= -0.0001 + min([q11, q12, q21, q22]), \
-        str(val) + ' ' + str(q11) + ' ' + str(q12) + ' ' + str(q21) + ' ' + str(q22)
+    assert val <= 0.0001 + max([q11, q12, q21, q22]), (
+        str(val) + " " + str(q11) + " " + str(q12) + " " + str(q21) + " " + str(q22)
+    )
+    assert val >= -0.0001 + min([q11, q12, q21, q22]), (
+        str(val) + " " + str(q11) + " " + str(q12) + " " + str(q21) + " " + str(q22)
+    )
     return val
 
 
 def missing_mean(inarr):
+    """Return mean value or None."""
     result = 0.0
     num = 0.0
     for val in inarr:
@@ -333,8 +482,8 @@ def missing_mean(inarr):
 
 def fill_missing_vals(q11, q12, q21, q22):
     """
-    For a group of four neighbouring grid boxes which form a square, 
-    fill gaps using means of neighbours
+    For a group of four neighbouring grid boxes which form a square,
+    fill gaps using means of neighbours.
     """
     outq11 = q11
     outq12 = q12
@@ -365,18 +514,19 @@ def fill_missing_vals(q11, q12, q21, q22):
 
 
 def get_four_surrounding_points(lat, lon, max90=1):
+    """Get fur surrounding points."""
     assert -90.0 <= lat <= 90.0
     assert -180.0 <= lon <= 180.0
 
     x2_index = lon_to_xindex(lon + 0.5)
     x2 = xindex_to_lon(x2_index)
     if x2 < lon:
-        x2 += 360.
+        x2 += 360.0
 
     x1_index = lon_to_xindex(lon - 0.5)
     x1 = xindex_to_lon(x1_index)
     if x1 > lon:
-        x1 -= 360.
+        x1 -= 360.0
 
     if lat + 0.5 <= 90:
         y2_index = lat_to_yindex(lat + 0.5)
@@ -398,26 +548,27 @@ def get_four_surrounding_points(lat, lon, max90=1):
 
 
 def get_clim_interpolated(rep, clim):
+    """Get climatological interpolation."""
     lat = rep.lat()
     lon = rep.lon()
-    mo = rep.getvar('MO')
-    dy = rep.getvar('DY')
+    mo = rep.getvar("MO")
+    dy = rep.getvar("DY")
 
     try:
         pert1 = get_sst(lat + 0.001, lon + 0.001, mo, dy, clim)
-    except:
+    except Exception:
         pert1 = None
     try:
         pert2 = get_sst(lat + 0.001, lon - 0.001, mo, dy, clim)
-    except:
+    except Exception:
         pert2 = None
     try:
         pert3 = get_sst(lat - 0.001, lon + 0.001, mo, dy, clim)
-    except:
+    except Exception:
         pert3 = None
     try:
         pert4 = get_sst(lat - 0.001, lon - 0.001, mo, dy, clim)
-    except:
+    except Exception:
         pert4 = None
     if pert1 is None and pert2 is None and pert3 is None and pert4 is None:
         return None
@@ -426,28 +577,28 @@ def get_clim_interpolated(rep, clim):
 
     try:
         q11 = get_sst(y1, x1, mo, dy, clim)
-    except:
+    except Exception:
         q11 = None
     if q11 is not None:
         q11 = float(q11)
 
     try:
         q22 = get_sst(y2, x2, mo, dy, clim)
-    except:
+    except Exception:
         q22 = None
     if q22 is not None:
         q22 = float(q22)
 
     try:
         q12 = get_sst(y2, x1, mo, dy, clim)
-    except:
+    except Exception:
         q12 = None
     if q12 is not None:
         q12 = float(q12)
 
     try:
         q21 = get_sst(y1, x2, mo, dy, clim)
-    except:
+    except Exception:
         q21 = None
     if q21 is not None:
         q21 = float(q21)
@@ -456,27 +607,24 @@ def get_clim_interpolated(rep, clim):
 
     x1, x2, y1, y2 = get_four_surrounding_points(lat, lon, 0)
 
-    return bilinear_interp(x1, x2, y1, y2,
-                           lon, lat,
-                           q11, q12, q21, q22)
+    return bilinear_interp(x1, x2, y1, y2, lon, lat, q11, q12, q21, q22)
 
 
 def get_clim(rep, clim):
     """
     Get the climatological value for this particular observation
-    
+
     :param rep: a MarineReport
     :param clim: a masked array containing the climatological averages
     :type rep: MarineReport
     :type clim: numpy array
     """
     try:
-        rep_clim = get_sst(rep.lat(), rep.lon(),
-                           rep.getvar('MO'),
-                           rep.getvar('DY'),
-                           clim)
+        rep_clim = get_sst(
+            rep.lat(), rep.lon(), rep.getvar("MO"), rep.getvar("DY"), clim
+        )
         rep_clim = float(rep_clim)
-    except:
+    except Exception:
         rep_clim = None
 
     return rep_clim
@@ -484,9 +632,9 @@ def get_clim(rep, clim):
 
 def get_sst_single_field(lat, lon, sst):
     """
-    when given an array (sst) of appropriate type, extracts the value associated with that pentad, 
+    when given an array (sst) of appropriate type, extracts the value associated with that pentad,
     latitude and longitude.
-    
+
     :param lat: latitude of the point
     :param lon: longitude of the point
     :param sst: an array holding the 1x1x5-day gridded values
@@ -495,8 +643,8 @@ def get_sst_single_field(lat, lon, sst):
     :type sst: numpy array
     :return: value in array at this point
     :rtype: float
-    
-    The structure of the SST array has to be quite specific it assumes a grid that is 360 x 180 x 73 
+
+    The structure of the SST array has to be quite specific it assumes a grid that is 360 x 180 x 73
     i.e. one year of 1degree lat x 1degree lon data split up into pentads. The west-most box is at 180degrees with
     index 0 and the northern most box also has index zero.
     """
@@ -528,7 +676,7 @@ def get_sst_single_field(lat, lon, sst):
 def blacklist(inid, indeck, inyear, inmonth, inlat, inlon, inpt=1):
     """
     Blacklisting of observations from Deck 732 and others as needed
-    
+
     :param inid: ID of the report
     :param indeck: Deck of the report
     :param inyear: year of the report
@@ -543,14 +691,13 @@ def blacklist(inid, indeck, inyear, inmonth, inlat, inlon, inpt=1):
     :type inlat: float
     :type inlon: float
     :type inpt: integer
-    
-    If the report is from Deck 732, compares the observations year and location to a table of pre-identified 
-    regions in which Deck 732 observations are known to be dubious - see Rayner et al. 2006 and Kennedy et al. 
-    2011b. Observations at 0 degrees latitude 0 degrees longitude are blacklisted as this is a common error. 
-    C-MAN stations with platform type 13 are blacklisted. SEAS data from deck 874 are unreliable (SSTs were 
+
+    If the report is from Deck 732, compares the observations year and location to a table of pre-identified
+    regions in which Deck 732 observations are known to be dubious - see Rayner et al. 2006 and Kennedy et al.
+    2011b. Observations at 0 degrees latitude 0 degrees longitude are blacklisted as this is a common error.
+    C-MAN stations with platform type 13 are blacklisted. SEAS data from deck 874 are unreliable (SSTs were
     often in excess of 50degC) and so the deck was removed.
     """
-
     if inlon > 180.0:
         inlon -= 360
 
@@ -562,68 +709,100 @@ def blacklist(inid, indeck, inyear, inmonth, inlat, inlon, inpt=1):
     if inpt is not None and inpt == 13:
         result = 1  # C-MAN data
 
-    if inid == 'SUPERIGORINA':
+    if inid == "SUPERIGORINA":
         result = 1
 
     # these are the definitions of the regions which are blacklisted for Deck 732
-    region = {1: [-175, 40, -170, 55],
-              2: [-165, 40, -160, 60],
-              3: [-145, 40, -140, 50],
-              4: [-140, 30, -135, 40],
-              5: [-140, 50, -130, 55],
-              6: [-70, 35, -60, 40],
-              7: [-50, 45, -40, 50],
-              8: [5, 70, 10, 80],
-              9: [0, -10, 10, 0],
-              10: [-30, -25, -25, -20],
-              11: [-60, -50, -55, -45],
-              12: [75, -20, 80, -15],
-              13: [50, -30, 60, -20],
-              14: [30, -40, 40, -30],
-              15: [20, 60, 25, 65],
-              16: [0, -40, 10, -30],
-              17: [-135, 30, -130, 40]}
+    region = {
+        1: [-175, 40, -170, 55],
+        2: [-165, 40, -160, 60],
+        3: [-145, 40, -140, 50],
+        4: [-140, 30, -135, 40],
+        5: [-140, 50, -130, 55],
+        6: [-70, 35, -60, 40],
+        7: [-50, 45, -40, 50],
+        8: [5, 70, 10, 80],
+        9: [0, -10, 10, 0],
+        10: [-30, -25, -25, -20],
+        11: [-60, -50, -55, -45],
+        12: [75, -20, 80, -15],
+        13: [50, -30, 60, -20],
+        14: [30, -40, 40, -30],
+        15: [20, 60, 25, 65],
+        16: [0, -40, 10, -30],
+        17: [-135, 30, -130, 40],
+    }
 
     # this dictionary contains the regions that are to be excluded for this year
-    year_to_regions = {1958: [1, 2, 3, 4, 5, 6, 14, 15],
-                       1959: [1, 2, 3, 4, 5, 6, 14, 15],
-                       1960: [1, 2, 3, 5, 6, 9, 14, 15],
-                       1961: [1, 2, 3, 5, 6, 14, 15, 16],
-                       1962: [1, 2, 3, 5, 12, 13, 14, 15, 16],
-                       1963: [1, 2, 3, 5, 6, 12, 13, 14, 15, 16],
-                       1964: [1, 2, 3, 5, 6, 12, 13, 14, 16],
-                       1965: [1, 2, 6, 10, 12, 13, 14, 15, 16],
-                       1966: [1, 2, 6, 9, 14, 15, 16],
-                       1967: [1, 2, 5, 6, 9, 14, 15],
-                       1968: [1, 2, 3, 5, 6, 9, 14, 15],
-                       1969: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 13, 14, 15, 16],
-                       1970: [1, 2, 3, 4, 5, 6, 8, 9, 14, 15],
-                       1971: [1, 2, 3, 4, 5, 6, 7, 8, 9, 13, 14, 16],
-                       1972: [4, 7, 8, 9, 10, 11, 13, 16, 17],
-                       1973: [4, 7, 8, 10, 11, 13, 16, 17],
-                       1974: [4, 7, 8, 10, 11, 16, 17]}
+    year_to_regions = {
+        1958: [1, 2, 3, 4, 5, 6, 14, 15],
+        1959: [1, 2, 3, 4, 5, 6, 14, 15],
+        1960: [1, 2, 3, 5, 6, 9, 14, 15],
+        1961: [1, 2, 3, 5, 6, 14, 15, 16],
+        1962: [1, 2, 3, 5, 12, 13, 14, 15, 16],
+        1963: [1, 2, 3, 5, 6, 12, 13, 14, 15, 16],
+        1964: [1, 2, 3, 5, 6, 12, 13, 14, 16],
+        1965: [1, 2, 6, 10, 12, 13, 14, 15, 16],
+        1966: [1, 2, 6, 9, 14, 15, 16],
+        1967: [1, 2, 5, 6, 9, 14, 15],
+        1968: [1, 2, 3, 5, 6, 9, 14, 15],
+        1969: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 13, 14, 15, 16],
+        1970: [1, 2, 3, 4, 5, 6, 8, 9, 14, 15],
+        1971: [1, 2, 3, 4, 5, 6, 7, 8, 9, 13, 14, 16],
+        1972: [4, 7, 8, 9, 10, 11, 13, 16, 17],
+        1973: [4, 7, 8, 10, 11, 13, 16, 17],
+        1974: [4, 7, 8, 10, 11, 16, 17],
+    }
 
     if indeck == 732:
         if inyear in year_to_regions:
             regions_to_check = year_to_regions[inyear]
             for regid in regions_to_check:
                 thisreg = region[regid]
-                if thisreg[0] <= inlon <= thisreg[2] and thisreg[1] <= inlat <= thisreg[3]:
+                if (
+                    thisreg[0] <= inlon <= thisreg[2]
+                    and thisreg[1] <= inlat <= thisreg[3]
+                ):
                     result = 1
 
     if indeck == 874:
         result = 1  # SEAS data gets blacklisted
 
-    if ((inyear == 2005 and inmonth == 11) or
-            (inyear == 2005 and inmonth == 12) or
-            (inyear == 2006 and inmonth == 1)):
-        if inid in ["53521    ", "53522    ", "53566    ", "53567    ",
-                    "53568    ", "53571    ", "53578    ", "53580    ",
-                    "53582    ", "53591    ", "53592    ", "53593    ",
-                    "53594    ", "53595    ", "53596    ", "53599    ",
-                    "53600    ", "53601    ", "53602    ", "53603    ",
-                    "53604    ", "53605    ", "53606    ", "53607    ",
-                    "53608    ", "53609    ", "53901    ", "53902    "]:
+    if (
+        (inyear == 2005 and inmonth == 11)
+        or (inyear == 2005 and inmonth == 12)
+        or (inyear == 2006 and inmonth == 1)
+    ):
+        if inid in [
+            "53521    ",
+            "53522    ",
+            "53566    ",
+            "53567    ",
+            "53568    ",
+            "53571    ",
+            "53578    ",
+            "53580    ",
+            "53582    ",
+            "53591    ",
+            "53592    ",
+            "53593    ",
+            "53594    ",
+            "53595    ",
+            "53596    ",
+            "53599    ",
+            "53600    ",
+            "53601    ",
+            "53602    ",
+            "53603    ",
+            "53604    ",
+            "53605    ",
+            "53606    ",
+            "53607    ",
+            "53608    ",
+            "53609    ",
+            "53901    ",
+            "53902    ",
+        ]:
             result = 1
 
     return result
@@ -640,7 +819,6 @@ def climatology_plus_stdev_with_lowbar(inval, inclimav, instdev, limit, lowbar):
     :param lowbar: the anomaly must be greater than lowbar to fail regardless of standard deviation
     :return: return 1 if the difference is outside the specified range, 0 otherwise.
     """
-
     assert limit > 0, "multiplier must be positive and non-zero"
 
     result = 0
@@ -655,11 +833,10 @@ def climatology_plus_stdev_with_lowbar(inval, inclimav, instdev, limit, lowbar):
     return result
 
 
-def climatology_plus_stdev_check(inval, inclimav, instdev,
-                                 stdev_limits, limit):
+def climatology_plus_stdev_check(inval, inclimav, instdev, stdev_limits, limit):
     """
     Climatology check which uses standardised anomalies.
-    
+
     :param inval: value to be compared to climatology
     :param inclimav: the climatological average to which the value will be compared
     :param instdev: the climatological standard deviation which will be used to standardise the anomaly
@@ -697,7 +874,7 @@ def climatology_plus_stdev_check(inval, inclimav, instdev,
 def climatology_check(inval, inclimav, limit=8.0):
     """
     Simple function to compare a value with a climatological average with some arbitrary limit on the difference
-    
+
     :param inval: value to be compared to climatology
     :param inclimav: the climatological average to which the value will be compared
     :param limit: the maximum allowed difference between the two
@@ -706,10 +883,9 @@ def climatology_check(inval, inclimav, limit=8.0):
     :type limit: float
     :return: return 1 if the difference is outside the specified limit, 0 otherwise
     :rtype: integer
-    
+
     This may be the second simplest function I have ever written (see blacklist)
     """
-
     result = 0
 
     if inval is None or inclimav is None or limit is None:
@@ -726,7 +902,7 @@ def climatology_check(inval, inclimav, limit=8.0):
 def value_check(inval):
     """
     Check if a value is equal to None
-    
+
     :param inval: the input value
     :param inval: float
     :return: 1 if the input value is None, 0 otherwise
@@ -741,7 +917,7 @@ def value_check(inval):
 def no_normal_check(inclimav):
     """
     Check if a climatological average is equal to None
-    
+
     :param inclimav: the input value
     :type inclimav: float
     :return: 1 if the input value is None, 0 otherwise
@@ -756,16 +932,16 @@ def no_normal_check(inclimav):
 def hard_limit(val, limits):
     """
     Check if a value is outside specified limits
-    
+
     :param val: value to be tested
     :param limits: two membered list of lower and upper limit
     :type val: float
     :type limits: list of floats
-    
+
     :return: 1 if the input is outside the limits, 0 otherwise
-    :return type: integer 
+    :return type: integer
     """
-    assert limits[1] > limits[0], 'limits are not well specified'
+    assert limits[1] > limits[0], "limits are not well specified"
     if val is None:
         return 1
     result = 1
@@ -776,15 +952,15 @@ def hard_limit(val, limits):
 
 def supersat_check(invaltd, invalt):
     """
-    Check if a valid dewpoint temperature is 
+    Check if a valid dewpoint temperature is
     greater than a valid air temperature
-    
+
     :param invaltd: the input value for dewpoint temperature
     :param invalt: the input value for air temperature
     :type invaltd: float
     :type invalt: float
     :return: 1 if the input values are invalid/None
-    :return: 1 if the dewpoint temperature is greater than the air temperarture 
+    :return: 1 if the dewpoint temperature is greater than the air temperarture
     :return: 0 otherwise
     :return type: integer
     """
@@ -800,7 +976,7 @@ def supersat_check(invaltd, invalt):
 def sst_freeze_check(insst, sst_uncertainty=0.0, freezing_point=-1.80, n_sigma=2.0):
     """
     Compare an input SST to see if it is above freezing.
-    
+
     :param insst: the input SST
     :param sst_uncertainty: the uncertainty in the SST value, defaults to zero
     :param freezing_point: the freezing point of the water, defaults to -1.8C
@@ -811,16 +987,15 @@ def sst_freeze_check(insst, sst_uncertainty=0.0, freezing_point=-1.80, n_sigma=2
     :type n_sigma: float
     :return: 1 if the input SST is below freezing point by more than twice the uncertainty, 0 otherwise
     :return type: integer
-    
-    This is a simple freezing point check made slightly more complex. We want to check if a 
-    measurement of SST is above freezing, but there are two problems. First, the freezing point 
-    can vary from place to place depending on the salinity of the water. Second, there is uncertainty 
-    in SST measurements. If we place a hard cut-off at -1.8, then we are likely to bias the average 
-    of many measurements too high when they are near the freezing point - observational error will 
-    push the measurements randomly higher and lower, and this test will trim out the lower tail, thus 
-    biasing the result. The inclusion of an SST uncertainty parameter *might* mitigate that.    
-    """
 
+    This is a simple freezing point check made slightly more complex. We want to check if a
+    measurement of SST is above freezing, but there are two problems. First, the freezing point
+    can vary from place to place depending on the salinity of the water. Second, there is uncertainty
+    in SST measurements. If we place a hard cut-off at -1.8, then we are likely to bias the average
+    of many measurements too high when they are near the freezing point - observational error will
+    push the measurements randomly higher and lower, and this test will trim out the lower tail, thus
+    biasing the result. The inclusion of an SST uncertainty parameter *might* mitigate that.
+    """
     assert sst_uncertainty is not None and freezing_point is not None
 
     # fail if SST below the freezing point by more than twice the uncertainty
@@ -835,9 +1010,9 @@ def sst_freeze_check(insst, sst_uncertainty=0.0, freezing_point=-1.80, n_sigma=2
 
 def position_check(inlat, inlon):
     """
-    Simple check to make sure that the latitude and longitude are within the bounds specified 
+    Simple check to make sure that the latitude and longitude are within the bounds specified
     by the ICOADS documentation. Latitude is between -90 and 90. Longitude is between -180 and 360
-    
+
     :param inlat: latitude
     :param inlon: longitude
     :type inlat: float
@@ -860,13 +1035,12 @@ def position_check(inlat, inlon):
 def time_check(inhour):
     """
     Check that the time is valid
-    
+
     :param inhour: hour of the time to be checked
     :type inhour: float
     :return: 1 if the hour is invalid, 0 otherwise
     :return type: integer
     """
-
     result = 0
 
     if inhour is not None and (inhour >= 24 or inhour < 0):
@@ -881,7 +1055,7 @@ def time_check(inhour):
 def date_check(inyear, inmonth, inday):
     """
     Check that the date is valid
-    
+
     :param inyear: year of the date to be checked
     :param inmonth: month of the data to be checked
     :param inday: day of the date to be checked
@@ -926,7 +1100,6 @@ def wind_consistency(windspeed, winddirection, variablelimit):
     :return: pass (0) or fail (1)
     :rtype: integer
     """
-
     result = 0
 
     if winddirection is None or windspeed is None:
@@ -945,10 +1118,10 @@ def wind_consistency(windspeed, winddirection, variablelimit):
 
 def p_data_given_good(x, q, r_hi, r_lo, mu, sigma):
     """
-    Calculate the probability of an observed value x given a normal distribution with mean mu 
-    standard deviation of sigma, where x is constrained to fall between R_hi and R_lo 
+    Calculate the probability of an observed value x given a normal distribution with mean mu
+    standard deviation of sigma, where x is constrained to fall between R_hi and R_lo
     and is known only to an integer multiple of Q, the quantization level.
-    
+
     :param x: observed value for which probability is required
     :param q: quantization of x, i.e. x is an integer multiple of Q
     :param r_hi: the upper limit on x imposed by previous QC choices.
@@ -966,18 +1139,28 @@ def p_data_given_good(x, q, r_hi, r_lo, mu, sigma):
     """
     assert q > 0.0, "q <= 0" + str(q)
     assert sigma > 0.0, "sigma <= 0 " + str(sigma)
-    assert r_hi > r_lo, "Limits not ascending r_lo " + str(r_lo) + " > r_hi " + str(r_hi)
+    assert r_hi > r_lo, (
+        "Limits not ascending r_lo " + str(r_lo) + " > r_hi " + str(r_hi)
+    )
     assert x >= r_lo, "x below lower limit " + str(x) + " < r_lo " + str(r_lo)
     assert x <= r_hi, "x above upper limit " + str(x) + " > r_hi " + str(r_hi)
 
     upper_x = min([x + 0.5 * q, r_hi + 0.5 * q])
     lower_x = max([x - 0.5 * q, r_lo - 0.5 * q])
 
-    normalizer = 0.5 * (math.erf((r_hi + 0.5 * q - mu) / (sigma * math.sqrt(2))) -
-                        math.erf((r_lo - 0.5 * q - mu) / (sigma * math.sqrt(2))))
+    normalizer = 0.5 * (
+        math.erf((r_hi + 0.5 * q - mu) / (sigma * math.sqrt(2)))
+        - math.erf((r_lo - 0.5 * q - mu) / (sigma * math.sqrt(2)))
+    )
 
-    return 0.5 * (math.erf((upper_x - mu) / (sigma * math.sqrt(2))) -
-                  math.erf((lower_x - mu) / (sigma * math.sqrt(2)))) / normalizer
+    return (
+        0.5
+        * (
+            math.erf((upper_x - mu) / (sigma * math.sqrt(2)))
+            - math.erf((lower_x - mu) / (sigma * math.sqrt(2)))
+        )
+        / normalizer
+    )
 
 
 def p_data_given_gross(q, r_hi, r_lo):
@@ -985,7 +1168,7 @@ def p_data_given_gross(q, r_hi, r_lo):
     Calculate the probability of the data given a gross error
     assuming gross errors are uniformly distributed between
     R_low and R_high and that the quantization, rounding level is Q
-    
+
     :param q: quantization of x, i.e. x is an integer multiple of Q
     :param r_hi: the upper limit on x imposed by previous QC choices.
     :param r_lo: the lower limit on x imposed by previous QC choices.
@@ -995,21 +1178,23 @@ def p_data_given_gross(q, r_hi, r_lo):
     :return: probability of the observed value given that its a gross error.
     :rtpye: float
     """
-    assert r_hi > r_lo, "Limits not ascending r_lo " + str(r_lo) + " > r_hi " + str(r_hi)
+    assert r_hi > r_lo, (
+        "Limits not ascending r_lo " + str(r_lo) + " > r_hi " + str(r_hi)
+    )
     assert q > 0.0, "q <= 0" + str(q)
 
     r = r_hi - r_lo
-    return 1. / (1. + (r / q))
+    return 1.0 / (1.0 + (r / q))
 
 
 def p_gross(p0, q, r_hi, r_lo, x, mu, sigma):
     """
-    Calculate the posterior probability of a gross error given the prior probability p0, 
-    the quantization level of the observed value, Q, previous limits on the observed value, 
-    R_hi and R_lo, the observed value, x, and the mean (mu) and standard deviation (sigma) of the 
-    distribution of good observations assuming they are normally distributed. Gross errors are 
+    Calculate the posterior probability of a gross error given the prior probability p0,
+    the quantization level of the observed value, Q, previous limits on the observed value,
+    R_hi and R_lo, the observed value, x, and the mean (mu) and standard deviation (sigma) of the
+    distribution of good observations assuming they are normally distributed. Gross errors are
     assumed to be uniformly distributed between R_lo and R_hi.
-    
+
     :param p0: prior probability of gross error
     :param q: quantization of x, i.e. x is an integer multiple of Q
     :param r_hi: the upper limit on x imposed by previous QC choices.
@@ -1026,13 +1211,21 @@ def p_gross(p0, q, r_hi, r_lo, x, mu, sigma):
     assert p0 >= 0, "p0 <= 0 " + str(p0)
     assert p0 <= 1, "p0 > 1 " + str(p0)
     assert q > 0.0, "q <= 0 " + str(q)
-    assert r_hi > r_lo, "Limits not ascending r_lo " + str(r_lo) + " > r_hi " + str(r_hi)
+    assert r_hi > r_lo, (
+        "Limits not ascending r_lo " + str(r_lo) + " > r_hi " + str(r_hi)
+    )
     assert x >= r_lo, "x below lower limit " + str(x) + " < r_lo " + str(r_lo)
     assert x <= r_hi, "x above upper limit " + str(x) + " > r_hi " + str(r_hi)
     assert sigma > 0.0, "sigma <= 0 " + str(sigma)
 
-    pgross = (p0 * p_data_given_gross(q, r_hi, r_lo) / (p0 * p_data_given_gross(q, r_hi, r_lo) +
-                                                        (1 - p0) * p_data_given_good(x, q, r_hi, r_lo, mu, sigma)))
+    pgross = (
+        p0
+        * p_data_given_gross(q, r_hi, r_lo)
+        / (
+            p0 * p_data_given_gross(q, r_hi, r_lo)
+            + (1 - p0) * p_data_given_good(x, q, r_hi, r_lo, mu, sigma)
+        )
+    )
 
     assert pgross >= 0.0, pgross
     assert pgross <= 1.0, pgross
@@ -1043,7 +1236,7 @@ def p_gross(p0, q, r_hi, r_lo, x, mu, sigma):
 def angle_diff(angle1, angle2):
     """
     Calculate the angular distance on a circle between two points given in radians
-    
+
     :param angle1: angle of first point
     :param angle2: angle of second point
     :type angle1: float
@@ -1062,7 +1255,7 @@ def angle_diff(angle1, angle2):
 def sunangle(year, day, hour, minute, sec, zone, dasvtm, lat, lon):
     """
     Calculate the local azimuth and elevation of the sun at a specified location and time.
-    
+
     :param year: year number
     :param day: day number of year starting with 1 for Jan 1st and running up to 365/6
     :param hour: hour
@@ -1082,20 +1275,19 @@ def sunangle(year, day, hour, minute, sec, zone, dasvtm, lat, lon):
     :type lat: float
     :type lon: float
 
-    :return:  Azimuth angle of the sun (degrees east of north), Elevation of sun (degrees), 
-              Right ascension of sun (degrees), Hour angle of sun (degrees), Hour angle of 
+    :return:  Azimuth angle of the sun (degrees east of north), Elevation of sun (degrees),
+              Right ascension of sun (degrees), Hour angle of sun (degrees), Hour angle of
               local siderial time (degrees), Declination of sun (degrees)
     :rtype: float
-    
-    Copied from Rob Hackett's area 28 Apr 1998 by J.Arnott. 
-    Add protection for ASIN near +/- 90 degrees 07 Jan 2002 by J.Arnott. 
+
+    Copied from Rob Hackett's area 28 Apr 1998 by J.Arnott.
+    Add protection for ASIN near +/- 90 degrees 07 Jan 2002 by J.Arnott.
     Pythonised 25/09/2015 by J.J. Kennedy
-    
-    The Python version gets within a fraction of a degree of the original Fortran code from which it was ported 
+
+    The Python version gets within a fraction of a degree of the original Fortran code from which it was ported
     for a range of values. The differences are larger if single precision values are used suggesting that this
     is not the most numerically robust scheme.
     """
-
     assert 0 < day <= 366
     assert 0 <= hour < 24
     assert 0 <= minute < 60
@@ -1103,14 +1295,14 @@ def sunangle(year, day, hour, minute, sec, zone, dasvtm, lat, lon):
     assert 90 >= lat >= -90
 
     # Conversion factor between degrees and radians
-    degrad = np.pi / 180.
+    degrad = np.pi / 180.0
 
     # Find number of whole years since end of 1979 (reference point)
-    delyear = (year - 1980)  #
+    delyear = year - 1980  #
     # Find leap year correction
-    leap = math.floor(delyear / 4.)
+    leap = math.floor(delyear / 4.0)
     # Find time in whole hours since midnight (allow for "daylight saving").
-    time_in_hours = hour + (minute + sec / 60.) / 60. + zone - dasvtm
+    time_in_hours = hour + (minute + sec / 60.0) / 60.0 + zone - dasvtm
     # Find time in whole days since start of January 1980
     time = delyear * 365 + leap + day - 1.0 + time_in_hours / 24.0
     # Make leapyear correction
@@ -1124,10 +1316,13 @@ def sunangle(year, day, hour, minute, sec, zone, dasvtm, lat, lon):
     # Mean anomaly of earth (g)
     mean_anomaly = -0.031271 - 4.5396e-7 * time + theta
     # Longitude of sun (el)
-    long_of_sun = (4.900968 + 3.6747e-7 * time +
-                   (0.033434 - 2.3e-9 * time) * math.sin(mean_anomaly) +
-                   0.000349 * math.sin(2.0 * mean_anomaly) +
-                   theta)
+    long_of_sun = (
+        4.900968
+        + 3.6747e-7 * time
+        + (0.033434 - 2.3e-9 * time) * math.sin(mean_anomaly)
+        + 0.000349 * math.sin(2.0 * mean_anomaly)
+        + theta
+    )
     # Angle plane of elliptic to plane of celestial equator (eps)
     # Slowly decreasing every year
     angle_of_elliptic = 0.409140 - 6.2149e-9 * time
@@ -1170,9 +1365,9 @@ def sunangle(year, day, hour, minute, sec, zone, dasvtm, lat, lon):
     phi = lat * degrad
 
     # q Sine of elevation
-    sin_elevation = (math.sin(phi) * math.sin(declination) +
-                     math.cos(phi) * math.cos(declination) *
-                     math.cos(hour_angle))
+    sin_elevation = math.sin(phi) * math.sin(declination) + math.cos(phi) * math.cos(
+        declination
+    ) * math.cos(hour_angle)
 
     if sin_elevation > 1.0:
         sin_elevation = 1.0
@@ -1190,11 +1385,8 @@ def sunangle(year, day, hour, minute, sec, zone, dasvtm, lat, lon):
 
     # If sun is not very near the zenith, leave a as 0 or 180
     if abs(elevation - 2 * np.pi / 4.0) > 0.000001:
-
         # Protect against rounding error near +/-90 degrees.
-        val_to_asin = (math.cos(declination) *
-                       math.sin(hour_angle) /
-                       math.cos(elevation))
+        val_to_asin = math.cos(declination) * math.sin(hour_angle) / math.cos(elevation)
         if val_to_asin > 1.0:
             val_to_asin = 1.0
         if val_to_asin < -1.0:
@@ -1221,7 +1413,7 @@ def sunangle(year, day, hour, minute, sec, zone, dasvtm, lat, lon):
 def dayinyear(year, month, day):
     """
     Calculate the day in year, running from 1 for Jan 1st to 365 (or 366) for Dec 31st
-    
+
     :param year: Year
     :param month: Month
     :param day: Day
@@ -1240,7 +1432,7 @@ def dayinyear(year, month, day):
 
     result = day
     if month > 1:
-        result = result + sum(month_lengths[0:month - 1])
+        result = result + sum(month_lengths[0 : month - 1])
 
     assert 1 <= result <= 366
     return result
@@ -1249,7 +1441,7 @@ def dayinyear(year, month, day):
 def day_test(year, month, day, hour, lat, lon, time_since_sun_above_horizon=1.0):
     """
     Given year month day hour lat and long calculate if the sun was above the horizon an hour ago.
-    
+
     :param year: Year
     :param month: Month
     :param day: Day
@@ -1265,9 +1457,9 @@ def day_test(year, month, day, hour, lat, lon, time_since_sun_above_horizon=1.0)
     :type lon: float
     :type time_since_sun_above_horizon: float
     :return: 1 if the sun was above the horizon an hour ago, 0 otherwise.
-        
-    This is the "day" test used to decide whether a Marine Air Temperature (MAT) measurement is 
-    a Night MAT (NMAT) or a Day (MAT). This is important because solar heating of the ship biases 
+
+    This is the "day" test used to decide whether a Marine Air Temperature (MAT) measurement is
+    a Night MAT (NMAT) or a Day (MAT). This is important because solar heating of the ship biases
     the MAT measurements. It uses the function sunangle to calculate the elevation of the sun.
     """
     assert 1 <= month <= 12
@@ -1282,7 +1474,6 @@ def day_test(year, month, day, hour, lat, lon, time_since_sun_above_horizon=1.0)
     result = 0
 
     if year is not None and month is not None and day is not None and hour is not None:
-
         year2 = year
         day2 = dayinyear(year, month, day)
         hour2 = math.floor(hour)
@@ -1304,8 +1495,9 @@ def day_test(year, month, day, hour, lat, lon, time_since_sun_above_horizon=1.0)
         if lon == 0:
             lon2 = 0.0001
 
-        azimuth, elevation, rta, hra, sid, dec = \
-            sunangle(year2, day2, hour2, minute2, 0, 0, 0, lat2, lon2)
+        azimuth, elevation, rta, hra, sid, dec = sunangle(
+            year2, day2, hour2, minute2, 0, 0, 0, lat2, lon2
+        )
 
         if elevation > 0:
             result = 1
@@ -1317,7 +1509,7 @@ def day_test(year, month, day, hour, lat, lon, time_since_sun_above_horizon=1.0)
 def jul_day(year, month, day):
     """
     Routine to calculate julian day. This is the weird Astronomical thing which counts from 1 Jan 4713 BC.
-    
+
     :param year: Year
     :param month: Month
     :param day: Day
@@ -1326,8 +1518,8 @@ def jul_day(year, month, day):
     :type day: integer
     :return: julian day
     :rtype: integer
-    
-    This is one of those routines that looks baffling but works. No one is sure exactly how. It gets 
+
+    This is one of those routines that looks baffling but works. No one is sure exactly how. It gets
     written once and then remains untouched for centuries, mysteriously working.
     """
     assert 1 <= month <= 12
@@ -1341,7 +1533,7 @@ def jul_day(year, month, day):
 def time_difference(year1, month1, day1, hour1, year2, month2, day2, hour2):
     """
     Calculate time difference in hours between any two times
-    
+
     :param year1: Year of first time point
     :param month1: Month of first time point
     :param day1: Day of first time point
@@ -1367,18 +1559,20 @@ def time_difference(year1, month1, day1, hour1, year2, month2, day2, hour2):
 
     assert 0 <= hour1 < 24 and 0 <= hour2 < 24
 
-    if ((year1 > year2) or
-            (year1 == year2 and month1 > month2) or
-            (year1 == year2 and month1 == month2 and day1 > day2) or
-            (year1 == year2 and month1 == month2 and
-             day1 == day2 and hour1 > hour2)):
-        return -1 * time_difference(year2, month2, day2, hour2,
-                                    year1, month1, day1, hour1)
+    if (
+        (year1 > year2)
+        or (year1 == year2 and month1 > month2)
+        or (year1 == year2 and month1 == month2 and day1 > day2)
+        or (year1 == year2 and month1 == month2 and day1 == day2 and hour1 > hour2)
+    ):
+        return -1 * time_difference(
+            year2, month2, day2, hour2, year1, month1, day1, hour1
+        )
 
-    first_day = jul_day(year1, month1, day1) + hour1 / 24.
-    last_day = jul_day(year2, month2, day2) + hour2 / 24.
+    first_day = jul_day(year1, month1, day1) + hour1 / 24.0
+    last_day = jul_day(year2, month2, day2) + hour2 / 24.0
 
-    timdif = 24. * (last_day - first_day)
+    timdif = 24.0 * (last_day - first_day)
 
     return timdif
 
@@ -1386,20 +1580,19 @@ def time_difference(year1, month1, day1, hour1, year2, month2, day2, hour2):
 def winsorised_mean(inarr):
     """
     The winsorised mean is a resistant way of calculating an average.
-    
+
     :param inarr: input array to be averaged
     :type inarr: List[float]
     :return: the winsorised mean of the input array with a 25% trimming
     :rtype: float
-    
-    The winsorised mean is that which you get if you set the first quarter of 
-    the sorted input array to the 1st quartile value and the the last quarter 
-    to the 3rd quartile and then take the mean. This is quite a heavy trimming of 
-    the distribution. It makes it very resistant - about half the obs can be egregiously 
-    bad without affecting the mean strongly - but it will be less accurate if 
+
+    The winsorised mean is that which you get if you set the first quarter of
+    the sorted input array to the 1st quartile value and the the last quarter
+    to the 3rd quartile and then take the mean. This is quite a heavy trimming of
+    the distribution. It makes it very resistant - about half the obs can be egregiously
+    bad without affecting the mean strongly - but it will be less accurate if
     there are lots of observations, or the quality of the obs is higher.
     """
-
     length = len(inarr)
 
     total = 0
@@ -1409,7 +1602,7 @@ def winsorised_mean(inarr):
     inarr.sort()
 
     if length >= 4:
-        lower = (length / 4)
+        lower = length / 4
         upper = upper - lower
         total = total + (inarr[lower] + inarr[upper]) * lower
 
@@ -1422,7 +1615,7 @@ def winsorised_mean(inarr):
 def trimmed_mean(inarr, trim):
     """
     Calculate a resistant (aka robust) mean of an input array given a trimming criteria.
-    
+
     :param inarr: list of numbers
     :param trim: trimming criteria. A value of 10 trims one tenth of the values off each end of the sorted array before
         calculating the mean.
@@ -1431,45 +1624,44 @@ def trimmed_mean(inarr, trim):
     :return: trimmed mean
     :rtype: float
     """
-
     if trim == 0:
         return np.mean(inarr)
 
     length = len(inarr)
     inarr.sort()
 
-    index1 = (length / trim)
+    index1 = length / trim
 
-    trim = np.mean(inarr[index1:length - index1])
+    trim = np.mean(inarr[index1 : length - index1])
 
     return trim
 
 
 def yindex_to_lat(yindex, res=1):
+    """Convert yindex to latitude."""
     assert yindex >= 0
     assert yindex < 180 / res
-    lat = 90. - yindex * res - res / 2.
+    lat = 90.0 - yindex * res - res / 2.0
     return lat
 
 
 def mds_lat_to_yindex(lat, res=1.0):
     """
     For a given latitude return the y-index as it was in MDS2/3 in a 1x1 global grid
-    
+
     :param lat: Latitude of the point
     :param res: resolution of grid in degrees
     :type lat: float
     :type res: float
     :return: grid box index
     :rtype: integer
-    
-    In the northern hemisphere, borderline latitudes which fall on grid boundaries are pushed north, except 
-    90 which goes south. In the southern hemisphere, they are pushed south, except -90 which goes north. 
+
+    In the northern hemisphere, borderline latitudes which fall on grid boundaries are pushed north, except
+    90 which goes south. In the southern hemisphere, they are pushed south, except -90 which goes north.
     At 0 degrees they are pushed south.
 
     Expects that latitudes run from 90N to 90S
     """
-
     lat_local = lat  # round(lat,1)
 
     if lat_local == -90:
@@ -1488,15 +1680,15 @@ def mds_lat_to_yindex(lat, res=1.0):
 def lat_to_yindex(lat, res=1):
     """
     For a given latitude return the y index in a 1x1x5-day global grid
-    
+
     :param lat: Latitude of the point
     :param res: resolution of the grid
     :type lat: float
     :type res: float
     :return: grid box index
     :rtype: integer
-    
-    The routine assumes that the structure of the SST array is a grid that is 360 x 180 x 73 
+
+    The routine assumes that the structure of the SST array is a grid that is 360 x 180 x 73
     i.e. one year of 1degree lat x 1degree lon data split up into pentads. The west-most box is at 180degrees with
     index 0 and the northern most box also has index zero. Inputs on the border between grid cells are pushed south.
     """
@@ -1517,25 +1709,26 @@ def lat_to_yindex(lat, res=1):
 
 
 def xindex_to_lon(xindex, res=1):
+    """Convert xindex to longitude."""
     assert xindex >= 0
     assert xindex < 360 / res
-    lon = xindex * res - 180. + res / 2.
+    lon = xindex * res - 180.0 + res / 2.0
     return lon
 
 
 def mds_lon_to_xindex(lon, res=1.0):
     """
     For a given longitude return the x-index as it was in MDS2/3 in a 1x1 global grid
-    
+
     :param lon: Longitude of the point
     :param res: resolution of the field
     :type lon: float
     :type res: float
     :return: grid box index
     :rtype: integer
-    
-    In the western hemisphere, borderline longitudes which fall on grid boundaries are pushed west, except 
-    -180 which goes east. In the eastern hemisphere, they are pushed east, except 180 which goes west. 
+
+    In the western hemisphere, borderline longitudes which fall on grid boundaries are pushed west, except
+    -180 which goes east. In the eastern hemisphere, they are pushed east, except 180 which goes west.
     At 0 degrees they are pushed west.
     """
     long_local = lon  # round(lon,1)
@@ -1553,25 +1746,24 @@ def mds_lon_to_xindex(lon, res=1.0):
 def lon_to_xindex(lon, res=1):
     """
     For a given longitude return the x index in a 1x1x5-day global grid
-    
+
     :param lon: Longitude of the point
     :param res: resolution of the grid
     :type lon: float
     :type res: float
     :return: grid box index
     :rtype: integer
-    
-    The routine assumes that the structure of the SST array is a grid that is 360 x 180 x 73 
+
+    The routine assumes that the structure of the SST array is a grid that is 360 x 180 x 73
     i.e. one year of 1degree lat x 1degree lon data split up into pentads. The west-most box is at 180degrees W with
     index 0 and the northern most box also has index zero. Inputs on the border betwen grid cells are pushed east.
     """
-
     if res == 1:
         inlon = lon
         if inlon >= 180.0:
             inlon = -180.0 + (inlon - 180.0)
         if inlon < -180.0:
-            inlon = inlon + 360.
+            inlon = inlon + 360.0
         xindex = int(inlon + 180.0)
         while xindex >= 360:
             xindex -= 360
@@ -1581,7 +1773,7 @@ def lon_to_xindex(lon, res=1):
         if inlon >= 180.0:
             inlon = -180.0 + (inlon - 180.0)
         if inlon < -180.0:
-            inlon = inlon + 360.
+            inlon = inlon + 360.0
         xindex = int((inlon + 180.0) / res)
         while xindex >= 360 / res:
             xindex -= 360 / res
@@ -1591,52 +1783,56 @@ def lon_to_xindex(lon, res=1):
 def id_is_generic(inid, inyear):
     """
     Test to see if an ID is one of the generic IDs
-    
+
     :param inid: ID from marine report
     :param inyear: year we are checking for
     :type inid: string
     :type inyear: integer
     :return: True if the ID is generic and False otherwise
     :rtype: logical
-    
-    Certain callsigns are shared by large numbers of ships. e.g. SHIP, PLAT, 0120, 
-    MASK, MASKSTID. This simple routine has a list of known generic call signs. 
+
+    Certain callsigns are shared by large numbers of ships. e.g. SHIP, PLAT, 0120,
+    MASK, MASKSTID. This simple routine has a list of known generic call signs.
     Some call signs are only generic between certain years.
     """
-    generic_ids = [None,'',' ',
-                   '1        ',
-                   '58       ',
-                   'RIGG     ',
-                   '     RIGG',
-                   'SHIP     ',
-                   'ship     ',
-                   '     SHIP',
-                   'PLAT     ',
-                   '     PLAT',
-                   '         ',
-                   '0120     ',
-                   '0204     ',
-                   '0205     ',
-                   '0206     ',
-                   '0207     ',
-                   '0208     ',
-                   '0209     ',
-                   'MASKST   ',
-                   'MASKSTID ',
-                   'MASK     ',
-                   'XXXX     ',
-                   '/////    ']
+    generic_ids = [
+        None,
+        "",
+        " ",
+        "1        ",
+        "58       ",
+        "RIGG     ",
+        "     RIGG",
+        "SHIP     ",
+        "ship     ",
+        "     SHIP",
+        "PLAT     ",
+        "     PLAT",
+        "         ",
+        "0120     ",
+        "0204     ",
+        "0205     ",
+        "0206     ",
+        "0207     ",
+        "0208     ",
+        "0209     ",
+        "MASKST   ",
+        "MASKSTID ",
+        "MASK     ",
+        "XXXX     ",
+        "/////    ",
+    ]
 
     if 1921 <= inyear <= 1941:
-        generic_ids.append('2        ')
-        generic_ids.append('00002    ')
+        generic_ids.append("2        ")
+        generic_ids.append("00002    ")
 
     if 1930 <= inyear <= 1937:
-        generic_ids.append('3        ')
+        generic_ids.append("3        ")
 
     if 1934 <= inyear <= 1954:
-        generic_ids.append('7        ')
-        generic_ids.append('00007    ')
+        generic_ids.append("7        ")
+        generic_ids.append("00007    ")
 
     result = False
     if inid in generic_ids:
@@ -1647,7 +1843,7 @@ def id_is_generic(inid, inyear):
 def last_month_was(year, month):
     """
     Short function to get the previous month given a particular month of interest
-    
+
     :param year: year of interest
     :param month: month of interest
     :type year: integer
@@ -1665,7 +1861,7 @@ def last_month_was(year, month):
 def next_month_is(year, month):
     """
     Short function to get the next month given a particular month of interest
-    
+
     :param year: year of interest
     :param month: month of interest
     :type year: integer
@@ -1682,9 +1878,9 @@ def next_month_is(year, month):
 
 def year_month_gen(year1, month1, year2, month2):
     """
-    A generator to loop one month at a time between 
+    A generator to loop one month at a time between
     year1 month1 and year2 month2
-    
+
     :param year1: first year to loop from
     :param month1: month in first year to start from
     :param year2: Last year to loop over
@@ -1696,7 +1892,6 @@ def year_month_gen(year1, month1, year2, month2):
     :return: Return an iterator that yields tuples of a year and month
     :rtype: Iterator[integer]
     """
-
     assert year2 >= year1, "Start year after end year"
     assert 0 < month1 <= 12, "Month outside 1-12"
 
@@ -1716,7 +1911,7 @@ def year_month_gen(year1, month1, year2, month2):
 def get_month_lengths(year):
     """
     Return a list holding the lengths of the months in a given year
-    
+
     :param year: Year for which you want month lengths
     :type year: int
     :return: list of month lengths
@@ -1740,11 +1935,10 @@ def imma1_record_to_marine_rep(x, climsst, climnmat):
     :type x: IMMA report
     :type climsst: numpy array
     :type climnmat: numpy array
-    
-    A feature of the current version is that, in line with MDS3 and earlier, the hour defaults to zero UTC when 
+
+    A feature of the current version is that, in line with MDS3 and earlier, the hour defaults to zero UTC when
     hour is missing from the report.
     """
-
     rep = MarineReport.report_from_imma(x)
 
     # Deck 201 GMT midnights are assigned to the wrong day, see Carella, Kent, Berry 2015 Appendix A3
@@ -1753,20 +1947,18 @@ def imma1_record_to_marine_rep(x, climsst, climnmat):
 
     # Deck 701 prior to 1857ish has lots of obs with no hour set
     if rep.dck == 701 and rep.year < 1860 and rep.hour is None:
-        rep.hour = 12.
+        rep.hour = 12.0
 
     try:
-        sst_climav = get_sst(rep.lat, rep.lon,
-                             rep.month, rep.day, climsst)
-    except:
+        sst_climav = get_sst(rep.lat, rep.lon, rep.month, rep.day, climsst)
+    except Exception:
         sst_climav = None
     if sst_climav is not None:
         sst_climav = float(sst_climav)
 
     try:
-        mat_climav = get_sst(rep.lat, rep.lon,
-                             rep.month, rep.day, climnmat)
-    except:
+        mat_climav = get_sst(rep.lat, rep.lon, rep.month, rep.day, climnmat)
+    except Exception:
         mat_climav = None
     if mat_climav is not None:
         mat_climav = float(mat_climav)
@@ -1777,79 +1969,94 @@ def imma1_record_to_marine_rep(x, climsst, climnmat):
 
 
 def base_qc_report(rep):
-    """
-    Take a marine report and do some base qc on it.
-    """
+    """Take a marine report and do some base qc on it."""
     # Basic positional QC
-    if rep.getvar('PT') in [6, 7]:
-        rep.set_qc('POS', 'isbuoy', 1)
+    if rep.getvar("PT") in [6, 7]:
+        rep.set_qc("POS", "isbuoy", 1)
     else:
-        rep.set_qc('POS', 'isbuoy', 0)
+        rep.set_qc("POS", "isbuoy", 0)
 
-    if rep.getvar('PT') in [0, 1, 2, 3, 4, 5, 10, 11, 12, 17]:
-        rep.set_qc('POS', 'isship', 1)
+    if rep.getvar("PT") in [0, 1, 2, 3, 4, 5, 10, 11, 12, 17]:
+        rep.set_qc("POS", "isship", 1)
     else:
-        rep.set_qc('POS', 'isship', 0)
+        rep.set_qc("POS", "isship", 0)
 
     # See Kent et al. HadNMAT2 QC section
-    rep.set_qc('POS', 'mat_blacklist', 0)
-    if rep.getvar('PT') == 5 and rep.getvar('DCK') == 780:
-        rep.set_qc('POS', 'mat_blacklist', 1)
+    rep.set_qc("POS", "mat_blacklist", 0)
+    if rep.getvar("PT") == 5 and rep.getvar("DCK") == 780:
+        rep.set_qc("POS", "mat_blacklist", 1)
 
     # make sure lons are in range -180 to 180
     lon = rep.lon()
     lat = rep.lat()
     # North Atlantic, Suez and indian ocean to be excluded from MAT processing
-    if (rep.getvar('DCK') == 193 and
-            1880 <= rep.getvar('YR') <= 1893 and
-            ((-80.0 <= lon <= 0.0 and 40.0 <= lat <= 55.0) or
-             (-10.0 <= lon <= 30.0 and 35.0 <= lat <= 45.0) or
-             (15.0 <= lon <= 45.0 and -10.0 <= lat <= 40.0) or
-             (15.0 <= lon <= 95.0 and lat >= -10.0 and lat <= 15.0) or
-             (95.0 <= lon <= 105.0 and -10.0 <= lat <= 5.0)
-            )):
-        rep.set_qc('POS', 'mat_blacklist', 1)
+    if (
+        rep.getvar("DCK") == 193
+        and 1880 <= rep.getvar("YR") <= 1893
+        and (
+            (-80.0 <= lon <= 0.0 and 40.0 <= lat <= 55.0)
+            or (-10.0 <= lon <= 30.0 and 35.0 <= lat <= 45.0)
+            or (15.0 <= lon <= 45.0 and -10.0 <= lat <= 40.0)
+            or (15.0 <= lon <= 95.0 and lat >= -10.0 and lat <= 15.0)
+            or (95.0 <= lon <= 105.0 and -10.0 <= lat <= 5.0)
+        )
+    ):
+        rep.set_qc("POS", "mat_blacklist", 1)
 
-    if rep.getvar('DCK') == 780:
-        rep.set_qc('POS', 'is780', 1)
+    if rep.getvar("DCK") == 780:
+        rep.set_qc("POS", "is780", 1)
     else:
-        rep.set_qc('POS', 'is780', 0)
+        rep.set_qc("POS", "is780", 0)
 
-    rep.set_qc('POS', 'pos', position_check(rep.lat(),
-                                            rep.lon()))
+    rep.set_qc("POS", "pos", position_check(rep.lat(), rep.lon()))
 
-    rep.set_qc('POS', 'date', date_check(rep.getvar('YR'),
-                                         rep.getvar('MO'),
-                                         rep.getvar('DY')))
+    rep.set_qc(
+        "POS", "date", date_check(rep.getvar("YR"), rep.getvar("MO"), rep.getvar("DY"))
+    )
 
-    if rep.get_qc('POS', 'pos') == 0 and rep.get_qc('POS', 'date') == 0:
-        rep.set_qc('POS', 'day',
-                   day_test(rep.getvar('YR'),
-                            rep.getvar('MO'),
-                            rep.getvar('DY'),
-                            rep.getvar('HR'),
-                            rep.lat(),
-                            rep.lon()))
+    if rep.get_qc("POS", "pos") == 0 and rep.get_qc("POS", "date") == 0:
+        rep.set_qc(
+            "POS",
+            "day",
+            day_test(
+                rep.getvar("YR"),
+                rep.getvar("MO"),
+                rep.getvar("DY"),
+                rep.getvar("HR"),
+                rep.lat(),
+                rep.lon(),
+            ),
+        )
     else:
-        rep.set_qc('POS', 'day', 1)
+        rep.set_qc("POS", "day", 1)
 
-    rep.set_qc('POS', 'blklst',
-               blacklist(rep.getvar('ID'), rep.getvar('DCK'),
-                         rep.getvar('YR'), rep.getvar('MO'),
-                         rep.lat(), rep.lon(),
-                         rep.getvar('PT')))
+    rep.set_qc(
+        "POS",
+        "blklst",
+        blacklist(
+            rep.getvar("ID"),
+            rep.getvar("DCK"),
+            rep.getvar("YR"),
+            rep.getvar("MO"),
+            rep.lat(),
+            rep.lon(),
+            rep.getvar("PT"),
+        ),
+    )
 
     # SST base QC
-    rep.set_qc('SST', 'noval', value_check(rep.getvar('SST')))
-    rep.set_qc('SST', 'freez', sst_freeze_check(rep.getvar('SST'), 0.0))
-    rep.set_qc('SST', 'clim', climatology_check(rep.getvar('SST'),
-                                                rep.getnorm('SST'), 8.0))
-    rep.set_qc('SST', 'nonorm', no_normal_check(rep.getnorm('SST')))
+    rep.set_qc("SST", "noval", value_check(rep.getvar("SST")))
+    rep.set_qc("SST", "freez", sst_freeze_check(rep.getvar("SST"), 0.0))
+    rep.set_qc(
+        "SST", "clim", climatology_check(rep.getvar("SST"), rep.getnorm("SST"), 8.0)
+    )
+    rep.set_qc("SST", "nonorm", no_normal_check(rep.getnorm("SST")))
 
     # MAT base QC
-    rep.set_qc('AT', 'noval', value_check(rep.getvar('AT')))
-    rep.set_qc('AT', 'clim', climatology_check(rep.getvar('AT'),
-                                               rep.getnorm('AT'), 10.0))
-    rep.set_qc('AT', 'nonorm', no_normal_check(rep.getnorm('AT')))
+    rep.set_qc("AT", "noval", value_check(rep.getvar("AT")))
+    rep.set_qc(
+        "AT", "clim", climatology_check(rep.getvar("AT"), rep.getnorm("AT"), 10.0)
+    )
+    rep.set_qc("AT", "nonorm", no_normal_check(rep.getnorm("AT")))
 
     return rep

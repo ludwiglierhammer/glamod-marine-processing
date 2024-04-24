@@ -7,7 +7,7 @@ code	description
 6	Less than 4.5 sigma lower limit (a1 < g - 4.5*s1)
 7	Greater than 4.5 sigma upper limit (a1 > g + 4.5*s5)
 11	Limits missing (ocean/coastal box); MEDS data correct (SF/PF only)
-12	Limits missing (ocean/coastal box) 
+12	Limits missing (ocean/coastal box)
 13	Landlocked 2-degree box
 14	Data unusable (SF, AF, and PF, only; see Table 2)
 15	Data missing or not computable (see Table 2)

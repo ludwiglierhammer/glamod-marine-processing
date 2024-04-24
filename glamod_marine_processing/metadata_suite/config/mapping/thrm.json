@@ -1,34 +1,92 @@
 {
-	"field":"thrm",
-	"map":[
-		{"--":"NULL"},
-		{"A L":"ALC"},
-		{"AL":"ALC"},
-		{"AL AL":"ALC ALC"},
-		{"AL ELE":"ALC ELE"},
-		{"AL MER":"ALC MER"},
-		{"ALC":"ALC"},
-		{"ALC ELE":"ALC ELE"},
-		{"ALC MER":"ALC MER"},
-		{"ALC*":"ALC"},
-		{"ALC+":"ALC"},
-		{"ALO*":"ALC"},
-		{"AN":"AN"},
-		{"E/E":"ELE"},
-		{"ELE":"ELE"},
-		{"ELE ---":"ELE NULL"},
-		{"ELE AL":"ELE ALC"},
-		{"ELE ALC":"ELE ALC"},
-		{"ELE MER":"ELE MER"},
-		{"MER":"MER"},
-		{"MER ---":"MER NULL"},
-		{"MER AL":"MER ALC"},
-		{"MER ALC":"MER ALC"},
-		{"MER ELE":"MER ELE"},
-		{"MER MER":"MER MER"},
-		{"MER$":"MER"},
-		{"MER,ELE":"MER ELE"},
-		{"MSNG":"NULL"},
-		{"P":"P"}
-	]
+  "field": "thrm",
+  "map": [
+    {
+      "--": "NULL"
+    },
+    {
+      "A L": "ALC"
+    },
+    {
+      "AL": "ALC"
+    },
+    {
+      "AL AL": "ALC ALC"
+    },
+    {
+      "AL ELE": "ALC ELE"
+    },
+    {
+      "AL MER": "ALC MER"
+    },
+    {
+      "ALC": "ALC"
+    },
+    {
+      "ALC ELE": "ALC ELE"
+    },
+    {
+      "ALC MER": "ALC MER"
+    },
+    {
+      "ALC*": "ALC"
+    },
+    {
+      "ALC+": "ALC"
+    },
+    {
+      "ALO*": "ALC"
+    },
+    {
+      "AN": "AN"
+    },
+    {
+      "E/E": "ELE"
+    },
+    {
+      "ELE": "ELE"
+    },
+    {
+      "ELE ---": "ELE NULL"
+    },
+    {
+      "ELE AL": "ELE ALC"
+    },
+    {
+      "ELE ALC": "ELE ALC"
+    },
+    {
+      "ELE MER": "ELE MER"
+    },
+    {
+      "MER": "MER"
+    },
+    {
+      "MER ---": "MER NULL"
+    },
+    {
+      "MER AL": "MER ALC"
+    },
+    {
+      "MER ALC": "MER ALC"
+    },
+    {
+      "MER ELE": "MER ELE"
+    },
+    {
+      "MER MER": "MER MER"
+    },
+    {
+      "MER$": "MER"
+    },
+    {
+      "MER,ELE": "MER ELE"
+    },
+    {
+      "MSNG": "NULL"
+    },
+    {
+      "P": "P"
+    }
+  ]
 }

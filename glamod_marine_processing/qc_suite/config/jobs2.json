@@ -1,6 +1,6 @@
 {
-  "schema":"/ichec/work/glamod/glamod-marine-processing.2022/qc-suite/imma/imma.json",
-  "code_tables":"/ichec/work/glamod/glamod-marine-processing.2022/qc-suite/imma/code_tables/",
+  "schema": "/ichec/work/glamod/glamod-marine-processing.2022/qc-suite/imma/imma.json",
+  "code_tables": "/ichec/work/glamod/glamod-marine-processing.2022/qc-suite/imma/code_tables/",
   "jobs": [
     {
       "index": 1,
@@ -18,73 +18,73 @@
     },
     {
       "index": 3,
-  	  "year1": 2015,
+      "year1": 2015,
       "month1": 3,
-	  "year2": 2015,
-	  "month2": 3
+      "year2": 2015,
+      "month2": 3
     },
     {
-	  "index": 4,
-	  "year1": 2015,
-	  "month1": 4,
-	  "year2": 2015,
-	  "month2": 4
+      "index": 4,
+      "year1": 2015,
+      "month1": 4,
+      "year2": 2015,
+      "month2": 4
     },
     {
-	  "index": 5,
-	  "year1": 2015,
-	  "month1": 5,
-	  "year2": 2015,
-	  "month2": 5
+      "index": 5,
+      "year1": 2015,
+      "month1": 5,
+      "year2": 2015,
+      "month2": 5
     },
     {
-	  "index": 6,
-	  "year1": 2015,
-	  "month1": 6,
-	  "year2": 2015,
-	  "month2": 6
+      "index": 6,
+      "year1": 2015,
+      "month1": 6,
+      "year2": 2015,
+      "month2": 6
     },
     {
-	  "index": 7,
-	  "year1": 2015,
-	  "month1": 7,
-	  "year2": 2015,
-	  "month2": 7
+      "index": 7,
+      "year1": 2015,
+      "month1": 7,
+      "year2": 2015,
+      "month2": 7
     },
     {
-	  "index": 8,
-	  "year1": 2015,
-	  "month1": 8,
-	  "year2": 2015,
-	  "month2": 8
+      "index": 8,
+      "year1": 2015,
+      "month1": 8,
+      "year2": 2015,
+      "month2": 8
     },
     {
-	  "index": 9,
-	  "year1": 2015,
-	  "month1": 9,
-	  "year2": 2015,
-	  "month2": 9
+      "index": 9,
+      "year1": 2015,
+      "month1": 9,
+      "year2": 2015,
+      "month2": 9
     },
     {
-	  "index": 10,
-	  "year1": 2015,
-	  "month1": 10,
-	  "year2": 2015,
-	  "month2": 10
+      "index": 10,
+      "year1": 2015,
+      "month1": 10,
+      "year2": 2015,
+      "month2": 10
     },
     {
-	  "index": 11,
-	  "year1": 2015,
-	  "month1": 11,
-	  "year2": 2015,
-	  "month2": 11
+      "index": 11,
+      "year1": 2015,
+      "month1": 11,
+      "year2": 2015,
+      "month2": 11
     },
     {
-	  "index": 12,
-	  "year1": 2015,
-	  "month1": 12,
-	  "year2": 2015,
-	  "month2": 12
+      "index": 12,
+      "year1": 2015,
+      "month1": 12,
+      "year2": 2015,
+      "month2": 12
     },
     {
       "index": 13,
@@ -101,74 +101,74 @@
       "month2": 2
     },
     {
-	  "index": 15,
-	  "year1": 2016,
-	  "month1": 3,
-	  "year2": 2016,
-	  "month2": 3
+      "index": 15,
+      "year1": 2016,
+      "month1": 3,
+      "year2": 2016,
+      "month2": 3
     },
     {
-	  "index": 16,
-	  "year1": 2016,
-	  "month1": 4,
-	  "year2": 2016,
-	  "month2": 4
+      "index": 16,
+      "year1": 2016,
+      "month1": 4,
+      "year2": 2016,
+      "month2": 4
     },
     {
-	  "index": 17,
-	  "year1": 2016,
-	  "month1": 5,
-	  "year2": 2016,
-	  "month2": 5
+      "index": 17,
+      "year1": 2016,
+      "month1": 5,
+      "year2": 2016,
+      "month2": 5
     },
     {
-	  "index": 18,
-	  "year1": 2016,
-	  "month1": 6,
-	  "year2": 2016,
-	  "month2": 6
+      "index": 18,
+      "year1": 2016,
+      "month1": 6,
+      "year2": 2016,
+      "month2": 6
     },
     {
-	  "index": 19,
-	  "year1": 2016,
-	  "month1": 7,
-	  "year2": 2016,
-	  "month2": 7
+      "index": 19,
+      "year1": 2016,
+      "month1": 7,
+      "year2": 2016,
+      "month2": 7
     },
     {
-	  "index": 20,
-	  "year1": 2016,
-	  "month1": 8,
-	  "year2": 2016,
-	  "month2": 8
+      "index": 20,
+      "year1": 2016,
+      "month1": 8,
+      "year2": 2016,
+      "month2": 8
     },
     {
-	  "index": 21,
-	  "year1": 2016,
-	  "month1": 9,
-	  "year2": 2016,
-	  "month2": 9
+      "index": 21,
+      "year1": 2016,
+      "month1": 9,
+      "year2": 2016,
+      "month2": 9
     },
     {
-	  "index": 22,
-	  "year1": 2016,
-	  "month1": 10,
-	  "year2": 2016,
-	  "month2": 10
+      "index": 22,
+      "year1": 2016,
+      "month1": 10,
+      "year2": 2016,
+      "month2": 10
     },
     {
-	  "index": 23,
-	  "year1": 2016,
-	  "month1": 11,
-	  "year2": 2016,
-	  "month2": 11
+      "index": 23,
+      "year1": 2016,
+      "month1": 11,
+      "year2": 2016,
+      "month2": 11
     },
     {
-	  "index": 24,
-	  "year1": 2016,
-	  "month1": 12,
-	  "year2": 2016,
-	  "month2": 12
+      "index": 24,
+      "year1": 2016,
+      "month1": 12,
+      "year2": 2016,
+      "month2": 12
     },
     {
       "index": 25,
@@ -589,7 +589,7 @@
       "month1": 12,
       "year2": 2021,
       "month2": 12
-    },  
+    },
     {
       "index": 85,
       "year1": 2022,

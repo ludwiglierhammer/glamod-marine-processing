@@ -1,1 +1,1 @@
-
+"""LOTUS script initialisation module."""

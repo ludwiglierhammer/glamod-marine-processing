@@ -134,12 +134,12 @@ File: babel.def 2019/05/04 3.31 Babel common definitions
 (/usr/local/texlive/2019/texmf-dist/tex/generic/babel/txtbabel.def)
 \bbl@dirlevel=\count102
 )
-\l@canadian = a dialect from \language\l@american 
-\l@australian = a dialect from \language\l@british 
-\l@newzealand = a dialect from \language\l@british 
+\l@canadian = a dialect from \language\l@american
+\l@australian = a dialect from \language\l@british
+\l@newzealand = a dialect from \language\l@british
 ))
 (/usr/local/texlive/2019/texmf-dist/tex/latex/psnfss/times.sty
-Package: times 2005/04/12 PSNFSS-v9.2a (SPQR) 
+Package: times 2005/04/12 PSNFSS-v9.2a (SPQR)
 )
 (/usr/local/texlive/2019/texmf-dist/tex/latex/fncychap/fncychap.sty
 Package: fncychap 2007/07/30 v1.34 LaTeX package (Revised chapters)
@@ -746,7 +746,7 @@ e
 * paper: letterpaper
 * layout: <same size as paper>
 * layoutoffset:(h,v)=(0.0pt,0.0pt)
-* modes: twoside 
+* modes: twoside
 * h-part:(L,W,R)=(72.26999pt, 469.75502pt, 72.26999pt)
 * v-part:(T,H,B)=(72.26999pt, 650.43001pt, 72.26999pt)
 * \paperwidth=614.295pt
@@ -888,7 +888,7 @@ Package pdftex.def Info: marine_file_system.png  used on input line 205.
 Chapter 5.
 [9]
 Overfull \hbox (6.83133pt too wide) in paragraph at lines 291--293
-[]|\T1/phv/m/n/10 version| 
+[]|\T1/phv/m/n/10 version|
  []
 
 [10]
@@ -940,7 +940,7 @@ Package rerunfilecheck Info: File `marineobservationssuite.out' has not changed
 .
 (rerunfilecheck)             Checksum: 16DA168435474EEC261C66A023E9B22D;4197.
 Package atveryend Info: Empty hook `AtVeryVeryEnd' on input line 1432.
- ) 
+ )
 Here is how much of TeX's memory you used:
  13482 strings out of 492616
  189897 string characters out of 6129481
@@ -965,4 +965,3 @@ PDF statistics:
  338 compressed objects within 4 object streams
  68 named destinations out of 1000 (max. 500000)
  252 words of extra memory for PDF output out of 10000 (max. 10000000)
-

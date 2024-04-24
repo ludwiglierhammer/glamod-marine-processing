@@ -27,4 +27,3 @@ freq2D<-freq2D-1
 
 return(freq2D)
 }
-

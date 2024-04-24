@@ -3,8 +3,9 @@ Set of functions for processing files and filenames which may be system specific
 changed in moving from one system to another.
 """
 
+from __future__ import annotations
+
 import os
-import subprocess
 
 
 def process_bad_id_file(bad_id_file):
@@ -12,13 +13,13 @@ def process_bad_id_file(bad_id_file):
     Read in each entry in the bad id file and if it is shorter than 9 characters
     pad with white space at the end of the string
     """
-    idfile = open(bad_id_file, 'r')
+    idfile = open(bad_id_file)
     ids_to_exclude = []
     for line in idfile:
         line = line.rstrip()
         while len(line) < 9:
-            line = line + ' '
-        if line != '         ':
+            line = line + " "
+        if line != "         ":
             ids_to_exclude.append(line)
     idfile.close()
     return ids_to_exclude
@@ -53,7 +54,6 @@ def safe_make_dir_generic(out_dir, subdirs):
     :param subdirs: a list of the names of the desired subdirectories
     :return: directory name
     """
-
     completions = build_completions(out_dir, subdirs)
 
     adir = None
@@ -61,9 +61,9 @@ def safe_make_dir_generic(out_dir, subdirs):
     for adir in completions:
         try:
             os.mkdir(adir)
-            print("Directory {} created ".format(adir))
+            print(f"Directory {adir} created ")
         except OSError:
-            print("Directory {} already exists".format(adir))
+            print(f"Directory {adir} already exists")
 
     return adir
 
@@ -78,7 +78,7 @@ def safe_make_dir(out_dir, year, month):
     :return: full pathname of created directory
     """
     syr = str(year)
-    smn = "{:02}".format(month)
+    smn = f"{month:02}"
 
     d2 = safe_make_dir_generic(out_dir, [syr, smn])
 
@@ -98,7 +98,9 @@ def icoads_filename_from_stub(dirstubs, filenamestubs, year, month):
     if year is None or month is None:
         return None
 
-    assert len(dirstubs) == len(filenamestubs), 'dirstubs and filename stubs have different numbers of members'
+    assert len(dirstubs) == len(
+        filenamestubs
+    ), "dirstubs and filename stubs have different numbers of members"
 
     candidatefilenames = []
 
@@ -125,23 +127,23 @@ def icoads_filename(icoads_dir, readyear, readmonth, version):
     :param version: the version of ICOADS being used
     :return: full pathname for the ICOADS file for specified year and month
     """
-    assert version in ['2.5', '3.0'], "name not 2.5 or 3.0"
+    assert version in ["2.5", "3.0"], "name not 2.5 or 3.0"
 
     syr = str(readyear)
-    smn = "{:02}".format(readmonth)
+    smn = f"{readmonth:02}"
 
     filename = None
 
-    if version == '2.5':
-        filename = "{}/ICOADS.2.5.1/R2.5.1.{}.{}.gz".format(icoads_dir, syr, smn)
+    if version == "2.5":
+        filename = f"{icoads_dir}/ICOADS.2.5.1/R2.5.1.{syr}.{smn}.gz"
         if (readyear > 2007) & (readyear < 2015):
-            filename = "{}/R2.5.2.{}.{}.gz".format(icoads_dir, syr, smn)
+            filename = f"{icoads_dir}/R2.5.2.{syr}.{smn}.gz"
 
-    if version == '3.0':
+    if version == "3.0":
         if readyear <= 2014:
-            filename = "{}/ICOADS.3.0.0/IMMA1_R3.0.0_{}-{}.gz".format(icoads_dir, syr, smn)
+            filename = f"{icoads_dir}/ICOADS.3.0.0/IMMA1_R3.0.0_{syr}-{smn}.gz"
         if readyear >= 2015:
-            filename = "{}/ICOADS.3.0.1/IMMA1_R3.0.1_{}-{}.gz".format(icoads_dir, syr, smn)
+            filename = f"{icoads_dir}/ICOADS.3.0.1/IMMA1_R3.0.1_{syr}-{smn}.gz"
 
     return filename
 
@@ -156,13 +158,13 @@ def process_string(instring, year, month, day):
     :param day: day to replace in input string
     :return: string with filled placeholders.
     """
-    sy = "{:04}".format(year)
-    sm = "{:02}".format(month)
-    sd = "{:02}".format(day)
+    sy = f"{year:04}"
+    sm = f"{month:02}"
+    sd = f"{day:02}"
 
-    outstring = instring.replace('YYYY', sy)
-    outstring = outstring.replace('MMMM', sm)
-    outstring = outstring.replace('DDDD', sd)
+    outstring = instring.replace("YYYY", sy)
+    outstring = outstring.replace("MMMM", sm)
+    outstring = outstring.replace("DDDD", sd)
 
     return outstring
 
@@ -179,7 +181,6 @@ def make_filename(dirstub, filenamestub, year, month, day):
     :param day: day to construct filename for
     :return: completed pathname for file
     """
-
     dirfill = process_string(dirstub, year, month, day)
     filenamefill = process_string(filenamestub, year, month, day)
 
@@ -206,7 +207,9 @@ def get_background_filename(dirstubs, filenamestubs, year, month, day):
     if year is None or month is None or day is None:
         return None
 
-    assert len(dirstubs) == len(filenamestubs), 'dirstubs and filename stubs have different numbers of members'
+    assert len(dirstubs) == len(
+        filenamestubs
+    ), "dirstubs and filename stubs have different numbers of members"
 
     originalfilenames = []
 
@@ -214,7 +217,7 @@ def get_background_filename(dirstubs, filenamestubs, year, month, day):
         filenamestub = filenamestubs[i]
         originalfilenames.append(make_filename(dirstub, filenamestub, year, month, day))
 
-# find the first original file that exists in the list
+    # find the first original file that exists in the list
     chosen_orig = None
     for i, fname in enumerate(originalfilenames):
         if chosen_orig is None:

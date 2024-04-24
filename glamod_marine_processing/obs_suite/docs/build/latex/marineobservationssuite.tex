@@ -92,13 +92,13 @@
 
 \chapter{Indices and tables}
 \label{\detokenize{index:indices-and-tables}}\begin{itemize}
-\item {} 
+\item {}
 \DUrole{xref,std,std-ref}{genindex}
 
-\item {} 
+\item {}
 \DUrole{xref,std,std-ref}{modindex}
 
-\item {} 
+\item {}
 \DUrole{xref,std,std-ref}{search}
 
 \end{itemize}
@@ -155,7 +155,7 @@ processes in which the source dataset transitions through the following levels:
 \noindent\sphinxincludegraphics[width=500\sphinxpxdimen]{{obs_suite_levels}.png}
 \caption{Observations Suite processing levels}\label{\detokenize{index:id4}}\end{figure}
 \begin{itemize}
-\item {} 
+\item {}
 level1a: is the first mapping of the dataset to the CDM. Prior to mapping,
 the input data files are validated against the schema / data model and code
 tables defining the input. Reports failing this validation are discarded. For
@@ -166,25 +166,25 @@ deck information and observed parameter. For each month a set of files is
 created containing the header and observation tables (header and
 observations\sphinxhyphen{}{[}at|sst|dpt|wbt|slp|ws|wd{]}).
 
-\item {} 
+\item {}
 level1b: is the data improved with corrections and/or additional information
 resulting from the linkage and duplicate identification process. Reassignment of
 reports to different monthly files can result from this process after datetime
 corrections.
 
-\item {} 
+\item {}
 level1c: is the data with metadata (currently primary station identification
 and datetime) validation performed and applied.
 
-\item {} 
+\item {}
 level1d: data is enriched with external meta\sphinxhyphen{}data where available. For ship
 data the additional meta data source is WMO Publication 47 metadata.
 
-\item {} 
+\item {}
 level1e: final quality control flags are added at this level, resulting from
 the position, parameter and tracking quality control processes.
 
-\item {} 
+\item {}
 level2: data ready to ingest in the database. Data in level1e is inspected as
 data filtering might apply and part of the initial data set might be rejected
 to be inserted in the CDS database.
@@ -221,7 +221,7 @@ git clone git@git.noc.ac.uk:iregon/glamod\PYGZhy{}marine\PYGZhy{}processing.git 
 
 where:
 \begin{itemize}
-\item {} 
+\item {}
 version: see repository tags. Last tagged version is v1.1, with this manual
 currently describing the HEAD of the repository (See {\hyperref[\detokenize{index:versions}]{\sphinxcrossref{\DUrole{std,std-ref}{Note on versions}}}}).
 
@@ -234,16 +234,16 @@ Script obs\sphinxhyphen{}suite/setpaths.sh sets the paths for the processing sof
 files, including a scratch directory for the user running the software. Edit the
 script file and set the environment variables as indicated below:
 \begin{itemize}
-\item {} 
+\item {}
 code\_directory: full path to the obs\sphinxhyphen{}suite code.
 
-\item {} 
+\item {}
 home\_directory\_smf: full path to the obs\sphinxhyphen{}suite configuration.
 
-\item {} 
+\item {}
 data\_directory: full path to marine data file system.
 
-\item {} 
+\item {}
 scratch\_directory: this is system dependent and is currently set as available in CEDA\sphinxhyphen{}JASMIN
 
 \end{itemize}
@@ -281,13 +281,13 @@ marine code version (v1.1 and HEAD).
 \sphinxaftertopcaption
 \begin{tabular}[t]{|\X{30}{125}|\X{30}{125}|\X{55}{125}|\X{10}{125}|}
 \hline
-\sphinxstyletheadfamily 
+\sphinxstyletheadfamily
 module
-&\sphinxstyletheadfamily 
+&\sphinxstyletheadfamily
 module\_local
-&\sphinxstyletheadfamily 
+&\sphinxstyletheadfamily
 module\_repo\_url
-&\sphinxstyletheadfamily 
+&\sphinxstyletheadfamily
 version
 \\
 \hline
@@ -343,16 +343,16 @@ git clone module\PYGZus{}repo\PYGZus{}url \PYGZhy{}\PYGZhy{}branch version \PYGZ
 \label{\detokenize{index:common-paths}}
 The following path names are used throughout this manual:
 \begin{itemize}
-\item {} 
+\item {}
 \sphinxstyleemphasis{obs\sphinxhyphen{}suite}: path of the observations suite in the marine processing repository
 
-\item {} 
+\item {}
 \sphinxstyleemphasis{config\_directory}: path to the obs\sphinxhyphen{}suite directory in the configuration repository
 
-\item {} 
+\item {}
 \sphinxstyleemphasis{data\_directory}: path to general data directory in the marine file system
 
-\item {} 
+\item {}
 \sphinxstyleemphasis{release\_config\_dir}: full path to the configuration of a specific data release
 within \sphinxstyleemphasis{config\_directory}
 
@@ -381,11 +381,11 @@ Currently, the following configuration sets are available:
 \sphinxaftertopcaption
 \begin{tabular}[t]{|\X{20}{60}|\X{30}{60}|\X{10}{60}|}
 \hline
-\sphinxstyletheadfamily 
+\sphinxstyletheadfamily
 Data release
-&\sphinxstyletheadfamily 
+&\sphinxstyletheadfamily
 Path in repo/obs\sphinxhyphen{}suite
-&\sphinxstyletheadfamily 
+&\sphinxstyletheadfamily
 Marine code version
 \\
 \hline
@@ -426,13 +426,13 @@ suite.
 \label{\detokenize{index:create-the-configuration-files-for-the-release-and-dataset}}
 Every data release is identified in the file system with the following tags:
 \begin{itemize}
-\item {} 
+\item {}
 release: release name (eg. release\_2.0)
 
-\item {} 
+\item {}
 update: udpate tag (eg. 000000)
 
-\item {} 
+\item {}
 dataset: dataset name (eg. ICOADS\_R3.0.0T)
 
 \end{itemize}
@@ -642,16 +642,16 @@ The level1d process will fail if it doesn’t find a metadata file for a month
 partition. To account for periods where metadata are not available, the
 following optional keys can be used:
 \begin{itemize}
-\item {} 
+\item {}
 “md\_not\_avail”: true indicates the process that for the full release period,
 there is not metadata available. Defaults to false.
 
-\item {} 
+\item {}
 “md\_first\_yr\_avail”: indicates the first year for which metadata files should
 be available in the release period. Defaults to first year in the release
 period.
 
-\item {} 
+\item {}
 “md\_last\_yr\_avail”: indicates the last year for which metadata files should be
 available in the release period. Defaults to last year in the release
 period.
@@ -687,19 +687,19 @@ Create file \sphinxstyleemphasis{release\_config\_dir}/level1e.json.
 
 The level1e specific parameters included in this file are:
 \begin{itemize}
-\item {} 
+\item {}
 “qc\_first\_date\_avail” : first monthly quality control file the process can
 expect to find. If the data files to process are prior to this date, then
 the data files will progress to the next level without quality flag merging
 and without raising an error.
 
-\item {} 
+\item {}
 “qc\_last\_date\_avail” : last monthly quality control file the process can
 expect to find. If the data files to process are later to this date, then
 the data files will progress to the next level without quality flag merging
 and without raising an error.
 
-\item {} 
+\item {}
 “history\_explain” : text added to the header file history field when flags are
 merged.
 
@@ -739,13 +739,13 @@ python make\PYGZus{}release\PYGZus{}source\PYGZus{}tree.py \PYG{n+nv}{\PYGZdl{}d
 
 where:
 \begin{itemize}
-\item {} 
+\item {}
 release: release identifier in file system
 
-\item {} 
+\item {}
 update: release update identifier in file system
 
-\item {} 
+\item {}
 dataset: dataset identifier in file system
 
 \end{itemize}
@@ -772,25 +772,25 @@ python level1a.py \PYG{n+nv}{\PYGZdl{}data\PYGZus{}directory} release update dat
 
 where:
 \begin{itemize}
-\item {} 
+\item {}
 release: release identifier in file system
 
-\item {} 
+\item {}
 update: release update identifier in file system
 
-\item {} 
+\item {}
 dataset: dataset identifier in file system
 
-\item {} 
+\item {}
 level1a\_config: path to the level1a configuration file ( {\hyperref[\detokenize{index:level1a-config-file}]{\sphinxcrossref{\DUrole{std,std-ref}{Level 1a configuration file}}}})
 
-\item {} 
+\item {}
 sid\sphinxhyphen{}dck: source\sphinxhyphen{}deck identifier
 
-\item {} 
+\item {}
 year: file year, format yyyy
 
-\item {} 
+\item {}
 month: file month, format mm
 
 \end{itemize}
@@ -808,20 +808,20 @@ python level1a\PYGZus{}slurm.py release update dataset \PYG{n+nv}{\PYGZdl{}confi
 
 where:
 \begin{itemize}
-\item {} 
+\item {}
 release: release identifier in file system
 
-\item {} 
+\item {}
 update: release update identifier in file system
 
-\item {} 
+\item {}
 dataset: dataset identifier in file system
 
-\item {} 
+\item {}
 process\_list: full path to file with the list of source\sphinxhyphen{}deck partitions to
 process. This file can be either {\hyperref[\detokenize{index:process-list-file}]{\sphinxcrossref{\DUrole{std,std-ref}{Process list file}}}} or a subset of it.
 
-\item {} 
+\item {}
 failed\_only: optional (yes|no). Defaults to no. Setting this argument to ‘yes’
 means that only the monthly files with a *.failed log file will be processed.
 
@@ -870,16 +870,16 @@ sbatch \PYGZhy{}J \PYG{n+nv}{\PYGZdl{}option} \PYGZhy{}o \PYG{n+nv}{\PYGZdl{}opt
 
 where:
 \begin{itemize}
-\item {} 
+\item {}
 release: release tag
 
-\item {} 
+\item {}
 option: id, datepos or duplicates
 
-\item {} 
+\item {}
 cor\_version: NOC correction version (v1x2019 for release 1 and release 2)
 
-\item {} 
+\item {}
 year\_init|end: first|last year of data release.
 
 \end{itemize}
@@ -903,25 +903,25 @@ python level1b.py \PYG{n+nv}{\PYGZdl{}data\PYGZus{}directory} release update dat
 
 where:
 \begin{itemize}
-\item {} 
+\item {}
 release: release identifier in file system
 
-\item {} 
+\item {}
 update: release update identifier in file system
 
-\item {} 
+\item {}
 dataset: dataset identifier in file system
 
-\item {} 
+\item {}
 level1b\_config: path to the level1b configuration file ( {\hyperref[\detokenize{index:level1b-config-file}]{\sphinxcrossref{\DUrole{std,std-ref}{Level 1b configuration file}}}})
 
-\item {} 
+\item {}
 sid\sphinxhyphen{}dck: source\sphinxhyphen{}deck identifier
 
-\item {} 
+\item {}
 year: file year, format yyyy
 
-\item {} 
+\item {}
 month: file month, format mm
 
 \end{itemize}
@@ -939,20 +939,20 @@ python level1b\PYGZus{}slurm.py release update dataset \PYG{n+nv}{\PYGZdl{}confi
 
 where:
 \begin{itemize}
-\item {} 
+\item {}
 release: release identifier in file system
 
-\item {} 
+\item {}
 update: release update identifier in file system
 
-\item {} 
+\item {}
 dataset: dataset identifier in file system
 
-\item {} 
+\item {}
 process\_list: full path to file with the list of source\sphinxhyphen{}deck partitions to
 process. This file can be either {\hyperref[\detokenize{index:process-list-file}]{\sphinxcrossref{\DUrole{std,std-ref}{Process list file}}}} or a subset of it.
 
-\item {} 
+\item {}
 failed\_only: optional (yes|no). Defaults to no. Setting this argument to ‘yes’
 means that only the monthly files with a *.failed log file will be processed.
 
@@ -993,25 +993,25 @@ python level1c.py \PYG{n+nv}{\PYGZdl{}data\PYGZus{}directory} release update dat
 
 where:
 \begin{itemize}
-\item {} 
+\item {}
 release: release identifier in file system
 
-\item {} 
+\item {}
 update: release update identifier in file system
 
-\item {} 
+\item {}
 dataset: dataset identifier in file system
 
-\item {} 
+\item {}
 level1c\_config: path to the level1c configuration file ( {\hyperref[\detokenize{index:level1c-config-file}]{\sphinxcrossref{\DUrole{std,std-ref}{Level 1c configuration file}}}})
 
-\item {} 
+\item {}
 sid\sphinxhyphen{}dck: source\sphinxhyphen{}deck identifier
 
-\item {} 
+\item {}
 year: file year, format yyyy
 
-\item {} 
+\item {}
 month: file month, format mm
 
 \end{itemize}
@@ -1029,24 +1029,24 @@ python level1c\PYGZus{}slurm.py release update dataset \PYG{n+nv}{\PYGZdl{}confi
 
 where:
 \begin{itemize}
-\item {} 
+\item {}
 release: release identifier in file system
 
-\item {} 
+\item {}
 update: release update identifier in file system
 
-\item {} 
+\item {}
 dataset: dataset identifier in file system
 
-\item {} 
+\item {}
 process\_list: full path to file with the list of source\sphinxhyphen{}deck partitions to
 process. This file can be either {\hyperref[\detokenize{index:process-list-file}]{\sphinxcrossref{\DUrole{std,std-ref}{Process list file}}}} or a subset of it.
 
-\item {} 
+\item {}
 failed\_only: optional (yes|no). Defaults to no. Setting this argument to ‘yes’
 means that only the monthly files with a *.failed log file will be processed.
 
-\item {} 
+\item {}
 remove\_source: optional (yes|no). Defaults to no. Setting this argument to ‘yes’
 implies removal of the source level (level1b) data files if the full set of
 monthly data files of a given source\sphinxhyphen{}deck is successfully processed.
@@ -1090,25 +1090,25 @@ python level1d.py \PYG{n+nv}{\PYGZdl{}data\PYGZus{}directory} release update dat
 
 where:
 \begin{itemize}
-\item {} 
+\item {}
 release: release identifier in file system
 
-\item {} 
+\item {}
 update: release update identifier in file system
 
-\item {} 
+\item {}
 dataset: dataset identifier in file system
 
-\item {} 
+\item {}
 level1d\_config: path to the level1d configuration file ( {\hyperref[\detokenize{index:level1d-config-file}]{\sphinxcrossref{\DUrole{std,std-ref}{Level 1d configuration file}}}})
 
-\item {} 
+\item {}
 sid\sphinxhyphen{}dck: source\sphinxhyphen{}deck identifier
 
-\item {} 
+\item {}
 year: file year, format yyyy
 
-\item {} 
+\item {}
 month: file month, format mm
 
 \end{itemize}
@@ -1126,24 +1126,24 @@ python level1d\PYGZus{}slurm.py release update dataset \PYG{n+nv}{\PYGZdl{}confi
 
 where:
 \begin{itemize}
-\item {} 
+\item {}
 release: release identifier in file system
 
-\item {} 
+\item {}
 update: release update identifier in file system
 
-\item {} 
+\item {}
 dataset: dataset identifier in file system
 
-\item {} 
+\item {}
 process\_list: full path to file with the list of source\sphinxhyphen{}deck partitions to
 process. This file can be either {\hyperref[\detokenize{index:process-list-file}]{\sphinxcrossref{\DUrole{std,std-ref}{Process list file}}}} or a subset of it.
 
-\item {} 
+\item {}
 failed\_only: optional (yes|no). Defaults to no. Setting this argument to ‘yes’
 means that only the monthly files with a *.failed log file will be processed.
 
-\item {} 
+\item {}
 remove\_source: optional (yes|no). Defaults to no. Setting this argument to ‘yes’
 implies removal of the source level (level1c) data files if the full set of
 monthly data files of a given source\sphinxhyphen{}deck is successfully processed.
@@ -1182,25 +1182,25 @@ python level1e.py \PYG{n+nv}{\PYGZdl{}data\PYGZus{}directory} release update dat
 
 where:
 \begin{itemize}
-\item {} 
+\item {}
 release: release identifier in file system
 
-\item {} 
+\item {}
 update: release update identifier in file system
 
-\item {} 
+\item {}
 dataset: dataset identifier in file system
 
-\item {} 
+\item {}
 level1e\_config: path to the level1e configuration file ( {\hyperref[\detokenize{index:level1e-config-file}]{\sphinxcrossref{\DUrole{std,std-ref}{Level 1e configuration file}}}})
 
-\item {} 
+\item {}
 sid\sphinxhyphen{}dck: source\sphinxhyphen{}deck identifier
 
-\item {} 
+\item {}
 year: file year, format yyyy
 
-\item {} 
+\item {}
 month: file month, format mm
 
 \end{itemize}
@@ -1218,24 +1218,24 @@ python level1e\PYGZus{}slurm.py release update dataset \PYG{n+nv}{\PYGZdl{}confi
 
 where:
 \begin{itemize}
-\item {} 
+\item {}
 release: release identifier in file system
 
-\item {} 
+\item {}
 update: release update identifier in file system
 
-\item {} 
+\item {}
 dataset: dataset identifier in file system
 
-\item {} 
+\item {}
 process\_list: full path to file with the list of source\sphinxhyphen{}deck partitions to
 process. This file can be either {\hyperref[\detokenize{index:process-list-file}]{\sphinxcrossref{\DUrole{std,std-ref}{Process list file}}}} or a subset of it.
 
-\item {} 
+\item {}
 failed\_only: optional (yes|no). Defaults to no. Setting this argument to ‘yes’
 means that only the monthly files with a *.failed log file will be processed.
 
-\item {} 
+\item {}
 remove\_source: optional (yes|no). Defaults to no. Setting this argument to ‘yes’
 implies removal of the source level (level1d) data files if the full set of
 monthly data files of a given source\sphinxhyphen{}deck is successfully processed.
@@ -1285,13 +1285,13 @@ python level2\PYGZus{}config.py release\PYGZus{}period\PYGZus{}file year\PYGZus{
 
 where:
 \begin{itemize}
-\item {} 
+\item {}
 release\_periods\_file: full path to the release periods file ( {\hyperref[\detokenize{index:release-periods-file}]{\sphinxcrossref{\DUrole{std,std-ref}{Release periods file}}}} )
 
-\item {} 
+\item {}
 year\_ini: first year in data release period.
 
-\item {} 
+\item {}
 year\_end: last year in data release period.
 
 \end{itemize}
@@ -1306,22 +1306,22 @@ After checking data quality on the level1e
 reports, edit the data selection file as needed to create the final dataset
 composition:
 \begin{itemize}
-\item {} 
+\item {}
 Remove a full sid\sphinxhyphen{}dck from level2 by setting to true the sid\sphinxhyphen{}dck ‘exclude’ tag.
 
-\item {} 
+\item {}
 Remove an observation table from the full dataset by adding it to the list under the general ‘params\_exclude’ tag.
 
-\item {} 
+\item {}
 Remove an observation table from a sid\sphinxhyphen{}dck by adding it to the list under the sid\sphinxhyphen{}dck ‘params\_exclude’ tag.
 
-\item {} 
+\item {}
 Adjust the release period of a sid\sphinxhyphen{}dck by modifying the ‘year\_init|end’ tags of the sid\sphinxhyphen{}dck
 
-\item {} 
+\item {}
 Observation tables to be removed have to be named as observations\sphinxhyphen{}{[}at|sst|dpt|wbt|wd|ws|slp{]}
 
-\item {} 
+\item {}
 All edits need to be consistent with JSON formatting rules.
 
 \end{itemize}
@@ -1371,19 +1371,19 @@ python level2.py data\PYGZus{}directory release update dataset level2\PYGZus{}co
 
 where:
 \begin{itemize}
-\item {} 
+\item {}
 release: release identifier in file system
 
-\item {} 
+\item {}
 update: release update identifier in file system
 
-\item {} 
+\item {}
 dataset: dataset identifier in file system
 
-\item {} 
+\item {}
 level2\_config: path to the level2 configuration file
 
-\item {} 
+\item {}
 sid\sphinxhyphen{}dck: source\sphinxhyphen{}deck identifier
 
 \end{itemize}
@@ -1400,16 +1400,16 @@ python level2\PYGZus{}slurm.py release update dataset \PYG{n+nv}{\PYGZdl{}config
 
 where:
 \begin{itemize}
-\item {} 
+\item {}
 release: release identifier in file system
 
-\item {} 
+\item {}
 update: release update identifier in file system
 
-\item {} 
+\item {}
 dataset: dataset identifier in file system
 
-\item {} 
+\item {}
 process\_list: full path to file with the list of source\sphinxhyphen{}deck partitions to
 process. This file can be either {\hyperref[\detokenize{index:process-list-file}]{\sphinxcrossref{\DUrole{std,std-ref}{Process list file}}}} or a subset of it.
 

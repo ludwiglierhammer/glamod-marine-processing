@@ -23,4 +23,3 @@ do
 		diff $rM/$base1 $rR/$base2
         fi
 done
-

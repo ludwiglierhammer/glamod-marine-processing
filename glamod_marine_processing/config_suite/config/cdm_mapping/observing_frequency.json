@@ -1,14 +1,30 @@
 {
-  "source_field":"freq",
-  "destination_field":"observing_frequency",
-  "map":[
-		{"OPD":0},
-		{"TPD":1},
-		{"FPD":2},
-		{"EPD":3},
-		{"HLY":4},
-		{"IRR":5},
-                {"-999999.0":null},
-		{"MSNG":null}
+  "source_field": "freq",
+  "destination_field": "observing_frequency",
+  "map": [
+    {
+      "OPD": 0
+    },
+    {
+      "TPD": 1
+    },
+    {
+      "FPD": 2
+    },
+    {
+      "EPD": 3
+    },
+    {
+      "HLY": 4
+    },
+    {
+      "IRR": 5
+    },
+    {
+      "-999999.0": null
+    },
+    {
+      "MSNG": null
+    }
   ]
 }

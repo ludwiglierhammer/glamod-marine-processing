@@ -1,18 +1,17 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 """
 Created on Mon Jun 17 14:24:10 2019
 
 Script to generate the C3S CDM Marine level1d data: add external MD (pub47...):
 
     - Read header table and MD and see if there is anything to merge
-    
+
     - Map MD to CDM with module cdm
-    
+
     - Merge mapped MD with CDM tables by primary_station_id and
-    save to file with function process_table()
-    (if nothing to merge, just save the file to level1d...)
-    
+      save to file with function process_table()
+      (if nothing to merge, just save the file to level1d...)
+
     - log, per table, total number of records and those with MD added/updated
 
 The processing unit is the source-deck monthly set of CDM tables.
@@ -29,7 +28,7 @@ Before processing starts:
 
 
 Inargs:
-------
+-------
 data_path: marine data path in file system
 release: release tag
 update: udpate tag
@@ -40,341 +39,407 @@ year: data file year (yyyy) (optional, from config_file otherwise)
 month: data file month (mm) (optional, from config_file otherwise)
 
 On input data:
--------------
+--------------
 If the pre-processing of the MD changes, then how we map the MD in map_to_cdm()
  changes also. The mappings there as for MD pre-processing in Autumn2019
 
 pub47 monthly files assumed to have 1 hdr line (first) with column names
 pub47 monthly files with FS=';'
 pub47 field names assumed: call;record;name;freq;vsslM;vssl;automation;rcnty;
-                           valid_from;valid_to;uid;thmH1;platH;brmH1;
-                           anmH;anHL1;wwH;sstD1;th1;hy1;st1;bm1;an1
+valid_from;valid_to;uid;thmH1;platH;brmH1;anmH;anHL1;wwH;sstD1;th1;hy1;st1;bm1;an1
 
 .....
 
 @author: iregon
 """
-import sys
-import os
-import json
-import simplejson
-import datetime
-import cdm
-from collections import Counter
-import glob
-import logging
-import pandas as pd
-from imp import reload
-reload(logging)  # This is to override potential previous config of logging
-import subprocess
+from __future__ import annotations
 
-#%% FUNCTIONS -------------------------------------------------------------------
+import datetime
+import glob
+import json
+import logging
+import os
+import subprocess
+import sys
+from collections import Counter
+from imp import reload
+
+import cdm
+import pandas as pd
+import simplejson
+
+reload(logging)  # This is to override potential previous config of logging
+
+
+# %% FUNCTIONS -------------------------------------------------------------------
 class script_setup:
+    """Set up script."""
+
     def __init__(self, inargs):
         self.data_path = inargs[1]
         self.release = inargs[2]
         self.update = inargs[3]
         self.dataset = inargs[4]
         self.configfile = inargs[5]
-        
+
         try:
             with open(self.configfile) as fileObj:
                 config = json.load(fileObj)
-        except:
-            logging.error('Opening configuration file :{}'.format(self.configfile), exc_info=True)
-            self.flag = False 
-            return
-        
-        if len(sys.argv) >= 8:
-            logging.warning('Removed option to provide sid_dck, year and month as arguments. Use config file instead')
-            #self.sid_dck = inargs[6]
-            #self.year = inargs[7]
-            #self.month = inargs[8]    
-        #else:
-        try:
-            self.sid_dck = config.get('sid_dck')
-            self.year = config.get('yyyy')
-            self.month = config.get('mm') 
         except Exception:
-            logging.error('Parsing configuration from file :{}'.format(self.configfile), exc_info=True)
+            logging.error(
+                f"Opening configuration file :{self.configfile}", exc_info=True
+            )
             self.flag = False
-                
+            return
+
+        if len(sys.argv) >= 8:
+            logging.warning(
+                "Removed option to provide sid_dck, year and month as arguments. Use config file instead"
+            )
+            # self.sid_dck = inargs[6]
+            # self.year = inargs[7]
+            # self.month = inargs[8]
+        # else:
+        try:
+            self.sid_dck = config.get("sid_dck")
+            self.year = config.get("yyyy")
+            self.month = config.get("mm")
+        except Exception:
+            logging.error(
+                f"Parsing configuration from file :{self.configfile}", exc_info=True
+            )
+            self.flag = False
+
         self.dck = self.sid_dck.split("-")[1]
 
         # However md_subdir is then nested in monthly....and inside monthly files
         # Other MD sources would stick to this? Force it otherwise?
-        process_options = ['md_model','md_subdir', 'history_explain',
-                           'md_first_yr_avail', 'md_last_yr_avail',
-                           'md_not_avail']
-        try:            
-            for opt in process_options: 
-                if not config.get(self.sid_dck,{}).get(opt):
+        process_options = [
+            "md_model",
+            "md_subdir",
+            "history_explain",
+            "md_first_yr_avail",
+            "md_last_yr_avail",
+            "md_not_avail",
+        ]
+        try:
+            for opt in process_options:
+                if not config.get(self.sid_dck, {}).get(opt):
                     setattr(self, opt, config.get(opt))
                 else:
                     setattr(self, opt, config.get(self.sid_dck).get(opt))
             self.flag = True
         except Exception:
-            logging.error('Parsing configuration from file :{}'.format(self.configfile), exc_info=True)
+            logging.error(
+                f"Parsing configuration from file :{self.configfile}", exc_info=True
+            )
             self.flag = False
-            
-# This is for json to handle dates
-date_handler = lambda obj: (
-    obj.isoformat()
-    if isinstance(obj, (datetime.datetime, datetime.date))
-    else None
-)
 
-def map_to_cdm(md_model,meta_df, log_level='INFO'):
+
+# This is for json to handle dates
+def date_handler(obj):
+    """Handle date."""
+    if isinstance(obj, (datetime.datetime, datetime.date)):
+        return obj.isoformat()
+
+
+def map_to_cdm(md_model, meta_df, log_level="INFO"):
+    """Map to CDM."""
     # Atts is a minimum info on vars the cdm mocule requires
-    atts = {k:{'column_type':'object'} for k in meta_df.columns}
+    atts = {k: {"column_type": "object"} for k in meta_df.columns}
     meta_cdm_dict = cdm.map_model(md_model, meta_df, atts, log_level=log_level)
     meta_cdm = pd.DataFrame()
-    table = 'header'
-    meta_cdm_columns = [ (table,x) for x in meta_cdm_dict[table]['data'].columns ]
-    meta_cdm[meta_cdm_columns] = meta_cdm_dict[table]['data']
+    table = "header"
+    meta_cdm_columns = [(table, x) for x in meta_cdm_dict[table]["data"].columns]
+    meta_cdm[meta_cdm_columns] = meta_cdm_dict[table]["data"]
     for table in obs_tables:
-        meta_cdm_columns = [(table, x) for x in meta_cdm_dict[table]['data'].columns ]
-        meta_cdm[meta_cdm_columns] = meta_cdm_dict[table]['data']
+        meta_cdm_columns = [(table, x) for x in meta_cdm_dict[table]["data"].columns]
+        meta_cdm[meta_cdm_columns] = meta_cdm_dict[table]["data"]
     return meta_cdm
 
 
-def process_table(table_df,table_name):
-    logging.info('Processing table {}'.format(table_name))
-    if isinstance(table_df,str):
+def process_table(table_df, table_name):
+    """Process table."""
+    logging.info(f"Processing table {table_name}")
+    if isinstance(table_df, str):
         # Assume 'header' and in a DF in table_df otherwise
         # Open table and reindex
         table_df = pd.DataFrame()
         if local:
-            table_df = cdm.read_tables(scratch_path,fileID,cdm_subset=[table_name])
+            table_df = cdm.read_tables(scratch_path, fileID, cdm_subset=[table_name])
         else:
-            table_df = cdm.read_tables(prev_level_path,fileID,cdm_subset=[table_name])
+            table_df = cdm.read_tables(prev_level_path, fileID, cdm_subset=[table_name])
         if table_df is None or len(table_df) == 0:
-            logging.warning('Empty or non existing table {}'.format(table_name))
+            logging.warning(f"Empty or non existing table {table_name}")
             return
-        table_df.set_index('report_id',inplace=True,drop=False)
+        table_df.set_index("report_id", inplace=True, drop=False)
         # by this point, header_df has its index set to report_id, hopefully ;)
-        table_df['primary_station_id'] = header_df['primary_station_id'].loc[table_df.index]
+        table_df["primary_station_id"] = header_df["primary_station_id"].loc[
+            table_df.index
+        ]
 
-    meta_dict[table_name] = {'total':len(table_df),'updated':0}
+    meta_dict[table_name] = {"total": len(table_df), "updated": 0}
     if merge:
-        meta_dict[table_name] = {'total':len(table_df),'updated':0}
-        table_df.set_index('primary_station_id',drop=False,inplace=True)
+        meta_dict[table_name] = {"total": len(table_df), "updated": 0}
+        table_df.set_index("primary_station_id", drop=False, inplace=True)
 
-        if table_name == 'header':
-            meta_table = meta_cdm[[ x for x in meta_cdm if x[0] == table_name ]]
-            meta_table.columns = [ x[1] for x in meta_table ]
-            #which should be equivalent to: (but more felxible if table_name !=header)
-            #meta_table = meta_cdm.loc[:, table_name]
+        if table_name == "header":
+            meta_table = meta_cdm[[x for x in meta_cdm if x[0] == table_name]]
+            meta_table.columns = [x[1] for x in meta_table]
+            # which should be equivalent to: (but more felxible if table_name !=header)
+            # meta_table = meta_cdm.loc[:, table_name]
         else:
-            meta_table = meta_cdm[[ x for x in meta_cdm if x[0] == table_name or (x[0]=='header' and x[1]=='primary_station_id')]]
-            meta_table.columns = [ x[1] for x in meta_table ]
-            #meta_table['primary_station_id'] = meta_cdm[('header', 'primary_station_id')]
-            #meta_table['primary_station_id'] = meta_cdm.loc[:,('header', 'primary_station_id')]
-        meta_table.set_index('primary_station_id', drop=False, inplace=True)
+            meta_table = meta_cdm[
+                [
+                    x
+                    for x in meta_cdm
+                    if x[0] == table_name
+                    or (x[0] == "header" and x[1] == "primary_station_id")
+                ]
+            ]
+            meta_table.columns = [x[1] for x in meta_table]
+            # meta_table['primary_station_id'] = meta_cdm[('header', 'primary_station_id')]
+            # meta_table['primary_station_id'] = meta_cdm.loc[:,('header', 'primary_station_id')]
+        meta_table.set_index("primary_station_id", drop=False, inplace=True)
         table_df.update(meta_table[~meta_table.index.duplicated()])
 
-        updated_locs =  [ x for x in table_df.index if x in meta_table.index ]
-        meta_dict[table_name]['updated'] = len(updated_locs)
+        updated_locs = [x for x in table_df.index if x in meta_table.index]
+        meta_dict[table_name]["updated"] = len(updated_locs)
 
-        if table_name == 'header':
-            missing_ids = [ x for x in table_df.index if x not in meta_table.index ]
-            if len(missing_ids)>0:
-                meta_dict['non ' + params.md_model + ' ids'] = {k:v for k,v in Counter(missing_ids).items()}
-            history_add = ';{0}. {1}'.format(history_tstmp,"metadata fix")
-            locs = table_df['primary_station_id'].isin(updated_locs)
-            table_df['history'].loc[locs] = table_df['history'].loc[locs] + history_add
+        if table_name == "header":
+            missing_ids = [x for x in table_df.index if x not in meta_table.index]
+            if len(missing_ids) > 0:
+                meta_dict["non " + params.md_model + " ids"] = {
+                    k: v for k, v in Counter(missing_ids).items()
+                }
+            history_add = ";{}. {}".format(history_tstmp, "metadata fix")
+            locs = table_df["primary_station_id"].isin(updated_locs)
+            table_df["history"].loc[locs] = table_df["history"].loc[locs] + history_add
 
     cdm_columns = cdm_tables.get(table_name).keys()
-    odata_filename = os.path.join(level_path,FFS.join([table_name,fileID_out]) + '.psv')
-    table_df.to_csv(odata_filename, index = False, sep = delimiter, columns = cdm_columns
-                 ,header = header, mode = wmode, na_rep = 'null')
+    odata_filename = os.path.join(
+        level_path, FFS.join([table_name, fileID_out]) + ".psv"
+    )
+    table_df.to_csv(
+        odata_filename,
+        index=False,
+        sep=delimiter,
+        columns=cdm_columns,
+        header=header,
+        mode=wmode,
+        na_rep="null",
+    )
 
     return
 
+
 def clean_level(file_id):
-    level_prods = glob.glob(os.path.join(level_path,'*-' + file_id + '.psv'))
-    level_logs = glob.glob(os.path.join(level_log_path, file_id + '.*'))
-    level_ql = glob.glob(os.path.join(level_ql_path, file_id + '.*'))
+    """Clean level."""
+    level_prods = glob.glob(os.path.join(level_path, "*-" + file_id + ".psv"))
+    level_logs = glob.glob(os.path.join(level_log_path, file_id + ".*"))
+    level_ql = glob.glob(os.path.join(level_ql_path, file_id + ".*"))
     for filename in level_prods + level_ql + level_logs:
         try:
-            logging.info('Removing previous file: {}'.format(filename))
+            logging.info(f"Removing previous file: {filename}")
             os.remove(filename)
         except FileNotFoundError:
             pass
 
-# END FUNCTIONS ---------------------------------------------------------------
-
-#python /ichec/work/glamod/glamod-marine-processing.2022/obs-suite/scripts/level1d.py 
-#/ichec/work/glamod/data/marine release_6.0 000000 ICOADS_R3.0.2T /ichec/work/glamod/data/marine/release_6.0/ICOADS_R3.0.2T/level1d/log/172-798/1.input 
-#> /ichec/work/glamod/data/marine/release_6.0/ICOADS_R3.0.2T/level1d/log/172-798/1.out 2> /ichec/work/glamod/data/marine/release_6.0/ICOADS_R3.0.2T/level1d/log/172-798/1.out
-
-#%% MAIN ------------------------------------------------------------------------
 
 # Process input and set up some things and make sure we can do something-------
-logging.basicConfig(format='%(levelname)s\t[%(asctime)s](%(filename)s)\t%(message)s',
-                    level=logging.DEBUG,datefmt='%Y%m%d %H:%M:%S',filename=None)
+logging.basicConfig(
+    format="%(levelname)s\t[%(asctime)s](%(filename)s)\t%(message)s",
+    level=logging.DEBUG,
+    datefmt="%Y%m%d %H:%M:%S",
+    filename=None,
+)
 
-if len(sys.argv)>1:
-    logging.info('Reading command line arguments')
+if len(sys.argv) > 1:
+    logging.info("Reading command line arguments")
     args = sys.argv
 else:
-    logging.error('Need arguments to run!')
+    logging.error("Need arguments to run!")
     sys.exit(1)
 
-#args = ['/ichec/work/glamod/data/marine','release_5.0','000000','ICOADS_R3.0.2T','/ichec/work/glamod/data/marine/release_5.0/ICOADS_R3.0.2T/level2_update/log/172-798/1.input']
 
 params = script_setup(args)
-#%%
-FFS = '-'
-delimiter = '|'
-md_delimiter = '|'
+# %%
+FFS = "-"
+delimiter = "|"
+md_delimiter = "|"
 header = True
-wmode = 'w'
+wmode = "w"
 local = True
 
-#%% might need adjustments (should go into config) ------------------------------------------------------------------------
+# %% might need adjustments (should go into config) ------------------------------------------------------------------------
 
-#I have to process from one release into another (4.0 to 4.1) because of missing write perm. and because release 4.0 frozen, Sorry for hardcoding!
-#level = 'level2'
-level = 'level2_update'
-level_prev = 'level2'
-#release_path_new = "/ichec/work/glamod/data/marine/release_4.1/ICOADS_R3.0.0T/"
-release_path_new = os.path.join(params.data_path,params.release,params.dataset)
-#release_new = "release_4.1"
+# I have to process from one release into another (4.0 to 4.1) because of missing write perm. and because release 4.0 frozen, Sorry for hardcoding!
+# level = 'level2'
+level = "level2_update"
+level_prev = "level2"
+# release_path_new = "/ichec/work/glamod/data/marine/release_4.1/ICOADS_R3.0.0T/"
+release_path_new = os.path.join(params.data_path, params.release, params.dataset)
+# release_new = "release_4.1"
 release_new = params.release
 
-#scratch_path = "/ichec/home/users/awerneck/scratch/local"#for testing only
+# scratch_path = "/ichec/home/users/awerneck/scratch/local"#for testing only
 scratch_path = os.path.join("/scratch/local", params.sid_dck)
 
-#%% might need adjustments ------------------------------------------------------------------------
+# %% might need adjustments ------------------------------------------------------------------------
 
 os.makedirs(scratch_path, exist_ok=True)
 
-release_path = os.path.join(params.data_path,params.release,params.dataset)
-release_id = FFS.join([params.release,params.update ])
-fileID = FFS.join([str(params.year),str(params.month).zfill(2),release_id ])
-fileID_date = FFS.join([str(params.year),str(params.month)])
+release_path = os.path.join(params.data_path, params.release, params.dataset)
+release_id = FFS.join([params.release, params.update])
+fileID = FFS.join([str(params.year), str(params.month).zfill(2), release_id])
+fileID_date = FFS.join([str(params.year), str(params.month)])
 
-release_id_new = FFS.join([release_new,params.update ])
-fileID_out = FFS.join([str(params.year),str(params.month).zfill(2),release_id_new ])
-#I have to process from one release into another (4.0 to 4.1) because of missing write perm. and because release 4.0 frozen, Sorry for hardcoding!
+release_id_new = FFS.join([release_new, params.update])
+fileID_out = FFS.join([str(params.year), str(params.month).zfill(2), release_id_new])
+# I have to process from one release into another (4.0 to 4.1) because of missing write perm. and because release 4.0 frozen, Sorry for hardcoding!
 
-prev_level_path = os.path.join(release_path,level_prev,params.sid_dck)
-level_path = os.path.join(release_path_new,level,params.sid_dck)
-level_ql_path = os.path.join(release_path_new,level,'quicklooks',params.sid_dck)
-level_log_path = os.path.join(release_path_new,level,'log',params.sid_dck)
+prev_level_path = os.path.join(release_path, level_prev, params.sid_dck)
+level_path = os.path.join(release_path_new, level, params.sid_dck)
+level_ql_path = os.path.join(release_path_new, level, "quicklooks", params.sid_dck)
+level_log_path = os.path.join(release_path_new, level, "log", params.sid_dck)
 
 data_paths = [prev_level_path, level_path, level_ql_path, level_log_path]
-if any([ not os.path.isdir(x) for x in data_paths ]):
-    logging.error('Could not find data paths: {}'.format(','.join([ x for x in data_paths if not os.path.isdir(x)])))
+if any([not os.path.isdir(x) for x in data_paths]):
+    logging.error(
+        "Could not find data paths: {}".format(
+            ",".join([x for x in data_paths if not os.path.isdir(x)])
+        )
+    )
     sys.exit(1)
 
-prev_level_filename = os.path.join(prev_level_path, 'header-' + fileID + '.psv')
+prev_level_filename = os.path.join(prev_level_path, "header-" + fileID + ".psv")
 if not os.path.isfile(prev_level_filename):
-    logging.error('L1c header file not found: {}'.format(prev_level_filename))
+    logging.error(f"L1c header file not found: {prev_level_filename}")
     sys.exit(1)
-    
+
 md_avail = True if not params.md_not_avail else False
 
 if md_avail:
-    md_path = os.path.join(params.data_path,release_new,params.md_subdir,'monthly')
-    logging.info('Setting MD path to {}'.format(md_path))
-    metadata_filename = os.path.join(md_path, FFS.join([params.year,params.month,'01.csv']))#removed .gz to make sure unzipping is not causing high I/O (just a guess)
-    metadata_fn_scratch = os.path.join(scratch_path, FFS.join([params.year,params.month,'01.csv']))#removed .gz to make sure unzipping is not causing high I/O (just a guess)
+    md_path = os.path.join(params.data_path, release_new, params.md_subdir, "monthly")
+    logging.info(f"Setting MD path to {md_path}")
+    metadata_filename = os.path.join(
+        md_path, FFS.join([params.year, params.month, "01.csv"])
+    )  # removed .gz to make sure unzipping is not causing high I/O (just a guess)
+    metadata_fn_scratch = os.path.join(
+        scratch_path, FFS.join([params.year, params.month, "01.csv"])
+    )  # removed .gz to make sure unzipping is not causing high I/O (just a guess)
 
     if not os.path.isfile(metadata_filename):
-        if int(params.year) > params.md_last_yr_avail or int(params.year) < params.md_first_yr_avail:
+        if (
+            int(params.year) > params.md_last_yr_avail
+            or int(params.year) < params.md_first_yr_avail
+        ):
             md_avail = False
-            logging.warning('Metadata source available only in period {0}-{1}'
-                            .format(str(params.md_first_yr_avail),str(params.md_last_yr_avail)))
-            logging.warning('level1d data will be created with no merging') 
+            logging.warning(
+                "Metadata source available only in period {}-{}".format(
+                    str(params.md_first_yr_avail), str(params.md_last_yr_avail)
+                )
+            )
+            logging.warning("level1d data will be created with no merging")
         else:
-            logging.error('Metadata file not found: {}'.format(metadata_filename))
+            logging.error(f"Metadata file not found: {metadata_filename}")
             sys.exit(1)
 else:
-    logging.info('Metadata not available for data source-deck {}'.format(params.sid_dck))
-    logging.info('level1d data will be created with no merging')
-        
-#%% Clean previous L1a products and side files ----------------------------------
-clean_level(fileID)#to be removed once all are deleted once
+    logging.info(f"Metadata not available for data source-deck {params.sid_dck}")
+    logging.info("level1d data will be created with no merging")
+
+# %% Clean previous L1a products and side files ----------------------------------
+clean_level(fileID)  # to be removed once all are deleted once
 clean_level(fileID_out)
 meta_dict = {}
 
 # DO THE DATA PROCESSING ------------------------------------------------------
 # -----------------------------------------------------------------------------
-history_tstmp = datetime.datetime.utcnow().strftime('%Y-%m-%d %H:%M:%S')
+history_tstmp = datetime.datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S")
 cdm_tables = cdm.lib.tables.tables_hdlr.load_tables()
-obs_tables = [ x for x in cdm_tables.keys() if x != 'header' ]
+obs_tables = [x for x in cdm_tables.keys() if x != "header"]
 
 # 1. SEE STATION ID's FROM BOTH DATA STREAMS AND SEE IF THERE'S ANYTHING TO
 # MERGE AT ALL
 # Read the header table
-table = 'header'
+table = "header"
 if local:
-    print('cp -L {}/*{}.psv {}'.format(prev_level_path, fileID, scratch_path))
-    subprocess.call('cp -L {}/*{}.psv {}'.format(prev_level_path, fileID, scratch_path), shell=True)
+    print(f"cp -L {prev_level_path}/*{fileID}.psv {scratch_path}")
+    subprocess.call(f"cp -L {prev_level_path}/*{fileID}.psv {scratch_path}", shell=True)
 header_df = pd.DataFrame()
-header_df = cdm.read_tables(scratch_path,fileID,cdm_subset=[table],na_values='null')
+header_df = cdm.read_tables(scratch_path, fileID, cdm_subset=[table], na_values="null")
 if len(header_df) == 0:
-    logging.error('Empty or non-existing header table')
+    logging.error("Empty or non-existing header table")
     sys.exit(1)
 
 # Read the metadona
 if md_avail:
     if local:
-        subprocess.call('cp -L {} {}'.format(metadata_filename, metadata_fn_scratch), shell=True)
+        subprocess.call(f"cp -L {metadata_filename} {metadata_fn_scratch}", shell=True)
     meta_df = pd.DataFrame()
-    meta_df = pd.read_csv(metadata_fn_scratch,delimiter = md_delimiter, dtype = 'object',
-                               header = 0, na_values='MSNG')
+    meta_df = pd.read_csv(
+        metadata_fn_scratch,
+        delimiter=md_delimiter,
+        dtype="object",
+        header=0,
+        na_values="MSNG",
+    )
     if len(meta_df) == 0:
-        logging.error('Empty or non-existing metadata file')
+        logging.error("Empty or non-existing metadata file")
         sys.exit(1)
 
 # See if there's anything to do
-header_df.set_index('primary_station_id',drop = False, inplace = True)
+header_df.set_index("primary_station_id", drop=False, inplace=True)
 merge = True if md_avail else False
 if md_avail:
-    meta_df = meta_df.loc[meta_df['ship_callsign'].isin(header_df['primary_station_id'])]
+    meta_df = meta_df.loc[
+        meta_df["ship_callsign"].isin(header_df["primary_station_id"])
+    ]
     if len(meta_df) == 0:
-        logging.warning('No metadata to merge in file')
+        logging.warning("No metadata to merge in file")
         merge = False
 
 # 2. MAP PUB47 MD TO CDM FIELDS -----------------------------------------------
 if merge:
-    logging.info('Mapping metadata to CDM')
-    meta_cdm = map_to_cdm(params.md_model,meta_df, log_level='DEBUG')
+    logging.info("Mapping metadata to CDM")
+    meta_cdm = map_to_cdm(params.md_model, meta_df, log_level="DEBUG")
 
 # 3. UPDATE CDM WITH PUB47 OR JUST COPY PREV LEVEL TO CURRENT -----------------
 # This is only valid for the header
-table =  'header'
-process_table(header_df,table)
+table = "header"
+process_table(header_df, table)
 
-header_df.set_index('report_id',inplace=True,drop=False)
+header_df.set_index("report_id", inplace=True, drop=False)
 # for obs
 for table in obs_tables:
     print(table)
     process_table(table, table)
 
 # 4. SAVE QUICKLOOK -----------------------------------------------------------
-logging.info('Saving json quicklook')
-level_io_filename = os.path.join(level_ql_path,fileID + '.json')
-with open(level_io_filename,'w') as fileObj:
-    simplejson.dump({'-'.join([params.year,params.month]):meta_dict},fileObj,
-                     default = date_handler,indent=4,ignore_nan=True)
+logging.info("Saving json quicklook")
+level_io_filename = os.path.join(level_ql_path, fileID + ".json")
+with open(level_io_filename, "w") as fileObj:
+    simplejson.dump(
+        {"-".join([params.year, params.month]): meta_dict},
+        fileObj,
+        default=date_handler,
+        indent=4,
+        ignore_nan=True,
+    )
 
 # 5. clean scratch
 for table in obs_tables:
-    try: 
-        os.remove('{}/{}-{}.psv'.format(scratch_path,table, fileID))
+    try:
+        os.remove(f"{scratch_path}/{table}-{fileID}.psv")
     except FileNotFoundError:
         pass
-try: 
-    os.remove('{}/header-{}.psv'.format(scratch_path, fileID))
+try:
+    os.remove(f"{scratch_path}/header-{fileID}.psv")
 except FileNotFoundError:
     pass
-try: 
+try:
     os.remove(metadata_fn_scratch)
 except FileNotFoundError:
     pass
 
-logging.info('End')
+logging.info("End")

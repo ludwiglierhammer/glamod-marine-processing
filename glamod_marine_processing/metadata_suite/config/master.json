@@ -1,143 +1,699 @@
 {
-  "fields":[
-    {"name":"proto_id", "kind":"object", "keep":true},
-    {"name":"record_number", "kind":"int", "keep":true},
-    {"name":"callsign", "kind":"object", "keep": true},
-    {"name":"country_of_registry", "kind":"object", "keep": true},
-    {"name":"name", "kind":"object", "keep": true},
-    {"name":"rte1", "kind":"object", "keep": true},
-    {"name":"rte2", "kind":"object", "keep": true},
-    {"name":"rte3", "kind":"object", "keep": true},
-    {"name":"rte4", "kind":"object", "keep": true},
-    {"name":"rte5", "kind":"object", "keep": true},
-    {"name":"rte6", "kind":"object", "keep": true},
-    {"name":"rte7", "kind":"object", "keep": true},
-    {"name":"rte8", "kind":"object", "keep": true},
-    {"name":"rte9", "kind":"object", "keep": true},
-    {"name":"rte10", "kind":"object", "keep": true},
-    {"name":"satcom1", "kind":"object", "keep": true},
-    {"name":"satcom2", "kind":"object", "keep": true},
-    {"name":"phGr1", "kind":"object", "keep":true},
-    {"name":"phGr2", "kind":"object", "keep":true},
-    {"name":"prST", "kind":"object", "keep":true},
-    {"name":"prSt1", "kind":"object", "keep":true},
-    {"name":"prSt2", "kind":"object", "keep":true},
-    {"name":"prSt3", "kind":"object", "keep":true},
-    {"name":"prSt4", "kind":"object", "keep":true},
-    {"name":"prSt5", "kind":"object", "keep":true},
-    {"name":"call2", "kind":"object", "keep": true},
-    {"name":"name2", "kind":"object", "keep": true},
-    {"name":"recruiting_country", "kind":"object", "keep": true},
-    {"name":"prepared", "kind":"object", "keep":true},
-    {"name":"vos_recruitment_date", "kind":"object", "keep":true},
-    {"name":"vos_derecruitment_date", "kind":"object", "keep":true},
-    {"name":"vosclim_recruitment_date", "kind":"object", "keep":true},
-    {"name":"vosclim_derecruitment_date", "kind":"object", "keep":true},
-    {"name":"vessel_image", "kind":"object", "keep":true},
-    {"name":"change_date", "kind":"object", "keep": true},
-    {"name":"meteorological_vessel_type", "kind":"object", "keep": true},
-    {"name":"valid_from", "kind":"datetime", "keep": true},
-    {"name":"valid_to", "kind":"datetime", "keep": true},
-    {"name":"source_file", "kind":"object", "keep": true},
-    {"name":"electronic_logbook", "kind":"object", "keep":true},
-    {"name":"aws_model", "kind":"object", "keep":true},
-    {"name":"aws_processing_software", "kind":"object", "keep":true},
-    {"name":"aws_display_software", "kind":"object", "keep":true},
-    {"name":"automation", "kind":"object", "keep":true},
-    {"name":"baseline_check", "kind":"object", "keep":true},
-    {"name":"observing_frequency", "kind":"object", "keep":true},
-    {"name":"vessel_type", "kind":"object", "keep": true},
-    {"name":"imo_number", "kind":"object", "keep":true},
-    {"name":"vessel_length", "kind":"float", "keep":true},
-    {"name":"vessel_breadth", "kind":"float", "keep":true},
-    {"name":"vessel_freeboard", "kind":"float", "keep":true},
-    {"name":"vessel_draught", "kind":"float", "keep":true},
-    {"name":"vessel_max_cargo_height", "kind":"float", "keep":true},
-    {"name":"distance_bow_to_bridge", "kind":"float", "keep":true},
-    {"name":"tele", "kind":"object", "keep": true},
-    {"name":"radOp", "kind":"int", "keep": true},
-    {"name":"windwave_observing_height", "kind":"float", "keep": true},
-    {"name":"anemometer_usage", "kind":"object", "keep":true},
-    {"name":"anemometer1_height_loadline", "kind":"float", "keep": true},
-    {"name":"anemometer1_height_deck", "kind":"float", "keep":true},
-    {"name":"anemometer1_distance_bow", "kind":"float", "keep":true},
-    {"name":"anemometer1_location", "kind":"object", "keep":true},
-    {"name":"anemometer1_distance_centreline", "kind":"float", "keep":true},
-    {"name":"anemometer1_side", "kind":"object", "keep":true},
-    {"name":"anemometer1_make_model", "kind":"object", "keep":true},
-    {"name":"anemometer1_type", "kind":"object", "keep":true},
-    {"name":"anemometer1_calibration_date", "kind":"object", "keep":true},
-    {"name":"anemometer2_height_loadline", "kind":"float", "keep":true},
-    {"name":"anemometer2_height_deck", "kind":"float", "keep":true},
-    {"name":"anemometer2_distance_bow", "kind":"float", "keep":true},
-    {"name":"anemometer2_distance_centreline", "kind":"float", "keep":true},
-    {"name":"anemometer2_location", "kind":"object", "keep":true},
-    {"name":"anemometer2_side", "kind":"object", "keep":true},
-    {"name":"anemometer2_make_model", "kind":"object", "keep":true},
-    {"name":"anemometer2_type", "kind":"object", "keep":true},
-    {"name":"anemometer2_calibration_date", "kind":"object", "keep":true},
-    {"name":"barometer1_type", "kind":"object", "keep": true},
-    {"name":"barometer1_height", "kind":"float", "keep":true},
-    {"name":"barometer1_make_model", "kind":"object", "keep":true},
-    {"name":"barometer1_location", "kind":"object", "keep":true},
-    {"name":"barometer1_units", "kind":"object", "keep":true},
-    {"name":"barometer1_calibration_date", "kind":"object", "keep":true},
-    {"name":"barometer2_type", "kind":"object", "keep": true},
-    {"name":"barometer2_height", "kind":"float", "keep":true},
-    {"name":"barometer2_make_model", "kind":"object", "keep":true},
-    {"name":"barometer2_location", "kind":"object", "keep":true},
-    {"name":"barometer2_units", "kind":"object", "keep":true},
-    {"name":"barometer2_calibration_date", "kind":"object", "keep":true},
-    {"name":"barograph1_type", "kind":"object", "keep": true},
-    {"name":"barograph2_type", "kind":"object", "keep": true},
-    {"name":"sst1_method", "kind":"object", "keep": true},
-    {"name":"sst1_depth", "kind":"float", "keep":true},
-    {"name":"sst2_method", "kind":"object", "keep": true},
-    {"name":"sst2_depth", "kind":"float", "keep":true},
-    {"name":"thermometer1_type", "kind":"object", "keep": true},
-    {"name":"thermometer1_exposure", "kind":"object", "keep": true},
-    {"name":"thermometer1_make_model", "kind":"object", "keep":true},
-    {"name":"thermometer1_location", "kind":"object", "keep":true},
-    {"name":"thermometer1_height", "kind":"float", "keep":true},
-    {"name":"thermometer1_scale", "kind":"object", "keep":true},
-    {"name":"thermometer2_type", "kind":"object", "keep": true},
-    {"name":"thermometer2_exposure", "kind":"object", "keep": true},
-    {"name":"thermometer2_make_model", "kind":"object", "keep":true},
-    {"name":"thermometer2_location", "kind":"object", "keep":true},
-    {"name":"thermometer2_height", "kind":"float", "keep":true},
-    {"name":"thermometer2_scale", "kind":"object", "keep":true},
-    {"name":"hygrometer1_type", "kind":"object", "keep": true},
-    {"name":"hygrometer1_exposure", "kind":"object", "keep": true},
-    {"name":"hygrometer2_type", "kind":"object", "keep": true},
-    {"name":"hygrometer2_exposure", "kind":"object", "keep": true},
-    {"name":"othI1", "kind":"object", "keep": true},
-    {"name":"othI2", "kind":"object", "keep": true},
-    {"name":"othI3", "kind":"object", "keep": true},
-    {"name":"othI4", "kind":"object", "keep": true},
-    {"name":"othI5", "kind":"object", "keep": true},
-    {"name":"othI6", "kind":"object", "keep": true},
-    {"name":"othI7", "kind":"object", "keep": true},
-    {"name":"othI8", "kind":"object", "keep": true},
-    {"name":"othI9", "kind":"object", "keep": true},
-    {"name":"fieldabbrev1", "kind":"object", "keep": true},
-    {"name":"footID1", "kind":"object", "keep": true},
-    {"name":"fieldabbrev2", "kind":"object", "keep": true},
-    {"name":"footID2", "kind":"object", "keep": true},
-    {"name":"fieldabbrev3", "kind":"object", "keep": true},
-    {"name":"footID3", "kind":"object", "keep": true},
-    {"name":"fieldabbrev4", "kind":"object", "keep": true},
-    {"name":"footID4", "kind":"object", "keep": true},
-    {"name":"fieldabbrev5", "kind":"object", "keep": true},
-    {"name":"footID5", "kind":"object", "keep": true},
-    {"name":"fieldabbrev6", "kind":"object", "keep": true},
-    {"name":"footID6", "kind":"object", "keep": true},
-    {"name":"fieldabbrev7", "kind":"object", "keep": true},
-    {"name":"footID7", "kind":"object", "keep": true},
-    {"name":"fieldabbrev8", "kind":"object", "keep": true},
-    {"name":"footID8", "kind":"object", "keep": true},
-    {"name":"fieldabbrev9", "kind":"object", "keep": true},
-    {"name":"footID9", "kind":"object", "keep": true},
-    {"name":"fieldabbrev10", "kind":"object", "keep": true},
-    {"name":"footID10", "kind":"object", "keep": true}
+  "fields": [
+    {
+      "name": "proto_id",
+      "kind": "object",
+      "keep": true
+    },
+    {
+      "name": "record_number",
+      "kind": "int",
+      "keep": true
+    },
+    {
+      "name": "callsign",
+      "kind": "object",
+      "keep": true
+    },
+    {
+      "name": "country_of_registry",
+      "kind": "object",
+      "keep": true
+    },
+    {
+      "name": "name",
+      "kind": "object",
+      "keep": true
+    },
+    {
+      "name": "rte1",
+      "kind": "object",
+      "keep": true
+    },
+    {
+      "name": "rte2",
+      "kind": "object",
+      "keep": true
+    },
+    {
+      "name": "rte3",
+      "kind": "object",
+      "keep": true
+    },
+    {
+      "name": "rte4",
+      "kind": "object",
+      "keep": true
+    },
+    {
+      "name": "rte5",
+      "kind": "object",
+      "keep": true
+    },
+    {
+      "name": "rte6",
+      "kind": "object",
+      "keep": true
+    },
+    {
+      "name": "rte7",
+      "kind": "object",
+      "keep": true
+    },
+    {
+      "name": "rte8",
+      "kind": "object",
+      "keep": true
+    },
+    {
+      "name": "rte9",
+      "kind": "object",
+      "keep": true
+    },
+    {
+      "name": "rte10",
+      "kind": "object",
+      "keep": true
+    },
+    {
+      "name": "satcom1",
+      "kind": "object",
+      "keep": true
+    },
+    {
+      "name": "satcom2",
+      "kind": "object",
+      "keep": true
+    },
+    {
+      "name": "phGr1",
+      "kind": "object",
+      "keep": true
+    },
+    {
+      "name": "phGr2",
+      "kind": "object",
+      "keep": true
+    },
+    {
+      "name": "prST",
+      "kind": "object",
+      "keep": true
+    },
+    {
+      "name": "prSt1",
+      "kind": "object",
+      "keep": true
+    },
+    {
+      "name": "prSt2",
+      "kind": "object",
+      "keep": true
+    },
+    {
+      "name": "prSt3",
+      "kind": "object",
+      "keep": true
+    },
+    {
+      "name": "prSt4",
+      "kind": "object",
+      "keep": true
+    },
+    {
+      "name": "prSt5",
+      "kind": "object",
+      "keep": true
+    },
+    {
+      "name": "call2",
+      "kind": "object",
+      "keep": true
+    },
+    {
+      "name": "name2",
+      "kind": "object",
+      "keep": true
+    },
+    {
+      "name": "recruiting_country",
+      "kind": "object",
+      "keep": true
+    },
+    {
+      "name": "prepared",
+      "kind": "object",
+      "keep": true
+    },
+    {
+      "name": "vos_recruitment_date",
+      "kind": "object",
+      "keep": true
+    },
+    {
+      "name": "vos_derecruitment_date",
+      "kind": "object",
+      "keep": true
+    },
+    {
+      "name": "vosclim_recruitment_date",
+      "kind": "object",
+      "keep": true
+    },
+    {
+      "name": "vosclim_derecruitment_date",
+      "kind": "object",
+      "keep": true
+    },
+    {
+      "name": "vessel_image",
+      "kind": "object",
+      "keep": true
+    },
+    {
+      "name": "change_date",
+      "kind": "object",
+      "keep": true
+    },
+    {
+      "name": "meteorological_vessel_type",
+      "kind": "object",
+      "keep": true
+    },
+    {
+      "name": "valid_from",
+      "kind": "datetime",
+      "keep": true
+    },
+    {
+      "name": "valid_to",
+      "kind": "datetime",
+      "keep": true
+    },
+    {
+      "name": "source_file",
+      "kind": "object",
+      "keep": true
+    },
+    {
+      "name": "electronic_logbook",
+      "kind": "object",
+      "keep": true
+    },
+    {
+      "name": "aws_model",
+      "kind": "object",
+      "keep": true
+    },
+    {
+      "name": "aws_processing_software",
+      "kind": "object",
+      "keep": true
+    },
+    {
+      "name": "aws_display_software",
+      "kind": "object",
+      "keep": true
+    },
+    {
+      "name": "automation",
+      "kind": "object",
+      "keep": true
+    },
+    {
+      "name": "baseline_check",
+      "kind": "object",
+      "keep": true
+    },
+    {
+      "name": "observing_frequency",
+      "kind": "object",
+      "keep": true
+    },
+    {
+      "name": "vessel_type",
+      "kind": "object",
+      "keep": true
+    },
+    {
+      "name": "imo_number",
+      "kind": "object",
+      "keep": true
+    },
+    {
+      "name": "vessel_length",
+      "kind": "float",
+      "keep": true
+    },
+    {
+      "name": "vessel_breadth",
+      "kind": "float",
+      "keep": true
+    },
+    {
+      "name": "vessel_freeboard",
+      "kind": "float",
+      "keep": true
+    },
+    {
+      "name": "vessel_draught",
+      "kind": "float",
+      "keep": true
+    },
+    {
+      "name": "vessel_max_cargo_height",
+      "kind": "float",
+      "keep": true
+    },
+    {
+      "name": "distance_bow_to_bridge",
+      "kind": "float",
+      "keep": true
+    },
+    {
+      "name": "tele",
+      "kind": "object",
+      "keep": true
+    },
+    {
+      "name": "radOp",
+      "kind": "int",
+      "keep": true
+    },
+    {
+      "name": "windwave_observing_height",
+      "kind": "float",
+      "keep": true
+    },
+    {
+      "name": "anemometer_usage",
+      "kind": "object",
+      "keep": true
+    },
+    {
+      "name": "anemometer1_height_loadline",
+      "kind": "float",
+      "keep": true
+    },
+    {
+      "name": "anemometer1_height_deck",
+      "kind": "float",
+      "keep": true
+    },
+    {
+      "name": "anemometer1_distance_bow",
+      "kind": "float",
+      "keep": true
+    },
+    {
+      "name": "anemometer1_location",
+      "kind": "object",
+      "keep": true
+    },
+    {
+      "name": "anemometer1_distance_centreline",
+      "kind": "float",
+      "keep": true
+    },
+    {
+      "name": "anemometer1_side",
+      "kind": "object",
+      "keep": true
+    },
+    {
+      "name": "anemometer1_make_model",
+      "kind": "object",
+      "keep": true
+    },
+    {
+      "name": "anemometer1_type",
+      "kind": "object",
+      "keep": true
+    },
+    {
+      "name": "anemometer1_calibration_date",
+      "kind": "object",
+      "keep": true
+    },
+    {
+      "name": "anemometer2_height_loadline",
+      "kind": "float",
+      "keep": true
+    },
+    {
+      "name": "anemometer2_height_deck",
+      "kind": "float",
+      "keep": true
+    },
+    {
+      "name": "anemometer2_distance_bow",
+      "kind": "float",
+      "keep": true
+    },
+    {
+      "name": "anemometer2_distance_centreline",
+      "kind": "float",
+      "keep": true
+    },
+    {
+      "name": "anemometer2_location",
+      "kind": "object",
+      "keep": true
+    },
+    {
+      "name": "anemometer2_side",
+      "kind": "object",
+      "keep": true
+    },
+    {
+      "name": "anemometer2_make_model",
+      "kind": "object",
+      "keep": true
+    },
+    {
+      "name": "anemometer2_type",
+      "kind": "object",
+      "keep": true
+    },
+    {
+      "name": "anemometer2_calibration_date",
+      "kind": "object",
+      "keep": true
+    },
+    {
+      "name": "barometer1_type",
+      "kind": "object",
+      "keep": true
+    },
+    {
+      "name": "barometer1_height",
+      "kind": "float",
+      "keep": true
+    },
+    {
+      "name": "barometer1_make_model",
+      "kind": "object",
+      "keep": true
+    },
+    {
+      "name": "barometer1_location",
+      "kind": "object",
+      "keep": true
+    },
+    {
+      "name": "barometer1_units",
+      "kind": "object",
+      "keep": true
+    },
+    {
+      "name": "barometer1_calibration_date",
+      "kind": "object",
+      "keep": true
+    },
+    {
+      "name": "barometer2_type",
+      "kind": "object",
+      "keep": true
+    },
+    {
+      "name": "barometer2_height",
+      "kind": "float",
+      "keep": true
+    },
+    {
+      "name": "barometer2_make_model",
+      "kind": "object",
+      "keep": true
+    },
+    {
+      "name": "barometer2_location",
+      "kind": "object",
+      "keep": true
+    },
+    {
+      "name": "barometer2_units",
+      "kind": "object",
+      "keep": true
+    },
+    {
+      "name": "barometer2_calibration_date",
+      "kind": "object",
+      "keep": true
+    },
+    {
+      "name": "barograph1_type",
+      "kind": "object",
+      "keep": true
+    },
+    {
+      "name": "barograph2_type",
+      "kind": "object",
+      "keep": true
+    },
+    {
+      "name": "sst1_method",
+      "kind": "object",
+      "keep": true
+    },
+    {
+      "name": "sst1_depth",
+      "kind": "float",
+      "keep": true
+    },
+    {
+      "name": "sst2_method",
+      "kind": "object",
+      "keep": true
+    },
+    {
+      "name": "sst2_depth",
+      "kind": "float",
+      "keep": true
+    },
+    {
+      "name": "thermometer1_type",
+      "kind": "object",
+      "keep": true
+    },
+    {
+      "name": "thermometer1_exposure",
+      "kind": "object",
+      "keep": true
+    },
+    {
+      "name": "thermometer1_make_model",
+      "kind": "object",
+      "keep": true
+    },
+    {
+      "name": "thermometer1_location",
+      "kind": "object",
+      "keep": true
+    },
+    {
+      "name": "thermometer1_height",
+      "kind": "float",
+      "keep": true
+    },
+    {
+      "name": "thermometer1_scale",
+      "kind": "object",
+      "keep": true
+    },
+    {
+      "name": "thermometer2_type",
+      "kind": "object",
+      "keep": true
+    },
+    {
+      "name": "thermometer2_exposure",
+      "kind": "object",
+      "keep": true
+    },
+    {
+      "name": "thermometer2_make_model",
+      "kind": "object",
+      "keep": true
+    },
+    {
+      "name": "thermometer2_location",
+      "kind": "object",
+      "keep": true
+    },
+    {
+      "name": "thermometer2_height",
+      "kind": "float",
+      "keep": true
+    },
+    {
+      "name": "thermometer2_scale",
+      "kind": "object",
+      "keep": true
+    },
+    {
+      "name": "hygrometer1_type",
+      "kind": "object",
+      "keep": true
+    },
+    {
+      "name": "hygrometer1_exposure",
+      "kind": "object",
+      "keep": true
+    },
+    {
+      "name": "hygrometer2_type",
+      "kind": "object",
+      "keep": true
+    },
+    {
+      "name": "hygrometer2_exposure",
+      "kind": "object",
+      "keep": true
+    },
+    {
+      "name": "othI1",
+      "kind": "object",
+      "keep": true
+    },
+    {
+      "name": "othI2",
+      "kind": "object",
+      "keep": true
+    },
+    {
+      "name": "othI3",
+      "kind": "object",
+      "keep": true
+    },
+    {
+      "name": "othI4",
+      "kind": "object",
+      "keep": true
+    },
+    {
+      "name": "othI5",
+      "kind": "object",
+      "keep": true
+    },
+    {
+      "name": "othI6",
+      "kind": "object",
+      "keep": true
+    },
+    {
+      "name": "othI7",
+      "kind": "object",
+      "keep": true
+    },
+    {
+      "name": "othI8",
+      "kind": "object",
+      "keep": true
+    },
+    {
+      "name": "othI9",
+      "kind": "object",
+      "keep": true
+    },
+    {
+      "name": "fieldabbrev1",
+      "kind": "object",
+      "keep": true
+    },
+    {
+      "name": "footID1",
+      "kind": "object",
+      "keep": true
+    },
+    {
+      "name": "fieldabbrev2",
+      "kind": "object",
+      "keep": true
+    },
+    {
+      "name": "footID2",
+      "kind": "object",
+      "keep": true
+    },
+    {
+      "name": "fieldabbrev3",
+      "kind": "object",
+      "keep": true
+    },
+    {
+      "name": "footID3",
+      "kind": "object",
+      "keep": true
+    },
+    {
+      "name": "fieldabbrev4",
+      "kind": "object",
+      "keep": true
+    },
+    {
+      "name": "footID4",
+      "kind": "object",
+      "keep": true
+    },
+    {
+      "name": "fieldabbrev5",
+      "kind": "object",
+      "keep": true
+    },
+    {
+      "name": "footID5",
+      "kind": "object",
+      "keep": true
+    },
+    {
+      "name": "fieldabbrev6",
+      "kind": "object",
+      "keep": true
+    },
+    {
+      "name": "footID6",
+      "kind": "object",
+      "keep": true
+    },
+    {
+      "name": "fieldabbrev7",
+      "kind": "object",
+      "keep": true
+    },
+    {
+      "name": "footID7",
+      "kind": "object",
+      "keep": true
+    },
+    {
+      "name": "fieldabbrev8",
+      "kind": "object",
+      "keep": true
+    },
+    {
+      "name": "footID8",
+      "kind": "object",
+      "keep": true
+    },
+    {
+      "name": "fieldabbrev9",
+      "kind": "object",
+      "keep": true
+    },
+    {
+      "name": "footID9",
+      "kind": "object",
+      "keep": true
+    },
+    {
+      "name": "fieldabbrev10",
+      "kind": "object",
+      "keep": true
+    },
+    {
+      "name": "footID10",
+      "kind": "object",
+      "keep": true
+    }
   ]
 }

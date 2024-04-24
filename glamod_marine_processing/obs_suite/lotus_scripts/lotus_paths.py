@@ -1,7 +1,11 @@
-import os 
+"""Set paths for LOTUS scripts."""
 
-lotus_scripts_directory = os.environ['lotus_scripts_directory']
-scripts_directory = os.environ['scripts_directory']
-data_directory = os.environ['data_directory']
-scratch_directory = os.environ['scratch_directory']
-config_directory  = os.environ['config_directory']
+from __future__ import annotations
+
+import os
+
+lotus_scripts_directory = os.environ["lotus_scripts_directory"]
+scripts_directory = os.environ["scripts_directory"]
+data_directory = os.environ["data_directory"]
+scratch_directory = os.environ["scratch_directory"]
+config_directory = os.environ["config_directory"]

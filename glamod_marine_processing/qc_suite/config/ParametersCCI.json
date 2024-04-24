@@ -1,192 +1,405 @@
 {
   "runid": "CCIrun",
-
-  "icoads_dir": ["/ichec/work/glamod/data/marine/release_5.1/metoffice_qc/corrected/"],
-
-  "icoads_filenames": ["YYYY-MM.psv"],
-
-  "background_dir": ["/ichec/work/glamod/data/marine/external_files/SST_daily_CCI/gws-access.jasmin.ac.uk/ICDR_v2/Analysis/L4/v2.1/YYYY/MMMM/DDDD/"],
-
-  "background_filenames": ["YYYYMMMMDDDD120000-ESACCI-L4_GHRSST-SSTdepth-OSTIA-GLOB_CDR2.1-v02.0-fv01.0.nc"],
-
-
+  "icoads_dir": [
+    "/ichec/work/glamod/data/marine/release_5.1/metoffice_qc/corrected/"
+  ],
+  "icoads_filenames": [
+    "YYYY-MM.psv"
+  ],
+  "background_dir": [
+    "/ichec/work/glamod/data/marine/external_files/SST_daily_CCI/gws-access.jasmin.ac.uk/ICDR_v2/Analysis/L4/v2.1/YYYY/MMMM/DDDD/"
+  ],
+  "background_filenames": [
+    "YYYYMMMMDDDD120000-ESACCI-L4_GHRSST-SSTdepth-OSTIA-GLOB_CDR2.1-v02.0-fv01.0.nc"
+  ],
   "climatologies": [
-    ["SST", "mean",  "/ichec/work/glamod/data/marine/external_files/SST/HadSST2_daily_1x1_climatology.nc", "sst"],
-    ["AT",  "mean",  "/ichec/work/glamod/data/marine/external_files/ERAClimatologies/t2m_pentad_1by1marine_ERA-Interim_data_19792015.nc", "t2m_clims"],
-    ["AT99","mean",  "/ichec/work/glamod/data/marine/external_files/AT/HadNMAT2_daily_1x1_climatology.nc", "nmat"],
-    ["DAT", "mean",  "/ichec/work/glamod/data/marine/external_files/AT/HadDAT_pentad_climatology.nc", "dmat"],
-    ["AT2", "mean",  "/ichec/work/glamod/data/marine/external_files/ERAClimatologies/t2m_pentad_1by1marine_ERA-Interim_data_19792015.nc", "t2m_clims"],
-    ["DPT", "mean",  "/ichec/work/glamod/data/marine/external_files/ERAClimatologies/td2m_pentad_1by1marine_ERA-Interim_data_19792015.nc", "td2m_clims"],
-    ["SHU", "mean",  "/ichec/work/glamod/data/marine/external_files/ERAClimatologies/q2m_pentad_1by1marine_ERA-Interim_data_19792015.nc", "q2m_clims"],
-    ["VAP", "mean",  "/ichec/work/glamod/data/marine/external_files/ERAClimatologies/e2m_pentad_1by1marine_ERA-Interim_data_19792015.nc", "e2m_clims"],
-    ["CRH", "mean",  "/ichec/work/glamod/data/marine/external_files/ERAClimatologies/rh2m_pentad_1by1marine_ERA-Interim_data_19792015.nc", "rh2m_clims"],
-    ["CWB", "mean",  "/ichec/work/glamod/data/marine/external_files/ERAClimatologies/tw2m_pentad_1by1marine_ERA-Interim_data_19792015.nc", "tw2m_clims"],
-    ["DPD", "mean",  "/ichec/work/glamod/data/marine/external_files/ERAClimatologies/dpd2m_pentad_1by1marine_ERA-Interim_data_19792015.nc", "dpd2m_clims"],
-    ["SLP2","mean",  "/ichec/work/glamod/data/marine/external_files/ERAClimatologies/p2m_pentad_1by1marine_ERA-Interim_data_19792015.nc", "p2m_clims"],
-    ["AT2", "stdev", "/ichec/work/glamod/data/marine/external_files/ERAClimatologies/t2m_pentad_1by1marine_ERA-Interim_data_19792015.nc",  "t2m_stdevs"],
-    ["DPT", "stdev", "/ichec/work/glamod/data/marine/external_files/ERAClimatologies/td2m_pentad_1by1marine_ERA-Interim_data_19792015.nc", "td2m_stdevs"], 
-    ["SLP", "mean",  "/ichec/work/glamod/data/marine/external_files/SLP/SLP_pentad_climatology.nc", "slp"], 
-    ["SLP", "stdev", "/ichec/work/glamod/data/marine/external_files/SLP/SLP_pentad_stdev_climatology.nc", "slp"] 
-                   ],
-
+    [
+      "SST",
+      "mean",
+      "/ichec/work/glamod/data/marine/external_files/SST/HadSST2_daily_1x1_climatology.nc",
+      "sst"
+    ],
+    [
+      "AT",
+      "mean",
+      "/ichec/work/glamod/data/marine/external_files/ERAClimatologies/t2m_pentad_1by1marine_ERA-Interim_data_19792015.nc",
+      "t2m_clims"
+    ],
+    [
+      "AT99",
+      "mean",
+      "/ichec/work/glamod/data/marine/external_files/AT/HadNMAT2_daily_1x1_climatology.nc",
+      "nmat"
+    ],
+    [
+      "DAT",
+      "mean",
+      "/ichec/work/glamod/data/marine/external_files/AT/HadDAT_pentad_climatology.nc",
+      "dmat"
+    ],
+    [
+      "AT2",
+      "mean",
+      "/ichec/work/glamod/data/marine/external_files/ERAClimatologies/t2m_pentad_1by1marine_ERA-Interim_data_19792015.nc",
+      "t2m_clims"
+    ],
+    [
+      "DPT",
+      "mean",
+      "/ichec/work/glamod/data/marine/external_files/ERAClimatologies/td2m_pentad_1by1marine_ERA-Interim_data_19792015.nc",
+      "td2m_clims"
+    ],
+    [
+      "SHU",
+      "mean",
+      "/ichec/work/glamod/data/marine/external_files/ERAClimatologies/q2m_pentad_1by1marine_ERA-Interim_data_19792015.nc",
+      "q2m_clims"
+    ],
+    [
+      "VAP",
+      "mean",
+      "/ichec/work/glamod/data/marine/external_files/ERAClimatologies/e2m_pentad_1by1marine_ERA-Interim_data_19792015.nc",
+      "e2m_clims"
+    ],
+    [
+      "CRH",
+      "mean",
+      "/ichec/work/glamod/data/marine/external_files/ERAClimatologies/rh2m_pentad_1by1marine_ERA-Interim_data_19792015.nc",
+      "rh2m_clims"
+    ],
+    [
+      "CWB",
+      "mean",
+      "/ichec/work/glamod/data/marine/external_files/ERAClimatologies/tw2m_pentad_1by1marine_ERA-Interim_data_19792015.nc",
+      "tw2m_clims"
+    ],
+    [
+      "DPD",
+      "mean",
+      "/ichec/work/glamod/data/marine/external_files/ERAClimatologies/dpd2m_pentad_1by1marine_ERA-Interim_data_19792015.nc",
+      "dpd2m_clims"
+    ],
+    [
+      "SLP2",
+      "mean",
+      "/ichec/work/glamod/data/marine/external_files/ERAClimatologies/p2m_pentad_1by1marine_ERA-Interim_data_19792015.nc",
+      "p2m_clims"
+    ],
+    [
+      "AT2",
+      "stdev",
+      "/ichec/work/glamod/data/marine/external_files/ERAClimatologies/t2m_pentad_1by1marine_ERA-Interim_data_19792015.nc",
+      "t2m_stdevs"
+    ],
+    [
+      "DPT",
+      "stdev",
+      "/ichec/work/glamod/data/marine/external_files/ERAClimatologies/td2m_pentad_1by1marine_ERA-Interim_data_19792015.nc",
+      "td2m_stdevs"
+    ],
+    [
+      "SLP",
+      "mean",
+      "/ichec/work/glamod/data/marine/external_files/SLP/SLP_pentad_climatology.nc",
+      "slp"
+    ],
+    [
+      "SLP",
+      "stdev",
+      "/ichec/work/glamod/data/marine/external_files/SLP/SLP_pentad_stdev_climatology.nc",
+      "slp"
+    ]
+  ],
   "hires_climatologies": [
-    ["SST", "mean", "/ichec/work/glamod/data/marine/external_files/SST/OIv2_clim_MDS_6190_0.25x0.25xdaily_365.nc"]
-                         ],
-
-  "base":{ 
-	"time_since_sun_above_horizon": 1.0
-         },
-
-  "track_check":{
-	       "min_speed": 8.50,
-	       "amax": 15.00,
-	       "amaxx": 20.00,
-	       "amin": 0.0,
-	       "max_multiplier": 1.25,
-	       "min_multiplier": 0.75,
-	       "max_direction_change": 60.0,
-	       "max_speed_change": 10.00,
-	       "max_absolute_speed": 40.00,
-	       "max_midpoint_discrepancy": 150.0
-	        },
-
-  "IQUAM_track_check":{
-             "number_of_neighbours": 5,
-             "buoy_speed_limit": 15.0,
-		     "ship_speed_limit": 60.0,
-		     "delta_d": 1.11,
-		     "delta_t": 0.01
-		      },
-
-  "IQUAM_spike_check":{
-             "number_of_neighbours": 5,
-		     "max_gradient_space": 0.5,
-		     "max_gradient_time": 1.0,
-		     "ship_delta_t": 2.0,
-		     "buoy_delta_t": 1.0
-		      },
-
-  "saturated_runs":{
-               "min_time_threshold": 48.0,
-		       "shortest_run": 4
-		        },
-
-  "multiple_rounded_values":{
-               "threshold": 0.5,
-			   "min_count": 20
-			    },
-
-  "find_repeated_values":{
-            "threshold": 0.7,
-			"min_count": 20
-                         },
-
-  "bayesian_buddy_check":{
-            "prior_probability_of_gross_error": 0.05,
-			"quantization_interval": 0.1,
-			"limits": [2, 2, 4],
-			"noise_scaling": 3.0,
-			"measurement_error": 1.0
- 			 },
-
-  "mds_buddy_check":{
-	       "limits": [[1, 1, 2], [2, 2, 2], [1, 1, 4], [2, 2, 4]],
-		   "number_of_obs_thresholds": [[0, 5, 15, 100], [0], [0, 5, 15, 100], [0]],
-		   "multipliers": [[4.0, 3.5, 3.0, 2.5], [4.0], [4.0, 3.5, 3.0, 2.5], [4.0]]
-		    },
-
-  "slp_buddy_check":{
-	       "limits": [[1, 1, 0], [2, 2, 0], [3, 3, 0], [4, 4, 0]],
-		   "number_of_obs_thresholds": [[0, 5, 15, 100], [0], [0, 5, 15, 100], [0]],
-		   "multipliers": [[4.0, 3.5, 3.0, 2.5], [4.0], [4.0, 3.5, 3.0, 2.5], [4.0]]
-		    },
-  "W":{
-     "hard_limits": [0.0, 50.0],
-     "variable_limit": 4.0
-      },
-  "SLP":{
-       "maximum_anomaly": 10.0,
-       "maximum_standardised_anomaly": 3.0,
-       "lowbar": 10.0
-        },
-
-  "SST":{
-       "freezing_point": -1.8,
-       "freeze_check_n_sigma": 2.0,
-       "maximum_anomaly": 8.0,
-       "hard_limits": [-5.0, 45.0]
-        },
-
-  "AT":{
-      "maximum_anomaly": 10.0,
-      "maximum_standardised_anomaly": 5.5,
-      "minmax_standard_deviation": [1.0, 4.0],
-      "hard_limits": [-80.0, 65.0]
-       },
-
-  "DAT":{
-       "maximum_anomaly": 10.0,
-       "maximum_standardised_anomaly": 5.5,
-       "minmax_standard_deviation": [1.0, 4.0],
-       "hard_limits": [-80.0, 65.0]
-       },
-
-  "DPT":{
-       "maximum_standardised_anomaly": 5.5,
-       "minmax_standard_deviation": [1.0, 4.0],
-       "hard_limits": [-80.0, 65.0]
-        },
-
-  "SHU":{
-       "hard_limits": [0.0, 500.0]
-        },
-   
-  "RH":{
-      "hard_limits": [0.0, 150.0]
-       },
-
-  "buoy_aground_check":{
-                     "smooth_win": 41,
-		     "min_win_period": 8,
-                     "max_win_period": 10
-		      },
-
-  "new_buoy_aground_check":{
-                     "smooth_win": 41,
-		     "min_win_period": 8
-		      },
-
-  "buoy_speed_check":{
-                     "speed_limit": 2.5,
-		     "min_win_period": 0.8,
-		     "max_win_period": 1.0
-		      },
-
-  "new_buoy_speed_check":{
-                     "speed_limit": 3.0,
-		     "min_win_period": 0.375
-		      },
-
-  "buoy_tail_check":{
-                   "long_win_len": 121,
-                   "long_err_std_n": 3.0,
-                   "short_win_len": 30,
-                   "short_err_std_n": 3.0,
-                   "short_win_n_bad": 2,
-                   "drift_inter": 0.29,
-                   "drif_intra": 1.00,
-                   "background_err_lim": 0.3
-                   },
-
-
-  "buoy_bias_noise_check":{
-                         "n_eval": 30,
-                         "bias_lim": 1.10,
-                         "drif_intra": 1.0,
-                         "drif_inter": 0.29,
-                         "err_std_n": 3.0,
-                         "n_bad": 2,
-                         "background_err_lim": 0.3
-                   }
-
+    [
+      "SST",
+      "mean",
+      "/ichec/work/glamod/data/marine/external_files/SST/OIv2_clim_MDS_6190_0.25x0.25xdaily_365.nc"
+    ]
+  ],
+  "base": {
+    "time_since_sun_above_horizon": 1.0
+  },
+  "track_check": {
+    "min_speed": 8.5,
+    "amax": 15.0,
+    "amaxx": 20.0,
+    "amin": 0.0,
+    "max_multiplier": 1.25,
+    "min_multiplier": 0.75,
+    "max_direction_change": 60.0,
+    "max_speed_change": 10.0,
+    "max_absolute_speed": 40.0,
+    "max_midpoint_discrepancy": 150.0
+  },
+  "IQUAM_track_check": {
+    "number_of_neighbours": 5,
+    "buoy_speed_limit": 15.0,
+    "ship_speed_limit": 60.0,
+    "delta_d": 1.11,
+    "delta_t": 0.01
+  },
+  "IQUAM_spike_check": {
+    "number_of_neighbours": 5,
+    "max_gradient_space": 0.5,
+    "max_gradient_time": 1.0,
+    "ship_delta_t": 2.0,
+    "buoy_delta_t": 1.0
+  },
+  "saturated_runs": {
+    "min_time_threshold": 48.0,
+    "shortest_run": 4
+  },
+  "multiple_rounded_values": {
+    "threshold": 0.5,
+    "min_count": 20
+  },
+  "find_repeated_values": {
+    "threshold": 0.7,
+    "min_count": 20
+  },
+  "bayesian_buddy_check": {
+    "prior_probability_of_gross_error": 0.05,
+    "quantization_interval": 0.1,
+    "limits": [
+      2,
+      2,
+      4
+    ],
+    "noise_scaling": 3.0,
+    "measurement_error": 1.0
+  },
+  "mds_buddy_check": {
+    "limits": [
+      [
+        1,
+        1,
+        2
+      ],
+      [
+        2,
+        2,
+        2
+      ],
+      [
+        1,
+        1,
+        4
+      ],
+      [
+        2,
+        2,
+        4
+      ]
+    ],
+    "number_of_obs_thresholds": [
+      [
+        0,
+        5,
+        15,
+        100
+      ],
+      [
+        0
+      ],
+      [
+        0,
+        5,
+        15,
+        100
+      ],
+      [
+        0
+      ]
+    ],
+    "multipliers": [
+      [
+        4.0,
+        3.5,
+        3.0,
+        2.5
+      ],
+      [
+        4.0
+      ],
+      [
+        4.0,
+        3.5,
+        3.0,
+        2.5
+      ],
+      [
+        4.0
+      ]
+    ]
+  },
+  "slp_buddy_check": {
+    "limits": [
+      [
+        1,
+        1,
+        0
+      ],
+      [
+        2,
+        2,
+        0
+      ],
+      [
+        3,
+        3,
+        0
+      ],
+      [
+        4,
+        4,
+        0
+      ]
+    ],
+    "number_of_obs_thresholds": [
+      [
+        0,
+        5,
+        15,
+        100
+      ],
+      [
+        0
+      ],
+      [
+        0,
+        5,
+        15,
+        100
+      ],
+      [
+        0
+      ]
+    ],
+    "multipliers": [
+      [
+        4.0,
+        3.5,
+        3.0,
+        2.5
+      ],
+      [
+        4.0
+      ],
+      [
+        4.0,
+        3.5,
+        3.0,
+        2.5
+      ],
+      [
+        4.0
+      ]
+    ]
+  },
+  "W": {
+    "hard_limits": [
+      0.0,
+      50.0
+    ],
+    "variable_limit": 4.0
+  },
+  "SLP": {
+    "maximum_anomaly": 10.0,
+    "maximum_standardised_anomaly": 3.0,
+    "lowbar": 10.0
+  },
+  "SST": {
+    "freezing_point": -1.8,
+    "freeze_check_n_sigma": 2.0,
+    "maximum_anomaly": 8.0,
+    "hard_limits": [
+      -5.0,
+      45.0
+    ]
+  },
+  "AT": {
+    "maximum_anomaly": 10.0,
+    "maximum_standardised_anomaly": 5.5,
+    "minmax_standard_deviation": [
+      1.0,
+      4.0
+    ],
+    "hard_limits": [
+      -80.0,
+      65.0
+    ]
+  },
+  "DAT": {
+    "maximum_anomaly": 10.0,
+    "maximum_standardised_anomaly": 5.5,
+    "minmax_standard_deviation": [
+      1.0,
+      4.0
+    ],
+    "hard_limits": [
+      -80.0,
+      65.0
+    ]
+  },
+  "DPT": {
+    "maximum_standardised_anomaly": 5.5,
+    "minmax_standard_deviation": [
+      1.0,
+      4.0
+    ],
+    "hard_limits": [
+      -80.0,
+      65.0
+    ]
+  },
+  "SHU": {
+    "hard_limits": [
+      0.0,
+      500.0
+    ]
+  },
+  "RH": {
+    "hard_limits": [
+      0.0,
+      150.0
+    ]
+  },
+  "buoy_aground_check": {
+    "smooth_win": 41,
+    "min_win_period": 8,
+    "max_win_period": 10
+  },
+  "new_buoy_aground_check": {
+    "smooth_win": 41,
+    "min_win_period": 8
+  },
+  "buoy_speed_check": {
+    "speed_limit": 2.5,
+    "min_win_period": 0.8,
+    "max_win_period": 1.0
+  },
+  "new_buoy_speed_check": {
+    "speed_limit": 3.0,
+    "min_win_period": 0.375
+  },
+  "buoy_tail_check": {
+    "long_win_len": 121,
+    "long_err_std_n": 3.0,
+    "short_win_len": 30,
+    "short_err_std_n": 3.0,
+    "short_win_n_bad": 2,
+    "drift_inter": 0.29,
+    "drif_intra": 1.0,
+    "background_err_lim": 0.3
+  },
+  "buoy_bias_noise_check": {
+    "n_eval": 30,
+    "bias_lim": 1.1,
+    "drif_intra": 1.0,
+    "drif_inter": 0.29,
+    "err_std_n": 3.0,
+    "n_bad": 2,
+    "background_err_lim": 0.3
+  }
 }

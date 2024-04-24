@@ -1,19 +1,47 @@
 {
-	"field":"anmT",
-	"map":[
-		{"AN":"AN"},
-		{"CCV":"CCV"},
-		{"HA":"HA"},
-		{"HANDLE ANEMOMETER":"HA"},
-		{"KOSHIN DENKI":"KOSHIN DENKI"},
-		{"MSNG":"NULL"},
-		{"OS7":"OS7"},
-		{"OT":"OT"},
-		{"PRO":"PV"},
-		{"PROPELLER VANE":"PV"},
-		{"PV":"PV"},
-		{"SCV":"SCV"},
-		{"SON":"SON"},
-		{"SONIC":"SON"}
-	]
+  "field": "anmT",
+  "map": [
+    {
+      "AN": "AN"
+    },
+    {
+      "CCV": "CCV"
+    },
+    {
+      "HA": "HA"
+    },
+    {
+      "HANDLE ANEMOMETER": "HA"
+    },
+    {
+      "KOSHIN DENKI": "KOSHIN DENKI"
+    },
+    {
+      "MSNG": "NULL"
+    },
+    {
+      "OS7": "OS7"
+    },
+    {
+      "OT": "OT"
+    },
+    {
+      "PRO": "PV"
+    },
+    {
+      "PROPELLER VANE": "PV"
+    },
+    {
+      "PV": "PV"
+    },
+    {
+      "SCV": "SCV"
+    },
+    {
+      "SON": "SON"
+    },
+    {
+      "SONIC": "SON"
+    }
+  ]
 }
