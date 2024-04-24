@@ -39,6 +39,7 @@ def get_cell(lon, lat, xmin, xmax, xstep, ymin, ymax, ystep):
 
 class deck_store:
     """Class to store info for each source/deck."""
+
     def __init__(self, tag, basepath, filename):
         Path(f"{basepath}/{tag}").mkdir(parents=True, exist_ok=True)
         self.outfile = f"{basepath}/{tag}/{os.path.basename(filename)}"

@@ -233,98 +233,77 @@ class pub47schema:
         return True
 
 
-# function to load pub47 data based on schema file
-def pub47load(schema, data_file, map_path=None):
-    """Load PUB47 data."""
-    # steps
-    # 1) Load data and basic validation
-    # 2) Map input for known errors and initial homgenisation
-    # 3) Split columns flagged to be split
-    # 4) Remap input
+def pandas_read(data_file, mode="csv", **kwargs):
+    """Read a file into DataFrame."""
+    params = {
+        "header": None,
+        "index_col": False,
+        "error_bad_lines": False,
+        "warn_bad_lines": True,
+        "encoding": "ISO-8859-1",
+    }
+    if mode == "csv":
+        return pd.read_csv(
+            data_file,
+            sep=";",
+            **params,
+            **kwargs,
+        )
+    elif mode == "fwf":
+        return pd.read_fwf(
+            data_file,
+            **params,
+            **kwargs,
+        )
+    raise ValueError("Mode has to be one of 'csv' or 'fwf'.")
 
-    print(f"Loading {data_file}")
-    # ===============================================
-    # Load data
-    # ===============================================
+
+def convert_to_expected_type(input_data, schema):
+    """Check we can convert all columns to expected type."""
+    for column in input_data:
+        converter = schema.column_converter[column]
+        for i, x in enumerate(input_data[column]):
+            try:
+                converter(str(x))
+            except ValueError:
+                print("Bad value for " + column + " at line " + str(i))
+                print(input_data.iloc[i])
+                raise
+
+
+def read_file(data_file, schema, **kwargs):
+    """Read file from disk."""
     if schema.format == "fixed":
         # first read file with everything as object
-        input_data = pd.read_fwf(
-            data_file,
-            names=schema.column_name,
-            header=None,
-            index_col=False,
-            dtype="object",
-            widths=schema.column_widths,
-            error_bad_lines=False,
-            warn_bad_lines=True,
-            encoding="ISO-8859-1",
-        )
-        # Now check we can convert all columns to expected type, if not
-        # message giving column name and element that fails
-        for column in input_data:
-            converter = schema.column_converter[column]
-            for i, x in enumerate(input_data[column]):
-                try:
-                    converter(str(x))
-                except ValueError:
-                    print(" Error processing " + data_file)
-                    print("Bad value for " + column + " at line " + str(i))
-                    print(input_data.iloc[i])
-                    raise
-        # next read data applying converters
-        input_data = pd.read_fwf(
-            data_file,
-            names=schema.column_name,
-            header=None,
-            index_col=False,
-            converters=schema.column_converter,
-            widths=schema.column_widths,
-            error_bad_lines=False,
-            warn_bad_lines=True,
-            encoding="ISO-8859-1",
-        )
+        kwargs["widths"] = schema.column_widths
+        params = {
+            "mode": "fwf",
+        }
     else:
         # first read file with everything as object
-        input_data = pd.read_csv(
-            data_file,
-            names=schema.column_name,
-            sep=";",
-            header=None,
-            index_col=False,
-            dtype="object",
-            error_bad_lines=False,
-            warn_bad_lines=True,
-            encoding="ISO-8859-1",
-        )
-        # Now check we can convert all columns to expected type, if not
-        # message giving column name and element that fails
-        for column in input_data:
-            converter = schema.column_converter[column]
-            for i, x in enumerate(input_data[column]):
-                try:
-                    converter(str(x))
-                except ValueError:
-                    print(" Error processing " + data_file)
-                    print("Bad value for " + column + " at line " + str(i))
-                    print(input_data.iloc[i])
-                    raise
-        # next read data applying converters
-        input_data = pd.read_csv(
-            data_file,
-            names=schema.column_name,
-            sep=";",
-            header=None,
-            index_col=False,
-            converters=schema.column_converter,
-            error_bad_lines=False,
-            warn_bad_lines=True,
-            encoding="ISO-8859-1",
-        )
+        params = {
+            "mode": "csv",
+        }
 
-    # Apply mapping, split, then reapply mappings
-    # ========================
-    # Apply mapping to columns
-    # ========================
+    input_data = pandas_read(
+        data_file,
+        dtype="object",
+        **params,
+        **kwargs,
+    )
+
+    convert_to_expected_type(input_data, schema)
+
+    return pandas_read(
+        data_file,
+        converters=schema.column_converter,
+        **params,
+        **kwargs,
+    )
+
+
+def apply_mapping(input_data, map_path):
+    """Apply mapping to columns."""
     for column in input_data:
         dictKey = re.sub("[0-9]", "", column)
         # check if mapping file exists
@@ -341,10 +320,12 @@ def pub47load(schema, data_file, map_path=None):
             input_data[column] = input_data[column].map(m)
         else:
             print(f"No mapping file for {dictKey}")
-    # ===============================================
-    # Check if any columns need splitting
-    # (some early data contain multiple values in single field)
-    # ===============================================
+
+    return input_data
+
+
+def split_columns(input_data, schema):
+    """Split columns if necessary."""
     for column in input_data:
         dictKey = re.sub("[0-9]", "", column)
         if column in schema.split_fields:
@@ -372,76 +353,80 @@ def pub47load(schema, data_file, map_path=None):
                 schema.column_code_table[c] = schema.column_code_table[column]
                 schema.column_valid_min[c] = schema.column_valid_min[column]
                 schema.column_valid_max[c] = schema.column_valid_max[column]
-    # ========================
-    # Apply mapping to columns
-    # ========================
-    for column in input_data:
-        dictKey = re.sub("[0-9]", "", column)
-        # check if mapping file exists
-        map_file = map_path + dictKey.lower() + ".json"
-        if os.path.isfile(map_file):
-            # print( 'Loading field mappings from ' + map_file )
-            with open(map_file) as m:
-                mapping = json.load(m)
-            # mapping data stored as list of dicts (unfortunately), need to convert to single dict
-            # (sub-class returns key if not in dict)
-            m = smart_dict()
-            for item in mapping["map"]:
-                for key in item:
-                    m[key] = item[key]
-            input_data[column] = input_data[column].map(m)
+    return input_data, schema
+
+
+def anemometer_mapping(input_data, schema, anemometer):
+    """Apply anemometer mapping."""
+    if anemometer == "anSC1":
+        output_field = "anemometer1_side"
+    elif anemometer == "anSC2":
+        output_field = "anemometer1_side"
+    else:
+        raise ValueError("Anemometer has to be one of 'anSC1' or 'anSC2'.")
+
+    if anemometer in input_data:
+        if anemometer in input_data:
+            output_field = anemometer
         else:
-            print(f"No mapping file for {dictKey}")
-    # non-simple mappings
-    # anemometer1_side
-    if "anDC1" in input_data:
-        if "anSC1" in input_data:
-            output_field = "anSC1"
-        else:
-            output_field = "anemometer1_side"
             schema.column_code_table[output_field] = None
             schema.column_type[output_field] = "object"
         # print('parsing anemometer1 side')
         input_data.at[:, output_field] = cmiss
-        input_data.at[input_data["anDC1"].str.contains("P"), output_field] = "PORT"
-        input_data.at[input_data["anDC1"].str.contains("p"), output_field] = "PORT"
+        input_data.at[input_data[anemometer].str.contains("P"), output_field] = "PORT"
+        input_data.at[input_data[anemometer].str.contains("p"), output_field] = "PORT"
         input_data.at[
-            (input_data["anDC1"].str.contains("S"))
-            & (input_data["anDC1"].astype(str) != cmiss),
+            (input_data[anemometer].str.contains("S"))
+            & (input_data[anemometer].astype(str) != cmiss),
             output_field,
         ] = "STARBOARD"
         input_data.at[
-            (input_data["anDC1"].str.contains("s"))
-            & (input_data["anDC1"].astype(str) != cmiss),
+            (input_data[anemometer].str.contains("s"))
+            & (input_data[anemometer].astype(str) != cmiss),
             output_field,
         ] = "STARBOARD"
-        input_data["anDC1"] = input_data["anDC1"].apply(
+        input_data["anDC1"] = input_data[anemometer].apply(
             lambda x: "".join(filter(lambda y: (y.isdigit()) | (y == "."), x))
         )
+    return input_data, schema
+
+
+# function to load pub47 data based on schema file
+def pub47load(schema, data_file, map_path=None):
+    """Load PUB47 data."""
+    # steps
+    # 1) Load data and basic validation
+    # 2) Map input for known errors and initial homgenisation
+    # 3) Split columns flagged to be split
+    # 4) Remap input
+
+    print(f"Loading {data_file}")
+    # ===============================================
+    # Load data
+    # ===============================================
+    input_data = read_file(data_file, schema, names=schema.column_names)
+
+    # Apply mapping, split, then reapply mappings
+    # ========================
+    # Apply mapping to columns
+    # ========================
+    input_data = apply_mapping(input_data, map_path)
+
+    # ===============================================
+    # Check if any columns need splitting
+    # (some early data contain multiple values in single field)
+    # ===============================================
+    input_data, schema = split_columns(input_data, schema)
+    # ========================
+    # Apply mapping to columns
+    # ========================
+    input_data = apply_mapping(input_data, map_path)
+
+    # non-simple mappings
+    # anemometer1_side
+    input_data, schema = anemometer_mapping(input_data, schema, "anSC1")
+
     # anemometer2_side
-    if "anDC2" in input_data:
-        if "anSC2" in input_data:
-            output_field = "anSC2"
-        else:
-            output_field = "anemometer2_side"
-            schema.column_code_table[output_field] = None
-            schema.column_type[output_field] = "object"
-        # print('parsing anemometer2 side')
-        input_data.at[:, output_field] = cmiss
-        input_data.at[input_data["anDC2"].str.contains("P"), output_field] = "PORT"
-        input_data.at[input_data["anDC2"].str.contains("p"), output_field] = "PORT"
-        input_data.at[
-            (input_data["anDC2"].str.contains("S"))
-            & (input_data["anDC2"].astype(str) != cmiss),
-            output_field,
-        ] = "STARBOARD"
-        input_data.at[
-            (input_data["anDC2"].str.contains("s"))
-            & (input_data["anDC2"].astype(str) != cmiss),
-            output_field,
-        ] = "STARBOARD"
-        input_data["anDC2"] = input_data["anDC2"].apply(
-            lambda x: "".join(filter(lambda y: (y.isdigit()) | (y == "."), x))
-        )
+    input_data, schema = anemometer_mapping(input_data, schema, "anSC2")
 
     return input_data

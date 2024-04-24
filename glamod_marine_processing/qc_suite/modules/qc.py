@@ -12,6 +12,9 @@ from datetime import datetime, timedelta
 
 import numpy as np
 
+# Conversion factor between degrees and radians
+degrad = np.pi / 180.0
+
 
 def month_match(y1, m1, y2, m2):
     """Check whether month matches."""
@@ -1252,6 +1255,169 @@ def angle_diff(angle1, angle2):
     return diff
 
 
+def relative_year_number(year, reference=1979):
+    """Get number of year relative to reference year."""
+    return year - (reference + 1)
+
+
+def convert_time_in_hours(hour, minute, sec, zone, dasvtm):
+    """Convert to time in hours."""
+    return hour + (minute + sec / 60.0) / 60.0 + zone - dasvtm
+
+
+def leap_year(delyear):
+    """Get leap year."""
+    return math.floor(delyear / 4.0)
+
+
+def time_in_whole_days(time_in_hours, day, delyear, leap):
+    """Calculate from time in hours to time in whole days."""
+    return delyear * 365 + leap + day - 1.0 + time_in_hours / 24.0
+
+
+def leap_year_correction(time_in_hours, day, delyear):
+    """Make eap year correction."""
+    leap = leap_year(delyear)
+    time = time_in_whole_days(time_in_hours, day, delyear, leap)
+    if delyear == leap * 4.0:
+        time = time - 1.0
+    if delyear < 0 and delyear != leap * 4.0:
+        time = time - 1.0
+    return time
+
+
+def sun_position(time):
+    """Find position of sun in celestial sphere, assuming circular orbit (radians)."""
+    return (360.0 * time / 365.25) * degrad
+
+
+def mean_earth_anomaly(time, theta):
+    """Calculate mean anomaly of earth (g)."""
+    return -0.031271 - 4.5396e-7 * time + theta
+
+
+def sun_longitude(time):
+    """Get longitude of sun."""
+    theta = sun_position(time)
+    mean_anomaly = mean_earth_anomaly(time, theta)
+    return (
+        4.900968
+        + 3.6747e-7 * time
+        + (0.033434 - 2.3e-9 * time) * math.sin(mean_anomaly)
+        + 0.000349 * math.sin(2.0 * mean_anomaly)
+        + theta
+    )
+
+
+def elliptic_angle(time):
+    """Get angle plane of elliptic to plane of celestial equator."""
+    return 0.409140 - 6.2149e-9 * time
+
+
+def sun_ascension(long_of_sun, sin_long_of_sun, angle_of_elliptic):
+    """Calculate right ascension."""
+    a1 = sin_long_of_sun * math.cos(angle_of_elliptic)
+    a2 = math.cos(long_of_sun)
+    right_ascension = math.atan2(a1, a2)
+    if right_ascension < 0.0:
+        right_ascension = right_ascension + 2 * np.pi
+    return right_ascension
+
+
+def sun_declination(sin_long_of_sun, angle_of_elliptic):
+    """Calculate declination of sun."""
+    return math.asin(sin_long_of_sun * math.sin(angle_of_elliptic))
+
+
+def calculate_sun_parameters(time):
+    """Calculate both right ascension and declination of sun."""
+    long_of_sun = sun_longitude(time)
+    angle_of_elliptic = elliptic_angle(time)
+    sin_long_of_sun = math.sin(long_of_sun)
+    rta = sun_ascension(long_of_sun, sin_long_of_sun, angle_of_elliptic)
+    dec = sun_declination(sin_long_of_sun, angle_of_elliptic)
+    return rta, dec
+
+
+def to_siderial_time(time, delyear):
+    """Convert to siderial time."""
+    sid = 1.759335 + 2 * np.pi * (time / 365.25 - delyear) + 3.694e-7 * time
+    if sid >= 2 * np.pi:
+        sid = sid - 2 * np.pi
+    return sid
+
+
+def to_local_siderial_time(time, time_in_hours, delyear, lon):
+    """Convert to local siderial time.."""
+    siderial_time = to_siderial_time(time, delyear)
+    lsid = siderial_time + (time_in_hours * 15.0 + lon) * degrad
+    if lsid >= 2 * np.pi:
+        lsid = lsid - 2 * np.pi
+    return lsid
+
+
+def sun_hour_angle(local_siderial_time, right_ascension):
+    """Get hour angle."""
+    hra = local_siderial_time - right_ascension
+    if hra < 0:
+        hra = hra + 2 * np.pi
+    return hra
+
+
+def sin_of_elevation(phi, declination, hour_angle):
+    """Get sinus of geometric elevation."""
+    sin_elevation = math.sin(phi) * math.sin(declination) + math.cos(phi) * math.cos(
+        declination
+    ) * math.cos(hour_angle)
+    if sin_elevation > 1.0:
+        sin_elevation = 1.0
+    if sin_elevation < -1.0:
+        sin_elevation = -1.0
+    return sin_elevation
+
+
+def sun_azimuth(phi, declination):
+    """Get azimuth."""
+    if (phi - declination) > 0:
+        return 0
+    else:
+        return 180
+
+
+def convert_degrees(deg):
+    """Convert drgrees."""
+    if deg < 0.0:
+        deg = 360.0 + deg
+    return deg
+
+
+def calculate_azimuth(declination, hour_angle, elevation, phi):
+    """Calculate azimuth."""
+    val_to_asin = math.cos(declination) * math.sin(hour_angle) / math.cos(elevation)
+    if val_to_asin > 1.0:
+        val_to_asin = 1.0
+    if val_to_asin < -1.0:
+        val_to_asin = -1.0
+    azimuth = math.asin(val_to_asin) / degrad
+    if math.sin(elevation) < math.sin(declination) / math.sin(phi):
+        azimuth = convert_degrees(azimuth)
+        azimuth = azimuth - 180.0
+    return 180.0 + azimuth
+
+
+def azimuth_elevation(lat, declination, hour_angle):
+    """Get both azimuth and geometric elevation of sun."""
+    phi = lat * degrad
+    sin_elevation = sin_of_elevation(phi, declination, hour_angle)
+    elevation = math.asin(sin_elevation)
+    azimuth = sun_azimuth(phi, declination)
+    # If sun is not very near the zenith, leave a as 0 or 180
+    if abs(elevation - 2 * np.pi / 4.0) > 0.000001:
+        # Protect against rounding error near +/-90 degrees.
+        azimuth = calculate_azimuth(declination, hour_angle, elevation, phi)
+    return azimuth, elevation
+
+
 def sunangle(year, day, hour, minute, sec, zone, dasvtm, lat, lon):
     """
     Calculate the local azimuth and elevation of the sun at a specified location and time.
@@ -1294,118 +1460,30 @@ def sunangle(year, day, hour, minute, sec, zone, dasvtm, lat, lon):
     assert 0 <= sec < 60
     assert 90 >= lat >= -90
 
-    # Conversion factor between degrees and radians
-    degrad = np.pi / 180.0
-
     # Find number of whole years since end of 1979 (reference point)
-    delyear = year - 1980  #
-    # Find leap year correction
-    leap = math.floor(delyear / 4.0)
+    delyear = relative_year_number(year)
     # Find time in whole hours since midnight (allow for "daylight saving").
-    time_in_hours = hour + (minute + sec / 60.0) / 60.0 + zone - dasvtm
-    # Find time in whole days since start of January 1980
-    time = delyear * 365 + leap + day - 1.0 + time_in_hours / 24.0
+    time_in_hours = convert_time_in_hours(hour, minute, sec, zone, dasvtm)
     # Make leapyear correction
-    if delyear == leap * 4.0:
-        time = time - 1.0
-    if delyear < 0 and delyear != leap * 4.0:
-        time = time - 1.0
-    # Find position of sun in celestial sphere, assuming circular orbit (radians).
-    theta = (360.0 * time / 365.25) * degrad
-    # Corrections for elliptical orbit
-    # Mean anomaly of earth (g)
-    mean_anomaly = -0.031271 - 4.5396e-7 * time + theta
-    # Longitude of sun (el)
-    long_of_sun = (
-        4.900968
-        + 3.6747e-7 * time
-        + (0.033434 - 2.3e-9 * time) * math.sin(mean_anomaly)
-        + 0.000349 * math.sin(2.0 * mean_anomaly)
-        + theta
-    )
-    # Angle plane of elliptic to plane of celestial equator (eps)
-    # Slowly decreasing every year
-    angle_of_elliptic = 0.409140 - 6.2149e-9 * time
-    sin_long_of_sun = math.sin(long_of_sun)
-    # Intermediate calculation for right ascension
-    a1 = sin_long_of_sun * math.cos(angle_of_elliptic)
-    a2 = math.cos(long_of_sun)
-    # Calculate right ascension
-    right_ascension = math.atan2(a1, a2)
-    if right_ascension < 0.0:
-        right_ascension = right_ascension + 2 * np.pi
-    rta = right_ascension / degrad  # Convert to degrees
-
-    # Calculate declination
-    declination = math.asin(sin_long_of_sun * math.sin(angle_of_elliptic))
-
-    # Calculate siderial time
-    siderial_time = 1.759335 + 2 * np.pi * (time / 365.25 - delyear) + 3.694e-7 * time
-    if siderial_time >= 2 * np.pi:
-        siderial_time = siderial_time - 2 * np.pi
-
-    # Claculate local siderial time
-    local_siderial_time = siderial_time + (time_in_hours * 15.0 + lon) * degrad
-    if local_siderial_time >= 2 * np.pi:
-        local_siderial_time = local_siderial_time - 2 * np.pi
-    sid = local_siderial_time / degrad  # Convert to degrees
-    if sid < 0:
-        sid = 360.0 + sid
-
+    time = leap_year_correction(time_in_hours, day, delyear)
+    # Get sun parameters
+    right_ascension, declination = calculate_sun_parameters(time)
+    local_siderial_time = to_local_siderial_time()
     # Hour Angle
-    hour_angle = local_siderial_time - right_ascension
-
-    if hour_angle < 0:
-        hour_angle = hour_angle + 2 * np.pi  # Correct for negative angles
-    hra = hour_angle / degrad  # Convert to degrees
-    if hra < 0.0:
-        hra = 360.0 + hra
-
-    # Latitude in radians
-    phi = lat * degrad
-
-    # q Sine of elevation
-    sin_elevation = math.sin(phi) * math.sin(declination) + math.cos(phi) * math.cos(
-        declination
-    ) * math.cos(hour_angle)
-
-    if sin_elevation > 1.0:
-        sin_elevation = 1.0
-    if sin_elevation < -1.0:
-        sin_elevation = -1.0
-
-    # Geometric elevation
-    elevation = math.asin(sin_elevation)
-
-    # Is sun north or south of zenith
-    if (phi - declination) > 0:
-        azimuth = 0
-    else:
-        azimuth = 180
-
-    # If sun is not very near the zenith, leave a as 0 or 180
-    if abs(elevation - 2 * np.pi / 4.0) > 0.000001:
-        # Protect against rounding error near +/-90 degrees.
-        val_to_asin = math.cos(declination) * math.sin(hour_angle) / math.cos(elevation)
-        if val_to_asin > 1.0:
-            val_to_asin = 1.0
-        if val_to_asin < -1.0:
-            val_to_asin = -1.0
-        azimuth = math.asin(val_to_asin) / degrad  # Azimuth in degrees
-        # WAS . . .
-        # a = ASIN (COS (declination) * SIN (h) / COS (e)) / degrad  ! Azimuth is degrees
-        # Wrap around beyond -180 to 180
-        if math.sin(elevation) < math.sin(declination) / math.sin(phi):
-            if azimuth < 0:
-                azimuth = azimuth + 360.0
-            azimuth = 180.0 - azimuth
-        # Convert to degrees east of north
-        azimuth = 180.0 + azimuth
+    hour_angle = sun_hour_angle(local_siderial_time, right_ascension)
+    # Geometric elevation and sun azimuth
+    azimuth, elevation = azimuth_elevation()
 
     elevation = elevation / degrad  # Convert elevation to degrees
     declination = declination / degrad  # Convert declination to degrees
 
     assert 180 >= elevation >= -180
+
+    rta = right_ascension / degrad
+    sid = local_siderial_time / degrad
+    sid = convert_degrees(sid)
+    hra = hour_angle / degrad
+    hra = convert_degrees(hra)
 
     return azimuth, elevation, rta, hra, sid, declination
 
