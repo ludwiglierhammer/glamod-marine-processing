@@ -121,7 +121,7 @@ with open(task_file, "w") as fn:
         if os.path.isfile(
             os.path.join(log_dir, f"{sid_dck}-{release}-{update}.failed")
         ):
-            print(f"Deleting {job_id}.failure file for a fresh start")
+            print(f"Deleting {sid_dck}.failure file for a fresh start")
             os.remove(os.path.join(log_dir, f"{sid_dck}-{release}-{update}.failed"))
         fn.writelines(
             "{0} {2} > {1}/{2}.out 2> {1}/{2}.out; if [ $? -eq 0 ]; "
