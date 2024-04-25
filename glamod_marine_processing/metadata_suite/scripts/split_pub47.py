@@ -27,8 +27,8 @@ from ..modules.soundex import soundex
 tol = 0.01
 
 
-def main(argv):
-    """Metadata suite splitting PUB47 data main function."""
+def read_args(argv):
+    """Read parser arguments."""
     parser = argparse.ArgumentParser(
         description="Split WMO Publication 47 metadata files by country"
     )
@@ -73,7 +73,259 @@ def main(argv):
         "-tag", dest="tag", required=False, default="", help="Tag appended to log files"
     )
 
-    args = parser.parse_args()
+    return parser.parse_args()
+
+
+def identify_duplicates(datain, rejects, schema):
+    """Identify duplicates within country."""
+    # now we need to identify duplicates within country
+    rejects = pd.DataFrame()
+    id_counts = datain.loc[:, "call"].value_counts()
+    duplicated_ids = id_counts.index.values[id_counts > 1]
+    duplicated_ids = list(duplicated_ids[duplicated_ids != cmiss])
+    unique_ids = list(id_counts.index.values[id_counts == 1])
+    unique_ids.append(cmiss)
+    unique_rows = datain.loc[datain["call"].apply(lambda x: x in unique_ids), :].copy()
+
+    for dup_id in duplicated_ids:
+        dup_rows = datain.loc[datain["call"] == dup_id, :]
+        # more than two entries for same callsign, reject all for later assessment
+        if dup_rows.shape[0] > 2:
+            rejects = pd.concat([rejects, dup_rows], ignore_index=True, sort=False)
+            continue
+        cmp = dup_rows.apply(lambda x: pub47_record_completeness(x), axis=1)
+        vsslM = dup_rows.loc[:, "vsslM"]
+        most_complete = list(cmp[cmp == max(cmp)].index.values)
+        highest_class = list(vsslM[vsslM == min(vsslM)].index.values)
+        ix = dup_rows.index.values
+        same_name = soundex(dup_rows.loc[ix[0], "name"]) == soundex(
+            dup_rows.loc[ix[1], "name"]
+        )
+        same_country = (
+            dup_rows.loc[ix[0], schema.recruiting_country]
+            == dup_rows.loc[ix[1], schema.recruiting_country]
+        )
+        # if same country and name merge if possible
+        # if different country but same name use highest VOS class
+        # else mark for rejection as ambiguous
+        if same_country and same_name:
+            # check if we can merge
+            if pub47_record_compare(
+                dup_rows.loc[ix[0], schema.duplicate_check],
+                dup_rows.loc[ix[1], schema.duplicate_check],
+            ):
+                record_to_add = dup_rows.loc[[most_complete[0]],].copy()
+                merged_record = pub47_merge_rows(
+                    dup_rows.loc[ix[0], schema.duplicate_check],
+                    dup_rows.loc[ix[1], schema.duplicate_check],
+                )
+                # record_to_add.at[ ix[0], schema['duplicate_check'] ] \
+                merged_record = pd.DataFrame(merged_record).transpose()
+                record_to_add.reset_index(inplace=True, drop=True)
+                merged_record.reset_index(inplace=True, drop=True)
+                record_to_add.at[:, schema.duplicate_check] = merged_record.loc[
+                    :, schema.duplicate_check
+                ]
+            elif len(highest_class) == 1:
+                record_to_add = dup_rows.loc[[highest_class[0]], :].copy()
+            elif len(most_complete) == 1:
+                record_to_add = dup_rows.loc[[most_complete[0]], :].copy()
+            else:
+                rejects = pd.concat([rejects, dup_rows], ignore_index=True, sort=False)
+                record_to_add = None
+        elif same_country:
+            rejects = pd.concat([rejects, dup_rows], ignore_index=True, sort=False)
+            record_to_add = None
+        else:
+            record_to_add = dup_rows
+        if record_to_add is not None:
+            unique_rows = pd.concat(
+                [unique_rows, record_to_add], ignore_index=True, sort=False
+            )
+    return rejects, unique_rows
+
+
+def correction(datain, tmp_data, country, column, schema, cor, verbose, log):
+    """Check if correction required and apply."""
+    if cor is not None:
+        for f in cor["corrections"]:
+            if f["field"] == column:
+                if f["all"] == 1:
+                    if verbose > 0:
+                        print(
+                            f"Applying corrections to all values in {column}",
+                            file=log,
+                        )
+                        print("Factor = {}".format(f["factor"]), file=log)
+                    # getting non missing rows
+                    # valid = tmp_data[column] != fmiss
+                    valid = tmp_data[column].apply(lambda x: abs(x - fmiss) < tol)
+                    # apply to tmp data
+                    tmp_data.at[valid, column] = (
+                        tmp_data.loc[valid, column] * f["factor"]
+                    )
+                    # apply to datain
+                    datain.at[(datain["rcnty"] == country) & (valid), column] = (
+                        datain.loc[(datain["rcnty"] == country) & (valid), column]
+                        * f["factor"]
+                    )
+                else:
+                    valid = pv.validate_numeric(
+                        tmp_data[column],
+                        min_value=schema.column_valid_min[column],
+                        max_value=schema.column_valid_max[column],
+                        return_type="mask_series",
+                    )
+                    valid = valid & ~(
+                        tmp_data[column].apply(lambda x: abs(x - fmiss) < tol)
+                    )
+                    if any(valid):
+                        if verbose > 0:
+                            print(
+                                f"Applying corrections to invalid values in {column}",
+                                file=log,
+                            )
+                            print("Factor = {}".format(f["factor"]), file=log)
+                        # apply to tmp data
+                        tmp_data.at[valid, column] = (
+                            tmp_data.loc[valid, column] * f["factor"]
+                        )
+                        # now apply to datain
+                        valid = pv.validate_numeric(
+                            datain[column],
+                            min_value=schema.column_valid_min[column],
+                            max_value=schema.column_valid_max[column],
+                            return_type="mask_series",
+                        )
+                        datain.at[(datain["rcnty"] == country) & (valid), column] = (
+                            datain.loc[
+                                (datain["rcnty"] == country) & (valid),
+                                column,
+                            ]
+                            * f["factor"]
+                        )
+    return datain, tmp_data
+
+
+def validate_numeric(tableID, schema, column, tmp_data, nrows):
+    """Validate numeric values."""
+    if tableID is None:
+        if schema.column_type[column] != "object":
+            # if int convert to float and replace -1 with np.na
+            if str(tmp_data[column].dtype) == "int64":
+                tmp_values = pd.to_numeric(tmp_data[column])
+                tmp_values = tmp_values.replace(
+                    to_replace=imiss, value=fmiss
+                )  # pd.np.nan )
+            else:
+                tmp_values = tmp_data[column]
+            valid = pv.validate_numeric(
+                tmp_data[column],
+                min_value=schema.column_valid_min[column],
+                max_value=schema.column_valid_max[column],
+                return_type="mask_series",
+            )
+            valid = valid & ~(tmp_data[column].apply(lambda x: abs(x - fmiss) < tol))
+        else:
+            valid = pd.Series(False * nrows)
+    return valid, tmp_values
+
+
+def validate_coded(tableID, schema, column, tmp_data, verbose, log):
+    """Validate coded values."""
+    if tableID in schema.code_tables:
+        codes = schema.code_tables[tableID]
+        if verbose > 1:
+            print("Validating against code table: " + str(tableID), file=log)
+        whitelist = codes["code"].map(str)
+        whitelist = whitelist.append(pd.Series([cmiss, "-1", "NA", "-999999"]))
+        tmp_values = tmp_data[column].map(str)
+        valid = pv.validate_string(
+            tmp_values, whitelist=whitelist, return_type="mask_series"
+        )
+    return valid, tmp_values
+
+
+def write_country_file(
+    country,
+    datain,
+    input_file,
+    corrections,
+    schema,
+    log,
+    valid_from,
+    valid_to,
+    outputpath,
+    verbose,
+):
+    """Write country file to disk."""
+    if verbose > 0:
+        print(f"Processing {country}", file=log)
+    tmp_data = datain.loc[datain.rcnty == country].copy()
+
+    tmp_data = tmp_data.reindex()
+    nrows = tmp_data.shape[0]
+
+    # output file for data from this country
+    country_file = os.path.basename(input_file) + "." + country
+
+    cor = None
+    # check if corrections exists for country / edition
+    for cor_temp in corrections:
+        if cor_temp["file"] == country_file:
+            cor = cor_temp
+            break
+
+    # validate (and correct) data
+    for column in tmp_data:
+        # ++++++++++ CORRECT DATA ++++++++++
+        datain, tmp_data = correction(
+            datain, tmp_data, country, column, schema, cor, verbose, log
+        )
+        # ++++++++++ VALIDATE++++++++++
+        tableID = schema.column_code_table[column]
+        valid, tmp_values = validate_coded(
+            tableID, schema, column, tmp_data, verbose, log
+        )
+        valid, tmp_values = validate_numeric(tableID, schema, column, tmp_data, nrows)
+
+        # calculate fraction bad
+        fraction_bad = sum(valid) / nrows
+        if (fraction_bad > 0.05) & (nrows > 10):
+            print(
+                f"///////////// {os.path.basename(input_file)}.{country} /////////////",
+                file=log,
+            )
+            print(
+                f"Large number of bad values for {column}({tableID})",
+                file=log,
+            )
+            print(tmp_data.loc[valid, column].unique(), file=log)
+        elif any(valid):
+            print(
+                f"Bad values, {column} ({str(tableID)})  :: {tmp_values[ valid ].unique()}",
+                file=log,
+            )
+
+    dataout = datain[datain.rcnty == country]
+    dataout = dataout.assign(valid_from=valid_from)
+    dataout = dataout.assign(valid_to=valid_to)
+    dataout = dataout.assign(schema=schema.version)
+    # convert all columns to object and replace fmiss and imiss with NA
+    dataout = dataout.astype(str)
+    dataout.replace(str(fmiss), pd.np.nan, inplace=True)
+    dataout.replace(str(imiss), pd.np.nan, inplace=True)
+    dataout.to_csv(
+        outputpath + "./split/" + os.path.basename(input_file) + "." + country,
+        index=False,
+        sep="|",
+        na_rep="NULL",
+    )
+
+
+def main(argv):
+    """Metadata suite splitting PUB47 data main function."""
+    args = read_args(argv)
     control_file = args.jobs
     first_job = args.jobIndexStart
     last_job = args.jobIndexEnd
@@ -128,8 +380,6 @@ def main(argv):
                 break
         assert job_index == job["jobindex"]
 
-        rejects = pd.DataFrame()
-
         # load schema
         schema = pub47schema(configpath + "./schemas/", job["schema"])
 
@@ -153,73 +403,7 @@ def main(argv):
         # remove any exact duplicates
         datain = datain.drop_duplicates(keep="first")
 
-        # now we need to identify duplicates within country
-        id_counts = datain.loc[:, "call"].value_counts()
-        duplicated_ids = id_counts.index.values[id_counts > 1]
-        duplicated_ids = list(duplicated_ids[duplicated_ids != cmiss])
-        unique_ids = list(id_counts.index.values[id_counts == 1])
-        unique_ids.append(cmiss)
-        unique_rows = datain.loc[
-            datain["call"].apply(lambda x: x in unique_ids), :
-        ].copy()
-
-        for dup_id in duplicated_ids:
-            dup_rows = datain.loc[datain["call"] == dup_id, :]
-            # more than two entries for same callsign, reject all for later assessment
-            if dup_rows.shape[0] > 2:
-                rejects = pd.concat([rejects, dup_rows], ignore_index=True, sort=False)
-                continue
-            cmp = dup_rows.apply(lambda x: pub47_record_completeness(x), axis=1)
-            vsslM = dup_rows.loc[:, "vsslM"]
-            most_complete = list(cmp[cmp == max(cmp)].index.values)
-            highest_class = list(vsslM[vsslM == min(vsslM)].index.values)
-            ix = dup_rows.index.values
-            same_name = soundex(dup_rows.loc[ix[0], "name"]) == soundex(
-                dup_rows.loc[ix[1], "name"]
-            )
-            same_country = (
-                dup_rows.loc[ix[0], schema.recruiting_country]
-                == dup_rows.loc[ix[1], schema.recruiting_country]
-            )
-            # if same country and name merge if possible
-            # if different country but same name use highest VOS class
-            # else mark for rejection as ambiguous
-            if same_country and same_name:
-                # check if we can merge
-                if pub47_record_compare(
-                    dup_rows.loc[ix[0], schema.duplicate_check],
-                    dup_rows.loc[ix[1], schema.duplicate_check],
-                ):
-                    record_to_add = dup_rows.loc[[most_complete[0]],].copy()
-                    merged_record = pub47_merge_rows(
-                        dup_rows.loc[ix[0], schema.duplicate_check],
-                        dup_rows.loc[ix[1], schema.duplicate_check],
-                    )
-                    # record_to_add.at[ ix[0], schema['duplicate_check'] ] \
-                    merged_record = pd.DataFrame(merged_record).transpose()
-                    record_to_add.reset_index(inplace=True, drop=True)
-                    merged_record.reset_index(inplace=True, drop=True)
-                    record_to_add.at[:, schema.duplicate_check] = merged_record.loc[
-                        :, schema.duplicate_check
-                    ]
-                elif len(highest_class) == 1:
-                    record_to_add = dup_rows.loc[[highest_class[0]], :].copy()
-                elif len(most_complete) == 1:
-                    record_to_add = dup_rows.loc[[most_complete[0]], :].copy()
-                else:
-                    rejects = pd.concat(
-                        [rejects, dup_rows], ignore_index=True, sort=False
-                    )
-                    record_to_add = None
-            elif same_country:
-                rejects = pd.concat([rejects, dup_rows], ignore_index=True, sort=False)
-                record_to_add = None
-            else:
-                record_to_add = dup_rows
-            if record_to_add is not None:
-                unique_rows = pd.concat(
-                    [unique_rows, record_to_add], ignore_index=True, sort=False
-                )
+        rejects, datain = identify_duplicates(datain, schema)
 
         # save rejects to file
         print("Saving rejects")
@@ -232,7 +416,6 @@ def main(argv):
             sep="|",
             na_rep="NULL",
         )
-        datain = unique_rows.copy()
 
         # get list of countries present in file
         countries = datain.rcnty.unique()
@@ -240,176 +423,17 @@ def main(argv):
 
         # now loop over countries homogenising
         for country in countries:
-            if verbose > 0:
-                print(f"Processing {country}", file=log)
-            tmp_data = datain.loc[datain.rcnty == country].copy()
-
-            tmp_data = tmp_data.reindex()
-            nrows = tmp_data.shape[0]
-
-            # output file for data from this country
-            country_file = os.path.basename(input_file) + "." + country
-
-            cor = None
-            # check if corrections exists for country / edition
-            for cor_temp in corrections:
-                if cor_temp["file"] == country_file:
-                    cor = cor_temp
-                    break
-
-            # validate (and correct) data
-            for column in tmp_data:
-                # ++++++++++ CORRECT DATA ++++++++++
-                # check if correction required and apply
-                if cor is not None:
-                    for f in cor["corrections"]:
-                        if f["field"] == column:
-                            if f["all"] == 1:
-                                if verbose > 0:
-                                    print(
-                                        f"Applying corrections to all values in {column}",
-                                        file=log,
-                                    )
-                                    print("Factor = {}".format(f["factor"]), file=log)
-                                # getting non missing rows
-                                # valid = tmp_data[column] != fmiss
-                                valid = tmp_data[column].apply(
-                                    lambda x: abs(x - fmiss) < tol
-                                )
-                                # apply to tmp data
-                                tmp_data.at[valid, column] = (
-                                    tmp_data.loc[valid, column] * f["factor"]
-                                )
-                                # apply to datain
-                                datain.at[
-                                    (datain["rcnty"] == country) & (valid), column
-                                ] = (
-                                    datain.loc[
-                                        (datain["rcnty"] == country) & (valid), column
-                                    ]
-                                    * f["factor"]
-                                )
-                            else:
-                                valid = pv.validate_numeric(
-                                    tmp_data[column],
-                                    min_value=schema.column_valid_min[column],
-                                    max_value=schema.column_valid_max[column],
-                                    return_type="mask_series",
-                                )
-                                valid = valid & ~(
-                                    tmp_data[column].apply(
-                                        lambda x: abs(x - fmiss) < tol
-                                    )
-                                )
-                                if any(valid):
-                                    if verbose > 0:
-                                        print(
-                                            f"Applying corrections to invalid values in {column}",
-                                            file=log,
-                                        )
-                                        print(
-                                            "Factor = {}".format(f["factor"]), file=log
-                                        )
-                                    # apply to tmp data
-                                    tmp_data.at[valid, column] = (
-                                        tmp_data.loc[valid, column] * f["factor"]
-                                    )
-                                    # now apply to datain
-                                    valid = pv.validate_numeric(
-                                        datain[column],
-                                        min_value=schema.column_valid_min[column],
-                                        max_value=schema.column_valid_max[column],
-                                        return_type="mask_series",
-                                    )
-                                    datain.at[
-                                        (datain["rcnty"] == country) & (valid), column
-                                    ] = (
-                                        datain.loc[
-                                            (datain["rcnty"] == country) & (valid),
-                                            column,
-                                        ]
-                                        * f["factor"]
-                                    )
-                # ++++++++++ VALIDATE CODED DATA ++++++++++
-                # get code table to validate against
-                tableID = schema.column_code_table[column]
-                if tableID in schema.code_tables:
-                    codes = schema.code_tables[tableID]
-                    if verbose > 1:
-                        print(
-                            "Validating against code table: " + str(tableID), file=log
-                        )
-                    whitelist = codes["code"].map(str)
-                    whitelist = whitelist.append(
-                        pd.Series([cmiss, "-1", "NA", "-999999"])
-                    )
-                    tmp_values = tmp_data[column].map(str)
-                    valid = pv.validate_string(
-                        tmp_values, whitelist=whitelist, return_type="mask_series"
-                    )
-
-                # ++++++++++ VALIDATE NUMERIC ++++++++++
-                if tableID is None:
-                    if schema.column_type[column] != "object":
-                        # if int convert to float and replace -1 with np.na
-                        if str(tmp_data[column].dtype) == "int64":
-                            tmp_values = pd.to_numeric(tmp_data[column])
-                            tmp_values = tmp_values.replace(
-                                to_replace=imiss, value=fmiss
-                            )  # pd.np.nan )
-                        else:
-                            tmp_values = tmp_data[column]
-                        valid = pv.validate_numeric(
-                            tmp_data[column],
-                            min_value=schema.column_valid_min[column],
-                            max_value=schema.column_valid_max[column],
-                            return_type="mask_series",
-                        )
-                        valid = valid & ~(
-                            tmp_data[column].apply(lambda x: abs(x - fmiss) < tol)
-                        )
-                    else:
-                        valid = pd.Series(False * nrows)
-
-                # calculate fraction bad
-                fraction_bad = sum(valid) / nrows
-                if (fraction_bad > 0.05) & (nrows > 10):
-                    print(
-                        "///////////// "
-                        + os.path.basename(input_file)
-                        + "."
-                        + country
-                        + " /////////////",
-                        file=log,
-                    )
-                    print(
-                        "Large number of bad values for "
-                        + column
-                        + "("
-                        + str(tableID)
-                        + ")",
-                        file=log,
-                    )
-                    print(tmp_data.loc[valid, column].unique(), file=log)
-                elif any(valid):
-                    print(
-                        f"Bad values, {column} ({str(tableID)})  :: {tmp_values[ valid ].unique()}",
-                        file=log,
-                    )
-
-            dataout = datain[datain.rcnty == country]
-            dataout = dataout.assign(valid_from=valid_from)
-            dataout = dataout.assign(valid_to=valid_to)
-            dataout = dataout.assign(schema=schema.version)
-            # convert all columns to object and replace fmiss and imiss with NA
-            dataout = dataout.astype(str)
-            dataout.replace(str(fmiss), pd.np.nan, inplace=True)
-            dataout.replace(str(imiss), pd.np.nan, inplace=True)
-            dataout.to_csv(
-                outputpath + "./split/" + os.path.basename(input_file) + "." + country,
-                index=False,
-                sep="|",
-                na_rep="NULL",
+            write_country_file(
+                country,
+                datain,
+                input_file,
+                corrections,
+                schema,
+                log,
+                valid_from,
+                valid_to,
+                outputpath,
+                verbose,
             )
 
 
