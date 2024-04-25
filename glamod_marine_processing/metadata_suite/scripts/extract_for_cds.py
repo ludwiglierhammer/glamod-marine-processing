@@ -37,7 +37,7 @@ def bad_number(number):
         return True
 
 
-def read_args():
+def read_args(argv):
     """Read parser arguments."""
     parser = argparse.ArgumentParser(
         description="Extract monthly edition of Pub47 for specified month and output"
@@ -116,7 +116,7 @@ def map_metadata(metadata, map_path):
 
 def main(argv):
     """Metadata suite extracting for CDS main function."""
-    args = read_args()
+    args = read_args(argv)
     config_file = args.config
     idx = args.index - 1
 

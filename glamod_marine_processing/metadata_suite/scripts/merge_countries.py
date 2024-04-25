@@ -19,7 +19,7 @@ fmiss = -999999.0
 imiss = -1  # -999999
 
 
-def read_args():
+def read_args(argv):
     """Read parser arguments."""
     parser = argparse.ArgumentParser(
         description="Merge split WMO Publication 47 metadata files to one file per country"
@@ -416,7 +416,7 @@ def write_country_file(
 
 def main(argv):
     """Metadata suite merging countries main function."""
-    args = read_args()
+    args = read_args(argv)
     control_file = args.jobs
     config_file = args.config
     country_file = args.country_file
