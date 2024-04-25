@@ -10,9 +10,13 @@ import sys
 
 import pandas as pd
 from dateutil.relativedelta import relativedelta
-from pub47 import cmiss, fmiss, imiss, smart_dict
+
+from ..modules.pub47 import cmiss, smart_dict
 
 pd.options.display.width = 0
+
+fmiss = -999999.0
+imiss = -1
 
 
 def record_completeness(record):
@@ -33,8 +37,8 @@ def bad_number(number):
         return True
 
 
-def main(argv):
-    """Metadata suite extracting for CDS main function."""
+def read_args():
+    """Read parser arguments."""
     parser = argparse.ArgumentParser(
         description="Extract monthly edition of Pub47 for specified month and output"
         + " for merge with observations in CDM"
@@ -62,7 +66,57 @@ def main(argv):
         help="Index of month to process, month 1 = Jan 1970",
     )
 
-    args = parser.parse_args()
+    return parser.parse_args()
+
+
+def adjust_numeric_metadata(metadata, mapping):
+    """Adjust metadata and get numeric columns."""
+    numeric_columns = list()
+    for column in metadata:
+        fieldInfo = None
+        for field in mapping["fields"]:
+            if field["name"] == column:
+                fieldInfo = field
+                # convert column to type specified by column_type if numeric (int or float)
+                if fieldInfo["kind"] == "int":
+                    bad_values = metadata[column].apply(lambda x: bad_number(x))
+                    metadata.at[bad_values, column] = imiss
+                    metadata[column].replace(cmiss, str(imiss), inplace=True)
+                    metadata[column].replace("-999999.0", str(imiss), inplace=True)
+                    metadata = metadata.astype({column: "float"})
+                    metadata = metadata.astype({column: "int"})
+                elif fieldInfo["kind"] == "float":
+                    metadata[column].replace(cmiss, str(fmiss), inplace=True)
+                    metadata = metadata.astype({column: "float"})
+                    metadata[column].replace(fmiss, pd.np.nan, inplace=True)
+                    numeric_columns.append(column)
+                elif fieldInfo["kind"] == "object":
+                    metadata[column].replace("-999999.0", cmiss, inplace=True)
+                break
+    return metadata, numeric_columns
+
+
+def map_metadata(metadata, map_path):
+    """Map metadata."""
+    columns = ["observing_frequency", "automation", "recruiting_country", "vessel_type"]
+    for column in columns:
+        map_file = map_path + "./" + column + ".json"
+        assert os.path.isfile(map_file)
+        with open(map_file) as m:
+            mapping = json.load(m)
+        # mapping data stored as list of dicts (unfortunately), need to convert to single dict
+        # (sub-class returns key if not in dict)
+        m = smart_dict()
+        for item in mapping["map"]:
+            for key in item:
+                m[key] = item[key]
+        metadata[column] = metadata[column].map(m)
+    return metadata
+
+
+def main(argv):
+    """Metadata suite extracting for CDS main function."""
+    args = read_args()
     config_file = args.config
     idx = args.index - 1
 
@@ -92,8 +146,6 @@ def main(argv):
 
     # make sure columns are as we expect
     map_file = args.schema  # + "./master.json"
-    fmiss = -999999.0
-    imiss = -1
 
     with open(map_file) as m:
         mapping = json.load(m)
@@ -102,28 +154,7 @@ def main(argv):
     output_fields.append("sx")
     output_fields.append("completeness")
 
-    numeric_columns = list()
-    for column in metadata:
-        fieldInfo = None
-        for field in mapping["fields"]:
-            if field["name"] == column:
-                fieldInfo = field
-                # convert column to type specified by column_type if numeric (int or float)
-                if fieldInfo["kind"] == "int":
-                    bad_values = metadata[column].apply(lambda x: bad_number(x))
-                    metadata.at[bad_values, column] = imiss
-                    metadata[column].replace(cmiss, str(imiss), inplace=True)
-                    metadata[column].replace("-999999.0", str(imiss), inplace=True)
-                    metadata = metadata.astype({column: "float"})
-                    metadata = metadata.astype({column: "int"})
-                elif fieldInfo["kind"] == "float":
-                    metadata[column].replace(cmiss, str(fmiss), inplace=True)
-                    metadata = metadata.astype({column: "float"})
-                    metadata[column].replace(fmiss, pd.np.nan, inplace=True)
-                    numeric_columns.append(column)
-                elif fieldInfo["kind"] == "object":
-                    metadata[column].replace("-999999.0", cmiss, inplace=True)
-                break
+    metadata, numeric_columns = adjust_numeric_metadata(metadata, mapping=mapping)
 
     # now convert valid to / from to dates
     metadata["valid_from"] = pd.to_datetime(metadata["valid_from"])
@@ -194,19 +225,7 @@ def main(argv):
     # apply final mappings between code tables
 
     # 'meteorological_vessel_type':'vsslM', -> station_configuration_codes
-    columns = ["observing_frequency", "automation", "recruiting_country", "vessel_type"]
-    for column in columns:
-        map_file = map_path + "./" + column + ".json"
-        assert os.path.isfile(map_file)
-        with open(map_file) as m:
-            mapping = json.load(m)
-        # mapping data stored as list of dicts (unfortunately), need to convert to single dict
-        # (sub-class returns key if not in dict)
-        m = smart_dict()
-        for item in mapping["map"]:
-            for key in item:
-                m[key] = item[key]
-        metadata[column] = metadata[column].map(m)
+    metadata = map_metadata(metadata, map_path=map_path)
 
     mm = pd.np.arange(660)
     dates = list(dt.datetime(1956, 1, 1) + relativedelta(months=m) for m in mm)
@@ -298,7 +317,6 @@ def main(argv):
         index=False,
         sep="|",
     )
-    # print( rejects )
 
 
 if __name__ == "__main__":
