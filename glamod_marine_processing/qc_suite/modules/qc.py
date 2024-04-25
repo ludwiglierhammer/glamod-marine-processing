@@ -12,6 +12,8 @@ from datetime import datetime, timedelta
 
 import numpy as np
 
+from .Extended_IMMA import MarineReport
+
 # Conversion factor between degrees and radians
 degrad = np.pi / 180.0
 
