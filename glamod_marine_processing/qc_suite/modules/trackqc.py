@@ -161,6 +161,100 @@ def assert_window_and_periods(smooth_win=1, min_win_period=1, max_win_period=Non
     return smooth_win, min_win_period, max_win_period
 
 
+def assert_limit_periods(
+    speed_limit=2.5,
+    min_win_period=1,
+    max_win_period=None,
+):
+    """Assert speed limit and window periods."""
+    speed_limit = float(speed_limit)
+    assert speed_limit >= 0, "speed_limit must be >= 0"
+    min_win_period = float(min_win_period)
+    assert min_win_period >= 0, "min_win_period must be >= 0"
+    if max_win_period is not None:
+        max_win_period = float(max_win_period)
+        assert max_win_period >= 0, "max_win_period must be >= 0"
+        assert (
+            max_win_period >= min_win_period
+        ), "max_win_period must be >= min_win_period"
+    return speed_limit, min_win_period, max_win_period
+
+
+def assert_drifters(
+    n_eval=1,
+    bias_lim=1.10,
+    drif_intra=1.0,
+    drif_inter=0.29,
+    err_std_n=3.0,
+    n_bad=2,
+    background_err_lim=0.3,
+):
+    """Assert drifter sea surface temperature record."""
+    n_eval = int(n_eval)
+    bias_lim = float(bias_lim)
+    drif_intra = float(drif_intra)
+    drif_inter = float(drif_inter)
+    err_std_n = float(err_std_n)
+    n_bad = int(n_bad)
+    background_err_lim = float(background_err_lim)
+    assert n_eval > 0, "n_eval must be > 0"
+    assert bias_lim >= 0, "bias_lim must be >= 0"
+    assert drif_intra >= 0, "drif_intra must be >= 0"
+    assert drif_inter >= 0, "drif_inter must be >= 0"
+    assert err_std_n >= 0, "err_std_n must be >= 0"
+    assert n_bad >= 1, "n_bad must be >= 1"
+    assert background_err_lim >= 0, "background_err_lim must be >= 0"
+    return (
+        n_eval,
+        bias_lim,
+        drif_intra,
+        drif_inter,
+        err_std_n,
+        n_bad,
+        background_err_lim,
+    )
+
+
+def assert_window_drifters(
+    long_win_len=1,
+    long_err_std_n=3.0,
+    short_win_len=1,
+    short_err_std_n=3.0,
+    short_win_n_bad=1,
+    drif_inter=0.29,
+    drif_intra=1.00,
+    background_err_lim=0.3,
+):
+    """Assert drifter and windoe parameters."""
+    long_win_len = int(long_win_len)
+    long_err_std_n = float(long_err_std_n)
+    short_win_len = int(short_win_len)
+    short_err_std_n = float(short_err_std_n)
+    short_win_n_bad = int(short_win_n_bad)
+    drif_inter = float(drif_inter)
+    drif_intra = float(drif_intra)
+    background_err_lim = float(background_err_lim)
+    assert long_win_len >= 1, "long_win_len must be >= 1"
+    assert long_win_len % 2 != 0, "long_win_len must be an odd number"
+    assert long_err_std_n >= 0, "long_err_std_n must be >= 0"
+    assert short_win_len >= 1, "short_win_len must be >= 1"
+    assert short_err_std_n >= 0, "short_err_std_n must be >= 0"
+    assert short_win_n_bad >= 1, "short_win_n_bad must be >= 1"
+    assert drif_inter >= 0, "drif_inter must be >= 0"
+    assert drif_intra >= 0, "drif_intra must be >= 0"
+    assert background_err_lim >= 0, "background_err_lim must be >= 0"
+    return (
+        long_win_len,
+        long_err_std_n,
+        short_win_len,
+        short_err_std_n,
+        short_win_n_bad,
+        drif_inter,
+        drif_intra,
+        background_err_lim,
+    )
+
+
 def retrieve_lon_lat_hrs(reps):
     """Retrieve lon/lat/time_diff variables from marine reports."""
     nrep = len(reps)
@@ -257,6 +351,246 @@ def check_drifter_aground(
     return is_aground, i_aground
 
 
+def check_drifter_speed(
+    reps,
+    lon=np.array([np.nan]),
+    lat=np.array([np.nan]),
+    hrs=np.array([np.nan]),
+    speed_limit=2.5,
+    min_win_period=1,
+    max_win_period=None,
+    iquam_track_ship=None,
+):
+    """Check whether drifter is moving too fast and flag any occurences."""
+    nrep = len(reps)
+    index_arr = np.array(range(0, nrep))
+    i = 0
+    time_to_end = hrs[-1] - hrs[i]
+    min_win_period_hours = min_win_period * 24.0
+    if max_win_period is None:
+        max_win_period_hours = None
+    else:
+        max_win_period_hours = max_win_period * 24.0
+    while time_to_end >= min_win_period_hours:
+        if iquam_track_ship is not None:
+            if iquam_track_ship[i] == 1:
+                i += 1
+                time_to_end = hrs[-1] - hrs[i]
+                continue
+            f_win = (hrs >= hrs[i] + min_win_period_hours) & (iquam_track_ship == 0)
+            if not any(f_win):
+                i += 1
+                time_to_end = hrs[-1] - hrs[i]
+                continue
+            win_len = hrs[f_win][0] - hrs[i]
+            ind = 0
+        else:
+            f_win = hrs <= hrs[i] + max_win_period_hours
+            win_len = hrs[f_win][-1] - hrs[i]
+            ind = -1
+            if win_len < min_win_period_hours:
+                i += 1
+                time_to_end = hrs[-1] - hrs[i]
+                continue
+
+        displace = sphere_distance(lat[i], lon[i], lat[f_win][ind], lon[f_win][ind])
+        speed = displace / win_len  # km per hr
+        speed = speed * 1000.0 / (60.0 * 60)  # metres per sec
+
+        if speed > speed_limit:
+            for ix in range(i, index_arr[f_win][ind] + 1):
+                if reps[ix].get_qc("POS", "drf_spd") == 0:
+                    reps[ix].set_qc("POS", "drf_spd", 1)
+            i += 1
+            time_to_end = hrs[-1] - hrs[i]
+        else:
+            i += 1
+            time_to_end = hrs[-1] - hrs[i]
+
+    return reps
+
+
+def filter_unsuitable_backgrounds(
+    reps,
+    background_err_lim=0.3,
+):
+    """Test and filter out obs with unsuitable background matches."""
+    reps_ind = []
+    sst_anom = []
+    bgvar = []
+    bgvar_is_masked = False
+    for ind, rep in enumerate(reps):
+        try:
+            bg_val = rep.getext("OSTIA")  # raises assertion error if not found
+            ice_val = rep.getext("ICE")  # raises assertion error if not found
+            bgvar_val = rep.getext("BGVAR")  # raises assertion error if not found
+        except AssertionError as error:
+            raise AssertionError("matched report value is missing: " + str(error))
+
+        if ice_val is None:
+            ice_val = 0.0
+        assert (
+            ice_val is not None and 0.0 <= ice_val <= 1.0
+        ), "matched ice proportion is invalid"
+
+        try:
+            daytime = track_day_test(
+                rep.getvar("YR"),
+                rep.getvar("MO"),
+                rep.getvar("DY"),
+                rep.getvar("HR"),
+                rep.getvar("LAT"),
+                rep.getvar("LON"),
+                -2.5,
+            )
+        except AssertionError as error:
+            raise AssertionError("problem with report value: " + str(error))
+
+        if ind > 0:
+            try:
+                time_diff = rep.getext(
+                    "time_diff"
+                )  # raises assertion error if 'time_diff' not found
+                assert time_diff >= 0, "times are not sorted"
+            except AssertionError as error:
+                raise AssertionError("problem with report value: " + str(error))
+
+        land_match = True if bg_val is None else False
+        ice_match = True if ice_val > 0.15 else False
+        bgvar_mask = (
+            True if bgvar_val is not None and bgvar_val > background_err_lim else False
+        )
+        if bgvar_mask:
+            bgvar_is_masked = True
+        if daytime or land_match or ice_match or bgvar_mask:
+            pass
+        else:
+            assert (
+                bg_val is not None and -5.0 <= bg_val <= 45.0
+            ), "matched background sst is invalid"
+            assert (
+                bgvar_val is not None and 0.0 <= bgvar_val <= 10
+            ), "matched background error variance is invalid"
+            reps_ind.append(ind)
+            sst_anom.append(rep.getvar("SST") - bg_val)
+            bgvar.append(bgvar_val)
+
+    reps_ind = np.array(reps_ind)
+    sst_anom = np.array(sst_anom)
+    bgerr = np.sqrt(np.array(bgvar))
+    return sst_anom, bgerr, bgvar_is_masked, reps_ind
+
+
+def long_tail_check(
+    nrep,
+    sst_anom=np.array([np.nan]),
+    bgerr=np.array([np.nan]),
+    drif_inter=0.29,
+    drif_intra=1.00,
+    long_win_len=1,
+    long_err_std_n=1,
+    background_err_lim=0.3,
+):
+    """Do long tail check."""
+    start_tail_ind = -1  # keeps track of index where start tail stops
+    end_tail_ind = nrep  # keeps track of index where end tail starts
+    mid_win_ind = (long_win_len - 1) / 2
+
+    if nrep >= long_win_len:
+        for forward in [True, False]:  # run forwards then backwards over timeseries
+            if forward:
+                sst_anom_temp = sst_anom
+                bgerr_temp = bgerr
+            else:
+                sst_anom_temp = np.flipud(sst_anom)
+                bgerr_temp = np.flipud(bgerr)
+            # this is the long tail check
+            for ix in range(0, nrep - long_win_len + 1):
+                sst_anom_winvals = sst_anom_temp[ix : ix + long_win_len]
+                bgerr_winvals = bgerr_temp[ix : ix + long_win_len]
+                if np.any(bgerr_winvals > np.sqrt(background_err_lim)):
+                    break
+                sst_anom_avg = trim_mean(sst_anom_winvals, 100)
+                sst_anom_stdev = trim_std(sst_anom_winvals, 100)
+                bgerr_avg = np.mean(bgerr_winvals)
+                bgerr_rms = np.sqrt(np.mean(bgerr_winvals**2))
+                if (
+                    abs(sst_anom_avg)
+                    > long_err_std_n * np.sqrt(drif_inter**2 + bgerr_avg**2)
+                ) or (sst_anom_stdev > np.sqrt(drif_intra**2 + bgerr_rms**2)):
+                    if forward:
+                        start_tail_ind = ix + mid_win_ind
+                    else:
+                        end_tail_ind = (nrep - 1) - ix - mid_win_ind
+                else:
+                    break
+
+    return start_tail_ind, end_tail_ind
+
+
+def short_tail_check(
+    start_tail_ind,
+    end_tail_ind,
+    sst_anom=np.array([np.nan]),
+    bgerr=np.array([np.nan]),
+    drif_inter=0.29,
+    drif_intra=1.00,
+    short_win_len=1,
+    short_err_std_n=3.0,
+    short_win_n_bad=1,
+    background_err_lim=0.3,
+):
+    """Do short tail check."""
+    # do short tail check on records that pass long tail check
+    if start_tail_ind < end_tail_ind:  # whole record already failed long tail check
+        first_pass_ind = start_tail_ind + 1  # first index passing long tail check
+        last_pass_ind = end_tail_ind - 1  # last index passing long tail check
+        npass = last_pass_ind - first_pass_ind + 1
+        assert npass > 0, "short tail check: npass not > 0"
+
+        if npass >= short_win_len:
+            for forward in [True, False]:  # run forwards then backwards over timeseries
+                if forward:
+                    sst_anom_temp = sst_anom[first_pass_ind : last_pass_ind + 1]
+                    bgerr_temp = bgerr[first_pass_ind : last_pass_ind + 1]
+                else:
+                    sst_anom_temp = np.flipud(
+                        sst_anom[first_pass_ind : last_pass_ind + 1]
+                    )
+                    bgerr_temp = np.flipud(bgerr[first_pass_ind : last_pass_ind + 1])
+                # this is the short tail check
+                for ix in range(0, npass - short_win_len + 1):
+                    sst_anom_winvals = sst_anom_temp[ix : ix + short_win_len]
+                    bgerr_winvals = bgerr_temp[ix : ix + short_win_len]
+                    if np.any(bgerr_winvals > np.sqrt(background_err_lim)):
+                        break
+                    limit = short_err_std_n * np.sqrt(
+                        bgerr_winvals**2 + drif_inter**2 + drif_intra**2
+                    )
+                    exceed_limit = np.logical_or(
+                        sst_anom_winvals > limit, sst_anom_winvals < -limit
+                    )
+                    if np.sum(exceed_limit) >= short_win_n_bad:
+                        if forward:
+                            if ix == (
+                                npass - short_win_len
+                            ):  # if all windows have failed, flag everything
+                                start_tail_ind += short_win_len
+                            else:
+                                start_tail_ind += 1
+                        else:
+                            if ix == (
+                                npass - short_win_len
+                            ):  # if all windows have failed, flag everything
+                                end_tail_ind -= short_win_len
+                            else:
+                                end_tail_ind -= 1
+                    else:
+                        break
+
+    return start_tail_ind, end_tail_ind
+
+
 def aground_check(reps, smooth_win=41, min_win_period=8, max_win_period=10):
     """
     Check to see whether a drifter has run aground based on 1/100th degree precision positions.
@@ -347,6 +681,8 @@ def aground_check(reps, smooth_win=41, min_win_period=8, max_win_period=10):
         else:
             rep.set_qc("POS", "drf_agr", 0)
 
+    return reps
+
 
 def new_aground_check(reps, smooth_win=41, min_win_period=8):
     """
@@ -355,12 +691,14 @@ def new_aground_check(reps, smooth_win=41, min_win_period=8):
 
     This is function `aground_check` with `max_win_period` is None.
     """
-    aground_check(
+    return aground_check(
         reps, smooth_win=smooth_win, min_win_period=min_win_period, max_win_period=None
     )
 
 
-def speed_check(reps, speed_limit=2.5, min_win_period=0.8, max_win_period=1.0):
+def speed_check(
+    reps, speed_limit=2.5, min_win_period=0.8, max_win_period=1.0, iquam_parameters=None
+):
     """
     Check to see whether a drifter has been picked up by a ship (out of water) based on 1/100th degree
     precision positions. A flag 'drf_spd' is set for each input report: flag=1 for reports deemed picked up,
@@ -394,26 +732,21 @@ def speed_check(reps, speed_limit=2.5, min_win_period=0.8, max_win_period=1.0):
     :param max_win_period: maximum period of time in days over which position is assessed for speed estimates
       (this should be greater than min_win_period and allow for some erratic temporal sampling e.g. min_win_period+0.2
       to allow for gaps of up to 0.2-days in sampling).
+    :param iquam_parameters: Parameter dictionary for Voyage.iquam_track_check() function.
     :type reps: a class`.Voyage`
     :type speed_limit: float
     :type min_win_period: float
-    :type max_win_period: float
+    :type max_win_period: float, optional
+    :type iquam_parameters: dictionary, optional
     """
     try:
-        speed_limit = float(speed_limit)
-        min_win_period = float(min_win_period)
-        max_win_period = float(max_win_period)
-        assert speed_limit >= 0, "speed_limit must be >= 0"
-        assert min_win_period >= 0, "min_win_period must be >= 0"
-        assert max_win_period >= 0, "max_win_period must be >= 0"
-        assert (
-            max_win_period >= min_win_period
-        ), "max_win_period must be >= min_win_period"
+        speed_limit, min_win_period, max_win_period = assert_limit_periods(
+            speed_limit=speed_limit,
+            min_win_period=min_win_period,
+            max_win_period=max_win_period,
+        )
     except AssertionError as error:
         raise AssertionError("invalid input parameter: " + str(error))
-
-    min_win_period_hours = min_win_period * 24.0
-    max_win_period_hours = max_win_period * 24.0
 
     nrep = len(reps)
     if nrep <= 1:  # pairs of records are needed to evaluate speed
@@ -422,62 +755,41 @@ def speed_check(reps, speed_limit=2.5, min_win_period=0.8, max_win_period=1.0):
             rep.set_qc("POS", "drf_spd", 0)
         return
 
-    # retrieve lon/lat/time_diff variables from marine reports
-    lon = np.empty(nrep)
-    lon[:] = np.nan
-    lat = np.empty(nrep)
-    lat[:] = np.nan
-    hrs = np.empty(nrep)
-    hrs[:] = np.nan
     try:
-        for ind, rep in enumerate(reps):
-            lon[ind] = rep.getvar("LON")  # returns None if missing
-            lat[ind] = rep.getvar("LAT")  # returns None if missing
-            if ind == 0:
-                hrs[ind] = 0
-            else:
-                hrs[ind] = rep.getext(
-                    "time_diff"
-                )  # raises assertion error if 'time_diff' not found
-        assert not any(np.isnan(lon)), "Nan(s) found in longitude"
-        assert not any(np.isnan(lat)), "Nan(s) found in latitude"
-        assert not any(np.isnan(hrs)), "Nan(s) found in time differences"
-        assert not any(hrs < 0), "times are not sorted"
+        lon, lat, hrs = retrieve_lon_lat_hrs(reps)
     except AssertionError as error:
         raise AssertionError("problem with report values: " + str(error))
 
-    hrs = np.cumsum(hrs)  # get time difference in hours relative to first report
+    if isinstance(iquam_parameters, dict):
+        reps_copy = copy.deepcopy(reps)
+        v = ex.Voyage()
+        qc_list = []
+        for rep in reps_copy:
+            rep.setvar("PT", 5)  # ship
+            rep.set_qc("POS", "iquam_track", 0)  # reset iquam parameters
+            v.add_report(rep)
+        v.iquam_track_check(iquam_parameters)
+        for rep in v.rep_feed():
+            qc_list.append(rep.get_qc("POS", "iquam_track"))
+        iquam_track_ship = np.array(qc_list)
+        del reps_copy, v, qc_list
+    else:
+        iquam_track_ship = None
 
     # begin by setting all reports to pass
     for rep in reps:
         rep.set_qc("POS", "drf_spd", 0)
 
-    # loop through timeseries to see if drifter is moving too fast
-    # and flag any occurences
-    index_arr = np.array(range(0, nrep))
-    i = 0
-    time_to_end = hrs[-1] - hrs[i]
-    while time_to_end >= min_win_period_hours:
-        f_win = hrs <= hrs[i] + max_win_period_hours
-        win_len = hrs[f_win][-1] - hrs[i]
-        if win_len < min_win_period_hours:
-            i += 1
-            time_to_end = hrs[-1] - hrs[i]
-            continue
-
-        displace = sphere_distance(lat[i], lon[i], lat[f_win][-1], lon[f_win][-1])
-        speed = displace / win_len  # km per hr
-        speed = speed * 1000.0 / (60.0 * 60)  # metres per sec
-
-        if speed > speed_limit:
-            for ix in range(i, index_arr[f_win][-1] + 1):
-                if reps[ix].get_qc("POS", "drf_spd") == 0:
-                    reps[ix].set_qc("POS", "drf_spd", 1)
-            i += 1
-            time_to_end = hrs[-1] - hrs[i]
-        else:
-            i += 1
-            time_to_end = hrs[-1] - hrs[i]
+    return check_drifter_speed(
+        reps,
+        lon=lon,
+        lat=lat,
+        hrs=hrs,
+        speed_limit=speed_limit,
+        min_win_period=min_win_period,
+        max_win_period=max_win_period,
+        iquam_track_ship=iquam_track_ship,
+    )
 
 
 def new_speed_check(reps, iquam_parameters, speed_limit=3.0, min_win_period=0.375):
@@ -486,134 +798,15 @@ def new_speed_check(reps, iquam_parameters, speed_limit=3.0, min_win_period=0.37
     precision positions. A flag 'drf_spd' is set for each input report: flag=1 for reports deemed picked up,
     else flag=0.
 
-    A drifter is deemed picked up if it is moving faster than might be expected for a fast ocean current
-    (a few m/s). Unreasonably fast movement is detected when speed of travel between report-pairs exceeds
-    the chosen 'speed_limit' (speed is estimated as distance between reports divided by time separation -
-    this 'straight line' speed between the two points is a minimum speed estimate given a less-direct
-    path may have been followed). Positional errors introduced by lon/lat 'jitter' and data precision
-    can be of order several km's. Reports must be separated by a suitably long period of time (the 'min_win_period')
-    to minimise the effect of these errors when calculating speed e.g. for reports separated by 9 hours
-    errors of order 10 cm/s would result which are a few percent of fast ocean current speed. Conversley,
-    the period of time chosen should not be too long so as to resolve short-lived burst of speed on
-    manouvering ships. Larger positional errors may also trigger the check.
-
-    For each report, speed is assessed over the shortest available period that exceeds 'min_win_period'.
-
-    Prior to assessment the drifter record is screened for positional errors using the iQuam track check
-    method (from class`.Voyage`). When running the iQuam check the record is treated as a ship (not a
-    drifter) so as to avoid accidentally filtering out observations made aboard a ship (which is what we
-    are trying to detect). This iQuam track check does not overwrite any existing iQuam track check flags.
-
-    IMPORTANT - for optimal performance, drifter records with observations failing this check should be
-    subsequently manually reviewed. Ships move around in all sorts of complicated ways that can readily
-    confuse such a simple check (e.g. pausing at sea, crisscrossing its own path) and once some erroneous
-    movement is detected it is likely a human operator can then better pick out the actual bad data. False
-    fails caused by positional errors (particularly in fast ocean currents) will also need reinstating.
-
-    :param reps: a time-sorted list of drifter observations in format class`.Voyage`,
-      each report must have a valid longitude, latitude and time-difference
-    :param iquam_parameters: Parameter dictionary for Voyage.iquam_track_check() function.
-    :param speed_limit: maximum allowable speed for an in situ drifting buoy (metres per second)
-    :param min_win_period: minimum period of time in days over which position is assessed for speed estimates (see
-      description)
-    :type reps: a class`.Voyage`
-    :type iquam_parameters: dictionary
-    :type speed_limit: float
-    :type min_win_period: float
+    This is function `speed_check` with `max_win_period` is None and iquam_parameters.
     """
-    try:
-        speed_limit = float(speed_limit)
-        min_win_period = float(min_win_period)
-        assert speed_limit >= 0, "speed_limit must be >= 0"
-        assert min_win_period >= 0, "min_win_period must be >= 0"
-    except AssertionError as error:
-        raise AssertionError("invalid input parameter: " + str(error))
-
-    min_win_period_hours = min_win_period * 24.0
-
-    nrep = len(reps)
-    if nrep <= 1:  # pairs of records are needed to evaluate speed
-        print("Voyage too short for QC, setting flags to pass")
-        for rep in reps:
-            rep.set_qc("POS", "drf_spd", 0)
-        return
-
-    # retrieve lon/lat/time_diff variables from marine reports
-    lon = np.empty(nrep)
-    lon[:] = np.nan
-    lat = np.empty(nrep)
-    lat[:] = np.nan
-    hrs = np.empty(nrep)
-    hrs[:] = np.nan
-    try:
-        for ind, rep in enumerate(reps):
-            lon[ind] = rep.getvar("LON")  # returns None if missing
-            lat[ind] = rep.getvar("LAT")  # returns None if missing
-            if ind == 0:
-                hrs[ind] = 0
-            else:
-                hrs[ind] = rep.getext(
-                    "time_diff"
-                )  # raises assertion error if 'time_diff' not found
-        assert not any(np.isnan(lon)), "Nan(s) found in longitude"
-        assert not any(np.isnan(lat)), "Nan(s) found in latitude"
-        assert not any(np.isnan(hrs)), "Nan(s) found in time differences"
-        assert not any(hrs < 0), "times are not sorted"
-    except AssertionError as error:
-        raise AssertionError("problem with report values: " + str(error))
-
-    hrs = np.cumsum(hrs)  # get time difference in hours relative to first report
-
-    # perform iQuam track check as if a ship
-    # a deep copy of reps is made so metadata can be safely modified ahead of iQuam check
-    # an array of qc flags (iquam_track_ship) is the result
-    reps_copy = copy.deepcopy(reps)
-    v = ex.Voyage()
-    qc_list = []
-    for rep in reps_copy:
-        rep.setvar("PT", 5)  # ship
-        rep.set_qc("POS", "iquam_track", 0)  # reset iquam parameters
-        v.add_report(rep)
-    v.iquam_track_check(iquam_parameters)
-    for rep in v.rep_feed():
-        qc_list.append(rep.get_qc("POS", "iquam_track"))
-    iquam_track_ship = np.array(qc_list)
-    del reps_copy, v, qc_list
-
-    # begin by setting all reports to pass
-    for rep in reps:
-        rep.set_qc("POS", "drf_spd", 0)
-
-    # loop through timeseries to see if drifter is moving too fast
-    # and flag any occurences
-    index_arr = np.array(range(0, nrep))
-    i = 0
-    time_to_end = hrs[-1] - hrs[i]
-    while time_to_end >= min_win_period_hours:
-        if iquam_track_ship[i] == 1:
-            i += 1
-            time_to_end = hrs[-1] - hrs[i]
-            continue
-        f_win = (hrs >= hrs[i] + min_win_period_hours) & (iquam_track_ship == 0)
-        if not any(f_win):
-            i += 1
-            time_to_end = hrs[-1] - hrs[i]
-            continue
-
-        win_len = hrs[f_win][0] - hrs[i]
-        displace = sphere_distance(lat[i], lon[i], lat[f_win][0], lon[f_win][0])
-        speed = displace / win_len  # km per hr
-        speed = speed * 1000.0 / (60.0 * 60)  # metres per sec
-
-        if speed > speed_limit:
-            for ix in range(i, index_arr[f_win][0] + 1):
-                if reps[ix].get_qc("POS", "drf_spd") == 0:
-                    reps[ix].set_qc("POS", "drf_spd", 1)
-            i += 1
-            time_to_end = hrs[-1] - hrs[i]
-        else:
-            i += 1
-            time_to_end = hrs[-1] - hrs[i]
+    return speed_check(
+        reps,
+        speed_limit=speed_limit,
+        min_win_period=min_win_period,
+        max_win_period=None,
+        iquam_parameters=iquam_parameters,
+    )
 
 
 def sst_tail_check(
@@ -678,79 +871,32 @@ def sst_tail_check(
     :type background_err_lim: float
     """
     try:
-        long_win_len = int(long_win_len)
-        long_err_std_n = float(long_err_std_n)
-        short_win_len = int(short_win_len)
-        short_err_std_n = float(short_err_std_n)
-        short_win_n_bad = int(short_win_n_bad)
-        drif_inter = float(drif_inter)
-        drif_intra = float(drif_intra)
-        background_err_lim = float(background_err_lim)
-        assert long_win_len >= 1, "long_win_len must be >= 1"
-        assert long_win_len % 2 != 0, "long_win_len must be an odd number"
-        assert long_err_std_n >= 0, "long_err_std_n must be >= 0"
-        assert short_win_len >= 1, "short_win_len must be >= 1"
-        assert short_err_std_n >= 0, "short_err_std_n must be >= 0"
-        assert short_win_n_bad >= 1, "short_win_n_bad must be >= 1"
-        assert drif_inter >= 0, "drif_inter must be >= 0"
-        assert drif_intra >= 0, "drif_intra must be >= 0"
-        assert background_err_lim >= 0, "background_err_lim must be >= 0"
+        (
+            long_win_len,
+            long_err_std_n,
+            short_win_len,
+            short_err_std_n,
+            short_win_n_bad,
+            drif_inter,
+            drit_intra,
+            background_err_lim,
+        ) = assert_window_drifters(
+            long_win_len,
+            long_err_std_n,
+            short_win_len,
+            short_err_std_n,
+            short_win_n_bad,
+            drif_inter,
+            drif_intra,
+            background_err_lim,
+        )
     except AssertionError as error:
         raise AssertionError("invalid input parameter: " + str(error))
 
-    # test and filter out obs with unsuitable background matches
-    reps_ind = []
-    sst_anom = []
-    bgvar = []
-    for ind, rep in enumerate(reps):
-        try:
-            bg_val = rep.getext("OSTIA")  # raises assertion error if not found
-            ice_val = rep.getext("ICE")  # raises assertion error if not found
-            bgvar_val = rep.getext("BGVAR")  # raises assertion error if not found
-        except AssertionError as error:
-            raise AssertionError("matched report value is missing: " + str(error))
-
-        if ice_val is None:
-            ice_val = 0.0
-        assert (
-            ice_val is not None and 0.0 <= ice_val <= 1.0
-        ), "matched ice proportion is invalid"
-
-        try:
-            daytime = track_day_test(
-                rep.getvar("YR"),
-                rep.getvar("MO"),
-                rep.getvar("DY"),
-                rep.getvar("HR"),
-                rep.getvar("LAT"),
-                rep.getvar("LON"),
-                -2.5,
-            )
-        except AssertionError as error:
-            raise AssertionError("problem with report value: " + str(error))
-        if ind > 0:
-            try:
-                time_diff = rep.getext(
-                    "time_diff"
-                )  # raises assertion error if 'time_diff' not found
-                assert time_diff >= 0, "times are not sorted"
-            except AssertionError as error:
-                raise AssertionError("problem with report value: " + str(error))
-
-        land_match = True if bg_val is None else False
-        ice_match = True if ice_val > 0.15 else False
-        if daytime or land_match or ice_match:
-            pass
-        else:
-            assert (
-                bg_val is not None and -5.0 <= bg_val <= 45.0
-            ), "matched background sst is invalid"
-            assert (
-                bgvar_val is not None and 0.0 <= bgvar_val <= 10
-            ), "matched background error variance is invalid"
-            reps_ind.append(ind)
-            sst_anom.append(rep.getvar("SST") - bg_val)
-            bgvar.append(bgvar_val)
+    sst_anom, bgerr, bgvar_is_masked, reps_ind = filter_unsuitable_backgrounds(
+        reps,
+        background_err_lim=background_err_lim,
+    )
 
     # set start and end tail flags to pass to ensure all obs receive flag
     # then exit if there are no obs suitable for assessment
@@ -761,99 +907,32 @@ def sst_tail_check(
         return
 
     # prepare numpy arrays and variables needed for tail checks
-    reps_ind = np.array(reps_ind)  # indices of obs suitable for assessment
-    sst_anom = np.array(sst_anom)  # ob-background differences
-    bgerr = np.sqrt(np.array(bgvar))  # standard deviation of background error
     nrep = len(sst_anom)
-    start_tail_ind = -1  # keeps track of index where start tail stops
-    end_tail_ind = nrep  # keeps track of index where end tail starts
 
-    # do long tail check
-    mid_win_ind = (long_win_len - 1) / 2
-    if nrep < long_win_len:  # records shorter than long-window length aren't evaluated
-        pass
-    else:
-        for forward in [True, False]:  # run forwards then backwards over timeseries
-            if forward:
-                sst_anom_temp = sst_anom
-                bgerr_temp = bgerr
-            else:
-                sst_anom_temp = np.flipud(sst_anom)
-                bgerr_temp = np.flipud(bgerr)
-            # this is the long tail check
-            for ix in range(0, nrep - long_win_len + 1):
-                sst_anom_winvals = sst_anom_temp[ix : ix + long_win_len]
-                bgerr_winvals = bgerr_temp[ix : ix + long_win_len]
-                if np.any(bgerr_winvals > np.sqrt(background_err_lim)):
-                    break
-                sst_anom_avg = trim_mean(sst_anom_winvals, 100)
-                sst_anom_stdev = trim_std(sst_anom_winvals, 100)
-                bgerr_avg = np.mean(bgerr_winvals)
-                bgerr_rms = np.sqrt(np.mean(bgerr_winvals**2))
-                if (
-                    abs(sst_anom_avg)
-                    > long_err_std_n * np.sqrt(drif_inter**2 + bgerr_avg**2)
-                ) or (sst_anom_stdev > np.sqrt(drif_intra**2 + bgerr_rms**2)):
-                    if forward:
-                        start_tail_ind = ix + mid_win_ind
-                    else:
-                        end_tail_ind = (nrep - 1) - ix - mid_win_ind
-                else:
-                    break
+    start_tail_ind, end_tail_ind = long_tail_check(
+        nrep,
+        sst_anom=sst_anom,
+        bgerr=bgerr,
+        drif_inter=drif_inter,
+        drif_intra=drif_intra,
+        long_win_len=long_win_len,
+        long_err_std_n=long_err_std_n,
+        background_err_lim=background_err_lim,
+    )
 
-    # do short tail check on records that pass long tail check
-    if start_tail_ind >= end_tail_ind:  # whole record already failed long tail check
-        pass
-    else:
-        first_pass_ind = start_tail_ind + 1  # first index passing long tail check
-        last_pass_ind = end_tail_ind - 1  # last index passing long tail check
-        npass = last_pass_ind - first_pass_ind + 1
-        assert npass > 0, "short tail check: npass not > 0"
-        if (
-            npass < short_win_len
-        ):  # records shorter than short-window length aren't evaluated
-            pass
-        else:
-            for forward in [True, False]:  # run forwards then backwards over timeseries
-                if forward:
-                    sst_anom_temp = sst_anom[first_pass_ind : last_pass_ind + 1]
-                    bgerr_temp = bgerr[first_pass_ind : last_pass_ind + 1]
-                else:
-                    sst_anom_temp = np.flipud(
-                        sst_anom[first_pass_ind : last_pass_ind + 1]
-                    )
-                    bgerr_temp = np.flipud(bgerr[first_pass_ind : last_pass_ind + 1])
-                # this is the short tail check
-                for ix in range(0, npass - short_win_len + 1):
-                    sst_anom_winvals = sst_anom_temp[ix : ix + short_win_len]
-                    bgerr_winvals = bgerr_temp[ix : ix + short_win_len]
-                    if np.any(bgerr_winvals > np.sqrt(background_err_lim)):
-                        break
-                    limit = short_err_std_n * np.sqrt(
-                        bgerr_winvals**2 + drif_inter**2 + drif_intra**2
-                    )
-                    exceed_limit = np.logical_or(
-                        sst_anom_winvals > limit, sst_anom_winvals < -limit
-                    )
-                    if np.sum(exceed_limit) >= short_win_n_bad:
-                        if forward:
-                            if ix == (
-                                npass - short_win_len
-                            ):  # if all windows have failed, flag everything
-                                start_tail_ind += short_win_len
-                            else:
-                                start_tail_ind += 1
-                        else:
-                            if ix == (
-                                npass - short_win_len
-                            ):  # if all windows have failed, flag everything
-                                end_tail_ind -= short_win_len
-                            else:
-                                end_tail_ind -= 1
-                    else:
-                        break
+    start_tail_ind, end_tail_ind = short_tail_check(
+        start_tail_ind,
+        end_tail_ind,
+        sst_anom=sst_anom,
+        bgerr=bgerr,
+        drif_inter=drif_inter,
+        drif_intra=drif_intra,
+        short_win_len=short_win_len,
+        short_err_std_n=short_err_std_n,
+        short_win_n_bad=short_win_n_bad,
+        background_err_lim=background_err_lim,
+    )
 
-                        # now flag reps
     if start_tail_ind >= end_tail_ind:  # whole record failed tail checks, dont flag
         start_tail_ind = -1
         end_tail_ind = nrep
@@ -865,108 +944,7 @@ def sst_tail_check(
         for ind, rep in enumerate(reps):
             if ind >= reps_ind[end_tail_ind]:
                 rep.set_qc("SST", "drf_tail2", 1)
-
-    return
-
-
-def assert_drifters(
-    n_eval=1,
-    bias_lim=1.10,
-    drif_intra=1.0,
-    drif_inter=0.29,
-    err_std_n=3.0,
-    n_bad=2,
-    background_err_lim=0.3,
-):
-    """Assert drifter sea surface temperature record."""
-    n_eval = int(n_eval)
-    bias_lim = float(bias_lim)
-    drif_intra = float(drif_intra)
-    drif_inter = float(drif_inter)
-    err_std_n = float(err_std_n)
-    n_bad = int(n_bad)
-    background_err_lim = float(background_err_lim)
-    assert n_eval > 0, "n_eval must be > 0"
-    assert bias_lim >= 0, "bias_lim must be >= 0"
-    assert drif_intra >= 0, "drif_intra must be >= 0"
-    assert drif_inter >= 0, "drif_inter must be >= 0"
-    assert err_std_n >= 0, "err_std_n must be >= 0"
-    assert n_bad >= 1, "n_bad must be >= 1"
-    assert background_err_lim >= 0, "background_err_lim must be >= 0"
-    return (
-        n_eval,
-        bias_lim,
-        drif_intra,
-        drif_inter,
-        err_std_n,
-        n_bad,
-        background_err_lim,
-    )
-
-
-def filter_unsuitable_backgrounds(
-    reps,
-    background_err_lim=0.3,
-):
-    """Test and filter out obs with unsuitable background matches."""
-    sst_anom = []
-    bgvar = []
-    bgvar_is_masked = False
-    for ind, rep in enumerate(reps):
-        try:
-            bg_val = rep.getext("OSTIA")  # raises assertion error if not found
-            ice_val = rep.getext("ICE")  # raises assertion error if not found
-            bgvar_val = rep.getext("BGVAR")  # raises assertion error if not found
-        except AssertionError as error:
-            raise AssertionError("matched report value is missing: " + str(error))
-
-        if ice_val is None:
-            ice_val = 0.0
-        assert (
-            ice_val is not None and 0.0 <= ice_val <= 1.0
-        ), "matched ice proportion is invalid"
-
-        try:
-            daytime = track_day_test(
-                rep.getvar("YR"),
-                rep.getvar("MO"),
-                rep.getvar("DY"),
-                rep.getvar("HR"),
-                rep.getvar("LAT"),
-                rep.getvar("LON"),
-                -2.5,
-            )
-        except AssertionError as error:
-            raise AssertionError("problem with report value: " + str(error))
-        if ind > 0:
-            try:
-                time_diff = rep.getext(
-                    "time_diff"
-                )  # raises assertion error if 'time_diff' not found
-                assert time_diff >= 0, "times are not sorted"
-            except AssertionError as error:
-                raise AssertionError("problem with report value: " + str(error))
-
-        land_match = True if bg_val is None else False
-        ice_match = True if ice_val > 0.15 else False
-        bgvar_mask = (
-            True if bgvar_val is not None and bgvar_val > background_err_lim else False
-        )
-        if bgvar_mask:
-            bgvar_is_masked = True
-        if daytime or land_match or ice_match or bgvar_mask:
-            pass
-        else:
-            assert (
-                bg_val is not None and -5.0 <= bg_val <= 45.0
-            ), "matched background sst is invalid"
-            assert (
-                bgvar_val is not None and 0.0 <= bgvar_val <= 10
-            ), "matched background error variance is invalid"
-            sst_anom.append(rep.getvar("SST") - bg_val)
-            bgvar.append(bgvar_val)
-
-    return sst_anom, bgvar, bgvar_is_masked
+    return reps
 
 
 def sst_biased_noisy_check(
@@ -1051,7 +1029,7 @@ def sst_biased_noisy_check(
     except AssertionError as error:
         raise AssertionError("invalid input parameter: " + str(error))
 
-    sst_anom, bgvar, bgvar_is_masked = filter_unsuitable_backgrounds(
+    sst_anom, bgerr, bgvar_is_masked, reps_ind = filter_unsuitable_backgrounds(
         reps,
         background_err_lim=background_err_lim,
     )
@@ -1064,10 +1042,6 @@ def sst_biased_noisy_check(
         rep.set_qc("SST", "drf_short", 0)
     if len(sst_anom) == 0:
         return
-
-    # prepare numpy arrays and variables needed for checks
-    sst_anom = np.array(sst_anom)  # ob-background differences
-    bgerr = np.sqrt(np.array(bgvar))  # standard deviation of background error
 
     nrep = len(sst_anom)
     long_record = True
@@ -1094,3 +1068,4 @@ def sst_biased_noisy_check(
             if np.sum(exceed_limit) >= n_bad:
                 for rep in reps:
                     rep.set_qc("SST", "drf_short", 1)
+    return reps
