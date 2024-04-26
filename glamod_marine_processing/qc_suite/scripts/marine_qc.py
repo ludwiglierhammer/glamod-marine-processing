@@ -28,7 +28,204 @@ from IMMA1 import IMMA
 
 from .modules.noc_auxiliary import to_none
 
+
 # reload(logging)
+def read_icoads_file(
+    year, month, icoads_dir, ids_to_exclude, tracking, parameters, climlib, config
+):
+    """Read ICOADS file."""
+    logging.info(
+        "INFO({}): {} {}".format(
+            datetime.now().time().isoformat(timespec="milliseconds"), year, month
+        )
+    )
+
+    last_year, last_month = qc.last_month_was(year, month)
+    next_year, next_month = qc.next_month_is(year, month)
+
+    reps = ex.Deck()
+    count = 0
+    lastday = -99
+
+    for readyear, readmonth in qc.year_month_gen(
+        last_year, last_month, next_year, next_month
+    ):
+        logging.info(
+            "INFO({}): {} {}".format(
+                datetime.now().time().isoformat(timespec="milliseconds"),
+                readyear,
+                readmonth,
+            )
+        )
+
+        ostia_bg_var = None
+        if tracking:
+            ostia_bg_var = clim.Climatology.from_filename(
+                config.get("Climatologies", qc.season(readmonth) + "_ostia_background"),
+                "bg_var",
+            )
+
+        filename = icoads_dir + f"{readyear:4d}-{readmonth:02d}.psv"
+
+        imma_obj = pd.read_csv(
+            filename,
+            sep="|",
+            header=None,
+            names=[
+                "YR",
+                "MO",
+                "DY",
+                "HR",
+                "LAT",
+                "LON",
+                "DS",
+                "VS",
+                "ID",
+                "AT",
+                "SST",
+                "DPT",
+                "DCK",
+                "SLP",
+                "SID",
+                "PT",
+                "UID",
+                "W",
+                "D",
+                "IRF",
+                "bad_data",
+                "outfile",
+            ],
+            low_memory=False,
+        )
+
+        # replace ' ' in ID field with '' (corrections introduce bug)
+        imma_obj["ID"].replace(" ", "", inplace=True)
+        imma_obj = imma_obj.sort_values(
+            ["YR", "MO", "DY", "HR", "ID"], axis=0, ascending=True
+        )
+        imma_obj = imma_obj.reset_index(drop=True)
+
+        data_index = imma_obj.index
+
+        rec = IMMA()
+        logging.info(
+            "INFO({}): Data read, applying first QC".format(
+                datetime.now().time().isoformat(timespec="milliseconds")
+            )
+        )
+        dyb_count = 0
+        for idx in data_index:
+            # set missing values to None
+            for k, v in imma_obj.loc[idx,].to_dict().items():
+                rec.data[k] = to_none(v)
+            readob = True
+            if (
+                rec.data["ID"] not in ids_to_exclude
+                and readob
+                and rec.data["YR"] == readyear
+                and rec.data["MO"] == readmonth
+                and rec.data["DY"] is not None
+            ):
+                rep = ex.MarineReportQC(rec)
+                del rec
+
+                rep.setvar("AT2", rep.getvar("AT"))
+
+                # if day has changed then read in OSTIA field if available and append SST and sea-ice fraction
+                # to the observation metadata
+                if tracking and readyear >= 1985 and rep.getvar("DY") is not None:
+                    if rep.getvar("DY") != lastday:
+                        lastday = rep.getvar("DY")
+                        y_year, y_month, y_day = qc.yesterday(
+                            readyear, readmonth, lastday
+                        )
+
+                        #                            ofname = ostia_filename(ostia_dir, y_year, y_month, y_day)
+                        ofname = bf.get_background_filename(
+                            parameters["background_dir"],
+                            parameters["background_filenames"],
+                            y_year,
+                            y_month,
+                            y_day,
+                        )
+
+                        climlib.add_field(
+                            "OSTIA",
+                            "background",
+                            clim.Climatology.from_filename(ofname, "analysed_sst"),
+                        )
+                        climlib.add_field(
+                            "OSTIA",
+                            "ice",
+                            clim.Climatology.from_filename(ofname, "sea_ice_fraction"),
+                        )
+
+                    rep_clim = climlib.get_field("OSTIA", "background").get_value_ostia(
+                        rep.lat(), rep.lon()
+                    )
+                    if rep_clim is not None:
+                        rep_clim -= 273.15
+
+                    rep.setext("OSTIA", rep_clim)
+                    rep.setext(
+                        "ICE",
+                        climlib.get_field("OSTIA", "ice").get_value_ostia(
+                            rep.lat(), rep.lon()
+                        ),
+                    )
+                    rep.setext(
+                        "BGVAR",
+                        ostia_bg_var.get_value_mds_style(
+                            rep.lat(), rep.lon(), rep.getvar("MO"), rep.getvar("DY")
+                        ),
+                    )
+
+                for varname in ["SST", "AT"]:
+                    rep_clim = climlib.get_field(varname, "mean").get_value_mds_style(
+                        rep.lat(), rep.lon(), rep.getvar("MO"), rep.getvar("DY")
+                    )
+                    rep.add_climate_variable(varname, rep_clim)
+
+                for varname in ["SLP2", "SHU", "CRH", "CWB", "DPD"]:
+                    rep_clim = climlib.get_field(varname, "mean").get_value(
+                        rep.lat(), rep.lon(), rep.getvar("MO"), rep.getvar("DY")
+                    )
+                    rep.add_climate_variable(varname, rep_clim)
+
+                for varname in ["DPT", "AT2", "SLP"]:
+                    rep_clim = climlib.get_field(varname, "mean").get_value(
+                        rep.lat(), rep.lon(), rep.getvar("MO"), rep.getvar("DY")
+                    )
+                    rep_stdev = climlib.get_field(varname, "stdev").get_value(
+                        rep.lat(), rep.lon(), rep.getvar("MO"), rep.getvar("DY")
+                    )
+                    rep.add_climate_variable(varname, rep_clim, rep_stdev)
+
+                rep.calculate_humidity_variables(["SHU", "VAP", "CRH", "CWB", "DPD"])
+
+                rep.perform_base_qc(parameters)
+                rep.set_qc(
+                    "POS",
+                    "month_match",
+                    qc.month_match(year, month, rep.getvar("YR"), rep.getvar("MO")),
+                )
+
+                reps.append(rep)
+                count += 1
+
+            rec = IMMA()
+            dyb_count += 1
+            if dyb_count % 1000 == 0:
+                logging.info(
+                    "INFO({}): {} out of {} processed".format(
+                        datetime.now().time().isoformat(timespec="milliseconds"),
+                        dyb_count,
+                        imma_obj.index.size,
+                    )
+                )
+
+            # icoads_file.close()
+    return reps, count
 
 
 def main(argv):
@@ -130,205 +327,16 @@ def main(argv):
         )
 
     for year, month in qc.year_month_gen(year1, month1, year2, month2):
-        logging.info(
-            "INFO({}): {} {}".format(
-                datetime.now().time().isoformat(timespec="milliseconds"), year, month
-            )
+        reps, count = read_icoads_file(
+            year,
+            month,
+            icoads_dir,
+            ids_to_exclude,
+            tracking,
+            parameters,
+            climlib,
+            config,
         )
-
-        last_year, last_month = qc.last_month_was(year, month)
-        next_year, next_month = qc.next_month_is(year, month)
-
-        reps = ex.Deck()
-        count = 0
-        lastday = -99
-
-        for readyear, readmonth in qc.year_month_gen(
-            last_year, last_month, next_year, next_month
-        ):
-            logging.info(
-                "INFO({}): {} {}".format(
-                    datetime.now().time().isoformat(timespec="milliseconds"),
-                    readyear,
-                    readmonth,
-                )
-            )
-
-            ostia_bg_var = None
-            if tracking:
-                ostia_bg_var = clim.Climatology.from_filename(
-                    config.get(
-                        "Climatologies", qc.season(readmonth) + "_ostia_background"
-                    ),
-                    "bg_var",
-                )
-
-            filename = icoads_dir + f"{readyear:4d}-{readmonth:02d}.psv"
-
-            imma_obj = pd.read_csv(
-                filename,
-                sep="|",
-                header=None,
-                names=[
-                    "YR",
-                    "MO",
-                    "DY",
-                    "HR",
-                    "LAT",
-                    "LON",
-                    "DS",
-                    "VS",
-                    "ID",
-                    "AT",
-                    "SST",
-                    "DPT",
-                    "DCK",
-                    "SLP",
-                    "SID",
-                    "PT",
-                    "UID",
-                    "W",
-                    "D",
-                    "IRF",
-                    "bad_data",
-                    "outfile",
-                ],
-                low_memory=False,
-            )
-
-            # replace ' ' in ID field with '' (corrections introduce bug)
-            imma_obj["ID"].replace(" ", "", inplace=True)
-            imma_obj = imma_obj.sort_values(
-                ["YR", "MO", "DY", "HR", "ID"], axis=0, ascending=True
-            )
-            imma_obj = imma_obj.reset_index(drop=True)
-
-            data_index = imma_obj.index
-
-            rec = IMMA()
-            logging.info(
-                "INFO({}): Data read, applying first QC".format(
-                    datetime.now().time().isoformat(timespec="milliseconds")
-                )
-            )
-            dyb_count = 0
-            for idx in data_index:
-                # set missing values to None
-                for k, v in imma_obj.loc[idx,].to_dict().items():
-                    rec.data[k] = to_none(v)
-                readob = True
-                if (
-                    rec.data["ID"] not in ids_to_exclude
-                    and readob
-                    and rec.data["YR"] == readyear
-                    and rec.data["MO"] == readmonth
-                    and rec.data["DY"] is not None
-                ):
-                    rep = ex.MarineReportQC(rec)
-                    del rec
-
-                    rep.setvar("AT2", rep.getvar("AT"))
-
-                    # if day has changed then read in OSTIA field if available and append SST and sea-ice fraction
-                    # to the observation metadata
-                    if tracking and readyear >= 1985 and rep.getvar("DY") is not None:
-                        if rep.getvar("DY") != lastday:
-                            lastday = rep.getvar("DY")
-                            y_year, y_month, y_day = qc.yesterday(
-                                readyear, readmonth, lastday
-                            )
-
-                            #                            ofname = ostia_filename(ostia_dir, y_year, y_month, y_day)
-                            ofname = bf.get_background_filename(
-                                parameters["background_dir"],
-                                parameters["background_filenames"],
-                                y_year,
-                                y_month,
-                                y_day,
-                            )
-
-                            climlib.add_field(
-                                "OSTIA",
-                                "background",
-                                clim.Climatology.from_filename(ofname, "analysed_sst"),
-                            )
-                            climlib.add_field(
-                                "OSTIA",
-                                "ice",
-                                clim.Climatology.from_filename(
-                                    ofname, "sea_ice_fraction"
-                                ),
-                            )
-
-                        rep_clim = climlib.get_field(
-                            "OSTIA", "background"
-                        ).get_value_ostia(rep.lat(), rep.lon())
-                        if rep_clim is not None:
-                            rep_clim -= 273.15
-
-                        rep.setext("OSTIA", rep_clim)
-                        rep.setext(
-                            "ICE",
-                            climlib.get_field("OSTIA", "ice").get_value_ostia(
-                                rep.lat(), rep.lon()
-                            ),
-                        )
-                        rep.setext(
-                            "BGVAR",
-                            ostia_bg_var.get_value_mds_style(
-                                rep.lat(), rep.lon(), rep.getvar("MO"), rep.getvar("DY")
-                            ),
-                        )
-
-                    for varname in ["SST", "AT"]:
-                        rep_clim = climlib.get_field(
-                            varname, "mean"
-                        ).get_value_mds_style(
-                            rep.lat(), rep.lon(), rep.getvar("MO"), rep.getvar("DY")
-                        )
-                        rep.add_climate_variable(varname, rep_clim)
-
-                    for varname in ["SLP2", "SHU", "CRH", "CWB", "DPD"]:
-                        rep_clim = climlib.get_field(varname, "mean").get_value(
-                            rep.lat(), rep.lon(), rep.getvar("MO"), rep.getvar("DY")
-                        )
-                        rep.add_climate_variable(varname, rep_clim)
-
-                    for varname in ["DPT", "AT2", "SLP"]:
-                        rep_clim = climlib.get_field(varname, "mean").get_value(
-                            rep.lat(), rep.lon(), rep.getvar("MO"), rep.getvar("DY")
-                        )
-                        rep_stdev = climlib.get_field(varname, "stdev").get_value(
-                            rep.lat(), rep.lon(), rep.getvar("MO"), rep.getvar("DY")
-                        )
-                        rep.add_climate_variable(varname, rep_clim, rep_stdev)
-
-                    rep.calculate_humidity_variables(
-                        ["SHU", "VAP", "CRH", "CWB", "DPD"]
-                    )
-
-                    rep.perform_base_qc(parameters)
-                    rep.set_qc(
-                        "POS",
-                        "month_match",
-                        qc.month_match(year, month, rep.getvar("YR"), rep.getvar("MO")),
-                    )
-
-                    reps.append(rep)
-                    count += 1
-
-                rec = IMMA()
-                dyb_count += 1
-                if dyb_count % 1000 == 0:
-                    logging.info(
-                        "INFO({}): {} out of {} processed".format(
-                            datetime.now().time().isoformat(timespec="milliseconds"),
-                            dyb_count,
-                            imma_obj.index.size,
-                        )
-                    )
-
-                # icoads_file.close()
 
     logging.info(
         "INFO({}): Read {} ICOADS records".format(
