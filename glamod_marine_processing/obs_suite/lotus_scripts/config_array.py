@@ -38,6 +38,157 @@ def get_yyyymm(filename):
     return yyyy_mm.group().split("-")
 
 
+def clean_ok_logs(
+    ai,
+    ok_files,
+    source_files,
+    sid_dck,
+    sid_dck_log_dir,
+    job_file,
+    source_dir,
+    source_pattern,
+    year_init,
+    year_end,
+    config,
+):
+    """Clean previous ok logs."""
+    # Clean previous ok logs
+    if len(ok_files) > 0:
+        logging.info(f"Removing previous {len(ok_files)} logs")
+        for x in ok_files:
+            os.remove(x)
+    for source_file in source_files:
+        # print(source_file)
+        yyyy, mm = get_yyyymm(source_file)
+        if int(yyyy) >= year_init and int(yyyy) <= year_end:
+            # config_element(sid_dck_log_dir,ai,script_config,sid_dck,yyyy,mm, source_file)
+            config_element(sid_dck_log_dir, ai, config, sid_dck, yyyy, mm, source_file)
+            ai += 1
+        elif (int(yyyy) == year_init - 1 and int(mm) == 12) or (
+            int(yyyy) == year_end + 1 and int(mm) == 1
+        ):
+            # include one month before and one after period to allow for qc within period
+            config_element(sid_dck_log_dir, ai, config, sid_dck, yyyy, mm, source_file)
+            ai += 1
+
+    logging.info(f"{str(ai)} elements configured")
+    if len(job_file) > 0:
+        logging.info(f"Removing previous job file {job_file[0]}")
+        os.remove(job_file[0])
+    return ai
+
+
+def clean_failed_logs_only(
+    ai,
+    failed_files,
+    sid_dck,
+    sid_dck_log_dir,
+    job_file,
+    source_dir,
+    source_pattern,
+    year_init,
+    year_end,
+    config,
+):
+    """Clean previous filed only logs."""
+    logging.info(f"{sid_dck}: found {str(len(failed_files))} failed jobs")
+    if len(job_file) > 0:
+        logging.info(f"Removing previous job file {job_file[0]}")
+        os.remove(job_file[0])
+    for failed_file in failed_files:
+        yyyy, mm = get_yyyymm(failed_file)
+        source_file = re.sub("[?]{4}", yyyy, source_pattern)
+        source_file = re.sub("[?]{2}", mm, source_file)
+        source_file = os.path.join(source_dir, sid_dck, source_file)
+        if int(yyyy) >= year_init and int(yyyy) <= year_end:
+            # config_element(sid_dck_log_dir,ai,script_config,sid_dck,yyyy,mm, source_file)
+            config_element(sid_dck_log_dir, ai, config, sid_dck, yyyy, mm, source_file)
+            ai += 1
+        elif (int(yyyy) == year_init - 1 and int(mm) == 12) or (
+            int(yyyy) == year_end + 1 and int(mm) == 1
+        ):
+            # include one month before and one after period to allow for qc within period
+            config_element(sid_dck_log_dir, ai, config, sid_dck, yyyy, mm, source_file)
+            ai += 1
+    return ai
+
+
+def clean_previous_ok_logs(
+    log_dir,
+    source_dir,
+    source_pattern,
+    sid_dck,
+    script_config,
+    release_periods,
+    failed_only,
+):
+    """Make sure there are no previous input files."""
+    # logging.info('Configuring data partition: {}'.format(sid_dck))
+    sid_dck_log_dir = os.path.join(log_dir, sid_dck)
+    job_file = glob.glob(os.path.join(sid_dck_log_dir, sid_dck + ".slurm"))
+
+    # check is seperate configuration for this source / deck
+    config = script_config.get(sid_dck)
+    if config is None:
+        config = script_config
+
+    if not os.path.isdir(sid_dck_log_dir):
+        logging.error(f"Data partition log diretory does not exist: {sid_dck_log_dir}")
+        sys.exit(1)
+
+    year_init = release_periods[sid_dck].get("year_init")
+    year_end = release_periods[sid_dck].get("year_end")
+    # Make sure there are not previous input files
+    ai = 1
+    i_files = glob.glob(os.path.join(sid_dck_log_dir, "*.input"))
+    if len(i_files) > 0:
+        logging.info(f"Removing previous {len(i_files)} input files")
+        for i_file in i_files:
+            os.remove(i_file)
+
+    ok_files = glob.glob(os.path.join(sid_dck_log_dir, "*.ok"))
+    failed_files = glob.glob(os.path.join(sid_dck_log_dir, "*.failed"))
+    source_files = glob.glob(os.path.join(source_dir, sid_dck, source_pattern))
+    logging.info(
+        f"Source dir: {source_dir}; sid_dck: {sid_dck}; Pattern: {source_pattern}"
+    )
+
+    if failed_only:
+        if len(failed_files) > 0:
+            ai = clean_failed_logs_only(
+                ai,
+                failed_files,
+                sid_dck,
+                sid_dck_log_dir,
+                job_file,
+                source_dir,
+                source_pattern,
+                year_init,
+                year_end,
+                config,
+            )
+        else:
+            logging.info(f"{sid_dck}: no failed files")
+    else:
+        ai = clean_ok_logs(
+            ai,
+            ok_files,
+            source_files,
+            sid_dck,
+            sid_dck_log_dir,
+            job_file,
+            source_dir,
+            source_pattern,
+            year_init,
+            year_end,
+            config,
+        )
+    if len(failed_files) > 0:
+        logging.info(f"Removing previous {len(failed_files)} failed logs")
+        for x in failed_files:
+            os.remove(x)
+
+
 # %% -----------------------------------------------------------------------------
 
 
@@ -61,98 +212,9 @@ def main(
         logging.info("Configuration using failed only mode")
     # %%
     for sid_dck in process_list:
-        # logging.info('Configuring data partition: {}'.format(sid_dck))
-        sid_dck_log_dir = os.path.join(log_dir, sid_dck)
-        job_file = glob.glob(os.path.join(sid_dck_log_dir, sid_dck + ".slurm"))
-
-        # check is seperate configuration for this source / deck
-        config = script_config.get(sid_dck)
-        if config is None:
-            config = script_config
-
-        ai = 1
-        if not os.path.isdir(sid_dck_log_dir):
-            logging.error(
-                f"Data partition log diretory does not exist: {sid_dck_log_dir}"
-            )
-            sys.exit(1)
-
-        year_init = release_periods[sid_dck].get("year_init")
-        year_end = release_periods[sid_dck].get("year_end")
-        # Make sure there are not previous input files
-        i_files = glob.glob(os.path.join(sid_dck_log_dir, "*.input"))
-        if len(i_files) > 0:
-            logging.info(f"Removing previous {len(i_files)} input files")
-            for i_file in i_files:
-                os.remove(i_file)
-
-        ok_files = glob.glob(os.path.join(sid_dck_log_dir, "*.ok"))
-        failed_files = glob.glob(os.path.join(sid_dck_log_dir, "*.failed"))
-        source_files = glob.glob(os.path.join(source_dir, sid_dck, source_pattern))
-        logging.info(
-            f"Source dir: {source_dir}; sid_dck: {sid_dck}; Pattern: {source_pattern}"
+        clean_previous_ok_logs(
+            log_dir, sid_dck, script_config, release_periods, failed_only
         )
-
-        if failed_only:
-            if len(failed_files) > 0:
-                logging.info(f"{sid_dck}: found {str(len(failed_files))} failed jobs")
-                if len(job_file) > 0:
-                    logging.info(f"Removing previous job file {job_file[0]}")
-                    os.remove(job_file[0])
-                for failed_file in failed_files:
-                    yyyy, mm = get_yyyymm(failed_file)
-                    source_file = re.sub("[?]{4}", yyyy, source_pattern)
-                    source_file = re.sub("[?]{2}", mm, source_file)
-                    source_file = os.path.join(source_dir, sid_dck, source_file)
-                    if int(yyyy) >= year_init and int(yyyy) <= year_end:
-                        # config_element(sid_dck_log_dir,ai,script_config,sid_dck,yyyy,mm, source_file)
-                        config_element(
-                            sid_dck_log_dir, ai, config, sid_dck, yyyy, mm, source_file
-                        )
-                        ai += 1
-                    elif (int(yyyy) == year_init - 1 and int(mm) == 12) or (
-                        int(yyyy) == year_end + 1 and int(mm) == 1
-                    ):
-                        # include one month before and one after period to allow for qc within period
-                        config_element(
-                            sid_dck_log_dir, ai, config, sid_dck, yyyy, mm, source_file
-                        )
-                        ai += 1
-            else:
-                logging.info(f"{sid_dck}: no failed files")
-        else:
-            # Clean previous ok logs
-            if len(ok_files) > 0:
-                logging.info(f"Removing previous {len(ok_files)} logs")
-                for x in ok_files:
-                    os.remove(x)
-            for source_file in source_files:
-                # print(source_file)
-                yyyy, mm = get_yyyymm(source_file)
-                if int(yyyy) >= year_init and int(yyyy) <= year_end:
-                    # config_element(sid_dck_log_dir,ai,script_config,sid_dck,yyyy,mm, source_file)
-                    config_element(
-                        sid_dck_log_dir, ai, config, sid_dck, yyyy, mm, source_file
-                    )
-                    ai += 1
-                elif (int(yyyy) == year_init - 1 and int(mm) == 12) or (
-                    int(yyyy) == year_end + 1 and int(mm) == 1
-                ):
-                    # include one month before and one after period to allow for qc within period
-                    config_element(
-                        sid_dck_log_dir, ai, config, sid_dck, yyyy, mm, source_file
-                    )
-                    ai += 1
-
-            logging.info(f"{str(ai)} elements configured")
-            if len(job_file) > 0:
-                logging.info(f"Removing previous job file {job_file[0]}")
-                os.remove(job_file[0])
-
-        if len(failed_files) > 0:
-            logging.info(f"Removing previous {len(failed_files)} failed logs")
-            for x in failed_files:
-                os.remove(x)
 
     return 0
 
