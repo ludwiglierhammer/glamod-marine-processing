@@ -11,6 +11,8 @@ import os
 import re
 import sys
 
+from glamod_marine_processing.utilities import mkdir
+
 DATE_REGEX = r"([1-2]{1}[0-9]{3}\-(0[1-9]{1}|1[0-2]{1}))"
 
 
@@ -125,6 +127,7 @@ def clean_previous_ok_logs(
     """Make sure there are no previous input files."""
     # logging.info('Configuring data partition: {}'.format(sid_dck))
     sid_dck_log_dir = os.path.join(log_dir, sid_dck)
+    mkdir(sid_dck_log_dir)
     job_file = glob.glob(os.path.join(sid_dck_log_dir, sid_dck + ".slurm"))
 
     # check is seperate configuration for this source / deck
@@ -133,7 +136,7 @@ def clean_previous_ok_logs(
         config = script_config
 
     if not os.path.isdir(sid_dck_log_dir):
-        logging.error(f"Data partition log diretory does not exist: {sid_dck_log_dir}")
+        logging.error(f"Data partition log directory does not exist: {sid_dck_log_dir}")
         sys.exit(1)
 
     year_init = release_periods[sid_dck].get("year_init")
@@ -213,7 +216,13 @@ def main(
     # %%
     for sid_dck in process_list:
         clean_previous_ok_logs(
-            log_dir, sid_dck, script_config, release_periods, failed_only
+            log_dir,
+            source_dir,
+            source_pattern,
+            sid_dck,
+            script_config,
+            release_periods,
+            failed_only,
         )
 
     return 0

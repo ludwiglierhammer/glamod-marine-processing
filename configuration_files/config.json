@@ -1,0 +1,11 @@
+{
+  "abbreviations": {
+    "release": "release_7.0",
+    "update": "000000",
+    "dataset": "ICOADS_R3.0.2T"
+  },
+  "paths": {
+    "glamod": ".",
+    "data_directory": "."
+  }
+}

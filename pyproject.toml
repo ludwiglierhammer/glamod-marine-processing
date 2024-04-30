@@ -30,6 +30,9 @@ classifiers = [
 ]
 dynamic = ["version", "dependencies"]
 
+[project.scripts]
+obs_suite = "glamod_marine_processing.cli:ObsCli"
+
 [project.urls]
 "Homepage" = "https://glamod-marine-processing.readthedocs.io"
 "Source" = "https://github.com/glamod/glamod-marine-processing"
@@ -144,6 +147,6 @@ dependencies = {file = "ci/requirements/requirements.txt"}
 
 [tool.setuptools_scm]
 fallback_version = "999"
-write_to = "cdm_reader_mapper/_version.py"
+write_to = "glamod_marine_processing/_version.py"
 write_to_template = '__version__ = "{version}"'
 tag_regex = "^(?P<prefix>v)?(?P<version>[^\\+]+)(?P<suffix>.*)?$"
