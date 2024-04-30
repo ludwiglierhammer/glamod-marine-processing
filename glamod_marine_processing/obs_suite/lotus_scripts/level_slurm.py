@@ -1,4 +1,3 @@
-#!/usr/bin/env python3
 """
 Created on Wed Jul 22 09:09:41 2020
 
@@ -7,28 +6,16 @@ Created on Wed Jul 22 09:09:41 2020
 
 from __future__ import annotations
 
-import argparse
 import glob
-import json
 import logging
 import os
 import subprocess
 import sys
 
-import config_array
-import lotus_paths
+from glamod_marine_processing.obs_suite.lotus_scripts import config_array, parser, slurm_preferences
+from glamod_marine_processing.utilities import load_json, read_txt
 
-# Set process params-----------------------------------------------------------
-LEVEL = "level1b"
-LEVEL_SOURCE = "level1a"
-SOURCE_PATTERN = "header-????-??-*.psv"
-PYSCRIPT = "level1b.py"
-# NODES = 1
-USER = "glamod"
-# ------------------------------------------------------------------------------
-
-
-# ------------------------------------------------------------------------------
+# %%------------------------------------------------------------------------------
 def check_file_exit(files):
     """Check whether file exists."""
     files = [files] if not isinstance(files, list) else files
@@ -64,7 +51,7 @@ def launch_process(process):
     return jid.split(" ")[-1]
 
 
-# ------------------------------------------------------------------------------
+# %%------------------------------------------------------------------------------
 
 
 logging.basicConfig(
@@ -76,59 +63,52 @@ logging.basicConfig(
 
 # Get process coordinates and build paths -------------------------------------
 script_config_file = sys.argv[1]
-
 check_file_exit([script_config_file])
-with open(script_config_file) as fO:
-    script_config = json.load(fO)
+script_config = load_json(script_config_file)
 
-release = script_config["release"]
-update = script_config["update"]
-dataset = script_config["dataset"]
+LEVEL = script_config["level"]
+LEVEL_SOURCE = slurm_preferences.level_source[LEVEL]
+SOURCE_PATTERN = slurm_preferences.source_pattern[LEVEL]
+PYSCRIPT = f"{LEVEL}.py"
+USER = "glamod"
+
+release = script_config["abbreviations"]["release"]
+update = script_config["abbreviations"]["update"]
+dataset = script_config["abbreviations"]["dataset"]
+config_files_path = script_config["paths"]["config_files_path"]
 process_list_file = script_config["process_list_file"]
+process_list_file = os.path.join(config_files_path, process_list_file)
 release_periods_file = script_config["release_periods_file"]
+release_periods_file = os.path.join(config_files_path, release_periods_file)
 
-
-parser = argparse.ArgumentParser()
-parser.add_argument("positional", metavar="N", type=str, nargs="+")
-parser.add_argument("--failed_only")
-
-args = parser.parse_args()
-if args.failed_only:
-    # failed_only = True if args.failed_only== 'yes' else False
-    logging.warning("failed_only is currently deactivated, all data will be processed")
-    failed_only = False
-else:
-    failed_only = False
+args = parser.get_parser_args()
 
 # Get lotus paths
-lotus_dir = lotus_paths.lotus_scripts_directory
-scripts_dir = lotus_paths.scripts_directory
-data_dir = lotus_paths.data_directory
-scratch_dir = lotus_paths.scratch_directory
+lotus_dir = script_config["paths"]["lotus_scripts_directory"]
+scripts_dir = script_config["paths"]["scripts_directory"]
+data_dir = script_config["paths"]["data_directory"]
+scratch_dir = script_config["paths"]["scratch_directory"]
 
 # Build process specific paths
 release_tag = "-".join([release, update])
-level_dir = os.path.join(data_dir, release, dataset, LEVEL)
-level_source_dir = os.path.join(data_dir, release, dataset, LEVEL_SOURCE)
+level_dir = os.path.join(data_dir, release_tag, dataset, LEVEL)
+
+level_source_dir = os.path.join(data_dir, "datasets", dataset, LEVEL_SOURCE)
 log_dir = os.path.join(level_dir, "log")
 
 # Check paths
 check_file_exit([release_periods_file, process_list_file])
-check_dir_exit([level_dir, level_source_dir, log_dir])
+#check_dir_exit([level_dir, level_source_dir, log_dir])
 
 logging.info(f"Periods file used: {release_periods_file}")
 logging.info(f"Deck list file used: {process_list_file}")
 
-# Get more configuration -----------------------------------------------------------
-with open(process_list_file) as fO:
-    process_list = fO.read().splitlines()
-
-with open(release_periods_file) as fO:
-    release_periods = json.load(fO)
+# Get further configuration -----------------------------------------------------------
+process_list = read_txt(process_list_file)
+release_periods = load_json(release_periods_file)
 
 # Build array input files -----------------------------------------------------
 logging.info("CONFIGURING JOB ARRAYS...")
-
 status = config_array.main(
     level_source_dir,
     SOURCE_PATTERN,
@@ -136,7 +116,7 @@ status = config_array.main(
     script_config,
     release_periods,
     process_list,
-    failed_only=failed_only,
+    failed_only=args.failed_only,
 )
 if status != 0:
     logging.error("Creating array inputs")
@@ -158,23 +138,33 @@ for sid_dck in process_list:
     log_diri = os.path.join(log_dir, sid_dck)
     array_size = len(glob.glob(os.path.join(log_diri, "*.input")))
     if array_size == 0:
-        logging.warning(f"No jobs for {log_diri}")
-        continue
+        logging.warning(f"{sid_dck}: no jobs for partition")
+        #continue
 
     job_file = os.path.join(log_diri, sid_dck + ".slurm")
     taskfarm_file = os.path.join(log_diri, sid_dck + ".tasks")
 
-    memi = script_config.get(sid_dck, {}).get("job_memo_mb")
-    memi = mem if not memi else memi
-    TaskPNi = min(int(190000.0 / float(memi)), 40)
-    nodesi = array_size // TaskPNi + (array_size % TaskPNi > 0)
-
-    t_hhi = script_config.get(sid_dck, {}).get("job_time_hr")
-    t_mmi = script_config.get(sid_dck, {}).get("job_time_min")
-    if t_hhi and t_mmi:
-        ti = ":".join([t_hhi, t_mmi, "00"])
+    if LEVEL in slurm_preferences.TaskPNi.keys():
+        TaskPNi = slurm_preferences.TaskPNi[LEVEL]
     else:
-        ti = t
+        memi = script_config.get(sid_dck, {}).get("job_memo_mb")
+        memi = mem if not memi else memi
+        TaskPNi = min(int(190000.0 / float(memi)), 40)
+        
+    if LEVEL in slurm_preferences.nodesi.keys():
+        nodesi = slurm_preferences.nodesi[LEVEL]
+    else:
+        nodesi = array_size // TaskPNi + (array_size % TaskPNi > 0)
+
+    if LEVEL in slurm_preferences.ti.keys():
+        ti = slurm_preferences.ti[LEVEL]
+    else:
+        t_hhi = script_config.get(sid_dck, {}).get("job_time_hr")
+        t_mmi = script_config.get(sid_dck, {}).get("job_time_min")
+        if t_hhi and t_mmi:
+            ti = ":".join([t_hhi, t_mmi, "00"])
+        else:
+            ti = t
 
     with open(taskfarm_file, "w") as fh:
         for i in range(array_size):
@@ -187,19 +177,20 @@ for sid_dck in process_list:
                 )
             )
 
-    with open(job_file, "w") as fh:
-        fh.writelines("#!/bin/bash\n")
-        fh.writelines(f"#SBATCH --job-name={sid_dck}.job\n")
-        fh.writelines(f"#SBATCH --output={log_diri}/%a.out\n")
-        fh.writelines(f"#SBATCH --error={log_diri}/%a.err\n")
-        fh.writelines(f"#SBATCH --time={ti}\n")
-        fh.writelines(f"#SBATCH --nodes={nodesi}\n")
-        fh.writelines("#SBATCH --open-mode=truncate\n")
-        fh.writelines(f"#SBATCH -A {USER}\n")
-        fh.writelines("module load taskfarm\n")
-        fh.writelines(f"export TASKFARM_PPN={TaskPNi}\n")
-        fh.writelines(f"taskfarm {taskfarm_file}\n")
+    header = read_txt(os.path.join(lotus_dir, "header", "slurm_header_kay.py"))
 
-    logging.info(f"{sid_dck}: launching array")
-    process = f"jid=$(sbatch {job_file} | cut -f 4 -d' ') && echo $jid"
-    jid = launch_process(process)
+    with open(job_file, "w") as fh:
+        for line in header:
+          line=eval(line)
+          line=f"{line}\n"
+          fh.writelines(line)
+
+    if script_config["submit_jobs"] is True:
+        logging.info(f"{sid_dck}: launching array")
+        process = f"jid=$(sbatch {job_file} | cut -f 4 -d' ') && echo $jid"
+        logging.info(f"process launching: {process}")
+        jid = launch_process(process)
+    else:
+        logging.info(f"{sid_dck}: create script")
+        logging.info(f"Script {job_file} was created.")
+        process = f"jid=$(sbatch {job_file} | cut -f 4 -d' ') && echo $jid"
