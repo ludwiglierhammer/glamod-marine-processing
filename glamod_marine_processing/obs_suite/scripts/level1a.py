@@ -1,13 +1,15 @@
-"""
-Created on Mon Jun 17 14:24:10 2019
+"""Created on Mon Jun 17 14:24:10 2019.
+
 Script to generate the C3S CDM Marine level1a data.
+
     - Reads dataset data (and supp if avail) file with module mdf_reader. This
-    includes a data model validation mask.
+      includes a data model validation mask.
     - fixes known PT type errors in source dataset with module metmetpy
     - selects data reports according to filtering requests
     - rejects data reports not validiting against its data model
     - maps to the C3S CDM header and observations tables if there is data left
-    after cleaning (table[i].psv CDM table-like files)
+      after cleaning (table[i].psv CDM table-like files)
+
 The processing unit is the source-deck monthly file.
 Outputs data to /<data_path>/<release>/<dataset>/level1a/<sid-dck>/table[i]-fileID.psv
 Outputs invalid data to /<data_path>/<release>/<dataset>/level1a/invalid/<sid-dck>/fileID-data|mask.psv
@@ -15,17 +17,20 @@ Outputs exluded data to /<data_path>/<release>/<dataset>/level1a/excluded/<sid-d
 Outputs quicklook info to:  /<data_path>/<release>/<dataset>/level1a/quicklooks/<sid-dck>/fileID.json
 where fileID is year-month-release-update
 Before processing starts:
+
     - checks the existence of all output subdirectories in level1a -> exits if fails
     - checks the existence of the source file to be converted -> exits if fails
     - removes all level1a products on input file resulting from previous runs
+
 On input data:
--------------
+--------------
 Records of input data assumed to be in sid-dck monthly partitions which imply:
+
     - data for same month-year period
     - data from a unique data model
 
 Inargs:
-------
+-------
 data_path: marine data path in file system
 release: release tag
 update: udpate tag
@@ -38,12 +43,14 @@ configfile:
 ----------
 To specify processing options that may be shared in different processing
 settings:
+
     - main data model
     - supplemental data model
     - processing options: supplemental replacements,
-    record selection/filtering by field (i.e. PT....)
+      record selection/filtering by field (i.e. PT....)
 
 .....
+
 @author: iregon
 """
 from __future__ import annotations
