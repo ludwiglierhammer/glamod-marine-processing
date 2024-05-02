@@ -80,6 +80,8 @@ repos:
       - id: check-hooks-apply
       - id: check-useless-excludes
 
+exclude: glamod_marine_processing/obs_suite/lotus_scripts/header
+
 ci:
   autofix_commit_msg: |
     [pre-commit.ci] auto fixes from pre-commit.com hooks
