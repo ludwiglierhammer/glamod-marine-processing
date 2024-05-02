@@ -5,7 +5,7 @@
     "dataset": "ICOADS_R3.0.2T"
   },
   "paths": {
-    "glamod": ".",
-    "data_directory": "."
+    "glamod": "/ichec/work/glamod",
+    "data_directory": "/ichec/work/glamod/data/marine"
   }
 }
