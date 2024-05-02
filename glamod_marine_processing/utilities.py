@@ -6,6 +6,31 @@ import errno
 import json
 import os
 
+try:
+    from importlib.resources import files as _files
+except ImportError:
+    from importlib_resources import files as _files
+
+
+_base = "glamod_marine_processing"
+
+config_files = {
+    "kay": "config_kay.json",
+    "meluxina": "config_meluxina.json",
+}
+
+
+def add_to_config(config, key=None, **kwargs):
+    """Add arguments to configuration file."""
+    for k, v in kwargs.items():
+        if key:
+            if key not in config.keys():
+                config[key] = {}
+            config[key][k] = v
+        else:
+            config[k] = v
+    return config
+
 
 def load_json(json_file):
     """Load json file from disk."""
@@ -34,3 +59,25 @@ def mkdir(directory):
     except OSError as e:
         if e.errno != errno.EEXIST:
             raise
+
+
+def get_base_path():
+    """Get files from file path."""
+    return os.path.abspath(_files(_base))
+
+
+def get_configuration(machine):
+    """Get machine-depending configuration file."""
+    _base_path = get_base_path()
+    machine = machine.lower()
+    try:
+        config_file = config_files[machine]
+    except KeyError:
+        raise KeyError(
+            "{} is not a valid machine name. Use one of {} instead.".format(
+                machine,
+                list(config_files.keys()),
+            )
+        )
+    config_file = os.path.join(_base_path, "configuration_files", config_file)
+    return load_json(config_file)

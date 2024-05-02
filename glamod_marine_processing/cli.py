@@ -13,31 +13,27 @@ import shutil
 import click
 
 from .obs_suite.scripts.make_release_source_tree import make_release_source_tree
-from .utilities import load_json, mkdir, save_json
-
-try:
-    from importlib.resources import files as _files
-except ImportError:
-    from importlib_resources import files as _files
-
-
-_base = "glamod_marine_processing"
-
-
-def add_to_config(config, key=None, **kwargs):
-    """Add arguments to configuration file."""
-    for k, v in kwargs.items():
-        if key:
-            if key not in config.keys():
-                config[key] = {}
-            config[key][k] = v
-        else:
-            config[k] = v
-    return config
+from .utilities import (
+    add_to_config,
+    get_base_path,
+    get_configuration,
+    load_json,
+    mkdir,
+    save_json,
+)
 
 
 @click.command()
-@click.option("-c", "--config", required=True, help="Configuration file ")
+@click.option(
+    "-m",
+    "--machine",
+    default="MELUXINA",
+    help="""HPC cluster where to create and run the scripts,
+    * KAY: kay.ichec.ie \n
+    * MELUXINA: login.lxp.lu \n
+    * default: MELUXINA
+    """,
+)
 @click.option(
     "-l",
     "--level",
@@ -53,16 +49,16 @@ def add_to_config(config, key=None, **kwargs):
     """,
 )
 @click.option("-submit", "--submit_jobs", is_flag=True, help="Submit job scripts")
-def ObsCli(config, level, submit_jobs):
+def ObsCli(machine, level, submit_jobs):
     """Enry point for the obs_suite command line interface."""
-    config = load_json(config)
+    config = get_configuration(machine)
 
     release = config["abbreviations"]["release"]
     update = config["abbreviations"]["update"]
     dataset = config["abbreviations"]["dataset"]
     release_update = f"{release}-{update}"
 
-    home_directory = os.path.abspath(_files(_base))
+    home_directory = get_base_path()
     data_directory = config["paths"]["data_directory"]
     code_directory = os.path.join(home_directory, "obs_suite")
     config_directory = os.path.join(code_directory, "configuration_files")
@@ -110,6 +106,7 @@ def ObsCli(config, level, submit_jobs):
         config,
         slurm_script=slurm_script_new,
         level_config_file=level_config_file,
+        machine=machine,
         key="scripts",
     )
 
