@@ -59,6 +59,7 @@ def ObsCli(config, level, submit_jobs):
     release_update = "{}-{}".format(release, update)
     
     home_directory = os.path.abspath(_files(_base))
+    data_directory = config["paths"]["data_directory"]
     code_directory = os.path.join(home_directory, "obs_suite")
     config_directory = os.path.join(code_directory, "configuration_files")
     config_files_path = os.path.join(config_directory, release_update, dataset)
@@ -67,7 +68,7 @@ def ObsCli(config, level, submit_jobs):
     lotus_scripts_directory = os.path.join(code_directory, "lotus_scripts")
     work_directory = os.path.abspath(config["paths"]["glamod"])
     scratch_directory = os.path.join(work_directory, os.getlogin())
-    release_directory = os.path.join(scratch_directory, release_update, dataset, level)
+    release_directory = os.path.join(scratch_directory, release, dataset, level)
 
     config = add_to_config(
       config,
@@ -84,7 +85,7 @@ def ObsCli(config, level, submit_jobs):
     )
 
     make_release_source_tree(
-        data_path=work_directory,
+        data_path=data_directory,
         config_path=config_directory,
         release=release,
         update=update,
