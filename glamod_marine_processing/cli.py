@@ -4,13 +4,16 @@ Command Line Interface module
 =============================
 """
 
-import click
+from __future__ import annotations
+
 import datetime
 import os
 import shutil
 
-from .utilities import load_json, save_json, mkdir
+import click
+
 from .obs_suite.scripts.make_release_source_tree import make_release_source_tree
+from .utilities import load_json, mkdir, save_json
 
 try:
     from importlib.resources import files as _files
@@ -18,14 +21,14 @@ except ImportError:
     from importlib_resources import files as _files
 
 
-_base = "glamod_marine_processing"  
- 
+_base = "glamod_marine_processing"
+
 
 def add_to_config(config, key=None, **kwargs):
     """Add arguments to configuration file."""
-    for k,v in kwargs.items():
-        if key: 
-            if not key in config.keys():
+    for k, v in kwargs.items():
+        if key:
+            if key not in config.keys():
                 config[key] = {}
             config[key][k] = v
         else:
@@ -36,7 +39,9 @@ def add_to_config(config, key=None, **kwargs):
 @click.command()
 @click.option("-c", "--config", required=True, help="Configuration file ")
 @click.option(
-    "-l", "--level", required=True, 
+    "-l",
+    "--level",
+    required=True,
     help="""Step of observation suite process:
 
     * level1a: Mapping dataset to CDM. \n
@@ -45,10 +50,9 @@ def add_to_config(config, key=None, **kwargs):
     * level1d: Enrich data with external metadata. \n
     * level1e: Add quality control flags to data. \n
     * level2: Make data ready to ingest in the database.
-    """
+    """,
 )
 @click.option("-submit", "--submit_jobs", is_flag=True, help="Submit job scripts")
-
 def ObsCli(config, level, submit_jobs):
     """Enry point for the obs_suite command line interface."""
     config = load_json(config)
@@ -56,8 +60,8 @@ def ObsCli(config, level, submit_jobs):
     release = config["abbreviations"]["release"]
     update = config["abbreviations"]["update"]
     dataset = config["abbreviations"]["dataset"]
-    release_update = "{}-{}".format(release, update)
-    
+    release_update = f"{release}-{update}"
+
     home_directory = os.path.abspath(_files(_base))
     data_directory = config["paths"]["data_directory"]
     code_directory = os.path.join(home_directory, "obs_suite")
@@ -71,17 +75,17 @@ def ObsCli(config, level, submit_jobs):
     release_directory = os.path.join(scratch_directory, release, dataset, level)
 
     config = add_to_config(
-      config,
-      home_directory=home_directory,
-      code_directory=code_directory,
-      config_directory=config_directory,
-      config_files_path=config_files_path,
-      pyTools_directory=pyTools_directory,
-      scripts_directory=scripts_directory,
-      lotus_scripts_directory=lotus_scripts_directory,
-      scratch_directory=scratch_directory,
-      release_directory=release_directory,
-      key="paths",
+        config,
+        home_directory=home_directory,
+        code_directory=code_directory,
+        config_directory=config_directory,
+        config_files_path=config_files_path,
+        pyTools_directory=pyTools_directory,
+        scripts_directory=scripts_directory,
+        lotus_scripts_directory=lotus_scripts_directory,
+        scratch_directory=scratch_directory,
+        release_directory=release_directory,
+        key="paths",
     )
 
     make_release_source_tree(
@@ -99,10 +103,10 @@ def ObsCli(config, level, submit_jobs):
     slurm_script_new = os.path.join(release_directory, slurm_script_)
     mkdir(release_directory)
     shutil.copyfile(slurm_script_tmp, slurm_script_new)
-    level_config_file = "{}.json".format(level)
+    level_config_file = f"{level}.json"
     level_config_file = os.path.join(config_files_path, level_config_file)
-    
-    config =  add_to_config(
+
+    config = add_to_config(
         config,
         slurm_script=slurm_script_new,
         level_config_file=level_config_file,
@@ -112,15 +116,15 @@ def ObsCli(config, level, submit_jobs):
     level_config = load_json(level_config_file)
     level_config["submit_jobs"] = submit_jobs
     level_config["level"] = level
- 
+
     for key, value in config.items():
         level_config[key] = value
-    
+
     current_time = datetime.datetime.now()
-    current_time = current_time.strftime('%Y%m%dT%H%M%S')
+    current_time = current_time.strftime("%Y%m%dT%H%M%S")
 
-    new_config = "{}_{}.json".format(level, current_time)
+    new_config = f"{level}_{current_time}.json"
     new_config = os.path.join(release_directory, new_config)
-    save_json(level_config, new_config)    
+    save_json(level_config, new_config)
 
-    os.system("python {} {}".format(slurm_script_new, new_config))
+    os.system(f"python {slurm_script_new} {new_config}")

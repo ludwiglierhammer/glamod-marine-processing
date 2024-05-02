@@ -12,8 +12,13 @@ import os
 import subprocess
 import sys
 
-from glamod_marine_processing.obs_suite.lotus_scripts import config_array, parser, slurm_preferences
+from glamod_marine_processing.obs_suite.lotus_scripts import (
+    config_array,
+    parser,
+    slurm_preferences,
+)
 from glamod_marine_processing.utilities import load_json, read_txt
+
 
 # %%------------------------------------------------------------------------------
 def check_file_exit(files):
@@ -97,7 +102,7 @@ log_dir = os.path.join(level_dir, "log")
 
 # Check paths
 check_file_exit([release_periods_file, process_list_file])
-#check_dir_exit([level_dir, level_source_dir, log_dir])
+# check_dir_exit([level_dir, level_source_dir, log_dir])
 
 logging.info(f"Periods file used: {release_periods_file}")
 logging.info(f"Deck list file used: {process_list_file}")
@@ -138,7 +143,7 @@ for sid_dck in process_list:
     array_size = len(glob.glob(os.path.join(log_diri, "*.input")))
     if array_size == 0:
         logging.warning(f"{sid_dck}: no jobs for partition")
-        #continue
+        # continue
 
     job_file = os.path.join(log_diri, sid_dck + ".slurm")
     taskfarm_file = os.path.join(log_diri, sid_dck + ".tasks")
@@ -149,7 +154,7 @@ for sid_dck in process_list:
         memi = script_config.get(sid_dck, {}).get("job_memo_mb")
         memi = mem if not memi else memi
         TaskPNi = min(int(190000.0 / float(memi)), 40)
-        
+
     if LEVEL in slurm_preferences.nodesi.keys():
         nodesi = slurm_preferences.nodesi[LEVEL]
     else:
@@ -180,9 +185,9 @@ for sid_dck in process_list:
 
     with open(job_file, "w") as fh:
         for line in header:
-          line=eval(line)
-          line=f"{line}\n"
-          fh.writelines(line)
+            line = eval(line)
+            line = f"{line}\n"
+            fh.writelines(line)
 
     if script_config["submit_jobs"] is True:
         logging.info(f"{sid_dck}: launching array")

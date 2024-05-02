@@ -24,6 +24,4 @@ TaskPNi = {
     "level1d": 20,
 }
 
-ti = {
-    "level1d": "02:00:00"
-}
+ti = {"level1d": "02:00:00"}
