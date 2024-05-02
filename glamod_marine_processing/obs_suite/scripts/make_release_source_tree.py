@@ -63,7 +63,7 @@ def make_release_source_tree(
     level_subdirs_.extend(sid_dck_dict.keys())
 
     # CREATE DIRS
-    release_path = os.path.join(data_path, release_tag)
+    release_path = os.path.join(data_path, release)
     source_path = os.path.join(release_path, dataset)
     level_subdir = os.path.join(source_path, level)
 
