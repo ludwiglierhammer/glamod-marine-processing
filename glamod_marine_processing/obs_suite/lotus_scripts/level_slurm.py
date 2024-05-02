@@ -90,8 +90,7 @@ data_dir = script_config["paths"]["data_directory"]
 scratch_dir = script_config["paths"]["scratch_directory"]
 
 # Build process specific paths
-release_tag = "-".join([release, update])
-level_dir = os.path.join(data_dir, release_tag, dataset, LEVEL)
+level_dir = os.path.join(data_dir, release, dataset, LEVEL)
 
 level_source_dir = os.path.join(data_dir, "datasets", dataset, LEVEL_SOURCE)
 log_dir = os.path.join(level_dir, "log")
