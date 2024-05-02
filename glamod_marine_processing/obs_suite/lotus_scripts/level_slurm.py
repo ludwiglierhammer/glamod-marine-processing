@@ -76,6 +76,7 @@ LEVEL_SOURCE = slurm_preferences.level_source[LEVEL]
 SOURCE_PATTERN = slurm_preferences.source_pattern[LEVEL]
 PYSCRIPT = f"{LEVEL}.py"
 USER = "glamod"
+MACHINE = script_config["scripts"]["machine"].lower()
 
 release = script_config["abbreviations"]["release"]
 update = script_config["abbreviations"]["update"]
@@ -181,7 +182,7 @@ for sid_dck in process_list:
                 )
             )
 
-    header = read_txt(os.path.join(lotus_dir, "header", "slurm_header_kay.py"))
+    header = read_txt(os.path.join(lotus_dir, "header", f"slurm_header_{MACHINE}.py"))
 
     with open(job_file, "w") as fh:
         for line in header:
