@@ -208,10 +208,7 @@ if any([not os.path.isdir(x) for x in data_paths]):
     )
     sys.exit(1)
 
-# L0_filename = os.path.join(L0_path, params.filename)
-L0_filename = (
-    "/ichec/home/users/llierhammer/github_test/glamod-marine-processing/L0.imma"
-)
+L0_filename = os.path.join(L0_path, params.filename)
 
 if not os.path.isfile(L0_filename):
     logging.error(f"L0 file not found: {L0_filename}")
