@@ -48,15 +48,27 @@ from .utilities import (
     * level2: Make data ready to ingest in the database.
     """,
 )
+@click.option("-r", "--release", default="release_7.0", help="Name of the data release.")
+@click.option("-u", "--update", default="000000", help="Name of the data release update.")
+@click.option("-d", "--dataset", default="ICOADS_R3.0.2T", help="Name of the data release dataset.")
 @click.option("-submit", "--submit_jobs", is_flag=True, help="Submit job scripts")
-def ObsCli(machine, level, submit_jobs):
+def ObsCli(
+    machine, 
+    level,
+    release,
+    update,
+    dataset, 
+    submit_jobs,
+):
     """Enry point for the obs_suite command line interface."""
-    config = get_configuration(machine)
-
-    release = config["abbreviations"]["release"]
-    update = config["abbreviations"]["update"]
-    dataset = config["abbreviations"]["dataset"]
     release_update = f"{release}-{update}"
+    config = get_configuration(machine)
+    config["abbreviations"] = {
+        "release": release,
+        "update": update,
+        "dataset": dataset,
+        "release_tag": release_update,
+    }
 
     home_directory = get_base_path()
     data_directory = config["paths"]["data_directory"]
