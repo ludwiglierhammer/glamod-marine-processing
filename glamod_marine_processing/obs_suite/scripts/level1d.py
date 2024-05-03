@@ -61,11 +61,12 @@ import os
 import subprocess
 import sys
 from collections import Counter
-from imp import reload
+from importlib import reload
+from shutil import rmtree
 
-import cdm
 import pandas as pd
 import simplejson
+from cdm_reader_mapper import cdm_mapper as cdm
 
 reload(logging)  # This is to override potential previous config of logging
 
@@ -95,10 +96,6 @@ class script_setup:
             logging.warning(
                 "Removed option to provide sid_dck, year and month as arguments. Use config file instead"
             )
-            # self.sid_dck = inargs[6]
-            # self.year = inargs[7]
-            # self.month = inargs[8]
-        # else:
         try:
             self.sid_dck = config.get("sid_dck")
             self.year = config.get("yyyy")
@@ -273,14 +270,6 @@ wmode = "w"
 
 local = True
 # copy files to local scratch to avoid high i/o stress on cluster (managed to bring down ICHEC before)
-
-# for testing only (if not run in SBATCH):
-# scratch_path = "/ichec/home/users/awerneck/scratch/local"
-# the real deal:
-scratch_path = os.path.join("/scratch/local", params.sid_dck)
-
-os.makedirs(scratch_path, exist_ok=True)
-
 release_path = os.path.join(params.data_path, params.release, params.dataset)
 release_id = FFS.join([params.release, params.update])
 fileID = FFS.join([str(params.year), str(params.month).zfill(2), release_id])
@@ -288,6 +277,9 @@ fileID_date = FFS.join([str(params.year), str(params.month)])
 
 prev_level_path = os.path.join(release_path, level_prev, params.sid_dck)
 level_path = os.path.join(release_path, level, params.sid_dck)
+scratch_ = os.path.join(release_path, level, "scratch")
+scratch_path = os.path.join(scratch_, params.sid_dck)
+os.makedirs(scratch_path, exist_ok=True)
 level_ql_path = os.path.join(release_path, level, "quicklooks", params.sid_dck)
 level_log_path = os.path.join(release_path, level, "log", params.sid_dck)
 
@@ -346,7 +338,7 @@ meta_dict = {}
 # DO THE DATA PROCESSING ------------------------------------------------------
 # -----------------------------------------------------------------------------
 history_tstmp = datetime.datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S")
-cdm_tables = cdm.lib.tables.tables_hdlr.load_tables()
+cdm_tables = cdm.load_tables()
 obs_tables = [x for x in cdm_tables.keys() if x != "header"]
 
 # 1. SEE STATION ID's FROM BOTH DATA STREAMS AND SEE IF THERE'S ANYTHING TO
@@ -435,18 +427,6 @@ with open(level_io_filename, "w") as fileObj:
     )
 
 # 5. clean scratch for comming tasks ------------------------------------------
-for table in obs_tables:
-    try:
-        os.remove(f"{scratch_path}/{table}-{fileID}.psv")
-    except FileNotFoundError:
-        pass
-try:
-    os.remove(f"{scratch_path}/header-{fileID}.psv")
-except FileNotFoundError:
-    pass
-try:
-    os.remove(metadata_fn_scratch)
-except FileNotFoundError:
-    pass
+rmtree(scratch_)
 
 logging.info("End")

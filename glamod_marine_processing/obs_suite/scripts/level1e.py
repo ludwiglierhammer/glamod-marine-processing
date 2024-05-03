@@ -126,12 +126,12 @@ import json
 import logging
 import os
 import sys
-from imp import reload
+from importlib import reload
 
-import cdm
 import numpy as np
 import pandas as pd
 import simplejson
+from cdm_reader_mapper import cdm_mapper as cdm
 
 reload(logging)  # This is to override potential previous config of logging
 
@@ -454,7 +454,7 @@ level_prev = "level1d"
 header = True
 wmode = "w"
 
-cdm_tables = cdm.lib.tables.tables_hdlr.load_tables()
+cdm_tables = cdm.load_tables()
 obs_tables = [x for x in cdm_tables.keys() if x != "header"]
 
 history_tstmp = datetime.datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S")

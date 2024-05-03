@@ -100,12 +100,12 @@ import logging
 import os
 import re
 import sys
-from imp import reload
+from importlib import reload
 
-import cdm
 import numpy as np
 import pandas as pd
 import simplejson
+from cdm_reader_mapper import cdm_mapper as cdm
 
 reload(logging)  # This is to override potential previous config of logging
 
@@ -355,7 +355,7 @@ dataset_id = "icoads_r3000"
 validated = ["report_timestamp", "primary_station_id"]
 history = "Performed report_timestamp (date_time) and primary_station_id validation"
 history_tstmp = datetime.datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S")
-cdm_tables = cdm.lib.tables.tables_hdlr.load_tables()
+cdm_tables = cdm.load_tables()
 
 # 1. READ THE DATA-------------------------------------------------------------
 

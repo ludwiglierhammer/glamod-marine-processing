@@ -55,13 +55,13 @@ import json
 import logging
 import os
 import sys
-from imp import reload
+from importlib import reload
 
-import cdm
 import numpy as np
 import pandas as pd
 import simplejson
-from pandas_operations import replace
+from cdm_reader_mapper import cdm_mapper as cdm
+from cdm_reader_mapper.operations import replace
 
 reload(logging)  # This is to override potential previous config of logging
 
@@ -170,7 +170,6 @@ L1a_path = os.path.join(release_path, "level1a", params.sid_dck)
 L1b_path = os.path.join(release_path, "level1b", params.sid_dck)
 L1b_ql_path = os.path.join(release_path, "level1b", "quicklooks", params.sid_dck)
 
-print(params.data_path, params.release, params.correction_version)
 L1b_main_corrections = os.path.join(
     params.data_path, params.release, "NOC_corrections", params.correction_version
 )
@@ -198,7 +197,8 @@ correction_dict = {table: {} for table in cdm.properties.cdm_tables}
 # Do the data processing ------------------------------------------------------
 isChange = "1"
 dupNotEval = "4"
-cdm_tables = cdm.lib.tables.tables_hdlr.load_tables()
+cdm_tables = cdm.load_tables()
+
 # 1. Do it a table at a time....
 history_tstmp = datetime.datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S")
 for table in cdm.properties.cdm_tables:
@@ -245,7 +245,6 @@ for table in cdm.properties.cdm_tables:
         if len(correction_df) > 0:
             correction_df.set_index("report_id", inplace=True, drop=False)
             try:
-                # correction_df = correction_df.loc[table_df.index]
                 correction_df = correction_df.loc[table_df.index].drop_duplicates()
             except Exception:
                 logging.warning(
