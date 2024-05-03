@@ -222,8 +222,7 @@ def get_qc_flags(qc, qc_df_full):
         dtype=qc_dtype,
         usecols=qc_columns.get(qc),
         delimiter=qc_delimiter,
-        error_bad_lines=False,
-        warn_bad_lines=True,
+        on_bad_lines="skip",
     )
     # Map UID to CDM (harcoded source ICOADS_R3.0.0T here!!!!!)
     # and keep only reports from current monthly table
@@ -316,7 +315,7 @@ def process_table(table_df, table_name):
         qc = table_qc.get(table_name).get("qc")
         element = table_qc.get(table_name).get("element")
         qc_table = qc_df[[qc]]
-        qc_table.rename({qc: element}, axis=1, inplace=True)
+        qc_table = qc_table.rename({qc: element}, axis=1)
         table_df.update(qc_table)
 
         updated_locs = qc_table.loc[qc_table.notna().all(axis=1)].index
