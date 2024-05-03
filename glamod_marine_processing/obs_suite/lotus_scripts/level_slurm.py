@@ -54,6 +54,13 @@ def launch_process(process):
     return jid.split(" ")[-1]
 
 
+def source_dataset(level, release):
+    """Get source dataset."""
+    if level == "level1a":
+        return "datasets"
+    return release
+
+
 # %%------------------------------------------------------------------------------
 
 
@@ -94,8 +101,8 @@ scratch_dir = script_config["paths"]["scratch_directory"]
 
 # Build process specific paths
 level_dir = os.path.join(data_dir, release, dataset, LEVEL)
-
-level_source_dir = os.path.join(data_dir, "datasets", dataset, LEVEL_SOURCE)
+level_source = source_dataset(LEVEL, release)
+level_source_dir = os.path.join(data_dir, level_source, dataset, LEVEL_SOURCE)
 log_dir = os.path.join(level_dir, "log")
 
 # Check paths
