@@ -48,16 +48,25 @@ from .utilities import (
     * level2: Make data ready to ingest in the database.
     """,
 )
-@click.option("-r", "--release", default="release_7.0", help="Name of the data release.")
-@click.option("-u", "--update", default="000000", help="Name of the data release update.")
-@click.option("-d", "--dataset", default="ICOADS_R3.0.2T", help="Name of the data release dataset.")
+@click.option(
+    "-r", "--release", default="release_7.0", help="Name of the data release."
+)
+@click.option(
+    "-u", "--update", default="000000", help="Name of the data release update."
+)
+@click.option(
+    "-d",
+    "--dataset",
+    default="ICOADS_R3.0.2T",
+    help="Name of the data release dataset.",
+)
 @click.option("-submit", "--submit_jobs", is_flag=True, help="Submit job scripts")
 def ObsCli(
-    machine, 
+    machine,
     level,
     release,
     update,
-    dataset, 
+    dataset,
     submit_jobs,
 ):
     """Enry point for the obs_suite command line interface."""
@@ -135,5 +144,4 @@ def ObsCli(
     new_config = f"{level}_{current_time}.json"
     new_config = os.path.join(release_directory, new_config)
     save_json(level_config, new_config)
-
     os.system(f"python {slurm_script_new} {new_config}")
