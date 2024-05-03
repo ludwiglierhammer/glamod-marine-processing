@@ -28,7 +28,6 @@ def check_file_exit(files):
         if not os.path.isfile(filei):
             logging.error(f"File {filei} does not exist. Exiting")
             sys.exit(1)
-    return
 
 
 def check_dir_exit(dirs):
@@ -38,7 +37,6 @@ def check_dir_exit(dirs):
         if not os.path.isdir(diri):
             logging.error(f"Directory {diri} does not exist. Exiting")
             sys.exit(1)
-    return
 
 
 def launch_process(process):
@@ -75,7 +73,6 @@ LEVEL = script_config["level"]
 LEVEL_SOURCE = slurm_preferences.level_source[LEVEL]
 SOURCE_PATTERN = slurm_preferences.source_pattern[LEVEL]
 PYSCRIPT = f"{LEVEL}.py"
-USER = "glamod"
 MACHINE = script_config["scripts"]["machine"].lower()
 
 release = script_config["abbreviations"]["release"]
@@ -144,7 +141,6 @@ for sid_dck in process_list:
     array_size = len(glob.glob(os.path.join(log_diri, "*.input")))
     if array_size == 0:
         logging.warning(f"{sid_dck}: no jobs for partition")
-        # continue
 
     job_file = os.path.join(log_diri, sid_dck + ".slurm")
     taskfarm_file = os.path.join(log_diri, sid_dck + ".tasks")
