@@ -60,7 +60,7 @@ def make_release_source_tree(
     sid_dck_dict = load_json(release_periods_file)
 
     level_subdirs_ = level_subdirs[level]
-    level_subdirs_.extend(sid_dck_dict.keys())
+    level_subdirs_.extend(".")
 
     # CREATE DIRS
     release_path = os.path.join(data_path, release)
