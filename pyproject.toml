@@ -28,7 +28,7 @@ classifiers = [
   "Programming Language :: Python :: 3.11",
   "Programming Language :: Python :: 3.12"
 ]
-dynamic = ["version", "dependencies"]
+dynamic = ["version", "dependencies", "optional-dependencies"]
 
 [project.scripts]
 obs_suite = "glamod_marine_processing.cli:ObsCli"
@@ -142,8 +142,15 @@ convention = "numpy"
 [tool.setuptools]
 packages = ["glamod_marine_processing"]
 
-[tool.setuptools.dynamic]
-dependencies = {file = "ci/requirements/requirements.txt"}
+[tool.setuptools.dynamic.dependencies]
+file = "ci/requirements/requirements.txt"
+
+[tool.setuptools.dynamic.optional-dependencies]
+obs = {file = "ci/requirements/requirements_ob.txt"}
+conf = {file = "ci/requirements/requirements_cf.txt"}
+qc = {file = "ci/requirements/requirements_qc.txt"}
+meta = {file = "ci/requirements/requirements_md.txt"}
+complete = {file = ["ci/requirements/requirements_ob.txt", "ci/requirements/requirements_cf.txt", "ci/requirements/requirements_qc.txt", "ci/requirements/requirements_md.txt"]}
 
 [tool.setuptools_scm]
 fallback_version = "999"
