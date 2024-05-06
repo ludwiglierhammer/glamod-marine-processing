@@ -1,7 +1,0 @@
-Processing DUPLICATES files
-/ichec/work/glamod/data/marine/datasets/NOC_corrections/v1x2021/DUP_FILES/2021-01.txt.gz
-INFO	[20230227 11:53:10](noc_duplicates_merge.py)	Reading command line arguments
-/ichec/work/glamod/data/marine/datasets/NOC_corrections/v1x2021/DUP_FILES/2021-02.txt.gz
-INFO	[20230227 11:53:19](noc_duplicates_merge.py)	Reading command line arguments
-/ichec/work/glamod/data/marine/datasets/NOC_corrections/v1x2021/DUP_FILES/2021-03.txt.gz
-INFO	[20230227 11:53:29](noc_duplicates_merge.py)	Reading command line arguments
