@@ -133,9 +133,9 @@ if status != 0:
 
 # Build jobs ------------------------------------------------------------------
 py_path = os.path.join(scripts_dir, PYSCRIPT)
-
-if slurm_preferences.addition.get(LEVEL) is True:
-    addition = os.path.join(config_files_path, f"{LEVEL}_cdm_add.json")
+add_file = os.path.join(config_files_path, f"{LEVEL}_cmd_add.json")
+if os.path.isfile(add_file):
+    addition = add_file
 else:
     addition = ""
 pycommand = f"python {py_path} {data_dir} {release} {update} {dataset} {addition}"
