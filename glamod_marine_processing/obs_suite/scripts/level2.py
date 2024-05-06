@@ -66,7 +66,19 @@ class script_setup:
         self.update = inargs[3]
         self.dataset = inargs[4]
         self.level2_list = inargs[5]
-        self.sid_dck = inargs[6]
+        self.configfile = inargs[6]
+
+        try:
+            with open(self.configfile) as fileObj:
+                config = json.load(fileObj)
+        except Exception:
+            logging.error(
+                f"Opening configuration file: {self.configfile}", exc_info=True
+            )
+            self.flag = False
+            return
+
+        self.sid_dck = config.get("sid_dck")
         self.dck = self.sid_dck.split("-")[1]
 
 
@@ -116,7 +128,6 @@ right_max_period = 2100
 
 release_path = os.path.join(params.data_path, params.release, params.dataset)
 release_id = FFS.join([params.release, params.update])
-
 L1e_path = os.path.join(release_path, "level1e", params.sid_dck)
 L2_path = os.path.join(release_path, level, params.sid_dck)
 L2_excluded_path = os.path.join(release_path, level, "excluded", params.sid_dck)

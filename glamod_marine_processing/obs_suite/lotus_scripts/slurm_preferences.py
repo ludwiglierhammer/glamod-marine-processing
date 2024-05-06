@@ -18,10 +18,6 @@ source_pattern = {
     "level2": "header-????-??-*.psv",
 }
 
-addition = {
-    "level2": True,
-}
-
 nodesi = {
     "level1d": 1,
     "level2": 1,
