@@ -48,10 +48,10 @@ import logging
 import os
 import shutil
 import sys
-from imp import reload
+from importlib import reload
 from subprocess import call
 
-import cdm
+from cdm_reader_mapper import cdm_mapper as cdm
 
 reload(logging)  # This is to override potential previous config of logging
 
@@ -64,7 +64,7 @@ class script_setup:
         self.data_path = inargs[1]
         self.release = inargs[2]
         self.update = inargs[3]
-        self.source = inargs[4]
+        self.dataset = inargs[4]
         self.level2_list = inargs[5]
         self.sid_dck = inargs[6]
         self.dck = self.sid_dck.split("-")[1]
@@ -79,7 +79,7 @@ def date_handler(obj):
 
 def clean_level():
     """Clean level."""
-    for dirname in [level_path, level_reports_path, level_excluded_path]:
+    for dirname in [L2_path, L2_reports_path, L2_excluded_path]:
         try:
             if os.path.isdir(dirname):
                 logging.info(f"Removing directory {dirname}")
@@ -108,22 +108,21 @@ params = script_setup(args)
 
 FFS = "-"
 level = "level2"
-level_prev = "level1e"
 header = True
 wmode = "w"
 # These to build the brace expansions for the out of release periods
 left_min_period = 1600
 right_max_period = 2100
 
-release_path = os.path.join(params.data_path, params.release, params.source)
+release_path = os.path.join(params.data_path, params.release, params.dataset)
 release_id = FFS.join([params.release, params.update])
 
-prev_level_path = os.path.join(release_path, level_prev, params.sid_dck)
-level_path = os.path.join(release_path, level, params.sid_dck)
-level_excluded_path = os.path.join(release_path, level, "excluded", params.sid_dck)
-level_reports_path = os.path.join(release_path, level, "reports", params.sid_dck)
+L1e_path = os.path.join(release_path, "level1e", params.sid_dck)
+L2_path = os.path.join(release_path, level, params.sid_dck)
+L2_excluded_path = os.path.join(release_path, level, "excluded", params.sid_dck)
+L2_reports_path = os.path.join(release_path, level, "reports", params.sid_dck)
 
-data_paths = [prev_level_path]
+data_paths = [L1e_path]
 if any([not os.path.isdir(x) for x in data_paths]):
     logging.error(
         "Could not find data paths: {}".format(
@@ -142,7 +141,7 @@ clean_level()
 
 # DO THE DATA SELECTION -------------------------------------------------------
 # -----------------------------------------------------------------------------
-cdm_tables = cdm.lib.tables.tables_hdlr.load_tables()
+cdm_tables = cdm.load_tables()
 obs_tables = [x for x in cdm_tables if x != "header"]
 with open(params.level2_list) as fileObj:
     include_list = json.load(fileObj)
@@ -186,15 +185,13 @@ try:
     include_param_list.append("header")
     if exclude_sid_dck:
         logging.info(f"Full dataset {params.sid_dck} excluded from level2")
-        os.mkdir(level_excluded_path)
+        os.mkdir(L2_excluded_path)
         for table in cdm_tables:
-            files = os.path.join(prev_level_path, table + "*.psv")
-            call(
-                " ".join(["cp", files, level_excluded_path, "2>/dev/null"]), shell=True
-            )
+            files = os.path.join(L1e_path, table + "*.psv")
+            call(" ".join(["cp", files, L2_excluded_path, "2>/dev/null"]), shell=True)
     else:
-        os.mkdir(level_path)
-        os.mkdir(level_reports_path)
+        os.mkdir(L2_path)
+        os.mkdir(L2_reports_path)
         period_brace = "{" + str(year_init) + ".." + str(year_end) + "}"
         left_period_brace = "{" + str(left_min_period) + ".." + str(year_init - 1) + "}"
         right_period_brace = (
@@ -202,32 +199,30 @@ try:
         )
         for table in exclude_param_list:
             logging.info(f"{table} excluded from level2")
-            files = os.path.join(prev_level_path, table + "*.psv")
+            files = os.path.join(L1e_path, table + "*.psv")
             file_list = glob.glob(files)
             if len(file_list) > 0:
-                if not os.path.isdir(level_excluded_path):
-                    os.mkdir(level_excluded_path)
+                if not os.path.isdir(L2_excluded_path):
+                    os.mkdir(L2_excluded_path)
                 call(
-                    " ".join(["cp", files, level_excluded_path, "2>/dev/null"]),
+                    " ".join(["cp", files, L2_excluded_path, "2>/dev/null"]),
                     shell=True,
                 )
         for table in include_param_list:
             logging.info(f"{table} included in level2")
-            files = os.path.join(
-                prev_level_path, table + FFS + period_brace + FFS + "*.psv"
-            )
-            call(" ".join(["cp", files, level_path, "2>/dev/null"]), shell=True)
+            files = os.path.join(L1e_path, table + FFS + period_brace + FFS + "*.psv")
+            call(" ".join(["cp", files, L2_path, "2>/dev/null"]), shell=True)
         # Send out of release period to excluded
-        if not os.path.isdir(level_excluded_path):
-            os.mkdir(level_excluded_path)
+        if not os.path.isdir(L2_excluded_path):
+            os.mkdir(L2_excluded_path)
         files = os.path.join(
-            prev_level_path, FFS.join(["*", left_period_brace, "??", "*.psv"])
+            L1e_path, FFS.join(["*", left_period_brace, "??", "*.psv"])
         )
-        call(" ".join(["cp", files, level_excluded_path, "2>/dev/null"]), shell=True)
+        call(" ".join(["cp", files, L2_excluded_path, "2>/dev/null"]), shell=True)
         files = os.path.join(
-            prev_level_path, FFS.join(["*", right_period_brace, "??", "*.psv"])
+            L1e_path, FFS.join(["*", right_period_brace, "??", "*.psv"])
         )
-        call(" ".join(["cp", files, level_excluded_path, "2>/dev/null"]), shell=True)
+        call(" ".join(["cp", files, L2_excluded_path, "2>/dev/null"]), shell=True)
     logging.info("Level2 data succesfully created")
 except Exception:
     logging.error("Error creating level2 data", exc_info=True)

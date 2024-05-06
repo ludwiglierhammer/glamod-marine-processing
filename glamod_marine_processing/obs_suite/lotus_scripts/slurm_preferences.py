@@ -6,6 +6,7 @@ level_source = {
     "level1c": "level1b",
     "level1d": "level1c",
     "level1e": "level1d",
+    "level2": "level1e",
 }
 
 source_pattern = {
@@ -14,10 +15,16 @@ source_pattern = {
     "level1c": "header-????-??-*.psv",
     "level1d": "header-????-??-*.psv",
     "level1e": "header-????-??-*.psv",
+    "level2": "header-????-??-*.psv",
+}
+
+addition = {
+    "level2": True,
 }
 
 nodesi = {
     "level1d": 1,
+    "level2": 1,
 }
 
 TaskPNi = {

@@ -1,67 +1,7 @@
 {
-  "103-792": {
-    "year_init": 2015,
-    "year_end": 2021,
-    "exclude": false,
-    "params_exclude": []
-  },
-  "103-793": {
-    "year_init": 2015,
-    "year_end": 2021,
-    "exclude": false,
-    "params_exclude": []
-  },
-  "103-794": {
-    "year_init": 2015,
-    "year_end": 2021,
-    "exclude": false,
-    "params_exclude": []
-  },
-  "103-795": {
-    "year_init": 2015,
-    "year_end": 2022,
-    "exclude": false,
-    "params_exclude": []
-  },
-  "103-797": {
-    "year_init": 2015,
-    "year_end": 2021,
-    "exclude": false,
-    "params_exclude": []
-  },
-  "114-992": {
-    "year_init": 2015,
-    "year_end": 2021,
-    "exclude": false,
-    "params_exclude": []
-  },
-  "114-993": {
-    "year_init": 2015,
-    "year_end": 2021,
-    "exclude": false,
-    "params_exclude": []
-  },
-  "114-994": {
-    "year_init": 2015,
-    "year_end": 2021,
-    "exclude": false,
-    "params_exclude": []
-  },
-  "114-995": {
-    "year_init": 2015,
-    "year_end": 2021,
-    "exclude": false,
-    "params_exclude": []
-  },
-  "172-798": {
-    "year_init": 2015,
-    "year_end": 2021,
-    "exclude": false,
-    "params_exclude": []
-  },
-  "params_exclude": [
-    "observations-wbt"
-  ],
-  "year_init": 2015,
-  "year_end": 2021
+  "process_list_file": "source_deck_list.txt",
+  "release_periods_file": "source_deck_periods.json",
+  "job_memo_mb": 500,
+  "job_time_hr": "00",
+  "job_time_min": "10"
 }
