@@ -8,6 +8,7 @@ from __future__ import annotations
 import datetime
 import os
 import shutil
+
 import click
 
 from .obs_suite.scripts.make_release_source_tree import make_release_source_tree
@@ -19,6 +20,7 @@ from .utilities import (
     mkdir,
     save_json,
 )
+
 
 @click.command()
 @click.option(
