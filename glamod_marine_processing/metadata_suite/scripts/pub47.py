@@ -238,8 +238,7 @@ def pandas_read(data_file, mode="csv", **kwargs):
     params = {
         "header": None,
         "index_col": False,
-        "error_bad_lines": False,
-        "warn_bad_lines": True,
+        "on_bad_lines": "skip",
         "encoding": "ISO-8859-1",
     }
     if mode == "csv":
@@ -404,7 +403,7 @@ def pub47load(schema, data_file, map_path=None):
     # ===============================================
     # Load data
     # ===============================================
-    input_data = read_file(data_file, schema, names=schema.column_names)
+    input_data = read_file(data_file, schema, names=schema.column_name)
 
     # Apply mapping, split, then reapply mappings
     # ========================
