@@ -1,10 +1,6 @@
 {
-  "data_path": "/ichec/work/glamod/data/marine/release_5.1/Pub47/",
-  "config_path": "/ichec/work/glamod/glamod-marine-processing.2022/metadata-suite/config/",
   "verbose": true,
-  "output_path": "/ichec/work/glamod/glamod-marine-processing.2022/working/metadata-suite/data/wmo_publication_47/",
   "corrections_file": "corrections.json",
-  "mapping_path": "/ichec/work/glamod/glamod-marine-processing.2022/metadata-suite/config/mapping/",
   "duplicateChecks": [
     "anemometer1_calibration_date",
     "anemometer1_distance_bow",
