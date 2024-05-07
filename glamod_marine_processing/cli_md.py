@@ -65,6 +65,12 @@ def MdataCli(
     work_directory = os.path.abspath(config["paths"]["glamod"])
     scratch_directory = os.path.join(work_directory, os.getlogin())
     release_directory = os.path.join(scratch_directory, "metadata_suite")
+    log_directory = os.path.join(release_directory, "logs")
+    log2_directory = os.path.join(release_directory, "logs2")
+    mkdir(os.path.join(log_directory, "failed"))
+    mkdir(os.path.join(log_directory, "successful"))
+    mkdir(os.path.join(log2_directory, "failed"))
+    mkdir(os.path.join(log2_directory, "successful"))
 
     if split_files is True:
         slurm_script = "submit_split.sh"
@@ -88,7 +94,7 @@ def MdataCli(
         mkdir(release_directory)
         save_json(lotus_config, new_config)
 
-        bash_command = f"{slurm_script} {scripts_directory} {code_directory} {release_directory} {new_config}"
+        bash_command = f"{slurm_script} {scripts_directory} {code_directory} {release_directory} {log2_directory} {new_config}"
         if submit_jobs is True:
             os.system(f"sbatch {bash_command}")
         else:

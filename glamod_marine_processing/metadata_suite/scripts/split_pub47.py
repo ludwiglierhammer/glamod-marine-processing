@@ -8,11 +8,11 @@ import json
 import os
 import sys
 
+import numpy as np
 import pandas as pd
 import pandasvalidation as pv
 from dateutil.relativedelta import relativedelta
-
-from ..modules.pub47 import (
+from pub47 import (
     cmiss,
     fmiss,
     imiss,
@@ -22,7 +22,7 @@ from ..modules.pub47 import (
     pub47load,
     pub47schema,
 )
-from ..modules.soundex import soundex
+from soundex import soundex
 
 tol = 0.01
 
@@ -342,6 +342,7 @@ def main(argv):
     # jobs specific options in control_file (need to rename)
 
     # load config options
+    print(config_file)
     with open(config_file) as cf:
         config = json.load(cf)
 
@@ -352,18 +353,18 @@ def main(argv):
     # parsing using pandas
 
     # global options
-
+    print(config)
     map_path = config["mapping_path"]
     datapath = config["data_path"]
     configpath = config["config_path"]
     verbose = config["verbose"]
     outputpath = config["output_path"]
-    corrections_file = configpath + "./" + config["corrections_file"]
+    corrections_file = os.path.join(configpath, config["corrections_file"])
 
     print(corrections_file)
 
     # read options from control file
-    log_file = log_path + "./split_pub47_" + args.tag + ".log"
+    log_file = os.path.join(log_path, "split_pub47_" + args.tag + ".log")
 
     # load corrections
     with open(corrections_file) as m:
@@ -373,7 +374,7 @@ def main(argv):
     log = open(log_file, "w")
 
     # iterate over jobs in control file
-    for job_index in pd.np.arange(first_job, last_job + 1, 1):
+    for job_index in np.arange(first_job, last_job + 1, 1):
         # find job in job list
         for job in control["jobs"]:
             if job["jobindex"] == job_index:
@@ -381,7 +382,7 @@ def main(argv):
         assert job_index == job["jobindex"]
 
         # load schema
-        schema = pub47schema(configpath + "./schemas/", job["schema"])
+        schema = pub47schema(os.path.join(configpath, "schemas", job["schema"]))
 
         # get input file
         input_file = job["data_file"]
