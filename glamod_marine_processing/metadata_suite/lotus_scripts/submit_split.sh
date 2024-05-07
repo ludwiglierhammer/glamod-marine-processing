@@ -1,20 +1,15 @@
-#!/bin/bash
-#BSUB -J split_[1-83]
-#BSUB -q short-serial
-#BSUB -o ./logs/%J_%I.out
-#BSUB -e ./logs/%J_%I.err
-#BSUB -W 24:00
-#BSUB -R "rusage[mem=64000]"
-#BSUB -M 64000
+scripts_directory=$1
+code_directory=$2
+release_directory=$3
+config_lotus=$4
 
-source ./setenv0.sh
 if [ -f split_${LSB_JOBINDEX}.success ]
 then
     echo ""
     echo "Job previously successful, job not rerun. Remove file 'split_${LSB_JOBINDEX}.success' to force rerun."
     echo ""
 else
-    python3 ${scripts_directory}/split_pub47.py -config ${code_directory}/config/config_lotus.json \
+    python ${scripts_directory}/split_pub47.py -config ${code_directory}/config/config_lotus.json \
         -jobs ${code_directory}/config/jobs.json -start ${LSB_JOBINDEX} -tag split_${LSB_JOBINDEX} \
         -log ./logs2/
     if [ $? -eq 0 ]

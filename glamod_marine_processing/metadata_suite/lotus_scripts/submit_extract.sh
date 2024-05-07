@@ -7,7 +7,6 @@
 #BSUB -R "rusage[mem=64000]"
 #BSUB -M 64000
 
-source ./setenv0.sh
 if [ -f extract_${LSB_JOBINDEX}.success ]
 then
     echo ""
