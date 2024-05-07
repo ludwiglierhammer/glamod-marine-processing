@@ -206,4 +206,3 @@ for sid_dck in process_list:
     else:
         logging.info(f"{sid_dck}: create script")
         logging.info(f"Script {job_file} was created.")
-        process = f"jid=$(sbatch {job_file} | cut -f 4 -d' ') && echo $jid"
