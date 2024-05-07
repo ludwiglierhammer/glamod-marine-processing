@@ -83,7 +83,6 @@ def ObsCli(
     code_directory = os.path.join(home_directory, "obs_suite")
     config_directory = os.path.join(code_directory, "configuration_files")
     config_files_path = os.path.join(config_directory, release_update, dataset)
-    pyTools_directory = os.path.join(code_directory, "modules", "python")
     scripts_directory = os.path.join(code_directory, "scripts")
     lotus_scripts_directory = os.path.join(code_directory, "lotus_scripts")
     work_directory = os.path.abspath(config["paths"]["glamod"])
@@ -96,7 +95,6 @@ def ObsCli(
         code_directory=code_directory,
         config_directory=config_directory,
         config_files_path=config_files_path,
-        pyTools_directory=pyTools_directory,
         scripts_directory=scripts_directory,
         lotus_scripts_directory=lotus_scripts_directory,
         scratch_directory=scratch_directory,
@@ -119,6 +117,7 @@ def ObsCli(
     slurm_script_new = os.path.join(release_directory, slurm_script_)
     mkdir(release_directory)
     shutil.copyfile(slurm_script_tmp, slurm_script_new)
+
     level_config_file = f"{level}.json"
     level_config_file = os.path.join(config_files_path, level_config_file)
 
