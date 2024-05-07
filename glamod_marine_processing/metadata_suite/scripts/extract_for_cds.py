@@ -20,7 +20,7 @@ imiss = -1
 
 
 def record_completeness(record):
-    """Ckeck record completeness."""
+    """Check record completeness."""
     s = record.size - sum(
         record.apply(lambda x: x == cmiss or x == str(fmiss) or x == str(imiss))
     )
