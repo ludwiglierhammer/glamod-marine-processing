@@ -48,6 +48,18 @@ Now you can install several dependency versions:
 
 This will install the package but you can still edit it and you don't need the package in your :code:`PYTHONPATH`.
 
+Usage
+-----
+``glamod-marine-processing`` is a python tool for creating SLURM scripts for several GLAMOD marine processing workflows.
+Once installed you can use it as an command-line interface. For more information, please call the help functions: 
+
+.. code-block:: console
+
+    metadata_suite --help  # Metadata workflow help page
+    qc_suite --help        # Quality control workflow help page
+    obs_suite --help       # Observations workflow help page
+    config_suite --help    # Configuration tabel workflow help page
+    
 
 .. |build| image:: https://github.com/glamod/glamod-marine-processing/actions/workflows/ci.yml/badge.svg
         :target: https://github.com/glamod/glamod-marine-processing/actions/workflows/ci.yml
