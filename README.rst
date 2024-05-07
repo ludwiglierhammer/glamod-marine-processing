@@ -51,7 +51,7 @@ This will install the package but you can still edit it and you don't need the p
 Usage
 -----
 ``glamod-marine-processing`` is a python tool for creating SLURM scripts for several GLAMOD marine processing workflows.
-Once installed you can use it as an command-line interface. For more information, please call the help functions: 
+Once installed you can use it as an command-line interface. For more information, please call the help functions:
 
 .. code-block:: console
 
@@ -59,7 +59,7 @@ Once installed you can use it as an command-line interface. For more information
     qc_suite --help        # Quality control workflow help page
     obs_suite --help       # Observations workflow help page
     config_suite --help    # Configuration tabel workflow help page
-    
+
 
 .. |build| image:: https://github.com/glamod/glamod-marine-processing/actions/workflows/ci.yml/badge.svg
         :target: https://github.com/glamod/glamod-marine-processing/actions/workflows/ci.yml
