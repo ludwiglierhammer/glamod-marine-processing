@@ -44,7 +44,7 @@ Now you can install several dependency versions:
     pip install -e .[qc]       # Install optional dependencies for the quality control workflow
     pip install -e .[obs]      # Install optional dependencies for the observations workflow
     pip install -e .[conf]     # Install optional dependencies for the configuration table workflow
-    pip istall -e .[complete]  # Install all the above for complete dependency version
+    pip install -e .[complete]  # Install all the above for complete dependency version
 
 This will install the package but you can still edit it and you don't need the package in your :code:`PYTHONPATH`.
 
