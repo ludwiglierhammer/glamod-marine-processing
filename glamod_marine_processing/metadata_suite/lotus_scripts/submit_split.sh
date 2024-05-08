@@ -1,8 +1,8 @@
 scripts_directory=$1
 code_directory=$2
 release_directory=$3
-log_directory=$4
-config_lotus=$5
+config_lotus=$4
+log_directory=$5
 LSB_JOBINDEX=1
 if [ -f ${release_directory}/split_${LSB_JOBINDEX}.success ]
 then
@@ -16,9 +16,11 @@ else
     if [ $? -eq 0 ]
     then
 	    touch ${release_directory}/split_${LSB_JOBINDEX}.success
-        #bsub -w "done(${LSB_JOBID})" mv ./logs/${LSB_JOBID}_${LSB_JOBINDEX}.* ./logs/successful/
+        #bsub -w "done(${LSB_JOBID})"
+        mv ./logs/${LSB_JOBID}_${LSB_JOBINDEX}.* ./logs/successful/
     else
 	    touch ${release_directory}/split_${LSB_JOBINDEX}.failed
-        #bsub -w "done(${LSB_JOBID})" mv ./logs/${LSB_JOBID}_${LSB_JOBINDEX}.* ./logs/failed/
+        #bsub -w "done(${LSB_JOBID})"
+        mv ./logs/${LSB_JOBID}_${LSB_JOBINDEX}.* ./logs/failed/
 	fi
 fi
