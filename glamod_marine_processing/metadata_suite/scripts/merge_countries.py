@@ -11,9 +11,8 @@ import sys
 import Levenshtein
 import pandas as pd
 from dateutil.relativedelta import relativedelta
-
-from ..modules.pub47 import cmiss, pub47schema
-from ..modules.soundex import soundex
+from pub47 import cmiss, pub47schema
+from soundex import soundex
 
 fmiss = -999999.0
 imiss = -1  # -999999

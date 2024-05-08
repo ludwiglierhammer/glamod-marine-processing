@@ -10,8 +10,7 @@ import sys
 
 import pandas as pd
 from dateutil.relativedelta import relativedelta
-
-from ..modules.pub47 import cmiss, smart_dict
+from pub47 import cmiss, smart_dict
 
 pd.options.display.width = 0
 

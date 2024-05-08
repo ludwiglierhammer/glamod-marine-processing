@@ -54,6 +54,17 @@ def MdataCli(
     submit_jobs,
 ):
     """Enry point for the metadata_suite command line interface."""
+
+    def execute_command(slurm_script, add=""):
+        """Run bash command."""
+        slurm_script = os.path.join(lotus_scripts_directory, slurm_script)
+        bash_command = f"{slurm_script} {scripts_directory} {code_directory} {release_directory} {new_config} {add}"
+
+        if submit_jobs is True:
+            os.system(f"sbatch {bash_command}")
+        else:
+            os.system(f"bash {bash_command}")
+
     config = get_configuration(machine)
 
     home_directory = get_base_path()
@@ -72,40 +83,28 @@ def MdataCli(
     mkdir(os.path.join(log2_directory, "failed"))
     mkdir(os.path.join(log2_directory, "successful"))
 
+    lotus_config_file = "config_lotus.json"
+    lotus_config_file = os.path.join(config_directory, lotus_config_file)
+    lotus_config = load_json(lotus_config_file)
+    lotus_config["data_path"] = os.path.join(data_directory, previous_release, "Pub47")
+    lotus_config["config_path"] = config_directory
+    lotus_config["output_path"] = os.path.join(
+        release_directory, "data", "wmo_publication_47"
+    )
+    lotus_config["mapping_path"] = os.path.join(config_directory, "mapping")
+    current_time = datetime.datetime.now()
+    current_time = current_time.strftime("%Y%m%dT%H%M%S")
+
+    new_config = f"config_lotus_{current_time}.json"
+    new_config = os.path.join(release_directory, new_config)
+    mkdir(release_directory)
+    save_json(lotus_config, new_config)
+
     if split_files is True:
-        slurm_script = "submit_split.sh"
-        slurm_script = os.path.join(lotus_scripts_directory, slurm_script)
-        lotus_config_file = "config_lotus.json"
-        lotus_config_file = os.path.join(config_directory, lotus_config_file)
-        lotus_config = load_json(lotus_config_file)
-        lotus_config["data_path"] = os.path.join(
-            data_directory, previous_release, "Pub47"
-        )
-        lotus_config["config_path"] = config_directory
-        lotus_config["output_path"] = os.path.join(
-            release_directory, "data", "wmo_publication_47"
-        )
-        lotus_config["mapping_path"] = os.path.join(config_directory, "mapping")
-        current_time = datetime.datetime.now()
-        current_time = current_time.strftime("%Y%m%dT%H%M%S")
-
-        new_config = f"config_lotus_{current_time}.json"
-        new_config = os.path.join(release_directory, new_config)
-        mkdir(release_directory)
-        save_json(lotus_config, new_config)
-
-        bash_command = f"{slurm_script} {scripts_directory} {code_directory} {release_directory} {log2_directory} {new_config}"
-        if submit_jobs is True:
-            os.system(f"sbatch {bash_command}")
-        else:
-            os.system(f"bash {bash_command}")
+        execute_command("submit_split.sh", add=log2_directory)
 
     if merge_countries is True:
-        slurm_script = "submit_merge.sh"
-        slurm_script = os.path.join(lotus_scripts_directory, slurm_script)
-        os.system(f"bash {slurm_script}")
+        execute_command("submit_merge.sh")
 
     if extract_for_cds is True:
-        slurm_script = "submit_extract.sh"
-        slurm_script = os.path.join(lotus_scripts_directory, slurm_script)
-        os.system(f"bash {slurm_script}")
+        execute_command("submit_extract.sh")

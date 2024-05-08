@@ -1,30 +1,29 @@
-#!/bin/bash
-#BSUB -J extract_[1-660]
-#BSUB -q short-serial
-#BSUB -o ./extract_logs/%J_%I.out
-#BSUB -e ./extract_logs/%J_%I.err
-#BSUB -W 24:00
-#BSUB -R "rusage[mem=64000]"
-#BSUB -M 64000
+scripts_directory=$1
+code_directory=$2
+release_directory=$3
+config_lotus=$4
+LSB_JOBINDEX=1
 
-if [ -f extract_${LSB_JOBINDEX}.success ]
+if [ -f ${release_directory}/extract_${LSB_JOBINDEX}.success ]
 then
     echo ""
     echo "Job previously successful, job not rerun. Remove file 'extract_${LSB_JOBINDEX}.success' to force rerun."
     echo ""
 else
-    python3 ${scripts_directory}/extract_for_cds.py  -config ${code_directory}/config/config_lotus.json -schema\
+    python ${scripts_directory}/extract_for_cds.py  -config ${config_lotus} -schema\
         ${code_directory}/config/master.json -index ${LSB_JOBINDEX}
     if [ $? -eq 0 ]
     then
-	    touch extract_${LSB_JOBINDEX}.success
-        bsub -w "done(${LSB_JOBID})" mv ./extract_logs/${LSB_JOBID}_${LSB_JOBINDEX}.* ./extract_logs/successful/
+	    touch ${release_directory}/extract_${LSB_JOBINDEX}.success
+        #bsub -w "done(${LSB_JOBID})"
+        mv ./extract_logs/${LSB_JOBID}_${LSB_JOBINDEX}.* ./extract_logs/successful/
         if [ -f  extract_${LSB_JOBINDEX}.failed ]
         then
             rm extract_${LSB_JOBINDEX}.failed
         fi
     else
-	    touch extract_${LSB_JOBINDEX}.failed
-        bsub -w "done(${LSB_JOBID})" mv ./extract_logs/${LSB_JOBID}_${LSB_JOBINDEX}.* ./extract_logs/failed/
+	    touch ${release_directory}/extract_${LSB_JOBINDEX}.failed
+        #bsub -w "done(${LSB_JOBID})"
+        mv ./extract_logs/${LSB_JOBID}_${LSB_JOBINDEX}.* ./extract_logs/failed/
 	fi
 fi

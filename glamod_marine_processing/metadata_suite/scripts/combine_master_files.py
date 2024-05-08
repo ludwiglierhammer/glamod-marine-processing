@@ -7,8 +7,7 @@ import json
 import sys
 
 import pandas as pd
-
-from ..modules.pub47 import fmiss, imiss
+from pub47 import fmiss, imiss
 
 
 def main(argv):
