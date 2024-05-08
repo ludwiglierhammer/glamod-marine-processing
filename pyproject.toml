@@ -31,10 +31,10 @@ classifiers = [
 dynamic = ["version", "dependencies", "optional-dependencies"]
 
 [project.scripts]
-obs_suite = "glamod_marine_processing.cli:ObsCli"
-metadata_suite = "glamod_marine_processing.cli:MdataCli"
-qc_suite = "glamod_marine_processing.cli:QcCli"
-config_suite = "glamod_marine_processing.cli:ConfigCli"
+metadata_suite = "glamod_marine_processing.cli_md:MdataCli"
+qc_suite = "glamod_marine_processing.cli_qc:QcCli"
+obs_suite = "glamod_marine_processing.cli_obs:ObsCli"
+config_suite = "glamod_marine_processing.cli_cf:ConfigCli"
 
 [project.urls]
 "Homepage" = "https://glamod-marine-processing.readthedocs.io"
