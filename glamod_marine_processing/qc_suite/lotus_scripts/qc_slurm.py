@@ -1,4 +1,4 @@
-"""Quality cntrol SLURM module."""
+"""Quality control SLURM module."""
 
 # make sure setenv0.sh is sourced before
 # about 5h per data month (tested in 2021), 4 jobs per node (ca. 40Gb ram per job)
