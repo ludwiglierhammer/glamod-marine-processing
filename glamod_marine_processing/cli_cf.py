@@ -10,10 +10,10 @@ import os
 
 import click
 
-from .utilities import get_base_path, get_configuration
+from .utilities import CONTEXT_SETTINGS, get_base_path, get_configuration
 
 
-@click.command()
+@click.command(context_settings=CONTEXT_SETTINGS)
 @click.option(
     "-m",
     "--machine",

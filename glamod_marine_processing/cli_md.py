@@ -11,10 +11,17 @@ import os
 
 import click
 
-from .utilities import get_base_path, get_configuration, load_json, mkdir, save_json
+from .utilities import (
+    CONTEXT_SETTINGS,
+    get_base_path,
+    get_configuration,
+    load_json,
+    mkdir,
+    save_json,
+)
 
 
-@click.command()
+@click.command(context_settings=CONTEXT_SETTINGS)
 @click.option(
     "-m",
     "--machine",

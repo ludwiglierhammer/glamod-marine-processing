@@ -13,6 +13,7 @@ import click
 
 from .obs_suite.scripts.make_release_source_tree import make_release_source_tree
 from .utilities import (
+    CONTEXT_SETTINGS,
     add_to_config,
     get_base_path,
     get_configuration,
@@ -22,7 +23,7 @@ from .utilities import (
 )
 
 
-@click.command()
+@click.command(context_settings=CONTEXT_SETTINGS)
 @click.option(
     "-m",
     "--machine",

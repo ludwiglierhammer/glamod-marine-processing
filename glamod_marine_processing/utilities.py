@@ -17,6 +17,7 @@ _base = "glamod_marine_processing"
 config_files = {
     "kay": "config_kay.json",
     "meluxina": "config_meluxina.json",
+    "test": "config_test.json",
 }
 
 
@@ -81,3 +82,6 @@ def get_configuration(machine):
         )
     config_file = os.path.join(_base_path, "configuration_files", config_file)
     return load_json(config_file)
+
+
+CONTEXT_SETTINGS = dict(help_option_names=["-h", "--help"])
