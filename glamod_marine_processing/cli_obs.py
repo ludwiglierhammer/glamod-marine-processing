@@ -1,6 +1,6 @@
 """
 ===========================================
-Observational Lommand Line Interface module
+Observational Command Line Interface module
 ===========================================
 """
 from __future__ import annotations
