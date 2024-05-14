@@ -1,15 +1,24 @@
+"""
+========================================
+Marine processing Command Line Interface
+========================================
+"""
+
+from __future__ import annotations
+
 import click
 
 CONTEXT_SETTINGS = dict(help_option_names=["-h", "--help"])
 
 
 def add_options():
+    """Add decorator click options."""
 
-    def get_parameters(func):
+    def _get_parameters(func):
         return func.__code__.co_varnames
-        
+
     def _add_options(func):
-        options = get_parameters(func)
+        options = _get_parameters(func)
         for option in reversed(options):
             if not hasattr(Options, option):
                 continue
@@ -21,6 +30,7 @@ def add_options():
 
 
 class Options:
+    """Class for click options."""
 
     def __init__(self):
         self.machine = click.option(
@@ -32,10 +42,10 @@ class Options:
             * MELUXINA: login.lxp.lu \n
             * default: MELUXINA
             """,
-        )      
+        )
         self.submit_jobs = click.option(
             "-submit", "--submit_jobs", is_flag=True, help="Submit job scripts"
-        )  
+        )
         self.level = click.option(
             "-l",
             "--level",
@@ -50,7 +60,7 @@ class Options:
             * level2: Make data ready to ingest in the database.
             """,
         )
-        self.release =  click.option(
+        self.release = click.option(
             "-r", "--release", default="release_7.0", help="Name of the data release."
         )
         self.update = click.option(
@@ -61,7 +71,7 @@ class Options:
             "--dataset",
             default="ICOADS_R3.0.2T",
             help="Name of the data release dataset.",
-        )   
+        )
         self.previous_release = click.option(
             "-pr",
             "--previous_release",
@@ -69,13 +79,19 @@ class Options:
             help="Name of the previous data release.",
         )
         self.split_files = click.option(
-            "-split", "--split_files", is_flag=True, help="Step 1: Splitting PUB47 data files."
+            "-split",
+            "--split_files",
+            is_flag=True,
+            help="Step 1: Splitting PUB47 data files.",
         )
         self.merge_countries = click.option(
             "-merge", "--merge_countries", is_flag=True, help="Step 2: Merge countries."
         )
         self.extract_for_cds = click.option(
-            "-extract", "--extract_for_cds", is_flag=True, help="Step 3: Extract for CDS"
+            "-extract",
+            "--extract_for_cds",
+            is_flag=True,
+            help="Step 3: Extract for CDS",
         )
         self.corrections_version = click.option(
             "-c",
@@ -83,5 +99,6 @@ class Options:
             default="",
             help="Name of the NOC corrections version.",
         )
+
 
 Options = Options()
