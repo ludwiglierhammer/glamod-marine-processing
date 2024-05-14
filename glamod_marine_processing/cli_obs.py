@@ -24,7 +24,7 @@ from .utilities import (
 
 
 @click.command(context_settings=CONTEXT_SETTINGS)
-@add_options(["machine", "level", "release", "update", "dataset", "submit_jobs"])
+@add_options()
 def ObsCli(
     machine,
     level,

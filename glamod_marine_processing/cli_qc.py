@@ -15,9 +15,7 @@ from .utilities import get_base_path, get_configuration, mkdir
 
 
 @click.command(context_settings=CONTEXT_SETTINGS)
-@add_options(
-    ["machine", "release", "update", "dataset", "corrections_version", "submit_jobs"]
-)
+@add_options()
 def QcCli(
     machine,
     release,

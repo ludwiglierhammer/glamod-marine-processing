@@ -16,17 +16,7 @@ from .utilities import get_base_path, get_configuration, load_json, mkdir, save_
 
 
 @click.command(context_settings=CONTEXT_SETTINGS)
-@add_options(
-    [
-        "machine",
-        "release",
-        "previous_release",
-        "split_files",
-        "merge_countries",
-        "extract_for_cds",
-        "submit_jobs",
-    ]
-)
+@add_options()
 def MdataCli(
     machine,
     release,

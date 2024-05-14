@@ -15,7 +15,7 @@ from .utilities import get_base_path, get_configuration
 
 
 @click.command(context_settings=CONTEXT_SETTINGS)
-@add_options(["machine", "submit_jobs"])
+@add_options()
 def ConfigCli(
     machine,
     submit_jobs,

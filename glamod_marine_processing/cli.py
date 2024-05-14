@@ -2,15 +2,23 @@ import click
 
 CONTEXT_SETTINGS = dict(help_option_names=["-h", "--help"])
 
-def add_options(*options):
 
+def add_options():
+
+    def get_parameters(func):
+        return func.__code__.co_varnames
+        
     def _add_options(func):
-        for option in reversed(*options):
+        options = get_parameters(func)
+        for option in reversed(options):
+            if not hasattr(Options, option):
+                continue
             option = getattr(Options, option)
             func = option(func)
         return func
 
     return _add_options
+
 
 class Options:
 
@@ -24,12 +32,10 @@ class Options:
             * MELUXINA: login.lxp.lu \n
             * default: MELUXINA
             """,
-        )
-        
+        )      
         self.submit_jobs = click.option(
             "-submit", "--submit_jobs", is_flag=True, help="Submit job scripts"
-        )
-    
+        )  
         self.level = click.option(
             "-l",
             "--level",
@@ -44,15 +50,12 @@ class Options:
             * level2: Make data ready to ingest in the database.
             """,
         )
-
         self.release =  click.option(
             "-r", "--release", default="release_7.0", help="Name of the data release."
         )
-
         self.update = click.option(
             "-u", "--update", default="000000", help="Name of the data release update."
         )
-
         self.dataset = click.option(
             "-d",
             "--dataset",
@@ -65,7 +68,6 @@ class Options:
             default="release_6.0",
             help="Name of the previous data release.",
         )
-        
         self.split_files = click.option(
             "-split", "--split_files", is_flag=True, help="Step 1: Splitting PUB47 data files."
         )
@@ -75,7 +77,6 @@ class Options:
         self.extract_for_cds = click.option(
             "-extract", "--extract_for_cds", is_flag=True, help="Step 3: Extract for CDS"
         )
-
         self.corrections_version = click.option(
             "-c",
             "--corrections_version",
