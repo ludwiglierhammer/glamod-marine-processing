@@ -11,9 +11,9 @@ import shutil
 
 import click
 
+from .cli import CONTEXT_SETTINGS, add_options
 from .obs_suite.scripts.make_release_source_tree import make_release_source_tree
 from .utilities import (
-    CONTEXT_SETTINGS,
     add_to_config,
     get_base_path,
     get_configuration,
@@ -24,43 +24,7 @@ from .utilities import (
 
 
 @click.command(context_settings=CONTEXT_SETTINGS)
-@click.option(
-    "-m",
-    "--machine",
-    default="MELUXINA",
-    help="""HPC cluster where to create and run the scripts,
-    * KAY: kay.ichec.ie \n
-    * MELUXINA: login.lxp.lu \n
-    * default: MELUXINA
-    """,
-)
-@click.option(
-    "-l",
-    "--level",
-    required=True,
-    help="""Step of observation suite process:
-
-    * level1a: Mapping dataset to CDM. \n
-    * level1b: Improve data with corrections and/or additional information. \n
-    * level1c: Perform data validation and apply data with metadata.\n
-    * level1d: Enrich data with external metadata. \n
-    * level1e: Add quality control flags to data. \n
-    * level2: Make data ready to ingest in the database.
-    """,
-)
-@click.option(
-    "-r", "--release", default="release_7.0", help="Name of the data release."
-)
-@click.option(
-    "-u", "--update", default="000000", help="Name of the data release update."
-)
-@click.option(
-    "-d",
-    "--dataset",
-    default="ICOADS_R3.0.2T",
-    help="Name of the data release dataset.",
-)
-@click.option("-submit", "--submit_jobs", is_flag=True, help="Submit job scripts")
+@add_options(["machine", "level", "release", "update", "dataset", "submit_jobs"])
 def ObsCli(
     machine,
     level,

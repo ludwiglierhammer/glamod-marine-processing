@@ -10,21 +10,12 @@ import os
 
 import click
 
-from .utilities import CONTEXT_SETTINGS, get_base_path, get_configuration
+from .cli import CONTEXT_SETTINGS, add_options
+from .utilities import get_base_path, get_configuration
 
 
 @click.command(context_settings=CONTEXT_SETTINGS)
-@click.option(
-    "-m",
-    "--machine",
-    default="MELUXINA",
-    help="""HPC cluster where to create and run the scripts,
-    * KAY: kay.ichec.ie \n
-    * MELUXINA: login.lxp.lu \n
-    * default: MELUXINA
-    """,
-)
-@click.option("-submit", "--submit_jobs", is_flag=True, help="Submit job scripts")
+@add_options(["machine", "submit_jobs"])
 def ConfigCli(
     machine,
     submit_jobs,

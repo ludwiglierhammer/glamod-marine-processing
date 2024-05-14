@@ -10,39 +10,14 @@ import os
 
 import click
 
-from .utilities import CONTEXT_SETTINGS, get_base_path, get_configuration, mkdir
+from .cli import CONTEXT_SETTINGS, add_options
+from .utilities import get_base_path, get_configuration, mkdir
 
 
 @click.command(context_settings=CONTEXT_SETTINGS)
-@click.option(
-    "-m",
-    "--machine",
-    default="MELUXINA",
-    help="""HPC cluster where to create and run the scripts,
-    * KAY: kay.ichec.ie \n
-    * MELUXINA: login.lxp.lu \n
-    * default: MELUXINA
-    """,
+@add_options(
+    ["machine", "release", "update", "dataset", "corrections_version", "submit_jobs"]
 )
-@click.option(
-    "-r", "--release", default="release_7.0", help="Name of the data release."
-)
-@click.option(
-    "-u", "--update", default="000000", help="Name of the data release update."
-)
-@click.option(
-    "-d",
-    "--dataset",
-    default="ICOADS_R3.0.2T",
-    help="Name of the data release dataset.",
-)
-@click.option(
-    "-c",
-    "--corrections_version",
-    default="",
-    help="Name of the NOC corrections version.",
-)
-@click.option("-submit", "--submit_jobs", is_flag=True, help="Submit job scripts")
 def QcCli(
     machine,
     release,

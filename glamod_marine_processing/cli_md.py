@@ -11,46 +11,22 @@ import os
 
 import click
 
-from .utilities import (
-    CONTEXT_SETTINGS,
-    get_base_path,
-    get_configuration,
-    load_json,
-    mkdir,
-    save_json,
-)
+from .cli import CONTEXT_SETTINGS, add_options
+from .utilities import get_base_path, get_configuration, load_json, mkdir, save_json
 
 
 @click.command(context_settings=CONTEXT_SETTINGS)
-@click.option(
-    "-m",
-    "--machine",
-    default="MELUXINA",
-    help="""HPC cluster where to create and run the scripts,
-    * KAY: kay.ichec.ie \n
-    * MELUXINA: login.lxp.lu \n
-    * default: MELUXINA
-    """,
+@add_options(
+    [
+        "machine",
+        "release",
+        "previous_release",
+        "split_files",
+        "merge_countries",
+        "extract_for_cds",
+        "submit_jobs",
+    ]
 )
-@click.option(
-    "-r", "--release", default="release_7.0", help="Name of the data release."
-)
-@click.option(
-    "-pr",
-    "--previous_release",
-    default="release_6.0",
-    help="Name of the previous data release.",
-)
-@click.option(
-    "-split", "--split_files", is_flag=True, help="Step 1: Splitting PUB47 data files."
-)
-@click.option(
-    "-merge", "--merge_countries", is_flag=True, help="Step 2: Merge countries."
-)
-@click.option(
-    "-extract", "--extract_for_cds", is_flag=True, help="Step 3: Extract for CDS"
-)
-@click.option("-submit", "--submit_jobs", is_flag=True, help="Submit job scripts")
 def MdataCli(
     machine,
     release,
