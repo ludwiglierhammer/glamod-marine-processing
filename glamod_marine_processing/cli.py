@@ -1,9 +1,11 @@
+from __future__ import annotations
+
 import click
 
 CONTEXT_SETTINGS = dict(help_option_names=["-h", "--help"])
 
-def add_options(*options):
 
+def add_options(*options):
     def _add_options(func):
         for option in reversed(*options):
             option = getattr(Options, option)
@@ -12,8 +14,8 @@ def add_options(*options):
 
     return _add_options
 
-class Options:
 
+class Options:
     def __init__(self):
         self.machine = click.option(
             "-m",
@@ -25,11 +27,11 @@ class Options:
             * default: MELUXINA
             """,
         )
-        
+
         self.submit_jobs = click.option(
             "-submit", "--submit_jobs", is_flag=True, help="Submit job scripts"
         )
-    
+
         self.level = click.option(
             "-l",
             "--level",
@@ -45,7 +47,7 @@ class Options:
             """,
         )
 
-        self.release =  click.option(
+        self.release = click.option(
             "-r", "--release", default="release_7.0", help="Name of the data release."
         )
 
@@ -58,22 +60,28 @@ class Options:
             "--dataset",
             default="ICOADS_R3.0.2T",
             help="Name of the data release dataset.",
-        )   
+        )
         self.previous_release = click.option(
             "-pr",
             "--previous_release",
             default="release_6.0",
             help="Name of the previous data release.",
         )
-        
+
         self.split_files = click.option(
-            "-split", "--split_files", is_flag=True, help="Step 1: Splitting PUB47 data files."
+            "-split",
+            "--split_files",
+            is_flag=True,
+            help="Step 1: Splitting PUB47 data files.",
         )
         self.merge_countries = click.option(
             "-merge", "--merge_countries", is_flag=True, help="Step 2: Merge countries."
         )
         self.extract_for_cds = click.option(
-            "-extract", "--extract_for_cds", is_flag=True, help="Step 3: Extract for CDS"
+            "-extract",
+            "--extract_for_cds",
+            is_flag=True,
+            help="Step 3: Extract for CDS",
         )
 
         self.corrections_version = click.option(
@@ -82,5 +90,6 @@ class Options:
             default="",
             help="Name of the NOC corrections version.",
         )
+
 
 Options = Options()
