@@ -10,6 +10,8 @@ import os
 import subprocess
 import sys
 
+from glamod_marine_processing.utilities import load_json
+
 # %%------------------------------------------------------------------------------
 
 
@@ -51,26 +53,22 @@ TI = "06:00:00"  #'12:00:00'
 TasksPN = 3
 # %%------------------------------------------------------------------------------
 
-configfile = os.path.abspath(sys.argv[1])
-
+configfile = sys.argv[1]
+if not os.path.isfile(configfile):
+    sys.exit(f"Configuration file not found at: {configfile}")
+script_config = load_json(configfile)
 
 # all including path
-scripts_directory = os.getenv("scripts_directory")
-config_directory = os.getenv("config_directory")
-logdir = os.getenv("qc_log_directory")
-# logdir='/ichec/work/glamod/glamod-marine-processing.2022/working/qc-suite/release_6.0/logs_qc'
-
-
+scripts_directory = script_config["paths"]["scripts_directory"]
+config_directory = script_config["paths"]["config_directory"]
+logdir = script_config["paths"]["qc_log_directory"]
 pyscript = os.path.join(scripts_directory, SCRIPTFN)
 jobsfile = os.path.join(config_directory, JOBSFN)
-# configfile = os.path.join(config_directory, CONFIGFN)
 
 if not os.path.isfile(pyscript):
     sys.exit(f"Python script not found at: {pyscript}")
 if not os.path.isfile(jobsfile):
     sys.exit(f"Jobs file not found at: {jobsfile}")
-if not os.path.isfile(configfile):
-    sys.exit(f"Configuration file not found at: {configfile}")
 if not os.path.isdir(logdir):
     sys.exit(f"Log directory not found at: {logdir}")
 
@@ -126,6 +124,11 @@ with open(slurmfile, "w") as fh:
     fh.writelines(f"export TASKFARM_PPN={TasksPN}\n")
     fh.writelines(f"taskfarm {taskfile}\n")
 
-logging.info(f"{taskfile}: launching taskfarm")
-process = f"jid=$(sbatch {slurmfile}) && echo $jid"
-jid = launch_process(process)
+    if script_config["submit_jobs"] is True:
+        logging.info(f"{taskfile}: launching taskfarm")
+        process = f"jid=$(sbatch {slurmfile}) && echo $jid"
+        logging.info(f"process launching: {process}")
+        jid = launch_process(process)
+    else:
+        logging.info(f"{taskfile}: create script")
+        logging.info(f"Script {slurmfile} was created.")
