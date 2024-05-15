@@ -8,7 +8,7 @@ from __future__ import annotations
 
 import click
 
-CONTEXT_SETTINGS = dict(help_option_names=["-h", "--help"])
+CONTEXT_SETTINGS = dict(help_option_names=["-h", "--help"], show_default=True)
 
 
 def add_options():
@@ -37,10 +37,9 @@ class Options:
             "-m",
             "--machine",
             default="MELUXINA",
-            help="""HPC cluster where to create and run the scripts,
+            help="""HPC cluster where to create and run the scripts, \n
             * KAY: kay.ichec.ie \n
-            * MELUXINA: login.lxp.lu \n
-            * default: MELUXINA
+            * MELUXINA: login.lxp.lu
             """,
         )
         self.submit_jobs = click.option(
@@ -96,7 +95,7 @@ class Options:
         self.corrections_version = click.option(
             "-c",
             "--corrections_version",
-            default="",
+            default="v1x2023",
             help="Name of the NOC corrections version.",
         )
 
