@@ -61,7 +61,7 @@ import json
 import logging
 import os
 import sys
-from imp import reload
+from importlib import reload
 from io import StringIO
 
 import numpy as np
@@ -337,7 +337,7 @@ for col in masked_columns:
             in cdm.properties.numeric_types
         ):
             values = io_dict["invalid"][k]["values"]
-            values = np.array(values)[~np.isnan(np.array(values))]
+            values = np.array(values)[~pd.isnull(values)]
             if len(values > 0):
                 [counts, edges] = np.histogram(values)
                 # Following binning approach only if at most 1 sign digit!
