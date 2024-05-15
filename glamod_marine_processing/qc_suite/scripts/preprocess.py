@@ -217,8 +217,8 @@ if 1:
                     # reset IRF as in imma before cdm
                     loc0 = data_dl.IRF != 1
                     loc1 = data_dl.IRF == 1
-                    data_dl.IRF.loc[loc0] = 1
-                    data_dl.IRF.loc[loc1] = 0
+                    data_dl.loc[loc0].IRF = 1
+                    data_dl.loc[loc1].IRF = 0
                     data_dl = data_dl.set_index("UID")
                 # %%from obsevations_at 'AT',
                 fn = os.path.join(
@@ -855,7 +855,6 @@ if 1:
                 )
                 # Need to replace NaNs in dup_flag column with 4s
                 data_dl[["dup_flag"]] = data_dl[["dup_flag"]].fillna("4")
-                # print(data_dl['PT'] == '7')
                 # For drifters we need to repalce dup with the IRF flag
 
                 data_dl.loc[
@@ -888,46 +887,47 @@ if 1:
                 data = pd.concat([data, data_dl])
                 print([(len(data_dl.index)), len(data.index)])
 
-            # print(data.head())
             data.reset_index(inplace=True)
-            print("Writing file")
-            # print(data.head())
-            data = data.sort_values(
-                ["YR", "MO", "DY", "HR", "UID"], axis=0, ascending=True
-            )
-            data = data.reindex(
-                columns=[
-                    "YR",
-                    "MO",
-                    "DY",
-                    "HR",
-                    "LAT",
-                    "LON",
-                    "DS",
-                    "VS",
-                    "ID",
-                    "AT",
-                    "SST",
-                    "DPT",
-                    "DCK",
-                    "SLP",
-                    "SID",
-                    "PT",
-                    "UID",
-                    "W",
-                    "D",
-                    "IRF",
-                    "bad_data",
-                    "outfile",
-                ]
-            )
-            data.to_csv(
-                out_dir + f"{yr:04d}-{mo:02d}.psv",
-                sep="|",
-                header=False,
-                index=False,
-                compression="infer",
-            )
+            if data.empty:
+                print("All dataframes are empty")
+            else:
+                print("Writing file")
+                data = data.sort_values(
+                    ["YR", "MO", "DY", "HR", "UID"], axis=0, ascending=True
+                )
+                data = data.reindex(
+                    columns=[
+                        "YR",
+                        "MO",
+                        "DY",
+                        "HR",
+                        "LAT",
+                        "LON",
+                        "DS",
+                        "VS",
+                        "ID",
+                        "AT",
+                        "SST",
+                        "DPT",
+                        "DCK",
+                        "SLP",
+                        "SID",
+                        "PT",
+                        "UID",
+                        "W",
+                        "D",
+                        "IRF",
+                        "bad_data",
+                        "outfile",
+                    ]
+                )
+                data.to_csv(
+                    out_dir + f"{yr:04d}-{mo:02d}.psv",
+                    sep="|",
+                    header=False,
+                    index=False,
+                    compression="infer",
+                )
 
 # if __name__ == '__main__':
 #    main(sys.argv[1:])
