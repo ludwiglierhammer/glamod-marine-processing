@@ -3,8 +3,9 @@
 from __future__ import annotations
 
 import numpy as np
-import qc
 from netCDF4 import Dataset
+
+from . import qc
 
 
 class Climatology:

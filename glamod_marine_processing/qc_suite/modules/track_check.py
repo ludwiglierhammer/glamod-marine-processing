@@ -11,9 +11,9 @@ from __future__ import annotations
 
 import math
 
-import Extended_IMMA as ex
-import qc
-import spherical_geometry as sph
+from . import Extended_IMMA as ex
+from . import qc
+from . import spherical_geometry as sph
 
 
 def modesp(awork):

@@ -13,12 +13,12 @@ from __future__ import annotations
 import math
 from datetime import datetime
 
-import CalcHums
 import numpy as np
-import qc
-import spherical_geometry as sph
-import track_check as tc
-import trackqc as tqc
+
+from . import CalcHums, qc
+from . import spherical_geometry as sph
+from . import track_check as tc
+from . import trackqc as tqc
 
 VARLIST = [
     "YR",
@@ -3439,7 +3439,8 @@ class Deck:
             ["W"],
             ["D"],
         ]
-
+        if len(self.reps) == 0:
+            return
         outfile.write(self.reps[0].print_variable_block(varnames, header=True))
         for rep in self.reps:
             if rep.getvar("YR") == year and rep.getvar("MO") == month:

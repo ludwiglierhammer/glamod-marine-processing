@@ -2,10 +2,11 @@
 
 from __future__ import annotations
 
+import numpy as np
 import pandas as pd
 
 imiss = -99999
-fmiss = pd.np.nan
+fmiss = np.nan
 cmiss = "__EMPTY"
 tmiss = pd.NaT
 

@@ -5,10 +5,11 @@ from __future__ import annotations
 import copy
 import math
 
-import Extended_IMMA as ex
 import numpy as np
-from qc import dayinyear, sunangle
-from spherical_geometry import sphere_distance
+
+from . import Extended_IMMA as ex
+from .qc import dayinyear, sunangle
+from .spherical_geometry import sphere_distance
 
 """
 The trackqc module contains a set of functions for performing the tracking QC

@@ -12,8 +12,6 @@ from datetime import datetime, timedelta
 
 import numpy as np
 
-from .Extended_IMMA import MarineReport
-
 # Conversion factor between degrees and radians
 degrad = np.pi / 180.0
 
@@ -1470,11 +1468,11 @@ def sunangle(year, day, hour, minute, sec, zone, dasvtm, lat, lon):
     time = leap_year_correction(time_in_hours, day, delyear)
     # Get sun parameters
     right_ascension, declination = calculate_sun_parameters(time)
-    local_siderial_time = to_local_siderial_time()
+    local_siderial_time = to_local_siderial_time(time, time_in_hours, delyear, lon)
     # Hour Angle
     hour_angle = sun_hour_angle(local_siderial_time, right_ascension)
     # Geometric elevation and sun azimuth
-    azimuth, elevation = azimuth_elevation()
+    azimuth, elevation = azimuth_elevation(lat, declination, hour_angle)
 
     elevation = elevation / degrad  # Convert elevation to degrees
     declination = declination / degrad  # Convert declination to degrees
@@ -2003,49 +2001,6 @@ def get_month_lengths(year):
         month_lengths = [31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31]
 
     return month_lengths
-
-
-def imma1_record_to_marine_rep(x, climsst, climnmat):
-    """
-    Given a database cursor and an IMMA report it will populate the appropriate table in the data base.
-
-    :param x: IMMA report to be added to the data base
-    :param climsst: SST climatology
-    :param climnmat: NMAT climatology
-    :type x: IMMA report
-    :type climsst: numpy array
-    :type climnmat: numpy array
-
-    A feature of the current version is that, in line with MDS3 and earlier, the hour defaults to zero UTC when
-    hour is missing from the report.
-    """
-    rep = MarineReport.report_from_imma(x)
-
-    # Deck 201 GMT midnights are assigned to the wrong day, see Carella, Kent, Berry 2015 Appendix A3
-    if rep.dck == 201 and rep.year < 1899 and rep.hour == 0:
-        rep.shift_day(-1)
-
-    # Deck 701 prior to 1857ish has lots of obs with no hour set
-    if rep.dck == 701 and rep.year < 1860 and rep.hour is None:
-        rep.hour = 12.0
-
-    try:
-        sst_climav = get_sst(rep.lat, rep.lon, rep.month, rep.day, climsst)
-    except Exception:
-        sst_climav = None
-    if sst_climav is not None:
-        sst_climav = float(sst_climav)
-
-    try:
-        mat_climav = get_sst(rep.lat, rep.lon, rep.month, rep.day, climnmat)
-    except Exception:
-        mat_climav = None
-    if mat_climav is not None:
-        mat_climav = float(mat_climav)
-
-    rep.setnorm(sst_climav, mat_climav)
-
-    return rep
 
 
 def base_qc_report(rep):

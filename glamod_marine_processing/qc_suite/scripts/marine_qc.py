@@ -11,25 +11,22 @@ from __future__ import annotations
 
 # external py modules
 import argparse
-import configparser
 import json
 import logging
+import os
 import sys
 from datetime import datetime
 
-import BackgroundField as bf
-import Climatology as clim
-import Extended_IMMA_sb as ex
 import pandas as pd
 
-# modules from MOQC suite
-import qc
-from IMMA1 import IMMA
+from glamod_marine_processing.qc_suite.modules import IMMA1
+from glamod_marine_processing.qc_suite.modules import BackgroundField as bf
+from glamod_marine_processing.qc_suite.modules import Climatology as clim
+from glamod_marine_processing.qc_suite.modules import Extended_IMMA_sb as ex
+from glamod_marine_processing.qc_suite.modules import noc_auxiliary, qc
+from glamod_marine_processing.utilities import load_json
 
-from .modules.noc_auxiliary import to_none
 
-
-# reload(logging)
 def read_icoads_file(
     year, month, icoads_dir, ids_to_exclude, tracking, parameters, climlib, config
 ):
@@ -61,12 +58,16 @@ def read_icoads_file(
         ostia_bg_var = None
         if tracking:
             ostia_bg_var = clim.Climatology.from_filename(
-                config.get("Climatologies", qc.season(readmonth) + "_ostia_background"),
+                config.get("Climatologies").get(
+                    qc.season(readmonth) + "_ostia_background"
+                ),
                 "bg_var",
             )
 
         filename = icoads_dir + f"{readyear:4d}-{readmonth:02d}.psv"
-
+        if not os.path.isfile(filename):
+            logging.warning(f"File not available: {filename}.")
+            continue
         imma_obj = pd.read_csv(
             filename,
             sep="|",
@@ -107,7 +108,7 @@ def read_icoads_file(
 
         data_index = imma_obj.index
 
-        rec = IMMA()
+        rec = IMMA1.IMMA()
         logging.info(
             "INFO({}): Data read, applying first QC".format(
                 datetime.now().time().isoformat(timespec="milliseconds")
@@ -117,7 +118,7 @@ def read_icoads_file(
         for idx in data_index:
             # set missing values to None
             for k, v in imma_obj.loc[idx,].to_dict().items():
-                rec.data[k] = to_none(v)
+                rec.data[k] = noc_auxiliary.to_none(v)
             readob = True
             if (
                 rec.data["ID"] not in ids_to_exclude
@@ -213,7 +214,7 @@ def read_icoads_file(
                 reps.append(rep)
                 count += 1
 
-            rec = IMMA()
+            rec = IMMA1.IMMA()
             dyb_count += 1
             if dyb_count % 1000 == 0:
                 logging.info(
@@ -284,38 +285,39 @@ def main(argv):
     logging.info(f"Running from {month1} {year1} to {month2} {year2}")
     logging.info("")
 
-    config = configparser.ConfigParser()
-    config.read(inputfile)
-    icoads_dir = config.get("Directories", "ICOADS_dir")
-    out_dir = config.get("Directories", "out_dir")
-    bad_id_file = config.get("Files", "IDs_to_exclude")
-    version = config.get("Icoads", "icoads_version")
+    config = load_json(inputfile)
+    icoads_dir = config.get("Directories").get("ICOADS_dir")
+    out_dir = config.get("Directories").get("out_dir")
+    bad_id_file = config.get("Files").get("IDs_to_exclude")
+    version = config.get("Icoads").get("icoads_version")
 
     logging.info(f"ICOADS directory = {icoads_dir}")
     logging.info(f"ICOADS version = {version}")
     logging.info(f"Output to {out_dir}")
     logging.info(f"List of bad IDs = {bad_id_file}")
-    logging.info("Parameter file = {}".format(config.get("Files", "parameter_file")))
+    logging.info(
+        "Parameter file = {}".format(config.get("Files").get("parameter_file"))
+    )
     logging.info("")
 
     ids_to_exclude = bf.process_bad_id_file(bad_id_file)
 
     # read in climatology files
     sst_pentad_stdev = clim.Climatology.from_filename(
-        config.get("Climatologies", "Old_SST_stdev_climatology"), "sst"
+        config.get("Climatologies").get("Old_SST_stdev_climatology"), "sst"
     )
 
     sst_stdev_1 = clim.Climatology.from_filename(
-        config.get("Climatologies", "SST_buddy_one_box_to_buddy_avg"), "sst"
+        config.get("Climatologies").get("SST_buddy_one_box_to_buddy_avg"), "sst"
     )
     sst_stdev_2 = clim.Climatology.from_filename(
-        config.get("Climatologies", "SST_buddy_one_ob_to_box_avg"), "sst"
+        config.get("Climatologies").get("SST_buddy_one_ob_to_box_avg"), "sst"
     )
     sst_stdev_3 = clim.Climatology.from_filename(
-        config.get("Climatologies", "SST_buddy_avg_sampling"), "sst"
+        config.get("Climatologies").get("SST_buddy_avg_sampling"), "sst"
     )
 
-    with open(config.get("Files", "parameter_file")) as f:
+    with open(config.get("Files").get("parameter_file")) as f:
         parameters = json.load(f)
 
     logging.info("Reading climatologies from parameter file")

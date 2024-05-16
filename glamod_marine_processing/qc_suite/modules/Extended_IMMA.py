@@ -13,12 +13,12 @@ from __future__ import annotations
 import math
 from datetime import datetime
 
-import CalcHums
 import numpy as np
-import qc
-import spherical_geometry as sph
-import track_check as tc
-import trackqc as tqc
+
+from . import CalcHums, qc
+from . import spherical_geometry as sph
+from . import track_check as tc
+from . import trackqc as tqc
 
 VARLIST = [
     "YR",
@@ -165,6 +165,49 @@ def get_threshold_multiplier(total_nobs, nob_limits, multiplier_values):
     assert multiplier > 0, "output multiplier less than or equal to zero "
 
     return multiplier
+
+
+def imma1_record_to_marine_rep(x, climsst, climnmat):
+    """
+    Given a database cursor and an IMMA report it will populate the appropriate table in the data base.
+
+    :param x: IMMA report to be added to the data base
+    :param climsst: SST climatology
+    :param climnmat: NMAT climatology
+    :type x: IMMA report
+    :type climsst: numpy array
+    :type climnmat: numpy array
+
+    A feature of the current version is that, in line with MDS3 and earlier, the hour defaults to zero UTC when
+    hour is missing from the report.
+    """
+    rep = MarineReport.report_from_imma(x)
+
+    # Deck 201 GMT midnights are assigned to the wrong day, see Carella, Kent, Berry 2015 Appendix A3
+    if rep.dck == 201 and rep.year < 1899 and rep.hour == 0:
+        rep.shift_day(-1)
+
+    # Deck 701 prior to 1857ish has lots of obs with no hour set
+    if rep.dck == 701 and rep.year < 1860 and rep.hour is None:
+        rep.hour = 12.0
+
+    try:
+        sst_climav = qc.get_sst(rep.lat, rep.lon, rep.month, rep.day, climsst)
+    except Exception:
+        sst_climav = None
+    if sst_climav is not None:
+        sst_climav = float(sst_climav)
+
+    try:
+        mat_climav = qc.get_sst(rep.lat, rep.lon, rep.month, rep.day, climnmat)
+    except Exception:
+        mat_climav = None
+    if mat_climav is not None:
+        mat_climav = float(mat_climav)
+
+    rep.setnorm(sst_climav, mat_climav)
+
+    return rep
 
 
 class MultivariableClimatology:
