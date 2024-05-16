@@ -8,7 +8,7 @@ import subprocess
 import sys
 
 from glamod_marine_processing.qc_suite.lotus_scripts import parser, slurm_preferences
-from glamod_marine_processing.utilities import load_json
+from glamod_marine_processing.utilities import load_json, read_txt
 
 # %%------------------------------------------------------------------------------
 
@@ -53,9 +53,11 @@ configfile = os.path.abspath(sys.argv[1])
 if not os.path.isfile(configfile):
     sys.exit(f"Configuration file not found at: {configfile}")
 script_config = load_json(configfile)
+machine = script_config["machine"]
 
 # all including path
 scripts_directory = script_config["paths"]["scripts_directory"]
+lotus_script_directory = script_config["paths"]["lotus_scripts_directory"]
 config_directory = script_config["paths"]["config_directory"]
 logdir = slurm_preferences.logdir[mode]
 logdir = script_config["paths"][logdir]
@@ -99,18 +101,15 @@ with open(taskfile, "w") as fn:
             )
         )
 
+header = read_txt(
+    os.path.join(lotus_script_directory, "header", f"slurm_header_{machine}.txt")
+)
+
 with open(slurmfile, "w") as fh:
-    fh.writelines("#!/bin/bash\n")
-    fh.writelines(f"#SBATCH --job-name={mode}.job\n")
-    fh.writelines(f"#SBATCH --output={logdir}/%a.out\n")
-    fh.writelines(f"#SBATCH --error={logdir}/%a.err\n")
-    fh.writelines(f"#SBATCH --time={TI}\n")
-    fh.writelines(f"#SBATCH --nodes={NODES}\n")
-    # fh.writelines('#SBATCH --mem={}\n'.format(MEM))
-    fh.writelines("#SBATCH -A glamod\n")
-    fh.writelines("module load taskfarm\n")
-    fh.writelines(f"export TASKFARM_PPN={TasksPN}\n")
-    fh.writelines(f"taskfarm {taskfile}\n")
+    for line in header:
+        line = eval(line)
+        line = f"{line}\n"
+        fh.writelines(line)
 
 if script_config["submit_jobs"] is True:
     logging.info(f"{taskfile}: launching taskfarm")

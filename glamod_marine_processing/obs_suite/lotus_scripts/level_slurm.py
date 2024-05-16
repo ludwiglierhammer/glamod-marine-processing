@@ -190,7 +190,7 @@ for sid_dck in process_list:
                 )
             )
 
-    header = read_txt(os.path.join(lotus_dir, "header", f"slurm_header_{MACHINE}.py"))
+    header = read_txt(os.path.join(lotus_dir, "header", f"slurm_header_{MACHINE}.txt"))
 
     with open(job_file, "w") as fh:
         for line in header:

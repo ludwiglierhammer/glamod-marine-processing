@@ -143,6 +143,7 @@ def QcCli(
         key="TestFiles",
     )
 
+    config["machine"] = machine
     config["submit_jobs"] = submit_jobs
 
     current_time = datetime.datetime.now()
