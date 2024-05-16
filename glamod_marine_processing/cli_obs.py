@@ -31,6 +31,8 @@ def ObsCli(
     release,
     update,
     dataset,
+    data_directory,
+    work_directory,
     submit_jobs,
 ):
     """Enry point for the obs_suite command line interface."""
@@ -42,6 +44,10 @@ def ObsCli(
         "dataset": dataset,
         "release_tag": release_update,
     }
+    if data_directory is not None:
+        config["paths"]["data_directory"] = data_directory
+    if work_directory is not None:
+        config["paths"]["glamod"] = work_directory
 
     home_directory = get_base_path()
     data_directory = config["paths"]["data_directory"]

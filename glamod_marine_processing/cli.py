@@ -77,6 +77,16 @@ class Options:
             default="release_6.0",
             help="Name of the previous data release.",
         )
+        self.data_directory = click.option(
+            "-data_dir",
+            "--data_directory",
+            help="Directory path of the input and output datasets. By default, take directory path from machine-depending configuration file."        
+        )    
+        self.work_directory = click.option(
+            "-work_dir",
+            "--work_directory",
+            help="Directory path of the log and template files. By default, take directory path from machine-depending configuration file."        
+        )             
         self.split_files = click.option(
             "-split",
             "--split_files",
@@ -98,6 +108,5 @@ class Options:
             default="v1x2023",
             help="Name of the NOC corrections version.",
         )
-
 
 Options = Options()
