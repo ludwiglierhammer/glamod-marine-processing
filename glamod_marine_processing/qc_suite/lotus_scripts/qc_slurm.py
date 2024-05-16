@@ -1,8 +1,5 @@
 """Quality control SLURM module."""
 
-# make sure setenv0.sh is sourced before
-# about 5h per data month (tested in 2021), 4 jobs per node (ca. 40Gb ram per job)
-
 from __future__ import annotations
 
 import logging
@@ -10,6 +7,7 @@ import os
 import subprocess
 import sys
 
+from glamod_marine_processing.qc_suite.lotus_scripts import parser, slurm_preferences
 from glamod_marine_processing.utilities import load_json
 
 # %%------------------------------------------------------------------------------
@@ -41,19 +39,17 @@ logging.basicConfig(
 
 # %%------------------------------------------------------------------------------
 
-SCRIPTFN = "marine_qc.py"
+mode = parser.get_parser_args().mode
+scriptfn = slurm_preferences.scriptfn[mode]
 JOBSFN = "jobs2.json"
-# CONFIGFN = 'configuration_r3.0.2.txt'
-# CONFIGFN = 'config_r3.0.2_release_6.0.txt'
 
-NODES = 2  # 3
-TI = "06:00:00"  #'12:00:00'
-# MEM = 191999       #64000
-# memory request replaced by limiting tasks per node to 4
-TasksPN = 3
+NODES = slurm_preferences.nodesi[mode]
+TI = slurm_preferences.ti[mode]
+TasksPN = slurm_preferences.TaskPNi[mode]
+
 # %%------------------------------------------------------------------------------
 
-configfile = sys.argv[1]
+configfile = os.path.abspath(sys.argv[1])
 if not os.path.isfile(configfile):
     sys.exit(f"Configuration file not found at: {configfile}")
 script_config = load_json(configfile)
@@ -61,8 +57,9 @@ script_config = load_json(configfile)
 # all including path
 scripts_directory = script_config["paths"]["scripts_directory"]
 config_directory = script_config["paths"]["config_directory"]
-logdir = script_config["paths"]["qc_log_directory"]
-pyscript = os.path.join(scripts_directory, SCRIPTFN)
+logdir = slurm_preferences.logdir[mode]
+logdir = script_config["paths"][logdir]
+pyscript = os.path.join(scripts_directory, scriptfn)
 jobsfile = os.path.join(config_directory, JOBSFN)
 
 if not os.path.isfile(pyscript):
@@ -72,30 +69,22 @@ if not os.path.isfile(jobsfile):
 if not os.path.isdir(logdir):
     sys.exit(f"Log directory not found at: {logdir}")
 
-
 # %%------------------------------------------------------------------------------
 
+job_ids = list(range(85, 97))
 
-# source ../setenv0.sh
+taskfile = os.path.join(logdir, slurm_preferences.taskfile[mode])
+slurmfile = os.path.join(logdir, slurm_preferences.slurmfile[mode])
 
-# job_ids = list(range(73,85))#2021
-job_ids = list(range(85, 97))  # 2022
-
-
-taskfile = os.path.join(logdir, "qc.tasks")
-slurmfile = os.path.join(logdir, "qc.slurm")
 jobs_torun = []
-
 for job_id in job_ids:
     if os.path.isfile(os.path.join(logdir, f"{job_id}.success")):
         logging.info(
-            "Job {0} previously successful, job not rerun. Remove file '{0}.success' to force rerun.".format(
-                job_id
-            )
+            f"Job {job_id} previously successful, job not rerun. Remove file 'i.success' to force rerun."
         )
+        job_ids.remove(job_id)
     else:
         jobs_torun.append(job_id)
-
 
 with open(taskfile, "w") as fn:
     for job_id in jobs_torun:
@@ -104,16 +93,15 @@ with open(taskfile, "w") as fn:
             os.remove(os.path.join(logdir, f"{job_id}.failure"))
 
         fn.writelines(
-            "python3 {0} -jobs {1} -job_index {2} -config {3} -tracking > {4}/{2}.out 2> {4}/{2}.err; if [ $? -eq 0 ];"
-            " then touch {4}/{2}.success; else touch {4}/{2}.failure; fi \n".format(
+            "python3 {0} -jobs {1} -job_index {2} -config {3} -tracking > {4}/{2}.out 2> {4}/{2}.err;"
+            " if [ $? -eq 0 ]; then touch {4}/{2}.success; else touch {4}/{2}.failure; fi \n".format(
                 pyscript, jobsfile, job_id, configfile, logdir
             )
         )
 
-
 with open(slurmfile, "w") as fh:
     fh.writelines("#!/bin/bash\n")
-    fh.writelines("#SBATCH --job-name=qc.job\n")
+    fh.writelines(f"#SBATCH --job-name={mode}.job\n")
     fh.writelines(f"#SBATCH --output={logdir}/%a.out\n")
     fh.writelines(f"#SBATCH --error={logdir}/%a.err\n")
     fh.writelines(f"#SBATCH --time={TI}\n")
@@ -124,11 +112,11 @@ with open(slurmfile, "w") as fh:
     fh.writelines(f"export TASKFARM_PPN={TasksPN}\n")
     fh.writelines(f"taskfarm {taskfile}\n")
 
-    if script_config["submit_jobs"] is True:
-        logging.info(f"{taskfile}: launching taskfarm")
-        process = f"jid=$(sbatch {slurmfile}) && echo $jid"
-        logging.info(f"process launching: {process}")
-        jid = launch_process(process)
-    else:
-        logging.info(f"{taskfile}: create script")
-        logging.info(f"Script {slurmfile} was created.")
+if script_config["submit_jobs"] is True:
+    logging.info(f"{taskfile}: launching taskfarm")
+    process = f"jid=$(sbatch {slurmfile}) && echo $jid"
+    logging.info(f"process launching: {process}")
+    jid = launch_process(process)
+else:
+    logging.info(f"{taskfile}: create script")
+    logging.info(f"Script {slurmfile} was created.")

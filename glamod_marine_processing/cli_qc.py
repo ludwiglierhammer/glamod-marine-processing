@@ -183,6 +183,5 @@ def QcCli(
     slurm_script = os.path.join(lotus_scripts_directory, slurm_script)
     os.system(f"python {slurm_script} {qc_config}")
 
-    slurm_script = "qc_hr_slurm.py"
     slurm_script = os.path.join(lotus_scripts_directory, slurm_script)
-    os.system(f"python {slurm_script} {qc_config}")
+    os.system(f"python {slurm_script} {qc_config} --hr")
