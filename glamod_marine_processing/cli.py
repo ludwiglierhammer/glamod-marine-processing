@@ -10,7 +10,14 @@ import os
 
 import click
 
-from .utilities import make_release_source_tree
+from .utilities import (
+    add_to_config,
+    get_base_path,
+    get_configuration,
+    load_json,
+    make_release_source_tree,
+    mkdir,
+)
 
 CONTEXT_SETTINGS = dict(help_option_names=["-h", "--help"], show_default=True)
 
@@ -19,7 +26,8 @@ def add_options():
     """Add decorator click options."""
 
     def _get_parameters(func):
-        return func.__code__.co_varnames
+        argcount = func.__code__.co_argcount
+        return func.__code__.co_varnames[:argcount]
 
     def _add_options(func):
         options = _get_parameters(func)
@@ -36,25 +44,91 @@ def add_options():
 class Cli:
     """Skeleton command line interface class."""
 
-    def __init__(self, config):
-        self.config = config
+    def __init__(
+        self,
+        machine,
+        level,
+        release,
+        update,
+        dataset,
+        data_directory,
+        work_directory,
+        config_file,
+        suite,
+    ):
+        self.machine = machine
+        self.level = level
+        self.release = release
+        self.update = update
+        self.dataset = dataset
+        self.data_directory = data_directory
+        self.work_directory = work_directory
+        self.config_file = config_file
+        self.suite = suite
+        self.release_update = f"{release}-{update}"
 
     def initialize(self):
         """Initialize command line interface settings."""
-        self.make_release_source_tree()
-        if self.config is False:
-            self.config = self.build_configuration_file()
-        elif not os.path.isfile(self.config):
-            raise FileNotFoundError
-        return self.config
+        if not self.config_file:
+            # config = get_configuration(self.machine)
+            config = self.build_configuration()
+        elif not os.path.isfile(self.config_file):
+            raise FileNotFoundError(config)
+        else:
+            config = load_json(self.config_file)
 
-    def make_release_source_tree(self):
-        """Make release source tree."""
-        make_release_source_tree()
+        make_release_source_tree(
+            data_path=config["paths"]["data_directory"],
+            config_path=config["paths"]["config_directory"],
+            release=self.release,
+            update=self.update,
+            dataset=self.dataset,
+            level=self.level,
+        )
+        mkdir(config["paths"]["release_directory"])
+        return config
 
-    def build_configuration_file(self):
-        """Build configuration file."""
-        pass
+    def build_configuration(self):
+        """Build configuration."""
+        config = get_configuration(self.machine)
+        config["abbreviations"] = {
+            "release": self.release,
+            "update": self.update,
+            "dataset": self.dataset,
+            "release_tag": self.release_update,
+        }
+        if self.data_directory is not None:
+            config["paths"]["data_directory"] = self.data_directory
+        if self.work_directory is not None:
+            config["paths"]["glamod"] = self.work_directory
+
+        home_directory = get_base_path()
+        code_directory = os.path.join(home_directory, self.suite)
+        config_directory = os.path.join(code_directory, "configuration_files")
+        config_files_path = os.path.join(
+            config_directory, self.release, self.update, self.dataset
+        )
+        scripts_directory = os.path.join(code_directory, "scripts")
+        lotus_scripts_directory = os.path.join(code_directory, "lotus_scripts")
+        work_directory = os.path.abspath(config["paths"]["glamod"])
+        scratch_directory = os.path.join(work_directory, os.getlogin())
+        release_directory = os.path.join(
+            scratch_directory, self.release, self.dataset, self.level
+        )
+
+        config = add_to_config(
+            config,
+            home_directory=home_directory,
+            code_directory=code_directory,
+            config_directory=config_directory,
+            config_files_path=config_files_path,
+            scripts_directory=scripts_directory,
+            lotus_scripts_directory=lotus_scripts_directory,
+            scratch_directory=scratch_directory,
+            release_directory=release_directory,
+            key="paths",
+        )
+        return config
 
 
 class Options:

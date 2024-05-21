@@ -11,7 +11,7 @@ import os
 
 import click
 
-from .cli import CONTEXT_SETTINGS, add_options
+from .cli import Cli, CONTEXT_SETTINGS, add_options
 from .utilities import get_base_path, get_configuration, load_json, mkdir, save_json
 
 
@@ -24,6 +24,9 @@ def MdataCli(
     split_files,
     merge_countries,
     extract_for_cds,
+    data_directory,
+    work_directory,
+    config_file,
     submit_jobs,
 ):
     """Enry point for the metadata_suite command line interface."""
@@ -38,8 +41,18 @@ def MdataCli(
         else:
             os.system(f"bash {bash_command}")
 
-    config = get_configuration(machine)
-
+    config = Cli(
+        machine=machine,
+        level="",
+        release=release,
+        update="",
+        dataset="",
+        data_directory=data_directory,
+        work_directory=work_directory,
+        config_file=config_file,
+        suite="metadata_suite",
+    ).initialize()
+    return
     home_directory = get_base_path()
     data_directory = config["paths"]["data_directory"]
     code_directory = os.path.join(home_directory, "metadata_suite")
@@ -48,6 +61,8 @@ def MdataCli(
     lotus_scripts_directory = os.path.join(code_directory, "lotus_scripts")
     work_directory = os.path.abspath(config["paths"]["glamod"])
     scratch_directory = os.path.join(work_directory, os.getlogin())
+    
+    
     release_directory = os.path.join(scratch_directory, "metadata_suite")
     log_directory = os.path.join(release_directory, "logs")
     log2_directory = os.path.join(release_directory, "logs2")

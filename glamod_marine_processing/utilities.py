@@ -28,6 +28,7 @@ level_subdirs = {
     "level1d": ["log", "quicklooks"],
     "level1e": ["log", "quicklooks", "reports"],
     "level2": ["log", "quicklooks", "excluded", "reports"],
+    "metadata_suite": ["log", "log2"],
 }
 
 
@@ -52,8 +53,9 @@ def make_release_source_tree(
     # Go --------------------------------------------------------------------------
     os.umask(0)
     # READ LIST OF SID-DCKS FOR RELEASE
-    release_tag = "-".join([release, update])
-    release_periods_file = os.path.join(config_path, release_tag, dataset, PERIODS_FILE)
+    release_periods_file = os.path.join(
+        config_path, release, update, dataset, PERIODS_FILE
+    )
     sid_dck_dict = load_json(release_periods_file)
 
     level_subdirs_ = level_subdirs[level]
@@ -63,7 +65,6 @@ def make_release_source_tree(
     release_path = os.path.join(data_path, release)
     source_path = os.path.join(release_path, dataset)
     level_subdir = os.path.join(source_path, level)
-
     for sublevel in level_subdirs_:
         create_subdir(os.path.join(level_subdir, sublevel), sid_dck_dict.keys())
 
