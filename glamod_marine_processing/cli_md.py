@@ -11,7 +11,7 @@ import os
 
 import click
 
-from .cli import Cli, CONTEXT_SETTINGS, add_options
+from .cli import CONTEXT_SETTINGS, Cli, add_options
 from .utilities import get_base_path, get_configuration, load_json, mkdir, save_json
 
 
@@ -61,8 +61,7 @@ def MdataCli(
     lotus_scripts_directory = os.path.join(code_directory, "lotus_scripts")
     work_directory = os.path.abspath(config["paths"]["glamod"])
     scratch_directory = os.path.join(work_directory, os.getlogin())
-    
-    
+
     release_directory = os.path.join(scratch_directory, "metadata_suite")
     log_directory = os.path.join(release_directory, "logs")
     log2_directory = os.path.join(release_directory, "logs2")
