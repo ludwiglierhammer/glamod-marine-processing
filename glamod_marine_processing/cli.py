@@ -6,7 +6,11 @@ Marine processing Command Line Interface
 
 from __future__ import annotations
 
+import os
+
 import click
+
+from .utilities import make_release_source_tree
 
 CONTEXT_SETTINGS = dict(help_option_names=["-h", "--help"], show_default=True)
 
@@ -27,6 +31,30 @@ def add_options():
         return func
 
     return _add_options
+
+
+class Cli:
+    """Skeleton command line interface class."""
+
+    def __init__(self, config):
+        self.config = config
+
+    def initialize(self):
+        """Initialize command line interface settings."""
+        self.make_release_source_tree()
+        if self.config is False:
+            self.config = self.build_configuration_file()
+        elif not os.path.isfile(self.config):
+            raise FileNotFoundError
+        return self.config
+
+    def make_release_source_tree(self):
+        """Make release source tree."""
+        make_release_source_tree()
+
+    def build_configuration_file(self):
+        """Build configuration file."""
+        pass
 
 
 class Options:
