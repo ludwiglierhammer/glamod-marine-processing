@@ -20,6 +20,53 @@ config_files = {
     "test": "config_test.json",
 }
 
+PERIODS_FILE = "source_deck_periods.json"
+level_subdirs = {
+    "level1a": ["log", "quicklooks", "invalid", "excluded"],
+    "level1b": ["log", "quicklooks"],
+    "level1c": ["log", "quicklooks", "invalid"],
+    "level1d": ["log", "quicklooks"],
+    "level1e": ["log", "quicklooks", "reports"],
+    "level2": ["log", "quicklooks", "excluded", "reports"],
+}
+
+
+def make_release_source_tree(
+    data_path=None,
+    config_path=None,
+    release=None,
+    update=None,
+    dataset=None,
+    level=None,
+):
+    """Make release source tree."""
+
+    # Functions -------------------------------------------------------------------
+    def create_subdir(lpath, subdir_list):
+        """Create subdirectories."""
+        subdir_list = [subdir_list] if isinstance(subdir_list, str) else subdir_list
+        for subdir in subdir_list:
+            sub_dir = os.path.join(lpath, subdir)
+            mkdir(sub_dir)
+
+    # Go --------------------------------------------------------------------------
+    os.umask(0)
+    # READ LIST OF SID-DCKS FOR RELEASE
+    release_tag = "-".join([release, update])
+    release_periods_file = os.path.join(config_path, release_tag, dataset, PERIODS_FILE)
+    sid_dck_dict = load_json(release_periods_file)
+
+    level_subdirs_ = level_subdirs[level]
+    level_subdirs_.extend(".")
+
+    # CREATE DIRS
+    release_path = os.path.join(data_path, release)
+    source_path = os.path.join(release_path, dataset)
+    level_subdir = os.path.join(source_path, level)
+
+    for sublevel in level_subdirs_:
+        create_subdir(os.path.join(level_subdir, sublevel), sid_dck_dict.keys())
+
 
 def add_to_config(config, key=None, **kwargs):
     """Add arguments to configuration file."""
@@ -82,6 +129,3 @@ def get_configuration(machine):
         )
     config_file = os.path.join(_base_path, "configuration_files", config_file)
     return load_json(config_file)
-
-
-CONTEXT_SETTINGS = dict(help_option_names=["-h", "--help"])
