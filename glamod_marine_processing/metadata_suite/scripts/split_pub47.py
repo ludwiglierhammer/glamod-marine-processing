@@ -342,7 +342,6 @@ def main(argv):
     # jobs specific options in control_file (need to rename)
 
     # load config options
-    print(config_file)
     with open(config_file) as cf:
         config = json.load(cf)
 
@@ -353,15 +352,12 @@ def main(argv):
     # parsing using pandas
 
     # global options
-    print(config)
     map_path = config["mapping_path"]
     datapath = config["data_path"]
     configpath = config["config_path"]
     verbose = config["verbose"]
     outputpath = config["output_path"]
     corrections_file = os.path.join(configpath, config["corrections_file"])
-
-    print(corrections_file)
 
     # read options from control file
     log_file = os.path.join(log_path, "split_pub47_" + args.tag + ".log")
