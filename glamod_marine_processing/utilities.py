@@ -5,6 +5,7 @@ from __future__ import annotations
 import errno
 import json
 import os
+from warnings import warn
 
 try:
     from importlib.resources import files as _files
@@ -17,7 +18,6 @@ _base = "glamod_marine_processing"
 config_files = {
     "kay": "config_kay.json",
     "meluxina": "config_meluxina.json",
-    "test": "config_test.json",
 }
 
 PERIODS_FILE = "source_deck_periods.json"
@@ -28,7 +28,6 @@ level_subdirs = {
     "level1d": ["log", "quicklooks"],
     "level1e": ["log", "quicklooks", "reports"],
     "level2": ["log", "quicklooks", "excluded", "reports"],
-    "metadata_suite": ["log", "log2"],
 }
 
 
@@ -56,6 +55,10 @@ def make_release_source_tree(
     release_periods_file = os.path.join(
         config_path, release, update, dataset, PERIODS_FILE
     )
+    if not os.path.isfile(release_periods_file):
+        warn(f"{release_periods_file} not available. Skip making release source tree.")
+        return
+
     sid_dck_dict = load_json(release_periods_file)
 
     level_subdirs_ = level_subdirs[level]
@@ -110,9 +113,14 @@ def mkdir(directory):
             raise
 
 
+def get_abs_path(path):
+    """Get absolut path."""
+    return os.path.abspath(path)
+
+
 def get_base_path():
     """Get files from file path."""
-    return os.path.abspath(_files(_base))
+    return get_abs_path(_files(_base))
 
 
 def get_configuration(machine):

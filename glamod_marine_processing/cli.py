@@ -12,6 +12,7 @@ import click
 
 from .utilities import (
     add_to_config,
+    get_abs_path,
     get_base_path,
     get_configuration,
     load_json,
@@ -97,10 +98,16 @@ class Cli:
             "dataset": self.dataset,
             "release_tag": self.release_update,
         }
+
         if self.data_directory is not None:
             config["paths"]["data_directory"] = self.data_directory
         if self.work_directory is not None:
             config["paths"]["glamod"] = self.work_directory
+
+        config["paths"]["data_directory"] = get_abs_path(
+            config["paths"]["data_directory"]
+        )
+        config["paths"]["glamod"] = get_abs_path(config["paths"]["glamod"])
 
         home_directory = get_base_path()
         code_directory = os.path.join(home_directory, self.suite)
