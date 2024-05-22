@@ -43,10 +43,6 @@ def MdataCli(
 
     config = Cli(
         machine=machine,
-        level="",
-        release="",
-        update="",
-        dataset="",
         data_directory=data_directory,
         work_directory=work_directory,
         config_file=config_file,

@@ -47,15 +47,15 @@ class Cli:
 
     def __init__(
         self,
-        machine,
-        level,
-        release,
-        update,
-        dataset,
-        data_directory,
-        work_directory,
-        config_file,
-        suite,
+        machine="",
+        level="",
+        release="",
+        update="",
+        dataset="",
+        data_directory=None,
+        work_directory=None,
+        config_file=None,
+        suite="",
     ):
         self.machine = machine
         self.level = level
