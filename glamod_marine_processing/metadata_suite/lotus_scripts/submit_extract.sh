@@ -11,7 +11,7 @@ then
     echo ""
 else
     python ${scripts_directory}/extract_for_cds.py  -config ${config_lotus} -schema\
-        ${code_directory}/config/master.json -index ${LSB_JOBINDEX}
+        ${code_directory}/configuration_files/master.json -index ${LSB_JOBINDEX}
     if [ $? -eq 0 ]
     then
 	    touch ${release_directory}/extract_${LSB_JOBINDEX}.success

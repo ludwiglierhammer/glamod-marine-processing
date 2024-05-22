@@ -11,7 +11,7 @@ then
     echo ""
 else
     python ${scripts_directory}/split_pub47.py -config ${config_lotus} \
-        -jobs ${code_directory}/config/jobs.json -start ${LSB_JOBINDEX} -end ${LSB_JOBINDEX} \
+        -jobs ${code_directory}/configuration_files/jobs.json -start ${LSB_JOBINDEX} -end ${LSB_JOBINDEX} \
         -tag split_${LSB_JOBINDEX} -log ${log_directory}
     if [ $? -eq 0 ]
     then

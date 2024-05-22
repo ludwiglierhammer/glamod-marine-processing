@@ -11,7 +11,7 @@ then
     echo ""
 else
     python ${scripts_directory}/merge_countries.py -config ${config_lotus} \
-        -jobs ${code_directory}/config/jobs.json -countries ${code_directory}/config/countries.json -index ${LSB_JOBINDEX}
+        -jobs ${code_directory}/configuration_files/jobs.json -countries ${code_directory}/configuration_files/countries.json -index ${LSB_JOBINDEX}
     if [ $? -eq 0 ]
     then
 	    touch ${release_directory}/merge_${LSB_JOBINDEX}.success
@@ -32,5 +32,5 @@ if [ ${LSB_JOBINDEX} == 1 ]
 then
 #bsub -w "done(${LSB_JOBID})"
   python ${scripts_directory}/combine_master_files.py -config ${config_lotus} \
-    -countries ${code_directory}/config/countries.json
+    -countries ${code_directory}/configuration_files/countries.json
 fi
