@@ -8,11 +8,12 @@ from __future__ import annotations
 
 import datetime
 import os
+from types import SimpleNamespace
 
 import click
 
 from .cli import CONTEXT_SETTINGS, Cli, add_options
-from .utilities import get_base_path, get_configuration, load_json, mkdir, save_json
+from .utilities import load_json, mkdir, save_json
 
 
 @click.command(context_settings=CONTEXT_SETTINGS)
@@ -33,9 +34,8 @@ def MdataCli(
 
     def execute_command(slurm_script, add=""):
         """Run bash command."""
-        slurm_script = os.path.join(lotus_scripts_directory, slurm_script)
-        bash_command = f"{slurm_script} {scripts_directory} {code_directory} {release_directory} {new_config} {add}"
-
+        slurm_script = os.path.join(p.lotus_scripts_directory, slurm_script)
+        bash_command = f"{slurm_script} {p.scripts_directory} {p.code_directory} {release_directory} {new_config} {add}"
         if submit_jobs is True:
             os.system(f"sbatch {bash_command}")
         else:
@@ -44,7 +44,7 @@ def MdataCli(
     config = Cli(
         machine=machine,
         level="",
-        release=release,
+        release="",
         update="",
         dataset="",
         data_directory=data_directory,
@@ -52,17 +52,9 @@ def MdataCli(
         config_file=config_file,
         suite="metadata_suite",
     ).initialize()
-    return
-    home_directory = get_base_path()
-    data_directory = config["paths"]["data_directory"]
-    code_directory = os.path.join(home_directory, "metadata_suite")
-    config_directory = os.path.join(code_directory, "config")
-    scripts_directory = os.path.join(code_directory, "scripts")
-    lotus_scripts_directory = os.path.join(code_directory, "lotus_scripts")
-    work_directory = os.path.abspath(config["paths"]["glamod"])
-    scratch_directory = os.path.join(work_directory, os.getlogin())
 
-    release_directory = os.path.join(scratch_directory, "metadata_suite")
+    p = SimpleNamespace(**config["paths"])
+    release_directory = os.path.join(p.scratch_directory, "metadata_suite")
     log_directory = os.path.join(release_directory, "logs")
     log2_directory = os.path.join(release_directory, "logs2")
     mkdir(os.path.join(log_directory, "failed"))
@@ -71,14 +63,16 @@ def MdataCli(
     mkdir(os.path.join(log2_directory, "successful"))
 
     lotus_config_file = "config_lotus.json"
-    lotus_config_file = os.path.join(config_directory, lotus_config_file)
+    lotus_config_file = os.path.join(p.config_directory, lotus_config_file)
     lotus_config = load_json(lotus_config_file)
-    lotus_config["data_path"] = os.path.join(data_directory, previous_release, "Pub47")
-    lotus_config["config_path"] = config_directory
+    lotus_config["data_path"] = os.path.join(
+        p.data_directory, previous_release, "Pub47"
+    )
+    lotus_config["config_path"] = p.config_directory
     lotus_config["output_path"] = os.path.join(
         release_directory, "data", "wmo_publication_47"
     )
-    lotus_config["mapping_path"] = os.path.join(config_directory, "mapping")
+    lotus_config["mapping_path"] = os.path.join(p.config_directory, "mapping")
     current_time = datetime.datetime.now()
     current_time = current_time.strftime("%Y%m%dT%H%M%S")
 
