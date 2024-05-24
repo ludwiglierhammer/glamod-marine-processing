@@ -103,7 +103,7 @@ class script_setup:
             self.sid_dck = inargs[6]
             self.year = inargs[7]
             self.month = inargs[8]
-            self.filename = inargs[9]  # config.get('filename')
+            self.filename = inargs[9]
         else:
             self.sid_dck = config.get("sid_dck")
             self.year = config.get("yyyy")
@@ -209,7 +209,6 @@ if any([not os.path.isdir(x) for x in data_paths]):
     sys.exit(1)
 
 L0_filename = os.path.join(L0_path, params.filename)
-
 if not os.path.isfile(L0_filename):
     logging.error(f"L0 file not found: {L0_filename}")
     sys.exit(1)
@@ -359,14 +358,12 @@ for col in masked_columns:
 # 2.4. Discard invalid data.
 data_invalid = {}
 data_invalid["attrs"] = data_in.attrs.copy()
-col = "global_mask"
 data_in.data, data_invalid["data"] = select.select_true(
     data_in.data, data_in.mask, out_rejected=True
 )
 data_in.mask, data_invalid["valid_mask"] = select.select_true(
     data_in.mask, data_in.mask, out_rejected=True
 )
-
 io_dict["invalid"]["total"] = inspect.get_length(data_invalid["data"])
 io_dict["processed"] = {"total": inspect.get_length(data_in.data)}
 
@@ -374,7 +371,6 @@ process = True
 if io_dict["processed"]["total"] == 0:
     process = False
     logging.warning("No data to map to CDM after selection and cleaning")
-
 
 # 2.9. Let's save reports with no observations...
 # OBS_VALUES = [ ('core',x) for x in ['AT','SST','SLP','D','W','WBT','DPT'] ]
