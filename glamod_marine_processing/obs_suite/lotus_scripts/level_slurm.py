@@ -183,7 +183,7 @@ for sid_dck in process_list:
     with open(taskfarm_file, "w") as fh:
         for i in range(array_size):
             if os.path.isfile(f"{log_diri}/{i+1}.failure"):
-                logging.info(f"Task {i+1} failed. Try calcualting again.")
+                logging.info(f"Task {i+1} failed. Try calculating again.")
                 os.remove(f"{log_diri}/{i+1}.failure")
             if os.path.isfile(f"{log_diri}/{i+1}.success"):
                 logging.info(
