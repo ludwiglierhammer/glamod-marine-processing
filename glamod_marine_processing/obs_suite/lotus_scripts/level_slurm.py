@@ -153,6 +153,7 @@ for sid_dck in process_list:
     array_size = len(glob.glob(os.path.join(log_diri, "*.input")))
     if array_size == 0:
         logging.warning(f"{sid_dck}: no jobs for partition")
+        continue
 
     job_file = os.path.join(log_diri, sid_dck + ".slurm")
     taskfarm_file = os.path.join(log_diri, sid_dck + ".tasks")
@@ -182,7 +183,13 @@ for sid_dck in process_list:
     with open(taskfarm_file, "w") as fh:
         for i in range(array_size):
             if os.path.isfile(f"{log_diri}/{i+1}.failure"):
+                logging.info(f"Task {i+1} failed. Try calcualting again.")
                 os.remove(f"{log_diri}/{i+1}.failure")
+            if os.path.isfile(f"{log_diri}/{i+1}.success"):
+                logging.info(
+                    f"Task {i+1} was already succesfull. Skip calculating again."
+                )
+                continue
             fh.writelines(
                 "{0} {1}/{2}.input > {1}/{2}.out 2> {1}/{2}.out; if [ $? -eq 0 ]; "
                 "then touch {1}/{2}.success; else touch {1}/{2}.failure; fi  \n".format(
