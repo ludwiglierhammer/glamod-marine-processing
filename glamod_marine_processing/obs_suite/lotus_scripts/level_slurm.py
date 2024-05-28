@@ -149,6 +149,7 @@ t = ":".join([t_hh, t_mm, "00"])
 logging.info("SUBMITTING ARRAYS...")
 
 for sid_dck in process_list:
+    logging.info(f"Creating scripts for {sid_dck}")
     log_diri = os.path.join(log_dir, sid_dck)
     array_size = len(glob.glob(os.path.join(log_diri, "*.input")))
     if array_size == 0:
@@ -180,6 +181,7 @@ for sid_dck in process_list:
         else:
             ti = t
 
+    calc_tasks = False
     with open(taskfarm_file, "w") as fh:
         for i in range(array_size):
             if os.path.isfile(f"{log_diri}/{i+1}.failure"):
@@ -196,6 +198,11 @@ for sid_dck in process_list:
                     pycommand, log_diri, i + 1
                 )
             )
+            calc_tasks = True
+
+    if calc_tasks is False:
+        logging.info("No tasks to be calculated")
+        continue
 
     header = read_txt(os.path.join(lotus_dir, "header", f"slurm_header_{MACHINE}.txt"))
 
