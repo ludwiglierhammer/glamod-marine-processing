@@ -88,18 +88,28 @@ for job_id in job_ids:
     else:
         jobs_torun.append(job_id)
 
+calc_tasks = False
 with open(taskfile, "w") as fn:
     for job_id in jobs_torun:
         if os.path.isfile(os.path.join(logdir, f"{job_id}.failure")):
             logging.info(f"Deleting {job_id}.failure file for a fresh start")
             os.remove(os.path.join(logdir, f"{job_id}.failure"))
-
+        if os.path.isfile(os.path.join(logdir, f"{job_id}.failure")):
+            logging.info(
+                f"Task {job_id} was already successful. Skip calculating again."
+            )
+            continue
+        calc_tasks = True
         fn.writelines(
             "python3 {0} -jobs {1} -job_index {2} -config {3} -tracking > {4}/{2}.out 2> {4}/{2}.err;"
             " if [ $? -eq 0 ]; then touch {4}/{2}.success; else touch {4}/{2}.failure; fi \n".format(
                 pyscript, jobsfile, job_id, configfile, logdir
             )
         )
+
+if calc_tasks is False:
+    logging.info("No tasks to be calculated.")
+    sys.exit()
 
 header = read_txt(
     os.path.join(lotus_script_directory, "header", f"slurm_header_{machine}.txt")
