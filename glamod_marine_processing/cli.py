@@ -57,7 +57,7 @@ class Cli:
         config_file=None,
         suite="",
     ):
-        self.machine = machine
+        self.machine = machine.lower()
         self.level = level
         self.release = release
         self.update = update
@@ -71,7 +71,6 @@ class Cli:
     def initialize(self):
         """Initialize command line interface settings."""
         if not self.config_file:
-            # config = get_configuration(self.machine)
             config = self.build_configuration()
         elif not os.path.isfile(self.config_file):
             raise FileNotFoundError(config)
