@@ -128,8 +128,6 @@ def QcCli(
         ostia_test_file=ostia_test_file,
         key="TestFiles",
     )
-
-    config["machine"] = machine
     config["submit_jobs"] = submit_jobs
 
     mkdir(qc_log_directory)
@@ -162,7 +160,6 @@ def QcCli(
 
     slurm_script = "preprocess.py"
     slurm_script = os.path.join(p.scripts_directory, slurm_script)
-
     os.system(
         "python {} -source={} -dck_list={} -dck_period={} -corrections={} -destination={} -release={} -update={}".format(
             slurm_script,

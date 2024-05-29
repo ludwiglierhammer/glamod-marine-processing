@@ -91,6 +91,7 @@ class Cli:
     def build_configuration(self):
         """Build configuration."""
         config = get_configuration(self.machine)
+        config["machine"] = self.machine
         config["abbreviations"] = {
             "release": self.release,
             "update": self.update,
