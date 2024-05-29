@@ -223,6 +223,12 @@ class Options:
             default=False,
             help="Use already existing configuration file.",
         )
+        self.preprocessing = click.option(
+            "-preproc",
+            "--preprocessing",
+            is_flag=True,
+            help="Do some preprocessing for qc_suite only.",
+        )
 
 
 Options = Options()

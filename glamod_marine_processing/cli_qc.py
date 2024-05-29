@@ -28,6 +28,7 @@ def QcCli(
     work_directory,
     config_file,
     submit_jobs,
+    preprocessing,
 ):
     """Enry point for theqcmetadata_suite command line interface."""
     config = Cli(
@@ -158,24 +159,23 @@ def QcCli(
         p.data_directory, release, "metoffice_qc", "corrected"
     )
 
-    slurm_script = "preprocess.py"
-    slurm_script = os.path.join(p.scripts_directory, slurm_script)
-    os.system(
-        "python {} -source={} -dck_list={} -dck_period={} -corrections={} -destination={} -release={} -update={}".format(
-            slurm_script,
-            qc_source,
-            dck_list,
-            dck_period,
-            corrections,
-            qc_destination,
-            release,
-            update,
+    if preprocessing is True:
+        preproc_script = "preprocess.py"
+        preproc_script = os.path.join(p.scripts_directory, preproc_script)
+        os.system(
+            "python {} -source={} -dck_list={} -dck_period={} -corrections={} -destination={} -release={} -update={}".format(
+                preproc_script,
+                qc_source,
+                dck_list,
+                dck_period,
+                corrections,
+                qc_destination,
+                release,
+                update,
+            )
         )
-    )
 
     slurm_script = "qc_slurm.py"
     slurm_script = os.path.join(p.lotus_scripts_directory, slurm_script)
     os.system(f"python {slurm_script} {qc_config}")
-
-    slurm_script = os.path.join(p.lotus_scripts_directory, slurm_script)
     os.system(f"python {slurm_script} {qc_config} --hr")
