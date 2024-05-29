@@ -63,6 +63,7 @@ logdir = slurm_preferences.logdir[mode]
 logdir = script_config["paths"][logdir]
 pyscript = os.path.join(scripts_directory, scriptfn)
 jobsfile = os.path.join(config_directory, JOBSFN)
+overwrite = script_config["overwrite"]
 
 if not os.path.isfile(pyscript):
     sys.exit(f"Python script not found at: {pyscript}")
@@ -94,11 +95,16 @@ with open(taskfile, "w") as fn:
         if os.path.isfile(os.path.join(logdir, f"{job_id}.failure")):
             logging.info(f"Deleting {job_id}.failure file for a fresh start")
             os.remove(os.path.join(logdir, f"{job_id}.failure"))
-        if os.path.isfile(os.path.join(logdir, f"{job_id}.failure")):
+        if os.path.isfile(os.path.join(logdir, f"{job_id}.success")):
+            if overwrite is not True:
+                logging.info(
+                    f"Task {job_id} was already successful. Skip calculating again."
+                )
+                continue
             logging.info(
-                f"Task {job_id} was already successful. Skip calculating again."
+                f"Task {job_id} was already successful. However, calculate task again since option 'overwrite' was chosen."
             )
-            continue
+            os.remove(os.path.join(logdir, f"{job_id}.success"))
         calc_tasks = True
         fn.writelines(
             "python3 {0} -jobs {1} -job_index {2} -config {3} -tracking > {4}/{2}.out 2> {4}/{2}.err;"

@@ -28,6 +28,7 @@ def ObsCli(
     work_directory,
     config_file,
     submit_jobs,
+    overwrite,
 ):
     """Enry point for the obs_suite command line interface."""
     config = Cli(
@@ -40,6 +41,7 @@ def ObsCli(
         work_directory=work_directory,
         config_file=config_file,
         suite="obs_suite",
+        overwrite=overwrite,
     ).initialize()
 
     p = SimpleNamespace(**config["paths"])
@@ -63,6 +65,7 @@ def ObsCli(
     level_config = load_json(level_config_file)
     level_config["submit_jobs"] = submit_jobs
     level_config["level"] = level
+    level_config["overwrite"] = overwrite
 
     for key, value in config.items():
         level_config[key] = value

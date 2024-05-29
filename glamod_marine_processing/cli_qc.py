@@ -29,6 +29,7 @@ def QcCli(
     config_file,
     submit_jobs,
     preprocessing,
+    overwrite,
 ):
     """Enry point for theqcmetadata_suite command line interface."""
     config = Cli(
@@ -40,6 +41,7 @@ def QcCli(
         work_directory=work_directory,
         config_file=config_file,
         suite="qc_suite",
+        overwrite=overwrite,
     ).initialize()
 
     p = SimpleNamespace(**config["paths"])

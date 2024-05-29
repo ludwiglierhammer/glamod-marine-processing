@@ -56,6 +56,7 @@ class Cli:
         work_directory=None,
         config_file=None,
         suite="",
+        overwrite=False,
     ):
         self.machine = machine.lower()
         self.level = level
@@ -67,6 +68,7 @@ class Cli:
         self.config_file = config_file
         self.suite = suite
         self.release_update = f"{release}-{update}"
+        self.overwrite = overwrite
 
     def initialize(self):
         """Initialize command line interface settings."""
@@ -92,6 +94,7 @@ class Cli:
         """Build configuration."""
         config = get_configuration(self.machine)
         config["machine"] = self.machine
+        config["overwrite"] = self.overwrite
         config["abbreviations"] = {
             "release": self.release,
             "update": self.update,
@@ -228,6 +231,12 @@ class Options:
             "--preprocessing",
             is_flag=True,
             help="Do some preprocessing for qc_suite only.",
+        )
+        self.overwrite = click.option(
+            "-o",
+            "--overwrite",
+            is_flag=True,
+            help="Overwrite already existing data.",
         )
 
 
