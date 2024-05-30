@@ -238,6 +238,12 @@ class Options:
             is_flag=True,
             help="Overwrite already existing data.",
         )
+        self.hires = click.option(
+            "-hi",
+            "--hires",
+            is_flag=True,
+            help="Do high resolution QC for qc_suite only.",
+        )
 
 
 Options = Options()
