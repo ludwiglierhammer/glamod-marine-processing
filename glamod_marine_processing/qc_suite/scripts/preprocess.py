@@ -922,7 +922,7 @@ if 1:
                     ]
                 )
                 data.to_csv(
-                    out_dir + f"{yr:04d}-{mo:02d}.psv",
+                    os.path.join(out_dir, f"{yr:04d}-{mo:02d}.psv"),
                     sep="|",
                     header=False,
                     index=False,
