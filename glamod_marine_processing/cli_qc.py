@@ -137,6 +137,8 @@ def QcCli(
 
     mkdir(qc_log_directory)
     mkdir(qc_hr_log_directory)
+    mkdir(out_dir)
+    mkdir(icoads_dir)
     config = add_to_config(
         config,
         qc_log_directory=qc_log_directory,
