@@ -64,7 +64,7 @@ def read_icoads_file(
                 "bg_var",
             )
 
-        filename = icoads_dir + f"{readyear:4d}-{readmonth:02d}.psv"
+        filename = os.path.join(icoads_dir, f"{readyear:4d}-{readmonth:02d}.psv")
         if not os.path.isfile(filename):
             logging.warning(f"File not available: {filename}.")
             continue
