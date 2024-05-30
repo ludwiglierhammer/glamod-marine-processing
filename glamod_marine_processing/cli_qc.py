@@ -29,7 +29,8 @@ def QcCli(
     config_file,
     submit_jobs,
     preprocessing,
-    hires,
+    quality_control,
+    high_resolution_qc,
     overwrite,
 ):
     """Enry point for theqcmetadata_suite command line interface."""
@@ -180,7 +181,7 @@ def QcCli(
 
     slurm_script = "qc_slurm.py"
     slurm_script = os.path.join(p.lotus_scripts_directory, slurm_script)
-    if hires is True:
-        os.system(f"python {slurm_script} {qc_config} --hr")
-    else:
+    if quality_control is True:
         os.system(f"python {slurm_script} {qc_config}")
+    if high_resolution_qc is True:
+        os.system(f"python {slurm_script} {qc_config} --hr")
