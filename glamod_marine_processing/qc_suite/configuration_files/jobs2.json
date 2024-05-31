@@ -1,6 +1,4 @@
 {
-  "schema": "/ichec/work/glamod/glamod-marine-processing.2022/qc-suite/imma/imma.json",
-  "code_tables": "/ichec/work/glamod/glamod-marine-processing.2022/qc-suite/imma/code_tables/",
   "jobs": [
     {
       "index": 1,
