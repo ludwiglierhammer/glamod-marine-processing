@@ -28,7 +28,15 @@ from glamod_marine_processing.utilities import load_json
 
 
 def read_icoads_file(
-    year, month, icoads_dir, ids_to_exclude, tracking, parameters, climlib, config
+    year,
+    month,
+    icoads_dir,
+    ids_to_exclude,
+    tracking,
+    external_dir,
+    parameters,
+    climlib,
+    config,
 ):
     """Read ICOADS file."""
     logging.info(
@@ -143,7 +151,7 @@ def read_icoads_file(
 
                         #                            ofname = ostia_filename(ostia_dir, y_year, y_month, y_day)
                         ofname = bf.get_background_filename(
-                            parameters["background_dir"],
+                            os.path.join(external_dir, parameters["background_dir"]),
                             parameters["background_filenames"],
                             y_year,
                             y_month,
@@ -224,8 +232,6 @@ def read_icoads_file(
                         imma_obj.index.size,
                     )
                 )
-
-            # icoads_file.close()
     return reps, count
 
 
@@ -288,6 +294,7 @@ def main(argv):
     config = load_json(inputfile)
     icoads_dir = config.get("Directories").get("ICOADS_dir")
     out_dir = config.get("Directories").get("out_dir")
+    external_dir = config.get("Directories").get("external_files")
     bad_id_file = config.get("Files").get("IDs_to_exclude")
     version = config.get("Icoads").get("icoads_version")
 
@@ -324,8 +331,9 @@ def main(argv):
     climlib = ex.ClimatologyLibrary()
     for entry in parameters["climatologies"]:
         logging.info(f"{entry[0]} {entry[1]}")
+        path = os.path.join(external_dir, entry[2])
         climlib.add_field(
-            entry[0], entry[1], clim.Climatology.from_filename(entry[2], entry[3])
+            entry[0], entry[1], clim.Climatology.from_filename(path, entry[3])
         )
 
     for year, month in qc.year_month_gen(year1, month1, year2, month2):
@@ -335,6 +343,7 @@ def main(argv):
             icoads_dir,
             ids_to_exclude,
             tracking,
+            external_dir,
             parameters,
             climlib,
             config,

@@ -94,6 +94,7 @@ def QcCli(
         out_dir=out_dir,
         ICOADS_dir=icoads_dir,
         track_out_dir=out_dir,
+        external_files=external_files,
         key="Directories",
     )
 

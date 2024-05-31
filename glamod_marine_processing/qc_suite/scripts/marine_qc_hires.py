@@ -81,6 +81,7 @@ def main(argv):
     config = load_json(inputfile)
     icoads_dir = config.get("Directories").get("ICOADS_dir")
     out_dir = config.get("Directories").get("out_dir")
+    external_dir = config.get("Directories").get("external_files")
     bad_id_file = config.get("Files").get("IDs_to_exclude")
     version = config.get("Icoads").get("icoads_version")
 
@@ -116,7 +117,7 @@ def main(argv):
     # read in high resolution SST climatology file
     for entry in parameters["hires_climatologies"]:
         if entry[0] == "SST" and entry[1] == "mean":
-            sst_climatology_file = entry[2]
+            sst_climatology_file = os.path.join(external_dir, entry[2])
             logging.info(f"hires sst climatology file {sst_climatology_file}")
 
     climlib = ex.ClimatologyLibrary()
