@@ -1,6 +1,0 @@
-argparse
-configparser
-pathlib 
-pandas
-pandas-validation
-netCDF4

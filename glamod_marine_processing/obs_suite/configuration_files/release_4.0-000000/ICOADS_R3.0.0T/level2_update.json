@@ -1,0 +1,17 @@
+{
+  "release": "release_4.0",
+  "update": "000000",
+  "dataset": "ICOADS_R3.0.0T",
+  "process_list_file": "/ichec/work/glamod/glamod-marine-processing.2022/obs-suite/configuration_files/release_4.0-000000/ICOADS_R3.0.0T/source_deck_list.txt",
+  "release_periods_file": "/ichec/work/glamod/glamod-marine-processing.2022/obs-suite/configuration_files/release_4.0-000000/ICOADS_R3.0.0T/release_4.0_ICOADS_R3.0.0T_level2.json",
+  "level_dir": "/ichec/work/glamod/data/marine/release_4.1/ICOADS_R3.0.0T/level2",
+  "level_source_dir": "/ichec/work/glamod/data/marine/release_4.0/ICOADS_R3.0.0T/level2",
+  "meta_dir": "/ichec/work/glamod/data/marine/release_4.1/Pub47/monthly",
+  "job_memo_mb": 4000,
+  "job_time_hr": "05",
+  "job_time_min": "00",
+  "md_model": "pub47_noc",
+  "md_subdir": "Pub47",
+  "md_first_yr_avail": 1956,
+  "md_last_yr_avail": 2020
+}

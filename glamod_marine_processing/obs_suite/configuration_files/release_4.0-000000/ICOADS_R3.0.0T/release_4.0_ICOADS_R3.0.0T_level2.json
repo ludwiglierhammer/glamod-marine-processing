@@ -1,0 +1,1891 @@
+{
+  "001-110": {
+    "year_end": 1951,
+    "year_init": 1945,
+    "exclude": false,
+    "params_exclude": []
+  },
+  "001-116": {
+    "year_end": 1963,
+    "year_init": 1945,
+    "exclude": false,
+    "params_exclude": []
+  },
+  "001-117": {
+    "year_end": 1953,
+    "year_init": 1952,
+    "exclude": false,
+    "params_exclude": []
+  },
+  "001-118": {
+    "year_end": 1953,
+    "year_init": 1930,
+    "exclude": false,
+    "params_exclude": []
+  },
+  "001-119": {
+    "year_end": 1961,
+    "year_init": 1951,
+    "exclude": false,
+    "params_exclude": []
+  },
+  "001-128": {
+    "year_end": 1969,
+    "year_init": 1950,
+    "exclude": false,
+    "params_exclude": []
+  },
+  "001-150": {
+    "year_end": 1961,
+    "year_init": 1939,
+    "exclude": false,
+    "params_exclude": []
+  },
+  "001-151": {
+    "year_end": 1960,
+    "year_init": 1864,
+    "exclude": false,
+    "params_exclude": []
+  },
+  "001-152": {
+    "year_end": 1960,
+    "year_init": 1856,
+    "exclude": false,
+    "params_exclude": []
+  },
+  "001-184": {
+    "year_end": 1956,
+    "year_init": 1953,
+    "exclude": false,
+    "params_exclude": []
+  },
+  "001-185": {
+    "year_end": 1958,
+    "year_init": 1957,
+    "exclude": false,
+    "params_exclude": []
+  },
+  "001-186": {
+    "year_end": 1969,
+    "year_init": 1950,
+    "exclude": false,
+    "params_exclude": []
+  },
+  "001-187": {
+    "year_end": 1956,
+    "year_init": 1946,
+    "exclude": false,
+    "params_exclude": []
+  },
+  "001-188": {
+    "year_end": 1939,
+    "year_init": 1932,
+    "exclude": false,
+    "params_exclude": []
+  },
+  "001-189": {
+    "year_end": 1959,
+    "year_init": 1939,
+    "exclude": false,
+    "params_exclude": []
+  },
+  "001-192": {
+    "year_end": 1939,
+    "year_init": 1855,
+    "exclude": false,
+    "params_exclude": []
+  },
+  "001-193": {
+    "year_end": 1938,
+    "year_init": 1800,
+    "exclude": false,
+    "params_exclude": []
+  },
+  "001-194": {
+    "year_end": 1955,
+    "year_init": 1856,
+    "exclude": false,
+    "params_exclude": []
+  },
+  "001-195": {
+    "year_end": 1946,
+    "year_init": 1941,
+    "exclude": false,
+    "params_exclude": []
+  },
+  "001-196": {
+    "year_end": 1954,
+    "year_init": 1949,
+    "exclude": false,
+    "params_exclude": []
+  },
+  "001-197": {
+    "year_end": 1956,
+    "year_init": 1871,
+    "exclude": false,
+    "params_exclude": []
+  },
+  "001-281": {
+    "year_end": 1945,
+    "year_init": 1926,
+    "exclude": false,
+    "params_exclude": []
+  },
+  "001-901": {
+    "year_end": 1963,
+    "year_init": 1868,
+    "exclude": false,
+    "params_exclude": []
+  },
+  "001-902": {
+    "year_end": 1961,
+    "year_init": 1957,
+    "exclude": false,
+    "params_exclude": []
+  },
+  "001-999": {
+    "year_end": 1969,
+    "year_init": 1967,
+    "exclude": false,
+    "params_exclude": []
+  },
+  "002-150": {
+    "year_end": 1961,
+    "year_init": 1939,
+    "exclude": false,
+    "params_exclude": []
+  },
+  "002-151": {
+    "year_end": 1960,
+    "year_init": 1862,
+    "exclude": false,
+    "params_exclude": []
+  },
+  "002-152": {
+    "year_end": 1961,
+    "year_init": 1855,
+    "exclude": false,
+    "params_exclude": []
+  },
+  "002-192": {
+    "year_end": 1939,
+    "year_init": 1865,
+    "exclude": false,
+    "params_exclude": []
+  },
+  "003-155": {
+    "year_end": 1960,
+    "year_init": 1861,
+    "exclude": false,
+    "params_exclude": []
+  },
+  "004-156": {
+    "year_end": 1961,
+    "year_init": 1852,
+    "exclude": false,
+    "params_exclude": []
+  },
+  "005-116": {
+    "year_end": 1963,
+    "year_init": 1949,
+    "exclude": false,
+    "params_exclude": []
+  },
+  "005-118": {
+    "year_end": 1953,
+    "year_init": 1933,
+    "exclude": false,
+    "params_exclude": []
+  },
+  "005-119": {
+    "year_end": 1961,
+    "year_init": 1951,
+    "exclude": false,
+    "params_exclude": []
+  },
+  "005-128": {
+    "year_end": 1975,
+    "year_init": 1961,
+    "exclude": false,
+    "params_exclude": []
+  },
+  "005-184": {
+    "year_end": 1955,
+    "year_init": 1953,
+    "exclude": false,
+    "params_exclude": []
+  },
+  "005-189": {
+    "year_end": 1959,
+    "year_init": 1945,
+    "exclude": false,
+    "params_exclude": []
+  },
+  "005-192": {
+    "year_end": 1939,
+    "year_init": 1871,
+    "exclude": false,
+    "params_exclude": []
+  },
+  "005-193": {
+    "year_end": 1937,
+    "year_init": 1854,
+    "exclude": false,
+    "params_exclude": []
+  },
+  "005-194": {
+    "year_end": 1953,
+    "year_init": 1892,
+    "exclude": false,
+    "params_exclude": []
+  },
+  "005-195": {
+    "year_end": 1945,
+    "year_init": 1942,
+    "exclude": false,
+    "params_exclude": []
+  },
+  "005-901": {
+    "year_end": 1950,
+    "year_init": 1928,
+    "exclude": false,
+    "params_exclude": []
+  },
+  "006-119": {
+    "year_end": 1961,
+    "year_init": 1954,
+    "exclude": false,
+    "params_exclude": []
+  },
+  "006-128": {
+    "year_end": 1978,
+    "year_init": 1950,
+    "exclude": false,
+    "params_exclude": []
+  },
+  "006-184": {
+    "year_end": 1955,
+    "year_init": 1953,
+    "exclude": false,
+    "params_exclude": []
+  },
+  "006-189": {
+    "year_end": 1955,
+    "year_init": 1947,
+    "exclude": false,
+    "params_exclude": []
+  },
+  "006-192": {
+    "year_end": 1933,
+    "year_init": 1868,
+    "exclude": false,
+    "params_exclude": []
+  },
+  "006-193": {
+    "year_end": 1938,
+    "year_init": 1855,
+    "exclude": false,
+    "params_exclude": []
+  },
+  "006-194": {
+    "year_end": 1954,
+    "year_init": 1910,
+    "exclude": false,
+    "params_exclude": []
+  },
+  "006-195": {
+    "year_end": 1945,
+    "year_init": 1942,
+    "exclude": false,
+    "params_exclude": []
+  },
+  "006-666": {
+    "year_end": 1975,
+    "year_init": 1970,
+    "exclude": false,
+    "params_exclude": []
+  },
+  "007-555": {
+    "year_end": 1969,
+    "year_init": 1966,
+    "exclude": false,
+    "params_exclude": []
+  },
+  "008-116": {
+    "year_end": 1963,
+    "year_init": 1945,
+    "exclude": false,
+    "params_exclude": []
+  },
+  "008-117": {
+    "year_end": 1964,
+    "year_init": 1952,
+    "exclude": false,
+    "params_exclude": []
+  },
+  "008-128": {
+    "year_end": 1973,
+    "year_init": 1950,
+    "exclude": false,
+    "params_exclude": []
+  },
+  "008-184": {
+    "year_end": 1961,
+    "year_init": 1953,
+    "exclude": false,
+    "params_exclude": []
+  },
+  "008-194": {
+    "year_end": 1952,
+    "year_init": 1952,
+    "exclude": false,
+    "params_exclude": []
+  },
+  "009-116": {
+    "year_end": 1962,
+    "year_init": 1947,
+    "exclude": false,
+    "params_exclude": []
+  },
+  "009-117": {
+    "year_end": 1953,
+    "year_init": 1952,
+    "exclude": false,
+    "params_exclude": []
+  },
+  "009-119": {
+    "year_end": 1959,
+    "year_init": 1955,
+    "exclude": false,
+    "params_exclude": []
+  },
+  "009-128": {
+    "year_end": 1973,
+    "year_init": 1963,
+    "exclude": false,
+    "params_exclude": []
+  },
+  "010-110": {
+    "year_end": 1951,
+    "year_init": 1948,
+    "exclude": false,
+    "params_exclude": []
+  },
+  "010-116": {
+    "year_end": 1963,
+    "year_init": 1949,
+    "exclude": false,
+    "params_exclude": []
+  },
+  "010-118": {
+    "year_end": 1953,
+    "year_init": 1932,
+    "exclude": false,
+    "params_exclude": []
+  },
+  "010-119": {
+    "year_end": 1961,
+    "year_init": 1953,
+    "exclude": false,
+    "params_exclude": []
+  },
+  "010-128": {
+    "year_end": 1968,
+    "year_init": 1963,
+    "exclude": false,
+    "params_exclude": []
+  },
+  "010-184": {
+    "year_end": 1956,
+    "year_init": 1953,
+    "exclude": false,
+    "params_exclude": []
+  },
+  "010-192": {
+    "year_end": 1939,
+    "year_init": 1864,
+    "exclude": false,
+    "params_exclude": []
+  },
+  "010-193": {
+    "year_end": 1938,
+    "year_init": 1854,
+    "exclude": false,
+    "params_exclude": []
+  },
+  "010-194": {
+    "year_end": 1954,
+    "year_init": 1921,
+    "exclude": false,
+    "params_exclude": []
+  },
+  "010-195": {
+    "year_end": 1945,
+    "year_init": 1942,
+    "exclude": false,
+    "params_exclude": []
+  },
+  "010-197": {
+    "year_end": 1938,
+    "year_init": 1927,
+    "exclude": false,
+    "params_exclude": []
+  },
+  "013-897": {
+    "year_end": 1963,
+    "year_init": 1962,
+    "exclude": false,
+    "params_exclude": []
+  },
+  "014-898": {
+    "year_end": 1974,
+    "year_init": 1954,
+    "exclude": false,
+    "params_exclude": []
+  },
+  "015-899": {
+    "year_end": 1955,
+    "year_init": 1900,
+    "exclude": false,
+    "params_exclude": []
+  },
+  "016-900": {
+    "year_end": 1970,
+    "year_init": 1931,
+    "exclude": false,
+    "params_exclude": []
+  },
+  "017-926": {
+    "year_end": 1979,
+    "year_init": 1956,
+    "exclude": false,
+    "params_exclude": []
+  },
+  "018-186": {
+    "year_end": 1970,
+    "year_init": 1970,
+    "exclude": false,
+    "params_exclude": []
+  },
+  "018-555": {
+    "year_end": 1973,
+    "year_init": 1970,
+    "exclude": false,
+    "params_exclude": []
+  },
+  "018-849": {
+    "year_end": 1979,
+    "year_init": 1978,
+    "exclude": false,
+    "params_exclude": []
+  },
+  "018-850": {
+    "year_end": 1979,
+    "year_init": 1978,
+    "exclude": false,
+    "params_exclude": []
+  },
+  "018-876": {
+    "year_end": 1977,
+    "year_init": 1972,
+    "exclude": false,
+    "params_exclude": []
+  },
+  "018-877": {
+    "year_end": 1976,
+    "year_init": 1973,
+    "exclude": false,
+    "params_exclude": []
+  },
+  "018-878": {
+    "year_end": 1978,
+    "year_init": 1974,
+    "exclude": false,
+    "params_exclude": []
+  },
+  "018-879": {
+    "year_end": 1978,
+    "year_init": 1974,
+    "exclude": false,
+    "params_exclude": []
+  },
+  "018-880": {
+    "year_end": 1978,
+    "year_init": 1976,
+    "exclude": false,
+    "params_exclude": []
+  },
+  "018-881": {
+    "year_end": 1977,
+    "year_init": 1976,
+    "exclude": false,
+    "params_exclude": []
+  },
+  "018-882": {
+    "year_end": 1979,
+    "year_init": 1978,
+    "exclude": false,
+    "params_exclude": []
+  },
+  "018-888": {
+    "year_end": 1979,
+    "year_init": 1973,
+    "exclude": false,
+    "params_exclude": []
+  },
+  "018-889": {
+    "year_end": 1979,
+    "year_init": 1972,
+    "exclude": false,
+    "params_exclude": []
+  },
+  "018-927": {
+    "year_end": 1979,
+    "year_init": 1970,
+    "exclude": false,
+    "params_exclude": []
+  },
+  "018-928": {
+    "year_end": 1974,
+    "year_init": 1970,
+    "exclude": false,
+    "params_exclude": []
+  },
+  "019-926": {
+    "year_end": 1979,
+    "year_init": 1978,
+    "exclude": false,
+    "params_exclude": []
+  },
+  "020-128": {
+    "year_end": 1974,
+    "year_init": 1970,
+    "exclude": false,
+    "params_exclude": []
+  },
+  "021-900": {
+    "year_end": 1979,
+    "year_init": 1971,
+    "exclude": false,
+    "params_exclude": []
+  },
+  "022-889": {
+    "year_end": 1983,
+    "year_init": 1982,
+    "exclude": false,
+    "params_exclude": []
+  },
+  "022-927": {
+    "year_end": 1987,
+    "year_init": 1982,
+    "exclude": false,
+    "params_exclude": []
+  },
+  "023-888": {
+    "year_end": 1979,
+    "year_init": 1973,
+    "exclude": false,
+    "params_exclude": []
+  },
+  "023-889": {
+    "year_end": 1979,
+    "year_init": 1973,
+    "exclude": false,
+    "params_exclude": []
+  },
+  "023-927": {
+    "year_end": 1979,
+    "year_init": 1973,
+    "exclude": false,
+    "params_exclude": []
+  },
+  "024-143": {
+    "year_end": 1977,
+    "year_init": 1976,
+    "exclude": false,
+    "params_exclude": []
+  },
+  "024-876": {
+    "year_end": 1977,
+    "year_init": 1972,
+    "exclude": false,
+    "params_exclude": []
+  },
+  "024-877": {
+    "year_end": 1976,
+    "year_init": 1973,
+    "exclude": false,
+    "params_exclude": []
+  },
+  "024-878": {
+    "year_end": 1978,
+    "year_init": 1974,
+    "exclude": false,
+    "params_exclude": []
+  },
+  "024-879": {
+    "year_end": 1978,
+    "year_init": 1974,
+    "exclude": false,
+    "params_exclude": []
+  },
+  "024-880": {
+    "year_end": 1978,
+    "year_init": 1976,
+    "exclude": false,
+    "params_exclude": []
+  },
+  "024-881": {
+    "year_end": 1977,
+    "year_init": 1976,
+    "exclude": false,
+    "params_exclude": []
+  },
+  "024-882": {
+    "year_end": 1979,
+    "year_init": 1978,
+    "exclude": false,
+    "params_exclude": []
+  },
+  "025-889": {
+    "year_end": 1984,
+    "year_init": 1983,
+    "exclude": false,
+    "params_exclude": []
+  },
+  "025-926": {
+    "year_end": 1984,
+    "year_init": 1962,
+    "exclude": false,
+    "params_exclude": []
+  },
+  "025-927": {
+    "year_end": 1984,
+    "year_init": 1980,
+    "exclude": false,
+    "params_exclude": []
+  },
+  "026-927": {
+    "year_end": 1975,
+    "year_init": 1975,
+    "exclude": false,
+    "params_exclude": []
+  },
+  "027-889": {
+    "year_end": 1985,
+    "year_init": 1984,
+    "exclude": false,
+    "params_exclude": []
+  },
+  "027-926": {
+    "year_end": 1984,
+    "year_init": 1970,
+    "exclude": false,
+    "params_exclude": []
+  },
+  "027-927": {
+    "year_end": 1985,
+    "year_init": 1979,
+    "exclude": false,
+    "params_exclude": []
+  },
+  "028-889": {
+    "year_end": 1985,
+    "year_init": 1985,
+    "exclude": false,
+    "params_exclude": []
+  },
+  "028-926": {
+    "year_end": 1984,
+    "year_init": 1976,
+    "exclude": false,
+    "params_exclude": []
+  },
+  "028-927": {
+    "year_end": 1985,
+    "year_init": 1983,
+    "exclude": false,
+    "params_exclude": []
+  },
+  "029-892": {
+    "year_end": 1992,
+    "year_init": 1980,
+    "exclude": false,
+    "params_exclude": []
+  },
+  "029-893": {
+    "year_end": 1992,
+    "year_init": 1986,
+    "exclude": false,
+    "params_exclude": []
+  },
+  "029-896": {
+    "year_end": 1992,
+    "year_init": 1980,
+    "exclude": false,
+    "params_exclude": []
+  },
+  "030-889": {
+    "year_end": 1984,
+    "year_init": 1979,
+    "exclude": false,
+    "params_exclude": []
+  },
+  "030-926": {
+    "year_end": 1984,
+    "year_init": 1965,
+    "exclude": false,
+    "params_exclude": []
+  },
+  "030-927": {
+    "year_end": 1984,
+    "year_init": 1971,
+    "exclude": false,
+    "params_exclude": []
+  },
+  "032-874": {
+    "year_end": 1997,
+    "year_init": 1996,
+    "exclude": false,
+    "params_exclude": []
+  },
+  "032-889": {
+    "year_end": 1995,
+    "year_init": 1986,
+    "exclude": false,
+    "params_exclude": []
+  },
+  "032-892": {
+    "year_end": 1994,
+    "year_init": 1993,
+    "exclude": false,
+    "params_exclude": []
+  },
+  "032-893": {
+    "year_end": 1994,
+    "year_init": 1993,
+    "exclude": false,
+    "params_exclude": []
+  },
+  "032-896": {
+    "year_end": 1994,
+    "year_init": 1993,
+    "exclude": false,
+    "params_exclude": []
+  },
+  "032-926": {
+    "year_end": 1992,
+    "year_init": 1986,
+    "exclude": false,
+    "params_exclude": []
+  },
+  "032-927": {
+    "year_end": 1995,
+    "year_init": 1986,
+    "exclude": false,
+    "params_exclude": []
+  },
+  "033-889": {
+    "year_end": 1993,
+    "year_init": 1986,
+    "exclude": false,
+    "params_exclude": []
+  },
+  "033-892": {
+    "year_end": 1993,
+    "year_init": 1993,
+    "exclude": false,
+    "params_exclude": []
+  },
+  "033-893": {
+    "year_end": 1993,
+    "year_init": 1993,
+    "exclude": false,
+    "params_exclude": []
+  },
+  "033-896": {
+    "year_end": 1993,
+    "year_init": 1993,
+    "exclude": false,
+    "params_exclude": []
+  },
+  "033-926": {
+    "year_end": 1988,
+    "year_init": 1974,
+    "exclude": false,
+    "params_exclude": []
+  },
+  "033-927": {
+    "year_end": 1993,
+    "year_init": 1986,
+    "exclude": false,
+    "params_exclude": []
+  },
+  "034-889": {
+    "year_end": 1985,
+    "year_init": 1985,
+    "exclude": false,
+    "params_exclude": []
+  },
+  "034-926": {
+    "year_end": 1985,
+    "year_init": 1969,
+    "exclude": false,
+    "params_exclude": []
+  },
+  "034-927": {
+    "year_end": 1985,
+    "year_init": 1982,
+    "exclude": false,
+    "params_exclude": []
+  },
+  "035-889": {
+    "year_end": 1986,
+    "year_init": 1986,
+    "exclude": false,
+    "params_exclude": []
+  },
+  "035-926": {
+    "year_end": 1986,
+    "year_init": 1975,
+    "exclude": false,
+    "params_exclude": []
+  },
+  "035-927": {
+    "year_end": 1986,
+    "year_init": 1981,
+    "exclude": false,
+    "params_exclude": []
+  },
+  "036-889": {
+    "year_end": 1987,
+    "year_init": 1987,
+    "exclude": false,
+    "params_exclude": []
+  },
+  "036-926": {
+    "year_end": 1987,
+    "year_init": 1974,
+    "exclude": false,
+    "params_exclude": []
+  },
+  "036-927": {
+    "year_end": 1987,
+    "year_init": 1978,
+    "exclude": false,
+    "params_exclude": []
+  },
+  "037-926": {
+    "year_end": 1988,
+    "year_init": 1974,
+    "exclude": false,
+    "params_exclude": []
+  },
+  "037-927": {
+    "year_end": 1988,
+    "year_init": 1984,
+    "exclude": false,
+    "params_exclude": []
+  },
+  "038-889": {
+    "year_end": 1989,
+    "year_init": 1989,
+    "exclude": false,
+    "params_exclude": []
+  },
+  "038-926": {
+    "year_end": 1989,
+    "year_init": 1984,
+    "exclude": false,
+    "params_exclude": []
+  },
+  "038-927": {
+    "year_end": 1989,
+    "year_init": 1982,
+    "exclude": false,
+    "params_exclude": []
+  },
+  "039-889": {
+    "year_end": 1991,
+    "year_init": 1990,
+    "exclude": false,
+    "params_exclude": []
+  },
+  "039-926": {
+    "year_end": 1990,
+    "year_init": 1983,
+    "exclude": false,
+    "params_exclude": []
+  },
+  "039-927": {
+    "year_end": 1991,
+    "year_init": 1985,
+    "exclude": false,
+    "params_exclude": []
+  },
+  "040-889": {
+    "year_end": 1991,
+    "year_init": 1991,
+    "exclude": false,
+    "params_exclude": []
+  },
+  "040-926": {
+    "year_end": 1991,
+    "year_init": 1982,
+    "exclude": false,
+    "params_exclude": []
+  },
+  "040-927": {
+    "year_end": 1991,
+    "year_init": 1984,
+    "exclude": false,
+    "params_exclude": []
+  },
+  "041-926": {
+    "year_end": 1991,
+    "year_init": 1985,
+    "exclude": false,
+    "params_exclude": []
+  },
+  "041-927": {
+    "year_end": 1992,
+    "year_init": 1986,
+    "exclude": false,
+    "params_exclude": []
+  },
+  "042-889": {
+    "year_end": 1993,
+    "year_init": 1980,
+    "exclude": false,
+    "params_exclude": []
+  },
+  "042-927": {
+    "year_end": 1993,
+    "year_init": 1989,
+    "exclude": false,
+    "params_exclude": []
+  },
+  "043-889": {
+    "year_end": 1994,
+    "year_init": 1994,
+    "exclude": false,
+    "params_exclude": []
+  },
+  "043-927": {
+    "year_end": 1994,
+    "year_init": 1989,
+    "exclude": false,
+    "params_exclude": []
+  },
+  "044-874": {
+    "year_end": 1995,
+    "year_init": 1995,
+    "exclude": false,
+    "params_exclude": []
+  },
+  "044-927": {
+    "year_end": 1995,
+    "year_init": 1992,
+    "exclude": false,
+    "params_exclude": []
+  },
+  "045-874": {
+    "year_end": 1996,
+    "year_init": 1995,
+    "exclude": false,
+    "params_exclude": []
+  },
+  "046-732": {
+    "year_end": 1995,
+    "year_init": 1976,
+    "exclude": false,
+    "params_exclude": []
+  },
+  "046-926": {
+    "year_end": 1990,
+    "year_init": 1969,
+    "exclude": false,
+    "params_exclude": []
+  },
+  "047-926": {
+    "year_end": 1994,
+    "year_init": 1970,
+    "exclude": false,
+    "params_exclude": []
+  },
+  "050-883": {
+    "year_end": 1997,
+    "year_init": 1980,
+    "exclude": false,
+    "params_exclude": []
+  },
+  "051-733": {
+    "year_end": 1938,
+    "year_init": 1937,
+    "exclude": false,
+    "params_exclude": []
+  },
+  "052-733": {
+    "year_end": 1991,
+    "year_init": 1950,
+    "exclude": false,
+    "params_exclude": []
+  },
+  "053-749": {
+    "year_end": 1979,
+    "year_init": 1978,
+    "exclude": false,
+    "params_exclude": []
+  },
+  "056-731": {
+    "year_end": 1891,
+    "year_init": 1804,
+    "exclude": false,
+    "params_exclude": []
+  },
+  "057-732": {
+    "year_end": 1993,
+    "year_init": 1888,
+    "exclude": false,
+    "params_exclude": []
+  },
+  "059-926": {
+    "year_end": 1989,
+    "year_init": 1982,
+    "exclude": false,
+    "params_exclude": []
+  },
+  "060-926": {
+    "year_end": 1988,
+    "year_init": 1954,
+    "exclude": false,
+    "params_exclude": []
+  },
+  "063-714": {
+    "year_end": 2014,
+    "year_init": 1978,
+    "exclude": false,
+    "params_exclude": []
+  },
+  "064-735": {
+    "year_end": 2000,
+    "year_init": 1936,
+    "exclude": false,
+    "params_exclude": []
+  },
+  "065-735": {
+    "year_end": 2000,
+    "year_init": 1947,
+    "exclude": false,
+    "params_exclude": []
+  },
+  "066-144": {
+    "year_end": 1992,
+    "year_init": 1985,
+    "exclude": false,
+    "params_exclude": []
+  },
+  "067-145": {
+    "year_end": 1991,
+    "year_init": 1979,
+    "exclude": false,
+    "params_exclude": []
+  },
+  "068-734": {
+    "year_end": 1924,
+    "year_init": 1893,
+    "exclude": false,
+    "params_exclude": []
+  },
+  "069-701": {
+    "year_end": 1863,
+    "year_init": 1784,
+    "exclude": false,
+    "params_exclude": []
+  },
+  "069-701_form_type1": {
+    "year_end": 1863,
+    "year_init": 1784,
+    "exclude": false,
+    "params_exclude": []
+  },
+  "069-701_form_type2": {
+    "year_end": 1863,
+    "year_init": 1784,
+    "exclude": false,
+    "params_exclude": []
+  },
+  "070-667": {
+    "year_end": 1997,
+    "year_init": 1979,
+    "exclude": false,
+    "params_exclude": []
+  },
+  "071-667": {
+    "year_end": 1997,
+    "year_init": 1971,
+    "exclude": false,
+    "params_exclude": []
+  },
+  "072-926": {
+    "year_end": 1997,
+    "year_init": 1982,
+    "exclude": false,
+    "params_exclude": []
+  },
+  "077-892": {
+    "year_end": 1997,
+    "year_init": 1994,
+    "exclude": false,
+    "params_exclude": []
+  },
+  "077-893": {
+    "year_end": 1997,
+    "year_init": 1994,
+    "exclude": false,
+    "params_exclude": []
+  },
+  "077-896": {
+    "year_end": 1997,
+    "year_init": 1994,
+    "exclude": false,
+    "params_exclude": []
+  },
+  "078-927": {
+    "year_end": 1997,
+    "year_init": 1987,
+    "exclude": false,
+    "params_exclude": []
+  },
+  "079-888": {
+    "year_end": 1997,
+    "year_init": 1980,
+    "exclude": false,
+    "params_exclude": []
+  },
+  "084-705": {
+    "year_end": 1939,
+    "year_init": 1939,
+    "exclude": false,
+    "params_exclude": []
+  },
+  "084-706": {
+    "year_end": 1944,
+    "year_init": 1910,
+    "exclude": false,
+    "params_exclude": []
+  },
+  "084-707": {
+    "year_end": 1932,
+    "year_init": 1913,
+    "exclude": false,
+    "params_exclude": []
+  },
+  "085-705": {
+    "year_end": 1946,
+    "year_init": 1910,
+    "exclude": false,
+    "params_exclude": []
+  },
+  "085-706": {
+    "year_end": 1943,
+    "year_init": 1910,
+    "exclude": false,
+    "params_exclude": []
+  },
+  "085-707": {
+    "year_end": 1941,
+    "year_init": 1913,
+    "exclude": false,
+    "params_exclude": []
+  },
+  "090-201": {
+    "year_end": 1929,
+    "year_init": 1856,
+    "exclude": false,
+    "params_exclude": []
+  },
+  "090-202": {
+    "year_end": 1938,
+    "year_init": 1915,
+    "exclude": false,
+    "params_exclude": []
+  },
+  "090-203": {
+    "year_end": 1961,
+    "year_init": 1929,
+    "exclude": false,
+    "params_exclude": []
+  },
+  "090-204": {
+    "year_end": 1949,
+    "year_init": 1930,
+    "exclude": false,
+    "params_exclude": []
+  },
+  "090-205": {
+    "year_end": 1949,
+    "year_init": 1946,
+    "exclude": false,
+    "params_exclude": []
+  },
+  "090-206": {
+    "year_end": 1948,
+    "year_init": 1948,
+    "exclude": false,
+    "params_exclude": []
+  },
+  "090-207": {
+    "year_end": 1949,
+    "year_init": 1945,
+    "exclude": false,
+    "params_exclude": []
+  },
+  "090-209": {
+    "year_end": 1956,
+    "year_init": 1951,
+    "exclude": false,
+    "params_exclude": []
+  },
+  "090-211": {
+    "year_end": 1960,
+    "year_init": 1957,
+    "exclude": false,
+    "params_exclude": []
+  },
+  "090-213": {
+    "year_end": 1962,
+    "year_init": 1953,
+    "exclude": false,
+    "params_exclude": []
+  },
+  "090-215": {
+    "year_end": 1939,
+    "year_init": 1860,
+    "exclude": false,
+    "params_exclude": []
+  },
+  "090-218": {
+    "year_end": 1963,
+    "year_init": 1953,
+    "exclude": false,
+    "params_exclude": []
+  },
+  "090-221": {
+    "year_end": 1988,
+    "year_init": 1962,
+    "exclude": false,
+    "params_exclude": []
+  },
+  "090-223": {
+    "year_end": 1982,
+    "year_init": 1962,
+    "exclude": false,
+    "params_exclude": []
+  },
+  "090-224": {
+    "year_end": 1981,
+    "year_init": 1976,
+    "exclude": false,
+    "params_exclude": []
+  },
+  "090-226": {
+    "year_end": 1952,
+    "year_init": 1949,
+    "exclude": false,
+    "params_exclude": []
+  },
+  "090-227": {
+    "year_end": 1954,
+    "year_init": 1947,
+    "exclude": false,
+    "params_exclude": []
+  },
+  "090-229": {
+    "year_end": 1981,
+    "year_init": 1953,
+    "exclude": false,
+    "params_exclude": []
+  },
+  "090-230": {
+    "year_end": 1971,
+    "year_init": 1962,
+    "exclude": false,
+    "params_exclude": []
+  },
+  "090-233": {
+    "year_end": 1994,
+    "year_init": 1982,
+    "exclude": false,
+    "params_exclude": []
+  },
+  "090-234": {
+    "year_end": 1994,
+    "year_init": 1982,
+    "exclude": false,
+    "params_exclude": []
+  },
+  "090-239": {
+    "year_end": 1993,
+    "year_init": 1953,
+    "exclude": false,
+    "params_exclude": []
+  },
+  "090-254": {
+    "year_end": 1994,
+    "year_init": 1954,
+    "exclude": false,
+    "params_exclude": []
+  },
+  "090-255": {
+    "year_end": 1994,
+    "year_init": 1857,
+    "exclude": false,
+    "params_exclude": []
+  },
+  "091-201": {
+    "year_end": 1925,
+    "year_init": 1854,
+    "exclude": false,
+    "params_exclude": []
+  },
+  "091-202": {
+    "year_end": 1936,
+    "year_init": 1915,
+    "exclude": false,
+    "params_exclude": []
+  },
+  "091-203": {
+    "year_end": 1944,
+    "year_init": 1929,
+    "exclude": false,
+    "params_exclude": []
+  },
+  "091-204": {
+    "year_end": 1949,
+    "year_init": 1929,
+    "exclude": false,
+    "params_exclude": []
+  },
+  "091-205": {
+    "year_end": 1956,
+    "year_init": 1945,
+    "exclude": false,
+    "params_exclude": []
+  },
+  "091-206": {
+    "year_end": 1948,
+    "year_init": 1947,
+    "exclude": false,
+    "params_exclude": []
+  },
+  "091-207": {
+    "year_end": 1953,
+    "year_init": 1945,
+    "exclude": false,
+    "params_exclude": []
+  },
+  "091-209": {
+    "year_end": 1956,
+    "year_init": 1951,
+    "exclude": false,
+    "params_exclude": []
+  },
+  "091-210": {
+    "year_end": 1956,
+    "year_init": 1950,
+    "exclude": false,
+    "params_exclude": []
+  },
+  "091-211": {
+    "year_end": 1961,
+    "year_init": 1956,
+    "exclude": false,
+    "params_exclude": []
+  },
+  "091-213": {
+    "year_end": 1961,
+    "year_init": 1956,
+    "exclude": false,
+    "params_exclude": []
+  },
+  "091-214": {
+    "year_end": 1961,
+    "year_init": 1956,
+    "exclude": false,
+    "params_exclude": []
+  },
+  "091-215": {
+    "year_end": 1940,
+    "year_init": 1862,
+    "exclude": false,
+    "params_exclude": []
+  },
+  "091-221": {
+    "year_end": 1979,
+    "year_init": 1962,
+    "exclude": false,
+    "params_exclude": []
+  },
+  "092-201": {
+    "year_end": 1956,
+    "year_init": 1855,
+    "exclude": false,
+    "params_exclude": []
+  },
+  "092-254": {
+    "year_end": 1978,
+    "year_init": 1860,
+    "exclude": false,
+    "params_exclude": []
+  },
+  "093-216": {
+    "year_end": 1939,
+    "year_init": 1935,
+    "exclude": false,
+    "params_exclude": []
+  },
+  "095-762": {
+    "year_end": 1940,
+    "year_init": 1889,
+    "exclude": false,
+    "params_exclude": []
+  },
+  "096-702": {
+    "year_end": 1889,
+    "year_init": 1867,
+    "exclude": false,
+    "params_exclude": []
+  },
+  "098-705": {
+    "year_end": 1944,
+    "year_init": 1933,
+    "exclude": false,
+    "params_exclude": []
+  },
+  "098-706": {
+    "year_end": 1941,
+    "year_init": 1914,
+    "exclude": false,
+    "params_exclude": []
+  },
+  "098-707": {
+    "year_end": 1919,
+    "year_init": 1916,
+    "exclude": false,
+    "params_exclude": []
+  },
+  "100-792": {
+    "year_end": 1999,
+    "year_init": 1998,
+    "exclude": false,
+    "params_exclude": []
+  },
+  "100-793": {
+    "year_end": 1999,
+    "year_init": 1998,
+    "exclude": false,
+    "params_exclude": []
+  },
+  "100-794": {
+    "year_end": 1999,
+    "year_init": 1998,
+    "exclude": false,
+    "params_exclude": []
+  },
+  "103-792": {
+    "year_end": 2014,
+    "year_init": 1999,
+    "exclude": false,
+    "params_exclude": []
+  },
+  "103-793": {
+    "year_end": 2014,
+    "year_init": 1999,
+    "exclude": false,
+    "params_exclude": []
+  },
+  "103-794": {
+    "year_end": 2014,
+    "year_init": 1999,
+    "exclude": false,
+    "params_exclude": []
+  },
+  "103-795": {
+    "year_end": 2014,
+    "year_init": 2005,
+    "exclude": false,
+    "params_exclude": []
+  },
+  "103-797": {
+    "year_end": 2014,
+    "year_init": 2008,
+    "exclude": false,
+    "params_exclude": []
+  },
+  "109-708": {
+    "year_end": 2012,
+    "year_init": 2001,
+    "exclude": false,
+    "params_exclude": []
+  },
+  "110-700": {
+    "year_end": 2010,
+    "year_init": 2000,
+    "exclude": false,
+    "params_exclude": []
+  },
+  "111-874": {
+    "year_end": 2007,
+    "year_init": 1991,
+    "exclude": false,
+    "params_exclude": []
+  },
+  "112-926": {
+    "year_end": 2014,
+    "year_init": 1982,
+    "exclude": false,
+    "params_exclude": []
+  },
+  "113-927": {
+    "year_end": 2012,
+    "year_init": 1992,
+    "exclude": false,
+    "params_exclude": []
+  },
+  "114-992": {
+    "year_end": 2014,
+    "year_init": 1999,
+    "exclude": false,
+    "params_exclude": []
+  },
+  "114-993": {
+    "year_end": 2014,
+    "year_init": 1999,
+    "exclude": false,
+    "params_exclude": []
+  },
+  "114-994": {
+    "year_end": 2014,
+    "year_init": 1999,
+    "exclude": false,
+    "params_exclude": []
+  },
+  "114-995": {
+    "year_end": 2014,
+    "year_init": 1999,
+    "exclude": false,
+    "params_exclude": []
+  },
+  "115-761": {
+    "year_end": 1984,
+    "year_init": 1946,
+    "exclude": false,
+    "params_exclude": []
+  },
+  "116-761": {
+    "year_end": 1976,
+    "year_init": 1951,
+    "exclude": false,
+    "params_exclude": []
+  },
+  "117-144": {
+    "year_end": 2001,
+    "year_init": 1990,
+    "exclude": false,
+    "params_exclude": []
+  },
+  "118-144": {
+    "year_end": 2004,
+    "year_init": 1996,
+    "exclude": false,
+    "params_exclude": []
+  },
+  "119-144": {
+    "year_end": 2004,
+    "year_init": 1998,
+    "exclude": false,
+    "params_exclude": []
+  },
+  "120-144": {
+    "year_end": 2004,
+    "year_init": 2000,
+    "exclude": false,
+    "params_exclude": []
+  },
+  "121-883": {
+    "year_end": 2012,
+    "year_init": 1998,
+    "exclude": false,
+    "params_exclude": []
+  },
+  "122-883": {
+    "year_end": 2008,
+    "year_init": 1980,
+    "exclude": false,
+    "params_exclude": []
+  },
+  "125-704": {
+    "year_end": 1894,
+    "year_init": 1878,
+    "exclude": false,
+    "params_exclude": []
+  },
+  "126-245": {
+    "year_end": 1955,
+    "year_init": 1936,
+    "exclude": false,
+    "params_exclude": []
+  },
+  "127-246": {
+    "year_end": 1940,
+    "year_init": 1898,
+    "exclude": false,
+    "params_exclude": []
+  },
+  "128-734": {
+    "year_end": 1902,
+    "year_init": 1898,
+    "exclude": false,
+    "params_exclude": []
+  },
+  "129-736": {
+    "year_end": 1934,
+    "year_init": 1929,
+    "exclude": false,
+    "params_exclude": []
+  },
+  "130-740": {
+    "year_end": 1998,
+    "year_init": 1990,
+    "exclude": false,
+    "params_exclude": []
+  },
+  "131-740": {
+    "year_end": 2014,
+    "year_init": 2005,
+    "exclude": false,
+    "params_exclude": []
+  },
+  "133-730": {
+    "year_end": 1855,
+    "year_init": 1662,
+    "exclude": false,
+    "params_exclude": []
+  },
+  "134-720": {
+    "year_end": 1914,
+    "year_init": 1884,
+    "exclude": false,
+    "params_exclude": []
+  },
+  "135-720": {
+    "year_end": 1902,
+    "year_init": 1876,
+    "exclude": false,
+    "params_exclude": []
+  },
+  "136-720": {
+    "year_end": 1899,
+    "year_init": 1882,
+    "exclude": false,
+    "params_exclude": []
+  },
+  "137-780": {
+    "year_end": 2005,
+    "year_init": 1772,
+    "exclude": false,
+    "params_exclude": []
+  },
+  "138-247": {
+    "year_end": 1876,
+    "year_init": 1872,
+    "exclude": false,
+    "params_exclude": []
+  },
+  "139-715": {
+    "year_end": 1996,
+    "year_init": 1980,
+    "exclude": false,
+    "params_exclude": []
+  },
+  "140-117": {
+    "year_end": 1964,
+    "year_init": 1950,
+    "exclude": false,
+    "params_exclude": []
+  },
+  "141-117": {
+    "year_end": 1964,
+    "year_init": 1951,
+    "exclude": false,
+    "params_exclude": []
+  },
+  "142-117": {
+    "year_end": 1964,
+    "year_init": 1951,
+    "exclude": false,
+    "params_exclude": []
+  },
+  "143-781": {
+    "year_end": 1993,
+    "year_init": 1968,
+    "exclude": false,
+    "params_exclude": []
+  },
+  "144-703": {
+    "year_end": 1980,
+    "year_init": 1931,
+    "exclude": false,
+    "params_exclude": []
+  },
+  "146-700": {
+    "year_end": 2012,
+    "year_init": 2010,
+    "exclude": false,
+    "params_exclude": []
+  },
+  "147-700": {
+    "year_end": 2012,
+    "year_init": 2000,
+    "exclude": false,
+    "params_exclude": []
+  },
+  "148-248": {
+    "year_end": 1834,
+    "year_init": 1789,
+    "exclude": false,
+    "params_exclude": []
+  },
+  "149-780": {
+    "year_end": 2014,
+    "year_init": 1770,
+    "exclude": false,
+    "params_exclude": []
+  },
+  "150-874": {
+    "year_end": 2014,
+    "year_init": 2013,
+    "exclude": false,
+    "params_exclude": []
+  },
+  "151-875": {
+    "year_end": 2014,
+    "year_init": 2012,
+    "exclude": false,
+    "params_exclude": []
+  },
+  "152-721": {
+    "year_end": 1868,
+    "year_init": 1845,
+    "exclude": false,
+    "params_exclude": []
+  },
+  "156-750": {
+    "year_end": 1977,
+    "year_init": 1974,
+    "exclude": false,
+    "params_exclude": []
+  },
+  "157-709": {
+    "year_end": 2006,
+    "year_init": 2004,
+    "exclude": false,
+    "params_exclude": []
+  },
+  "158-875": {
+    "year_end": 2014,
+    "year_init": 2014,
+    "exclude": false,
+    "params_exclude": []
+  },
+  "159-782": {
+    "year_end": 2013,
+    "year_init": 1980,
+    "exclude": false,
+    "params_exclude": []
+  },
+  "160-720": {
+    "year_end": 1907,
+    "year_init": 1868,
+    "exclude": false,
+    "params_exclude": []
+  },
+  "161-720": {
+    "year_end": 1988,
+    "year_init": 1929,
+    "exclude": false,
+    "params_exclude": []
+  },
+  "162-782": {
+    "year_end": 2014,
+    "year_init": 2014,
+    "exclude": false,
+    "params_exclude": []
+  },
+  "163-782": {
+    "year_end": 2014,
+    "year_init": 2000,
+    "exclude": false,
+    "params_exclude": []
+  },
+  "164-782": {
+    "year_end": 2014,
+    "year_init": 2001,
+    "exclude": false,
+    "params_exclude": []
+  },
+  "165-249": {
+    "year_end": 1925,
+    "year_init": 1912,
+    "exclude": false,
+    "params_exclude": []
+  },
+  "166-710": {
+    "year_end": 1946,
+    "year_init": 1870,
+    "exclude": false,
+    "params_exclude": []
+  },
+  "167-246": {
+    "year_end": 1930,
+    "year_init": 1699,
+    "exclude": false,
+    "params_exclude": []
+  },
+  "167-247": {
+    "year_end": 1875,
+    "year_init": 1874,
+    "exclude": false,
+    "params_exclude": []
+  },
+  "168-246": {
+    "year_end": 1872,
+    "year_init": 1816,
+    "exclude": false,
+    "params_exclude": []
+  },
+  "169-146": {
+    "year_end": 2014,
+    "year_init": 1998,
+    "exclude": false,
+    "params_exclude": []
+  },
+  "170-146": {
+    "year_end": 2014,
+    "year_init": 1977,
+    "exclude": false,
+    "params_exclude": []
+  },
+  "171-711": {
+    "year_end": 1899,
+    "year_init": 1889,
+    "exclude": false,
+    "params_exclude": []
+  },
+  "params_exclude": [
+    "observations-wbt"
+  ],
+  "year_init": 1700,
+  "year_end": 2014
+}

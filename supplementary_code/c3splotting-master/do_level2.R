@@ -2,7 +2,7 @@ my_args = commandArgs(trailingOnly=TRUE)
 
 # if running on command line, the above code sets my_args
 # to the command line arguments. If running within an
-# R or Rstudio session, need to set my_args2 to the 
+# R or Rstudio session, need to set my_args2 to the
 # wanted values which are then used if no command line input
 
 if (length(my_args) == 0) my_args<-my_args2
@@ -63,7 +63,7 @@ for ( dck.want in as.character(seq(start.dck,end.dck,1)) ) {
   sp<-split(df,df$sid)
   for (sid.want in names(sp) ) {
      df<-sp[[sid.want]]
-     op<-dck_sid_summary(df,sid_txt_file="sid_list.txt",dck_txt_file="dck_list.txt",inv.ver="2") 
+     op<-dck_sid_summary(df,sid_txt_file="sid_list.txt",dck_txt_file="dck_list.txt",inv.ver="2")
      if ( !dir.exists(config$output_path_txt) ) dir.create(config$output_path_txt, recursive=TRUE)
      write.table(op,paste0(config$output_path_txt,"",dck.want,"_",sid.want,".txt"),sep=",",col.names=T)
   }

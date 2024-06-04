@@ -19,7 +19,7 @@ for ( dir in dirs ) {
   dck.want<-substr(basename(dir),5,7)
   sid.want<-substr(basename(dir),1,3)
   fn<-paste0(check.dir,"C3S_D311_Lot1_Marine_sid",sid.want,"_dck",dck.want,".pdf")
-  
+
   #fn<-gsub("-","_",fn)
   if (file.exists(fn)) {
     #cat("got",fn,"\n")
