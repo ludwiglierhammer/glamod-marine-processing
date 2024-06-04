@@ -56,8 +56,9 @@ class Cli:
         work_directory=None,
         config_file=None,
         suite="",
+        overwrite=False,
     ):
-        self.machine = machine
+        self.machine = machine.lower()
         self.level = level
         self.release = release
         self.update = update
@@ -67,11 +68,11 @@ class Cli:
         self.config_file = config_file
         self.suite = suite
         self.release_update = f"{release}-{update}"
+        self.overwrite = overwrite
 
     def initialize(self):
         """Initialize command line interface settings."""
         if not self.config_file:
-            # config = get_configuration(self.machine)
             config = self.build_configuration()
         elif not os.path.isfile(self.config_file):
             raise FileNotFoundError(config)
@@ -92,6 +93,8 @@ class Cli:
     def build_configuration(self):
         """Build configuration."""
         config = get_configuration(self.machine)
+        config["machine"] = self.machine
+        config["overwrite"] = self.overwrite
         config["abbreviations"] = {
             "release": self.release,
             "update": self.update,
@@ -222,6 +225,30 @@ class Options:
             "--config_file",
             default=False,
             help="Use already existing configuration file.",
+        )
+        self.preprocessing = click.option(
+            "-preproc",
+            "--preprocessing",
+            is_flag=True,
+            help="Do some preprocessing for qc_suite only.",
+        )
+        self.overwrite = click.option(
+            "-o",
+            "--overwrite",
+            is_flag=True,
+            help="Overwrite already existing data.",
+        )
+        self.high_resolution_qc = click.option(
+            "-hi_qc",
+            "--high_resolution_qc",
+            is_flag=True,
+            help="Do high resolution QC for qc_suite only.",
+        )
+        self.quality_control = click.option(
+            "-qc",
+            "--quality_control",
+            is_flag=True,
+            help="Do quality control for qc_suite only",
         )
 
 

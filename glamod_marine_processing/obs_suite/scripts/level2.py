@@ -196,13 +196,10 @@ try:
     include_param_list.append("header")
     if exclude_sid_dck:
         logging.info(f"Full dataset {params.sid_dck} excluded from level2")
-        os.mkdir(L2_excluded_path)
         for table in cdm_tables:
             files = os.path.join(L1e_path, table + "*.psv")
             call(" ".join(["cp", files, L2_excluded_path, "2>/dev/null"]), shell=True)
     else:
-        os.mkdir(L2_path)
-        os.mkdir(L2_reports_path)
         period_brace = "{" + str(year_init) + ".." + str(year_end) + "}"
         left_period_brace = "{" + str(left_min_period) + ".." + str(year_init - 1) + "}"
         right_period_brace = (
@@ -213,8 +210,6 @@ try:
             files = os.path.join(L1e_path, table + "*.psv")
             file_list = glob.glob(files)
             if len(file_list) > 0:
-                if not os.path.isdir(L2_excluded_path):
-                    os.mkdir(L2_excluded_path)
                 call(
                     " ".join(["cp", files, L2_excluded_path, "2>/dev/null"]),
                     shell=True,
@@ -224,8 +219,6 @@ try:
             files = os.path.join(L1e_path, table + FFS + period_brace + FFS + "*.psv")
             call(" ".join(["cp", files, L2_path, "2>/dev/null"]), shell=True)
         # Send out of release period to excluded
-        if not os.path.isdir(L2_excluded_path):
-            os.mkdir(L2_excluded_path)
         files = os.path.join(
             L1e_path, FFS.join(["*", left_period_brace, "??", "*.psv"])
         )

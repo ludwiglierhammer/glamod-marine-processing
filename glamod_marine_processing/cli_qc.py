@@ -28,6 +28,10 @@ def QcCli(
     work_directory,
     config_file,
     submit_jobs,
+    preprocessing,
+    quality_control,
+    high_resolution_qc,
+    overwrite,
 ):
     """Enry point for theqcmetadata_suite command line interface."""
     config = Cli(
@@ -39,6 +43,7 @@ def QcCli(
         work_directory=work_directory,
         config_file=config_file,
         suite="qc_suite",
+        overwrite=overwrite,
     ).initialize()
 
     p = SimpleNamespace(**config["paths"])
@@ -89,6 +94,7 @@ def QcCli(
         out_dir=out_dir,
         ICOADS_dir=icoads_dir,
         track_out_dir=out_dir,
+        external_files=external_files,
         key="Directories",
     )
 
@@ -128,12 +134,12 @@ def QcCli(
         ostia_test_file=ostia_test_file,
         key="TestFiles",
     )
-
-    config["machine"] = machine
     config["submit_jobs"] = submit_jobs
 
     mkdir(qc_log_directory)
     mkdir(qc_hr_log_directory)
+    mkdir(out_dir)
+    mkdir(icoads_dir)
     config = add_to_config(
         config,
         qc_log_directory=qc_log_directory,
@@ -160,25 +166,25 @@ def QcCli(
         p.data_directory, release, "metoffice_qc", "corrected"
     )
 
-    slurm_script = "preprocess.py"
-    slurm_script = os.path.join(p.scripts_directory, slurm_script)
-
-    os.system(
-        "python {} -source={} -dck_list={} -dck_period={} -corrections={} -destination={} -release={} -update={}".format(
-            slurm_script,
-            qc_source,
-            dck_list,
-            dck_period,
-            corrections,
-            qc_destination,
-            release,
-            update,
+    if preprocessing is True:
+        preproc_script = "preprocess.py"
+        preproc_script = os.path.join(p.scripts_directory, preproc_script)
+        os.system(
+            "python {} -source={} -dck_list={} -dck_period={} -corrections={} -destination={} -release={} -update={}".format(
+                preproc_script,
+                qc_source,
+                dck_list,
+                dck_period,
+                corrections,
+                qc_destination,
+                release,
+                update,
+            )
         )
-    )
 
     slurm_script = "qc_slurm.py"
     slurm_script = os.path.join(p.lotus_scripts_directory, slurm_script)
-    os.system(f"python {slurm_script} {qc_config}")
-
-    slurm_script = os.path.join(p.lotus_scripts_directory, slurm_script)
-    os.system(f"python {slurm_script} {qc_config} --hr")
+    if quality_control is True:
+        os.system(f"python {slurm_script} {qc_config}")
+    if high_resolution_qc is True:
+        os.system(f"python {slurm_script} {qc_config} --hr")

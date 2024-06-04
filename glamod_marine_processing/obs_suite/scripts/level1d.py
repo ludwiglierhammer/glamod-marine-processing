@@ -62,7 +62,6 @@ import subprocess
 import sys
 from collections import Counter
 from importlib import reload
-from shutil import rmtree
 
 import pandas as pd
 import simplejson
@@ -411,7 +410,6 @@ process_table(header_df, table)
 header_df.set_index("report_id", inplace=True, drop=False)
 # for obs
 for table in obs_tables:
-    print(table)
     process_table(table, table)
 
 # 4. SAVE QUICKLOOK -----------------------------------------------------------
@@ -427,6 +425,6 @@ with open(level_io_filename, "w") as fileObj:
     )
 
 # 5. clean scratch for comming tasks ------------------------------------------
-rmtree(scratch_)
+# rmtree(scratch_)
 
 logging.info("End")

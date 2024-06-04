@@ -81,6 +81,7 @@ LEVEL_SOURCE = slurm_preferences.level_source[LEVEL]
 SOURCE_PATTERN = slurm_preferences.source_pattern[LEVEL]
 PYSCRIPT = f"{LEVEL}.py"
 MACHINE = script_config["scripts"]["machine"].lower()
+overwrite = script_config["overwrite"]
 
 release = script_config["abbreviations"]["release"]
 update = script_config["abbreviations"]["update"]
@@ -187,11 +188,17 @@ for sid_dck in process_list:
             if os.path.isfile(f"{log_diri}/{i+1}.failure"):
                 logging.info(f"Task {i+1} failed. Try calculating again.")
                 os.remove(f"{log_diri}/{i+1}.failure")
-            if os.path.isfile(f"{log_diri}/{i+1}.success"):
+            elif os.path.isfile(f"{log_diri}/{i+1}.success"):
+                if overwrite is not True:
+                    logging.info(
+                        f"Task {i+1} was already succesfull. Skip calculating again."
+                    )
+                    continue
                 logging.info(
-                    f"Task {i+1} was already succesfull. Skip calculating again."
+                    f"Task {i+1} was already succesfull. However, calculate task again since option 'overwrite' was chosen."
                 )
-                continue
+                os.remove(f"{log_diri}/{i+1}.success")
+
             fh.writelines(
                 "{0} {1}/{2}.input > {1}/{2}.out 2> {1}/{2}.out; if [ $? -eq 0 ]; "
                 "then touch {1}/{2}.success; else touch {1}/{2}.failure; fi  \n".format(

@@ -126,7 +126,6 @@ def get_base_path():
 def get_configuration(machine):
     """Get machine-depending configuration file."""
     _base_path = get_base_path()
-    machine = machine.lower()
     try:
         config_file = config_files[machine]
     except KeyError:
