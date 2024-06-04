@@ -1,0 +1,425 @@
+{
+  "id": "wmo47",
+  "version": 0,
+  "format": "fixed",
+  "content": [
+    {
+      "name": "one",
+      "field_length": 1,
+      "column_type": "object",
+      "valid_min": null,
+      "valid_max": null,
+      "missing_value": null,
+      "code_table": null
+    },
+    {
+      "name": "rcnty",
+      "field_length": 2,
+      "column_type": "object",
+      "valid_min": null,
+      "valid_max": null,
+      "missing_value": null,
+      "code_table": null
+    },
+    {
+      "name": "name",
+      "field_length": 25,
+      "column_type": "object",
+      "valid_min": null,
+      "valid_max": null,
+      "missing_value": null,
+      "code_table": null
+    },
+    {
+      "name": "call",
+      "field_length": 7,
+      "column_type": "object",
+      "valid_min": null,
+      "valid_max": null,
+      "missing_value": null,
+      "code_table": null
+    },
+    {
+      "name": "vsslM",
+      "field_length": 2,
+      "column_type": "object",
+      "valid_min": null,
+      "valid_max": null,
+      "missing_value": null,
+      "code_table": null
+    },
+    {
+      "name": "rte1",
+      "field_length": 8,
+      "column_type": "object",
+      "valid_min": null,
+      "valid_max": null,
+      "missing_value": null,
+      "code_table": null
+    },
+    {
+      "name": "barm1",
+      "field_length": 3,
+      "column_type": "object",
+      "valid_min": null,
+      "valid_max": null,
+      "missing_value": null,
+      "code_table": null
+    },
+    {
+      "name": "thrm1",
+      "field_length": 3,
+      "column_type": "object",
+      "valid_min": null,
+      "valid_max": null,
+      "missing_value": null,
+      "code_table": null
+    },
+    {
+      "name": "thmE1",
+      "field_length": 2,
+      "column_type": "object",
+      "valid_min": null,
+      "valid_max": null,
+      "missing_value": null,
+      "code_table": null
+    },
+    {
+      "name": "hygr1",
+      "field_length": 1,
+      "column_type": "object",
+      "valid_min": null,
+      "valid_max": null,
+      "missing_value": null,
+      "code_table": null
+    },
+    {
+      "name": "hgrE1",
+      "field_length": 2,
+      "column_type": "object",
+      "valid_min": null,
+      "valid_max": null,
+      "missing_value": null,
+      "code_table": null
+    },
+    {
+      "name": "sstM1",
+      "field_length": 4,
+      "column_type": "object",
+      "valid_min": null,
+      "valid_max": null,
+      "missing_value": null,
+      "code_table": null
+    },
+    {
+      "name": "barg1",
+      "field_length": 3,
+      "column_type": "object",
+      "valid_min": null,
+      "valid_max": null,
+      "missing_value": null,
+      "code_table": null
+    },
+    {
+      "name": "othI1",
+      "field_length": 3,
+      "column_type": "object",
+      "valid_min": null,
+      "valid_max": null,
+      "missing_value": null,
+      "code_table": null
+    },
+    {
+      "name": "tele",
+      "field_length": 3,
+      "column_type": "object",
+      "valid_min": null,
+      "valid_max": null,
+      "missing_value": null,
+      "code_table": null
+    },
+    {
+      "name": "radOp",
+      "field_length": 1,
+      "column_type": "object",
+      "valid_min": null,
+      "valid_max": null,
+      "missing_value": null,
+      "code_table": null
+    },
+    {
+      "name": "platH",
+      "field_length": 2,
+      "column_type": "packedFloat",
+      "valid_min": 0.1,
+      "valid_max": 70,
+      "missing_value": null,
+      "code_table": null
+    },
+    {
+      "name": "blank1",
+      "field_length": 1,
+      "column_type": "object",
+      "valid_min": null,
+      "valid_max": null,
+      "missing_value": null,
+      "code_table": null
+    },
+    {
+      "name": "anmH",
+      "field_length": 2,
+      "column_type": "packedFloat",
+      "valid_min": 0.1,
+      "valid_max": 70,
+      "missing_value": null,
+      "code_table": null
+    },
+    {
+      "name": "fieldabbrev1",
+      "field_length": 2,
+      "column_type": "object",
+      "valid_min": null,
+      "valid_max": null,
+      "missing_value": null,
+      "code_table": null
+    },
+    {
+      "name": "footID1",
+      "field_length": 2,
+      "column_type": "object",
+      "valid_min": null,
+      "valid_max": null,
+      "missing_value": null,
+      "code_table": null
+    },
+    {
+      "name": "blank2",
+      "field_length": 4,
+      "column_type": "object",
+      "valid_min": null,
+      "valid_max": null,
+      "missing_value": null,
+      "code_table": null
+    },
+    {
+      "name": "barm2",
+      "field_length": 3,
+      "column_type": "object",
+      "valid_min": null,
+      "valid_max": null,
+      "missing_value": null,
+      "code_table": null
+    },
+    {
+      "name": "thrm2",
+      "field_length": 3,
+      "column_type": "object",
+      "valid_min": null,
+      "valid_max": null,
+      "missing_value": null,
+      "code_table": null
+    },
+    {
+      "name": "thmE2",
+      "field_length": 2,
+      "column_type": "object",
+      "valid_min": null,
+      "valid_max": null,
+      "missing_value": null,
+      "code_table": null
+    },
+    {
+      "name": "hygr2",
+      "field_length": 1,
+      "column_type": "object",
+      "valid_min": null,
+      "valid_max": null,
+      "missing_value": null,
+      "code_table": null
+    },
+    {
+      "name": "hgrE2",
+      "field_length": 2,
+      "column_type": "object",
+      "valid_min": null,
+      "valid_max": null,
+      "missing_value": null,
+      "code_table": null
+    },
+    {
+      "name": "sstM2",
+      "field_length": 4,
+      "column_type": "object",
+      "valid_min": null,
+      "valid_max": null,
+      "missing_value": null,
+      "code_table": null
+    },
+    {
+      "name": "barg2",
+      "field_length": 3,
+      "column_type": "object",
+      "valid_min": null,
+      "valid_max": null,
+      "missing_value": null,
+      "code_table": null
+    },
+    {
+      "name": "othI2",
+      "field_length": 3,
+      "column_type": "object",
+      "valid_min": null,
+      "valid_max": null,
+      "missing_value": null,
+      "code_table": null
+    },
+    {
+      "name": "satcom1",
+      "field_length": 1,
+      "column_type": "object",
+      "valid_min": null,
+      "valid_max": null,
+      "missing_value": null,
+      "code_table": null
+    },
+    {
+      "name": "satcom2",
+      "field_length": 1,
+      "column_type": "object",
+      "valid_min": null,
+      "valid_max": null,
+      "missing_value": null,
+      "code_table": null
+    },
+    {
+      "name": "call2",
+      "field_length": 9,
+      "column_type": "object",
+      "valid_min": null,
+      "valid_max": null,
+      "missing_value": null,
+      "code_table": null
+    },
+    {
+      "name": "othI3",
+      "field_length": 3,
+      "column_type": "object",
+      "valid_min": null,
+      "valid_max": null,
+      "missing_value": null,
+      "code_table": null
+    },
+    {
+      "name": "othI4",
+      "field_length": 3,
+      "column_type": "object",
+      "valid_min": null,
+      "valid_max": null,
+      "missing_value": null,
+      "code_table": null
+    },
+    {
+      "name": "othI5",
+      "field_length": 3,
+      "column_type": "object",
+      "valid_min": null,
+      "valid_max": null,
+      "missing_value": null,
+      "code_table": null
+    },
+    {
+      "name": "othI6",
+      "field_length": 3,
+      "column_type": "object",
+      "valid_min": null,
+      "valid_max": null,
+      "missing_value": null,
+      "code_table": null
+    },
+    {
+      "name": "name2",
+      "field_length": 20,
+      "column_type": "object",
+      "valid_min": null,
+      "valid_max": null,
+      "missing_value": null,
+      "code_table": null
+    },
+    {
+      "name": "rte2",
+      "field_length": 4,
+      "column_type": "object",
+      "valid_min": null,
+      "valid_max": null,
+      "missing_value": null,
+      "code_table": null
+    },
+    {
+      "name": "blank3",
+      "field_length": 1,
+      "column_type": "object",
+      "valid_min": null,
+      "valid_max": null,
+      "missing_value": null,
+      "code_table": null
+    },
+    {
+      "name": "fieldabbrev2",
+      "field_length": 2,
+      "column_type": "object",
+      "valid_min": null,
+      "valid_max": null,
+      "missing_value": null,
+      "code_table": null
+    },
+    {
+      "name": "footID2",
+      "field_length": 2,
+      "column_type": "object",
+      "valid_min": null,
+      "valid_max": null,
+      "missing_value": null,
+      "code_table": null
+    },
+    {
+      "name": "fieldabbrev3",
+      "field_length": 2,
+      "column_type": "object",
+      "valid_min": null,
+      "valid_max": null,
+      "missing_value": null,
+      "code_table": null
+    },
+    {
+      "name": "footID3",
+      "field_length": 2,
+      "column_type": "object",
+      "valid_min": null,
+      "valid_max": null,
+      "missing_value": null,
+      "code_table": null
+    }
+  ],
+  "duplicate_check": [
+    "rcnty",
+    "call",
+    "vsslM",
+    "barm1",
+    "thrm1",
+    "thmE1",
+    "hygr1",
+    "hgrE1",
+    "sstM1",
+    "barg1",
+    "platH",
+    "anmH",
+    "barm2",
+    "thrm2",
+    "thmE2",
+    "hygr2",
+    "hgrE2",
+    "sstM2",
+    "barg2"
+  ],
+  "recruiting_country": "rcnty"
+}

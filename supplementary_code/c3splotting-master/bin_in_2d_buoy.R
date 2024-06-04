@@ -12,11 +12,10 @@ y.bin <- seq(from=ybin[1],to=ybin[2],by=ybin[3])
 freq <-  as.data.frame(table(findInterval(data2bin$X, x.bin),
 		findInterval(data2bin$Y, y.bin )))
 
-freq<-freq[which(freq[,3] > 0 ),] 
+freq<-freq[which(freq[,3] > 0 ),]
 freq[,1] <- x.bin[as.numeric.factor(freq[,1])]
 freq[,2] <- y.bin[as.numeric.factor(freq[,2])]
 colnames(freq)<-c("X","Y","freq")
 
 return(freq)
 }
-

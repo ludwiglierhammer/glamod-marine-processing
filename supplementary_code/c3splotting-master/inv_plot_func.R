@@ -40,7 +40,7 @@ add_date2 <- function(df){
 
   tmp<- strftime(as.POSIXct(tmphr * 60 * 60, origin = "0001-01-01", tz = "GMT"), format = "%H:%M:%S")
 #------------------------------------------------------------------------------------------------------
-# add date 
+# add date
 #------------------------------------------------------------------------------------------------------
   dd<-paste0(df$yr,"-",df$mo,"-",df$dy," ",tmp)
   dd[grepl("NA",dd)] <- NA
@@ -143,7 +143,7 @@ y.bin <- seq(from=ybin[1],to=ybin[2],by=ybin[3])
 freq <-  as.data.frame(table(findInterval(data2bin$X, x.bin),
 		findInterval(data2bin$Y, y.bin )))
 
-freq<-freq[which(freq[,3] > 0 ),] 
+freq<-freq[which(freq[,3] > 0 ),]
 freq[,1] <- x.bin[as.numeric.factor(freq[,1])]
 freq[,2] <- y.bin[as.numeric.factor(freq[,2])]
 colnames(freq)<-c("X","Y","freq")
@@ -224,14 +224,14 @@ calc_local<-function(df) {
 
 get_id_class2 <- function (dck, id, config) {
 #get_id_class <- function (dck, id) {
-    patterns <- jsonlite::fromJSON(paste0(config$json_files_path, 
+    patterns <- jsonlite::fromJSON(paste0(config$json_files_path,
         "/dck", dck, ".json"))
     id_class <- rep("invalid", length(id))
     for (i in 1:length(patterns$patterns)) {
         ind <- grep(patterns$patterns[i], id)
         id_class[ind] <- names(patterns$patterns)[i]
     }
-    id_class <- ifelse(dck == 849 & nchar(id) == 4, "callsign", 
+    id_class <- ifelse(dck == 849 & nchar(id) == 4, "callsign",
         id_class)
     id_class <- ifelse(id == "SHIP", "SHIP", id_class)
     id_class <- ifelse(id == "MASKSTID", "MASKSTID", id_class)
@@ -245,4 +245,3 @@ get_id_class2 <- function (dck, id, config) {
     #}
     return(id_class)
 }
-

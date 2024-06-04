@@ -1,9 +1,7 @@
 {
-   "dck":143,
-   "patterns":{
-      "7digit_buoy_number":"^[0-9]{7}$"
-   },
-   "corrections":{
-      
-   }
+  "dck": 143,
+  "patterns": {
+    "7digit_buoy_number": "^[0-9]{7}$"
+  },
+  "corrections": {}
 }

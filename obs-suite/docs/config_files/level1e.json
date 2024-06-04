@@ -1,8 +1,0 @@
-{
-  "job_memo_mb": 4000,
-  "job_time_hr": "01",
-  "job_time_min": "30",
-  "qc_first_date_avail" : "1850-02",
-  "qc_last_date_avail" :"2010-11",
-  "history_explain" : "Position, tracking and parameter QC flags added"
-}

@@ -1,0 +1,23 @@
+{
+  "field": "brmL",
+  "map": [
+    {
+      "CH": "Chart room"
+    },
+    {
+      "CR": "Chart room"
+    },
+    {
+      "MSNG": "NULL"
+    },
+    {
+      "OT": "Other"
+    },
+    {
+      "PW": "Pressurised wheelhouse (closed and not vented to the outside)"
+    },
+    {
+      "WH": "Wheelhouse, not pressurised (vented to the outside)"
+    }
+  ]
+}

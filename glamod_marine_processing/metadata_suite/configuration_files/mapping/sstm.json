@@ -1,0 +1,107 @@
+{
+  "field": "sstM",
+  "map": [
+    {
+      "BT": "BT"
+    },
+    {
+      "BU": "BU"
+    },
+    {
+      "BU*": "BU"
+    },
+    {
+      "BU BT": "BU BT"
+    },
+    {
+      "BU BT C": "BU BT C"
+    },
+    {
+      "BU C": "BU C"
+    },
+    {
+      "BU C ELE*": "BU C ELE"
+    },
+    {
+      "BU ELE C*": "BU ELE C"
+    },
+    {
+      "BU ELEC*": "BU ELE C"
+    },
+    {
+      "BU ELE*": "BU ELE"
+    },
+    {
+      "BU ELE* C": "BU ELE C"
+    },
+    {
+      "BU ELE": "BU ELE"
+    },
+    {
+      "BU, C": "BU C"
+    },
+    {
+      "BU,C": "BU C"
+    },
+    {
+      "BU-": "BU"
+    },
+    {
+      "C": "C"
+    },
+    {
+      "C BU": "C BU"
+    },
+    {
+      "C,BU": "C BU"
+    },
+    {
+      "C MER": "C MER"
+    },
+    {
+      "ELE": "ELE"
+    },
+    {
+      "ELE BU*": "ELE BU"
+    },
+    {
+      "ELE*": "ELE"
+    },
+    {
+      "ELE+": "ELE"
+    },
+    {
+      "MSNG": "NULL"
+    },
+    {
+      "VU": "BU"
+    },
+    {
+      "NU": "BU"
+    },
+    {
+      "UU": "BU"
+    },
+    {
+      "HU": "BU"
+    },
+    {
+      "-": "NULL"
+    },
+    {
+      "--": "NULL"
+    },
+    {
+      "----": "NULL"
+    },
+    {
+      "ELE*BU": "ELE BU"
+    },
+    {
+      "ELE*C": "ELE C"
+    },
+    {
+      "C*": "C"
+    }
+  ]
+}

@@ -8,7 +8,7 @@ module load jasr
 open a R session (type R at the command line) then
 install.packages("config")
 
-you'll need to select a mirror site to download from, maybe in a 
+you'll need to select a mirror site to download from, maybe in a
 pop-up window, then quit
 
 q()
@@ -17,7 +17,7 @@ n
 ---------------------
 change config
 ---------------------
-look at config_level0.yml & config_level2.yml to see where files are read from 
+look at config_level0.yml & config_level2.yml to see where files are read from
 and written to edit if required
 
 ---------------------
@@ -45,5 +45,3 @@ and see what is happening: https://help.jasmin.ac.uk/article/4892-how-to-monitor
 for level2 jobs are in 2 files:
 dosub2small.slurm
 dosub2big.slurm
-
-

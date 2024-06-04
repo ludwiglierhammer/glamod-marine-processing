@@ -147,9 +147,9 @@ inv_plot <- function (level=0, data, dck.want, sid.want=NA, dev="pdf", pdfname="
    barplot(tmp_table,col="white",axes=FALSE,names.arg="",ylim=yl)
    box()
    mtext("Lon. Prec.",side=2,line=1,adj=0,cex=0.6,padj=0)
-   
+
    if(print.comm)cat("done lon prec","\n")
-   
+
    tvar<-data2plot$longitude
    tvar<-c(tvar,extra)
    tvar<-round(tvar%%1,1)
@@ -161,9 +161,9 @@ inv_plot <- function (level=0, data, dck.want, sid.want=NA, dev="pdf", pdfname="
    barplot(tmp_table,col="white",axes=FALSE,las=2,ylim=yl)
    box()
    mtext("Lat Prec.",side=2,line=1,adj=0,cex=0.6,padj=0)
-   
+
    if(print.comm)cat("done lat prec","\n")
-   
+
    extra<-seq(0,23,1)
    tvar<-floor(as.numeric(format(data2plot$report_timestamp,"%H")))
    tvar<-c(tvar,extra)
@@ -181,22 +181,22 @@ inv_plot <- function (level=0, data, dck.want, sid.want=NA, dev="pdf", pdfname="
        data2plot$ltime<-NA
      }
    }
-   
+
    tvar<-data2plot$ltime
    tvar<-c(tvar,extra)
    tmp_table<-table(tvar)-1
    tmp_table<-data.frame(round(tmp_table/nrep*100,1))
    time_table<-cbind(time_table,tmp_table[[2]])
    colnames(time_table)[3]<-"local"
-   
+
    yl<-range(time_table[,2])
    yl[1]<-0
    yl[2]<-max(pretty(yl[2]*1.1))
    barplot(time_table[,2],ylim=yl,col="white",las=2,axes=FALSE,names.arg="")
    mtext("Hour UTC",side=2,line=1,adj=0,cex=0.6,padj=0)
-   
+
    if(print.comm)cat("done UTC","\n")
-   
+
    yl<-range(time_table[,3])
    yl[1]<-0
    yl[2]<-max(pretty(yl[2]*1.1))
@@ -205,18 +205,18 @@ inv_plot <- function (level=0, data, dck.want, sid.want=NA, dev="pdf", pdfname="
    bp2<-bp[subs]
    axis(side=1,at=bp2,labels=seq(0,23,2),las=2,cex=0.8)
    mtext("Hour local",side=2,line=1,adj=0,cex=0.6,padj=0)
-   
+
    if(print.comm)cat("done local","\n")
-   
+
    # restore no margins
    par(mar=c(0,0,0,0))
-   
+
    # Information on ID availability
    num.id.gen<-sum(data2plot$id %in% ids.gen)
    num.id.miss<-sum(data2plot$id.class=="missing")
    num.id.invalid<-sum(data2plot$id.class=="invalid")
    num.id.valid<-nrow(data2plot) - num.id.miss - num.id.invalid - num.id.gen
-   
+
    plot(0,xlim=c(0,1),ylim=c(0,1),type='n',axes=FALSE,ann=FALSE)
    string <- sprintf("ID valid = %s ",num.id.valid)
    text(0.0,0.6,labels = string,cex=1.1,adj=0)
@@ -224,40 +224,40 @@ inv_plot <- function (level=0, data, dck.want, sid.want=NA, dev="pdf", pdfname="
    text(0.0,0.35,labels = string,cex=1.1,adj=0)
    string <- sprintf("ID generic or missing = %s ",num.id.gen + num.id.miss)
    text(0.0,0.1,labels = string,cex=1.1,adj=0)
-   
+
    wklen <- max(data2plot$report_timestamp,na.rm=T)-min(data2plot$report_timestamp,na.rm=T)
    units(wklen)<-"weeks"
-   
-   # toggle between days, months and years for histo 
+
+   # toggle between days, months and years for histo
      if (wklen >= 52*30) {
    	h.int<-"years"
      } else if ( wklen >= 52*5 ) {
-   	h.int<-"months"	
+   	h.int<-"months"
      } else {
         h.int<-"weeks"
      }
-   
+
    # consolidate ICOADS PT flag into 4 platform types
    data2plot$platform<-rep("Other",length(data2plot$pt))
    data2plot$platform[which(data2plot$pt>=0 & data2plot$pt<=5)] = "Ship"
    data2plot$platform[which(data2plot$pt==6 )] = "M.buoy"
    data2plot$platform[which(data2plot$pt==7 )] = "D.buoy"
-   
+
    # get histogram counts to scale all histos by total obs
    h.tmp<-hist(data2plot$report_timestamp,breaks=h.int,plot=FALSE)
    yl<-range(pretty(h.tmp$counts))
    yl[1]<-0
-   
+
    options(warn=-1)  # turn off warnings about histogram calls
-   
+
    plat.list <- c("Ship","M.buoy","D.buoy","Other")
-   
+
    for ( iplat in plat.list ) {
-   
+
    if(print.comm)cat(iplat,"\n")
-   
+
    xvals<-pretty(data2plot$report_timestamp,n=10)
-   
+
    # subset data on platform type
    d.sub<-data2plot[which(data2plot$platform==iplat),]
    if ( iplat == plat.list[length(plat.list)]) {
@@ -286,16 +286,16 @@ inv_plot <- function (level=0, data, dck.want, sid.want=NA, dev="pdf", pdfname="
    	# label platform name
    	mtext(side=2,text=iplat,las=2)
    }
-   
+
    # by ECV
-   
+
    ecv.list <- c("SLP","SST","AT","HUM","WS","WD")
    if ( !("HUM_observation_value") %in% names(data2plot) ) ecv.list<-gsub("HUM","DPT",ecv.list)
-   
+
    if(print.comm)cat("about to do histos","\n")
-   
+
    labs<-c("SLP","SST","AT","DPT","WS","WD")
-   
+
    icount<-0
    for ( ev in ecv.list ) {
      icount<-icount+1
@@ -317,15 +317,14 @@ inv_plot <- function (level=0, data, dck.want, sid.want=NA, dev="pdf", pdfname="
    	main="",xaxt='n',yaxt='n',add=TRUE,ylim=yl,freq=TRUE)
      }
    }
-   
+
    options(warn=0)
-   
+
    mtext("C3S2_D311_Lot1 marine data summary: input from ICOADS R3.0.0/2", side = 1, line = 3, outer = FALSE,font=3,col="grey")
 
    if ( dev != "screen" ) 	dev.off()
-   
+
    if(print.comm)cat("done plot","\n")
-   
+
    return(data2plot)
 }
-
