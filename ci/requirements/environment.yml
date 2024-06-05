@@ -1,4 +1,4 @@
-name: cdm-test
+name: marine-processing-test
 
 channels:
     - conda-forge

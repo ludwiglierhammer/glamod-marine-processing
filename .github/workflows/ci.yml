@@ -52,14 +52,14 @@ jobs:
           conda info -a
           conda list
 
-      - name: Import cdm reader mapper toolbox
+      - name: Import marine_processing toolbox
         run: |
           python -c "import glamod_marine_processing"
 
       - name: Run tests
         timeout-minutes: 10
         run: python -u -m pytest
-          --cov=cdm_reader_mapper
+          --cov=glamod_marine_processing
           --cov-report=xml
           --junitxml=test-results/${{ runner.os }}-${{ matrix.python-version }}.xml
 
