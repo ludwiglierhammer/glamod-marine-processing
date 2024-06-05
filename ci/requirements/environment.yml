@@ -1,0 +1,12 @@
+name: cdm-test
+
+channels:
+    - conda-forge
+    - nodefaults
+
+dependencies:
+    - pip:
+      - cdm_reader_mapper
+      - pandas-validation
+      - Levenshtein
+      - simplejson
