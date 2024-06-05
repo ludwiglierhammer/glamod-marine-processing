@@ -10,7 +10,7 @@ dependencies:
     - pytest-cov
     - pytest-env
     - pip:
-      - cdm_reader_mapper
+      - git+https://github.com/glamod/cdm_reader_mapper
       - pandas-validation
       - Levenshtein
       - simplejson
