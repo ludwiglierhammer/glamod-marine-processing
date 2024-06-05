@@ -6,4 +6,4 @@ import glamod_marine_processing
 
 
 def test_marine_processing():
-    assert
+    """Sample pytest test."""
