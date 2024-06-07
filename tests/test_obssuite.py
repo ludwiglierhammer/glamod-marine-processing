@@ -1,15 +1,9 @@
 from __future__ import annotations
 
 import os
-import subprocess
 
-import cdm_reader_mapper as cdm
 import pytest  # noqa
 from cdm_reader_mapper.common.getting_files import load_file
-from click.testing import CliRunner
-
-import glamod_marine_processing
-from glamod_marine_processing.cli_obs import ObsCli
 
 
 def test_level1a_NRT():
@@ -29,9 +23,6 @@ def test_level1a_NRT():
         "-run"
     )
     os.system(s)
-
-
-test_level1a_NRT()
 
 
 def test_level1b():
