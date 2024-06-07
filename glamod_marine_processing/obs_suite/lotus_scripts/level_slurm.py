@@ -78,7 +78,10 @@ script_config = load_json(script_config_file)
 
 LEVEL = script_config["level"]
 LEVEL_SOURCE = slurm_preferences.level_source[LEVEL]
-SOURCE_PATTERN = slurm_preferences.source_pattern[LEVEL]
+if "source_pattern" in script_config.keys():
+    SOURCE_PATTERN = script_config["source_pattern"]
+else:
+    SOURCE_PATTERN = slurm_preferences.source_pattern[LEVEL]
 PYSCRIPT = f"{LEVEL}.py"
 MACHINE = script_config["scripts"]["machine"].lower()
 overwrite = script_config["overwrite"]
@@ -152,6 +155,7 @@ logging.info("SUBMITTING ARRAYS...")
 for sid_dck in process_list:
     logging.info(f"Creating scripts for {sid_dck}")
     log_diri = os.path.join(log_dir, sid_dck)
+    logging.info(log_diri)
     array_size = len(glob.glob(os.path.join(log_diri, "*.input")))
     if array_size == 0:
         logging.warning(f"{sid_dck}: no jobs for partition")
@@ -226,4 +230,9 @@ for sid_dck in process_list:
         jid = launch_process(process)
     else:
         logging.info(f"{sid_dck}: create script")
-        logging.info(f"Script {job_file} was created.")
+        logging.info(f"Script {taskfarm_file} was created.")
+        if script_config["run_jobs"] is True:
+            logging.info("Run interactively.")
+            os.system(f"chmod u+x {taskfarm_file}")
+            os.system(f"{taskfarm_file}")
+            logging.info(f"Check whether jobs was successful: {log_diri}")

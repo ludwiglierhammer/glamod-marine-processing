@@ -155,7 +155,10 @@ class Options:
             """,
         )
         self.submit_jobs = click.option(
-            "-submit", "--submit_jobs", is_flag=True, help="Submit job scripts"
+            "-submit", "--submit_jobs", is_flag=True, help="Submit job scripts."
+        )
+        self.run_jobs = click.option(
+            "-run", "--run_jobs", is_flag=True, help="Run job scripts interactively."
         )
         self.level = click.option(
             "-l",
@@ -248,7 +251,12 @@ class Options:
             "-qc",
             "--quality_control",
             is_flag=True,
-            help="Do quality control for qc_suite only",
+            help="Do quality control for qc_suite only.",
+        )
+        self.source_pattern = click.option(
+            "-sp",
+            "--source_pattern",
+            help="User-defined input source pattern.",
         )
 
 

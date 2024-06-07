@@ -24,10 +24,12 @@ def ObsCli(
     release,
     update,
     dataset,
+    source_pattern,
     data_directory,
     work_directory,
     config_file,
     submit_jobs,
+    run_jobs,
     overwrite,
 ):
     """Enry point for the obs_suite command line interface."""
@@ -64,8 +66,11 @@ def ObsCli(
 
     level_config = load_json(level_config_file)
     level_config["submit_jobs"] = submit_jobs
+    level_config["run_jobs"] = run_jobs
     level_config["level"] = level
     level_config["overwrite"] = overwrite
+    if source_pattern:
+        level_config["source_pattern"] = source_pattern
 
     for key, value in config.items():
         level_config[key] = value
