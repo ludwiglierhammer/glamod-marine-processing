@@ -195,9 +195,10 @@ def read_table_files(table):
     # First read the master file, if any, then append leaks
     # If no yyyy-mm master file, can still have reports from datetime leaks
     # On reading 'header' read null as NaN so that we can validate null ids as NaN easily
-    table_df = cdm.read_tables(
-        prev_level_path, fileID, cdm_subset=[table], na_values="null"
-    )
+    # table_df = cdm.read_tables(
+    #    prev_level_path, fileID, cdm_subset=[table], na_values="null"
+    # )
+    table_df = cdm.read_tables(prev_level_path, cdm_subset=[table], na_values="null")
     try:
         len(table_df)
     except Exception:
