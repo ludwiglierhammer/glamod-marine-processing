@@ -47,6 +47,14 @@ def _load_NOC_corrections():
         )
 
 
+def _load_NOC_ANC_INFO():
+    load_file(
+        "NOC_ANC_INFO/json_files/dck992.json",
+        cache_dir="./T1C/release_7.0",
+        branch="marine_processing_testing",
+    )
+
+
 def test_level1a(capsys):
     """Testing level1a."""
     load_file(
@@ -87,13 +95,13 @@ def test_level1a(capsys):
 
 def test_level1b(capsys):
     """Testing level1b."""
+    _load_NOC_corrections()
     for table_name in table_names:
         load_file(
             f"imma1_992/cdm_tables/{table_name}-114-992_2022-01-01_subset.psv",
             cache_dir="./T1B/release_7.0/ICOADS_R3.0.2T/level1a/114-992",
             within_drs=False,
         )
-    _load_NOC_corrections()
     s = (
         "obs_suite "
         "-l level1b "
@@ -129,8 +137,48 @@ def test_level1b(capsys):
     pd.testing.assert_frame_equal(results, expected)
 
 
-def test_level1c():
+def test_level1c(capsys):
     """Testing level1c."""
+    _load_NOC_ANC_INFO()
+    for table_name in table_names:
+        load_file(
+            f"imma1_992/cdm_tables/{table_name}-114-992_2022-01-01_subset.psv",
+            cache_dir="./T1C/release_7.0/ICOADS_R3.0.2T/level1b/114-992",
+            within_drs=False,
+        )
+
+    s = (
+        "obs_suite "
+        "-l level1c "
+        "-data_dir ./T1C "
+        "-work_dir ./T1C "
+        "-sp header-???-???_????-??-??_subset.psv "
+        "-o "
+        "-run"
+    )
+    os.system(s)
+    captured = capsys.readouterr()
+    assert captured.out == ""
+
+    results = read_tables(
+        "./T1C/release_7.0/ICOADS_R3.0.2T/level1c/114-992", cdm_subset=["header"]
+    )
+    for table_name in table_names_1b:
+        load_file(
+            f"imma1_992/cdm_tables/{table_name}-114-992_2022-01-01_subset.psv",
+            cache_dir="./E1C/ICOADS_R3.0.2T/level1c/114-992",
+            within_drs=False,
+        )
+    expected = read_tables(
+        "./E1C/ICOADS_R3.0.2T/level1c/114-992", cdm_subset=["header"]
+    )
+
+    del results["record_timestamp"]
+    del expected["record_timestamp"]
+    del results["history"]
+    del expected["history"]
+
+    pd.testing.assert_frame_equal(results, expected)
 
 
 def test_level1d():
