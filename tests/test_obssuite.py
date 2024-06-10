@@ -1,10 +1,13 @@
 from __future__ import annotations
 
+import json
 import os
 
 import pandas as pd
 from cdm_reader_mapper.cdm_mapper import read_tables
 from cdm_reader_mapper.common.getting_files import load_file
+
+from glamod_marine_processing.utilities import mkdir
 
 table_names = [
     "header",
@@ -13,6 +16,16 @@ table_names = [
     "observations-slp",
     "observations-sst",
     "observations-wbt",
+    "observations-wd",
+    "observations-ws",
+]
+
+table_names_1b = [
+    "header",
+    "observations-at",
+    "observations-dpt",
+    "observations-slp",
+    "observations-sst",
     "observations-wd",
     "observations-ws",
 ]
@@ -42,10 +55,10 @@ def test_level1a(capsys):
     for table_name in table_names:
         load_file(
             f"imma1_992/cdm_tables/{table_name}-114-992_2022-01-01_subset.psv",
-            cache_dir="./expected/ICOADS_R3.0.2T/level1a/114-992",
+            cache_dir="./E1A/ICOADS_R3.0.2T/level1a/114-992",
             within_drs=False,
         )
-    expected = read_tables("./expected/ICOADS_R3.0.2T/level1a/114-992")
+    expected = read_tables("./E1A/ICOADS_R3.0.2T/level1a/114-992")
 
     del results[("header", "record_timestamp")]
     del expected[("header", "record_timestamp")]
@@ -55,8 +68,48 @@ def test_level1a(capsys):
     pd.testing.assert_frame_equal(results, expected)
 
 
-def test_level1b():
+def test_level1b(capsys):
     """Testing level1b."""
+    for table_name in table_names:
+        load_file(
+            f"imma1_992/cdm_tables/{table_name}-114-992_2022-01-01_subset.psv",
+            cache_dir="./T1B/release_7.0/ICOADS_R3.0.2T/level1a/114-992",
+            within_drs=False,
+        )
+
+    s = (
+        "obs_suite "
+        "-l level1b "
+        "-data_dir ./T1B "
+        "-work_dir ./T1B "
+        "-sp header-???-???_????-??-??_subset.psv "
+        "-o "
+        "-run"
+    )
+    os.system(s)
+    captured = capsys.readouterr()
+    assert captured.out == ""
+
+    results = read_tables(
+        "./T1B/release_7.0/ICOADS_R3.0.2T/level1b/114-992", cdm_subset=table_names_1b
+    )
+
+    for table_name in table_names_1b:
+        load_file(
+            f"imma1_992/cdm_tables/{table_name}-114-992_2022-01-01_subset.psv",
+            cache_dir="./E1B/ICOADS_R3.0.2T/level1b/114-992",
+            within_drs=False,
+        )
+    expected = read_tables(
+        "./E1B/ICOADS_R3.0.2T/level1b/114-992", cdm_subset=table_names_1b
+    )
+
+    del results[("header", "record_timestamp")]
+    del expected[("header", "record_timestamp")]
+    del results[("header", "history")]
+    del expected[("header", "history")]
+
+    pd.testing.assert_frame_equal(results, expected)
 
 
 def test_level1c():
