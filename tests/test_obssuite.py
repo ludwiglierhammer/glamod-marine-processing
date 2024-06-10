@@ -3,7 +3,6 @@ from __future__ import annotations
 import os
 
 import pandas as pd
-import pytest  # noqa
 from cdm_reader_mapper.cdm_mapper import read_tables
 from cdm_reader_mapper.common.getting_files import load_file
 
@@ -19,7 +18,7 @@ table_names = [
 ]
 
 
-def test_level1a():
+def test_level1a(capsys):
     """Testing level1a."""
     load_file(
         "imma1_992/input/114-992_2022-01-01_subset.imma",
@@ -36,6 +35,8 @@ def test_level1a():
         "-run"
     )
     os.system(s)
+    captured = capsys.readouterr()
+    assert captured.out == ""
 
     results = read_tables("./T1A/release_7.0/ICOADS_R3.0.2T/level1a/114-992")
     for table_name in table_names:
