@@ -155,7 +155,6 @@ logging.info("SUBMITTING ARRAYS...")
 for sid_dck in process_list:
     logging.info(f"Creating scripts for {sid_dck}")
     log_diri = os.path.join(log_dir, sid_dck)
-    logging.info(log_diri)
     array_size = len(glob.glob(os.path.join(log_diri, "*.input")))
     if array_size == 0:
         logging.warning(f"{sid_dck}: no jobs for partition")
