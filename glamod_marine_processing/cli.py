@@ -107,6 +107,11 @@ class Cli:
         if self.work_directory is not None:
             config["paths"]["glamod"] = self.work_directory
 
+        try:
+            user = os.getlogin()
+        except OSError:
+            user = "testuser"
+
         config["paths"]["data_directory"] = get_abs_path(
             config["paths"]["data_directory"]
         )
@@ -121,7 +126,7 @@ class Cli:
         scripts_directory = os.path.join(code_directory, "scripts")
         lotus_scripts_directory = os.path.join(code_directory, "lotus_scripts")
         work_directory = os.path.abspath(config["paths"]["glamod"])
-        scratch_directory = os.path.join(work_directory, os.getlogin())
+        scratch_directory = os.path.join(work_directory, user)
         release_directory = os.path.join(
             scratch_directory, self.release, self.dataset, self.level
         )
