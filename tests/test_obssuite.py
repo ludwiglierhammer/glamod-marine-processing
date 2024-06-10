@@ -23,21 +23,21 @@ def test_level1a():
     """Testing level1a."""
     load_file(
         "imma1_992/input/114-992_2022-01-01_subset.imma",
-        cache_dir="./datasets/ICOADS_R3.0.2T/level0/114-992",
+        cache_dir="./T1A/datasets/ICOADS_R3.0.2T/level0/114-992",
         within_drs=False,
     )
     s = (
         "obs_suite "
         "-l level1a "
-        "-data_dir . "
-        "-work_dir . "
+        "-data_dir ./T1A "
+        "-work_dir ./T1A "
         "-sp ???-???_????-??-??_subset.imma "
         "-o "
         "-run"
     )
     os.system(s)
 
-    results = read_tables("./release_7.0/ICOADS_R3.0.2T/level1a/114-992")
+    results = read_tables("./T1A/release_7.0/ICOADS_R3.0.2T/level1a/114-992")
     for table_name in table_names:
         load_file(
             f"imma1_992/cdm_tables/{table_name}-114-992_2022-01-01_subset.psv",
