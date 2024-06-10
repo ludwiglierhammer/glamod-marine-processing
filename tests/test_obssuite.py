@@ -46,10 +46,10 @@ def test_level1a():
         )
     expected = read_tables("./expected/ICOADS_R3.0.2T/level1a/114-992")
 
-    # del results[("header", "record_timestamp")]
-    # del expected[("header", "record_timestamp")]
-    # del results[("header", "history")]
-    # del expected[("header", "history")]
+    del results[("header", "record_timestamp")]
+    del expected[("header", "record_timestamp")]
+    del results[("header", "history")]
+    del expected[("header", "history")]
 
     pd.testing.assert_frame_equal(results, expected)
 
