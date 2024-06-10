@@ -31,6 +31,22 @@ table_names_1b = [
 ]
 
 
+def _load_NOC_corrections():
+    for sub in [
+        "duplicate_flags",
+        "duplicates",
+        "id",
+        "latitude",
+        "longitude",
+        "timestamp",
+    ]:
+        load_file(
+            f"NOC_corrections/v1x2023/{sub}/2022-01.txt.gz",
+            cache_dir="./T1B/release_7.0",
+            branch="marine_processing_testing",
+        )
+
+
 def test_level1a(capsys):
     """Testing level1a."""
     load_file(
@@ -38,6 +54,7 @@ def test_level1a(capsys):
         cache_dir="./T1A/datasets/ICOADS_R3.0.2T/level0/114-992",
         within_drs=False,
     )
+
     s = (
         "obs_suite "
         "-l level1a "
@@ -76,7 +93,7 @@ def test_level1b(capsys):
             cache_dir="./T1B/release_7.0/ICOADS_R3.0.2T/level1a/114-992",
             within_drs=False,
         )
-
+    _load_NOC_corrections()
     s = (
         "obs_suite "
         "-l level1b "
