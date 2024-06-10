@@ -110,6 +110,8 @@ class script_setup:
             )
             self.flag = False
 
+        self.filename = config.get("filename")
+
 
 # This is for json to handle dates
 def date_handler(obj):
@@ -185,7 +187,7 @@ if any([not os.path.isdir(x) for x in data_paths]):
     )
     sys.exit(1)
 
-L1a_filename = os.path.join(L1a_path, "header-" + fileID + ".psv")
+L1a_filename = params.filename
 if not os.path.isfile(L1a_filename):
     logging.error(f"L1a header file not found: {L1a_filename}")
     sys.exit(1)
@@ -205,7 +207,8 @@ for table in cdm.properties.cdm_tables:
     datetime_col = "report_timestamp" if table == "header" else "date_time"
     logging.info(f"TABLE {table}")
     table_df = pd.DataFrame()
-    table_df = cdm.read_tables(L1a_path, fileID, cdm_subset=[table])
+    # table_df = cdm.read_tables(L1a_path, fileID, cdm_subset=[table])
+    table_df = cdm.read_tables(L1a_path, cdm_subset=[table])
 
     if len(table_df) == 0:
         logging.warning(f"Empty or non-existing table {table}")
