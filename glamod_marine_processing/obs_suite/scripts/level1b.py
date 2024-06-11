@@ -102,7 +102,7 @@ else:
     sys.exit(1)
 
 process_options = ["correction_version", "corrections", "histories"]
-params = script_setup(args)
+params = script_setup(process_options, args)
 
 filename_field_sep = "-"
 delimiter = "|"
@@ -155,6 +155,7 @@ for table in cdm.properties.cdm_tables:
     logging.info(f"TABLE {table}")
     table_df = pd.DataFrame()
     # table_df = cdm.read_tables(L1a_path, fileID, cdm_subset=[table])
+    print(L1a_path)
     table_df = cdm.read_tables(L1a_path, cdm_subset=[table])
 
     if len(table_df) == 0:
