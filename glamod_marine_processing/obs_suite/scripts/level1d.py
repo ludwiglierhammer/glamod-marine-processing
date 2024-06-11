@@ -92,10 +92,14 @@ def process_table(table_df, table_name):
         # Assume 'header' and in a DF in table_df otherwise
         # Open table and reindex
         table_df = pd.DataFrame()
+        # if local:
+        #    table_df = cdm.read_tables(scratch_path, fileID, cdm_subset=[table_name])
+        # else:
+        #    table_df = cdm.read_tables(prev_level_path, fileID, cdm_subset=[table_name])
         if local:
-            table_df = cdm.read_tables(scratch_path, fileID, cdm_subset=[table_name])
+            table_df = cdm.read_tables(scratch_path, cdm_subset=[table_name])
         else:
-            table_df = cdm.read_tables(prev_level_path, fileID, cdm_subset=[table_name])
+            table_df = cdm.read_tables(prev_level_path, cdm_subset=[table_name])
         if table_df is None or len(table_df) == 0:
             logging.warning(f"Empty or non existing table {table_name}")
             return
@@ -285,17 +289,21 @@ obs_tables = [x for x in cdm_tables.keys() if x != "header"]
 # Read the header table
 table = "header"
 if local:
-    logging.info(f"cp -L {prev_level_path}/*{fileID}.psv {scratch_path}")
-    subprocess.call(f"cp -L {prev_level_path}/*{fileID}.psv {scratch_path}", shell=True)
+    # logging.info(f"cp -L {prev_level_path}/*{fileID}.psv {scratch_path}")
+    # subprocess.call(f"cp -L {prev_level_path}/*{fileID}.psv {scratch_path}", shell=True)
+    logging.info(f"cp -L {prev_level_path}/*.psv {scratch_path}")
+    subprocess.call(f"cp -L {prev_level_path}/*.psv {scratch_path}", shell=True)
 header_df = pd.DataFrame()
 if local:
-    header_df = cdm.read_tables(
-        scratch_path, fileID, cdm_subset=[table], na_values="null"
-    )
+    # header_df = cdm.read_tables(
+    #    scratch_path, fileID, cdm_subset=[table], na_values="null"
+    # )
+    header_df = cdm.read_tables(scratch_path, cdm_subset=[table], na_values="null")
 else:
-    header_df = cdm.read_tables(
-        prev_level_path, fileID, cdm_subset=[table], na_values="null"
-    )
+    # header_df = cdm.read_tables(
+    #    prev_level_path, fileID, cdm_subset=[table], na_values="null"
+    # )
+    header_df = cdm.read_tables(prev_level_path, cdm_subset=[table], na_values="null")
 
 if len(header_df) == 0:
     logging.error("Empty or non-existing header table")
