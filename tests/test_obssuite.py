@@ -3,6 +3,7 @@ from __future__ import annotations
 import json
 import os
 
+import numpy as np
 import pandas as pd
 from cdm_reader_mapper.cdm_mapper import read_tables
 from cdm_reader_mapper.common.getting_files import load_file
@@ -235,6 +236,95 @@ def test_level1d(capsys):
     del expected[("header", "record_timestamp")]
     del results[("header", "history")]
     del expected[("header", "history")]
+
+    expected[("header", "station_name")] = [
+        "null",
+        "FF HELMER HANSEN",
+        "WAVERIDER TFSTD",
+        "NORNE",
+        "WAVERIDER TFDRN",
+    ]
+    expected[("header", "platform_sub_type")] = ["null", "RV", "OT", "MI", "OT"]
+    expected[("header", "station_record_number")] = ["1", "1", "0", "13", "0"]
+    expected[("header", "report_duration")] = ["11", "HLY", "11", "HLY", "11"]
+    expected[("observations-at", "sensor_id")] = ["null", "AT", np.nan, "null", np.nan]
+    expected[("observations-dpt", "sensor_id")] = [
+        np.nan,
+        "HUM",
+        np.nan,
+        "null",
+        np.nan,
+    ]
+    expected[("observations-slp", "sensor_id")] = [
+        "null",
+        "SLP",
+        np.nan,
+        "null",
+        np.nan,
+    ]
+    expected[("observations-sst", "sensor_id")] = [
+        "null",
+        "SST",
+        np.nan,
+        np.nan,
+        np.nan,
+    ]
+    expected[("observations-wd", "sensor_id")] = [
+        "null",
+        "WSPD",
+        np.nan,
+        "null",
+        np.nan,
+    ]
+    expected[("observations-ws", "sensor_id")] = [
+        "null",
+        "WSPD",
+        np.nan,
+        "null",
+        np.nan,
+    ]
+    expected[("observations-at", "sensor_automation_status")] = [
+        "5",
+        "3",
+        np.nan,
+        "5",
+        np.nan,
+    ]
+    expected[("observations-dpt", "sensor_automation_status")] = [
+        np.nan,
+        "3",
+        np.nan,
+        "5",
+        np.nan,
+    ]
+    expected[("observations-slp", "sensor_automation_status")] = [
+        "5",
+        "3",
+        np.nan,
+        "5",
+        np.nan,
+    ]
+    expected[("observations-sst", "sensor_automation_status")] = [
+        "5",
+        "3",
+        np.nan,
+        np.nan,
+        np.nan,
+    ]
+    expected[("observations-wd", "sensor_automation_status")] = [
+        "5",
+        "3",
+        np.nan,
+        "5",
+        np.nan,
+    ]
+    expected[("observations-ws", "sensor_automation_status")] = [
+        "5",
+        "3",
+        np.nan,
+        "5",
+        np.nan,
+    ]
 
     pd.testing.assert_frame_equal(results, expected)
 
