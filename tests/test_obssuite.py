@@ -31,7 +31,7 @@ table_names_1b = [
 ]
 
 
-def _load_NOC_corrections():
+def _load_NOC_corrections(**kwargs):
     for sub in [
         "duplicate_flags",
         "duplicates",
@@ -42,16 +42,14 @@ def _load_NOC_corrections():
     ]:
         load_file(
             f"NOC_corrections/v1x2023/{sub}/2022-01.txt.gz",
-            cache_dir="./T1B/release_7.0",
-            branch="marine_processing_testing",
+            **kwargs,
         )
 
 
-def _load_NOC_ANC_INFO():
+def _load_NOC_ANC_INFO(**kwargs):
     load_file(
         "NOC_ANC_INFO/json_files/dck992.json",
-        cache_dir="./T1C/release_7.0",
-        branch="marine_processing_testing",
+        **kwargs,
     )
 
 
@@ -95,7 +93,10 @@ def test_level1a(capsys):
 
 def test_level1b(capsys):
     """Testing level1b."""
-    _load_NOC_corrections()
+    _load_NOC_corrections(
+        cache_dir="./T1B/release_7.0",
+        branch="marine_processing_testing",
+    )
     for table_name in table_names:
         load_file(
             f"imma1_992/cdm_tables/{table_name}-114-992_2022-01-01_subset.psv",
@@ -139,7 +140,10 @@ def test_level1b(capsys):
 
 def test_level1c(capsys):
     """Testing level1c."""
-    _load_NOC_ANC_INFO()
+    _load_NOC_ANC_INFO(
+        cache_dir="./T1C/release_7.0",
+        branch="marine_processing_testing",
+    )
     for table_name in table_names:
         load_file(
             f"imma1_992/cdm_tables/{table_name}-114-992_2022-01-01_subset.psv",
