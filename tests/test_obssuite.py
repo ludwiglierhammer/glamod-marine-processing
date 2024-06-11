@@ -214,9 +214,9 @@ def test_level1d(capsys):
         "-o "
         "-run"
     )
-    # os.system(s)
-    # captured = capsys.readouterr()
-    # assert captured.out == ""
+    os.system(s)
+    captured = capsys.readouterr()
+    assert captured.out == ""
 
     results = read_tables(
         "./T1D/release_7.0/ICOADS_R3.0.2T/level1d/114-992", cdm_subset=table_names_1b
