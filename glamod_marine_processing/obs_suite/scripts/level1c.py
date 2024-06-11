@@ -251,7 +251,7 @@ else:
     logging.error("Need arguments to run!")
     sys.exit(1)
 
-params = script_setup(args)
+params = script_setup([], args)
 
 FFS = "-"
 delimiter = "|"

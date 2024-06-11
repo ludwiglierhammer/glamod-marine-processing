@@ -189,7 +189,15 @@ else:
     logging.error("Need arguments to run!")
     sys.exit(1)
 
-params = script_setup(args)
+process_options = [
+    "md_model",
+    "md_subdir",
+    "history_explain",
+    "md_first_yr_avail",
+    "md_last_yr_avail",
+    "md_not_avail",
+]
+params = script_setup(process_options, args)
 # %%
 FFS = "-"
 delimiter = "|"

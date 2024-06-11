@@ -120,7 +120,13 @@ else:
     logging.error("Need arguments to run!")
     sys.exit(1)
 
-params = script_setup(args)
+process_options = [
+    "data_model",
+    "read_sections",
+    "filter_reports_by",
+    "cdm_map",
+]
+params = script_setup(process_options, args)
 
 if not params.flag:
     logging.error("Error parsing initial configuration")

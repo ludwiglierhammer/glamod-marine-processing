@@ -101,6 +101,7 @@ else:
     logging.error("Need arguments to run!")
     sys.exit(1)
 
+process_options = ["correction_version", "corrections", "histories"]
 params = script_setup(args)
 
 filename_field_sep = "-"
