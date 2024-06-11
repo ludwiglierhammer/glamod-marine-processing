@@ -53,6 +53,13 @@ def _load_NOC_ANC_INFO(**kwargs):
     )
 
 
+def _load_Pub47(**kwargs):
+    load_file(
+        "Pub47/monthly/2022-01-01.json",
+        **kwargs,
+    )
+
+
 def test_level1a(capsys):
     """Testing level1a."""
     load_file(
@@ -187,6 +194,10 @@ def test_level1c(capsys):
 
 def test_level1d(capsys):
     """Testing level1d."""
+    _load_Pub47(
+        cache_dir="./T1D/release_7.0",
+        branch="marine_processing_testing",
+    )
     for table_name in table_names:
         load_file(
             f"imma1_992/cdm_tables/{table_name}-114-992_2022-01-01_subset.psv",
