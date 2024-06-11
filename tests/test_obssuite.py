@@ -185,8 +185,47 @@ def test_level1c(capsys):
     pd.testing.assert_frame_equal(results, expected)
 
 
-def test_level1d():
+def test_level1d(capsys):
     """Testing level1d."""
+    for table_name in table_names:
+        load_file(
+            f"imma1_992/cdm_tables/{table_name}-114-992_2022-01-01_subset.psv",
+            cache_dir="./T1D/release_7.0/ICOADS_R3.0.2T/level1c/114-992",
+            within_drs=False,
+        )
+
+    s = (
+        "obs_suite "
+        "-l level1d "
+        "-data_dir ./T1D "
+        "-work_dir ./T1D "
+        "-sp header-???-???_????-??-??_subset.psv "
+        "-o "
+        "-run"
+    )
+    os.system(s)
+    captured = capsys.readouterr()
+    assert captured.out == ""
+
+    results = read_tables(
+        "./T1D/release_7.0/ICOADS_R3.0.2T/level1d/114-992", cdm_subset=["header"]
+    )
+    for table_name in table_names_1b:
+        load_file(
+            f"imma1_992/cdm_tables/{table_name}-114-992_2022-01-01_subset.psv",
+            cache_dir="./E1D/ICOADS_R3.0.2T/level1c/114-992",
+            within_drs=False,
+        )
+    expected = read_tables(
+        "./E1D/ICOADS_R3.0.2T/level1d/114-992", cdm_subset=["header"]
+    )
+
+    del results["record_timestamp"]
+    del expected["record_timestamp"]
+    del results["history"]
+    del expected["history"]
+
+    pd.testing.assert_frame_equal(results, expected)
 
 
 def test_level1e():
