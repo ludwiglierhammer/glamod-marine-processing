@@ -64,9 +64,8 @@ from importlib import reload
 
 import pandas as pd
 import simplejson
+from _utilities import date_handler, script_setup
 from cdm_reader_mapper import cdm_mapper as cdm
-
-from ._utilities import date_handler, script_setup
 
 reload(logging)  # This is to override potential previous config of logging
 
