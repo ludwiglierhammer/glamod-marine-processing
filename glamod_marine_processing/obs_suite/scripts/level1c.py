@@ -107,54 +107,9 @@ import pandas as pd
 import simplejson
 from cdm_reader_mapper import cdm_mapper as cdm
 
+from ._utilities import date_handler, script_setup
+
 reload(logging)  # This is to override potential previous config of logging
-
-
-# FUNCTIONS -------------------------------------------------------------------
-class script_setup:
-    """Set up script."""
-
-    def __init__(self, inargs):
-        self.data_path = inargs[1]
-        self.release = inargs[2]
-        self.update = inargs[3]
-        self.dataset = inargs[4]
-        self.configfile = inargs[5]
-
-        try:
-            with open(self.configfile) as fileObj:
-                config = json.load(fileObj)
-        except Exception:
-            logging.error(
-                f"Opening configuration file :{self.configfile}", exc_info=True
-            )
-            self.flag = False
-            return
-
-        if len(sys.argv) > 6:
-            self.sid_dck = inargs[6]
-            self.year = inargs[7]
-            self.month = inargs[8]
-        else:
-            try:
-                self.sid_dck = config.get("sid_dck")
-                self.year = config.get("yyyy")
-                self.month = config.get("mm")
-            except Exception:
-                logging.error(
-                    f"Parsing configuration from file :{self.configfile}", exc_info=True
-                )
-                self.flag = False
-
-        self.dck = self.sid_dck.split("-")[1]
-        self.flag = True
-
-
-# This is for json to handle dates
-def date_handler(obj):
-    """Handle date."""
-    if isinstance(obj, (datetime.datetime, datetime.date)):
-        return obj.isoformat()
 
 
 def validate_id(idSeries):
@@ -318,7 +273,7 @@ level_invalid_path = os.path.join(release_path, level, "invalid", params.sid_dck
 
 id_validation_path = os.path.join(
     params.data_path, params.release, "NOC_ANC_INFO", "json_files"
-)  # os.path.join(params.data_path,'datasets',params.dataset,'NOC_ANC_INFO','json_files')
+)
 
 data_paths = [
     prev_level_path,
@@ -335,11 +290,7 @@ if any([not os.path.isdir(x) for x in data_paths]):
     )
     sys.exit(1)
 
-
-prev_level_filename = os.path.join(
-    prev_level_path,
-    "header-*" + "-".join([str(params.year), str(params.month)]) + "*.psv",
-)
+prev_level_filename = params.filename
 if len(glob.glob(prev_level_filename)) == 0:
     logging.error(f"L1b header files not found: {prev_level_filename}")
     sys.exit(1)

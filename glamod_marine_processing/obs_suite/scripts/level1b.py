@@ -51,7 +51,6 @@ from __future__ import annotations
 
 import datetime
 import glob
-import json
 import logging
 import os
 import sys
@@ -63,61 +62,9 @@ import simplejson
 from cdm_reader_mapper import cdm_mapper as cdm
 from cdm_reader_mapper.operations import replace
 
+from ._utilities import date_handler, script_setup
+
 reload(logging)  # This is to override potential previous config of logging
-
-
-# Functions--------------------------------------------------------------------
-class script_setup:
-    """Create script."""
-
-    def __init__(self, inargs):
-        self.data_path = inargs[1]
-        self.release = inargs[2]
-        self.update = inargs[3]
-        self.dataset = inargs[4]
-        self.configfile = inargs[5]
-
-        try:
-            with open(self.configfile) as fileObj:
-                config = json.load(fileObj)
-        except Exception:
-            logging.error(
-                f"Opening configuration file :{self.configfile}", exc_info=True
-            )
-            self.flag = False
-            return
-
-        if len(sys.argv) > 6:
-            self.sid_dck = inargs[6]
-            self.year = inargs[7]
-            self.month = inargs[8]
-        else:
-            self.sid_dck = config.get("sid_dck")
-            self.year = config.get("yyyy")
-            self.month = config.get("mm")
-
-        process_options = ["correction_version", "corrections", "histories"]
-        try:
-            for opt in process_options:
-                if not config.get(self.sid_dck, {}).get(opt):
-                    setattr(self, opt, config.get(opt))
-                else:
-                    setattr(self, opt, config.get(self.sid_dck).get(opt))
-            self.flag = True
-        except Exception:
-            logging.error(
-                f"Parsing configuration from file :{self.configfile}", exc_info=True
-            )
-            self.flag = False
-
-        self.filename = config.get("filename")
-
-
-# This is for json to handle dates
-def date_handler(obj):
-    """Handle date."""
-    if isinstance(obj, (datetime.datetime, datetime.date)):
-        return obj.isoformat()
 
 
 def clean_L1b(L1b_id):
