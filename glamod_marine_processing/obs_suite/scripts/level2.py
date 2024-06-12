@@ -45,9 +45,10 @@ import glob
 import json
 import logging
 import os
+import shutil
 import sys
 from importlib import reload
-from subprocess import call
+from pathlib import Path
 
 from _utilities import script_setup
 from cdm_reader_mapper import cdm_mapper as cdm
@@ -67,6 +68,15 @@ def clean_level():
             pass
 
 
+def copyfiles(pattern, dest, mode="excluded"):
+    """Copy file pattern to dest."""
+    file_list = glob.glob(pattern)
+    for file_ in file_list:
+        file_name = Path(file_).name
+        shutil.copyfile(file_, os.path.join(dest, file_name))
+        logging.info(f"{file_name} {mode} from level2 in {dest}")
+
+
 # MAIN ------------------------------------------------------------------------
 
 # Process input and set up some things and make sure we can do something-------
@@ -81,7 +91,6 @@ if len(sys.argv) > 1:
     args = sys.argv
 else:
     logging.error("Need arguments to run!")
-    sys.exit(1)
 
 params = script_setup([], args)
 
@@ -162,41 +171,28 @@ if not exclude_sid_dck and len(include_param_list) == 0:
 try:
     include_param_list.append("header")
     if exclude_sid_dck:
-        logging.info(f"Full dataset {params.sid_dck} excluded from level2")
         for table in cdm_tables:
-            files = os.path.join(L1e_path, table + "*.psv")
-            call(" ".join(["cp", files, L2_excluded_path, "2>/dev/null"]), shell=True)
+            pattern = os.path.join(L1e_path, table + "*.psv")
+            copyfiles(pattern, L2_excluded_path)
     else:
-        period_brace = "{" + str(year_init) + ".." + str(year_end) + "}"
-        left_period_brace = "{" + str(left_min_period) + ".." + str(year_init - 1) + "}"
-        right_period_brace = (
-            "{" + str(year_end + 1) + ".." + str(right_max_period) + "}"
-        )
         for table in exclude_param_list:
-            logging.info(f"{table} excluded from level2 in {L2_excluded_path}")
-            files = os.path.join(L1e_path, table + "*.psv")
-            file_list = glob.glob(files)
-            if len(file_list) > 0:
-                call(
-                    " ".join(["cp", files, L2_excluded_path, "2>/dev/null"]),
-                    shell=True,
-                )
+            pattern = os.path.join(L1e_path, table + "*.psv")
+            copyfiles(pattern, L2_excluded_path)
         for table in include_param_list:
-            logging.info(f"{table} included in level2 in {L2_path}.")
-            files = os.path.join(L1e_path, table + FFS + period_brace + FFS + "*.psv")
-            call(" ".join(["cp", files, L2_path, "2>/dev/null"]), shell=True)
+            for year in range(year_init, year_end + 1):
+                pattern = os.path.join(L1e_path, table + FFS + str(year) + FFS + ".psv")
+                copyfiles(pattern, L2_path, mode="included")
+
         # Send out of release period to excluded
-        files = os.path.join(
-            L1e_path, FFS.join(["*", left_period_brace, "??", "*.psv"])
-        )
-        call(" ".join(["cp", files, L2_excluded_path, "2>/dev/null"]), shell=True)
-        files = os.path.join(
-            L1e_path, FFS.join(["*", right_period_brace, "??", "*.psv"])
-        )
-        call(" ".join(["cp", files, L2_excluded_path, "2>/dev/null"]), shell=True)
+        for year in range(left_min_period, year_init):
+            pattern = os.path.join(L1e_path, FFS.join(["*", str(year), "??", "*.psv"]))
+            copyfiles(pattern, L2_excluded_path)
+        for year in range(year_end + 1, right_max_period + 1):
+            pattern = os.path.join(L1e_path, FFS.join(["*", str(year), "??", "*.psv"]))
+            copyfiles(pattern, L2_excluded_path)
+
     logging.info("Level2 data succesfully created")
 except Exception:
     logging.error("Error creating level2 data", exc_info=True)
     logging.info(f"Level2 data {params.sid_dck} removed")
     clean_level()
-    sys.exit(1)
