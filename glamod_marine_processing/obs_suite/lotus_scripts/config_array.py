@@ -18,7 +18,13 @@ DATE_REGEX = r"([1-2]{1}[0-9]{3}\-(0[1-9]{1}|1[0-2]{1}))"
 
 # FUNCTIONS -------------------------------------------------------------------
 def config_element(
-    sid_dck_log_dir, ai, script_config, sid_dck, yyyy, mm, filename=None
+    sid_dck_log_dir,
+    ai,
+    script_config,
+    sid_dck,
+    yyyy,
+    mm,
+    filename=None,
 ):
     """Update configuration script."""
     script_config.update({"sid_dck": sid_dck})
@@ -60,10 +66,8 @@ def clean_ok_logs(
         for x in ok_files:
             os.remove(x)
     for source_file in source_files:
-        # print(source_file)
         yyyy, mm = get_yyyymm(source_file)
         if int(yyyy) >= year_init and int(yyyy) <= year_end:
-            # config_element(sid_dck_log_dir,ai,script_config,sid_dck,yyyy,mm, source_file)
             config_element(sid_dck_log_dir, ai, config, sid_dck, yyyy, mm, source_file)
             ai += 1
         elif (int(yyyy) == year_init - 1 and int(mm) == 12) or (
@@ -103,7 +107,6 @@ def clean_failed_logs_only(
         source_file = re.sub("[?]{2}", mm, source_file)
         source_file = os.path.join(source_dir, sid_dck, source_file)
         if int(yyyy) >= year_init and int(yyyy) <= year_end:
-            # config_element(sid_dck_log_dir,ai,script_config,sid_dck,yyyy,mm, source_file)
             config_element(sid_dck_log_dir, ai, config, sid_dck, yyyy, mm, source_file)
             ai += 1
         elif (int(yyyy) == year_init - 1 and int(mm) == 12) or (
