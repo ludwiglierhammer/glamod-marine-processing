@@ -392,5 +392,44 @@ def test_level1e(capsys):
     pd.testing.assert_frame_equal(results, expected)
 
 
-def test_level2():
+def test_level2(capsys):
     """Testing level2."""
+    for table_name in table_names:
+        load_file(
+            f"imma1_992/cdm_tables/{table_name}-114-992_2022-01-01_subset.psv",
+            cache_dir="./T2/release_7.0/ICOADS_R3.0.2T/level1e/114-992",
+            within_drs=False,
+        )
+
+    s = (
+        "obs_suite "
+        "-l level2 "
+        "-data_dir ./T2 "
+        "-work_dir ./T2 "
+        "-sp header-???-???_????-??-??_subset.psv "
+        "-o "
+        "-run"
+    )
+    os.system(s)
+    captured = capsys.readouterr()
+    assert captured.out == ""
+
+    results = read_tables(
+        "./T2/release_7.0/ICOADS_R3.0.2T/level2/114-992", cdm_subset=table_names_1b
+    )
+    for table_name in table_names_1b:
+        load_file(
+            f"imma1_992/cdm_tables/{table_name}-114-992_2022-01-01_subset.psv",
+            cache_dir="./E2/ICOADS_R3.0.2T/level2/114-992",
+            within_drs=False,
+        )
+    expected = read_tables(
+        "./E2/ICOADS_R3.0.2T/level2/114-992", cdm_subset=table_names_1b
+    )
+
+    del results[("header", "record_timestamp")]
+    del expected[("header", "record_timestamp")]
+    del results[("header", "history")]
+    del expected[("header", "history")]
+
+    pd.testing.assert_frame_equal(results, expected)
