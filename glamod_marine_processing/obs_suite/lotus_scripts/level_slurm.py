@@ -120,6 +120,11 @@ logging.info(f"Deck list file used: {process_list_file}")
 process_list = read_txt(process_list_file)
 release_periods = load_json(release_periods_file)
 
+# Optionally, add CMD add file
+add_file = os.path.join(config_files_path, f"{LEVEL}_cmd_add.json")
+if os.path.isfile(add_file):
+    script_config["cmd_add_file"] = add_file
+
 # Build array input files -----------------------------------------------------
 logging.info("CONFIGURING JOB ARRAYS...")
 status = config_array.main(
@@ -137,12 +142,7 @@ if status != 0:
 
 # Build jobs ------------------------------------------------------------------
 py_path = os.path.join(scripts_dir, PYSCRIPT)
-add_file = os.path.join(config_files_path, f"{LEVEL}_cmd_add.json")
-if os.path.isfile(add_file):
-    addition = add_file
-else:
-    addition = ""
-pycommand = f"python {py_path} {data_dir} {release} {update} {dataset} {addition}"
+pycommand = f"python {py_path} {data_dir} {release} {update} {dataset}"
 
 # Set default job params
 mem = script_config["job_memo_mb"]

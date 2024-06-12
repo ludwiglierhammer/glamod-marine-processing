@@ -59,6 +59,7 @@ class script_setup:
             self.flag = False
 
         self.filename = config.get("filename")
+        self.level2_list = config.get("cmd_add_file")
 
 
 # This is for json to handle dates
