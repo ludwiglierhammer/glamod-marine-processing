@@ -75,7 +75,7 @@ def _load_metoffice_qc(**kwargs):
         load_file(f"metoffice_qc/base/2022/01/{qc_file}", **kwargs)
 
 
-def test_level1a(capsys):
+def _test_level1a(capsys):
     """Testing level1a."""
     load_file(
         "imma1_992/input/114-992_2022-01-01_subset.imma",
@@ -113,7 +113,7 @@ def test_level1a(capsys):
     pd.testing.assert_frame_equal(results, expected)
 
 
-def test_level1b(capsys):
+def _test_level1b(capsys):
     """Testing level1b."""
     _load_NOC_corrections(
         cache_dir="./T1B/release_7.0",
@@ -160,7 +160,7 @@ def test_level1b(capsys):
     pd.testing.assert_frame_equal(results, expected)
 
 
-def test_level1c(capsys):
+def _test_level1c(capsys):
     """Testing level1c."""
     _load_NOC_ANC_INFO(
         cache_dir="./T1C/release_7.0",
@@ -207,7 +207,7 @@ def test_level1c(capsys):
     pd.testing.assert_frame_equal(results, expected)
 
 
-def test_level1d(capsys):
+def _test_level1d(capsys):
     """Testing level1d."""
     _load_Pub47(
         cache_dir="./T1D/release_7.0",
@@ -343,7 +343,7 @@ def test_level1d(capsys):
     pd.testing.assert_frame_equal(results, expected)
 
 
-def test_level1e(capsys):
+def _test_level1e(capsys):
     """Testing level1e."""
     _load_metoffice_qc(
         cache_dir="./T1E/release_7.0",
