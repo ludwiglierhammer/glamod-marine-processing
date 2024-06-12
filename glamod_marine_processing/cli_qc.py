@@ -31,6 +31,7 @@ def QcCli(
     preprocessing,
     quality_control,
     high_resolution_qc,
+    run_jobs,
     overwrite,
 ):
     """Enry point for theqcmetadata_suite command line interface."""
@@ -135,6 +136,7 @@ def QcCli(
         key="TestFiles",
     )
     config["submit_jobs"] = submit_jobs
+    config["run_jobs"] = run_jobs
 
     mkdir(qc_log_directory)
     mkdir(qc_hr_log_directory)
