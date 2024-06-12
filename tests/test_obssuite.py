@@ -61,6 +61,20 @@ def _load_Pub47(**kwargs):
     )
 
 
+def _load_metoffice_qc(**kwargs):
+    for qc_file in [
+        "AT_qc_202201_CCIrun.csv",
+        "DPT_qc_202201_CCIrun.csv",
+        "POS_qc_202201_CCIrun.csv",
+        "SLP_qc_202201_CCIrun.csv",
+        "SST_qc_202201_CCIrun.csv",
+        "SST_qc_202201_hires_CCIrun.csv",
+        "Variables_202201_CCIrun.csv",
+        "W_qc_202201_CCIrun.csv",
+    ]:
+        load_file(f"metoffice_qc/base/2022/01/{qc_file}", **kwargs)
+
+
 def test_level1a(capsys):
     """Testing level1a."""
     load_file(
@@ -329,8 +343,53 @@ def test_level1d(capsys):
     pd.testing.assert_frame_equal(results, expected)
 
 
-def test_level1e():
+def test_level1e(capsys):
     """Testing level1e."""
+    _load_metoffice_qc(
+        cache_dir="./T1E/release_7.0",
+        branch="marine_processing_testing",
+    )
+    for table_name in table_names:
+        load_file(
+            f"imma1_992/cdm_tables/{table_name}-114-992_2022-01-01_subset.psv",
+            cache_dir="./T1E/release_7.0/ICOADS_R3.0.2T/level1d/114-992",
+            within_drs=False,
+        )
+
+    s = (
+        "obs_suite "
+        "-l level1e "
+        "-data_dir ./T1E "
+        "-work_dir ./T1E "
+        "-sp header-???-???_????-??-??_subset.psv "
+        "-o "
+        "-run"
+    )
+    os.system(s)
+    captured = capsys.readouterr()
+    assert captured.out == ""
+
+    results = read_tables(
+        "./T1E/release_7.0/ICOADS_R3.0.2T/level1e/114-992", cdm_subset=table_names_1b
+    )
+    for table_name in table_names_1b:
+        load_file(
+            f"imma1_992/cdm_tables/{table_name}-114-992_2022-01-01_subset.psv",
+            cache_dir="./E1E/ICOADS_R3.0.2T/level1e/114-992",
+            within_drs=False,
+        )
+    expected = read_tables(
+        "./E1E/ICOADS_R3.0.2T/level1e/114-992", cdm_subset=table_names_1b
+    )
+
+    del results[("header", "record_timestamp")]
+    del expected[("header", "record_timestamp")]
+    del results[("header", "history")]
+    del expected[("header", "history")]
+
+    expected[("header", "report_quality")] = ["2", "2", "2", "2", "2"]
+
+    pd.testing.assert_frame_equal(results, expected)
 
 
 def test_level2():
