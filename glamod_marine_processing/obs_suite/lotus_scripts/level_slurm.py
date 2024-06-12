@@ -235,3 +235,4 @@ for sid_dck in process_list:
             os.system(f"chmod u+x {taskfarm_file}")
             os.system(f"{taskfarm_file}")
             logging.info(f"Check whether jobs was successful: {log_diri}")
+            logging.info(os.system(f"ls {log_diri}"))
