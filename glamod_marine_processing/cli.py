@@ -263,6 +263,11 @@ class Options:
             "--source_pattern",
             help="User-defined input source pattern.",
         )
+        self.external_qc_files = click.option(
+            "-ext_qc",
+            "--external_qc_files",
+            help="Path to external QC files. Default: <data_directory>/external_files.",
+        )
 
 
 Options = Options()
