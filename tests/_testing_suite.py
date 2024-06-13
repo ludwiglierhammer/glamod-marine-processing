@@ -1,16 +1,12 @@
 from __future__ import annotations
 
-import json
 import os
 
 import _load_data
 import _settings
-import numpy as np
 import pandas as pd
 from cdm_reader_mapper.cdm_mapper import read_tables
 from cdm_reader_mapper.common.getting_files import load_file
-
-from glamod_marine_processing.utilities import mkdir
 
 add_data = {
     "level1a": None,
@@ -67,7 +63,7 @@ def _obs_testing(level, capsys):
 
     expected = manipulate_expected(expected, level)
 
-    for deletion in _settings.deletions[level]:
+    for deletion in [("header", "record_timestamp"), ("header", "history")]:
         del results[deletion]
         del expected[deletion]
 

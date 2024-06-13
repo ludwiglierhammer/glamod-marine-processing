@@ -44,7 +44,7 @@ level_input = {
 which_tables = {
     "level1a": table_names,
     "level1b": table_names_1b,
-    "level1c": ["header"],
+    "level1c": table_names_1b,
     "level1d": table_names_1b,
     "level1e": table_names_1b,
     "level2": table_names_1b,
@@ -57,15 +57,6 @@ pattern = {
     "level1d": "header-???-???_????-??-??_subset.psv",
     "level1e": "header-???-???_????-??-??_subset.psv",
     "level2": "header-???-???_????-??-??_subset.psv",
-}
-
-deletions = {
-    "level1a": [("header", "record_timestamp"), ("header", "history")],
-    "level1b": [("header", "record_timestamp"), ("header", "history")],
-    "level1c": ["record_timestamp", "history"],
-    "level1d": [("header", "record_timestamp"), ("header", "history")],
-    "level1e": [("header", "record_timestamp"), ("header", "history")],
-    "level2": [("header", "record_timestamp"), ("header", "history")],
 }
 
 manipulation = {
