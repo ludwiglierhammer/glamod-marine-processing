@@ -3,8 +3,8 @@
 Changelog
 =========
 
-0.1.0 (unpublished)
--------------------
+release_7.0.0 (2024-06-13)
+--------------------------
 Contributors to this version: Ludwig Lierhammer (:user:`ludwiglierhammer`)
 
 Breaking changes
