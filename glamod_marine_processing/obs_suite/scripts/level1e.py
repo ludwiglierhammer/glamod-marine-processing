@@ -209,6 +209,14 @@ def add_report_quality(qc_df_full):
     return qc_df_full
 
 
+def compare_quality_checks(df):
+    """Compare entries with location_quality and report_time_quality."""
+    df = df.mask(location_quality == 2, 1)
+    df = df.mask(report_time_quality == 4, 1)
+    df = df.mask(report_time_quality == 5, 1)
+    return df
+
+
 # This is to apply the qc flags and write out fllgged tables
 def process_table(table_df, table_name):
     """Process table."""
@@ -217,20 +225,6 @@ def process_table(table_df, table_name):
     not_checked_location = "3"
     not_checked_param = "2"
     logging.info(f"Processing table {table_name}")
-    df_lz = pd.DataFrame()
-    # replace report quality to fail for LZ_UIDS
-    # path to LZ_UIDs for release 5.0
-    lzpath = "/gws/nopw/j04/c3s311a_lot2/data/marine/" + params.release + "/LZ_UIDS/"
-    fn_lz = os.path.join(lzpath, "-".join(["lz_" + params.year, params.month + ".psv"]))
-    if os.path.exists(fn_lz):
-        df_lz = pd.read_csv(
-            fn_lz,
-            delimiter="|",
-            dtype="object",
-            names=["UID"],
-            quotechar=None,
-            quoting=3,
-        )
 
     if isinstance(table_df, str):
         # Assume 'header' and in a DF in table_df otherwise
@@ -286,9 +280,7 @@ def process_table(table_df, table_name):
             table_df["location_quality"] = not_checked_location
 
     if table_name != "header":
-        if not df_lz.empty:
-            if df_lz.UID.isin(table_df.report_id).any().any():
-                table_df["quality_flag"].loc[table_df.report_id.isin(df_lz.UID)] = "1"
+        table_df["quality_flag"] = compare_quality_checks(table_df["quality_flags"])
 
     if table_name == "header":
         # set report quality to 2 for ids with partial match to TEST
@@ -297,9 +289,8 @@ def process_table(table_df, table_name):
                 table_df.duplicate_status == "4"
             )
             table_df.report_quality.loc[loc] = "2"
-        if not df_lz.empty:
-            if df_lz.UID.isin(table_df.report_id).any().any():
-                table_df["report_quality"].loc[table_df.report_id.isin(df_lz.UID)] = "1"
+
+        table_df["report_quality"] = compare_quality_checks(table_df["report_quality"])
 
     cdm_columns = cdm_tables.get(table_name).keys()
     odata_filename = os.path.join(
@@ -314,8 +305,6 @@ def process_table(table_df, table_name):
         mode=wmode,
         na_rep="null",
     )
-
-    return
 
 
 # This is to remove files of a previous process on this same level file
@@ -476,12 +465,13 @@ header_filename = params.filename
 if not os.path.isfile(header_filename):
     logging.error(f"Header table file not found: {header_filename}")
     sys.exit(1)
-table = "header"
+
 header_df = pd.DataFrame()
 # header_df = cdm.read_tables(
 #    prev_level_path, fileID, cdm_subset=[table], na_values="null"
 # )
 header_df = cdm.read_tables(prev_level_path, cdm_subset=[table], na_values="null")
+
 if len(header_df) == 0:
     logging.error("Empty or non-existing header table")
     sys.exit(1)
@@ -538,6 +528,9 @@ if qc_avail:
 #    header.location_quality = default not-checked ('3') to not-checked('3')
 
 # First header, then rest.
+location_quality = header_df["location_quality"]
+report_time_quality = header_df["report_time_quality"]
+
 flag = True if qc_avail else False
 process_table(header_df, "header")
 
