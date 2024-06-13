@@ -31,7 +31,6 @@ def _obs_testing(level, capsys):
     if add_data[level] is not None:
         add_data[level](
             cache_dir=f"./T{level}/release_7.0",
-            branch="marine_processing_testing",
         )
 
     _load_data.load_input(level)
