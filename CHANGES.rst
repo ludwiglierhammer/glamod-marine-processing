@@ -13,6 +13,10 @@ Breaking changes
 * create requirements for each suite (:pull:`3`)
 * rebuild to a installable python package (:pull:`3`)
 * install package and requirements via a pyproject.toml file (:pul::`3`)
+* change QC mapping in obs_suite level1e (:issue:`7`, :pull:`8`): 
+
+  * if ``location_quality`` is equal ``2`` set both ``report_quality`` and ``quality_flag`` to ``1``
+  * if ```report_time_quality`` is equal ``4`` or ``5`` set both ``report_quality`` and ``quality_flag`` to ``1`` 
 
 New features and enhancements
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
