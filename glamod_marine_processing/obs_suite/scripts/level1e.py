@@ -250,7 +250,7 @@ def process_table(table_df, table_name):
         updated_locs = qc_table.loc[qc_table.notna().all(axis=1)].index
 
         if table_name != "header":
-            qc_dict[table_name]["quality_flags"] = (
+            qc_dict[table_name]["quality_flag"] = (
                 table_df[element].value_counts(dropna=False).to_dict()
             )
 
@@ -258,10 +258,10 @@ def process_table(table_df, table_name):
             table_df.update(qc_df["report_quality"])
             history_add = f";{history_tstmp}. {params.history_explain}"
             table_df["report_time_quality"] = pass_time
-            qc_dict[table_name]["location_quality_flags"] = (
+            qc_dict[table_name]["location_quality_flag"] = (
                 table_df["location_quality"].value_counts(dropna=False).to_dict()
             )
-            qc_dict[table_name]["report_quality_flags"] = (
+            qc_dict[table_name]["report_quality_flag"] = (
                 table_df["report_quality"].value_counts(dropna=False).to_dict()
             )
             table_df["history"].loc[updated_locs] = (
@@ -280,7 +280,7 @@ def process_table(table_df, table_name):
             table_df["location_quality"] = not_checked_location
 
     if table_name != "header":
-        table_df["quality_flag"] = compare_quality_checks(table_df["quality_flags"])
+        table_df["quality_flag"] = compare_quality_checks(table_df["quality_flag"])
 
     if table_name == "header":
         # set report quality to 2 for ids with partial match to TEST
@@ -467,10 +467,7 @@ if not os.path.isfile(header_filename):
     sys.exit(1)
 
 header_df = pd.DataFrame()
-# header_df = cdm.read_tables(
-#    prev_level_path, fileID, cdm_subset=[table], na_values="null"
-# )
-header_df = cdm.read_tables(prev_level_path, cdm_subset=[table], na_values="null")
+header_df = cdm.read_tables(prev_level_path, cdm_subset=["header"], na_values="null")
 
 if len(header_df) == 0:
     logging.error("Empty or non-existing header table")
