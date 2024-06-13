@@ -3,7 +3,7 @@ GLAMOD marine processing: ``glamod-marine-processing`` toolbox
 ==================================================================
 
 +----------------------------+-----------------------------------------------------+
-| Versions                   | |pypi| |versions| |tag| |release|                   |
+| Versions                   | |tag| |release|                                     |
 +----------------------------+-----------------------------------------------------+
 | Documentation and Support  | |docs|                                              |
 +----------------------------+-----------------------------------------------------+
@@ -97,10 +97,6 @@ Once installed you can use it as an command-line interface. For more information
    :target: https://results.pre-commit.ci/latest/github/glamod/glamod-marine-processing/master
    :alt: pre-commit.ci status
 
-.. |pypi| image:: https://img.shields.io/pypi/v/glamod-marine-processing.svg
-        :target: https://pypi.python.org/pypi/glamod-marine-processing
-        :alt: Python Package Index Build
-
 .. |ruff| image:: https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/astral-sh/ruff/main/assets/badge/v2.json
         :target: https://github.com/astral-sh/ruff
         :alt: Ruff
@@ -116,10 +112,6 @@ Once installed you can use it as an command-line interface. For more information
 .. |tag| image:: https://img.shields.io/github/v/tag/glamod/glamod-marine-processing.svg
         :target: https://github.com/glamod/glamod-marine-processing/tags
         :alt: Tag
-
-.. |versions| image:: https://img.shields.io/pypi/pyversions/glamod-marine-processing.svg
-        :target: https://pypi.python.org/pypi/glamod-marine-processing
-        :alt: Supported Python Versions
 
 .. |zenodo| image:: https://img.shields.io/badge/zenodo-package_or_version_not_found-red
         :target: https://zenodo.org/glamod-marine-processing
