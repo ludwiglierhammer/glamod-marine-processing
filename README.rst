@@ -5,8 +5,6 @@ GLAMOD marine processing: ``glamod-marine-processing`` toolbox
 +----------------------------+-----------------------------------------------------+
 | Versions                   | |tag| |release|                                     |
 +----------------------------+-----------------------------------------------------+
-| Documentation and Support  | |docs|                                              |
-+----------------------------+-----------------------------------------------------+
 | Open Source                | |license| |zenodo|                                  |
 +----------------------------+-----------------------------------------------------+
 | Coding Standards           | |black| |ruff| |pre-commit| |fossa| |codefactor|    |
@@ -76,10 +74,6 @@ Once installed you can use it as an command-line interface. For more information
 .. |coveralls| image:: https://codecov.io/gh/glamod/glamod-marine-processing/graph/badge.svg
 	      :target: https://codecov.io/gh/glamod/glamod-marine-processing
 	      :alt: Coveralls
-
-.. |docs| image:: https://readthedocs.org/projects/glamod-marine-processing/badge/?version=latest
-        :target: https://glamod-marine-processing.readthedocs.io/en/latest/?version=latest
-        :alt: Documentation Status
 
 .. |fossa| image:: https://app.fossa.com/api/projects/git%2Bgithub.com%2Fglamod%2Fglamod-marine-processing.svg?type=shield
         :target: https://app.fossa.com/projects/git%2Bgithub.com%2Fglamod%2Fglamod-marine-processing?ref=badge_shield
