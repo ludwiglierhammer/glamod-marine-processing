@@ -122,7 +122,6 @@ from __future__ import annotations
 
 import datetime
 import glob
-import json
 import logging
 import os
 import sys
@@ -131,79 +130,13 @@ from importlib import reload
 import numpy as np
 import pandas as pd
 import simplejson
+from _utilities import date_handler, script_setup
 from cdm_reader_mapper import cdm_mapper as cdm
 
 reload(logging)  # This is to override potential previous config of logging
 
 
 # Functions--------------------------------------------------------------------
-class script_setup:
-    """Set up script."""
-
-    def __init__(self, inargs):
-        self.data_path = inargs[1]
-        self.release = inargs[2]
-        self.update = inargs[3]
-        self.dataset = inargs[4]
-        self.configfile = inargs[5]
-
-        try:
-            with open(self.configfile) as fileObj:
-                config = json.load(fileObj)
-        except Exception:
-            logging.error(
-                f"Opening configuration file :{self.configfile}", exc_info=True
-            )
-            self.flag = False
-            return
-
-        if len(sys.argv) > 6:
-            self.sid_dck = inargs[6]
-            self.year = inargs[7]
-            self.month = inargs[8]
-        else:
-            try:
-                self.sid_dck = config.get("sid_dck")
-                self.year = config.get("yyyy")
-                self.month = config.get("mm")
-            except Exception:
-                logging.error(
-                    f"Parsing configuration from file :{self.configfile}",
-                    exc_info=True,
-                )
-                self.flag = False
-
-        self.dck = self.sid_dck.split("-")[1]
-
-        # However md_subdir is then nested in monthly....and inside monthly files
-        # Other MD sources would stick to this? Force it otherwise?
-        process_options = [
-            "history_explain",
-            "qc_first_date_avail",
-            "qc_last_date_avail",
-        ]
-        try:
-            for opt in process_options:
-                if not config.get(self.sid_dck, {}).get(opt):
-                    setattr(self, opt, config.get(opt))
-                else:
-                    setattr(self, opt, config.get(self.sid_dck).get(opt))
-            self.flag = True
-        except Exception:
-            logging.error(
-                f"Parsing configuration from file :{self.configfile}",
-                exc_info=True,
-            )
-            self.flag = False
-
-
-# This is for json to handle dates
-def date_handler(obj):
-    """Handle date."""
-    if isinstance(obj, (datetime.datetime, datetime.date)):
-        return obj.isoformat()
-
-
 # This is to get the unique flag per parameter
 def get_qc_flags(qc, qc_df_full):
     """Get QC flag."""
@@ -297,7 +230,9 @@ def process_table(table_df, table_name):
         # Assume 'header' and in a DF in table_df otherwise
         # Open table and reindex
         table_df = pd.DataFrame()
-        table_df = cdm.read_tables(prev_level_path, fileID, cdm_subset=[table_name])
+        table_df = cdm.read_tables(
+            prev_level_path, params.prev_fileID, cdm_subset=[table_name]
+        )
 
         if table_df is None or len(table_df) == 0:
             logging.warning(f"Empty or non existing table {table_name}")
@@ -464,7 +399,12 @@ else:
     logging.error("Need arguments to run!")
     sys.exit(1)
 
-params = script_setup(args)
+process_options = [
+    "history_explain",
+    "qc_first_date_avail",
+    "qc_last_date_avail",
+]
+params = script_setup(process_options, args)
 
 release_path = os.path.join(params.data_path, params.release, params.dataset)
 release_id = filename_field_sep.join([params.release, params.update])
@@ -472,6 +412,8 @@ fileID = filename_field_sep.join(
     [str(params.year), str(params.month).zfill(2), release_id]
 )
 fileID_date = filename_field_sep.join([str(params.year), str(params.month)])
+if params.prev_fileID is None:
+    params.prev_fileID = fileID
 
 prev_level_path = os.path.join(release_path, level_prev, params.sid_dck)
 level_path = os.path.join(release_path, level, params.sid_dck)
@@ -519,17 +461,17 @@ if not os.path.isfile(qc_pos_filename):
         sys.exit(1)
 
 # Do some additional checks before clicking go, do we have a valid header?
-header_filename = os.path.join(
-    prev_level_path, filename_field_sep.join(["header", fileID]) + ".psv"
-)
+header_filename = params.filename
 if not os.path.isfile(header_filename):
     logging.error(f"Header table file not found: {header_filename}")
     sys.exit(1)
 
 header_df = pd.DataFrame()
-header_df = cdm.read_tables(
-    prev_level_path, fileID, cdm_subset=["header"], na_values="null"
-)
+# header_df = cdm.read_tables(
+#    prev_level_path, fileID, cdm_subset=[table], na_values="null"
+# )
+header_df = cdm.read_tables(prev_level_path, cdm_subset=[table], na_values="null")
+
 if len(header_df) == 0:
     logging.error("Empty or non-existing header table")
     sys.exit(1)

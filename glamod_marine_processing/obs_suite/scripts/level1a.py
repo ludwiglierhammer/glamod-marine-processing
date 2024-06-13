@@ -57,7 +57,6 @@ from __future__ import annotations
 
 import datetime
 import glob
-import json
 import logging
 import os
 import sys
@@ -67,6 +66,7 @@ from io import StringIO
 import numpy as np
 import pandas as pd
 import simplejson
+from _utilities import date_handler, script_setup
 from cdm_reader_mapper import cdm_mapper as cdm
 from cdm_reader_mapper import mdf_reader, metmetpy
 from cdm_reader_mapper.common import pandas_TextParser_hdlr
@@ -79,67 +79,6 @@ FFS = "-"
 
 
 # FUNCTIONS -------------------------------------------------------------------
-class script_setup:
-    """Setup LEVEL1a script."""
-
-    def __init__(self, inargs):
-        self.data_path = inargs[1]
-        self.release = inargs[2]
-        self.update = inargs[3]
-        self.dataset = inargs[4]
-        self.configfile = inargs[5]
-
-        try:
-            with open(self.configfile) as fileObj:
-                config = json.load(fileObj)
-        except Exception:
-            logging.error(
-                f"Opening configuration file :{self.configfile}", exc_info=True
-            )
-            self.flag = False
-            return
-
-        if len(sys.argv) > 6:
-            self.sid_dck = inargs[6]
-            self.year = inargs[7]
-            self.month = inargs[8]
-            self.filename = inargs[9]
-        else:
-            self.sid_dck = config.get("sid_dck")
-            self.year = config.get("yyyy")
-            self.month = config.get("mm")
-            self.filename = config.get("filename")
-
-        self.dck = self.sid_dck.split("-")[1]
-        self.corrections = config.get("corrections")
-
-        process_options = [
-            "data_model",
-            "read_sections",
-            "filter_reports_by",
-            "cdm_map",
-        ]
-        try:
-            for opt in process_options:
-                if not config.get(self.sid_dck, {}).get(opt):
-                    setattr(self, opt, config.get(opt))
-                else:
-                    setattr(self, opt, config.get(self.sid_dck).get(opt))
-            self.flag = True
-        except Exception:
-            logging.error(
-                f"Parsing configuration from file :{self.configfile}", exc_info=True
-            )
-            self.flag = False
-
-
-# This is for json to handle dates
-def date_handler(obj):
-    """Handle date."""
-    if isinstance(obj, (datetime.datetime, datetime.date)):
-        return obj.isoformat()
-
-
 def clean_L1a(L1a_id):
     """Clean previous LEVEL1a files."""
     L1a_prods = glob.glob(os.path.join(L1a_path, "*" + FFS + L1a_id + ".psv"))
@@ -181,7 +120,13 @@ else:
     logging.error("Need arguments to run!")
     sys.exit(1)
 
-params = script_setup(args)
+process_options = [
+    "data_model",
+    "read_sections",
+    "filter_reports_by",
+    "cdm_map",
+]
+params = script_setup(process_options, args)
 
 if not params.flag:
     logging.error("Error parsing initial configuration")
@@ -217,7 +162,7 @@ release_id = FFS.join([params.release, params.update])
 L1a_id = FFS.join([str(params.year), str(params.month).zfill(2), release_id])
 
 # CLEAN PREVIOUS L1A PRODUCTS AND SIDE FILES ----------------------------------
-# clean_L1a(L1a_id)
+clean_L1a(L1a_id)
 
 # DO THE DATA PROCESSING ------------------------------------------------------
 data_model = params.data_model
@@ -372,24 +317,7 @@ if io_dict["processed"]["total"] == 0:
     process = False
     logging.warning("No data to map to CDM after selection and cleaning")
 
-# 2.9. Let's save reports with no observations...
-# OBS_VALUES = [ ('core',x) for x in ['AT','SST','SLP','D','W','WBT','DPT'] ]
-# no_obs_file = os.path.join(L1a_path,'no_obs',str(params.year) + FFS + str(params.month) + '.psv')
-# c = 0
-# for data_obs in data_in.data:
-#    if len(data_obs[data_obs[OBS_VALUES].isna().all(axis=1)]) > 0:
-#        if not os.path.isdir(os.path.join(L1a_path,'no_obs')):
-#            os.mkdir(os.path.join(L1a_path,'no_obs'))
-#        wmode = 'a' if c > 0 else 'w'
-#        header = False if c > 0 else True
-#        data_obs[data_obs[OBS_VALUES].isna().all(axis=1)].to_csv(no_obs_file, sep = '|', mode = wmode, header = header)
-#        c += 1
-# %% extract NOC_corrections/duplicates
-# data_in.data = TextParser_hdlr.restore(data_in.data)
-# logging.info('Generate files needed in level1b for corrections')
-# corrections.corrections(data_in.data, dataset, correction_path, params.year, params.month)
 
-# data_in.data = TextParser_hdlr.restore(data_in.data)
 # 3. Map to common data model and output files
 if process:
     logging.info("Mapping to CDM")

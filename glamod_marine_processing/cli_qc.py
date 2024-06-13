@@ -26,11 +26,13 @@ def QcCli(
     corrections_version,
     data_directory,
     work_directory,
+    external_qc_files,
     config_file,
     submit_jobs,
     preprocessing,
     quality_control,
     high_resolution_qc,
+    run_jobs,
     overwrite,
 ):
     """Enry point for theqcmetadata_suite command line interface."""
@@ -58,8 +60,9 @@ def QcCli(
     )
     parameter_file = os.path.join(p.config_directory, "ParametersCCI.json")
     icoads_version = "3.0.2"
-    external_files = os.path.join(p.data_directory, "external_files")
-    sst_files = os.path.join(external_files, "SST")
+    if external_qc_files is None:
+        external_qc_files = os.path.join(p.data_directory, "external_files")
+    sst_files = os.path.join(external_qc_files, "SST")
     sst_stdev_climatology = os.path.join(sst_files, "OSTIA_pentad_stdev_climatology.nc")
     old_sst_stdev_climatology = os.path.join(
         sst_files, "HadSST2_pentad_stdev_climatology.nc"
@@ -73,12 +76,12 @@ def QcCli(
     sst_buddy_avg_sampling = os.path.join(
         sst_files, "OSTIA_buddy_range_sampling_error.nc"
     )
-    ostia_background = os.path.join(external_files, "OSTIA_background")
+    ostia_background = os.path.join(external_qc_files, "OSTIA_background")
     djf_ostia_background = os.path.join(ostia_background, "DJF_bckerr_smooth.nc")
     jja_ostia_background = os.path.join(ostia_background, "JJA_bckerr_smooth.nc")
     son_ostia_background = os.path.join(ostia_background, "SON_bckerr_smooth.nc")
     mam_ostia_background = os.path.join(ostia_background, "MAM_bckerr_smooth.nc")
-    test_files = os.path.join(external_files, "TestFiles")
+    test_files = os.path.join(external_qc_files, "TestFiles")
     sst_climatology_file = os.path.join(test_files, "HadSST2_pentad_climatology.nc")
     mat_climatology_file = os.path.join(test_files, "HadNMAT2_pentad_climatology.nc")
     stdev_climatology_file = os.path.join(
@@ -94,7 +97,7 @@ def QcCli(
         out_dir=out_dir,
         ICOADS_dir=icoads_dir,
         track_out_dir=out_dir,
-        external_files=external_files,
+        external_files=external_qc_files,
         key="Directories",
     )
 
@@ -135,6 +138,7 @@ def QcCli(
         key="TestFiles",
     )
     config["submit_jobs"] = submit_jobs
+    config["run_jobs"] = run_jobs
 
     mkdir(qc_log_directory)
     mkdir(qc_hr_log_directory)

@@ -41,7 +41,6 @@ json file as created by L2_list_create.py.
 """
 from __future__ import annotations
 
-import datetime
 import glob
 import json
 import logging
@@ -49,55 +48,33 @@ import os
 import shutil
 import sys
 from importlib import reload
-from subprocess import call
+from pathlib import Path
 
+from _utilities import script_setup
 from cdm_reader_mapper import cdm_mapper as cdm
 
 reload(logging)  # This is to override potential previous config of logging
 
 
 # FUNCTIONS -------------------------------------------------------------------
-class script_setup:
-    """Set up script."""
-
-    def __init__(self, inargs):
-        self.data_path = inargs[1]
-        self.release = inargs[2]
-        self.update = inargs[3]
-        self.dataset = inargs[4]
-        self.level2_list = inargs[5]
-        self.configfile = inargs[6]
-
-        try:
-            with open(self.configfile) as fileObj:
-                config = json.load(fileObj)
-        except Exception:
-            logging.error(
-                f"Opening configuration file: {self.configfile}", exc_info=True
-            )
-            self.flag = False
-            return
-
-        self.sid_dck = config.get("sid_dck")
-        self.dck = self.sid_dck.split("-")[1]
-
-
-# This is for json to handle dates
-def date_handler(obj):
-    """Handle date."""
-    if isinstance(obj, (datetime.datetime, datetime.date)):
-        return obj.isoformat()
-
-
 def clean_level():
     """Clean level."""
     for dirname in [L2_path, L2_reports_path, L2_excluded_path]:
         try:
             if os.path.isdir(dirname):
                 logging.info(f"Removing directory {dirname}")
-                shutil.rmtree(dirname)
+                os.remove(os.path.join(dirname, "*.psv"))
         except Exception:
             pass
+
+
+def copyfiles(pattern, dest, mode="excluded"):
+    """Copy file pattern to dest."""
+    file_list = glob.glob(pattern)
+    for file_ in file_list:
+        file_name = Path(file_).name
+        shutil.copyfile(file_, os.path.join(dest, file_name))
+        logging.info(f"{file_name} {mode} from level2 in {dest}")
 
 
 # MAIN ------------------------------------------------------------------------
@@ -114,11 +91,9 @@ if len(sys.argv) > 1:
     args = sys.argv
 else:
     logging.error("Need arguments to run!")
-    sys.exit(1)
 
-params = script_setup(args)
+params = script_setup([], args)
 
-FFS = "-"
 level = "level2"
 header = True
 wmode = "w"
@@ -127,7 +102,7 @@ left_min_period = 1600
 right_max_period = 2100
 
 release_path = os.path.join(params.data_path, params.release, params.dataset)
-release_id = FFS.join([params.release, params.update])
+release_id = "-".join([params.release, params.update])
 L1e_path = os.path.join(release_path, "level1e", params.sid_dck)
 L2_path = os.path.join(release_path, level, params.sid_dck)
 L2_excluded_path = os.path.join(release_path, level, "excluded", params.sid_dck)
@@ -195,41 +170,29 @@ if not exclude_sid_dck and len(include_param_list) == 0:
 try:
     include_param_list.append("header")
     if exclude_sid_dck:
-        logging.info(f"Full dataset {params.sid_dck} excluded from level2")
         for table in cdm_tables:
-            files = os.path.join(L1e_path, table + "*.psv")
-            call(" ".join(["cp", files, L2_excluded_path, "2>/dev/null"]), shell=True)
+            pattern = os.path.join(L1e_path, table + "*.psv")
+            copyfiles(pattern, L2_excluded_path)
     else:
-        period_brace = "{" + str(year_init) + ".." + str(year_end) + "}"
-        left_period_brace = "{" + str(left_min_period) + ".." + str(year_init - 1) + "}"
-        right_period_brace = (
-            "{" + str(year_end + 1) + ".." + str(right_max_period) + "}"
-        )
         for table in exclude_param_list:
-            logging.info(f"{table} excluded from level2")
-            files = os.path.join(L1e_path, table + "*.psv")
-            file_list = glob.glob(files)
-            if len(file_list) > 0:
-                call(
-                    " ".join(["cp", files, L2_excluded_path, "2>/dev/null"]),
-                    shell=True,
-                )
+            pattern = os.path.join(L1e_path, table + "*.psv")
+            copyfiles(pattern, L2_excluded_path)
         for table in include_param_list:
-            logging.info(f"{table} included in level2")
-            files = os.path.join(L1e_path, table + FFS + period_brace + FFS + "*.psv")
-            call(" ".join(["cp", files, L2_path, "2>/dev/null"]), shell=True)
+            for year in range(year_init, year_end + 1):
+                pattern = os.path.join(L1e_path, f"{table}-*{str(year)}-??-*.psv")
+                logging.warning(pattern)
+                copyfiles(pattern, L2_path, mode="included")
+
         # Send out of release period to excluded
-        files = os.path.join(
-            L1e_path, FFS.join(["*", left_period_brace, "??", "*.psv"])
-        )
-        call(" ".join(["cp", files, L2_excluded_path, "2>/dev/null"]), shell=True)
-        files = os.path.join(
-            L1e_path, FFS.join(["*", right_period_brace, "??", "*.psv"])
-        )
-        call(" ".join(["cp", files, L2_excluded_path, "2>/dev/null"]), shell=True)
+        for year in range(left_min_period, year_init):
+            pattern = os.path.join(L1e_path, f"*{str(year)}-??-*.psv")
+            copyfiles(pattern, L2_excluded_path)
+        for year in range(year_end + 1, right_max_period + 1):
+            pattern = os.path.join(L1e_path, f"*{str(year)}-??-*.psv")
+            copyfiles(pattern, L2_excluded_path)
+
     logging.info("Level2 data succesfully created")
 except Exception:
     logging.error("Error creating level2 data", exc_info=True)
     logging.info(f"Level2 data {params.sid_dck} removed")
     clean_level()
-    sys.exit(1)

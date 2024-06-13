@@ -206,7 +206,10 @@ def get_background_filename(dirstubs, filenamestubs, year, month, day):
     """
     if year is None or month is None or day is None:
         return None
-
+    if isinstance(dirstubs, str):
+        dirstubs = [dirstubs]
+    if isinstance(filenamestubs, str):
+        filenamestubs = [filenamestubs]
     assert len(dirstubs) == len(
         filenamestubs
     ), "dirstubs and filename stubs have different numbers of members"

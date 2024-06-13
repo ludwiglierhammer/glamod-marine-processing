@@ -135,3 +135,8 @@ if script_config["submit_jobs"] is True:
 else:
     logging.info(f"{taskfile}: create script")
     logging.info(f"Script {slurmfile} was created.")
+    if script_config["run_jobs"] is True:
+        logging.info("Run interactively.")
+        os.system(f"chmod u+x {taskfile}")
+        os.system(f"{taskfile}")
+        logging.info(f"Check whether jobs was successful: {logdir}")

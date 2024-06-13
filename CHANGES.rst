@@ -18,10 +18,11 @@ New features and enhancements
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 * add some information files: ``AUTHORS.rst``, ``CHANGES.rst``, ``CONTRIBUTING.rst`` and ``LICENSE`` (:pull:`3`)
 * make us of pre-commit (:pull:`3`)
-* make use of an command-line interface to create suite PYTHON and SLURM scripts (:pull:`3`)
+* make use of an command-line interface to create suite PYTHON and SLURM scripts (:pull:`3`, :pull:`5`)
 * add new release 7.0 configuration files (:pull:`3`)
 * set some default directories and SLURM settings for both HPC systems KAY and MeluXina (:pull:`3`)
 
 Internal changes
 ^^^^^^^^^^^^^^^^
 * reduce complexity of some functions (:pull:`3`)
+* adding observational testing suite (:issue:`5`, :pull:`5`)

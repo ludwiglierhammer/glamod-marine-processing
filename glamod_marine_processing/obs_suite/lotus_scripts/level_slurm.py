@@ -78,7 +78,10 @@ script_config = load_json(script_config_file)
 
 LEVEL = script_config["level"]
 LEVEL_SOURCE = slurm_preferences.level_source[LEVEL]
-SOURCE_PATTERN = slurm_preferences.source_pattern[LEVEL]
+if "source_pattern" in script_config.keys():
+    SOURCE_PATTERN = script_config["source_pattern"]
+else:
+    SOURCE_PATTERN = slurm_preferences.source_pattern[LEVEL]
 PYSCRIPT = f"{LEVEL}.py"
 MACHINE = script_config["scripts"]["machine"].lower()
 overwrite = script_config["overwrite"]
@@ -117,6 +120,11 @@ logging.info(f"Deck list file used: {process_list_file}")
 process_list = read_txt(process_list_file)
 release_periods = load_json(release_periods_file)
 
+# Optionally, add CMD add file
+add_file = os.path.join(config_files_path, f"{LEVEL}_cmd_add.json")
+if os.path.isfile(add_file):
+    script_config["cmd_add_file"] = add_file
+
 # Build array input files -----------------------------------------------------
 logging.info("CONFIGURING JOB ARRAYS...")
 status = config_array.main(
@@ -134,12 +142,7 @@ if status != 0:
 
 # Build jobs ------------------------------------------------------------------
 py_path = os.path.join(scripts_dir, PYSCRIPT)
-add_file = os.path.join(config_files_path, f"{LEVEL}_cmd_add.json")
-if os.path.isfile(add_file):
-    addition = add_file
-else:
-    addition = ""
-pycommand = f"python {py_path} {data_dir} {release} {update} {dataset} {addition}"
+pycommand = f"python {py_path} {data_dir} {release} {update} {dataset}"
 
 # Set default job params
 mem = script_config["job_memo_mb"]
@@ -226,4 +229,9 @@ for sid_dck in process_list:
         jid = launch_process(process)
     else:
         logging.info(f"{sid_dck}: create script")
-        logging.info(f"Script {job_file} was created.")
+        logging.info(f"Script {taskfarm_file} was created.")
+        if script_config["run_jobs"] is True:
+            logging.info("Run interactively.")
+            os.system(f"chmod u+x {taskfarm_file}")
+            os.system(f"{taskfarm_file}")
+            logging.info(f"Check whether jobs was successful: {log_diri}")
