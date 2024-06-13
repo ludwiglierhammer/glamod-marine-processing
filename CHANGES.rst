@@ -30,3 +30,4 @@ Internal changes
 ^^^^^^^^^^^^^^^^
 * reduce complexity of some functions (:pull:`3`)
 * adding observational testing suite (:issue:`5`, :pull:`5`)
+* load data from ``cdm-testdata`` (:pull:`11`)
