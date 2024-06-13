@@ -162,7 +162,7 @@ release_id = FFS.join([params.release, params.update])
 L1a_id = FFS.join([str(params.year), str(params.month).zfill(2), release_id])
 
 # CLEAN PREVIOUS L1A PRODUCTS AND SIDE FILES ----------------------------------
-# clean_L1a(L1a_id)
+clean_L1a(L1a_id)
 
 # DO THE DATA PROCESSING ------------------------------------------------------
 data_model = params.data_model
@@ -317,24 +317,7 @@ if io_dict["processed"]["total"] == 0:
     process = False
     logging.warning("No data to map to CDM after selection and cleaning")
 
-# 2.9. Let's save reports with no observations...
-# OBS_VALUES = [ ('core',x) for x in ['AT','SST','SLP','D','W','WBT','DPT'] ]
-# no_obs_file = os.path.join(L1a_path,'no_obs',str(params.year) + FFS + str(params.month) + '.psv')
-# c = 0
-# for data_obs in data_in.data:
-#    if len(data_obs[data_obs[OBS_VALUES].isna().all(axis=1)]) > 0:
-#        if not os.path.isdir(os.path.join(L1a_path,'no_obs')):
-#            os.mkdir(os.path.join(L1a_path,'no_obs'))
-#        wmode = 'a' if c > 0 else 'w'
-#        header = False if c > 0 else True
-#        data_obs[data_obs[OBS_VALUES].isna().all(axis=1)].to_csv(no_obs_file, sep = '|', mode = wmode, header = header)
-#        c += 1
-# %% extract NOC_corrections/duplicates
-# data_in.data = TextParser_hdlr.restore(data_in.data)
-# logging.info('Generate files needed in level1b for corrections')
-# corrections.corrections(data_in.data, dataset, correction_path, params.year, params.month)
 
-# data_in.data = TextParser_hdlr.restore(data_in.data)
 # 3. Map to common data model and output files
 if process:
     logging.info("Mapping to CDM")
