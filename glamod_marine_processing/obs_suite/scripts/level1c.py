@@ -105,56 +105,10 @@ from importlib import reload
 import numpy as np
 import pandas as pd
 import simplejson
+from _utilities import date_handler, script_setup
 from cdm_reader_mapper import cdm_mapper as cdm
 
 reload(logging)  # This is to override potential previous config of logging
-
-
-# FUNCTIONS -------------------------------------------------------------------
-class script_setup:
-    """Set up script."""
-
-    def __init__(self, inargs):
-        self.data_path = inargs[1]
-        self.release = inargs[2]
-        self.update = inargs[3]
-        self.dataset = inargs[4]
-        self.configfile = inargs[5]
-
-        try:
-            with open(self.configfile) as fileObj:
-                config = json.load(fileObj)
-        except Exception:
-            logging.error(
-                f"Opening configuration file :{self.configfile}", exc_info=True
-            )
-            self.flag = False
-            return
-
-        if len(sys.argv) > 6:
-            self.sid_dck = inargs[6]
-            self.year = inargs[7]
-            self.month = inargs[8]
-        else:
-            try:
-                self.sid_dck = config.get("sid_dck")
-                self.year = config.get("yyyy")
-                self.month = config.get("mm")
-            except Exception:
-                logging.error(
-                    f"Parsing configuration from file :{self.configfile}", exc_info=True
-                )
-                self.flag = False
-
-        self.dck = self.sid_dck.split("-")[1]
-        self.flag = True
-
-
-# This is for json to handle dates
-def date_handler(obj):
-    """Handle date."""
-    if isinstance(obj, (datetime.datetime, datetime.date)):
-        return obj.isoformat()
 
 
 def validate_id(idSeries):
@@ -195,9 +149,10 @@ def read_table_files(table):
     # First read the master file, if any, then append leaks
     # If no yyyy-mm master file, can still have reports from datetime leaks
     # On reading 'header' read null as NaN so that we can validate null ids as NaN easily
-    table_df = cdm.read_tables(
-        prev_level_path, fileID, cdm_subset=[table], na_values="null"
-    )
+    # table_df = cdm.read_tables(
+    #    prev_level_path, fileID, cdm_subset=[table], na_values="null"
+    # )
+    table_df = cdm.read_tables(prev_level_path, cdm_subset=[table], na_values="null")
     try:
         len(table_df)
     except Exception:
@@ -296,7 +251,7 @@ else:
     logging.error("Need arguments to run!")
     sys.exit(1)
 
-params = script_setup(args)
+params = script_setup([], args)
 
 FFS = "-"
 delimiter = "|"
@@ -309,6 +264,8 @@ release_path = os.path.join(params.data_path, params.release, params.dataset)
 release_id = FFS.join([params.release, params.update])
 fileID = FFS.join([str(params.year), str(params.month).zfill(2), release_id])
 fileID_date = FFS.join([str(params.year), str(params.month)])
+if params.prev_fileID is None:
+    params.prev_fileID = fileID
 
 prev_level_path = os.path.join(release_path, level_prev, params.sid_dck)
 level_path = os.path.join(release_path, level, params.sid_dck)
@@ -317,7 +274,7 @@ level_invalid_path = os.path.join(release_path, level, "invalid", params.sid_dck
 
 id_validation_path = os.path.join(
     params.data_path, params.release, "NOC_ANC_INFO", "json_files"
-)  # os.path.join(params.data_path,'datasets',params.dataset,'NOC_ANC_INFO','json_files')
+)
 
 data_paths = [
     prev_level_path,
@@ -334,11 +291,7 @@ if any([not os.path.isdir(x) for x in data_paths]):
     )
     sys.exit(1)
 
-
-prev_level_filename = os.path.join(
-    prev_level_path,
-    "header-*" + "-".join([str(params.year), str(params.month)]) + "*.psv",
-)
+prev_level_filename = params.filename
 if len(glob.glob(prev_level_filename)) == 0:
     logging.error(f"L1b header files not found: {prev_level_filename}")
     sys.exit(1)
@@ -454,7 +407,7 @@ logging.info("Cleaning table header")
 process_table(table_df, table)
 obs_tables = [x for x in cdm_tables.keys() if x != "header"]
 for table in obs_tables:
-    table_pattern = FFS.join([table, fileID]) + "*.psv"
+    table_pattern = FFS.join([table, params.prev_fileID]) + "*.psv"
     table_files = glob.glob(os.path.join(prev_level_path, table_pattern))
     if len(table_files) > 0:
         logging.info(f"Cleaning table {table}")

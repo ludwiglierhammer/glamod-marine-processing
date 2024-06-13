@@ -107,6 +107,11 @@ class Cli:
         if self.work_directory is not None:
             config["paths"]["glamod"] = self.work_directory
 
+        try:
+            user = os.getlogin()
+        except OSError:
+            user = "testuser"
+
         config["paths"]["data_directory"] = get_abs_path(
             config["paths"]["data_directory"]
         )
@@ -121,7 +126,7 @@ class Cli:
         scripts_directory = os.path.join(code_directory, "scripts")
         lotus_scripts_directory = os.path.join(code_directory, "lotus_scripts")
         work_directory = os.path.abspath(config["paths"]["glamod"])
-        scratch_directory = os.path.join(work_directory, os.getlogin())
+        scratch_directory = os.path.join(work_directory, user)
         release_directory = os.path.join(
             scratch_directory, self.release, self.dataset, self.level
         )
@@ -155,7 +160,10 @@ class Options:
             """,
         )
         self.submit_jobs = click.option(
-            "-submit", "--submit_jobs", is_flag=True, help="Submit job scripts"
+            "-submit", "--submit_jobs", is_flag=True, help="Submit job scripts."
+        )
+        self.run_jobs = click.option(
+            "-run", "--run_jobs", is_flag=True, help="Run job scripts interactively."
         )
         self.level = click.option(
             "-l",
@@ -248,7 +256,22 @@ class Options:
             "-qc",
             "--quality_control",
             is_flag=True,
-            help="Do quality control for qc_suite only",
+            help="Do quality control for qc_suite only.",
+        )
+        self.source_pattern = click.option(
+            "-sp",
+            "--source_pattern",
+            help="User-defined input source pattern.",
+        )
+        self.prev_file_id = click.option(
+            "-p_id",
+            "--prev_file_id",
+            help="fileID of input file names. Default <YYYY><MM><RELEASE>",
+        )
+        self.external_qc_files = click.option(
+            "-ext_qc",
+            "--external_qc_files",
+            help="Path to external QC files. Default: <data_directory>/external_files.",
         )
 
 

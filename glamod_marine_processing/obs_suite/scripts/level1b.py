@@ -51,7 +51,6 @@ from __future__ import annotations
 
 import datetime
 import glob
-import json
 import logging
 import os
 import sys
@@ -60,62 +59,11 @@ from importlib import reload
 import numpy as np
 import pandas as pd
 import simplejson
+from _utilities import date_handler, script_setup
 from cdm_reader_mapper import cdm_mapper as cdm
 from cdm_reader_mapper.operations import replace
 
 reload(logging)  # This is to override potential previous config of logging
-
-
-# Functions--------------------------------------------------------------------
-class script_setup:
-    """Create script."""
-
-    def __init__(self, inargs):
-        self.data_path = inargs[1]
-        self.release = inargs[2]
-        self.update = inargs[3]
-        self.dataset = inargs[4]
-        self.configfile = inargs[5]
-
-        try:
-            with open(self.configfile) as fileObj:
-                config = json.load(fileObj)
-        except Exception:
-            logging.error(
-                f"Opening configuration file :{self.configfile}", exc_info=True
-            )
-            self.flag = False
-            return
-
-        if len(sys.argv) > 6:
-            self.sid_dck = inargs[6]
-            self.year = inargs[7]
-            self.month = inargs[8]
-        else:
-            self.sid_dck = config.get("sid_dck")
-            self.year = config.get("yyyy")
-            self.month = config.get("mm")
-
-        process_options = ["correction_version", "corrections", "histories"]
-        try:
-            for opt in process_options:
-                if not config.get(self.sid_dck, {}).get(opt):
-                    setattr(self, opt, config.get(opt))
-                else:
-                    setattr(self, opt, config.get(self.sid_dck).get(opt))
-            self.flag = True
-        except Exception:
-            logging.error(
-                f"Parsing configuration from file :{self.configfile}", exc_info=True
-            )
-            self.flag = False
-
-
-# This is for json to handle dates
-def date_handler(obj):
-    """Handle date."""
-    if isinstance(obj, (datetime.datetime, datetime.date)):
-        return obj.isoformat()
 
 
 def clean_L1b(L1b_id):
@@ -153,7 +101,8 @@ else:
     logging.error("Need arguments to run!")
     sys.exit(1)
 
-params = script_setup(args)
+process_options = ["correction_version", "corrections", "histories"]
+params = script_setup(process_options, args)
 
 filename_field_sep = "-"
 delimiter = "|"
@@ -165,6 +114,8 @@ fileID = filename_field_sep.join(
     [str(params.year), str(params.month).zfill(2), release_id]
 )
 fileID_date = filename_field_sep.join([str(params.year), str(params.month)])
+if params.prev_fileID is None:
+    params.prev_fileID = fileID
 
 L1a_path = os.path.join(release_path, "level1a", params.sid_dck)
 L1b_path = os.path.join(release_path, "level1b", params.sid_dck)
@@ -185,7 +136,7 @@ if any([not os.path.isdir(x) for x in data_paths]):
     )
     sys.exit(1)
 
-L1a_filename = os.path.join(L1a_path, "header-" + fileID + ".psv")
+L1a_filename = params.filename
 if not os.path.isfile(L1a_filename):
     logging.error(f"L1a header file not found: {L1a_filename}")
     sys.exit(1)
@@ -203,9 +154,10 @@ cdm_tables = cdm.load_tables()
 history_tstmp = datetime.datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S")
 for table in cdm.properties.cdm_tables:
     datetime_col = "report_timestamp" if table == "header" else "date_time"
-    logging.info(f"TABLE {table}")
-    table_df = pd.DataFrame()
-    table_df = cdm.read_tables(L1a_path, fileID, cdm_subset=[table])
+    logging.info(L1a_path)
+    logging.info(params.prev_fileID)
+    logging.info(table)
+    table_df = cdm.read_tables(L1a_path, params.prev_fileID, cdm_subset=[table])
 
     if len(table_df) == 0:
         logging.warning(f"Empty or non-existing table {table}")

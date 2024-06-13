@@ -55,7 +55,6 @@ from __future__ import annotations
 
 import datetime
 import glob
-import json
 import logging
 import os
 import subprocess
@@ -65,77 +64,10 @@ from importlib import reload
 
 import pandas as pd
 import simplejson
+from _utilities import date_handler, script_setup
 from cdm_reader_mapper import cdm_mapper as cdm
 
 reload(logging)  # This is to override potential previous config of logging
-
-
-# %% FUNCTIONS -------------------------------------------------------------------
-class script_setup:
-    """Set up script."""
-
-    def __init__(self, inargs):
-        self.data_path = inargs[1]
-        self.release = inargs[2]
-        self.update = inargs[3]
-        self.dataset = inargs[4]
-        self.configfile = inargs[5]
-
-        try:
-            with open(self.configfile) as fileObj:
-                config = json.load(fileObj)
-        except Exception:
-            logging.error(
-                f"Opening configuration file :{self.configfile}", exc_info=True
-            )
-            self.flag = False
-            return
-
-        if len(sys.argv) >= 8:
-            logging.warning(
-                "Removed option to provide sid_dck, year and month as arguments. Use config file instead"
-            )
-        try:
-            self.sid_dck = config.get("sid_dck")
-            self.year = config.get("yyyy")
-            self.month = config.get("mm")
-        except Exception:
-            logging.error(
-                f"Parsing configuration from file :{self.configfile}", exc_info=True
-            )
-            self.flag = False
-
-        self.dck = self.sid_dck.split("-")[1]
-
-        # However md_subdir is then nested in monthly....and inside monthly files
-        # Other MD sources would stick to this? Force it otherwise?
-        process_options = [
-            "md_model",
-            "md_subdir",
-            "history_explain",
-            "md_first_yr_avail",
-            "md_last_yr_avail",
-            "md_not_avail",
-        ]
-        try:
-            for opt in process_options:
-                if not config.get(self.sid_dck, {}).get(opt):
-                    setattr(self, opt, config.get(opt))
-                else:
-                    setattr(self, opt, config.get(self.sid_dck).get(opt))
-            self.flag = True
-        except Exception:
-            logging.error(
-                f"Parsing configuration from file :{self.configfile}", exc_info=True
-            )
-            self.flag = False
-
-
-# This is for json to handle dates
-def date_handler(obj):
-    """Handle date."""
-    if isinstance(obj, (datetime.datetime, datetime.date)):
-        return obj.isoformat()
 
 
 def map_to_cdm(md_model, meta_df, log_level="INFO"):
@@ -161,9 +93,13 @@ def process_table(table_df, table_name):
         # Open table and reindex
         table_df = pd.DataFrame()
         if local:
-            table_df = cdm.read_tables(scratch_path, fileID, cdm_subset=[table_name])
+            table_df = cdm.read_tables(
+                scratch_path, params.prev_fileID, cdm_subset=[table_name]
+            )
         else:
-            table_df = cdm.read_tables(prev_level_path, fileID, cdm_subset=[table_name])
+            table_df = cdm.read_tables(
+                prev_level_path, params.prev_fileID, cdm_subset=[table_name]
+            )
         if table_df is None or len(table_df) == 0:
             logging.warning(f"Empty or non existing table {table_name}")
             return
@@ -257,7 +193,15 @@ else:
     logging.error("Need arguments to run!")
     sys.exit(1)
 
-params = script_setup(args)
+process_options = [
+    "md_model",
+    "md_subdir",
+    "history_explain",
+    "md_first_yr_avail",
+    "md_last_yr_avail",
+    "md_not_avail",
+]
+params = script_setup(process_options, args)
 # %%
 FFS = "-"
 delimiter = "|"
@@ -273,6 +217,8 @@ release_path = os.path.join(params.data_path, params.release, params.dataset)
 release_id = FFS.join([params.release, params.update])
 fileID = FFS.join([str(params.year), str(params.month).zfill(2), release_id])
 fileID_date = FFS.join([str(params.year), str(params.month)])
+if params.prev_fileID is None:
+    params.prev_fileID = fileID
 
 prev_level_path = os.path.join(release_path, level_prev, params.sid_dck)
 level_path = os.path.join(release_path, level, params.sid_dck)
@@ -291,7 +237,7 @@ if any([not os.path.isdir(x) for x in data_paths]):
     )
     sys.exit(1)
 
-prev_level_filename = os.path.join(prev_level_path, "header-" + fileID + ".psv")
+prev_level_filename = params.filename
 if not os.path.isfile(prev_level_filename):
     logging.error(f"L1c header file not found: {prev_level_filename}")
     sys.exit(1)
@@ -345,17 +291,21 @@ obs_tables = [x for x in cdm_tables.keys() if x != "header"]
 # Read the header table
 table = "header"
 if local:
-    logging.info(f"cp -L {prev_level_path}/*{fileID}.psv {scratch_path}")
-    subprocess.call(f"cp -L {prev_level_path}/*{fileID}.psv {scratch_path}", shell=True)
+    # logging.info(f"cp -L {prev_level_path}/*{fileID}.psv {scratch_path}")
+    # subprocess.call(f"cp -L {prev_level_path}/*{fileID}.psv {scratch_path}", shell=True)
+    logging.info(f"cp -L {prev_level_path}/*.psv {scratch_path}")
+    subprocess.call(f"cp -L {prev_level_path}/*.psv {scratch_path}", shell=True)
 header_df = pd.DataFrame()
 if local:
-    header_df = cdm.read_tables(
-        scratch_path, fileID, cdm_subset=[table], na_values="null"
-    )
+    # header_df = cdm.read_tables(
+    #    scratch_path, fileID, cdm_subset=[table], na_values="null"
+    # )
+    header_df = cdm.read_tables(scratch_path, cdm_subset=[table], na_values="null")
 else:
-    header_df = cdm.read_tables(
-        prev_level_path, fileID, cdm_subset=[table], na_values="null"
-    )
+    # header_df = cdm.read_tables(
+    #    prev_level_path, fileID, cdm_subset=[table], na_values="null"
+    # )
+    header_df = cdm.read_tables(prev_level_path, cdm_subset=[table], na_values="null")
 
 if len(header_df) == 0:
     logging.error("Empty or non-existing header table")

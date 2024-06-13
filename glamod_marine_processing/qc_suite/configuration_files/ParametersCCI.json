@@ -3,12 +3,8 @@
   "icoads_filenames": [
     "YYYY-MM.psv"
   ],
-  "background_dir": [
-    "SST_daily_CCI/gws-access.jasmin.ac.uk/ICDR_v2/Analysis/L4/v2.1/YYYY/MMMM/DDDD/"
-  ],
-  "background_filenames": [
-    "YYYYMMMMDDDD120000-ESACCI-L4_GHRSST-SSTdepth-OSTIA-GLOB_CDR2.1-v02.0-fv01.0.nc"
-  ],
+  "background_dir": "SST_daily_CCI/gws-access.jasmin.ac.uk/ICDR_v2/Analysis/L4/v2.1/YYYY/MMMM/DDDD/",
+  "background_filenames": "YYYYMMMMDDDD120000-ESACCI-L4_GHRSST-SSTdepth-OSTIA-GLOB_CDR2.1-v02.0-fv01.0.nc",
   "climatologies": [
     [
       "SST",

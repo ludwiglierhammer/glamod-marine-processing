@@ -1,0 +1,16 @@
+name: marine-processing-test
+
+channels:
+    - conda-forge
+    - nodefaults
+
+dependencies:
+    # for testing
+    - pytest
+    - pytest-cov
+    - pytest-env
+    - pip:
+      - git+https://github.com/glamod/cdm_reader_mapper
+      - pandas-validation
+      - Levenshtein
+      - simplejson

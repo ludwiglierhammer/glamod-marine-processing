@@ -3385,6 +3385,10 @@ class Deck:
         syr = str(year)
         smn = f"{month:02}"
 
+        if len(self.reps) == 0:
+            print("wrote no output")
+            return
+
         for var in allvarnames:
             outfilename = var + "_qc_" + syr + smn + "_" + runid + ".csv"
             if test:
@@ -3405,7 +3409,6 @@ class Deck:
             outfile.close()
 
         print(f"wrote out {count_write} obs")
-        return
 
     def write_output(self, runid, icoads_dir, year, month, test=False):
         """Write out the contents of the class`.Deck`."""

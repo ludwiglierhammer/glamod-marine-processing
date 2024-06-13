@@ -108,7 +108,7 @@ def read_icoads_file(
         )
 
         # replace ' ' in ID field with '' (corrections introduce bug)
-        imma_obj["ID"].replace(" ", "", inplace=True)
+        imma_obj["ID"] = imma_obj["ID"].replace(" ", "")
         imma_obj = imma_obj.sort_values(
             ["YR", "MO", "DY", "HR", "ID"], axis=0, ascending=True
         )
@@ -149,7 +149,6 @@ def read_icoads_file(
                             readyear, readmonth, lastday
                         )
 
-                        #                            ofname = ostia_filename(ostia_dir, y_year, y_month, y_day)
                         ofname = bf.get_background_filename(
                             os.path.join(external_dir, parameters["background_dir"]),
                             parameters["background_filenames"],
@@ -323,7 +322,6 @@ def main(argv):
     sst_stdev_3 = clim.Climatology.from_filename(
         config.get("Climatologies").get("SST_buddy_avg_sampling"), "sst"
     )
-
     with open(config.get("Files").get("parameter_file")) as f:
         parameters = json.load(f)
 
