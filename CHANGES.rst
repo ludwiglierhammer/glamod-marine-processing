@@ -3,6 +3,16 @@
 Changelog
 =========
 
+v7.0.0 (2024-06-13)
+-------------------
+Contributors to this version: Ludwig Lierhammer (:user:`ludwiglierhammer`)
+
+Announcements
+^^^^^^^^^^^^^^
+
+renaming release name to vX.Y.Z
+
+
 release_7.0.0 (2024-06-13)
 --------------------------
 Contributors to this version: Ludwig Lierhammer (:user:`ludwiglierhammer`)
