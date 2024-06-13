@@ -73,7 +73,7 @@ Once installed you can use it as an command-line interface. For more information
 		:target: https://www.codefactor.io/repository/github/glamod/glamod-marine-processing
 		:alt: CodeFactor
 
-.. |coveralls| image:: https://codecov.io/gh/glamod/glamod-marine-processingr/branch/master/graph/badge.svg
+.. |coveralls| image:: https://codecov.io/gh/glamod/glamod-marine-processing/graph/badge.svg
 	      :target: https://codecov.io/gh/glamod/glamod-marine-processing
 	      :alt: Coveralls
 
