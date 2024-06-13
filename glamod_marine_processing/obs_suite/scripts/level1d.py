@@ -92,14 +92,14 @@ def process_table(table_df, table_name):
         # Assume 'header' and in a DF in table_df otherwise
         # Open table and reindex
         table_df = pd.DataFrame()
-        # if local:
-        #    table_df = cdm.read_tables(scratch_path, fileID, cdm_subset=[table_name])
-        # else:
-        #    table_df = cdm.read_tables(prev_level_path, fileID, cdm_subset=[table_name])
         if local:
-            table_df = cdm.read_tables(scratch_path, cdm_subset=[table_name])
+            table_df = cdm.read_tables(
+                scratch_path, params.prev_fileID, cdm_subset=[table_name]
+            )
         else:
-            table_df = cdm.read_tables(prev_level_path, cdm_subset=[table_name])
+            table_df = cdm.read_tables(
+                prev_level_path, params.prev_fileID, cdm_subset=[table_name]
+            )
         if table_df is None or len(table_df) == 0:
             logging.warning(f"Empty or non existing table {table_name}")
             return
@@ -217,6 +217,8 @@ release_path = os.path.join(params.data_path, params.release, params.dataset)
 release_id = FFS.join([params.release, params.update])
 fileID = FFS.join([str(params.year), str(params.month).zfill(2), release_id])
 fileID_date = FFS.join([str(params.year), str(params.month)])
+if params.prev_fileID is None:
+    params.prev_fileID = fileID
 
 prev_level_path = os.path.join(release_path, level_prev, params.sid_dck)
 level_path = os.path.join(release_path, level, params.sid_dck)

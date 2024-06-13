@@ -94,7 +94,6 @@ else:
 
 params = script_setup([], args)
 
-FFS = "-*"
 level = "level2"
 header = True
 wmode = "w"
@@ -103,7 +102,7 @@ left_min_period = 1600
 right_max_period = 2100
 
 release_path = os.path.join(params.data_path, params.release, params.dataset)
-release_id = FFS.join([params.release, params.update])
+release_id = "-".join([params.release, params.update])
 L1e_path = os.path.join(release_path, "level1e", params.sid_dck)
 L2_path = os.path.join(release_path, level, params.sid_dck)
 L2_excluded_path = os.path.join(release_path, level, "excluded", params.sid_dck)
@@ -180,15 +179,16 @@ try:
             copyfiles(pattern, L2_excluded_path)
         for table in include_param_list:
             for year in range(year_init, year_end + 1):
-                pattern = os.path.join(L1e_path, table + FFS + str(year) + FFS + ".psv")
+                pattern = os.path.join(L1e_path, f"{table}-*{str(year)}-??-*.psv")
+                logging.warning(pattern)
                 copyfiles(pattern, L2_path, mode="included")
 
         # Send out of release period to excluded
         for year in range(left_min_period, year_init):
-            pattern = os.path.join(L1e_path, FFS.join(["*", str(year), "??", "*.psv"]))
+            pattern = os.path.join(L1e_path, f"*{str(year)}-??-*.psv")
             copyfiles(pattern, L2_excluded_path)
         for year in range(year_end + 1, right_max_period + 1):
-            pattern = os.path.join(L1e_path, FFS.join(["*", str(year), "??", "*.psv"]))
+            pattern = os.path.join(L1e_path, f"*{str(year)}-??-*.psv")
             copyfiles(pattern, L2_excluded_path)
 
     logging.info("Level2 data succesfully created")

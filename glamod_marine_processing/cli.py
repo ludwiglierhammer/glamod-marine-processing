@@ -263,6 +263,11 @@ class Options:
             "--source_pattern",
             help="User-defined input source pattern.",
         )
+        self.prev_file_id = click.option(
+            "-p_id",
+            "--prev_file_id",
+            help="fileID of input file names. Default <YYYY><MM><RELEASE>",
+        )
         self.external_qc_files = click.option(
             "-ext_qc",
             "--external_qc_files",

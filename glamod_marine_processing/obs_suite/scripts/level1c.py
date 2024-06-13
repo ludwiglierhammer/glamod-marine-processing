@@ -264,6 +264,8 @@ release_path = os.path.join(params.data_path, params.release, params.dataset)
 release_id = FFS.join([params.release, params.update])
 fileID = FFS.join([str(params.year), str(params.month).zfill(2), release_id])
 fileID_date = FFS.join([str(params.year), str(params.month)])
+if params.prev_fileID is None:
+    params.prev_fileID = fileID
 
 prev_level_path = os.path.join(release_path, level_prev, params.sid_dck)
 level_path = os.path.join(release_path, level, params.sid_dck)
@@ -405,8 +407,7 @@ logging.info("Cleaning table header")
 process_table(table_df, table)
 obs_tables = [x for x in cdm_tables.keys() if x != "header"]
 for table in obs_tables:
-    # table_pattern = FFS.join([table, fileID]) + "*.psv"
-    table_pattern = FFS.join([table, "*"]) + "*.psv"
+    table_pattern = FFS.join([table, params.prev_fileID]) + "*.psv"
     table_files = glob.glob(os.path.join(prev_level_path, table_pattern))
     if len(table_files) > 0:
         logging.info(f"Cleaning table {table}")

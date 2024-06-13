@@ -114,6 +114,8 @@ fileID = filename_field_sep.join(
     [str(params.year), str(params.month).zfill(2), release_id]
 )
 fileID_date = filename_field_sep.join([str(params.year), str(params.month)])
+if params.prev_fileID is None:
+    params.prev_fileID = fileID
 
 L1a_path = os.path.join(release_path, "level1a", params.sid_dck)
 L1b_path = os.path.join(release_path, "level1b", params.sid_dck)
@@ -152,11 +154,10 @@ cdm_tables = cdm.load_tables()
 history_tstmp = datetime.datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S")
 for table in cdm.properties.cdm_tables:
     datetime_col = "report_timestamp" if table == "header" else "date_time"
-    logging.info(f"TABLE {table}")
-    table_df = pd.DataFrame()
-    # table_df = cdm.read_tables(L1a_path, fileID, cdm_subset=[table])
-    print(L1a_path)
-    table_df = cdm.read_tables(L1a_path, cdm_subset=[table])
+    logging.info(L1a_path)
+    logging.info(params.prev_fileID)
+    logging.info(table)
+    table_df = cdm.read_tables(L1a_path, params.prev_fileID, cdm_subset=[table])
 
     if len(table_df) == 0:
         logging.warning(f"Empty or non-existing table {table}")

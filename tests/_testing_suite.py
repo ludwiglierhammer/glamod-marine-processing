@@ -33,6 +33,7 @@ def _obs_testing(level, capsys):
             cache_dir=f"./T{level}/release_7.0",
             branch="marine_processing_testing",
         )
+
     _load_data.load_input(level)
 
     s = (
@@ -41,6 +42,7 @@ def _obs_testing(level, capsys):
         f"-data_dir ./T{level} "
         f"-work_dir ./T{level} "
         f"-sp {_settings.pattern[level]} "
+        "-p_id subset "
         "-o "
         "-run"
     )
