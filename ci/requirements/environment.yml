@@ -12,5 +12,4 @@ dependencies:
     - pip:
       - git+https://github.com/glamod/cdm_reader_mapper
       - pandas-validation
-      - Levenshtein
       - simplejson
