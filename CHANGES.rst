@@ -7,6 +7,10 @@ v7.0.1 (unpublished)
 --------------------
 Contributors to this version: Ludwig Lierhammer (:user:`ludwiglierhammer`)
 
+Breaking changes
+^^^^^^^^^^^^^^^^
+* delete metadata suite, config suite and not-used scripts/modules (:issue:`14`, :pull:`16`)
+
 Bug fixes
 ^^^^^^^^^
 * fixing observation suite level1e tests (:pull:`17`) 
