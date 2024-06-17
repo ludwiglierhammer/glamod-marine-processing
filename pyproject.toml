@@ -31,10 +31,8 @@ classifiers = [
 dynamic = ["version", "dependencies", "optional-dependencies"]
 
 [project.scripts]
-metadata_suite = "glamod_marine_processing.cli_md:MdataCli"
 qc_suite = "glamod_marine_processing.cli_qc:QcCli"
 obs_suite = "glamod_marine_processing.cli_obs:ObsCli"
-config_suite = "glamod_marine_processing.cli_cf:ConfigCli"
 
 [project.urls]
 "Homepage" = "https://glamod-marine-processing.readthedocs.io"
@@ -150,10 +148,8 @@ file = "ci/requirements/requirements.txt"
 
 [tool.setuptools.dynamic.optional-dependencies]
 obs = {file = "ci/requirements/requirements_ob.txt"}
-conf = {file = "ci/requirements/requirements_cf.txt"}
 qc = {file = "ci/requirements/requirements_qc.txt"}
-meta = {file = "ci/requirements/requirements_md.txt"}
-complete = {file = ["ci/requirements/requirements_ob.txt", "ci/requirements/requirements_cf.txt", "ci/requirements/requirements_qc.txt", "ci/requirements/requirements_md.txt"]}
+complete = {file = ["ci/requirements/requirements_ob.txt", "ci/requirements/requirements_qc.txt"]}
 
 [tool.setuptools_scm]
 fallback_version = "999"
