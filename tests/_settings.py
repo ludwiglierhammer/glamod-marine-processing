@@ -124,7 +124,13 @@ manipulation = {
         ],
     },
     "level1e": {
-        ("header", "report_quality"): ["2", "2", "2", "2", "2"],
+        ("header", "report_quality"): ["0", "0", "1", "0", "1"],
+        ("observations-at", "quality_flag"): ["1", "1", np.nan, "0", np.nan],
+        ("observations-dpt", "quality_flag"): [np.nan, "0", np.nan, "0", np.nan],
+        ("observations-slp", "quality_flag"): ["0", "0", np.nan, "0", np.nan],
+        ("observations-sst", "quality_flag"): ["0", "0", np.nan, np.nan, np.nan],
+        ("observations-wd", "quality_flag"): ["0", "0", np.nan, "0", np.nan],
+        ("observations-ws", "quality_flag"): ["0", "0", np.nan, "0", np.nan],
     },
     "level2": {},
 }
