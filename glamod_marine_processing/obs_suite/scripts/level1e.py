@@ -476,9 +476,7 @@ if len(header_df) == 0:
 # See what CDM tables are available for this fileID
 tables_in = ["header"]
 for table in obs_tables:
-    table_filename = os.path.join(
-        prev_level_path, filename_field_sep.join([table, fileID]) + ".psv"
-    )
+    table_filename = header_filename.replace("header", table)
     if not os.path.isfile(table_filename):
         logging.warning(f"CDM table not available: {table_filename}")
     else:
