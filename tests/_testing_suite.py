@@ -5,7 +5,7 @@ import os
 import _load_data
 import _settings
 import pandas as pd
-from cdm_reader_mapper.cdm_mapper import read_tables
+from cdm_reader_mapper.cdm_mapper import read_tables, cdm_to_ascii
 from cdm_reader_mapper.common.getting_files import load_file
 
 add_data = {
@@ -17,6 +17,10 @@ add_data = {
     "level2": None,
 }
 
+
+def manipulate_inputs(inputs, level):
+    """Manipulate input data."""
+    return inputs
 
 def manipulate_expected(expected, level):
     """Manipulate expected result data."""
@@ -33,7 +37,15 @@ def _obs_testing(level, capsys):
             cache_dir=f"./T{level}/release_7.0",
         )
 
-    _load_data.load_input(level)
+    cache_dir = _load_data.load_input(level)
+    
+    inputs = read_tables(
+        cache_dir, cdm_subset=tables
+    )
+    
+    inputs = manipulate_inputs(inputs, level)
+    
+    cdm_to_ascii(inputs, out_dir=cache_dir)
 
     s = (
         "obs_suite "
