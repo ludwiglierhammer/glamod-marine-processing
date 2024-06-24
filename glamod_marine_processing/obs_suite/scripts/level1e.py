@@ -283,13 +283,6 @@ def process_table(table_df, table_name):
         table_df["quality_flag"] = compare_quality_checks(table_df["quality_flag"])
 
     if table_name == "header":
-        # set report quality to 2 for ids with partial match to TEST
-        if params.year >= "2015":
-            loc = (table_df.primary_station_id.str.contains("TEST")) & (
-                table_df.duplicate_status == "4"
-            )
-            table_df.report_quality.loc[loc] = "2"
-
         table_df["report_quality"] = compare_quality_checks(table_df["report_quality"])
 
     cdm_columns = cdm_tables.get(table_name).keys()
