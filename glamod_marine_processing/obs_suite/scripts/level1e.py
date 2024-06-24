@@ -211,9 +211,9 @@ def add_report_quality(qc_df_full):
 
 def compare_quality_checks(df):
     """Compare entries with location_quality and report_time_quality."""
-    df = df.mask(location_quality == 2, 1)
-    df = df.mask(report_time_quality == 4, 1)
-    df = df.mask(report_time_quality == 5, 1)
+    df = df.mask(location_quality == "2", "1")
+    df = df.mask(report_time_quality == "4", "1")
+    df = df.mask(report_time_quality == "5", "1")
     return df
 
 
