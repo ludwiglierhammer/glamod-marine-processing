@@ -55,26 +55,28 @@ def load_input(level):
     """Load level input data data from cdm-testdata."""
     p_level = prev_level[level]
     leveli = level_input[level]
+    cache_dir = f"./T{level}/{leveli}/ICOADS_R3.0.2T/{p_level}/114-992"
     if level == "level1a":
-        load_imma(level, leveli, p_level)
+        load_imma(cache_dir)
     else:
-        load_cdms(level, leveli, p_level)
+        load_cdms(cache_dir)
+    return cache_dir
 
 
-def load_cdms(level, leveli, p_level):
+def load_cdms(cache_dir):
     """Load level CDM input data from cdm-testdata."""
     for table_name in table_names:
         load_file(
             f"imma1_992/cdm_tables/{table_name}-114-992_2022-01-01_subset.psv",
-            cache_dir=f"./T{level}/{leveli}/ICOADS_R3.0.2T/{p_level}/114-992",
+            cache_dir=cache_dir,
             within_drs=False,
         )
 
 
-def load_imma(level, leveli, p_level):
+def load_imma(cache_dir):
     """Load level IMMA input data from cdm-testdata."""
     load_file(
         "imma1_992/input/114-992_2022-01-01_subset.imma",
-        cache_dir=f"./T{level}/{leveli}/ICOADS_R3.0.2T/{p_level}/114-992",
+        cache_dir=cache_dir,
         within_drs=False,
     )
