@@ -13,7 +13,7 @@ Breaking changes
 
 Bug fixes
 ^^^^^^^^^
-* fixing observation suite level1e tests (:pull:`17`) 
+* fixing observation suite level1e tests (:pull:`17`)
 
 v7.0.0 (2024-06-13)
 -------------------
