@@ -523,8 +523,8 @@ if qc_avail:
 #    header.location_quality = default not-checked ('3') to not-checked('3')
 
 # First header, then rest.
-location_quality = header_df["location_quality"]
-report_time_quality = header_df["report_time_quality"]
+location_quality = header_df["location_quality"].copy()
+report_time_quality = header_df["report_time_quality"].copy()
 
 flag = True if qc_avail else False
 process_table(header_df, "header")
