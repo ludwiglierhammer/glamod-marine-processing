@@ -211,9 +211,9 @@ def add_report_quality(qc_df_full):
 
 def compare_quality_checks(df):
     """Compare entries with location_quality and report_time_quality."""
-    df = df.mask(location_quality == 2, 1)
-    df = df.mask(report_time_quality == 4, 1)
-    df = df.mask(report_time_quality == 5, 1)
+    df = df.mask(location_quality == "2", "1")
+    df = df.mask(report_time_quality == "4", "1")
+    df = df.mask(report_time_quality == "5", "1")
     return df
 
 
@@ -283,13 +283,6 @@ def process_table(table_df, table_name):
         table_df["quality_flag"] = compare_quality_checks(table_df["quality_flag"])
 
     if table_name == "header":
-        # set report quality to 2 for ids with partial match to TEST
-        if params.year >= "2015":
-            loc = (table_df.primary_station_id.str.contains("TEST")) & (
-                table_df.duplicate_status == "4"
-            )
-            table_df.report_quality.loc[loc] = "2"
-
         table_df["report_quality"] = compare_quality_checks(table_df["report_quality"])
 
     cdm_columns = cdm_tables.get(table_name).keys()
@@ -523,8 +516,8 @@ if qc_avail:
 #    header.location_quality = default not-checked ('3') to not-checked('3')
 
 # First header, then rest.
-location_quality = header_df["location_quality"]
-report_time_quality = header_df["report_time_quality"]
+location_quality = header_df["location_quality"].copy()
+report_time_quality = header_df["report_time_quality"].copy()
 
 flag = True if qc_avail else False
 process_table(header_df, "header")

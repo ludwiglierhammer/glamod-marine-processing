@@ -20,8 +20,11 @@ add_data = {
 
 def manipulate_expected(expected, level):
     """Manipulate expected result data."""
-    for index, values in _settings.manipulation[level].items():
-        expected[index] = values
+    if level in _settings.manipulation.keys():
+        for index, values in _settings.manipulation[level].items():
+            expected[index] = values
+    if level in _settings.drops.keys():
+        expected = expected.drop(_settings.drops[level]).reset_index(drop=True)
     return expected
 
 
@@ -33,7 +36,7 @@ def _obs_testing(level, capsys):
             cache_dir=f"./T{level}/release_7.0",
         )
 
-    _load_data.load_input(level)
+    cache_dir = _load_data.load_input(level)
 
     s = (
         "obs_suite "

@@ -13,7 +13,8 @@ Breaking changes
 
 Bug fixes
 ^^^^^^^^^
-* fixing observation suite level1e tests (:pull:`17`) 
+* fixing observation suite level1e tests (:pull:`17`)
+* level1e: change QC mapping from ``v7.0.0`` is now running by setting values of ``location_quality`` and ``report_time_quality`` to ``str`` (:pull:`18`)
 
 v7.0.0 (2024-06-13)
 -------------------
@@ -36,7 +37,7 @@ Breaking changes
 * change QC mapping in obs_suite level1e (:issue:`7`, :pull:`8`):
 
   * if ``location_quality`` is equal ``2`` set both ``report_quality`` and ``quality_flag`` to ``1``
-  * if ```report_time_quality`` is equal ``4`` or ``5`` set both ``report_quality`` and ``quality_flag`` to ``1``
+  * if ``report_time_quality`` is equal ``4`` or ``5`` set both ``report_quality`` and ``quality_flag`` to ``1``
 
 New features and enhancements
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^

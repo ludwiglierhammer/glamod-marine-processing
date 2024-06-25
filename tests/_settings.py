@@ -60,20 +60,18 @@ pattern = {
 }
 
 manipulation = {
-    "level1a": {},
-    "level1b": {},
     "level1c": {},
     "level1d": {
         ("header", "station_name"): [
             "null",
             "FF HELMER HANSEN",
             "WAVERIDER TFSTD",
-            "NORNE",
+            "null",
             "WAVERIDER TFDRN",
         ],
-        ("header", "platform_sub_type"): ["null", "RV", "OT", "MI", "OT"],
-        ("header", "station_record_number"): ["1", "1", "0", "13", "0"],
-        ("header", "report_duration"): ["11", "HLY", "11", "HLY", "11"],
+        ("header", "platform_sub_type"): ["null", "RV", "OT", "null", "OT"],
+        ("header", "station_record_number"): ["1", "1", "0", "1", "0"],
+        ("header", "report_duration"): ["11", "HLY", "11", "11", "11"],
         ("observations-at", "sensor_id"): ["null", "AT", np.nan, "null", np.nan],
         ("observations-dpt", "sensor_id"): [np.nan, "HUM", np.nan, "null", np.nan],
         ("observations-slp", "sensor_id"): ["null", "SLP", np.nan, "null", np.nan],
@@ -132,5 +130,9 @@ manipulation = {
         ("observations-wd", "quality_flag"): ["0", "0", np.nan, "0", np.nan],
         ("observations-ws", "quality_flag"): ["0", "0", np.nan, "0", np.nan],
     },
-    "level2": {},
+}
+
+drops = {
+    "level1a": [0],
+    "level1c": [0, 3],
 }
