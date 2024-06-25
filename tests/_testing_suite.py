@@ -20,11 +20,11 @@ add_data = {
 
 def manipulate_expected(expected, level):
     """Manipulate expected result data."""
-    if level in _settings.manipulation.keys()
-       for index, values in _settings.manipulation[level].items():
-         expected[index] = values
+    if level in _settings.manipulation.keys():
+        for index, values in _settings.manipulation[level].items():
+            expected[index] = values
     if level in _settings.drops.keys():
-       expected.drop(_settings.drops[level])
+        expected.drop(_settings.drops[level])
     return expected
 
 
