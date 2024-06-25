@@ -18,11 +18,6 @@ add_data = {
 }
 
 
-def manipulate_inputs(inputs, level):
-    """Manipulate input data."""
-    return inputs
-
-
 def manipulate_expected(expected, level):
     """Manipulate expected result data."""
     for index, values in _settings.manipulation[level].items():
@@ -39,12 +34,6 @@ def _obs_testing(level, capsys):
         )
 
     cache_dir = _load_data.load_input(level)
-
-    inputs = read_tables(cache_dir, cdm_subset=tables)
-
-    inputs = manipulate_inputs(inputs, level)
-
-    cdm_to_ascii(inputs, out_dir=cache_dir)
 
     s = (
         "obs_suite "
