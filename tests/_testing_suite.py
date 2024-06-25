@@ -5,7 +5,7 @@ import os
 import _load_data
 import _settings
 import pandas as pd
-from cdm_reader_mapper.cdm_mapper import cdm_to_ascii, read_tables
+from cdm_reader_mapper.cdm_mapper import read_tables
 from cdm_reader_mapper.common.getting_files import load_file
 
 add_data = {
