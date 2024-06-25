@@ -66,7 +66,7 @@ manipulation = {
             "null",
             "FF HELMER HANSEN",
             "WAVERIDER TFSTD",
-            "NORNE",
+            "null",
             "WAVERIDER TFDRN",
         ],
         ("header", "platform_sub_type"): ["null", "RV", "OT", "MI", "OT"],
