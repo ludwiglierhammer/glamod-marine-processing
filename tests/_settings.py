@@ -60,8 +60,6 @@ pattern = {
 }
 
 manipulation = {
-    "level1a": {},
-    "level1b": {},
     "level1c": {},
     "level1d": {
         ("header", "station_name"): [
@@ -132,5 +130,8 @@ manipulation = {
         ("observations-wd", "quality_flag"): ["0", "0", np.nan, "0", np.nan],
         ("observations-ws", "quality_flag"): ["0", "0", np.nan, "0", np.nan],
     },
-    "level2": {},
+}
+
+drops = {
+    "level1c": [0,3]
 }
