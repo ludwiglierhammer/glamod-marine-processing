@@ -69,7 +69,7 @@ manipulation = {
             "null",
             "WAVERIDER TFDRN",
         ],
-        ("header", "platform_sub_type"): ["null", "RV", "OT", "MI", "OT"],
+        ("header", "platform_sub_type"): ["null", "RV", "OT", "null", "OT"],
         ("header", "station_record_number"): ["1", "1", "0", "13", "0"],
         ("header", "report_duration"): ["11", "HLY", "11", "HLY", "11"],
         ("observations-at", "sensor_id"): ["null", "AT", np.nan, "null", np.nan],
