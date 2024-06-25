@@ -70,7 +70,6 @@ def load_cdms(cache_dir):
             f"imma1_992/cdm_tables/{table_name}-114-992_2022-01-01_subset.psv",
             cache_dir=cache_dir,
             within_drs=False,
-            branch="level_manipulating",
         )
 
 
@@ -80,5 +79,4 @@ def load_imma(cache_dir):
         "imma1_992/input/114-992_2022-01-01_subset.imma",
         cache_dir=cache_dir,
         within_drs=False,
-        branch="level_manipulating",
     )

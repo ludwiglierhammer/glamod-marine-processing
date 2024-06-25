@@ -60,7 +60,6 @@ def _obs_testing(level, capsys):
             f"imma1_992/cdm_tables/{table_name}-114-992_2022-01-01_subset.psv",
             cache_dir=f"./E{level}/ICOADS_R3.0.2T/{level}/114-992",
             within_drs=False,
-            branch="level_manipulating",
         )
     expected = read_tables(
         f"./E{level}/ICOADS_R3.0.2T/{level}/114-992", cdm_subset=tables
