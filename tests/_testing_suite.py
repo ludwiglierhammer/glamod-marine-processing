@@ -24,7 +24,7 @@ def manipulate_expected(expected, level):
         for index, values in _settings.manipulation[level].items():
             expected[index] = values
     if level in _settings.drops.keys():
-        expected = expected.drop(_settings.drops[level])
+        expected = expected.drop(_settings.drops[level]).reset_index()
     return expected
 
 
