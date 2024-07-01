@@ -2,6 +2,7 @@
 
 This is a temporary script file.
 """
+
 from __future__ import annotations
 
 import glob
