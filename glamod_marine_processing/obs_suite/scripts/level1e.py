@@ -203,9 +203,9 @@ def add_report_quality(qc_df_full):
     # Second: at least one observed param passed -> report_quality = '0'
     qc_df_full.loc[qc_param_sum < qc_param_applied, "report_quality"] = pass_report
     # Third: POS qc fails, no matter how good the observed params are -> report_quality '1'
-    qc_df_full.loc[
-        qc_df_full["POS"] == failed_location, "report_quality"
-    ] = failed_report
+    qc_df_full.loc[qc_df_full["POS"] == failed_location, "report_quality"] = (
+        failed_report
+    )
     return qc_df_full
 
 

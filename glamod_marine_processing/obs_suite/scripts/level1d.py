@@ -51,6 +51,7 @@ valid_from;valid_to;uid;thmH1;platH;brmH1;anmH;anHL1;wwH;sstD1;th1;hy1;st1;bm1;a
 
 @author: iregon
 """
+
 from __future__ import annotations
 
 import datetime
