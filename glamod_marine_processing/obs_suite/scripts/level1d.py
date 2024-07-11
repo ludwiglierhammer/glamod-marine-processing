@@ -159,8 +159,6 @@ def process_table(table_df, table_name):
         na_rep="null",
     )
 
-    return
-
 
 def clean_level(file_id):
     """Clean table."""
@@ -292,20 +290,12 @@ obs_tables = [x for x in cdm_tables.keys() if x != "header"]
 # Read the header table
 table = "header"
 if local:
-    # logging.info(f"cp -L {prev_level_path}/*{fileID}.psv {scratch_path}")
-    # subprocess.call(f"cp -L {prev_level_path}/*{fileID}.psv {scratch_path}", shell=True)
     logging.info(f"cp -L {prev_level_path}/*.psv {scratch_path}")
     subprocess.call(f"cp -L {prev_level_path}/*.psv {scratch_path}", shell=True)
 header_df = pd.DataFrame()
 if local:
-    # header_df = cdm.read_tables(
-    #    scratch_path, fileID, cdm_subset=[table], na_values="null"
-    # )
     header_df = cdm.read_tables(scratch_path, cdm_subset=[table], na_values="null")
 else:
-    # header_df = cdm.read_tables(
-    #    prev_level_path, fileID, cdm_subset=[table], na_values="null"
-    # )
     header_df = cdm.read_tables(prev_level_path, cdm_subset=[table], na_values="null")
 
 if len(header_df) == 0:
@@ -374,8 +364,5 @@ with open(level_io_filename, "w") as fileObj:
         indent=4,
         ignore_nan=True,
     )
-
-# 5. clean scratch for comming tasks ------------------------------------------
-# rmtree(scratch_)
 
 logging.info("End")
