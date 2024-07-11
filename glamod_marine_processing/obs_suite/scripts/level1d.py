@@ -74,15 +74,11 @@ reload(logging)  # This is to override potential previous config of logging
 def map_to_cdm(md_model, meta_df, log_level="INFO"):
     """Map to CDM."""
     # Atts is a minimum info on vars the cdm mocule requires
-    atts = {k: {"column_type": "object"} for k in meta_df.columns}
-    meta_cdm_dict = cdm.map_model(md_model, meta_df, atts, log_level=log_level)
+    meta_cdm_dict = cdm.map_model(md_model, meta_df, {}, log_level=log_level)
     meta_cdm = pd.DataFrame()
-    table = "header"
-    meta_cdm_columns = [(table, x) for x in meta_cdm_dict[table]["data"].columns]
-    meta_cdm[meta_cdm_columns] = meta_cdm_dict[table]["data"]
-    for table in obs_tables:
+    for table in cdm_tables:
         meta_cdm_columns = [(table, x) for x in meta_cdm_dict[table]["data"].columns]
-        meta_cdm[meta_cdm_columns] = meta_cdm_dict[table]["data"]
+        meta_cdm[meta_cdm_columns] = meta_cdm_dict[table]["data"].astype("object")
     return meta_cdm
 
 
@@ -342,7 +338,7 @@ if md_avail:
 if merge:
     logging.info("Mapping metadata to CDM")
     meta_cdm = map_to_cdm(params.md_model, meta_df, log_level="DEBUG")
-
+   
 # 3. UPDATE CDM WITH PUB47 OR JUST COPY PREV LEVEL TO CURRENT -----------------
 # This is only valid for the header
 table = "header"
