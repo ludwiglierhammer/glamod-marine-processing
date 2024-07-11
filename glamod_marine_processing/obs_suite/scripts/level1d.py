@@ -74,15 +74,11 @@ reload(logging)  # This is to override potential previous config of logging
 def map_to_cdm(md_model, meta_df, log_level="INFO"):
     """Map to CDM."""
     # Atts is a minimum info on vars the cdm mocule requires
-    atts = {k: {"column_type": "object"} for k in meta_df.columns}
-    meta_cdm_dict = cdm.map_model(md_model, meta_df, atts, log_level=log_level)
+    meta_cdm_dict = cdm.map_model(md_model, meta_df, {}, log_level=log_level)
     meta_cdm = pd.DataFrame()
-    table = "header"
-    meta_cdm_columns = [(table, x) for x in meta_cdm_dict[table]["data"].columns]
-    meta_cdm[meta_cdm_columns] = meta_cdm_dict[table]["data"]
-    for table in obs_tables:
+    for table in cdm_tables:
         meta_cdm_columns = [(table, x) for x in meta_cdm_dict[table]["data"].columns]
-        meta_cdm[meta_cdm_columns] = meta_cdm_dict[table]["data"]
+        meta_cdm[meta_cdm_columns] = meta_cdm_dict[table]["data"].astype("object")
     return meta_cdm
 
 
@@ -158,8 +154,6 @@ def process_table(table_df, table_name):
         mode=wmode,
         na_rep="null",
     )
-
-    return
 
 
 def clean_level(file_id):
@@ -292,20 +286,12 @@ obs_tables = [x for x in cdm_tables.keys() if x != "header"]
 # Read the header table
 table = "header"
 if local:
-    # logging.info(f"cp -L {prev_level_path}/*{fileID}.psv {scratch_path}")
-    # subprocess.call(f"cp -L {prev_level_path}/*{fileID}.psv {scratch_path}", shell=True)
     logging.info(f"cp -L {prev_level_path}/*.psv {scratch_path}")
     subprocess.call(f"cp -L {prev_level_path}/*.psv {scratch_path}", shell=True)
 header_df = pd.DataFrame()
 if local:
-    # header_df = cdm.read_tables(
-    #    scratch_path, fileID, cdm_subset=[table], na_values="null"
-    # )
     header_df = cdm.read_tables(scratch_path, cdm_subset=[table], na_values="null")
 else:
-    # header_df = cdm.read_tables(
-    #    prev_level_path, fileID, cdm_subset=[table], na_values="null"
-    # )
     header_df = cdm.read_tables(prev_level_path, cdm_subset=[table], na_values="null")
 
 if len(header_df) == 0:
@@ -374,8 +360,5 @@ with open(level_io_filename, "w") as fileObj:
         indent=4,
         ignore_nan=True,
     )
-
-# 5. clean scratch for comming tasks ------------------------------------------
-# rmtree(scratch_)
 
 logging.info("End")
