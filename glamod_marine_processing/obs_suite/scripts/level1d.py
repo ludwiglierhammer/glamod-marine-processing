@@ -338,7 +338,7 @@ if md_avail:
 if merge:
     logging.info("Mapping metadata to CDM")
     meta_cdm = map_to_cdm(params.md_model, meta_df, log_level="DEBUG")
-   
+
 # 3. UPDATE CDM WITH PUB47 OR JUST COPY PREV LEVEL TO CURRENT -----------------
 # This is only valid for the header
 table = "header"
