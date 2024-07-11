@@ -10,6 +10,7 @@ Contributors to this version: Ludwig Lierhammer (:user:`ludwiglierhammer`)
 Breaking changes
 ^^^^^^^^^^^^^^^^
 * delete metadata suite, config suite and not-used scripts/modules (:issue:`14`, :pull:`16`)
+* adjust ``obs_suite`` to ``cdm_reader_mapper`` version ``v0.4.0`` (yet unpublished) (:pull:`21`)
 
 Bug fixes
 ^^^^^^^^^
