@@ -118,9 +118,10 @@ if not params.flag:
 
 correction_path = os.path.join(params.data_path, params.release, params.corrections)
 
-L0_path = os.path.join(
-    params.data_path, "datasets", params.dataset, "level0", params.sid_dck
-)
+L0_filename = os.path.join(params.prev_level_path, params.filename)
+if not os.path.isfile(L0_filename):
+    logging.error(f"L0 file not found: {L0_filename}")
+    sys.exit(1)
 
 # CLEAN PREVIOUS L1A PRODUCTS AND SIDE FILES ----------------------------------
 L1a_prods = glob.glob(
@@ -148,7 +149,7 @@ read_kwargs = {
     "sections": params.read_sections,
     "chunksize": 200000,
 }
-data_in = mdf_reader.read(params.filename, **read_kwargs)
+data_in = mdf_reader.read(L0_filename, **read_kwargs)
 logging.info(data_in.data)
 io_dict["read"] = {"total": inspect.get_length(data_in.data)}
 

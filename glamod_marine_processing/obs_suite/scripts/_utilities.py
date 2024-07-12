@@ -75,7 +75,10 @@ class script_setup:
         if self.prev_fileID is None:
             self.prev_fileID = self.fileID
 
-        self.prev_level_path = os.path.join(release_path, level_prev, self.sid_dck)
+        if level = "level1a":
+            self.prev_level_path = os.path.join(self.data_path, "datasets", self.dataset, "level0", self.sid_dck)
+        else:
+            self.prev_level_path = os.path.join(release_path, level_prev, self.sid_dck)
         self.level_path = os.path.join(release_path, level, self.sid_dck)
         self.level_ql_path = os.path.join(
             release_path, level, "quicklooks", self.sid_dck
