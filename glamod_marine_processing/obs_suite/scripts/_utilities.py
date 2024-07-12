@@ -8,6 +8,7 @@ import logging
 import sys
 
 delimiter = "|"
+FFS = "-"
 
 
 # Functions--------------------------------------------------------------------

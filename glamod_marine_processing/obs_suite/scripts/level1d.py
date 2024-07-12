@@ -65,7 +65,7 @@ from importlib import reload
 
 import pandas as pd
 import simplejson
-from _utilities import date_handler, delimiter, script_setup, table_to_csv
+from _utilities import FFS, date_handler, delimiter, script_setup, table_to_csv
 from cdm_reader_mapper import cdm_mapper as cdm
 
 reload(logging)  # This is to override potential previous config of logging
@@ -189,8 +189,7 @@ process_options = [
     "md_not_avail",
 ]
 params = script_setup(process_options, args)
-# %%
-FFS = "-"
+
 level = "level1d"
 level_prev = "level1c"
 

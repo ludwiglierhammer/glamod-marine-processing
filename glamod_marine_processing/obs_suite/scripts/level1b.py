@@ -60,7 +60,7 @@ from importlib import reload
 import numpy as np
 import pandas as pd
 import simplejson
-from _utilities import date_handler, delimiter, script_setup, table_to_csv
+from _utilities import FFS, date_handler, delimiter, script_setup, table_to_csv
 from cdm_reader_mapper import cdm_mapper as cdm
 from cdm_reader_mapper.operations import replace
 
@@ -105,15 +105,12 @@ else:
 process_options = ["correction_version", "corrections", "histories"]
 params = script_setup(process_options, args)
 
-filename_field_sep = "-"
 cor_ext = ".txt.gz"
 
 release_path = os.path.join(params.data_path, params.release, params.dataset)
-release_id = filename_field_sep.join([params.release, params.update])
-fileID = filename_field_sep.join(
-    [str(params.year), str(params.month).zfill(2), release_id]
-)
-fileID_date = filename_field_sep.join([str(params.year), str(params.month)])
+release_id = FFS.join([params.release, params.update])
+fileID = FFS.join([str(params.year), str(params.month).zfill(2), release_id])
+fileID_date = FFS.join([str(params.year), str(params.month)])
 if params.prev_fileID is None:
     params.prev_fileID = fileID
 
@@ -283,9 +280,7 @@ for table in cdm.properties.cdm_tables:
                 source_mon_period.strftime("%Y-%m"), table
             )
         )
-        filename = os.path.join(
-            L1b_path, filename_field_sep.join([table, fileID]) + ".psv"
-        )
+        filename = os.path.join(L1b_path, FFS.join([table, fileID]) + ".psv")
         table_to_csv(
             table_df.loc[[source_mon_period], :], filename, columns=cdm_columns
         )
@@ -308,7 +303,7 @@ for table in cdm.properties.cdm_tables:
             logging.info(
                 "Writing {} data to {} table file".format(leak.strftime("%Y-%m"), table)
             )
-            L1b_idl = filename_field_sep.join(
+            L1b_idl = FFS.join(
                 [
                     table,
                     leak.strftime("%Y-%m"),

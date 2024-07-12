@@ -130,7 +130,7 @@ from importlib import reload
 import numpy as np
 import pandas as pd
 import simplejson
-from _utilities import date_handler, script_setup, table_to_csv
+from _utilities import FFS, date_handler, script_setup, table_to_csv
 from cdm_reader_mapper import cdm_mapper as cdm
 
 reload(logging)  # This is to override potential previous config of logging
@@ -247,13 +247,13 @@ def wind_qc():
         table_ws["quality_flag"] = table_ws["quality_flag"].mask(masked, "1")
 
     odata_filename_wd = os.path.join(
-        level_path, filename_field_sep.join(["observations-wd", fileID]) + ".psv"
+        level_path, FFS.join(["observations-wd", fileID]) + ".psv"
     )
     cdm_columns = cdm_tables.get("observations-wd").keys()
     table_to_csv(table_wd, odata_filename_wd, columns=cdm_columns)
 
     odata_filename_ws = os.path.join(
-        level_path, filename_field_sep.join(["observations-ws", fileID]) + ".psv"
+        level_path, FFS.join(["observations-ws", fileID]) + ".psv"
     )
     cdm_columns = cdm_tables.get("observations-ws").keys()
     table_to_csv(table_ws, odata_filename_ws, columns=cdm_columns)
@@ -336,9 +336,7 @@ def process_table(table_df, table_name):
         table_df["report_quality"] = compare_quality_checks(table_df["report_quality"])
 
     cdm_columns = cdm_tables.get(table_name).keys()
-    odata_filename = os.path.join(
-        level_path, filename_field_sep.join([table_name, fileID]) + ".psv"
-    )
+    odata_filename = os.path.join(level_path, FFS.join([table_name, fileID]) + ".psv")
     table_to_csv(table_df, odata_filename, columns=cdm_columns)
 
 
@@ -405,7 +403,6 @@ qc_delimiter = ","
 # -----------------------------------------------------------------------------
 
 # Some other parameters -------------------------------------------------------
-filename_field_sep = "-"
 level = "level1e"
 level_prev = "level1d"
 
@@ -439,11 +436,9 @@ process_options = [
 params = script_setup(process_options, args)
 
 release_path = os.path.join(params.data_path, params.release, params.dataset)
-release_id = filename_field_sep.join([params.release, params.update])
-fileID = filename_field_sep.join(
-    [str(params.year), str(params.month).zfill(2), release_id]
-)
-fileID_date = filename_field_sep.join([str(params.year), str(params.month)])
+release_id = FFS.join([params.release, params.update])
+fileID = FFS.join([str(params.year), str(params.month).zfill(2), release_id])
+fileID_date = FFS.join([str(params.year), str(params.month)])
 if params.prev_fileID is None:
     params.prev_fileID = fileID
 

@@ -67,16 +67,13 @@ from io import StringIO
 import numpy as np
 import pandas as pd
 import simplejson
-from _utilities import date_handler, script_setup
+from _utilities import FFS, date_handler, script_setup
 from cdm_reader_mapper import cdm_mapper as cdm
 from cdm_reader_mapper import mdf_reader, metmetpy
 from cdm_reader_mapper.common import pandas_TextParser_hdlr
 from cdm_reader_mapper.operations import inspect, select
 
 reload(logging)  # This is to override potential previous config of logging
-
-
-FFS = "-"
 
 
 # FUNCTIONS -------------------------------------------------------------------
@@ -136,7 +133,6 @@ if not params.flag:
 release_path = os.path.join(params.data_path, params.release, params.dataset)
 correction_path = os.path.join(params.data_path, params.release, params.corrections)
 
-FFS = "-"
 L0_path = os.path.join(
     params.data_path, "datasets", params.dataset, "level0", params.sid_dck
 )
