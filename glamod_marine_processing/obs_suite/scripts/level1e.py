@@ -212,10 +212,10 @@ def add_report_quality(qc_df_full):
 def wind_qc():
     """Wind Quality Control function."""
     table_wd = cdm.read_tables(
-        prev_level_path, params.prev_fileID, cdm_subset=["observations-wd"]
+        params.prev_level_path, params.prev_fileID, cdm_subset=["observations-wd"]
     )
     table_ws = cdm.read_tables(
-        prev_level_path, params.prev_fileID, cdm_subset=["observations-ws"]
+        params.prev_level_path, params.prev_fileID, cdm_subset=["observations-ws"]
     )
     if len(table_wd) == 0:
         logging.warning(
@@ -247,13 +247,13 @@ def wind_qc():
         table_ws["quality_flag"] = table_ws["quality_flag"].mask(masked, "1")
 
     odata_filename_wd = os.path.join(
-        level_path, FFS.join(["observations-wd", fileID]) + ".psv"
+        params.level_path, FFS.join(["observations-wd", params.fileID]) + ".psv"
     )
     cdm_columns = cdm_tables.get("observations-wd").keys()
     table_to_csv(table_wd, odata_filename_wd, columns=cdm_columns)
 
     odata_filename_ws = os.path.join(
-        level_path, FFS.join(["observations-ws", fileID]) + ".psv"
+        params.level_path, FFS.join(["observations-ws", params.fileID]) + ".psv"
     )
     cdm_columns = cdm_tables.get("observations-ws").keys()
     table_to_csv(table_ws, odata_filename_ws, columns=cdm_columns)
@@ -281,7 +281,7 @@ def process_table(table_df, table_name):
         # Open table and reindex
         table_df = pd.DataFrame()
         table_df = cdm.read_tables(
-            prev_level_path, params.prev_fileID, cdm_subset=[table_name]
+            params.prev_level_path, params.prev_fileID, cdm_subset=[table_name]
         )
 
         if table_df is None or len(table_df) == 0:
@@ -336,7 +336,9 @@ def process_table(table_df, table_name):
         table_df["report_quality"] = compare_quality_checks(table_df["report_quality"])
 
     cdm_columns = cdm_tables.get(table_name).keys()
-    odata_filename = os.path.join(level_path, FFS.join([table_name, fileID]) + ".psv")
+    odata_filename = os.path.join(
+        params.level_path, FFS.join([table_name, params.fileID]) + ".psv"
+    )
     table_to_csv(table_df, odata_filename, columns=cdm_columns)
 
 
@@ -388,9 +390,6 @@ qc_delimiter = ","
 # -----------------------------------------------------------------------------
 
 # Some other parameters -------------------------------------------------------
-level = "level1e"
-level_prev = "level1d"
-
 cdm_tables = cdm.load_tables()
 obs_tables = [x for x in cdm_tables.keys() if x != "header"]
 
@@ -418,31 +417,13 @@ process_options = [
     "qc_first_date_avail",
     "qc_last_date_avail",
 ]
-params = script_setup(process_options, args)
+params = script_setup(process_options, args, "level1e", "level1d")
 
-release_path = os.path.join(params.data_path, params.release, params.dataset)
-release_id = FFS.join([params.release, params.update])
-fileID = FFS.join([str(params.year), str(params.month).zfill(2), release_id])
-fileID_date = FFS.join([str(params.year), str(params.month)])
-if params.prev_fileID is None:
-    params.prev_fileID = fileID
-
-prev_level_path = os.path.join(release_path, level_prev, params.sid_dck)
-level_path = os.path.join(release_path, level, params.sid_dck)
-level_ql_path = os.path.join(release_path, level, "quicklooks", params.sid_dck)
-level_log_path = os.path.join(release_path, level, "log", params.sid_dck)
-
-# qc_path = os.path.join(release_path,'metoffice_qc','base')
 qc_path = os.path.join(params.data_path, params.release, "metoffice_qc", "base")
 
 # Check we have all the dirs!
-data_paths = [prev_level_path, level_path, level_ql_path, level_log_path, qc_path]
-if any([not os.path.isdir(x) for x in data_paths]):
-    logging.error(
-        "Could not find data paths: {}".format(
-            ",".join([x for x in data_paths if not os.path.isdir(x)])
-        )
-    )
+if not os.path.isdir(qc_path):
+    logging.error(f"Could not find data paths: {qc_path}")
     sys.exit(1)
 
 # Check we have QC files!
@@ -479,7 +460,9 @@ if not os.path.isfile(header_filename):
     sys.exit(1)
 
 header_df = pd.DataFrame()
-header_df = cdm.read_tables(prev_level_path, cdm_subset=["header"], na_values="null")
+header_df = cdm.read_tables(
+    params.prev_level_path, cdm_subset=["header"], na_values="null"
+)
 
 if len(header_df) == 0:
     logging.error("Empty or non-existing header table")
@@ -502,9 +485,9 @@ if len(tables_in) == 1:
 # DO THE DATA PROCESSING ------------------------------------------------------
 header_df.set_index("report_id", inplace=True, drop=False)
 qc_dict = {}
-level_prods = glob.glob(os.path.join(level_path, "*-" + fileID + ".psv"))
-level_logs = glob.glob(os.path.join(level_log_path, fileID + ".*"))
-level_ql = glob.glob(os.path.join(level_ql_path, "*" + fileID + "*.*"))
+level_prods = glob.glob(os.path.join(params.level_path, "*-" + params.fileID + ".psv"))
+level_logs = glob.glob(os.path.join(params.level_log_path, params.fileID + ".*"))
+level_ql = glob.glob(os.path.join(params.level_ql_path, "*" + params.fileID + "*.*"))
 clean_level(level_prods + level_logs + level_ql)
 
 # 1. PROCESS QC FLAGS ---------------------------------------------------------
@@ -555,7 +538,7 @@ wind_qc()
 qc_dict["date processed"] = datetime.datetime.now()
 
 logging.info("Saving json quicklook")
-level_io_filename = os.path.join(level_ql_path, fileID + ".json")
+level_io_filename = os.path.join(params.level_ql_path, params.fileID + ".json")
 with open(level_io_filename, "w") as fileObj:
     simplejson.dump(
         {"-".join([params.year, params.month]): qc_dict},

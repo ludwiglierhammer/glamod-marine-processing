@@ -82,39 +82,21 @@ if len(sys.argv) > 1:
 else:
     logging.error("Need arguments to run!")
 
-params = script_setup([], args)
-
 level = "level2"
+params = script_setup([], args, level, "level1e")
 
 # These to build the brace expansions for the out of release periods
 left_min_period = 1600
 right_max_period = 2100
 
-release_path = os.path.join(params.data_path, params.release, params.dataset)
-release_id = "-".join([params.release, params.update])
-L1e_path = os.path.join(release_path, "level1e", params.sid_dck)
-L2_path = os.path.join(release_path, level, params.sid_dck)
-L2_excluded_path = os.path.join(release_path, level, "excluded", params.sid_dck)
-L2_reports_path = os.path.join(release_path, level, "reports", params.sid_dck)
-
-data_paths = [L1e_path]
-if any([not os.path.isdir(x) for x in data_paths]):
-    logging.error(
-        "Could not find data paths: {}".format(
-            ",".join([x for x in data_paths if not os.path.isdir(x)])
-        )
-    )
+if not os.path.isdir(params.prev_level_path):
+    logging.error(f"Could not find data paths: {params.prev_level_path}")
     sys.exit(1)
-
-if not os.path.isfile(params.level2_list):
-    logging.error(f"Level2 selection file {params.level2_list} not found")
-    sys.exit(1)
-
 
 # Clean previous L2 data and report subdirs -----------------------------------
-L2_prods = glob.glob(os.path.join(L2_path, "*.psv"))
-L2_reps = glob.glob(os.path.join(L2_reports_path, "*.psv"))
-L2_excl = glob.glob(os.path.join(L2_excluded_path, "*.psv"))
+L2_prods = glob.glob(os.path.join(params.level_path, "*.psv"))
+L2_reps = glob.glob(os.path.join(params.level_reports_path, "*.psv"))
+L2_excl = glob.glob(os.path.join(params.level_excluded_path, "*.psv"))
 clean_level(L2_prods + L2_reps + L2_excl)
 
 # DO THE DATA SELECTION -------------------------------------------------------
@@ -163,25 +145,27 @@ try:
     include_param_list.append("header")
     if exclude_sid_dck:
         for table in cdm_tables:
-            pattern = os.path.join(L1e_path, table + "*.psv")
-            copyfiles(pattern, L2_excluded_path)
+            pattern = os.path.join(params.prev_level_path, table + "*.psv")
+            copyfiles(pattern, params.level_excluded_path)
     else:
         for table in exclude_param_list:
-            pattern = os.path.join(L1e_path, table + "*.psv")
-            copyfiles(pattern, L2_excluded_path)
+            pattern = os.path.join(params.prev_level_path, table + "*.psv")
+            copyfiles(pattern, params.level_excluded_path)
         for table in include_param_list:
             for year in range(year_init, year_end + 1):
-                pattern = os.path.join(L1e_path, f"{table}-*{str(year)}-??-*.psv")
+                pattern = os.path.join(
+                    params.prev_level_path, f"{table}-*{str(year)}-??-*.psv"
+                )
                 logging.warning(pattern)
-                copyfiles(pattern, L2_path, mode="included")
+                copyfiles(pattern, params.level_path, mode="included")
 
         # Send out of release period to excluded
         for year in range(left_min_period, year_init):
-            pattern = os.path.join(L1e_path, f"*{str(year)}-??-*.psv")
-            copyfiles(pattern, L2_excluded_path)
+            pattern = os.path.join(params.prev_level_path, f"*{str(year)}-??-*.psv")
+            copyfiles(pattern, params.level_excluded_path)
         for year in range(year_end + 1, right_max_period + 1):
-            pattern = os.path.join(L1e_path, f"*{str(year)}-??-*.psv")
-            copyfiles(pattern, L2_excluded_path)
+            pattern = os.path.join(params.prev_level_path, f"*{str(year)}-??-*.psv")
+            copyfiles(pattern, params.level_excluded_path)
 
     logging.info("Level2 data succesfully created")
 except Exception:

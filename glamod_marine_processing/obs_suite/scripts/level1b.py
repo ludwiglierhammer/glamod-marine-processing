@@ -90,50 +90,29 @@ else:
     sys.exit(1)
 
 process_options = ["correction_version", "corrections", "histories"]
-params = script_setup(process_options, args)
+params = script_setup(process_options, args, "level1b", "level1a")
 
 cor_ext = ".txt.gz"
-
-release_path = os.path.join(params.data_path, params.release, params.dataset)
-release_id = FFS.join([params.release, params.update])
-fileID = FFS.join([str(params.year), str(params.month).zfill(2), release_id])
-fileID_date = FFS.join([str(params.year), str(params.month)])
-if params.prev_fileID is None:
-    params.prev_fileID = fileID
-
-L1a_path = os.path.join(release_path, "level1a", params.sid_dck)
-L1b_path = os.path.join(release_path, "level1b", params.sid_dck)
-L1b_ql_path = os.path.join(release_path, "level1b", "quicklooks", params.sid_dck)
 
 L1b_main_corrections = os.path.join(
     params.data_path, params.release, "NOC_corrections", params.correction_version
 )
 
 logging.info(f"Setting corrections path to {L1b_main_corrections}")
+if not os.path.isdir(L1b_main_corrections):
+    logging.error(f"Could not find data paths: {L1b_main_corrections}")
+    sys.exit()
 
-data_paths = [L1a_path, L1b_path, L1b_ql_path, L1b_main_corrections]
-if any([not os.path.isdir(x) for x in data_paths]):
-    logging.error(
-        "Could not find data paths: {}".format(
-            ",".join([x for x in data_paths if not os.path.isdir(x)])
-        )
-    )
-    sys.exit(1)
-
-L1a_filename = params.filename
-if not os.path.isfile(L1a_filename):
-    logging.error(f"L1a header file not found: {L1a_filename}")
-    sys.exit(1)
 
 # Clean previous L1a products and side files ----------------------------------
-L1b_prods = glob.glob(os.path.join(L1b_path, "*-" + fileID + ".psv"))
+L1b_prods = glob.glob(os.path.join(params.level_path, "*-" + params.fileID + ".psv"))
 L1b_prods_idate = glob.glob(
     os.path.join(
-        L1b_path,
+        params.level_path,
         "*" + "-".join([str(params.year), str(params.month).zfill(2)]) + ".psv",
     )
 )
-L1b_ql = glob.glob(os.path.join(L1b_ql_path, fileID + ".*"))
+L1b_ql = glob.glob(os.path.join(params.level_ql_path, params.fileID + ".*"))
 clean_level(L1b_prods + L1b_prods_idate + L1b_ql)
 correction_dict = {table: {} for table in cdm.properties.cdm_tables}
 
@@ -146,10 +125,12 @@ cdm_tables = cdm.load_tables()
 history_tstmp = datetime.datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S")
 for table in cdm.properties.cdm_tables:
     datetime_col = "report_timestamp" if table == "header" else "date_time"
-    logging.info(L1a_path)
+    logging.info(params.prev_level_path)
     logging.info(params.prev_fileID)
     logging.info(table)
-    table_df = cdm.read_tables(L1a_path, params.prev_fileID, cdm_subset=[table])
+    table_df = cdm.read_tables(
+        params.prev_level_path, params.prev_fileID, cdm_subset=[table]
+    )
 
     if len(table_df) == 0:
         logging.warning(f"Empty or non-existing table {table}")
@@ -170,7 +151,9 @@ for table in cdm.properties.cdm_tables:
     for correction, element in table_corrections.items():
         correction_dict[table]["corrections"][element] = {"applied": 1, "number": 0}
         logging.info(f"Applying corrections for element {element}")
-        cor_path = os.path.join(L1b_main_corrections, correction, fileID_date + cor_ext)
+        cor_path = os.path.join(
+            L1b_main_corrections, correction, params.fileID_date + cor_ext
+        )
         if not os.path.isfile(cor_path):
             logging.warning(f"Correction file {cor_path} not found")
             continue
@@ -275,7 +258,9 @@ for table in cdm.properties.cdm_tables:
                 source_mon_period.strftime("%Y-%m"), table
             )
         )
-        filename = os.path.join(L1b_path, FFS.join([table, fileID]) + ".psv")
+        filename = os.path.join(
+            params.level_path, FFS.join([table, params.fileID]) + ".psv"
+        )
         table_to_csv(
             table_df.loc[[source_mon_period], :], filename, columns=cdm_columns
         )
@@ -302,11 +287,11 @@ for table in cdm.properties.cdm_tables:
                 [
                     table,
                     leak.strftime("%Y-%m"),
-                    release_id,
+                    params.release_id,
                     source_mon_period.strftime("%Y-%m"),
                 ]
             )
-            filename = os.path.join(L1b_path, L1b_idl + ".psv")
+            filename = os.path.join(params.level_path, L1b_idl + ".psv")
             table_to_csv(table_df.loc[[leak], :], filename, columns=cdm_columns)
             table_df.drop(leak, inplace=True)
             len_df_i = len_df
@@ -324,7 +309,7 @@ for table in cdm.properties.cdm_tables:
 correction_dict["date processed"] = datetime.datetime.now()
 
 logging.info("Saving json quicklook")
-L1b_io_filename = os.path.join(L1b_ql_path, fileID + ".json")
+L1b_io_filename = os.path.join(params.level_ql_path, params.fileID + ".json")
 with open(L1b_io_filename, "w") as fileObj:
     simplejson.dump(
         {"-".join([params.year, params.month]): correction_dict},

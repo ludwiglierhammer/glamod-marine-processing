@@ -102,7 +102,7 @@ def process_table(table_df, table_name):
             )
         else:
             table_df = cdm.read_tables(
-                prev_level_path, params.prev_fileID, cdm_subset=[table_name]
+                params.prev_level_path, params.prev_fileID, cdm_subset=[table_name]
             )
         if table_df is None or len(table_df) == 0:
             logging.warning(f"Empty or non existing table {table_name}")
@@ -151,7 +151,9 @@ def process_table(table_df, table_name):
             table_df["history"].loc[locs] = table_df["history"].loc[locs] + history_add
 
     cdm_columns = cdm_tables.get(table_name).keys()
-    odata_filename = os.path.join(level_path, FFS.join([table_name, fileID]) + ".psv")
+    odata_filename = os.path.join(
+        params.level_path, FFS.join([table_name, params.fileID]) + ".psv"
+    )
     table_to_csv(table_df, odata_filename, columns=cdm_columns)
 
 
@@ -182,41 +184,17 @@ process_options = [
     "md_last_yr_avail",
     "md_not_avail",
 ]
-params = script_setup(process_options, args)
-
 level = "level1d"
-level_prev = "level1c"
+params = script_setup(process_options, args, level, "level1c")
 
 local = True
-# copy files to local scratch to avoid high i/o stress on cluster (managed to bring down ICHEC before)
-release_path = os.path.join(params.data_path, params.release, params.dataset)
-release_id = FFS.join([params.release, params.update])
-fileID = FFS.join([str(params.year), str(params.month).zfill(2), release_id])
-fileID_date = FFS.join([str(params.year), str(params.month)])
-if params.prev_fileID is None:
-    params.prev_fileID = fileID
 
-prev_level_path = os.path.join(release_path, level_prev, params.sid_dck)
-level_path = os.path.join(release_path, level, params.sid_dck)
-scratch_ = os.path.join(release_path, level, "scratch")
+scratch_ = os.path.join(params.release_path, level, "scratch")
 scratch_path = os.path.join(scratch_, params.sid_dck)
 os.makedirs(scratch_path, exist_ok=True)
-level_ql_path = os.path.join(release_path, level, "quicklooks", params.sid_dck)
-level_log_path = os.path.join(release_path, level, "log", params.sid_dck)
 
-data_paths = [prev_level_path, level_path, level_ql_path, level_log_path]
-if any([not os.path.isdir(x) for x in data_paths]):
-    logging.error(
-        "Could not find data paths: {}".format(
-            ",".join([x for x in data_paths if not os.path.isdir(x)])
-        )
-    )
-    sys.exit(1)
-
-prev_level_filename = params.filename
-if not os.path.isfile(prev_level_filename):
-    logging.error(f"L1c header file not found: {prev_level_filename}")
-    sys.exit(1)
+if not os.path.isdir(params.level_log_path):
+    logging.error(f"Could not find data paths: {params.level_log_path}")
 
 md_avail = True if not params.md_not_avail else False
 
@@ -253,9 +231,9 @@ else:
     logging.info("level1d data will be created with no merging")
 
 # %% Clean previous L1a products and side files ----------------------------------
-level_prods = glob.glob(os.path.join(level_path, "*-" + fileID + ".psv"))
-level_logs = glob.glob(os.path.join(level_log_path, fileID + ".*"))
-level_ql = glob.glob(os.path.join(level_ql_path, fileID + ".*"))
+level_prods = glob.glob(os.path.join(params.level_path, "*-" + params.fileID + ".psv"))
+level_logs = glob.glob(os.path.join(params.level_log_path, params.fileID + ".*"))
+level_ql = glob.glob(os.path.join(params.level_ql_path, params.fileID + ".*"))
 clean_level(level_prods + level_logs + level_ql)
 meta_dict = {}
 
@@ -270,13 +248,15 @@ obs_tables = [x for x in cdm_tables.keys() if x != "header"]
 # Read the header table
 table = "header"
 if local:
-    logging.info(f"cp -L {prev_level_path}/*.psv {scratch_path}")
-    subprocess.call(f"cp -L {prev_level_path}/*.psv {scratch_path}", shell=True)
+    logging.info(f"cp -L {params.prev_level_path}/*.psv {scratch_path}")
+    subprocess.call(f"cp -L {params.prev_level_path}/*.psv {scratch_path}", shell=True)
 header_df = pd.DataFrame()
 if local:
     header_df = cdm.read_tables(scratch_path, cdm_subset=[table], na_values="null")
 else:
-    header_df = cdm.read_tables(prev_level_path, cdm_subset=[table], na_values="null")
+    header_df = cdm.read_tables(
+        params.prev_level_path, cdm_subset=[table], na_values="null"
+    )
 
 if len(header_df) == 0:
     logging.error("Empty or non-existing header table")
@@ -335,7 +315,7 @@ for table in obs_tables:
 
 # 4. SAVE QUICKLOOK -----------------------------------------------------------
 logging.info("Saving json quicklook")
-level_io_filename = os.path.join(level_ql_path, fileID + ".json")
+level_io_filename = os.path.join(params.level_ql_path, params.fileID + ".json")
 with open(level_io_filename, "w") as fileObj:
     simplejson.dump(
         {"-".join([params.year, params.month]): meta_dict},
