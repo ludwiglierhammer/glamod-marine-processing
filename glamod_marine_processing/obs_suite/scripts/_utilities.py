@@ -92,7 +92,7 @@ class script_setup:
         self.level_reports_path = os.path.join(
             release_path, level, "reports", self.sid_dck
         )
-        data_paths = [self.prev_level_path, self.level_path, self.level_ql_path]
+        data_paths = [self.prev_level_path, self.level_path, self.level_ql_path, self.level_log_path, self.level_invalid_path, self.level_excluded_path]
 
         if any([not os.path.isdir(x) for x in data_paths]):
             logging.error(

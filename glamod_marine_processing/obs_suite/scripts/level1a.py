@@ -122,15 +122,6 @@ L0_path = os.path.join(
     params.data_path, "datasets", params.dataset, "level0", params.sid_dck
 )
 
-data_paths = [params.level_excluded_path, params.level_invalid_path]
-if any([not os.path.isdir(x) for x in data_paths]):
-    logging.error(
-        "Could not find data paths: {}".format(
-            ",".join([x for x in data_paths if not os.path.isdir(x)])
-        )
-    )
-    sys.exit(1)
-
 # CLEAN PREVIOUS L1A PRODUCTS AND SIDE FILES ----------------------------------
 L1a_prods = glob.glob(
     os.path.join(params.level_path, "*" + FFS + params.fileID + ".psv")
