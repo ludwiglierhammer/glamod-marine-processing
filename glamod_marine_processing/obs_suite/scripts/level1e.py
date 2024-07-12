@@ -209,6 +209,57 @@ def add_report_quality(qc_df_full):
     return qc_df_full
 
 
+def wind_qc():
+    table_wd = cdm.read_tables(prev_level_path, params.prev_fileID, cdm_subset=["observations-wd"])
+    table_ws = cdm.read_tables(prev_level_path, params.prev_fileID, cdm_subset=["observations-ws"])
+    if len(table_wd) == 0:
+        logging.warning("NO wind direction QC is possible since table is empty or non exisisting table.")
+    else:
+        value_wd = table_wd["observation_value"].astype(float)
+        table_wd["quality_flag"] = table_wd["quality_flag"].mask(
+            (value_wd < 0.) || (value_wd >= 360.),
+            "1",
+        )
+    if len(table_ws) == 0:
+        logging.warning("NO wind speed QC is possible since table is empty or non exisisting table.")
+    else:
+        value_ws = table_ws["observation_value"].astype(float)
+        table_ws["quality_flag"] = table_ws["quality_flag"].mask(
+            (value_ws < 0.) || (value _ws > 500.),
+            "1",
+        )
+    if len(table_wd) == 0 and len(table_ws) == 0:
+        logging.warning("NO more wind QC is possible since table is empty or non exisisting table.")
+    else:
+        masked = value_ws == 0. and value_wd != 0
+        table_wd["quality_flag"] = table_wd["quality_flag"].mask(masked, "1")
+        table_ws["quality_flag"] = table_ws["quality_flag"].mask(masked, "1")
+
+    odata_filename_wd = os.path.join(
+        level_path, filename_field_sep.join(["observations-wd", fileID]) + ".psv"
+    )
+    table_wd.to_csv(
+        odata_filename_wd,
+        index=False,
+        sep=delimiter,
+        columns=cdm_columns,
+        header=header,
+        mode=wmode,
+        na_rep="null",
+    )
+    odata_filename_ws = os.path.join(
+        level_path, filename_field_sep.join(["observations-ws", fileID]) + ".psv"
+    )
+    table_ws.to_csv(
+        odata_filename_ws,
+        index=False,
+        sep=delimiter,
+        columns=cdm_columns,
+        header=header,
+        mode=wmode,
+        na_rep="null",
+    )
+
 def compare_quality_checks(df):
     """Compare entries with location_quality and report_time_quality."""
     df = df.mask(location_quality == "2", "1")
@@ -525,6 +576,9 @@ process_table(header_df, "header")
 for table in obs_tables:
     flag = True if table in tables_in and qc_avail else False
     process_table(table, table)
+
+# 3 wind QC
+wind_wc()
 
 # CHECKOUT --------------------------------------------------------------------
 qc_dict["date processed"] = datetime.datetime.now()
