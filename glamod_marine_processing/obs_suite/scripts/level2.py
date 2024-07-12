@@ -96,8 +96,7 @@ else:
 params = script_setup([], args)
 
 level = "level2"
-header = True
-wmode = "w"
+
 # These to build the brace expansions for the out of release periods
 left_min_period = 1600
 right_max_period = 2100
