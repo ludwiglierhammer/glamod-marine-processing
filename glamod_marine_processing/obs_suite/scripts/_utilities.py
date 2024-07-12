@@ -7,6 +7,8 @@ import json
 import logging
 import sys
 
+delimiter = "|"
+
 
 # Functions--------------------------------------------------------------------
 class script_setup:
@@ -68,3 +70,16 @@ def date_handler(obj):
     """Handle date."""
     if isinstance(obj, (datetime.datetime, datetime.date)):
         return obj.isoformat()
+
+
+def table_to_csv(df, out_name, **kwargs):
+    """Write table to disk."""
+    df.to_csv(
+        out_name,
+        index=False,
+        sep=delimiter,
+        header=True,
+        mode="w",
+        na_rep="null",
+        **kwargs,
+    )

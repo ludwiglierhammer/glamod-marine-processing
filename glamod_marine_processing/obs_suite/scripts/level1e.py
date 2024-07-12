@@ -130,7 +130,7 @@ from importlib import reload
 import numpy as np
 import pandas as pd
 import simplejson
-from _utilities import date_handler, script_setup
+from _utilities import date_handler, script_setup, table_to_csv
 from cdm_reader_mapper import cdm_mapper as cdm
 
 reload(logging)  # This is to override potential previous config of logging
@@ -250,28 +250,13 @@ def wind_qc():
         level_path, filename_field_sep.join(["observations-wd", fileID]) + ".psv"
     )
     cdm_columns = cdm_tables.get("observations-wd").keys()
-    table_wd.to_csv(
-        odata_filename_wd,
-        index=False,
-        sep=delimiter,
-        columns=cdm_columns,
-        header=header,
-        mode=wmode,
-        na_rep="null",
-    )
+    table_to_csv(table_wd, odata_filename_wd, columns=cdm_columns)
+
     odata_filename_ws = os.path.join(
         level_path, filename_field_sep.join(["observations-ws", fileID]) + ".psv"
     )
     cdm_columns = cdm_tables.get("observations-ws").keys()
-    table_ws.to_csv(
-        odata_filename_ws,
-        index=False,
-        sep=delimiter,
-        columns=cdm_columns,
-        header=header,
-        mode=wmode,
-        na_rep="null",
-    )
+    table_to_csv(table_ws, odata_filename_ws, columns=cdm_columns)
 
 
 def compare_quality_checks(df):
@@ -354,15 +339,7 @@ def process_table(table_df, table_name):
     odata_filename = os.path.join(
         level_path, filename_field_sep.join([table_name, fileID]) + ".psv"
     )
-    table_df.to_csv(
-        odata_filename,
-        index=False,
-        sep=delimiter,
-        columns=cdm_columns,
-        header=header,
-        mode=wmode,
-        na_rep="null",
-    )
+    table_to_csv(table_df, odata_filename, columns=cdm_columns)
 
 
 # This is to remove files of a previous process on this same level file
@@ -429,11 +406,8 @@ qc_delimiter = ","
 
 # Some other parameters -------------------------------------------------------
 filename_field_sep = "-"
-delimiter = "|"
 level = "level1e"
 level_prev = "level1d"
-header = True
-wmode = "w"
 
 cdm_tables = cdm.load_tables()
 obs_tables = [x for x in cdm_tables.keys() if x != "header"]

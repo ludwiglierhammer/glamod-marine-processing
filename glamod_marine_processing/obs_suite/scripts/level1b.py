@@ -60,7 +60,7 @@ from importlib import reload
 import numpy as np
 import pandas as pd
 import simplejson
-from _utilities import date_handler, script_setup
+from _utilities import date_handler, delimiter, script_setup, table_to_csv
 from cdm_reader_mapper import cdm_mapper as cdm
 from cdm_reader_mapper.operations import replace
 
@@ -106,7 +106,6 @@ process_options = ["correction_version", "corrections", "histories"]
 params = script_setup(process_options, args)
 
 filename_field_sep = "-"
-delimiter = "|"
 cor_ext = ".txt.gz"
 
 release_path = os.path.join(params.data_path, params.release, params.dataset)
@@ -259,8 +258,6 @@ for table in cdm.properties.cdm_tables:
 
     # Now get ready to write out, extracting eventual leaks of data to a different monthly table
     cdm_columns = cdm_tables.get(table).keys()
-    header = True
-    wmode = "w"
     # BECAUSE LIZ'S datetimes have UTC info:
     # ValueError: Tz-aware datetime.datetime cannot be converted to datetime64 unless utc=True
     table_df["monthly_period"] = pd.to_datetime(
@@ -289,13 +286,8 @@ for table in cdm.properties.cdm_tables:
         filename = os.path.join(
             L1b_path, filename_field_sep.join([table, fileID]) + ".psv"
         )
-        table_df.loc[[source_mon_period], :].to_csv(
-            filename,
-            index=False,
-            sep=delimiter,
-            columns=cdm_columns,
-            header=header,
-            mode=wmode,
+        table_to_csv(
+            table_df.loc[[source_mon_period], :], filename, columns=cdm_columns
         )
         table_df.drop(source_mon_period, inplace=True)
         len_df_i = len_df
@@ -325,14 +317,7 @@ for table in cdm.properties.cdm_tables:
                 ]
             )
             filename = os.path.join(L1b_path, L1b_idl + ".psv")
-            table_df.loc[[leak], :].to_csv(
-                filename,
-                index=False,
-                sep=delimiter,
-                columns=cdm_columns,
-                header=header,
-                mode=wmode,
-            )
+            table_to_csv(table_df.loc[[leak], :], filename, columns=cdm_columns)
             table_df.drop(leak, inplace=True)
             len_df_i = len_df
             len_df = len(table_df)

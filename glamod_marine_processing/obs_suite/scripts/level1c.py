@@ -106,7 +106,7 @@ from importlib import reload
 import numpy as np
 import pandas as pd
 import simplejson
-from _utilities import date_handler, script_setup
+from _utilities import date_handler, script_setup, table_to_csv
 from cdm_reader_mapper import cdm_mapper as cdm
 
 reload(logging)  # This is to override potential previous config of logging
@@ -206,15 +206,7 @@ def process_table(table_df, table_name):
         )
 
     if len(table_df[table_mask["all"]]) > 0:
-        table_df[table_mask["all"]].to_csv(
-            odata_filename,
-            index=False,
-            sep=delimiter,
-            columns=cdm_columns,
-            header=header,
-            mode=wmode,
-            na_rep="null",
-        )
+        table_to_csv(table_df[table_mask["all"]], odata_filename, columns=cdm_columns)
     else:
         logging.warning(f"Table {table_name} is empty. No file will be produced")
 
@@ -255,11 +247,8 @@ else:
 params = script_setup([], args)
 
 FFS = "-"
-delimiter = "|"
 level = "level1c"
 level_prev = "level1b"
-header = True
-wmode = "w"
 
 release_path = os.path.join(params.data_path, params.release, params.dataset)
 release_id = FFS.join([params.release, params.update])
@@ -380,15 +369,7 @@ for field in validated:
         idata_filename = os.path.join(
             level_invalid_path, FFS.join(["header", fileID, field]) + ".psv"
         )
-        table_df[~mask_df[field]].to_csv(
-            idata_filename,
-            index=False,
-            sep=delimiter,
-            columns=cdm_columns,
-            header=header,
-            mode=wmode,
-            na_rep="null",
-        )
+        table_to_csv(table_df[~mask_df[field]], idata_filename, columns=cdm_columns)
 
 
 # 4. REPORT INVALIDS PER FIELD  -----------------------------------------------

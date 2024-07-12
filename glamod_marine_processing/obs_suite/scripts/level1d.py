@@ -65,7 +65,7 @@ from importlib import reload
 
 import pandas as pd
 import simplejson
-from _utilities import date_handler, script_setup
+from _utilities import date_handler, delimiter, script_setup, table_to_csv
 from cdm_reader_mapper import cdm_mapper as cdm
 
 reload(logging)  # This is to override potential previous config of logging
@@ -145,15 +145,7 @@ def process_table(table_df, table_name):
 
     cdm_columns = cdm_tables.get(table_name).keys()
     odata_filename = os.path.join(level_path, FFS.join([table_name, fileID]) + ".psv")
-    table_df.to_csv(
-        odata_filename,
-        index=False,
-        sep=delimiter,
-        columns=cdm_columns,
-        header=header,
-        mode=wmode,
-        na_rep="null",
-    )
+    table_to_csv(table_df, odata_filename, columns=cdm_columns)
 
 
 def clean_level(file_id):
@@ -199,12 +191,8 @@ process_options = [
 params = script_setup(process_options, args)
 # %%
 FFS = "-"
-delimiter = "|"
-md_delimiter = "|"
 level = "level1d"
 level_prev = "level1c"
-header = True
-wmode = "w"
 
 local = True
 # copy files to local scratch to avoid high i/o stress on cluster (managed to bring down ICHEC before)
@@ -306,7 +294,7 @@ if md_avail:
     if local:
         meta_df = pd.read_csv(
             metadata_fn_scratch,
-            delimiter=md_delimiter,
+            delimiter=delimiter,
             dtype="object",
             header=0,
             na_values="MSNG",
@@ -314,7 +302,7 @@ if md_avail:
     else:
         meta_df = pd.read_csv(
             metadata_filename,
-            delimiter=md_delimiter,
+            delimiter=delimiter,
             dtype="object",
             header=0,
             na_values="MSNG",
