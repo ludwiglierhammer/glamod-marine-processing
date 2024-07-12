@@ -106,7 +106,7 @@ from importlib import reload
 import numpy as np
 import pandas as pd
 import simplejson
-from _utilities import FFS, date_handler, script_setup, table_to_csv
+from _utilities import FFS, clean_level, date_handler, script_setup, table_to_csv
 from cdm_reader_mapper import cdm_mapper as cdm
 
 reload(logging)  # This is to override potential previous config of logging
@@ -213,21 +213,6 @@ def process_table(table_df, table_name):
     validation_dict[table_name]["total"] = len(table_df[table_mask["all"]])
 
 
-def clean_level(file_id):
-    """Clean level."""
-    level_prods = glob.glob(os.path.join(level_path, "*" + FFS + file_id + ".psv"))
-    level_ql = glob.glob(os.path.join(level_ql_path, file_id + ".json"))
-    level_invalid = glob.glob(
-        os.path.join(level_invalid_path, "*" + FFS + file_id + ".*")
-    )
-    for filename in level_prods + level_ql + level_invalid:
-        try:
-            logging.info(f"Removing previous file: {filename}")
-            os.remove(filename)
-        except Exception:
-            pass
-
-
 # MAIN ------------------------------------------------------------------------
 
 # Process input and set up some things and make sure we can do something-------
@@ -286,7 +271,10 @@ if len(glob.glob(prev_level_filename)) == 0:
     sys.exit(1)
 
 # Clean previous L1c products and side files ----------------------------------
-clean_level(fileID)
+level_prods = glob.glob(os.path.join(level_path, "*" + FFS + fileID + ".psv"))
+level_ql = glob.glob(os.path.join(level_ql_path, fileID + ".json"))
+level_invalid = glob.glob(os.path.join(level_invalid_path, "*" + FFS + fileID + ".*"))
+clean_level(level_prods + level_ql + level_invalid)
 validation_dict = {table: {} for table in cdm.properties.cdm_tables}
 
 # DO THE DATA PROCESSING ------------------------------------------------------

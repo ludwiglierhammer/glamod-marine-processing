@@ -67,7 +67,7 @@ from io import StringIO
 import numpy as np
 import pandas as pd
 import simplejson
-from _utilities import FFS, date_handler, script_setup
+from _utilities import FFS, clean_level, date_handler, script_setup
 from cdm_reader_mapper import cdm_mapper as cdm
 from cdm_reader_mapper import mdf_reader, metmetpy
 from cdm_reader_mapper.common import pandas_TextParser_hdlr
@@ -77,20 +77,6 @@ reload(logging)  # This is to override potential previous config of logging
 
 
 # FUNCTIONS -------------------------------------------------------------------
-def clean_L1a(L1a_id):
-    """Clean previous LEVEL1a files."""
-    L1a_prods = glob.glob(os.path.join(L1a_path, "*" + FFS + L1a_id + ".psv"))
-    L1a_ql = glob.glob(os.path.join(L1a_ql_path, L1a_id + ".json"))
-    L1a_excluded = glob.glob(os.path.join(L1a_excluded_path, L1a_id + FFS + "*.psv"))
-    L1a_invalid = glob.glob(os.path.join(L1a_invalid_path, L1a_id + FFS + "*.psv"))
-    for filename in L1a_prods + L1a_ql + L1a_excluded + L1a_invalid:
-        try:
-            logging.info(f"Removing previous file: {filename}")
-            os.remove(filename)
-        except Exception:
-            pass
-
-
 def write_out_junk(dataObj, filename):
     """Write to disk."""
     v = [dataObj] if not read_kwargs.get("chunksize") else dataObj
@@ -159,7 +145,11 @@ release_id = FFS.join([params.release, params.update])
 L1a_id = FFS.join([str(params.year), str(params.month).zfill(2), release_id])
 
 # CLEAN PREVIOUS L1A PRODUCTS AND SIDE FILES ----------------------------------
-clean_L1a(L1a_id)
+L1a_prods = glob.glob(os.path.join(L1a_path, "*" + FFS + L1a_id + ".psv"))
+L1a_ql = glob.glob(os.path.join(L1a_ql_path, L1a_id + ".json"))
+L1a_excluded = glob.glob(os.path.join(L1a_excluded_path, L1a_id + FFS + "*.psv"))
+L1a_invalid = glob.glob(os.path.join(L1a_invalid_path, L1a_id + FFS + "*.psv"))
+clean_level(L1a_prods + L1a_ql + L1a_excluded + L1a_invalid)
 
 # DO THE DATA PROCESSING ------------------------------------------------------
 data_model = params.data_model

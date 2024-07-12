@@ -65,7 +65,14 @@ from importlib import reload
 
 import pandas as pd
 import simplejson
-from _utilities import FFS, date_handler, delimiter, script_setup, table_to_csv
+from _utilities import (
+    FFS,
+    clean_level,
+    date_handler,
+    delimiter,
+    script_setup,
+    table_to_csv,
+)
 from cdm_reader_mapper import cdm_mapper as cdm
 
 reload(logging)  # This is to override potential previous config of logging
@@ -146,19 +153,6 @@ def process_table(table_df, table_name):
     cdm_columns = cdm_tables.get(table_name).keys()
     odata_filename = os.path.join(level_path, FFS.join([table_name, fileID]) + ".psv")
     table_to_csv(table_df, odata_filename, columns=cdm_columns)
-
-
-def clean_level(file_id):
-    """Clean table."""
-    level_prods = glob.glob(os.path.join(level_path, "*-" + file_id + ".psv"))
-    level_logs = glob.glob(os.path.join(level_log_path, file_id + ".*"))
-    level_ql = glob.glob(os.path.join(level_ql_path, file_id + ".*"))
-    for filename in level_prods + level_ql + level_logs:
-        try:
-            logging.info(f"Removing previous file: {filename}")
-            os.remove(filename)
-        except FileNotFoundError:
-            pass
 
 
 # END FUNCTIONS ---------------------------------------------------------------
@@ -259,7 +253,10 @@ else:
     logging.info("level1d data will be created with no merging")
 
 # %% Clean previous L1a products and side files ----------------------------------
-clean_level(fileID)
+level_prods = glob.glob(os.path.join(level_path, "*-" + fileID + ".psv"))
+level_logs = glob.glob(os.path.join(level_log_path, fileID + ".*"))
+level_ql = glob.glob(os.path.join(level_ql_path, fileID + ".*"))
+clean_level(level_prods + level_logs + level_ql)
 meta_dict = {}
 
 # DO THE DATA PROCESSING ------------------------------------------------------

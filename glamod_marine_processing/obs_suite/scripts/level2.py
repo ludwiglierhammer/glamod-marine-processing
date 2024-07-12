@@ -51,24 +51,13 @@ import sys
 from importlib import reload
 from pathlib import Path
 
-from _utilities import script_setup
+from _utilities import clean_level, script_setup
 from cdm_reader_mapper import cdm_mapper as cdm
 
 reload(logging)  # This is to override potential previous config of logging
 
 
 # FUNCTIONS -------------------------------------------------------------------
-def clean_level():
-    """Clean level."""
-    for dirname in [L2_path, L2_reports_path, L2_excluded_path]:
-        try:
-            if os.path.isdir(dirname):
-                logging.info(f"Removing directory {dirname}")
-                os.remove(os.path.join(dirname, "*.psv"))
-        except Exception:
-            pass
-
-
 def copyfiles(pattern, dest, mode="excluded"):
     """Copy file pattern to dest."""
     file_list = glob.glob(pattern)
@@ -123,7 +112,10 @@ if not os.path.isfile(params.level2_list):
 
 
 # Clean previous L2 data and report subdirs -----------------------------------
-clean_level()
+L2_prods = glob.glob(os.path.join(L2_path, "*.psv"))
+L2_reps = glob.glob(os.path.join(L2_reports_path, "*.psv"))
+L2_excl = glob.glob(os.path.join(L2_excluded_path, "*.psv"))
+clean_level(L2_prods + L2_reps + L2_excl)
 
 # DO THE DATA SELECTION -------------------------------------------------------
 # -----------------------------------------------------------------------------

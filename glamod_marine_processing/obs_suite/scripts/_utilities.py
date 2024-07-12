@@ -5,6 +5,7 @@ from __future__ import annotations
 import datetime
 import json
 import logging
+import os
 import sys
 
 delimiter = "|"
@@ -84,3 +85,14 @@ def table_to_csv(df, out_name, **kwargs):
         na_rep="null",
         **kwargs,
     )
+
+
+def clean_level(filenames):
+    """Clean level."""
+    for filename in filenames:
+        try:
+            logging.info(f"Removing previous file: {filename}")
+            os.remove(filename)
+        except Exception:
+            logging.warning(f"Could not remove previous file: {filename}")
+            pass

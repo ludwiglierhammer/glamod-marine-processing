@@ -130,7 +130,7 @@ from importlib import reload
 import numpy as np
 import pandas as pd
 import simplejson
-from _utilities import FFS, date_handler, script_setup, table_to_csv
+from _utilities import FFS, clean_level, date_handler, script_setup, table_to_csv
 from cdm_reader_mapper import cdm_mapper as cdm
 
 reload(logging)  # This is to override potential previous config of logging
@@ -340,21 +340,6 @@ def process_table(table_df, table_name):
     table_to_csv(table_df, odata_filename, columns=cdm_columns)
 
 
-# This is to remove files of a previous process on this same level file
-def clean_level(file_id):
-    """Clean level."""
-    level_prods = glob.glob(os.path.join(level_path, "*-" + file_id + ".psv"))
-    level_logs = glob.glob(os.path.join(level_log_path, file_id + ".*"))
-    level_ql = glob.glob(os.path.join(level_ql_path, "*" + file_id + "*.*"))
-    for filename in level_prods + level_ql + level_logs:
-        try:
-            logging.info(f"Removing previous file: {filename}")
-            os.remove(filename)
-        except Exception:
-            logging.warning(f"Could not remove previous file: {filename}")
-            pass
-
-
 # ------------------------------------------------------------------------------
 
 # PARAMETERIZE HOW TO HANDLE QC FILES AND HOW TO APPLY THESE TO THE CDM FIELDS-
@@ -517,7 +502,10 @@ if len(tables_in) == 1:
 # DO THE DATA PROCESSING ------------------------------------------------------
 header_df.set_index("report_id", inplace=True, drop=False)
 qc_dict = {}
-clean_level(fileID)
+level_prods = glob.glob(os.path.join(level_path, "*-" + fileID + ".psv"))
+level_logs = glob.glob(os.path.join(level_log_path, fileID + ".*"))
+level_ql = glob.glob(os.path.join(level_ql_path, "*" + fileID + "*.*"))
+clean_level(level_prods + level_logs + level_ql)
 
 # 1. PROCESS QC FLAGS ---------------------------------------------------------
 # GET THE QC FILES WE NEED FOR THE CURRENT SET OF CDM TABLES

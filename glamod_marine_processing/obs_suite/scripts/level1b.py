@@ -60,34 +60,21 @@ from importlib import reload
 import numpy as np
 import pandas as pd
 import simplejson
-from _utilities import FFS, date_handler, delimiter, script_setup, table_to_csv
+from _utilities import (
+    FFS,
+    clean_level,
+    date_handler,
+    delimiter,
+    script_setup,
+    table_to_csv,
+)
 from cdm_reader_mapper import cdm_mapper as cdm
 from cdm_reader_mapper.operations import replace
 
 reload(logging)  # This is to override potential previous config of logging
 
 
-def clean_L1b(L1b_id):
-    """Clean level 1b."""
-    L1b_prods = glob.glob(os.path.join(L1b_path, "*-" + L1b_id + ".psv"))
-    L1b_prods_idate = glob.glob(
-        os.path.join(
-            L1b_path,
-            "*" + "-".join([str(params.year), str(params.month).zfill(2)]) + ".psv",
-        )
-    )
-    L1b_ql = glob.glob(os.path.join(L1b_ql_path, L1b_id + ".*"))
-    for filename in L1b_prods + L1b_prods_idate + L1b_ql:
-        try:
-            logging.info(f"Removing previous file: {filename}")
-            os.remove(filename)
-        except Exception:
-            pass
-
-
 # MAIN ------------------------------------------------------------------------
-
-
 # Process input and set up some things ----------------------------------------
 logging.basicConfig(
     format="%(levelname)s\t[%(asctime)s](%(filename)s)\t%(message)s",
@@ -139,7 +126,15 @@ if not os.path.isfile(L1a_filename):
     sys.exit(1)
 
 # Clean previous L1a products and side files ----------------------------------
-clean_L1b(fileID)
+L1b_prods = glob.glob(os.path.join(L1b_path, "*-" + fileID + ".psv"))
+L1b_prods_idate = glob.glob(
+    os.path.join(
+        L1b_path,
+        "*" + "-".join([str(params.year), str(params.month).zfill(2)]) + ".psv",
+    )
+)
+L1b_ql = glob.glob(os.path.join(L1b_ql_path, fileID + ".*"))
+clean_level(L1b_prods + L1b_prods_idate + L1b_ql)
 correction_dict = {table: {} for table in cdm.properties.cdm_tables}
 
 # Do the data processing ------------------------------------------------------
