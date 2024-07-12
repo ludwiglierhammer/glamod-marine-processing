@@ -210,34 +210,46 @@ def add_report_quality(qc_df_full):
 
 
 def wind_qc():
-    table_wd = cdm.read_tables(prev_level_path, params.prev_fileID, cdm_subset=["observations-wd"])
-    table_ws = cdm.read_tables(prev_level_path, params.prev_fileID, cdm_subset=["observations-ws"])
+    """Wind Quality Control function."""
+    table_wd = cdm.read_tables(
+        prev_level_path, params.prev_fileID, cdm_subset=["observations-wd"]
+    )
+    table_ws = cdm.read_tables(
+        prev_level_path, params.prev_fileID, cdm_subset=["observations-ws"]
+    )
     if len(table_wd) == 0:
-        logging.warning("NO wind direction QC is possible since table is empty or non exisisting table.")
+        logging.warning(
+            "NO wind direction QC is possible since table is empty or non exisisting table."
+        )
     else:
         value_wd = table_wd["observation_value"].astype(float)
         table_wd["quality_flag"] = table_wd["quality_flag"].mask(
-            (value_wd < 0.) || (value_wd >= 360.),
+            (value_wd < 0.0) or (value_wd >= 360.0),
             "1",
         )
     if len(table_ws) == 0:
-        logging.warning("NO wind speed QC is possible since table is empty or non exisisting table.")
+        logging.warning(
+            "NO wind speed QC is possible since table is empty or non exisisting table."
+        )
     else:
         value_ws = table_ws["observation_value"].astype(float)
         table_ws["quality_flag"] = table_ws["quality_flag"].mask(
-            (value_ws < 0.) || (value _ws > 500.),
+            (value_ws < 0.0) or (value_ws > 500.0),
             "1",
         )
     if len(table_wd) == 0 and len(table_ws) == 0:
-        logging.warning("NO more wind QC is possible since table is empty or non exisisting table.")
+        logging.warning(
+            "NO more wind QC is possible since table is empty or non exisisting table."
+        )
     else:
-        masked = value_ws == 0. and value_wd != 0
+        masked = value_ws == 0.0 and value_wd != 0
         table_wd["quality_flag"] = table_wd["quality_flag"].mask(masked, "1")
         table_ws["quality_flag"] = table_ws["quality_flag"].mask(masked, "1")
 
     odata_filename_wd = os.path.join(
         level_path, filename_field_sep.join(["observations-wd", fileID]) + ".psv"
     )
+    cdm_columns = cdm_tables.get("observations-wd").keys()
     table_wd.to_csv(
         odata_filename_wd,
         index=False,
@@ -250,6 +262,7 @@ def wind_qc():
     odata_filename_ws = os.path.join(
         level_path, filename_field_sep.join(["observations-ws", fileID]) + ".psv"
     )
+    cdm_columns = cdm_tables.get("observations-ws").keys()
     table_ws.to_csv(
         odata_filename_ws,
         index=False,
@@ -259,6 +272,7 @@ def wind_qc():
         mode=wmode,
         na_rep="null",
     )
+
 
 def compare_quality_checks(df):
     """Compare entries with location_quality and report_time_quality."""
@@ -578,7 +592,7 @@ for table in obs_tables:
     process_table(table, table)
 
 # 3 wind QC
-wind_wc()
+wind_qc()
 
 # CHECKOUT --------------------------------------------------------------------
 qc_dict["date processed"] = datetime.datetime.now()
