@@ -142,6 +142,7 @@ def clean_level(filenames):
             logging.warning(f"Could not remove previous file: {filename}")
             pass
 
+
 def paths_exist(data_paths):
     """Check whether path(s) exist(s)."""
     if not isinstance(data_paths, list):
@@ -153,4 +154,3 @@ def paths_exist(data_paths):
             logging.error(f"Could not find data paths: {data_path}")
     if exit is True:
         sys.exit(1)
-  
