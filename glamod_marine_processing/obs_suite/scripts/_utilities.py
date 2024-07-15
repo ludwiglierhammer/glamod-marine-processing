@@ -76,9 +76,13 @@ class script_setup:
             self.prev_fileID = self.fileID
 
         if level == "level1a":
-            self.prev_level_path = os.path.join(self.data_path, "datasets", self.dataset, "level0", self.sid_dck)
+            self.prev_level_path = os.path.join(
+                self.data_path, "datasets", self.dataset, "level0", self.sid_dck
+            )
         else:
-            self.prev_level_path = os.path.join(self.release_path, level_prev, self.sid_dck)
+            self.prev_level_path = os.path.join(
+                self.release_path, level_prev, self.sid_dck
+            )
         self.level_path = os.path.join(self.release_path, level, self.sid_dck)
         self.level_ql_path = os.path.join(
             self.release_path, level, "quicklooks", self.sid_dck
@@ -95,7 +99,14 @@ class script_setup:
         self.level_reports_path = os.path.join(
             self.release_path, level, "reports", self.sid_dck
         )
-        data_paths = [self.prev_level_path, self.level_path, self.level_ql_path, self.level_log_path, self.level_invalid_path, self.level_excluded_path]
+        data_paths = [
+            self.prev_level_path,
+            self.level_path,
+            self.level_ql_path,
+            self.level_log_path,
+            self.level_invalid_path,
+            self.level_excluded_path,
+        ]
 
         if any([not os.path.isdir(x) for x in data_paths]):
             logging.error(
