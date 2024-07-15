@@ -66,7 +66,7 @@ class script_setup:
         self.filename = config.get("filename")
         self.level2_list = config.get("cmd_add_file")
         self.prev_fileID = config.get("prev_fileID")
-        release_path = os.path.join(self.data_path, self.release, self.dataset)
+        self.release_path = os.path.join(self.data_path, self.release, self.dataset)
         self.release_id = FFS.join([self.release, self.update])
         self.fileID = FFS.join(
             [str(self.year), str(self.month).zfill(2), self.release_id]
@@ -75,25 +75,25 @@ class script_setup:
         if self.prev_fileID is None:
             self.prev_fileID = self.fileID
 
-        if level = "level1a":
+        if level == "level1a":
             self.prev_level_path = os.path.join(self.data_path, "datasets", self.dataset, "level0", self.sid_dck)
         else:
-            self.prev_level_path = os.path.join(release_path, level_prev, self.sid_dck)
-        self.level_path = os.path.join(release_path, level, self.sid_dck)
+            self.prev_level_path = os.path.join(self.release_path, level_prev, self.sid_dck)
+        self.level_path = os.path.join(self.release_path, level, self.sid_dck)
         self.level_ql_path = os.path.join(
-            release_path, level, "quicklooks", self.sid_dck
+            self.release_path, level, "quicklooks", self.sid_dck
         )
         self.level_log_path = os.path.join(
             self.release_path, level, "log", self.sid_dck
         )
         self.level_invalid_path = os.path.join(
-            release_path, level, "invalid", self.sid_dck
+            self.release_path, level, "invalid", self.sid_dck
         )
         self.level_excluded_path = os.path.join(
-            release_path, level, "excluded", self.sid_dck
+            self.release_path, level, "excluded", self.sid_dck
         )
         self.level_reports_path = os.path.join(
-            release_path, level, "reports", self.sid_dck
+            self.release_path, level, "reports", self.sid_dck
         )
         data_paths = [self.prev_level_path, self.level_path, self.level_ql_path, self.level_log_path, self.level_invalid_path, self.level_excluded_path]
 
