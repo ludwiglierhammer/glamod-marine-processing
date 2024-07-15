@@ -67,7 +67,7 @@ from io import StringIO
 import numpy as np
 import pandas as pd
 import simplejson
-from _utilities import FFS, clean_level, date_handler, script_setup
+from _utilities import FFS, clean_level, date_handler, paths_exist, script_setup
 from cdm_reader_mapper import cdm_mapper as cdm
 from cdm_reader_mapper import mdf_reader, metmetpy
 from cdm_reader_mapper.common import pandas_TextParser_hdlr
@@ -120,8 +120,10 @@ correction_path = os.path.join(params.data_path, params.release, params.correcti
 
 L0_filename = os.path.join(params.prev_level_path, params.filename)
 if not os.path.isfile(L0_filename):
-    logging.error(f"L0 file not found: {L0_filename}")
+    logging.error(f"Could not find data input file: {L0_filename}")
     sys.exit(1)
+
+paths_exist([params.level_invalid_path, params.level_excluded_path])
 
 # CLEAN PREVIOUS L1A PRODUCTS AND SIDE FILES ----------------------------------
 L1a_prods = glob.glob(

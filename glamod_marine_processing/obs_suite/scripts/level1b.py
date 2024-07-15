@@ -65,6 +65,7 @@ from _utilities import (
     clean_level,
     date_handler,
     delimiter,
+    paths_exist,
     script_setup,
     table_to_csv,
 )
@@ -99,10 +100,7 @@ L1b_main_corrections = os.path.join(
 )
 
 logging.info(f"Setting corrections path to {L1b_main_corrections}")
-if not os.path.isdir(L1b_main_corrections):
-    logging.error(f"Could not find data paths: {L1b_main_corrections}")
-    sys.exit()
-
+paths_exist(L1b_main_corrections)
 
 # Clean previous L1a products and side files ----------------------------------
 L1b_prods = glob.glob(os.path.join(params.level_path, "*-" + params.fileID + ".psv"))

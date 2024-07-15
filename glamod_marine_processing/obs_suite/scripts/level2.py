@@ -51,7 +51,7 @@ import sys
 from importlib import reload
 from pathlib import Path
 
-from _utilities import clean_level, script_setup
+from _utilities import clean_level, paths_exist, script_setup
 from cdm_reader_mapper import cdm_mapper as cdm
 
 reload(logging)  # This is to override potential previous config of logging
@@ -89,9 +89,7 @@ params = script_setup([], args, level, "level1e")
 left_min_period = 1600
 right_max_period = 2100
 
-if not os.path.isdir(params.prev_level_path):
-    logging.error(f"Could not find data paths: {params.prev_level_path}")
-    sys.exit(1)
+paths_exist([params.level_excluded_path, params.level_reports_path])
 
 # Clean previous L2 data and report subdirs -----------------------------------
 L2_prods = glob.glob(os.path.join(params.level_path, "*.psv"))

@@ -70,6 +70,7 @@ from _utilities import (
     clean_level,
     date_handler,
     delimiter,
+    paths_exist,
     script_setup,
     table_to_csv,
 )
@@ -192,9 +193,7 @@ local = True
 scratch_ = os.path.join(params.release_path, level, "scratch")
 scratch_path = os.path.join(scratch_, params.sid_dck)
 os.makedirs(scratch_path, exist_ok=True)
-
-if not os.path.isdir(params.level_log_path):
-    logging.error(f"Could not find data paths: {params.level_log_path}")
+paths_exist(params.level_log_path)
 
 md_avail = True if not params.md_not_avail else False
 

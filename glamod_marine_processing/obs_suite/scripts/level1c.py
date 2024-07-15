@@ -106,7 +106,7 @@ from importlib import reload
 import numpy as np
 import pandas as pd
 import simplejson
-from _utilities import FFS, clean_level, date_handler, script_setup, table_to_csv
+from _utilities import FFS, clean_level, date_handler, paths_exist, script_setup, table_to_csv
 from cdm_reader_mapper import cdm_mapper as cdm
 
 reload(logging)  # This is to override potential previous config of logging
@@ -235,13 +235,11 @@ else:
 
 params = script_setup([], args, "level1c", "level1b")
 
-level_invalid_path = os.path.join(
-    params.release_path, "level1c", "invalid", params.sid_dck
-)
-
 id_validation_path = os.path.join(
     params.data_path, params.release, "NOC_ANC_INFO", "json_files"
 )
+
+paths_exist([id_validation_path, params.level_invalid_path])
 
 # Clean previous L1c products and side files ----------------------------------
 level_prods = glob.glob(

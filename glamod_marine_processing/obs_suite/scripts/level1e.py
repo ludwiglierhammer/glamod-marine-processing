@@ -130,7 +130,7 @@ from importlib import reload
 import numpy as np
 import pandas as pd
 import simplejson
-from _utilities import FFS, clean_level, date_handler, script_setup, table_to_csv
+from _utilities import FFS, clean_level, date_handler, paths_exist, script_setup, table_to_csv
 from cdm_reader_mapper import cdm_mapper as cdm
 
 reload(logging)  # This is to override potential previous config of logging
@@ -422,9 +422,7 @@ params = script_setup(process_options, args, "level1e", "level1d")
 qc_path = os.path.join(params.data_path, params.release, "metoffice_qc", "base")
 
 # Check we have all the dirs!
-if not os.path.isdir(qc_path):
-    logging.error(f"Could not find data paths: {qc_path}")
-    sys.exit(1)
+paths_exist(qc_path)
 
 # Check we have QC files!
 logging.info(f"Using qc files in {qc_path}")

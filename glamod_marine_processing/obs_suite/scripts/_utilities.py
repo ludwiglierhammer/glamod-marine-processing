@@ -103,18 +103,9 @@ class script_setup:
             self.prev_level_path,
             self.level_path,
             self.level_ql_path,
-            self.level_log_path,
-            self.level_invalid_path,
-            self.level_excluded_path,
         ]
 
-        if any([not os.path.isdir(x) for x in data_paths]):
-            logging.error(
-                "Could not find data paths: {}".format(
-                    ",".join([x for x in data_paths if not os.path.isdir(x)])
-                )
-            )
-            sys.exit(1)
+        paths_exist(data_paths)
 
         if len(glob.glob(self.filename)) == 0:
             logging.error(f"L1b header files not found: {self.filename}")
@@ -150,3 +141,16 @@ def clean_level(filenames):
         except Exception:
             logging.warning(f"Could not remove previous file: {filename}")
             pass
+
+def paths_exist(data_paths):
+    """Check whether path(s) exist(s)."""
+    if not isinstance(data_paths, list):
+        data_paths = [data_paths]
+    exit = False
+    for data_path in data_paths:
+        if not os.path.isdir(data_path):
+            exit = True
+            logging.error(f"Could not find data paths: {data_path}")
+    if exit is True:
+        sys.exit(1)
+  
