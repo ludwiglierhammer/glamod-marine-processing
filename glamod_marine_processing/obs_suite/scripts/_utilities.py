@@ -108,7 +108,7 @@ class script_setup:
         paths_exist(data_paths)
 
         if len(glob.glob(self.filename)) == 0:
-            logging.error(f"L1b header files not found: {self.filename}")
+            logging.error(f"Previous level header files not found: {self.filename}")
             sys.exit(1)
 
 
