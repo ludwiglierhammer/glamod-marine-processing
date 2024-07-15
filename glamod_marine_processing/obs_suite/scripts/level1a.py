@@ -57,7 +57,6 @@ settings:
 from __future__ import annotations
 
 import datetime
-import glob
 import logging
 import os
 import sys
@@ -67,7 +66,7 @@ from io import StringIO
 import numpy as np
 import pandas as pd
 import simplejson
-from _utilities import FFS, clean_level, date_handler, paths_exist, script_setup
+from _utilities import FFS, date_handler, script_setup
 from cdm_reader_mapper import cdm_mapper as cdm
 from cdm_reader_mapper import mdf_reader, metmetpy
 from cdm_reader_mapper.common import pandas_TextParser_hdlr
@@ -122,21 +121,6 @@ L0_filename = os.path.join(params.prev_level_path, params.filename)
 if not os.path.isfile(L0_filename):
     logging.error(f"Could not find data input file: {L0_filename}")
     sys.exit(1)
-
-paths_exist([params.level_invalid_path, params.level_excluded_path])
-
-# CLEAN PREVIOUS L1A PRODUCTS AND SIDE FILES ----------------------------------
-L1a_prods = glob.glob(
-    os.path.join(params.level_path, "*" + FFS + params.fileID + ".psv")
-)
-L1a_ql = glob.glob(os.path.join(params.level_ql_path, params.fileID + ".json"))
-L1a_excluded = glob.glob(
-    os.path.join(params.level_excluded_path, params.fileID + FFS + "*.psv")
-)
-L1a_invalid = glob.glob(
-    os.path.join(params.level_invalid_path, params.fileID + FFS + "*.psv")
-)
-clean_level(L1a_prods + L1a_ql + L1a_excluded + L1a_invalid)
 
 # DO THE DATA PROCESSING ------------------------------------------------------
 data_model = params.data_model

@@ -121,7 +121,6 @@ of the QC files relative to a set path (i.e. informing of the QC version)
 from __future__ import annotations
 
 import datetime
-import glob
 import logging
 import os
 import sys
@@ -130,14 +129,7 @@ from importlib import reload
 import numpy as np
 import pandas as pd
 import simplejson
-from _utilities import (
-    FFS,
-    clean_level,
-    date_handler,
-    paths_exist,
-    script_setup,
-    table_to_csv,
-)
+from _utilities import FFS, date_handler, paths_exist, script_setup, table_to_csv
 from cdm_reader_mapper import cdm_mapper as cdm
 
 reload(logging)  # This is to override potential previous config of logging
@@ -490,10 +482,6 @@ if len(tables_in) == 1:
 # DO THE DATA PROCESSING ------------------------------------------------------
 header_df.set_index("report_id", inplace=True, drop=False)
 qc_dict = {}
-level_prods = glob.glob(os.path.join(params.level_path, "*-" + params.fileID + ".psv"))
-level_logs = glob.glob(os.path.join(params.level_log_path, params.fileID + ".*"))
-level_ql = glob.glob(os.path.join(params.level_ql_path, "*" + params.fileID + "*.*"))
-clean_level(level_prods + level_logs + level_ql)
 
 # 1. PROCESS QC FLAGS ---------------------------------------------------------
 # GET THE QC FILES WE NEED FOR THE CURRENT SET OF CDM TABLES

@@ -106,14 +106,7 @@ from importlib import reload
 import numpy as np
 import pandas as pd
 import simplejson
-from _utilities import (
-    FFS,
-    clean_level,
-    date_handler,
-    paths_exist,
-    script_setup,
-    table_to_csv,
-)
+from _utilities import FFS, date_handler, paths_exist, script_setup, table_to_csv
 from cdm_reader_mapper import cdm_mapper as cdm
 
 reload(logging)  # This is to override potential previous config of logging
@@ -248,15 +241,6 @@ id_validation_path = os.path.join(
 
 paths_exist([id_validation_path, params.level_invalid_path])
 
-# Clean previous L1c products and side files ----------------------------------
-level_prods = glob.glob(
-    os.path.join(params.level_path, "*" + FFS + params.fileID + ".psv")
-)
-level_ql = glob.glob(os.path.join(params.level_ql_path, params.fileID + ".json"))
-level_invalid = glob.glob(
-    os.path.join(params.level_invalid_path, "*" + FFS + params.fileID + ".*")
-)
-clean_level(level_prods + level_ql + level_invalid)
 validation_dict = {table: {} for table in cdm.properties.cdm_tables}
 
 # DO THE DATA PROCESSING ------------------------------------------------------

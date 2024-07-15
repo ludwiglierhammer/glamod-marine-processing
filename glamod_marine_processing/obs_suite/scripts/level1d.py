@@ -55,7 +55,6 @@ valid_from;valid_to;uid;thmH1;platH;brmH1;anmH;anHL1;wwH;sstD1;th1;hy1;st1;bm1;a
 from __future__ import annotations
 
 import datetime
-import glob
 import logging
 import os
 import subprocess
@@ -67,7 +66,6 @@ import pandas as pd
 import simplejson
 from _utilities import (
     FFS,
-    clean_level,
     date_handler,
     delimiter,
     paths_exist,
@@ -229,11 +227,6 @@ else:
     logging.info(f"Metadata not available for data source-deck {params.sid_dck}")
     logging.info("level1d data will be created with no merging")
 
-# %% Clean previous L1a products and side files ----------------------------------
-level_prods = glob.glob(os.path.join(params.level_path, "*-" + params.fileID + ".psv"))
-level_logs = glob.glob(os.path.join(params.level_log_path, params.fileID + ".*"))
-level_ql = glob.glob(os.path.join(params.level_ql_path, params.fileID + ".*"))
-clean_level(level_prods + level_logs + level_ql)
 meta_dict = {}
 
 # DO THE DATA PROCESSING ------------------------------------------------------

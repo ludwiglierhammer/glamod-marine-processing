@@ -51,7 +51,6 @@ configfile includes:
 from __future__ import annotations
 
 import datetime
-import glob
 import logging
 import os
 import sys
@@ -62,7 +61,6 @@ import pandas as pd
 import simplejson
 from _utilities import (
     FFS,
-    clean_level,
     date_handler,
     delimiter,
     paths_exist,
@@ -102,16 +100,6 @@ L1b_main_corrections = os.path.join(
 logging.info(f"Setting corrections path to {L1b_main_corrections}")
 paths_exist(L1b_main_corrections)
 
-# Clean previous L1a products and side files ----------------------------------
-L1b_prods = glob.glob(os.path.join(params.level_path, "*-" + params.fileID + ".psv"))
-L1b_prods_idate = glob.glob(
-    os.path.join(
-        params.level_path,
-        "*" + "-".join([str(params.year), str(params.month).zfill(2)]) + ".psv",
-    )
-)
-L1b_ql = glob.glob(os.path.join(params.level_ql_path, params.fileID + ".*"))
-clean_level(L1b_prods + L1b_prods_idate + L1b_ql)
 correction_dict = {table: {} for table in cdm.properties.cdm_tables}
 
 # Do the data processing ------------------------------------------------------

@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import datetime
 import glob
+import itertools
 import json
 import logging
 import os
@@ -11,6 +12,15 @@ import sys
 
 delimiter = "|"
 FFS = "-"
+
+add_data_paths = {
+    "level1a": ["level_excluded_path", "level_invalid_path"],
+    "level1b": [],
+    "level1c": ["level_invalid_path"],
+    "level1d": ["level_log_path"],
+    "level1e": ["level_log_path"],
+    "level2": ["level_excluded_path", "level_reports_path"],
+}
 
 
 # Functions--------------------------------------------------------------------
@@ -104,12 +114,19 @@ class script_setup:
             self.level_path,
             self.level_ql_path,
         ]
-
+        for data_path in add_data_paths[level]:
+            data_paths.append(getattr(self, data_path))
         paths_exist(data_paths)
 
         if len(glob.glob(self.filename)) == 0:
             logging.error(f"Previous level header files not found: {self.filename}")
             sys.exit(1)
+
+        filenames = [
+            glob.glob(f"{data_path}/**/*", recursive=True)
+            for data_path in data_paths[1:]
+        ]
+        clean_level(filenames)
 
 
 # This is for json to handle dates
@@ -134,6 +151,7 @@ def table_to_csv(df, out_name, **kwargs):
 
 def clean_level(filenames):
     """Clean level."""
+    filenames = list(itertools.chain(*filenames))
     for filename in filenames:
         try:
             logging.info(f"Removing previous file: {filename}")
