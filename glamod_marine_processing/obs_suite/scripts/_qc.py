@@ -4,24 +4,24 @@ from __future__ import annotations
 
 import os
 
+from _utilities import table_to_csv
 from cdm_reader_mapper import cdm_mapper as cdm
 
-from _utilities import table_to_csv
 
 def wind_qc(table_wd, table_ws):
     """Wind Quality Control function.
-    
+
     Note:
     * northerlies given as 360°
     * calm winds given as 0°
-     
+
     Flags:
     * negative wind speeds
     * wind speeds above 99.9 m/s
     * negative wind directions
     * wrapped directions (> 360°)
     * no wind speeds but wind directions
-    * no wind directions but wind speeds    
+    * no wind directions but wind speeds
     """
     if len(table_wd) == 0:
         logging.warning(
