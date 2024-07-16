@@ -233,7 +233,7 @@ def wind_qc():
     else:
         value_ws = table_ws["observation_value"].astype(float)
         table_ws["quality_flag"] = table_ws["quality_flag"].mask(
-            (value_ws < 0.0) or (value_ws > 500.0),
+            (value_ws < 0.0) or (value_ws > 99.9),
             "1",
         )
     if len(table_wd) == 0 and len(table_ws) == 0:
