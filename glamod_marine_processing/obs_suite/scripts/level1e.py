@@ -482,7 +482,20 @@ table_wd = cdm.read_tables(
 table_ws = cdm.read_tables(
     params.prev_level_path, params.prev_fileID, cdm_subset=["observations-ws"]
 )
-wind_qc(table_wd=table_wd, table_ws=table_ws)
+
+windQC = wind_qc(table_wd=table_wd, table_ws=table_ws)
+
+odata_filename_wd = os.path.join(
+    params.level_path, FFS.join(["observations-wd", params.fileID]) + ".psv"
+)
+cdm_columns = cdm_tables.get("observations-wd").keys()
+table_to_csv(windQC.wind_direction, odata_filename_wd, columns=cdm_columns)
+
+odata_filename_ws = os.path.join(
+    params.level_path, FFS.join(["observations-ws", params.fileID]) + ".psv"
+)
+cdm_columns = cdm_tables.get("observations-ws").keys()
+table_to_csv(windQC.wind_speed, odata_filename_ws, columns=cdm_columns)
 
 # CHECKOUT --------------------------------------------------------------------
 qc_dict["date processed"] = datetime.datetime.now()

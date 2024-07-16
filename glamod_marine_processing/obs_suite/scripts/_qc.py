@@ -2,10 +2,15 @@
 
 from __future__ import annotations
 
-import os
+import logging
 
-from _utilities import table_to_csv
-from cdm_reader_mapper import cdm_mapper as cdm
+
+class QualityControl:
+    """Class for quality control."""
+
+    def __init__(self, wind_speed, wind_direction):
+        self.wind_speed = wind_speed
+        self.wind_direction = wind_direction
 
 
 def wind_qc(table_wd, table_ws):
@@ -55,14 +60,4 @@ def wind_qc(table_wd, table_ws):
         table_wd["quality_flag"] = table_wd["quality_flag"].mask(masked, "1")
         table_ws["quality_flag"] = table_ws["quality_flag"].mask(masked, "1")
 
-    odata_filename_wd = os.path.join(
-        params.level_path, FFS.join(["observations-wd", params.fileID]) + ".psv"
-    )
-    cdm_columns = cdm_tables.get("observations-wd").keys()
-    table_to_csv(table_wd, odata_filename_wd, columns=cdm_columns)
-
-    odata_filename_ws = os.path.join(
-        params.level_path, FFS.join(["observations-ws", params.fileID]) + ".psv"
-    )
-    cdm_columns = cdm_tables.get("observations-ws").keys()
-    table_to_csv(table_ws, odata_filename_ws, columns=cdm_columns)
+    return QualityControl(table_ws, table_wd)
