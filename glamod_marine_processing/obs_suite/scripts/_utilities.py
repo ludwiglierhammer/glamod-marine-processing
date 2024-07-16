@@ -138,6 +138,8 @@ def date_handler(obj):
 
 def table_to_csv(df, out_name, **kwargs):
     """Write table to disk."""
+    if len(df) == 0:
+        return
     df.to_csv(
         out_name,
         index=False,
