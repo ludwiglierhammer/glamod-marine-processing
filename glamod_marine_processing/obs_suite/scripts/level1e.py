@@ -244,6 +244,9 @@ def wind_qc():
         masked = value_ws == 0.0 and value_wd != 0
         table_wd["quality_flag"] = table_wd["quality_flag"].mask(masked, "1")
         table_ws["quality_flag"] = table_ws["quality_flag"].mask(masked, "1")
+        masked = value_ws != 0.0 and value_wd == 0
+        table_wd["quality_flag"] = table_wd["quality_flag"].mask(masked, "1")
+        table_ws["quality_flag"] = table_ws["quality_flag"].mask(masked, "1")
 
     odata_filename_wd = os.path.join(
         params.level_path, FFS.join(["observations-wd", params.fileID]) + ".psv"
