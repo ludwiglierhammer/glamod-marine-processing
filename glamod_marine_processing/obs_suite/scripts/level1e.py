@@ -209,7 +209,20 @@ def add_report_quality(qc_df_full):
 
 
 def wind_qc():
-    """Wind Quality Control function."""
+    """Wind Quality Control function.
+    
+    Note:
+    * northerlies given as 360°
+    * calm winds given as 0°
+     
+    Flags:
+    * negative wind speeds
+    * wind speeds above 99.9 m/s
+    * negative wind directions
+    * wrapped directions (> 360°)
+    * no wind speeds but wind directions
+    * no wind directions but wind speeds    
+    """
     table_wd = cdm.read_tables(
         params.prev_level_path, params.prev_fileID, cdm_subset=["observations-wd"]
     )
