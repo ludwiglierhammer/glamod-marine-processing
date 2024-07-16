@@ -218,7 +218,7 @@ def wind_qc():
     )
     if len(table_wd) == 0:
         logging.warning(
-            "NO wind direction QC is possible since table is empty or non exisisting table."
+            "No wind direction QC is possible since table is empty or non exisisting table."
         )
     else:
         value_wd = table_wd["observation_value"].astype(float)
@@ -228,7 +228,7 @@ def wind_qc():
         )
     if len(table_ws) == 0:
         logging.warning(
-            "NO wind speed QC is possible since table is empty or non exisisting table."
+            "No wind speed QC is possible since table is empty or non exisisting table."
         )
     else:
         value_ws = table_ws["observation_value"].astype(float)
@@ -238,7 +238,7 @@ def wind_qc():
         )
     if len(table_wd) == 0 and len(table_ws) == 0:
         logging.warning(
-            "NO more wind QC is possible since table is empty or non exisisting table."
+            "No wind QC cross checks are possible since tables are empty or non exisisting table."
         )
     else:
         masked = value_ws == 0.0 and value_wd != 0
