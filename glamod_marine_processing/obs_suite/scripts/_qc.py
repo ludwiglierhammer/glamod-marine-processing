@@ -35,7 +35,7 @@ def wind_qc(table_wd, table_ws):
     else:
         value_wd = table_wd["observation_value"].astype(float)
         table_wd["quality_flag"] = table_wd["quality_flag"].mask(
-            (value_wd < 0.0) or (value_wd >= 360.0),
+            (value_wd < 0.0) | (value_wd > 360.0),
             "1",
         )
     if len(table_ws) == 0:
@@ -45,7 +45,7 @@ def wind_qc(table_wd, table_ws):
     else:
         value_ws = table_ws["observation_value"].astype(float)
         table_ws["quality_flag"] = table_ws["quality_flag"].mask(
-            (value_ws < 0.0) or (value_ws > 99.9),
+            (value_ws < 0.0) | (value_ws > 99.9),
             "1",
         )
     if len(table_wd) == 0 and len(table_ws) == 0:
@@ -53,10 +53,10 @@ def wind_qc(table_wd, table_ws):
             "No wind QC cross checks are possible since tables are empty or non exisisting table."
         )
     else:
-        masked = value_ws == 0.0 and value_wd != 0
+        masked = (value_ws == 0.0) & (value_wd != 0)
         table_wd["quality_flag"] = table_wd["quality_flag"].mask(masked, "1")
         table_ws["quality_flag"] = table_ws["quality_flag"].mask(masked, "1")
-        masked = value_ws != 0.0 and value_wd == 0
+        masked = (value_ws != 0.0) & (value_wd == 0)
         table_wd["quality_flag"] = table_wd["quality_flag"].mask(masked, "1")
         table_ws["quality_flag"] = table_ws["quality_flag"].mask(masked, "1")
 
