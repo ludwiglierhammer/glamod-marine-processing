@@ -133,6 +133,6 @@ manipulation = {
 }
 
 drops = {
-    "level1a": [0],
+    "level1a": [0,5,6,7,9],
     "level1c": [0, 3],
 }
