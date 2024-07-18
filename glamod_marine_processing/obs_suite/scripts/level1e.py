@@ -477,10 +477,10 @@ for table in obs_tables:
 
 # 3 wind QC
 table_wd = cdm.read_tables(
-    params.prev_level_path, params.prev_fileID, cdm_subset=["observations-wd"]
+    params.level_path, params.fileID, cdm_subset=["observations-wd"]
 )
 table_ws = cdm.read_tables(
-    params.prev_level_path, params.prev_fileID, cdm_subset=["observations-ws"]
+    params.level_path, params.fileID, cdm_subset=["observations-ws"]
 )
 
 windQC = wind_qc(table_wd=table_wd, table_ws=table_ws)
