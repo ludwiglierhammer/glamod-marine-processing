@@ -35,7 +35,7 @@ def QcCli(
     run_jobs,
     overwrite,
 ):
-    """Enry point for theqcmetadata_suite command line interface."""
+    """Enry point for the qc_suite command line interface."""
     config = Cli(
         machine=machine,
         release=release,
