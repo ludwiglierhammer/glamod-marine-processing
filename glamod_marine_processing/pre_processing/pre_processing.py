@@ -153,7 +153,7 @@ def pre_processing(
         If True, overwrite already existing files.
     """
     # get list of files to process
-    infiles = sorted(glob.glob(f"{idir}/IMMA1_R3.0.*"))
+    infiles = sorted(glob.glob(f"{idir}/*_r3.0.*.dat"))
     # get number of files
     nfiles = len(infiles)
     print(f"{nfiles} files found in foler {idir}")
