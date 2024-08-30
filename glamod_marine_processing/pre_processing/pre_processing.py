@@ -21,6 +21,7 @@ hourIdx = range(8, 12)
 latitudeIdx = range(12, 17)
 longitudeIdx = range(17, 23)
 # default input file source pattern
+_dataset = "ICOADS_R3.0.2T"
 _source_pattern = "IMMA1_R3.0.*"
 
 
@@ -37,13 +38,16 @@ def get_cell(lon, lat, xmin, xmax, xstep, ymin, ymax, ystep):
     cell = {"id": cell, "xmin": x1, "xmax": x2, "ymin": y1, "ymax": y2, "count": 0}
     return cell
 
+def get_outfile_name(basepath, tag, dataset, year, month):
+    filename = f"{dataset}_{tag}_{year:04d}-{month:02d}"
+    return f"{basepath}/{tag}/{os.path.basename(filename)}"
 
 class deck_store:
     """Class to store info for each source / deck."""
 
-    def __init__(self, tag, basepath, filename):
+    def __init__(self, dataset, tag, year, month, basepath):
         Path(f"{basepath}/{tag}").mkdir(parents=True, exist_ok=True)
-        self.outfile = f"{basepath}/{tag}/{os.path.basename(filename)}"
+        self.outfile = get_outfile_name(basepath, tag, dataset, year, month)
         self.count = 0
         self.linecache = list()
         self.fh = open(self.outfile, "w")
@@ -58,9 +62,9 @@ class deck_store:
         self.summary["year"] = dict()
         self.summary["dck"] = dict()
 
-    def set_path(self, tag, basepath, filename):
+    def set_path(self, dataset, tag, year, month, basepath):
         """Set data path."""
-        outfile = f"{basepath}/{tag}/{os.path.basename(filename)}"
+        outfile = get_outfile_name(basepath, tag, dataset, year, month)
         if self.outfile != outfile:
             self.close()
             self.outfile = outfile
@@ -141,6 +145,7 @@ class deck_store:
 def pre_processing(
     idir,
     odir,
+    dataset=None,
     source_pattern=None,
     overwrite=False,
 ):
@@ -158,6 +163,8 @@ def pre_processing(
     # get list of files to process
     if source_pattern is None:
         source_pattern = _source_pattern
+    if dataset is None:
+        dataset = _dataset
     infiles = sorted(glob.glob(f"{idir}/{source_pattern}"))
     # get number of files
     nfiles = len(infiles)
@@ -174,13 +181,15 @@ def pre_processing(
             # get source Id and deck
             dck = int(line[dckIdx.start : dckIdx.stop])
             sid = int(line[sidIdx.start : sidIdx.stop])
+            year = int(line[yearIdx.start : yearIdx.stop])
+            month = int(line[monthIdx.start : monthIdx.stop])
             # set tag for data
             tag = f"{sid:03d}-{dck:03d}"
             # Initialise deck or update output path
             if tag not in decks:
-                decks[tag] = deck_store(tag, odir, infile)
+                decks[tag] = deck_store(dataset, tag, year, month, odir)
             else:
-                decks[tag].set_path(tag, odir, infile)
+                decks[tag].set_path(dataset, tag, year, month, odir)
             # add ICOADS record to deck
             decks[tag].add_line(line)
         fh.close()

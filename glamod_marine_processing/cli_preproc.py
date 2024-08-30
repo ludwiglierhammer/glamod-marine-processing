@@ -39,6 +39,7 @@ def PreProcCli(
     pre_processing(
         idir=input_dir,
         odir=output_dir,
+        dataset=dataset,
         source_pattern=source_pattern,
         overwrite=overwrite,
     )
