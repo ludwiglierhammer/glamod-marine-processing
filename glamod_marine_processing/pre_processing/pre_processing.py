@@ -141,7 +141,7 @@ class deck_store:
 def pre_processing(
     idir,
     odir,
-    source_pattern="IMMA1_R3.0.*",
+    source_pattern=None,
     overwrite=False,
 ):
     """Split ICOADS data into monthly deck files.
