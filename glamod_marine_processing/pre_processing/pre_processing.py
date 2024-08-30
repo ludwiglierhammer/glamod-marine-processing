@@ -11,16 +11,16 @@ from pathlib import Path
 maxLines = 1000
 # columns for resepective variables
 parse_dict = {
-    "dck": [118, 121],
-    "sid": [121, 124],
-    "platformType": [124, 126],
-    "callsign": [34, 43],
-    "year": [0, 4],
-    "month": [4, 6],
-    "day": [6, 8],
-    "hour": [8, 12],
-    "latitude": [12, 17],
-    "longitude": [17, 23],
+  "dck": [118, 121],
+  "sid": [121, 124], 
+  "platformType": [124, 126],
+  "callsign": [34, 43],
+  "year": [0, 4],
+  "month": [4, 6],
+  "day": [6, 8],
+  "hour": [8, 12],
+  "latitude": [12, 17],
+  "longitude": [17, 23],
 }
 
 # default input file source pattern
@@ -41,16 +41,15 @@ def get_cell(lon, lat, xmin, xmax, xstep, ymin, ymax, ystep):
     cell = {"id": cell, "xmin": x1, "xmax": x2, "ymin": y1, "ymax": y2, "count": 0}
     return cell
 
-
 def parse_line(line, entry):
+    """Parse line."""
     values = parse_dict[entry]
     return line[values[0] : values[-1]]
-
-
+    
 def get_outfile_name(basepath, tag, dataset, year, month):
+    """Generate output file name."""
     filename = f"{dataset}_{tag}_{year:04d}-{month:02d}"
     return f"{basepath}/{tag}/{os.path.basename(filename)}"
-
 
 class deck_store:
     """Class to store info for each source / deck."""
