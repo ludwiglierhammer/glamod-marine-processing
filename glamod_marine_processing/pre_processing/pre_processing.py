@@ -10,16 +10,19 @@ from pathlib import Path
 # number of lines to store in each cache
 maxLines = 1000
 # columns for resepective variables
-dckIdx = range(118, 121)
-sidIdx = range(121, 124)
-platformTypeIdx = range(124, 126)
-callsignIdx = range(34, 43)
-yearIdx = range(0, 4)
-monthIdx = range(4, 6)
-dayIdx = range(6, 8)
-hourIdx = range(8, 12)
-latitudeIdx = range(12, 17)
-longitudeIdx = range(17, 23)
+parse_dict = {
+  "dck": [118, 121],
+  "sid": [121, 124], 
+  "platformType": [124, 126],
+  "callsign": [34, 43],
+  "year": [0, 4],
+  "month": [4, 6],
+  "day": [6, 8],
+  "hour": [8, 12],
+  "latitude": [12, 17],
+  "longitude": [17, 23],
+}
+
 # default input file source pattern
 _dataset = "ICOADS_R3.0.2T"
 _source_pattern = "IMMA1_R3.0.*"
@@ -38,6 +41,10 @@ def get_cell(lon, lat, xmin, xmax, xstep, ymin, ymax, ystep):
     cell = {"id": cell, "xmin": x1, "xmax": x2, "ymin": y1, "ymax": y2, "count": 0}
     return cell
 
+def parse_line(line, entry):
+    values = parse_dict[entry]
+    return line[values[0] : values[-1]]
+    
 def get_outfile_name(basepath, tag, dataset, year, month):
     filename = f"{dataset}_{tag}_{year:04d}-{month:02d}"
     return f"{basepath}/{tag}/{os.path.basename(filename)}"
@@ -72,14 +79,14 @@ class deck_store:
 
     def add_line(self, line):
         """Extract the data to be used when summarising deck."""
-        latitude = float(line[latitudeIdx.start : latitudeIdx.stop]) * 0.01
-        longitude = float(line[longitudeIdx.start : longitudeIdx.stop]) * 0.01
+        latitude = float(parse_line(line, "latitude")) * 0.01
+        longitude = float(parse_line(line, "longitude")) * 0.01
         if longitude >= 180:
             longitude = longitude - 360
-        year = int(line[yearIdx.start : yearIdx.stop])
-        dck = line[dckIdx.start : dckIdx.stop]
-        platform = line[platformTypeIdx.start : platformTypeIdx.stop]
-        callsign = line[callsignIdx.start : callsignIdx.stop]
+        year = int(parse_line(line, "year"))
+        dck = parse_line(line, "dck")
+        platform = parse_line(line, "platformType")
+        callsign = parse_line(line, "callsign")
         cell = get_cell(longitude, latitude, -180, 180, 5, -90, 90, 5)
 
         if callsign in self.summary["callsigns"]:
@@ -179,10 +186,10 @@ def pre_processing(
 
         for line in fh.readlines():
             # get source Id and deck
-            dck = int(line[dckIdx.start : dckIdx.stop])
-            sid = int(line[sidIdx.start : sidIdx.stop])
-            year = int(line[yearIdx.start : yearIdx.stop])
-            month = int(line[monthIdx.start : monthIdx.stop])
+            dck = int(parse_line(line, "dck"))
+            sid = int(parse_line(line, "sid"))
+            year = int(parse_line(line, "year"))
+            month = int(parse_line(line, "month"))
             # set tag for data
             tag = f"{sid:03d}-{dck:03d}"
             # Initialise deck or update output path
