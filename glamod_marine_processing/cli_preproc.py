@@ -25,13 +25,13 @@ def PreProcCli(
     source_pattern,
     overwrite,
 ):
-    """Entry point for the pre-processing command line interface."""  
+    """Entry point for the pre-processing command line interface."""
     config = Cli(
         machine=machine,
         dataset=dataset,
         data_directory=data_directory,
-    ).initialize()   
-    p = SimpleNamespace(**config["paths"])  
+    ).initialize()
+    p = SimpleNamespace(**config["paths"])
     input_dir = os.path.join(p.data_directory, "datasets", dataset, "ORIGINAL")
     output_dir = os.path.join(p.data_directory, "datasets", dataset, "level0")
     mkdir(output_dir)
