@@ -33,6 +33,7 @@ dynamic = ["version", "dependencies", "optional-dependencies"]
 [project.scripts]
 qc_suite = "glamod_marine_processing.cli_qc:QcCli"
 obs_suite = "glamod_marine_processing.cli_obs:ObsCli"
+pre_proc = "glamod_marine_processing.cli_preproc:PreProcCli"
 
 [project.urls]
 "Homepage" = "https://glamod-marine-processing.readthedocs.io"
