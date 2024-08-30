@@ -20,6 +20,8 @@ dayIdx = range(6, 8)
 hourIdx = range(8, 12)
 latitudeIdx = range(12, 17)
 longitudeIdx = range(17, 23)
+# default input file source pattern
+_source_pattern = "IMMA1_R3.0.*"
 
 
 def get_cell(lon, lat, xmin, xmax, xstep, ymin, ymax, ystep):
@@ -139,6 +141,7 @@ class deck_store:
 def pre_processing(
     idir,
     odir,
+    source_pattern="IMMA1_R3.0.*",
     overwrite=False,
 ):
     """Split ICOADS data into monthly deck files.
@@ -153,7 +156,9 @@ def pre_processing(
         If True, overwrite already existing files.
     """
     # get list of files to process
-    infiles = sorted(glob.glob(f"{idir}/*_r3.0.*.dat"))
+    if source_pattern is None:
+        source_pattern = _source_pattern
+    infiles = sorted(glob.glob(f"{idir}/{source_pattern}"))
     # get number of files
     nfiles = len(infiles)
     print(f"{nfiles} files found in foler {idir}")

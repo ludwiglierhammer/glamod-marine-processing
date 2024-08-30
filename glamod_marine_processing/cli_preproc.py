@@ -22,6 +22,7 @@ def PreProcCli(
     machine,
     dataset,
     data_directory,
+    source_pattern,
     overwrite,
 ):
     """Entry point for the pre-processing command line interface."""  
@@ -38,5 +39,6 @@ def PreProcCli(
     pre_processing(
         idir=input_dir,
         odir=output_dir,
+        source_pattern=source_pattern,
         overwrite=overwrite,
     )
