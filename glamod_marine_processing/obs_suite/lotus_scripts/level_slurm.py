@@ -76,16 +76,6 @@ script_config_file = sys.argv[1]
 check_file_exit([script_config_file])
 script_config = load_json(script_config_file)
 
-LEVEL = script_config["level"]
-LEVEL_SOURCE = slurm_preferences.level_source[LEVEL]
-if "source_pattern" in script_config.keys():
-    SOURCE_PATTERN = script_config["source_pattern"]
-else:
-    SOURCE_PATTERN = slurm_preferences.source_pattern[LEVEL]
-PYSCRIPT = f"{LEVEL}.py"
-MACHINE = script_config["scripts"]["machine"].lower()
-overwrite = script_config["overwrite"]
-
 release = script_config["abbreviations"]["release"]
 update = script_config["abbreviations"]["update"]
 dataset = script_config["abbreviations"]["dataset"]
@@ -96,6 +86,20 @@ release_periods_file = script_config["release_periods_file"]
 release_periods_file = os.path.join(config_files_path, release_periods_file)
 
 args = parser.get_parser_args()
+
+LEVEL = script_config["level"]
+LEVEL_SOURCE = slurm_preferences.level_source[LEVEL]
+if "source_pattern" in script_config.keys():
+    SOURCE_PATTERN = script_config["source_pattern"]
+else:
+    SOURCE_PATTERN = slurm_preferences.source_pattern[LEVEL]
+
+if isinstance(SOURCE_PATTERN, dict):
+    SOURCE_PATTERN = SOURCE_PATTERN[dataset]
+
+PYSCRIPT = f"{LEVEL}.py"
+MACHINE = script_config["scripts"]["machine"].lower()
+overwrite = script_config["overwrite"]
 
 # Get lotus paths
 lotus_dir = script_config["paths"]["lotus_scripts_directory"]

@@ -161,7 +161,9 @@ def clean_previous_ok_logs(
 
     ok_files = glob.glob(os.path.join(sid_dck_log_dir, "*.ok"))
     failed_files = glob.glob(os.path.join(sid_dck_log_dir, "*.failed"))
+    logging.info(f"{os.path.join(source_dir, sid_dck, source_pattern)}")
     source_files = glob.glob(os.path.join(source_dir, sid_dck, source_pattern))
+    logging.info(source_files)
     logging.info(
         f"Source dir: {source_dir}; sid_dck: {sid_dck}; Pattern: {source_pattern}"
     )
