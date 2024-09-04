@@ -66,9 +66,9 @@ def clean_ok_logs(
         logging.info(f"Removing previous {len(ok_files)} logs")
         for x in ok_files:
             os.remove(x)
+
     for source_file in source_files:
         yyyy, mm = get_yyyymm(source_file)
-        print(yyyy, mm)  # exit()
         if int(yyyy) >= year_init and int(yyyy) <= year_end:
             config_element(sid_dck_log_dir, ai, config, sid_dck, yyyy, mm, source_file)
             ai += 1
@@ -162,9 +162,7 @@ def clean_previous_ok_logs(
 
     ok_files = glob.glob(os.path.join(sid_dck_log_dir, "*.ok"))
     failed_files = glob.glob(os.path.join(sid_dck_log_dir, "*.failed"))
-    logging.info(f"{os.path.join(source_dir, sid_dck, source_pattern)}")
     source_files = glob.glob(os.path.join(source_dir, sid_dck, source_pattern))
-    logging.info(source_files)
     logging.info(
         f"Source dir: {source_dir}; sid_dck: {sid_dck}; Pattern: {source_pattern}"
     )
