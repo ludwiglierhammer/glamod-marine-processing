@@ -115,8 +115,6 @@ if not params.flag:
     logging.error("Error parsing initial configuration")
     sys.exit(1)
 
-correction_path = os.path.join(params.data_path, params.release, params.corrections)
-
 L0_filename = os.path.join(params.prev_level_path, params.filename)
 if not os.path.isfile(L0_filename):
     logging.error(f"Could not find data input file: {L0_filename}")
