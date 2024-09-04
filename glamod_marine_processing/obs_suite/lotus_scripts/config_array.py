@@ -68,6 +68,7 @@ def clean_ok_logs(
             os.remove(x)
     for source_file in source_files:
         yyyy, mm = get_yyyymm(source_file)
+        print(yyyy, mm)#exit()
         if int(yyyy) >= year_init and int(yyyy) <= year_end:
             config_element(sid_dck_log_dir, ai, config, sid_dck, yyyy, mm, source_file)
             ai += 1
