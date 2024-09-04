@@ -1,0 +1,9 @@
+{
+  "process_list_file": "source_deck_list_pre.txt",
+  "release_periods_file": "source_deck_periods.json",
+  "job_memo_mb": 4000,
+  "job_time_hr": "01",
+  "job_time_min": "30",
+  "data_model": "c_raid",
+  "cdm_map": "c_raid"
+}
