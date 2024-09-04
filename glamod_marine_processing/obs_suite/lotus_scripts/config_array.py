@@ -129,6 +129,12 @@ def clean_previous_ok_logs(
     failed_only,
 ):
     """Make sure there are no previous input files."""
+
+    def get_year(periods, sid_dck, yr_str):
+        if sid_dck in periods.keys():
+            return periods[sid_dck].get(yr_str)
+        return periods.get(yr_str)
+
     # logging.info('Configuring data partition: {}'.format(sid_dck))
     sid_dck_log_dir = os.path.join(log_dir, sid_dck)
     mkdir(sid_dck_log_dir)
@@ -143,8 +149,8 @@ def clean_previous_ok_logs(
         logging.error(f"Data partition log directory does not exist: {sid_dck_log_dir}")
         sys.exit(1)
 
-    year_init = release_periods[sid_dck].get("year_init")
-    year_end = release_periods[sid_dck].get("year_end")
+    year_init = get_year(release_periods, sid_dck, "year_init")
+    year_end = get_year(release_periods, sid_dck, "year_end")
     # Make sure there are not previous input files
     ai = 1
     i_files = glob.glob(os.path.join(sid_dck_log_dir, "*.input"))
