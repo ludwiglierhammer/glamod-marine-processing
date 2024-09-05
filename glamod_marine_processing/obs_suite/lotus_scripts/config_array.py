@@ -70,7 +70,7 @@ def clean_ok_logs(
     for source_file in source_files:
         yyyy, mm = get_yyyymm(source_file)
         add = False
-        if not all ((yyyy, mm)):
+        if not all((yyyy, mm)):
             add = True
         elif int(yyyy) >= year_init and int(yyyy) <= year_end:
             add = True
