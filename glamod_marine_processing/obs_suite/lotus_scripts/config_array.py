@@ -42,8 +42,8 @@ def get_yyyymm(filename):
     """Extract date from filename."""
     yyyy_mm = re.search(DATE_REGEX, os.path.basename(filename))
     if not (yyyy_mm):
-        logging.error(f"Could not extract date from filename {filename}")
-        sys.exit(1)
+        logging.warning(f"Could not extract date from filename {filename}")
+        return (None, None)
     return yyyy_mm.group().split("-")
 
 
@@ -69,13 +69,17 @@ def clean_ok_logs(
 
     for source_file in source_files:
         yyyy, mm = get_yyyymm(source_file)
-        if int(yyyy) >= year_init and int(yyyy) <= year_end:
-            config_element(sid_dck_log_dir, ai, config, sid_dck, yyyy, mm, source_file)
-            ai += 1
+        add = False
+        if not all ((yyyy, mm)):
+            add = True
+        elif int(yyyy) >= year_init and int(yyyy) <= year_end:
+            add = True
         elif (int(yyyy) == year_init - 1 and int(mm) == 12) or (
             int(yyyy) == year_end + 1 and int(mm) == 1
         ):
-            # include one month before and one after period to allow for qc within period
+            add = True
+
+        if add is True:
             config_element(sid_dck_log_dir, ai, config, sid_dck, yyyy, mm, source_file)
             ai += 1
 
