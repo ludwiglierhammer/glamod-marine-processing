@@ -22,6 +22,12 @@ add_data_paths = {
     "level2": ["level_excluded_path", "level_reports_path"],
 }
 
+chunksizes = {
+    "C-RAID_1.2": None,
+    "ICOADS_R3.0.2T": 200000,
+    "ICOADS_R3.0.0T": 200000,
+}
+
 
 # Functions--------------------------------------------------------------------
 class script_setup:
@@ -57,7 +63,10 @@ class script_setup:
             self.year = config.get("yyyy")
             self.month = config.get("mm")
 
-        self.dck = self.sid_dck.split("-")[1]
+        if "-" in self.sid_dck:
+            self.dck = self.sid_dck.split("-")[1]
+        else:
+            self.dck = self.sid_dck
         self.corrections = config.get("corrections")
 
         try:
