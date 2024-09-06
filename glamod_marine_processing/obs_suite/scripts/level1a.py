@@ -227,10 +227,6 @@ for col in masked_columns:
                 ivalues.remove(np.nan)
                 ivalues.sort()
                 ivalues.append(str(np.nan))
-            elif pd.NaT in ivalues:
-                ivalues.remove(pd.NaT)
-                ivalues.sort()
-                ivalues.append(str(pd.NaT))
             else:
                 ivalues.sort()
             io_dict["invalid"][k].update(
@@ -296,7 +292,7 @@ if process:
     io_dict.update({table: {} for table in tables})
     mapping = params.cdm_map
     logging.debug(f"Mapping attributes: {data_in.attrs}")
-    cdm_tables = cdm.map_model(mapping, data_in.data, data_in.attrs, log_level="INFO")
+    cdm_tables = cdm.map_model(mapping, data_in.data, log_level="INFO")
 
     logging.info("Printing tables to psv files")
     cdm.cdm_to_ascii(
