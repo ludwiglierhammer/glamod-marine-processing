@@ -8,6 +8,7 @@ cdm = f"{deck}_2022-01-01_subset"
 output = cdm
 suffix = "imma"
 level0 = f"{input_dir}/input/{cdm}.{suffix}"
+pid = "subset"
 
 table_names = [
     "header",
