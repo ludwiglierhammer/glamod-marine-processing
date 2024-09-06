@@ -54,7 +54,8 @@ def load_input(dataset, level, settings):
     """Load level input data data from cdm-testdata."""
     p_level = settings.prev_level[level]
     leveli = settings.level_input[level]
-    cache_dir = f"./T{level}/{leveli}/{dataset}/{p_level}/114-992"
+    deck = settings.deck
+    cache_dir = f"./T{level}/{leveli}/{dataset}/{p_level}/{deck}"
     if level == "level1a":
         load_level0(cache_dir, settings)
     else:
@@ -64,9 +65,10 @@ def load_input(dataset, level, settings):
 
 def load_cdms(cache_dir, settings):
     """Load level CDM input data from cdm-testdata."""
+    cdm = settings.cdm
     for table_name in settings.table_names:
         load_file(
-            f"imma1_992/cdm_tables/{table_name}-114-992_2022-01-01_subset.psv",
+            f"imma1_992/cdm_tables/{table_name}-{cdm}.psv",
             cache_dir=cache_dir,
             within_drs=False,
         )
@@ -75,7 +77,7 @@ def load_cdms(cache_dir, settings):
 def load_level0(cache_dir, settings):
     """Load level0 input data from cdm-testdata."""
     load_file(
-        "imma1_992/input/114-992_2022-01-01_subset.imma",
+        settings.level0,
         cache_dir=cache_dir,
         within_drs=False,
     )

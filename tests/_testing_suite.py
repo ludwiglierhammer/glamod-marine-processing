@@ -37,7 +37,7 @@ def _obs_testing(dataset, level, capsys):
             cache_dir=f"./T{level}/release_7.0",
         )
 
-    cache_dir = _load_data.load_input(dataset, level, settings)
+    cache_dir = _load_data.load_input(dataset, level, _settings)
 
     s = (
         "obs_suite "
@@ -55,15 +55,17 @@ def _obs_testing(dataset, level, capsys):
     assert captured.out == ""
 
     results = read_tables(
-        f"./T{level}/release_7.0/{dataset}/{level}/114-992", cdm_subset=tables
+        f"./T{level}/release_7.0/{dataset}/{level}/{_settings.deck}", cdm_subset=tables
     )
     for table_name in tables:
         load_file(
-            f"imma1_992/cdm_tables/{table_name}-114-992_2022-01-01_subset.psv",
-            cache_dir=f"./E{level}/{dataset}/{level}/114-992",
+            f"{_settings.input_dir}/cdm_tables/{table_name}-{_settings.cdm}.psv",
+            cache_dir=f"./E{level}/{dataset}/{level}/{_settings.deck}",
             within_drs=False,
         )
-    expected = read_tables(f"./E{level}/{dataset}/{level}/114-992", cdm_subset=tables)
+    expected = read_tables(
+        f"./E{level}/{dataset}/{level}/{_settings.deck}", cdm_subset=tables
+    )
 
     expected = manipulate_expected(expected, level)
 
