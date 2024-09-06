@@ -5,6 +5,7 @@ import numpy as np
 input_dir = "c_raid"
 deck = "1260810"
 cdm = f"{deck}_20041220"
+output = "craid"
 suffix = "nc"
 level0 = f"{input_dir}/input/{cdm}.{suffix}"
 
