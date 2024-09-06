@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-from _settings import level_input, prev_level, table_names
 from cdm_reader_mapper.common.getting_files import load_file
 
 
@@ -51,21 +50,21 @@ def load_metoffice_qc(**kwargs):
         load_file(f"metoffice_qc/base/2022/01/{qc_file}", **kwargs)
 
 
-def load_input(level):
+def load_input(dataset, level, settings):
     """Load level input data data from cdm-testdata."""
-    p_level = prev_level[level]
-    leveli = level_input[level]
-    cache_dir = f"./T{level}/{leveli}/ICOADS_R3.0.2T/{p_level}/114-992"
+    p_level = settings.prev_level[level]
+    leveli = settings.level_input[level]
+    cache_dir = f"./T{level}/{leveli}/{dataset}/{p_level}/114-992"
     if level == "level1a":
-        load_imma(cache_dir)
+        load_level0(cache_dir, settings)
     else:
-        load_cdms(cache_dir)
+        load_cdms(cache_dir, settings)
     return cache_dir
 
 
-def load_cdms(cache_dir):
+def load_cdms(cache_dir, settings):
     """Load level CDM input data from cdm-testdata."""
-    for table_name in table_names:
+    for table_name in settings.table_names:
         load_file(
             f"imma1_992/cdm_tables/{table_name}-114-992_2022-01-01_subset.psv",
             cache_dir=cache_dir,
@@ -73,8 +72,8 @@ def load_cdms(cache_dir):
         )
 
 
-def load_imma(cache_dir):
-    """Load level IMMA input data from cdm-testdata."""
+def load_level0(cache_dir, settings):
+    """Load level0 input data from cdm-testdata."""
     load_file(
         "imma1_992/input/114-992_2022-01-01_subset.imma",
         cache_dir=cache_dir,

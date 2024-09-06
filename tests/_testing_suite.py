@@ -37,7 +37,7 @@ def _obs_testing(dataset, level, capsys):
             cache_dir=f"./T{level}/release_7.0",
         )
 
-    cache_dir = _load_data.load_input(level)
+    cache_dir = _load_data.load_input(dataset, level, settings)
 
     s = (
         "obs_suite "
