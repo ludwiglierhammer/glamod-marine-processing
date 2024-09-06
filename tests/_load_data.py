@@ -67,7 +67,7 @@ def load_cdms(cache_dir, settings):
     """Load level CDM input data from cdm-testdata."""
     for table_name in settings.table_names:
         load_file(
-            f"{settings.input}/cdm_tables/{table_name}-{settings.cdm}.psv",
+            f"{settings.input_dir}/cdm_tables/{table_name}-{settings.cdm}.psv",
             cache_dir=cache_dir,
             within_drs=False,
         )
