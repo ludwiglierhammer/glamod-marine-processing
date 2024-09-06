@@ -59,7 +59,7 @@ def _obs_testing(dataset, level, capsys):
     )
     for table_name in tables:
         load_file(
-            f"{_settings.input_dir}/cdm_tables/{table_name}-{_settings.cdm}.psv",
+            f"{_settings.input_dir}/cdm_tables/{table_name}-{_settings.output}.psv",
             cache_dir=f"./E{level}/{dataset}/{level}/{_settings.deck}",
             within_drs=False,
         )
