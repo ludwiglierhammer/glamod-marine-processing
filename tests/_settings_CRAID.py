@@ -2,10 +2,11 @@ from __future__ import annotations
 
 import numpy as np
 
-input_dir = "imma1_992"
-level0 = "imma1_992/input/114-992_2022-01-01_subset.imma"
-cdm = "114-992_2022-01-01_subset"
-deck = "114-992"
+input_dir = "c_raid"
+deck = "1260810"
+cdm = f"{deck}_20041210"
+suffix = "nc"
+level0 = f"{input_dir}/input/{cdm}.{suffix}"
 
 table_names = [
     "header",
