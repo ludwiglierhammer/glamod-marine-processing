@@ -42,7 +42,7 @@ def _obs_testing(dataset, level, capsys):
     s = (
         "obs_suite "
         f"-l {level} "
-        f"-f {dataset} "
+        f"-d {dataset} "
         f"-data_dir ./T{level} "
         f"-work_dir ./T{level} "
         f"-sp {_settings.pattern[level]} "
