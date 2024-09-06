@@ -3,8 +3,8 @@ from __future__ import annotations
 import os
 
 import _load_data
-from _settings import get_settings
 import pandas as pd
+from _settings import get_settings
 from cdm_reader_mapper.cdm_mapper import read_tables
 from cdm_reader_mapper.common.getting_files import load_file
 
@@ -20,7 +20,7 @@ add_data = {
 
 def _obs_testing(dataset, level, capsys):
     """Observational testing suite."""
-    
+
     def manipulate_expected(expected, level):
         """Manipulate expected result data."""
         if level in _settings.manipulation.keys():
@@ -63,9 +63,7 @@ def _obs_testing(dataset, level, capsys):
             cache_dir=f"./E{level}/{dataset}/{level}/114-992",
             within_drs=False,
         )
-    expected = read_tables(
-        f"./E{level}/{dataset}/{level}/114-992", cdm_subset=tables
-    )
+    expected = read_tables(f"./E{level}/{dataset}/{level}/114-992", cdm_subset=tables)
 
     expected = manipulate_expected(expected, level)
 

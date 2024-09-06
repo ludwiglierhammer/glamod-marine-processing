@@ -2,7 +2,6 @@ from __future__ import annotations
 
 import numpy as np
 
-
 table_names = [
     "header",
     "observations-at",
