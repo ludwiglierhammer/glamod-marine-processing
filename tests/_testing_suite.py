@@ -23,6 +23,8 @@ def _obs_testing(dataset, level, capsys):
 
     def manipulate_expected(expected, level):
         """Manipulate expected result data."""
+        if not hasattr(_settings, "manipulation"):
+            return expected
         if level in _settings.manipulation.keys():
             for index, values in _settings.manipulation[level].items():
                 expected[index] = values
