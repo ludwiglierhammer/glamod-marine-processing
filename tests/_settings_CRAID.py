@@ -20,14 +20,10 @@ table_names = [
     "observations-ws",
 ]
 
-table_names_1b = [
+table_names_next = [
     "header",
-    "observations-at",
-    "observations-dpt",
     "observations-slp",
     "observations-sst",
-    "observations-wd",
-    "observations-ws",
 ]
 
 prev_level = {
@@ -50,11 +46,11 @@ level_input = {
 
 which_tables = {
     "level1a": table_names,
-    "level1b": table_names_1b,
-    "level1c": table_names_1b,
-    "level1d": table_names_1b,
-    "level1e": table_names_1b,
-    "level2": table_names_1b,
+    "level1b": table_names_next,
+    "level1c": table_names_next,
+    "level1d": table_names_next,
+    "level1e": table_names_next,
+    "level2": table_names_next,
 }
 
 pattern = {
