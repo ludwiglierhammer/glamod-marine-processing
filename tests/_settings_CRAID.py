@@ -8,7 +8,6 @@ cdm = f"{deck}_20041220"
 output = "craid"
 suffix = "nc"
 level0 = f"{input_dir}/input/{cdm}.{suffix}"
-p_id = "*"
 
 table_names = [
     "header",
