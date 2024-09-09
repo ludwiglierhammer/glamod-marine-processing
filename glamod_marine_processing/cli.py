@@ -273,6 +273,11 @@ class Options:
             "--external_qc_files",
             help="Path to external QC files. Default: <data_directory>/external_files.",
         )
+        self.process_list = click.option(
+            "-p_list",
+            "--process_list",
+            help="List of decks to process. Take default from level configuration file.",
+        )
 
 
 Options = Options()

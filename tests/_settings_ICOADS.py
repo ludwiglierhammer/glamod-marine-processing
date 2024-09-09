@@ -9,6 +9,7 @@ output = cdm
 suffix = "imma"
 level0 = f"{input_dir}/input/{cdm}.{suffix}"
 p_id = "subset"
+process_list = "114-992"
 
 table_names = [
     "header",

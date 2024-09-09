@@ -48,6 +48,7 @@ def _obs_testing(dataset, level, capsys):
         f"-data_dir ./T{level} "
         f"-work_dir ./T{level} "
         f"-sp {_settings.pattern[level]} "
+        f"-p_list {_settings.process_list} "
         "-o "
         "-run "
     )

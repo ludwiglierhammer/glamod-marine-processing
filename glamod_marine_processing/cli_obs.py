@@ -25,6 +25,7 @@ def ObsCli(
     release,
     update,
     dataset,
+    process_list,
     source_pattern,
     prev_file_id,
     data_directory,
@@ -71,6 +72,9 @@ def ObsCli(
     level_config["run_jobs"] = run_jobs
     level_config["level"] = level
     level_config["overwrite"] = overwrite
+    if isinstance(process_list, str):
+        process_list = [process_list]
+    level_config["process_list"] = process_list
     if source_pattern:
         level_config["source_pattern"] = source_pattern
     if prev_file_id:

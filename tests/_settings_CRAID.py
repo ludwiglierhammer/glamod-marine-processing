@@ -8,6 +8,7 @@ cdm = f"{deck}_20041220"
 output = "craid"
 suffix = "nc"
 level0 = f"{input_dir}/input/{cdm}.{suffix}"
+process_list = "1260810"
 
 table_names = [
     "header",
