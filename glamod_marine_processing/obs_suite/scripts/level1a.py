@@ -227,6 +227,10 @@ for col in masked_columns:
                 ivalues.remove(np.nan)
                 ivalues.sort()
                 ivalues.append(str(np.nan))
+            elif pd.NaT in ivalues:
+                ivalues.remove(pd.NaT)
+                ivalues.sort()
+                ivalues.append(str(pd.NaT))
             else:
                 ivalues.sort()
             io_dict["invalid"][k].update(
