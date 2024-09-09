@@ -8,7 +8,7 @@
   "read_sections": [
     "general",
     "dimensions",
-    "drifter_charakeristics",
+    "drifter_characteristics",
     "drifter_history",
     "drifter_measurements",
     "drifter_sensor"
