@@ -48,11 +48,10 @@ def _obs_testing(dataset, level, capsys):
         f"-data_dir ./T{level} "
         f"-work_dir ./T{level} "
         f"-sp {_settings.pattern[level]} "
-        # "-p_id {_settings.p_id} "
+        f"-p_id {_settings.p_id} "
         "-o "
         "-run"
     )
-
     os.system(s)
     captured = capsys.readouterr()
     assert captured.out == ""
