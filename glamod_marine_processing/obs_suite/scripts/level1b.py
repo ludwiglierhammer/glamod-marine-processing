@@ -98,7 +98,8 @@ L1b_main_corrections = os.path.join(
 )
 
 logging.info(f"Setting corrections path to {L1b_main_corrections}")
-paths_exist(L1b_main_corrections)
+if params.correction_version != "null":
+    paths_exist(L1b_main_corrections)
 
 correction_dict = {table: {} for table in cdm.properties.cdm_tables}
 
@@ -117,7 +118,6 @@ for table in cdm.properties.cdm_tables:
     table_df = cdm.read_tables(
         params.prev_level_path, params.prev_fileID, cdm_subset=[table]
     )
-
     if len(table_df) == 0:
         logging.warning(f"Empty or non-existing table {table}")
         correction_dict[table]["read"] = 0
@@ -126,7 +126,10 @@ for table in cdm.properties.cdm_tables:
     table_df.set_index("report_id", inplace=True, drop=False)
     correction_dict[table]["read"] = len(table_df)
 
-    table_corrections = params.corrections.get(table)
+    if params.corrections is None:
+        table_corrections = []
+    else:
+        table_corrections = params.corrections.get(table)
     if len(table_corrections) == 0:
         logging.warning(f"No corrections defined for table {table}")
         continue
