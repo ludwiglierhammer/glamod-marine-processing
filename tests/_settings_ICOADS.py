@@ -5,10 +5,8 @@ import numpy as np
 input_dir = "imma1_992"
 deck = "114-992"
 cdm = f"{deck}_2022-01-01_subset"
-output = cdm
 suffix = "imma"
 level0 = f"{input_dir}/input/{cdm}.{suffix}"
-p_id = "subset"
 process_list = "114-992"
 
 table_names = [

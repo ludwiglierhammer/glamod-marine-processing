@@ -48,12 +48,11 @@ def _obs_testing(dataset, level, capsys):
         f"-data_dir ./T{level} "
         f"-work_dir ./T{level} "
         f"-sp {_settings.pattern[level]} "
+        f" -p_id subset "
         f"-p_list {_settings.process_list} "
         "-o "
-        "-run "
+        "-run"
     )
-    if hasattr(_settings, "p_id"):
-        s = s + f" -p_id {_settings.p_id}"
 
     os.system(s)
     captured = capsys.readouterr()
@@ -65,7 +64,7 @@ def _obs_testing(dataset, level, capsys):
 
     for table_name in tables:
         load_file(
-            f"{_settings.input_dir}/cdm_tables/{table_name}-{_settings.output}.psv",
+            f"{_settings.input_dir}/cdm_tables/{table_name}-{_settings.cdm}.psv",
             cache_dir=f"./E{level}/{dataset}/{level}/{_settings.deck}",
             within_drs=False,
         )
