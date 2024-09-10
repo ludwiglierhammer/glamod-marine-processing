@@ -127,12 +127,11 @@ for table in cdm.properties.cdm_tables:
     correction_dict[table]["read"] = len(table_df)
 
     if params.corrections is None:
-        table_corrections = []
+        table_corrections = {}
     else:
         table_corrections = params.corrections.get(table)
     if len(table_corrections) == 0:
         logging.warning(f"No corrections defined for table {table}")
-        continue
 
     correction_dict[table]["date leak out"] = {}
     correction_dict[table]["corrections"] = {}
@@ -140,24 +139,28 @@ for table in cdm.properties.cdm_tables:
     for correction, element in table_corrections.items():
         correction_dict[table]["corrections"][element] = {"applied": 1, "number": 0}
         logging.info(f"Applying corrections for element {element}")
-        cor_path = os.path.join(
-            L1b_main_corrections, correction, params.fileID_date + cor_ext
-        )
-        if not os.path.isfile(cor_path):
-            logging.warning(f"Correction file {cor_path} not found")
-            continue
-
         columns = ["report_id", element, element + ".isChange"]
-        correction_df = pd.read_csv(
-            cor_path,
-            delimiter=delimiter,
-            dtype="object",
-            header=None,
-            usecols=[0, 1, 2],
-            names=columns,
-            quotechar=None,
-            quoting=3,
-        )
+        if params.correction_version != "null":
+
+            cor_path = os.path.join(
+                L1b_main_corrections, correction, params.fileID_date + cor_ext
+            )
+            if not os.path.isfile(cor_path):
+                logging.warning(f"Correction file {cor_path} not found")
+                continue
+
+            correction_df = pd.read_csv(
+                cor_path,
+                delimiter=delimiter,
+                dtype="object",
+                header=None,
+                usecols=[0, 1, 2],
+                names=columns,
+                quotechar=None,
+                quoting=3,
+            )
+        else:
+            correction_df = pd.Dataframe(columns=columns)
         if len(correction_df) > 0:
             correction_df.set_index("report_id", inplace=True, drop=False)
             try:
@@ -239,7 +242,6 @@ for table in cdm.properties.cdm_tables:
         monthly_periods.append(source_mon_period)
     table_df["monthly_period"].fillna(source_mon_period, inplace=True)
     table_df.set_index("monthly_period", inplace=True, drop=True)
-
     len_df = len(table_df)
     if source_mon_period in monthly_periods:
         logging.info(
