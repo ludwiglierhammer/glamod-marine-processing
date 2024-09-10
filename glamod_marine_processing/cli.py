@@ -279,10 +279,10 @@ class Options:
             help="List of decks to process. Take default from level configuration file.",
         )
         self.year_init = click.option(
-            "year_i", "--year_init", help="Initial release period year."
+            "-year_i", "--year_init", help="Initial release period year."
         )
         self.year_end = click.option(
-            "year_e", "--year_end", help="End release period year."
+            "-year_e", "--year_end", help="End release period year."
         )
 
 
