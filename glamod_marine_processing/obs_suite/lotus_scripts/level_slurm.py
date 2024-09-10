@@ -125,8 +125,8 @@ logging.info(f"Process deck list: {process_list}")
 check_file_exist([release_periods_file])
 release_periods = load_json(release_periods_file)
 
-if script_config["year_end"]:
-    release_periods["year_end"] = script_config["year_end"]
+if script_config["year_init"]:
+    release_periods["year_init"] = script_config["year_init"]
 if script_config["year_end"]:
     release_periods["year_end"] = script_config["year_end"]
 
