@@ -4,8 +4,5 @@
   "job_memo_mb": 4000,
   "job_time_hr": "00",
   "job_time_min": "30",
-  "md_model": "null",
-  "md_subdir": "null",
-  "md_first_yr_avail": "null",
-  "md_last_yr_avail": "null"
+  "md_not_avail": true
 }
