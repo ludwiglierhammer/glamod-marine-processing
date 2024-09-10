@@ -8,6 +8,8 @@ cdm = f"{deck}_2022-01-01_subset"
 suffix = "imma"
 level0 = f"{input_dir}/input/{cdm}.{suffix}"
 process_list = "114-992"
+year_init = "2020"
+year_end = "2025"
 
 table_names = [
     "header",
