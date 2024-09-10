@@ -26,6 +26,8 @@ def ObsCli(
     update,
     dataset,
     process_list,
+    year_init,
+    year_end,
     source_pattern,
     prev_file_id,
     data_directory,
@@ -75,6 +77,8 @@ def ObsCli(
     if isinstance(process_list, str):
         process_list = [process_list]
     level_config["process_list"] = process_list
+    level_config["year_init"] = year_init
+    level_config["year_end"] = year_end
     if source_pattern:
         level_config["source_pattern"] = source_pattern
     if prev_file_id:

@@ -125,6 +125,11 @@ logging.info(f"Process deck list: {process_list}")
 check_file_exist([release_periods_file])
 release_periods = load_json(release_periods_file)
 
+if script_config["year_end"]:
+    release_periods["year_end"] = script_config["year_end"]
+if script_config["year_end"]:
+    release_periods["year_end"] = script_config["year_end"]
+
 # Optionally, add CMD add file
 add_file = os.path.join(config_files_path, f"{LEVEL}_cmd_add.json")
 if os.path.isfile(add_file):

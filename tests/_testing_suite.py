@@ -48,12 +48,13 @@ def _obs_testing(dataset, level, capsys):
         f"-data_dir ./T{level} "
         f"-work_dir ./T{level} "
         f"-sp {_settings.pattern[level]} "
-        f" -p_id subset "
+        f"-p_id subset "
+        f"-year_i {_settings.year_init} "
+        f"-year_e {_settings.year_end} "
         f"-p_list {_settings.process_list} "
         "-o "
         "-run"
     )
-
     os.system(s)
     captured = capsys.readouterr()
     assert captured.out == ""
@@ -68,6 +69,7 @@ def _obs_testing(dataset, level, capsys):
             cache_dir=f"./E{level}/{dataset}/{level}/{_settings.deck}",
             within_drs=False,
         )
+
     expected = read_tables(
         f"./E{level}/{dataset}/{level}/{_settings.deck}", cdm_subset=tables
     )
