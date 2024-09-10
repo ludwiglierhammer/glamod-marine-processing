@@ -369,6 +369,10 @@ process_options = [
 ]
 params = script_setup(process_options, args, "level1e", "level1d")
 
+if params.config.get("year_init"):
+    setattr(params, "qc_first_date_avail", f"{params.config.get('year_init')}-01")
+if params.config.get("year_end"):
+    setattr(params, "qc_last_date_avail", f"{params.config.get('year_end')}-12")
 qc_path = os.path.join(params.data_path, params.release, "metoffice_qc", "base")
 
 # Check we have all the dirs!
@@ -398,8 +402,8 @@ if not os.path.isfile(qc_pos_filename):
         )
         logging.warning("level1e data will be created with no merging")
     else:
-        logging.error(f"POSITION QC file not found: {qc_pos_filename}")
-        sys.exit(1)
+        logging.warning(f"POSITION QC file not found: {qc_pos_filename}")
+        qc_avail = False
 
 # Do some additional checks before clicking go, do we have a valid header?
 header_filename = params.filename
