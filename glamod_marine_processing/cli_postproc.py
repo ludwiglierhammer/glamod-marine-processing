@@ -52,13 +52,11 @@ def PostProcCli(
 
     future_deck = open_deck_list_file(p.config_files_path, f"{level}.json")
     prev_deck_list = open_deck_list_file(p.config_files_path, f"{prev_level}.json")
-    prev_deck_list = ["1410001"]
-    dataset = "C-RAID_1.2"
     input_dir = os.path.join(p.data_directory, release, dataset, "level1a")
-    future_deck = ["202404"]
-    for f_deck in future_deck:
-        output_dir = os.path.join(p.data_directory, release, dataset, "level1a", f_deck)
-        mkdir(output_dir)
+    output_dir = os.path.join(
+        p.data_directory, release, dataset, "level1a", future_deck
+    )
+    mkdir(output_dir)
 
     post_processing(
         idir=input_dir,
