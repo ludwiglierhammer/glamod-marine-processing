@@ -462,12 +462,12 @@ if qc_avail:
 if qc_avail:
     qc_df = add_report_quality(qc_df)
 
-pass_time = None    
+pass_time = None
 if params.no_qc_suite:
     qc_avail = True
     qc_df["report_quality"] = header_df["report_quality"]
     pass_time = header_df["report_time_quality"]
-   
+
 # 2. APPLY FLAGS, LOOP THROUGH TABLES -----------------------------------------
 
 # Test new things with 090-221. See 1984-03. What happens if not POS flags matching?
