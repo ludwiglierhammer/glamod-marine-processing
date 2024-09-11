@@ -6,11 +6,11 @@ Post-Processing Command Line Interface module
 
 from __future__ import annotations
 
+import json
 import os
 from types import SimpleNamespace
 
 import click
-import json
 
 from .cli import CONTEXT_SETTINGS, Cli, add_options
 from .post_processing import post_processing
@@ -49,7 +49,7 @@ def PostProcCli(
         suite="obs_suite",
     ).initialize()
     p = SimpleNamespace(**config["paths"])
-    
+
     future_deck = open_deck_list_file(p.config_files_path, f"{level}.json")
     prev_deck_list = open_deck_list_file(p.config_files_path, f"{prev_level}.json")
     prev_deck_list = ["1410001"]
