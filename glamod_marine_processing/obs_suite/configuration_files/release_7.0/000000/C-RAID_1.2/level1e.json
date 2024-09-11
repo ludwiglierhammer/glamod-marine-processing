@@ -6,5 +6,6 @@
   "job_time_min": "59",
   "qc_first_date_avail": "2015-01",
   "qc_last_date_avail": "2024-08",
-  "history_explain": "Position, tracking and parameter QC flags added"
+  "history_explain": "Position, tracking and parameter QC flags added",
+  "no_qc_suite": true
 }

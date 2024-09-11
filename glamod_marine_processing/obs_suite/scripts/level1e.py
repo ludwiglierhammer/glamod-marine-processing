@@ -366,6 +366,7 @@ process_options = [
     "history_explain",
     "qc_first_date_avail",
     "qc_last_date_avail",
+    "no_qc_suite",
 ]
 params = script_setup(process_options, args, "level1e", "level1d")
 
@@ -459,6 +460,9 @@ if qc_avail:
 
 if qc_avail:
     qc_df = add_report_quality(qc_df)
+
+if params.no_qc_suite:
+    qc_avail = True
 
 # 2. APPLY FLAGS, LOOP THROUGH TABLES -----------------------------------------
 
