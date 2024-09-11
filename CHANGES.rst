@@ -12,11 +12,17 @@ New features and enhancements
 * add quality checks for both Wind speed and wind direction in level1e script (:issue:`20`, :pull:`22`)
 * add pre-processing for ICOADS data (:pull:`24`)
 * add post processing for C-RAID level1a data (:pull:`26`)
+* ``obs_suite``: optionally, set list of decks to process (:pul:`25`)
+* ``obs_suite``: optionally, set both release period init and end year (:pull:`25`)
+* ``obs_suite``: configuration files for C-RAID (:pull:`25`)
+* ``obs_suite``: running with C-RAID data (:pull:`25`)
 
 Breaking changes
 ^^^^^^^^^^^^^^^^
 * delete metadata suite, config suite and not-used scripts/modules (:issue:`14`, :pull:`16`)
 * adjust ``obs_suite`` to ``cdm_reader_mapper`` version ``v0.4.0`` (yet unpublished) (:pull:`21`)
+* ``obs_suite``: date information is NOT mandatory in filenames anymore (:pull:`25`)
+* ``obs_suite``: pass tables if no correction or quality control file are available (:pull:`25`)
 
 Bug fixes
 ^^^^^^^^^

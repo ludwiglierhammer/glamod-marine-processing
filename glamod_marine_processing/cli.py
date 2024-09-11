@@ -273,6 +273,17 @@ class Options:
             "--external_qc_files",
             help="Path to external QC files. Default: <data_directory>/external_files.",
         )
+        self.process_list = click.option(
+            "-p_list",
+            "--process_list",
+            help="List of decks to process. Take default from level configuration file.",
+        )
+        self.year_init = click.option(
+            "-year_i", "--year_init", help="Initial release period year."
+        )
+        self.year_end = click.option(
+            "-year_e", "--year_end", help="End release period year."
+        )
 
 
 Options = Options()

@@ -20,7 +20,7 @@ config_files = {
     "meluxina": "config_meluxina.json",
 }
 
-PERIODS_FILE = "source_deck_periods.json"
+DECK_FILE = "source_deck_list.txt"
 level_subdirs = {
     "level1a": ["log", "quicklooks", "invalid", "excluded"],
     "level1b": ["log", "quicklooks"],
@@ -52,14 +52,13 @@ def make_release_source_tree(
     # Go --------------------------------------------------------------------------
     os.umask(0)
     # READ LIST OF SID-DCKS FOR RELEASE
-    release_periods_file = os.path.join(
-        config_path, release, update, dataset, PERIODS_FILE
-    )
-    if not os.path.isfile(release_periods_file):
-        warn(f"{release_periods_file} not available. Skip making release source tree.")
+    deck_file = os.path.join(config_path, release, update, dataset, DECK_FILE)
+    if not os.path.isfile(deck_file):
+        warn(f"{deck_file} not available. Skip making release source tree.")
         return
 
-    sid_dck_dict = load_json(release_periods_file)
+    with open(deck_file) as f:
+        deck_list = f.read().splitlines()
 
     level_subdirs_ = level_subdirs[level]
     level_subdirs_.extend(".")
@@ -69,7 +68,7 @@ def make_release_source_tree(
     source_path = os.path.join(release_path, dataset)
     level_subdir = os.path.join(source_path, level)
     for sublevel in level_subdirs_:
-        create_subdir(os.path.join(level_subdir, sublevel), sid_dck_dict.keys())
+        create_subdir(os.path.join(level_subdir, sublevel), deck_list)
 
 
 def add_to_config(config, key=None, **kwargs):

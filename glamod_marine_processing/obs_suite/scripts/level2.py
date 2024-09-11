@@ -95,33 +95,41 @@ paths_exist([params.level_excluded_path, params.level_reports_path])
 # -----------------------------------------------------------------------------
 cdm_tables = cdm.load_tables()
 obs_tables = [x for x in cdm_tables if x != "header"]
+
 with open(params.level2_list) as fileObj:
     include_list = json.load(fileObj)
 
 if not include_list.get(params.sid_dck):
-    logging.error(
+    logging.warning(
         f"sid-dck {params.sid_dck} not registered in level2 list {params.level2_list}"
     )
-    sys.exit(1)
+    year_init = int(include_list.get("year_init"))
+    year_end = int(include_list.get("year_end"))
+else:
+    # See if global release period has been changed for level 2 and apply to sid-dck
+    # For some strange reason the years are strings in the periods files...
+    year_init = int(include_list[params.sid_dck].get("year_init"))
+    year_end = int(include_list[params.sid_dck].get("year_end"))
 
-
-# See if global release period has been changed for level 2 and apply to sid-dck
-# For some strange reason the years are strings in the periods files...
-year_init = int(include_list.get(params.sid_dck, {}).get("year_init"))
-year_end = int(include_list.get(params.sid_dck, {}).get("year_end"))
-
-init_global = include_list.get("year_init")
-end_global = include_list.get("year_end")
+init_global = int(include_list.get("year_init"))
+end_global = int(include_list.get("year_end"))
 
 if init_global:
     year_init = year_init if year_init >= int(init_global) else int(init_global)
 if end_global:
     year_end = year_end if year_end <= int(end_global) else int(end_global)
 
+if params.config.get("year_init"):
+    year_init = int(params.config.get("year_init"))
+if params.config.get("year_end"):
+    year_end = int(params.config.get("year_end"))
+
 exclude_sid_dck = include_list.get(params.sid_dck, {}).get("exclude")
 
-exclude_param_global_list = include_list.get("params_exclude")
-exclude_param_sid_dck_list = include_list.get(params.sid_dck, {}).get("params_exclude")
+exclude_param_global_list = include_list.get("params_exclude", [])
+exclude_param_sid_dck_list = include_list.get(params.sid_dck, {}).get(
+    "params_exclude", []
+)
 
 exclude_param_list = list(set(exclude_param_global_list + exclude_param_sid_dck_list))
 include_param_list = [x for x in obs_tables if x not in exclude_param_list]
@@ -132,7 +140,6 @@ if not exclude_sid_dck and len(include_param_list) == 0:
         f"sid-dck {params.sid_dck} is to be included, but include parameter list is empty"
     )
     sys.exit(1)
-
 try:
     include_param_list.append("header")
     if exclude_sid_dck:
@@ -148,7 +155,6 @@ try:
                 pattern = os.path.join(
                     params.prev_level_path, f"{table}-*{str(year)}-??-*.psv"
                 )
-                logging.warning(pattern)
                 copyfiles(pattern, params.level_path, mode="included")
 
         # Send out of release period to excluded

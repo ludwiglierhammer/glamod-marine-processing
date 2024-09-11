@@ -21,7 +21,7 @@ from glamod_marine_processing.utilities import load_json, read_txt
 
 
 # %%------------------------------------------------------------------------------
-def check_file_exit(files):
+def check_file_exist(files):
     """Check whether file exists."""
     files = [files] if not isinstance(files, list) else files
     for filei in files:
@@ -73,8 +73,17 @@ logging.basicConfig(
 
 # Get process coordinates and build paths -------------------------------------
 script_config_file = sys.argv[1]
-check_file_exit([script_config_file])
+check_file_exist([script_config_file])
 script_config = load_json(script_config_file)
+
+release = script_config["abbreviations"]["release"]
+update = script_config["abbreviations"]["update"]
+dataset = script_config["abbreviations"]["dataset"]
+config_files_path = script_config["paths"]["config_files_path"]
+release_periods_file = script_config["release_periods_file"]
+release_periods_file = os.path.join(config_files_path, release_periods_file)
+
+args = parser.get_parser_args()
 
 LEVEL = script_config["level"]
 LEVEL_SOURCE = slurm_preferences.level_source[LEVEL]
@@ -82,20 +91,13 @@ if "source_pattern" in script_config.keys():
     SOURCE_PATTERN = script_config["source_pattern"]
 else:
     SOURCE_PATTERN = slurm_preferences.source_pattern[LEVEL]
+
+if isinstance(SOURCE_PATTERN, dict):
+    SOURCE_PATTERN = SOURCE_PATTERN[dataset]
+
 PYSCRIPT = f"{LEVEL}.py"
 MACHINE = script_config["scripts"]["machine"].lower()
 overwrite = script_config["overwrite"]
-
-release = script_config["abbreviations"]["release"]
-update = script_config["abbreviations"]["update"]
-dataset = script_config["abbreviations"]["dataset"]
-config_files_path = script_config["paths"]["config_files_path"]
-process_list_file = script_config["process_list_file"]
-process_list_file = os.path.join(config_files_path, process_list_file)
-release_periods_file = script_config["release_periods_file"]
-release_periods_file = os.path.join(config_files_path, release_periods_file)
-
-args = parser.get_parser_args()
 
 # Get lotus paths
 lotus_dir = script_config["paths"]["lotus_scripts_directory"]
@@ -109,16 +111,24 @@ level_source = source_dataset(LEVEL, release)
 level_source_dir = os.path.join(data_dir, level_source, dataset, LEVEL_SOURCE)
 log_dir = os.path.join(level_dir, "log")
 
-# Check paths
-check_file_exit([release_periods_file, process_list_file])
-# check_dir_exit([level_dir, level_source_dir, log_dir])
+# Get further configuration -----------------------------------------------------------
+if script_config["process_list"]:
+    process_list = script_config["process_list"]
+else:
+    process_list_file = script_config["process_list_file"]
+    process_list_file = os.path.join(config_files_path, process_list_file)
+    check_file_exist([process_list_file])
+    process_list = read_txt(process_list_file)
 
 logging.info(f"Periods file used: {release_periods_file}")
-logging.info(f"Deck list file used: {process_list_file}")
-
-# Get further configuration -----------------------------------------------------------
-process_list = read_txt(process_list_file)
+logging.info(f"Process deck list: {process_list}")
+check_file_exist([release_periods_file])
 release_periods = load_json(release_periods_file)
+
+if script_config["year_init"]:
+    release_periods["year_init"] = script_config["year_init"]
+if script_config["year_end"]:
+    release_periods["year_end"] = script_config["year_end"]
 
 # Optionally, add CMD add file
 add_file = os.path.join(config_files_path, f"{LEVEL}_cmd_add.json")

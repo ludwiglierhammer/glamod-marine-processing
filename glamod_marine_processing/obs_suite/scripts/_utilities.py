@@ -22,6 +22,12 @@ add_data_paths = {
     "level2": ["level_excluded_path", "level_reports_path"],
 }
 
+chunksizes = {
+    "C-RAID_1.2": None,
+    "ICOADS_R3.0.2T": 200000,
+    "ICOADS_R3.0.0T": 200000,
+}
+
 
 # Functions--------------------------------------------------------------------
 class script_setup:
@@ -36,7 +42,7 @@ class script_setup:
 
         try:
             with open(self.configfile) as fileObj:
-                config = json.load(fileObj)
+                self.config = json.load(fileObj)
         except Exception:
             logging.error(
                 f"Opening configuration file :{self.configfile}", exc_info=True
@@ -53,19 +59,22 @@ class script_setup:
             self.year = inargs[7]
             self.month = inargs[8]
         else:
-            self.sid_dck = config.get("sid_dck")
-            self.year = config.get("yyyy")
-            self.month = config.get("mm")
+            self.sid_dck = self.config.get("sid_dck")
+            self.year = self.config.get("yyyy")
+            self.month = self.config.get("mm")
 
-        self.dck = self.sid_dck.split("-")[1]
-        self.corrections = config.get("corrections")
+        if "-" in self.sid_dck:
+            self.dck = self.sid_dck.split("-")[1]
+        else:
+            self.dck = self.sid_dck
+        self.corrections = self.config.get("corrections")
 
         try:
             for opt in process_options:
-                if not config.get(self.sid_dck, {}).get(opt):
-                    setattr(self, opt, config.get(opt))
+                if not self.config.get(self.sid_dck, {}).get(opt):
+                    setattr(self, opt, self.config.get(opt))
                 else:
-                    setattr(self, opt, config.get(self.sid_dck).get(opt))
+                    setattr(self, opt, self.config.get(self.sid_dck).get(opt))
             self.flag = True
         except Exception:
             logging.error(
@@ -73,9 +82,9 @@ class script_setup:
             )
             self.flag = False
 
-        self.filename = config.get("filename")
-        self.level2_list = config.get("cmd_add_file")
-        self.prev_fileID = config.get("prev_fileID")
+        self.filename = self.config.get("filename")
+        self.level2_list = self.config.get("cmd_add_file")
+        self.prev_fileID = self.config.get("prev_fileID")
         self.release_path = os.path.join(self.data_path, self.release, self.dataset)
         self.release_id = FFS.join([self.release, self.update])
         self.fileID = FFS.join(

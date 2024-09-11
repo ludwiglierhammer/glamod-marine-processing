@@ -66,7 +66,7 @@ from io import StringIO
 import numpy as np
 import pandas as pd
 import simplejson
-from _utilities import FFS, date_handler, script_setup
+from _utilities import FFS, chunksizes, date_handler, script_setup
 from cdm_reader_mapper import cdm_mapper as cdm
 from cdm_reader_mapper import mdf_reader, metmetpy
 from cdm_reader_mapper.common import pandas_TextParser_hdlr
@@ -115,8 +115,6 @@ if not params.flag:
     logging.error("Error parsing initial configuration")
     sys.exit(1)
 
-correction_path = os.path.join(params.data_path, params.release, params.corrections)
-
 L0_filename = os.path.join(params.prev_level_path, params.filename)
 if not os.path.isfile(L0_filename):
     logging.error(f"Could not find data input file: {L0_filename}")
@@ -129,14 +127,13 @@ io_dict = {}
 
 # 1. Read input file to dataframe
 logging.info("Reading dataset data")
-
+chunksize = chunksizes[params.dataset]
 read_kwargs = {
     "data_model": params.data_model,
     "sections": params.read_sections,
-    "chunksize": 200000,
+    "chunksize": chunksize,
 }
 data_in = mdf_reader.read(L0_filename, **read_kwargs)
-logging.info(data_in.data)
 io_dict["read"] = {"total": inspect.get_length(data_in.data)}
 
 # 2. PT fixing, filtering and invalid rejectionselect_true
@@ -154,7 +151,7 @@ data_in.data = metmetpy.correct_pt.correct(
 )
 
 # 2.2. Apply record selection (filter by) criteria: PT types.....
-if hasattr(params, "filter_reports_by"):
+if params.filter_reports_by:
     logging.info("Applying selection filters")
     io_dict["not_selected"] = {}
     data_excluded = {}
@@ -190,19 +187,22 @@ io_dict["pre_selected"] = {"total": inspect.get_length(data_in.data)}
 # First create a global mask and count failure occurrences
 newmask_buffer = StringIO()
 logging.info("Removing invalid data")
-for data, mask in zip(data_in.data, data_in.mask):
+if chunksize:
+    zipped = zip(data_in.data, data_in.mask)
+else:
+    zipped = zip([data_in.data], [data_in.mask])
+for data, mask in zipped:
     mask["global_mask"] = mask.all(axis=1)
     mask.to_csv(newmask_buffer, header=False, mode="a", encoding="utf-8", index=False)
 
     # 2.3.2. Invalid reports counts and values
     # Initialize counters if first chunk
-    masked_columns = [
-        x for x in mask if not all(mask[x].isna()) and x != ("global_mask", "")
-    ]
+    masked_columns = [x for x in mask if not all(mask[x].isna()) and x != "global_mask"]
     if not io_dict.get("invalid"):
         io_dict["invalid"] = {
             ".".join(k): {"total": 0, "values": []} for k in masked_columns
         }
+
     for col in masked_columns:
         k = ".".join(col)
         io_dict["invalid"][k]["total"] += len(mask[col].loc[~mask[col]])
@@ -210,13 +210,12 @@ for data, mask in zip(data_in.data, data_in.mask):
             io_dict["invalid"][k]["values"].extend(data[col].loc[~mask[col]].values)
 
 newmask_buffer.seek(0)
-chunksize = (
-    None
-    if isinstance(data_in.mask, pd.DataFrame)
-    else data_in.mask.orig_options["chunksize"]
-)
-data_in.mask = pd.read_csv(newmask_buffer, names=[x for x in mask], chunksize=chunksize)
-data_in.data = pandas_TextParser_hdlr.restore(data_in.data)
+if chunksize:
+    data_in.mask = pd.read_csv(
+        newmask_buffer, names=[x for x in mask], chunksize=chunksize
+    )
+    data_in.data = pandas_TextParser_hdlr.restore(data_in.data)
+
 # Now see what fails
 for col in masked_columns:
     k = ".".join(col)
@@ -227,7 +226,11 @@ for col in masked_columns:
             if np.nan in ivalues:
                 ivalues.remove(np.nan)
                 ivalues.sort()
-                ivalues.append(np.nan)
+                ivalues.append(str(np.nan))
+            elif pd.NaT in ivalues:
+                ivalues.remove(pd.NaT)
+                ivalues.sort()
+                ivalues.append(str(pd.NaT))
             else:
                 ivalues.sort()
             io_dict["invalid"][k].update(
@@ -293,7 +296,7 @@ if process:
     io_dict.update({table: {} for table in tables})
     mapping = params.cdm_map
     logging.debug(f"Mapping attributes: {data_in.attrs}")
-    cdm_tables = cdm.map_model(mapping, data_in.data, data_in.attrs, log_level="INFO")
+    cdm_tables = cdm.map_model(mapping, data_in.data, log_level="INFO")
 
     logging.info("Printing tables to psv files")
     cdm.cdm_to_ascii(
@@ -310,9 +313,12 @@ if process:
 io_dict["date processed"] = datetime.datetime.now()
 logging.info("Saving json quicklook")
 L1a_io_filename = os.path.join(params.level_ql_path, params.fileID + ".json")
+if isinstance(params.year, str):
+    io_dict = {"-".join([params.year, params.month]): io_dict}
+
 with open(L1a_io_filename, "w") as fileObj:
     simplejson.dump(
-        {"-".join([params.year, params.month]): io_dict},
+        io_dict,
         fileObj,
         default=date_handler,
         indent=4,
@@ -320,7 +326,7 @@ with open(L1a_io_filename, "w") as fileObj:
     )
 
 # Output exluded and invalid ---------------------------------------------
-if hasattr(params, "filter_reports_by"):
+if params.filter_reports_by:
     for k, v in data_excluded["data"].items():
         if inspect.get_length(data_excluded["data"][k]) > 0:
             excluded_filename = os.path.join(
