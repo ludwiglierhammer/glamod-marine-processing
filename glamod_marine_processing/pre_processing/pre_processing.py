@@ -162,6 +162,7 @@ def pre_processing(
     overwrite=False,
 ):
     """Split ICOADS data into monthly deck files.
+    Use this function to create obs_suite level0 data.
 
     Parameters
     ----------
