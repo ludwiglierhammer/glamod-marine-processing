@@ -169,6 +169,10 @@ def pre_processing(
         Input data directory
     odir: str
         Output data directory
+    dataset: str, default: ICOADS_R3.0.2T
+        Name of input dataset.
+    source_pattern: str, default: IMMA1_R3.0.*
+        Input source pattern.
     overwrite: bool
         If True, overwrite already existing files.
     """
