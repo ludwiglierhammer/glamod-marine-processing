@@ -2,9 +2,7 @@
 
 from __future__ import annotations
 
-import csv
 import glob
-import json
 import os
 from pathlib import Path
 
@@ -24,6 +22,7 @@ def get_outfile_name(basepath, tag, dataset, year, month):
 
 
 def get_year_month(df, time_axis):
+    """Group dataframe by year-month."""
     dates = df[time_axis]
     dates_pd = pd.DatetimeIndex(dates)
     return dates_pd.to_period("M")

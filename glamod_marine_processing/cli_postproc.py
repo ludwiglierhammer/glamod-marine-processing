@@ -6,7 +6,6 @@ Post-Processing Command Line Interface module
 
 from __future__ import annotations
 
-import json
 import os
 from types import SimpleNamespace
 
@@ -18,6 +17,7 @@ from .utilities import load_json, mkdir, read_txt
 
 
 def open_deck_list_file(config_files_path, level_config_file):
+    """Open Deck list file from config file."""
     level_config_file = os.path.join(config_files_path, level_config_file)
     level_config = load_json(level_config_file)
     deck_list_file = level_config["process_list_file"]
