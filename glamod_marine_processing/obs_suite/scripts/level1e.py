@@ -217,10 +217,11 @@ def compare_quality_checks(df):
     return df
 
 
-# This is to apply the qc flags and write out fllgged tables
-def process_table(table_df, table_name):
+# This is to apply the qc flags and write out flagged tables
+def process_table(table_df, table_name, pass_time=None):
     """Process table."""
-    pass_time = "2"
+    if pass_time is None:
+        pass_time = "2"
     not_checked_report = "2"
     not_checked_location = "3"
     not_checked_param = "2"
@@ -366,9 +367,14 @@ process_options = [
     "history_explain",
     "qc_first_date_avail",
     "qc_last_date_avail",
+    "no_qc_suite",
 ]
 params = script_setup(process_options, args, "level1e", "level1d")
 
+if params.config.get("year_init"):
+    setattr(params, "qc_first_date_avail", f"{params.config.get('year_init')}-01")
+if params.config.get("year_end"):
+    setattr(params, "qc_last_date_avail", f"{params.config.get('year_end')}-12")
 qc_path = os.path.join(params.data_path, params.release, "metoffice_qc", "base")
 
 # Check we have all the dirs!
@@ -398,8 +404,8 @@ if not os.path.isfile(qc_pos_filename):
         )
         logging.warning("level1e data will be created with no merging")
     else:
-        logging.error(f"POSITION QC file not found: {qc_pos_filename}")
-        sys.exit(1)
+        logging.warning(f"POSITION QC file not found: {qc_pos_filename}")
+        qc_avail = False
 
 # Do some additional checks before clicking go, do we have a valid header?
 header_filename = params.filename
@@ -439,9 +445,9 @@ qc_dict = {}
 # AND CREATE A DF WITH THE UNIQUE FLAGS PER QC AND HAVE IT INDEXED TO FULL CDM
 # TABLE (ALL REPORTS)
 # ALSO BUILD FROM FULL QC FLAGS SET THE REPORT_QUALITY FLAG
+qc_list = list({table_qc.get(table).get("qc") for table in tables_in})
+qc_df = pd.DataFrame(index=header_df.index, columns=qc_list)
 if qc_avail:
-    qc_list = list({table_qc.get(table).get("qc") for table in tables_in})
-    qc_df = pd.DataFrame(index=header_df.index, columns=qc_list)
     # Make sure POS is first as we need it to process the rest!
     # The use of POS in other QCs is probably a need inherited from BetaRelease,
     # where param qc was merged with POS QC. Now we don't do that, so I am quite
@@ -456,6 +462,12 @@ if qc_avail:
 if qc_avail:
     qc_df = add_report_quality(qc_df)
 
+pass_time = None
+if params.no_qc_suite:
+    qc_avail = True
+    qc_df["report_quality"] = header_df["report_quality"]
+    pass_time = header_df["report_time_quality"]
+
 # 2. APPLY FLAGS, LOOP THROUGH TABLES -----------------------------------------
 
 # Test new things with 090-221. See 1984-03. What happens if not POS flags matching?
@@ -469,11 +481,11 @@ location_quality = header_df["location_quality"].copy()
 report_time_quality = header_df["report_time_quality"].copy()
 
 flag = True if qc_avail else False
-process_table(header_df, "header")
+process_table(header_df, "header", pass_time=pass_time)
 
 for table in obs_tables:
     flag = True if table in tables_in and qc_avail else False
-    process_table(table, table)
+    process_table(table, table, pass_time=pass_time)
 
 # 3 wind QC
 table_wd = cdm.read_tables(

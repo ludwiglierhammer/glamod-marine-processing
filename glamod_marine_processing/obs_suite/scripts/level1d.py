@@ -209,9 +209,8 @@ if md_avail:
     )
 
     if not os.path.isfile(metadata_filename):
-        if (
-            int(params.year) > params.md_last_yr_avail
-            or int(params.year) < params.md_first_yr_avail
+        if int(params.year) > int(params.md_last_yr_avail) or int(params.year) < int(
+            params.md_first_yr_avail
         ):
             md_avail = False
             logging.warning(

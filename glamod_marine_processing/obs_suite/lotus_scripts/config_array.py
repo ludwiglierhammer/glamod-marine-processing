@@ -42,8 +42,8 @@ def get_yyyymm(filename):
     """Extract date from filename."""
     yyyy_mm = re.search(DATE_REGEX, os.path.basename(filename))
     if not (yyyy_mm):
-        logging.error(f"Could not extract date from filename {filename}")
-        sys.exit(1)
+        logging.warning(f"Could not extract date from filename {filename}")
+        return (None, None)
     return yyyy_mm.group().split("-")
 
 
@@ -66,15 +66,20 @@ def clean_ok_logs(
         logging.info(f"Removing previous {len(ok_files)} logs")
         for x in ok_files:
             os.remove(x)
+
     for source_file in source_files:
         yyyy, mm = get_yyyymm(source_file)
-        if int(yyyy) >= year_init and int(yyyy) <= year_end:
-            config_element(sid_dck_log_dir, ai, config, sid_dck, yyyy, mm, source_file)
-            ai += 1
+        add = False
+        if not all((yyyy, mm)):
+            add = True
+        elif int(yyyy) >= year_init and int(yyyy) <= year_end:
+            add = True
         elif (int(yyyy) == year_init - 1 and int(mm) == 12) or (
             int(yyyy) == year_end + 1 and int(mm) == 1
         ):
-            # include one month before and one after period to allow for qc within period
+            add = True
+
+        if add is True:
             config_element(sid_dck_log_dir, ai, config, sid_dck, yyyy, mm, source_file)
             ai += 1
 
@@ -129,6 +134,12 @@ def clean_previous_ok_logs(
     failed_only,
 ):
     """Make sure there are no previous input files."""
+
+    def get_year(periods, sid_dck, yr_str):
+        if sid_dck in periods.keys():
+            return periods[sid_dck].get(yr_str)
+        return periods.get(yr_str)
+
     # logging.info('Configuring data partition: {}'.format(sid_dck))
     sid_dck_log_dir = os.path.join(log_dir, sid_dck)
     mkdir(sid_dck_log_dir)
@@ -143,8 +154,8 @@ def clean_previous_ok_logs(
         logging.error(f"Data partition log directory does not exist: {sid_dck_log_dir}")
         sys.exit(1)
 
-    year_init = release_periods[sid_dck].get("year_init")
-    year_end = release_periods[sid_dck].get("year_end")
+    year_init = int(get_year(release_periods, sid_dck, "year_init"))
+    year_end = int(get_year(release_periods, sid_dck, "year_end"))
     # Make sure there are not previous input files
     ai = 1
     i_files = glob.glob(os.path.join(sid_dck_log_dir, "*.input"))
