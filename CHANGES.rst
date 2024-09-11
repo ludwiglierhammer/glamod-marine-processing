@@ -11,6 +11,7 @@ New features and enhancements
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 * add quality checks for both Wind speed and wind direction in level1e script (:issue:`20`, :pull:`22`)
 * add pre-processing for ICOADS data (:pull:`24`)
+* add post processing for C-RAID level1a data (:pull:`26`)
 
 Breaking changes
 ^^^^^^^^^^^^^^^^
