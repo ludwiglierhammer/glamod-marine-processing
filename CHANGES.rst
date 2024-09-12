@@ -10,6 +10,7 @@ Contributors to this version: Ludwig Lierhammer (:user:`ludwiglierhammer`)
 New features and enhancements
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 * add quality checks for both Wind speed and wind direction in level1e script (:issue:`20`, :pull:`22`)
+* add pre-processing for ICOADS data (:pull:`24`)
 * add post processing for C-RAID level1a data (:pull:`26`)
 * ``obs_suite``: optionally, set list of decks to process (:pul:`25`)
 * ``obs_suite``: optionally, set both release period init and end year (:pull:`25`)

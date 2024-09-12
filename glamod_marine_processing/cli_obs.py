@@ -37,7 +37,7 @@ def ObsCli(
     run_jobs,
     overwrite,
 ):
-    """Enry point for the obs_suite command line interface."""
+    """Entry point for the obs_suite command line interface."""
     config = Cli(
         machine=machine,
         level=level,
