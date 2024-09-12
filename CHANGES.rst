@@ -23,6 +23,7 @@ Breaking changes
 * adjust ``obs_suite`` to ``cdm_reader_mapper`` version ``v0.4.0`` (yet unpublished) (:pull:`21`)
 * ``obs_suite``: date information is NOT mandatory in filenames anymore (:pull:`25`)
 * ``obs_suite``: pass tables if no correction or quality control file are available (:pull:`25`)
+* ``obs_suite``: adjust both process deck lists and processing init/end years to release7.0 requirements (:pull:`27`)
 
 Bug fixes
 ^^^^^^^^^
