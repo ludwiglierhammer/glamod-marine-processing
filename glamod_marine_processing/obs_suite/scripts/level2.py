@@ -93,7 +93,7 @@ paths_exist([params.level_excluded_path, params.level_reports_path])
 
 # DO THE DATA SELECTION -------------------------------------------------------
 # -----------------------------------------------------------------------------
-cdm_tables = cdm.tables.tables.get_cdm_atts(cdm.properties.cdm_tables)
+cdm_tables = cdm.get_cdm_atts()
 obs_tables = [x for x in cdm_tables if x != "header"]
 
 with open(params.level2_list) as fileObj:

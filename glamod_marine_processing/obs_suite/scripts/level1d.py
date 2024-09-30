@@ -231,7 +231,7 @@ meta_dict = {}
 # DO THE DATA PROCESSING ------------------------------------------------------
 # -----------------------------------------------------------------------------
 history_tstmp = datetime.datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S")
-cdm_tables = cdm.tables.tables.get_cdm_atts(cdm.properties.cdm_tables)
+cdm_tables = cdm.get_cdm_atts()
 obs_tables = [x for x in cdm_tables.keys() if x != "header"]
 
 # 1. SEE STATION ID's FROM BOTH DATA STREAMS AND SEE IF THERE'S ANYTHING TO
@@ -274,6 +274,7 @@ if md_avail:
             header=0,
             na_values="MSNG",
         )
+
     if len(meta_df) == 0:
         logging.error("Empty or non-existing metadata file")
         sys.exit(1)
@@ -292,6 +293,7 @@ if md_avail:
 # 2. MAP PUB47 MD TO CDM FIELDS -----------------------------------------------
 if merge:
     logging.info("Mapping metadata to CDM")
+    print(params.md_model)
     meta_cdm = map_to_cdm(params.md_model, meta_df, log_level="DEBUG")
 
 # 3. UPDATE CDM WITH PUB47 OR JUST COPY PREV LEVEL TO CURRENT -----------------

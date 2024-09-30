@@ -251,7 +251,7 @@ dataset_id = "icoads_r3000"
 validated = ["report_timestamp", "primary_station_id"]
 history = "Performed report_timestamp (date_time) and primary_station_id validation"
 history_tstmp = datetime.datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S")
-cdm_tables = cdm.tables.tables.get_cdm_atts(cdm.properties.cdm_tables)
+cdm_tables = cdm.get_cdm_atts()
 
 # 1. READ THE DATA-------------------------------------------------------------
 
