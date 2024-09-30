@@ -1,6 +1,9 @@
 {
   "process_list_file": "source_deck_list.txt",
   "release_periods_file": "source_deck_periods.json",
+  "job_memo_mb": 16000,
+  "job_time_hr": "01",
+  "job_time_min": "30",
   "read_sections": [
     "core",
     "c1",
@@ -17,63 +20,33 @@
     ]
   },
   "103-792": {
-    "job_memo_mb": 16000,
-    "job_time_hr": "01",
-    "job_time_min": "30",
     "data_model": "icoads_r302_d792"
   },
   "103-793": {
-    "job_memo_mb": 16000,
-    "job_time_hr": "01",
-    "job_time_min": "30",
     "data_model": "icoads_r302_d793"
   },
   "103-794": {
-    "job_memo_mb": 16000,
-    "job_time_hr": "01",
-    "job_time_min": "30",
     "data_model": "icoads_r302_d794"
   },
   "103-795": {
-    "job_memo_mb": 16000,
-    "job_time_hr": "01",
-    "job_time_min": "30",
     "data_model": "icoads_r302_d795"
   },
   "103-797": {
-    "job_memo_mb": 16000,
-    "job_time_hr": "01",
-    "job_time_min": "30",
     "data_model": "icoads_r302_d797"
   },
   "114-992": {
-    "job_memo_mb": 13500,
-    "job_time_hr": "01",
-    "job_time_min": "00",
     "data_model": "icoads_r302_d992"
   },
   "114-993": {
-    "job_memo_mb": 13500,
-    "job_time_hr": "00",
-    "job_time_min": "30",
     "data_model": "icoads_r302_d993"
   },
   "114-994": {
-    "job_memo_mb": 13500,
-    "job_time_hr": "00",
-    "job_time_min": "30",
     "data_model": "icoads_r302_d994"
   },
   "114-995": {
-    "job_memo_mb": 18000,
-    "job_time_hr": "02",
-    "job_time_min": "30",
     "data_model": "icoads_r302_d995"
   },
   "172-798": {
-    "job_memo_mb": 18000,
-    "job_time_hr": "02",
-    "job_time_min": "30",
     "data_model": "icoads_r302_d798"
   }
 }

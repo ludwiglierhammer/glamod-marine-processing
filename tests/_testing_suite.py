@@ -55,6 +55,7 @@ def _obs_testing(dataset, level, capsys):
         "-o "
         "-run"
     )
+
     os.system(s)
     captured = capsys.readouterr()
     assert captured.out == ""
