@@ -2,11 +2,14 @@ from __future__ import annotations
 
 import numpy as np
 
-input_dir = "imma1_992"
-deck = "114-992"
-cdm = f"{deck}_2022-01-01_subset"
+data_model = "icoads"
+release = "r302"
+deck = "d992"
+input_dir = f"{data-model}/{release}/{deck}"
+cdm = f"icoads_{release}_{deck}_2022-01-01_subset"
 suffix = "imma"
 level0 = f"{input_dir}/input/{cdm}.{suffix}"
+
 process_list = "114-992"
 year_init = "2020"
 year_end = "2025"

@@ -2,11 +2,11 @@ from __future__ import annotations
 
 import numpy as np
 
-input_dir = "c_raid"
-deck = "1260810"
-cdm = f"{deck}_2004-12-20_subset"
+data_model = "craid"
+input_dir = data_model
+cdm = f"{data_model}_2004-12-20_subset"
 suffix = "nc"
-level0 = f"{input_dir}/input/{cdm}.{suffix}"
+level0 = f"{data_model}/input/{cdm}.{suffix}"
 process_list = "1260810"
 year_init = "2000"
 year_end = "2010"
