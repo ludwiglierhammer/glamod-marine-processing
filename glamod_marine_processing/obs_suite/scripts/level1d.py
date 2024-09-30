@@ -293,7 +293,6 @@ if md_avail:
 # 2. MAP PUB47 MD TO CDM FIELDS -----------------------------------------------
 if merge:
     logging.info("Mapping metadata to CDM")
-    print(params.md_model)
     meta_cdm = map_to_cdm(params.md_model, meta_df, log_level="DEBUG")
 
 # 3. UPDATE CDM WITH PUB47 OR JUST COPY PREV LEVEL TO CURRENT -----------------
