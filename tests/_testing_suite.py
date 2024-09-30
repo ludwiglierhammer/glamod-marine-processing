@@ -59,8 +59,7 @@ def _obs_testing(dataset, level, capsys):
     os.system(s)
     captured = capsys.readouterr()
     assert captured.out == ""
-    print(f"./T{level}/release_7.0/{dataset}/{level}/{_settings.process_list}")
-    exit()
+
     results = read_tables(
         f"./T{level}/release_7.0/{dataset}/{level}/{_settings.process_list}",
         cdm_subset=tables,
