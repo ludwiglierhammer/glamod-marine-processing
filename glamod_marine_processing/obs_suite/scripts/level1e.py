@@ -341,7 +341,7 @@ qc_delimiter = ","
 # -----------------------------------------------------------------------------
 
 # Some other parameters -------------------------------------------------------
-cdm_tables = cdm.load_tables()
+cdm_tables = cdm.tables.tables.get_cdm_atts(cdm.properties.cdm_tables)
 obs_tables = [x for x in cdm_tables.keys() if x != "header"]
 
 history_tstmp = datetime.datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S")

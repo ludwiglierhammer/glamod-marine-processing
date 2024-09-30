@@ -231,7 +231,7 @@ meta_dict = {}
 # DO THE DATA PROCESSING ------------------------------------------------------
 # -----------------------------------------------------------------------------
 history_tstmp = datetime.datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S")
-cdm_tables = cdm.load_tables()
+cdm_tables = cdm.tables.tables.get_cdm_atts(cdm.properties.cdm_tables)
 obs_tables = [x for x in cdm_tables.keys() if x != "header"]
 
 # 1. SEE STATION ID's FROM BOTH DATA STREAMS AND SEE IF THERE'S ANYTHING TO

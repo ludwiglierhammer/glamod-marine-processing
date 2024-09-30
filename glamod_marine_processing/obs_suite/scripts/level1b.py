@@ -106,7 +106,7 @@ correction_dict = {table: {} for table in cdm.properties.cdm_tables}
 # Do the data processing ------------------------------------------------------
 isChange = "1"
 dupNotEval = "4"
-cdm_tables = cdm.load_tables()
+cdm_tables = cdm.tables.tables.get_cdm_atts(cdm.properties.cdm_tables)
 
 # 1. Do it a table at a time....
 history_tstmp = datetime.datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S")
