@@ -54,7 +54,7 @@ def PostProcCli(
     prev_deck_list = open_deck_list_file(p.config_files_path, f"{prev_level}.json")
     input_dir = os.path.join(p.data_directory, release, dataset, "level1a")
     output_dir = os.path.join(
-        p.data_directory, release, dataset, "level1a", future_deck
+        p.data_directory, release, dataset, "level1a", future_deck[0],
     )
     mkdir(output_dir)
 
