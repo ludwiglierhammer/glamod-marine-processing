@@ -33,7 +33,7 @@ chunksizes = {
 class script_setup:
     """Create script."""
 
-    def __init__(self, process_options, inargs, level, level_prev):
+    def __init__(self, process_options, inargs, level, level_prev, clean=False):
         self.data_path = inargs[1]
         self.release = inargs[2]
         self.update = inargs[3]
@@ -135,7 +135,9 @@ class script_setup:
             glob.glob(f"{data_path}/**/*", recursive=True)
             for data_path in data_paths[1:]
         ]
-        clean_level(filenames)
+
+        if clean is True:
+            clean_level(filenames)
 
 
 # This is for json to handle dates

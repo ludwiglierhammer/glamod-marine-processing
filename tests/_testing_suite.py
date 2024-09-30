@@ -55,12 +55,14 @@ def _obs_testing(dataset, level, capsys):
         "-o "
         "-run"
     )
+
     os.system(s)
     captured = capsys.readouterr()
     assert captured.out == ""
 
     results = read_tables(
-        f"./T{level}/release_7.0/{dataset}/{level}/{_settings.deck}", cdm_subset=tables
+        f"./T{level}/release_7.0/{dataset}/{level}/{_settings.process_list}",
+        cdm_subset=tables,
     )
 
     for table_name in tables:

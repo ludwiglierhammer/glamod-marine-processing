@@ -54,8 +54,8 @@ def load_input(dataset, level, settings):
     """Load level input data data from cdm-testdata."""
     p_level = settings.prev_level[level]
     leveli = settings.level_input[level]
-    deck = settings.deck
-    cache_dir = f"./T{level}/{leveli}/{dataset}/{p_level}/{deck}"
+    process_list = settings.process_list
+    cache_dir = f"./T{level}/{leveli}/{dataset}/{p_level}/{process_list}"
     if level == "level1a":
         load_level0(cache_dir, settings)
     else:
