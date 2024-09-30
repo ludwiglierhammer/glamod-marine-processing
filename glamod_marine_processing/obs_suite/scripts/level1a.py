@@ -132,7 +132,9 @@ read_kwargs = {
     "sections": params.read_sections,
     "chunksize": chunksize,
 }
+
 data_in = mdf_reader.read(L0_filename, **read_kwargs)
+
 io_dict["read"] = {"total": inspect.get_length(data_in.data)}
 
 # 2. PT fixing, filtering and invalid rejectionselect_true
