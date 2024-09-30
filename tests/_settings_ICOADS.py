@@ -5,7 +5,7 @@ import numpy as np
 data_model = "icoads"
 release = "r302"
 deck = "d992"
-input_dir = f"{data-model}/{release}/{deck}"
+input_dir = f"{data_model}/{release}/{deck}"
 cdm = f"icoads_{release}_{deck}_2022-01-01_subset"
 suffix = "imma"
 level0 = f"{input_dir}/input/{cdm}.{suffix}"
