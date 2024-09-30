@@ -107,7 +107,6 @@ process_options = [
     "data_model",
     "read_sections",
     "filter_reports_by",
-    "cdm_map",
 ]
 params = script_setup(process_options, args, "level1a", "level0")
 
@@ -129,7 +128,7 @@ io_dict = {}
 logging.info("Reading dataset data")
 chunksize = chunksizes[params.dataset]
 read_kwargs = {
-    "data_model": params.data_model,
+    "data_model": data_model,
     "sections": params.read_sections,
     "chunksize": chunksize,
 }
@@ -144,11 +143,7 @@ io_dict["read"] = {"total": inspect.get_length(data_in.data)}
 # we now do the dirty trick here: dataset_metmetpy = icoads_r3000
 
 logging.info("Applying platform type fixtures")
-dataset_metmetpy = "icoads_r3000_NRT"
-data_model_metmetpy = "imma1"
-data_in.data = metmetpy.correct_pt.correct(
-    data_in.data, dataset_metmetpy, data_model_metmetpy, params.dck
-)
+data_in.data = metmetpy.correct_pt.correct(data_in.data, data_model)
 
 # 2.2. Apply record selection (filter by) criteria: PT types.....
 if params.filter_reports_by:
@@ -294,9 +289,8 @@ if process:
     ]
     obs_tables = tables[1:]
     io_dict.update({table: {} for table in tables})
-    mapping = params.cdm_map
     logging.debug(f"Mapping attributes: {data_in.attrs}")
-    cdm_tables = cdm.map_model(mapping, data_in.data, log_level="INFO")
+    cdm_tables = cdm.map_model(data_model, data=data_in.data, log_level="INFO")
 
     logging.info("Printing tables to psv files")
     cdm.cdm_to_ascii(
