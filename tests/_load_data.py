@@ -56,7 +56,6 @@ def load_input(dataset, level, settings):
     leveli = settings.level_input[level]
     process_list = settings.process_list
     cache_dir = f"./T{level}/{leveli}/{dataset}/{p_level}/{process_list}"
-    print(cache_dir)
     if level == "level1a":
         load_level0(cache_dir, settings)
     else:
