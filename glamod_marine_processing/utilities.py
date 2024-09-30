@@ -18,6 +18,7 @@ _base = "glamod_marine_processing"
 config_files = {
     "kay": "config_kay.json",
     "meluxina": "config_meluxina.json",
+    "bastion": "config_bastion.json",
 }
 
 DECK_FILE = "source_deck_list.txt"
