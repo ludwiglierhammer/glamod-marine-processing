@@ -69,7 +69,7 @@ class Cli:
         self.config_file = config_file
         self.suite = suite
         self.release_update = f"{release}-{update}"
-        self.deck_list = deck_list,
+        self.deck_list = (deck_list,)
         self.overwrite = overwrite
 
     def initialize(self):
