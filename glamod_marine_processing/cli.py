@@ -56,6 +56,7 @@ class Cli:
         work_directory=None,
         config_file=None,
         suite="",
+        deck_list=None,
         overwrite=False,
     ):
         self.machine = machine.lower()
@@ -68,6 +69,7 @@ class Cli:
         self.config_file = config_file
         self.suite = suite
         self.release_update = f"{release}-{update}"
+        self.deck_list = (deck_list,)
         self.overwrite = overwrite
 
     def initialize(self):
@@ -86,6 +88,7 @@ class Cli:
             update=self.update,
             dataset=self.dataset,
             level=self.level,
+            deck_list=self.deck_list,
         )
         mkdir(config["paths"]["release_directory"])
         return config

@@ -57,7 +57,6 @@ from __future__ import annotations
 import datetime
 import logging
 import os
-import subprocess
 import sys
 from collections import Counter
 from importlib import reload
@@ -80,7 +79,7 @@ reload(logging)  # This is to override potential previous config of logging
 def map_to_cdm(md_model, meta_df, log_level="INFO"):
     """Map to CDM."""
     # Atts is a minimum info on vars the cdm mocule requires
-    meta_cdm_dict = cdm.map_model(md_model, meta_df, {}, log_level=log_level)
+    meta_cdm_dict = cdm.map_model(meta_df, imodel=md_model, log_level=log_level)
     meta_cdm = pd.DataFrame()
     for table in cdm_tables:
         meta_cdm_columns = [(table, x) for x in meta_cdm_dict[table]["data"].columns]
@@ -94,15 +93,9 @@ def process_table(table_df, table_name):
     if isinstance(table_df, str):
         # Assume 'header' and in a DF in table_df otherwise
         # Open table and reindex
-        table_df = pd.DataFrame()
-        if local:
-            table_df = cdm.read_tables(
-                scratch_path, params.prev_fileID, cdm_subset=[table_name]
-            )
-        else:
-            table_df = cdm.read_tables(
-                params.prev_level_path, params.prev_fileID, cdm_subset=[table_name]
-            )
+        table_df = cdm.read_tables(
+            params.prev_level_path, params.prev_fileID, cdm_subset=[table_name]
+        )
         if table_df is None or len(table_df) == 0:
             logging.warning(f"Empty or non existing table {table_name}")
             return
@@ -186,8 +179,6 @@ process_options = [
 level = "level1d"
 params = script_setup(process_options, args, level, "level1c")
 
-local = True
-
 scratch_ = os.path.join(params.release_path, level, "scratch")
 scratch_path = os.path.join(scratch_, params.sid_dck)
 os.makedirs(scratch_path, exist_ok=True)
@@ -238,42 +229,23 @@ obs_tables = [x for x in cdm_tables.keys() if x != "header"]
 # MERGE AT ALL
 # Read the header table
 table = "header"
-if local:
-    logging.info(f"cp -L {params.prev_level_path}/*.psv {scratch_path}")
-    subprocess.call(f"cp -L {params.prev_level_path}/*.psv {scratch_path}", shell=True)
-header_df = pd.DataFrame()
-if local:
-    header_df = cdm.read_tables(scratch_path, cdm_subset=[table], na_values="null")
-else:
-    header_df = cdm.read_tables(
-        params.prev_level_path, cdm_subset=[table], na_values="null"
-    )
+header_df = cdm.read_tables(
+    params.prev_level_path, cdm_subset=[table], na_values="null"
+)
 
 if len(header_df) == 0:
     logging.error("Empty or non-existing header table")
     sys.exit(1)
 
-# Read the metadona
+# Read the metadata
 if md_avail:
-    if local:
-        subprocess.call(f"cp -L {metadata_filename} {metadata_fn_scratch}", shell=True)
-    meta_df = pd.DataFrame()
-    if local:
-        meta_df = pd.read_csv(
-            metadata_fn_scratch,
-            delimiter=delimiter,
-            dtype="object",
-            header=0,
-            na_values="MSNG",
-        )
-    else:
-        meta_df = pd.read_csv(
-            metadata_filename,
-            delimiter=delimiter,
-            dtype="object",
-            header=0,
-            na_values="MSNG",
-        )
+    meta_df = pd.read_csv(
+        metadata_filename,
+        delimiter=delimiter,
+        dtype="object",
+        header=0,
+        na_values="MSNG",
+    )
 
     if len(meta_df) == 0:
         logging.error("Empty or non-existing metadata file")

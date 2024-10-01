@@ -18,9 +18,9 @@ _base = "glamod_marine_processing"
 config_files = {
     "kay": "config_kay.json",
     "meluxina": "config_meluxina.json",
+    "bastion": "config_bastion.json",
 }
 
-DECK_FILE = "source_deck_list.txt"
 level_subdirs = {
     "level1a": ["log", "quicklooks", "invalid", "excluded"],
     "level1b": ["log", "quicklooks"],
@@ -38,6 +38,7 @@ def make_release_source_tree(
     update=None,
     dataset=None,
     level=None,
+    deck_list=None,
 ):
     """Make release source tree."""
 
@@ -52,13 +53,19 @@ def make_release_source_tree(
     # Go --------------------------------------------------------------------------
     os.umask(0)
     # READ LIST OF SID-DCKS FOR RELEASE
-    deck_file = os.path.join(config_path, release, update, dataset, DECK_FILE)
-    if not os.path.isfile(deck_file):
-        warn(f"{deck_file} not available. Skip making release source tree.")
-        return
+    if deck_list is None:
+        path_ = os.path.join(config_path, release, update, dataset)
+        json_file = os.path.join(path_, f"{level}.json")
+        json_dict = load_json(json_file)
 
-    with open(deck_file) as f:
-        deck_list = f.read().splitlines()
+        deck_file = json_dict["process_list_file"]
+        deck_file = os.path.join(path_, deck_file)
+
+        if not os.path.isfile(deck_file):
+            warn(f"{deck_file} not available. Skip making release source tree.")
+            return
+
+        deck_list = read_txt(deck_file)
 
     level_subdirs_ = level_subdirs[level]
     level_subdirs_.extend(".")
