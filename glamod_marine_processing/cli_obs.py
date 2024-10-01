@@ -48,6 +48,7 @@ def ObsCli(
         work_directory=work_directory,
         config_file=config_file,
         suite="obs_suite",
+        deck_list=process_list,
         overwrite=overwrite,
     ).initialize()
 

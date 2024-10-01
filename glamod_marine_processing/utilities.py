@@ -38,6 +38,7 @@ def make_release_source_tree(
     update=None,
     dataset=None,
     level=None,
+    deck_list=None,
 ):
     """Make release source tree."""
 
@@ -52,18 +53,19 @@ def make_release_source_tree(
     # Go --------------------------------------------------------------------------
     os.umask(0)
     # READ LIST OF SID-DCKS FOR RELEASE
-    path_ = os.path.join(config_path, release, update, dataset)
-    json_file = os.path.join(path_, f"{level}.json")
-    json_dict = load_json(json_file)
+    if deck_list is None:
+        path_ = os.path.join(config_path, release, update, dataset)
+        json_file = os.path.join(path_, f"{level}.json")
+        json_dict = load_json(json_file)
 
-    deck_file = json_dict["process_list_file"]
-    deck_file = os.path.join(path_, deck_file)
+        deck_file = json_dict["process_list_file"]
+        deck_file = os.path.join(path_, deck_file)
 
-    if not os.path.isfile(deck_file):
-        warn(f"{deck_file} not available. Skip making release source tree.")
-        return
+        if not os.path.isfile(deck_file):
+            warn(f"{deck_file} not available. Skip making release source tree.")
+            return
 
-    deck_list = read_txt(deck_file)
+        deck_list = read_txt(deck_file)
 
     level_subdirs_ = level_subdirs[level]
     level_subdirs_.extend(".")
