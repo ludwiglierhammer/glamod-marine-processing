@@ -57,7 +57,6 @@ from __future__ import annotations
 import datetime
 import logging
 import os
-import subprocess
 import sys
 from collections import Counter
 from importlib import reload
@@ -95,7 +94,7 @@ def process_table(table_df, table_name):
         # Assume 'header' and in a DF in table_df otherwise
         # Open table and reindex
         table_df = cdm.read_tables(
-                params.prev_level_path, params.prev_fileID, cdm_subset=[table_name]
+            params.prev_level_path, params.prev_fileID, cdm_subset=[table_name]
         )
         if table_df is None or len(table_df) == 0:
             logging.warning(f"Empty or non existing table {table_name}")
@@ -231,7 +230,7 @@ obs_tables = [x for x in cdm_tables.keys() if x != "header"]
 # Read the header table
 table = "header"
 header_df = cdm.read_tables(
-        params.prev_level_path, cdm_subset=[table], na_values="null"
+    params.prev_level_path, cdm_subset=[table], na_values="null"
 )
 
 if len(header_df) == 0:
@@ -241,11 +240,11 @@ if len(header_df) == 0:
 # Read the metadata
 if md_avail:
     meta_df = pd.read_csv(
-            metadata_filename,
-            delimiter=delimiter,
-            dtype="object",
-            header=0,
-            na_values="MSNG",
+        metadata_filename,
+        delimiter=delimiter,
+        dtype="object",
+        header=0,
+        na_values="MSNG",
     )
 
     if len(meta_df) == 0:
