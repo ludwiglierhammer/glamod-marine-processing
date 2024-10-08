@@ -3,7 +3,6 @@ from __future__ import annotations
 from cdm_reader_mapper.common.getting_files import load_file
 
 
-
 def load_NOC_ANC_INFO(**kwargs):
     """Load NOC ANC INFO data from cdm-testdata."""
     load_file(

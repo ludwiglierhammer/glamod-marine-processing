@@ -73,7 +73,7 @@ pattern = {
 
 manipulation = {
     "level1b": {
-        ("header", "duplicate_status"): [0,0,0,0,0,0,0,0,0,0],
+        ("header", "duplicate_status"): [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
     },
     "level1d": {
         ("header", "station_name"): [
