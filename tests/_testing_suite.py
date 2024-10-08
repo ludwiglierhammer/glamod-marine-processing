@@ -10,7 +10,7 @@ from cdm_reader_mapper.common.getting_files import load_file
 
 add_data = {
     "level1a": None,
-    "level1b": _load_data.load_NOC_corrections,
+    "level1b": None,
     "level1c": _load_data.load_NOC_ANC_INFO,
     "level1d": _load_data.load_Pub47,
     "level1e": _load_data.load_metoffice_qc,
