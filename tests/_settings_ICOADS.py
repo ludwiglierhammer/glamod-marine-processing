@@ -373,9 +373,9 @@ manipulation = {
             "0",
             "0",
             "0",
-            "0",
-            "0",
-            "0",
+            "2",
+            "2",
+            "2",
         ],
         ("observations-at", "quality_flag"): [
             "1",
@@ -471,6 +471,6 @@ manipulation = {
 }
 
 drops = {
-    "level1a": [0, 5, 6, 7, 9],
+    "level1a": [0, 5, 6, 7, 9, 10, 12],
     "level1c": [0, 3],
 }
