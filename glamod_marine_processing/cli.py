@@ -156,7 +156,7 @@ class Options:
         self.machine = click.option(
             "-m",
             "--machine",
-            default="MELUXINA",
+            default="BASTION",
             help="""HPC cluster where to create and run the scripts, \n
             * KAY: kay.ichec.ie \n
             * MELUXINA: login.lxp.lu \n
