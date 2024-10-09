@@ -159,7 +159,8 @@ class Options:
             default="MELUXINA",
             help="""HPC cluster where to create and run the scripts, \n
             * KAY: kay.ichec.ie \n
-            * MELUXINA: login.lxp.lu
+            * MELUXINA: login.lxp.lu \n
+            * BASTION: bastion01.core.ichec.ie
             """,
         )
         self.submit_jobs = click.option(
