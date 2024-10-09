@@ -9,12 +9,9 @@ from cdm_reader_mapper.cdm_mapper import read_tables
 from cdm_reader_mapper.common.getting_files import load_file
 
 add_data = {
-    "level1a": None,
-    "level1b": None,
     "level1c": _load_data.load_NOC_ANC_INFO,
     "level1d": _load_data.load_Pub47,
     "level1e": _load_data.load_metoffice_qc,
-    "level2": None,
 }
 
 
@@ -34,7 +31,7 @@ def _obs_testing(dataset, level, capsys):
 
     _settings = get_settings(dataset)
     tables = _settings.which_tables[level]
-    if add_data[level] is not None:
+    if add_data.get(level) is not None:
         add_data[level](
             cache_dir=f"./T{level}/release_7.0",
         )
