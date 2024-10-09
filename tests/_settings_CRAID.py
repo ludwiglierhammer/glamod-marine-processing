@@ -66,5 +66,5 @@ pattern = {
 }
 
 manipulation = {
-    "level1b": {("header", "duplicate_status"): [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]}
+    "level1b": {("header", "duplicate_status"): ["0", "0", "0", "0", "0", "0", "0", "0", "0", "0"]}
 }
