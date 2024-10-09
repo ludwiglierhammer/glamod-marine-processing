@@ -212,7 +212,7 @@ for table in cdm.properties.cdm_tables:
     # Track duplicate status
     if table == "header":
         correction_dict["duplicates"] = {}
-        if params.correction_version == "null": 
+        if params.correction_version == "null":
             DupDetect = cdm.duplicate_check(table_df)
             DupDetect.flag_duplicates()
             table_df = DupDetect.result
