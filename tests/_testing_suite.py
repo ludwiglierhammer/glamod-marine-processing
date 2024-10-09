@@ -25,6 +25,8 @@ def _obs_testing(dataset, level, capsys):
         if level in _settings.manipulation.keys():
             for index, values in _settings.manipulation[level].items():
                 expected[index] = values
+        if not hasattr(_settings, "drops"):
+            return expected
         if level in _settings.drops.keys():
             expected = expected.drop(_settings.drops[level]).reset_index(drop=True)
         return expected
