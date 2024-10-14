@@ -88,7 +88,7 @@ else:
     logging.error("Need arguments to run!")
     sys.exit(1)
 
-process_options = ["correction_version", "corrections", "histories", "ignore_columns"]
+process_options = ["correction_version", "corrections", "histories", "duplicates"]
 params = script_setup(process_options, args, "level1b", "level1a")
 
 cor_ext = ".txt.gz"
@@ -213,9 +213,7 @@ for table in cdm.properties.cdm_tables:
     if table == "header":
         correction_dict["duplicates"] = {}
         if params.correction_version == "null":
-            DupDetect = cdm.duplicate_check(
-                table_df, ignore_columns=params.ignore_columns
-            )
+            DupDetect = cdm.duplicate_check(table_df, **params.duplicates)
             DupDetect.flag_duplicates()
             table_df = DupDetect.result
         contains_info = table_df["duplicate_status"] != dupNotEval

@@ -5,5 +5,12 @@
   "job_time_hr": "01",
   "job_time_min": "00",
   "correction_version": "null",
-  "ignore_columns": "primary_station_id"
+  "duplictates": {
+    "ignore_columns": "primary_station_id",
+    "offsets": {
+      "longitude": 0.005,
+      "latitude": 0.005,
+      "report_timestamp": 30
+    }
+  }
 }

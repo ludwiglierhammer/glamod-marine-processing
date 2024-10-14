@@ -5,8 +5,10 @@
   "job_time_hr": "01",
   "job_time_min": "00",
   "correction_version": "null",
-  "histories": {
-    "duplicate_flags": "Added duplicate information - flag",
-    "duplicates": "Added duplicate information - duplicates"
+  "duplicates": {
+    "ignore_entries": [
+      "SHIP",
+      "MASKSTID"
+    ]
   }
 }
