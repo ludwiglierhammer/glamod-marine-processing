@@ -157,6 +157,7 @@ def read_table_files(table):
         params.prev_level_path,
         params.prev_fileID,
         cdm_subset=[table],
+        na_values="null",
     )
     try:
         len(table_df)
