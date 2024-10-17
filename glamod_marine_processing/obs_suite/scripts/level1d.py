@@ -230,7 +230,7 @@ obs_tables = [x for x in cdm_tables.keys() if x != "header"]
 # Read the header table
 table = "header"
 header_df = cdm.read_tables(
-    params.prev_level_path, cdm_subset=[table], na_values="null"
+    params.prev_level_path, params.prev_fileID, cdm_subset=[table], na_values="null"
 )
 
 if len(header_df) == 0:
