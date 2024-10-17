@@ -11,6 +11,10 @@
       "longitude": 0.005,
       "latitude": 0.005,
       "report_timestamp": 30
+    },
+    "ignore_entries": {
+      "station_speed": "null",
+      "station_course": "null"
     }
   }
 }

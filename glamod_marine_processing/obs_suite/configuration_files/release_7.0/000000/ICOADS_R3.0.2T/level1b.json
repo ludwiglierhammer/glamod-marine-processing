@@ -6,9 +6,13 @@
   "job_time_min": "00",
   "correction_version": "null",
   "duplicates": {
-    "ignore_entries": [
-      "SHIP",
-      "MASKSTID"
-    ]
+    "ignore_entries": {
+      "primary_station_id": [
+        "SHIP",
+        "MASKSTID"
+      ],
+      "station_speed": "null",
+      "station_course": "null"
+    }
   }
 }
