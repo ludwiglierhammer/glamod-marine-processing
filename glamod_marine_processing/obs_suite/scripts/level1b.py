@@ -73,6 +73,15 @@ from cdm_reader_mapper.operations import replace
 reload(logging)  # This is to override potential previous config of logging
 
 
+def drop_qualities(df, drop_dict):
+    """Drop rows with bad quality flags."""
+    for column, values in drop_dict.items():
+        if not isinstance(values, list):
+            values = [values]
+        df = df.drop(~df[column].isin(values))
+    return df
+
+
 # MAIN ------------------------------------------------------------------------
 # Process input and set up some things ----------------------------------------
 logging.basicConfig(
@@ -213,6 +222,8 @@ for table in cdm.properties.cdm_tables:
     if table == "header":
         correction_dict["duplicates"] = {}
         if params.correction_version == "null":
+            if params.drop_qualities:
+                table_df = drop_qualities(table_df, params.drop_qualities)
             DupDetect = cdm.duplicate_check(table_df, **params.duplicates)
             DupDetect.flag_duplicates()
             table_df = DupDetect.result

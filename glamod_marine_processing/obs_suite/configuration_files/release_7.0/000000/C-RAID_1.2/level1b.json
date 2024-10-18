@@ -5,6 +5,15 @@
   "job_time_hr": "01",
   "job_time_min": "00",
   "correction_version": "null",
+  "drop_qualities": {
+    "location_quality": [
+      "2"
+    ],
+    "report_time_quality": [
+      "4",
+      "5"
+    ]
+  },
   "duplicates": {
     "ignore_columns": "primary_station_id",
     "offsets": {
