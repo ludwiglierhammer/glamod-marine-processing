@@ -12,6 +12,7 @@ import os
 
 import numpy as np
 import pandas as pd
+from cdm_reader_mapper.cdm_mapper import read_tables
 
 """
 simplified version of preprocess.py in qc_suite
@@ -115,62 +116,12 @@ for yr in range(y_init - 1, y_end + 2):
                 dl,
                 "header-" + str(yr) + "-" + f"{mo:02d}" + f"-{rel_id}-{upd_id}.psv",
             )
-            if os.path.exists(fn):
-                print(f"Reading header {fn}")
-                rn = [
-                    "report_id",
-                    "region",
-                    "sub_region",
-                    "application_area",
-                    "observing_programme",
-                    "report_type",
-                    "station_name",
-                    "station_type",
-                    "platform_type",
-                    "platform_sub_type",
-                    "primary_station_id",
-                    "station_record_number",
-                    "primary_station_id_scheme",
-                    "longitude",
-                    "latitude",
-                    "location_accuracy",
-                    "location_method",
-                    "location_quality",
-                    "crs",
-                    "station_speed",
-                    "station_course",
-                    "station_heading",
-                    "height_of_station_above_local_ground",
-                    "height_of_station_above_sea_level",
-                    "height_of_station_above_sea_level_accuracy",
-                    "sea_level_datum",
-                    "report_meaning_of_timestamp",
-                    "report_timestamp",
-                    "report_duration",
-                    "report_time_accuracy",
-                    "report_time_quality",
-                    "report_time_reference",
-                    "profile_id",
-                    "events_at_station",
-                    "report_quality",
-                    "duplicate_status",
-                    "duplicates",
-                    "record_timestamp",
-                    "history",
-                    "processing_level",
-                    "processing_codes",
-                    "source_id",
-                    "source_record_id",
-                ]
-                tmp = pd.read_csv(
-                    fn,
-                    delimiter="|",
-                    dtype="object",
-                    header=None,
-                    skiprows=1,
-                    names=rn,
-                )
-
+            tmp = read_tables(
+                os.path.join(in_dir, dl),
+                f"{yr}-{mo:02d}-{rel_id}-{upd_id}",
+                cdm_subset=["header"],
+            )
+            if not tmp.empty:
                 tmp.rename(columns={"latitude": "LAT"}, inplace=True)
                 tmp.rename(columns={"longitude": "LON"}, inplace=True)
                 tmp.rename(columns={"primary_station_id": "ID"}, inplace=True)
@@ -214,73 +165,12 @@ for yr in range(y_init - 1, y_end + 2):
                 data_dl = data_dl.set_index("UID")
             for obs_val in ["AT", "SST", "DPT", "SLP", "WS", "WD"]:
                 # %%from obsevations_at,
-                fn = os.path.join(
-                    in_dir,
-                    dl,
-                    f"observations-{obs_val.lower()}-"
-                    + str(yr)
-                    + "-"
-                    + f"{mo:02d}"
-                    + f"-{rel_id}-{upd_id}.psv",
+                tmp = read_tables(
+                    os.path.join(in_dir, dl),
+                    f"{yr}-{mo:02d}-{rel_id}-{upd_id}",
+                    cdm_subset=["observations-{obs_val.lower()}"],
                 )
-                if os.path.exists(fn):
-                    print(f"Reading {obs_val} data {fn}")
-                    rn = [
-                        "observation_id",
-                        "report_id",
-                        "data_policy_licence",
-                        "date_time",
-                        "date_time_meaning",
-                        "observation_duration",
-                        "longitude",
-                        "latitude",
-                        "crs",
-                        "z_coordinate",
-                        "z_coordinate_type",
-                        "observation_height_above_station_surface",
-                        "observed_variable",
-                        "secondary_variable",
-                        "observation_value",
-                        "value_significance",
-                        "secondary_value",
-                        "units",
-                        "code_table",
-                        "conversion_flag",
-                        "location_method",
-                        "location_precision",
-                        "z_coordinate_method",
-                        "bbox_min_longitude",
-                        "bbox_max_longitude",
-                        "bbox_min_latitude",
-                        "bbox_max_latitude",
-                        "spatial_representativeness",
-                        "quality_flag",
-                        "numerical_precision",
-                        "sensor_id",
-                        "sensor_automation_status",
-                        "exposure_of_sensor",
-                        "original_precision",
-                        "original_units",
-                        "original_code_table",
-                        "original_value",
-                        "conversion_method",
-                        "processing_code",
-                        "processing_level",
-                        "adjustment_id",
-                        "traceability",
-                        "advanced_qc",
-                        "advanced_uncertainty",
-                        "advanced_homogenisation",
-                        "source_id",
-                    ]
-                    tmp = pd.read_csv(
-                        fn,
-                        delimiter="|",
-                        dtype="object",
-                        header=None,
-                        skiprows=1,
-                        names=rn,
-                    )
+                if not tmp.empty:
                     tmp.rename(columns={"report_id": "UID"}, inplace=True)
                     tmp.rename(columns={"observation_value": obs_val}, inplace=True)
                     if obs_val not in ["WS", "WD"]:
