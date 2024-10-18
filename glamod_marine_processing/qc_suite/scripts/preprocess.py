@@ -72,8 +72,6 @@ for dl in dck_list:
     y_init = np.minimum(dck_period[dl].get("year_init"), 2022)
     y_end = np.maximum(dck_period[dl].get("year_end"), 1948)
 
-# infile_patt = '-{}-{}.psv'.format(rel_id, upd_id)
-# verbose = True  # need set to read as arg in future
 
 for yr in range(y_init - 1, y_end + 2):
     # expanded to include dec of the privious year and jan of the following, for buddy checks (i think)
@@ -105,7 +103,7 @@ for yr in range(y_init - 1, y_end + 2):
         )
         dup_flags = dup_flags.set_index("UID")
         data = pd.DataFrame()
-        # %%
+
         for dl in dck_list:
             print(dl)
             data_dl = pd.DataFrame()
@@ -172,7 +170,7 @@ for yr in range(y_init - 1, y_end + 2):
                     skiprows=1,
                     names=rn,
                 )
-                # print("Reanaming")
+
                 tmp.rename(columns={"latitude": "LAT"}, inplace=True)
                 tmp.rename(columns={"longitude": "LON"}, inplace=True)
                 tmp.rename(columns={"primary_station_id": "ID"}, inplace=True)
@@ -183,7 +181,7 @@ for yr in range(y_init - 1, y_end + 2):
                 tmp.rename(columns={"report_quality": "IRF"}, inplace=True)
                 tmp.rename(columns={"station_course": "DS"}, inplace=True)
                 tmp.rename(columns={"station_speed": "VS"}, inplace=True)
-                # print("splitting")
+
                 tmp["YR"] = tmp["report_timestamp"].apply(lambda x: x[0:4])
                 tmp["MO"] = tmp["report_timestamp"].apply(lambda x: x[5:7])
                 tmp["DY"] = tmp["report_timestamp"].apply(lambda x: x[8:10])
@@ -456,10 +454,6 @@ for yr in range(y_init - 1, y_end + 2):
 
                 if not drifters.empty:
                     print("Adding drifters")
-                    # drifters = tmp[['YR', 'MO', 'DY', 'HR', 'LAT', 'LON',
-                    #                 'ID', 'DCK', 'SID', 'PT', 'UID', 'IRF',
-                    #                 'DS', 'VS', 'AT', 'SST', 'DPT', 'SLP',
-                    #                 'W', 'D']].copy()
                     drifters.loc[:, "bad_data"] = False
                     drifters.loc[:, "outfile"] = None
                     # here UID is source_uid; add prepend
@@ -475,9 +469,7 @@ for yr in range(y_init - 1, y_end + 2):
                 continue
 
             # find duplicates in list
-            # duplicates = [name for name in names if names.count(name) > 1]
             # unique_duplicates = list(set(duplicates))
-            # print(unique_duplicates)
             # %% merge duplicate flags
             print("merging duplicate flags")
             data_dl = data_dl.merge(
