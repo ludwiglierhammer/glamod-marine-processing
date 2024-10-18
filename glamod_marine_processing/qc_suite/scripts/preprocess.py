@@ -88,23 +88,6 @@ for yr in range(y_init - 1, y_end + 2):
     for mo in mos:
         print(yr, mo)
         # %% load duplicates flags
-        dup_file = os.path.join(
-            corr, "duplicate_flags", str(yr) + "-" + f"{mo:02d}" + ".txt.gz"
-        )
-        if not os.path.isfile(dup_file):
-            print(f"No NOC_correction duplicate file found for {yr}-{mo} at {dup_file}")
-            continue
-        dup_flags = pd.read_csv(
-            dup_file,
-            delimiter="|",
-            dtype="object",
-            header=None,
-            usecols=[0, 1, 2],
-            names=["UID", "dup_flag", "dups"],
-            quotechar=None,
-            quoting=3,
-        )
-        dup_flags = dup_flags.set_index("UID")
         data = pd.DataFrame()
 
         for dl in dck_list:
@@ -134,6 +117,8 @@ for yr in range(y_init - 1, y_end + 2):
                 tmp.rename(columns={"report_quality": "IRF"}, inplace=True)
                 tmp.rename(columns={"station_course": "DS"}, inplace=True)
                 tmp.rename(columns={"station_speed": "VS"}, inplace=True)
+                tmp.rename(columns={"duplicate_status": "dup_flag"}, inplace=True)
+                tmp.rename(columns={"duplicates": "dups"}, inplace=True)
 
                 tmp["YR"] = tmp["report_timestamp"].apply(lambda x: x[0:4])
                 tmp["MO"] = tmp["report_timestamp"].apply(lambda x: x[5:7])
@@ -213,14 +198,6 @@ for yr in range(y_init - 1, y_end + 2):
             # find duplicates in list
             # unique_duplicates = list(set(duplicates))
             # %% merge duplicate flags
-            print("merging duplicate flags")
-            data_dl = data_dl.merge(
-                dup_flags,
-                how="left",
-                left_index=True,
-                right_index=True,
-                suffixes=(False, False),
-            )
             # Need to replace NaNs in dup_flag column with 4s
             data_dl[["dup_flag"]] = data_dl[["dup_flag"]].fillna("4")
             # For drifters we need to repalce dup with the IRF flag
