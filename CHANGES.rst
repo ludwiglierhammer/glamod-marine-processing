@@ -25,6 +25,7 @@ Breaking changes
 * ``obs_suite``: pass tables if no correction or quality control file are available (:pull:`25`)
 * ``obs_suite``: adjust both process deck lists and processing init/end years to release7.0 requirements (:pull:`27`)
 * ``obs_suite``: adjust structure to ``cdm_reader_mapper`` structure (:pull:`28`)
+* ``qc_suite``: no need for NOC correction files (:pull:`39`)
 
 Bug fixes
 ^^^^^^^^^
