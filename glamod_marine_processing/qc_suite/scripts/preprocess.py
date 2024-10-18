@@ -27,6 +27,11 @@ print("########################")
 print("Running preprocessing")
 print("########################")
 
+obs_vals = ["AT","SST","DPT","SLP","W","D"]
+usecols_ = ["YR","MO","DY","HR","LAT","LON","ID","DCK","SID","PT","UID","IRF","DS","VS"]
+setcols_ = usecols_ + obs_vals_
+outcols_ = ["YR","MO","DY","HR","LAT","LON","DS","VS","ID","AT","SST","DPT","DCK","SLP","SID","PT","UID","W","D","IRF","bad_data","outfile"]
+
 parser = argparse.ArgumentParser(description="Marine QC system, preprocessing program")
 parser.add_argument(
     "-source", type=str, help="Path to level1d data files", required=True
@@ -139,31 +144,14 @@ for yr in range(y_init - 1, y_end + 2):
                 tmp["HR"] = tmp["report_timestamp"].apply(lambda x: x[11:13])
                 tmp["DCK"] = tmp["source_id"].apply(lambda x: x[18:21])
                 tmp["SID"] = tmp["source_id"].apply(lambda x: x[14:17])
-                data_dl = tmp[
-                    [
-                        "YR",
-                        "MO",
-                        "DY",
-                        "HR",
-                        "LAT",
-                        "LON",
-                        "ID",
-                        "DCK",
-                        "SID",
-                        "PT",
-                        "UID",
-                        "IRF",
-                        "DS",
-                        "VS",
-                    ]
-                ]
+                data_dl = tmp[usecols_]
                 # reset IRF as in imma before cdm
                 loc0 = data_dl.IRF != 1
                 loc1 = data_dl.IRF == 1
                 data_dl.loc[loc0].IRF = 1
                 data_dl.loc[loc1].IRF = 0
                 data_dl = data_dl.set_index("UID")
-            for obs_val in ["AT", "SST", "DPT", "SLP", "WS", "WD"]:
+            for obs_val in obs_vals:
                 # %%from obsevations_at,
                 tmp = read_tables(
                     os.path.join(in_dir, dl),
@@ -307,29 +295,6 @@ for yr in range(y_init - 1, y_end + 2):
                     "IRF",
                 ]
 
-                selcols = [
-                    "YR",
-                    "MO",
-                    "DY",
-                    "HR",
-                    "LAT",
-                    "LON",
-                    "ID",
-                    "DCK",
-                    "SID",
-                    "PT",
-                    "UID",
-                    "IRF",
-                    "DS",
-                    "VS",
-                    "AT",
-                    "SST",
-                    "DPT",
-                    "SLP",
-                    "W",
-                    "D",
-                ]
-
                 drifters = pd.read_csv(
                     fn,
                     delimiter="|",
@@ -337,7 +302,7 @@ for yr in range(y_init - 1, y_end + 2):
                     header=None,
                     skiprows=2,
                     names=rn,
-                    usecols=lambda c: c in set(selcols),
+                    usecols=lambda c: c in set(selcols_),
                 )
 
                 drifters = drifters[drifters["PT"] == "7"]
@@ -412,30 +377,7 @@ for yr in range(y_init - 1, y_end + 2):
                 ["YR", "MO", "DY", "HR", "UID"], axis=0, ascending=True
             )
             data = data.reindex(
-                columns=[
-                    "YR",
-                    "MO",
-                    "DY",
-                    "HR",
-                    "LAT",
-                    "LON",
-                    "DS",
-                    "VS",
-                    "ID",
-                    "AT",
-                    "SST",
-                    "DPT",
-                    "DCK",
-                    "SLP",
-                    "SID",
-                    "PT",
-                    "UID",
-                    "W",
-                    "D",
-                    "IRF",
-                    "bad_data",
-                    "outfile",
-                ]
+                columns=outcols_
             )
             data.to_csv(
                 os.path.join(out_dir, f"{yr:04d}-{mo:02d}.psv"),
