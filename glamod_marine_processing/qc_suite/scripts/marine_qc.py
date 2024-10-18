@@ -26,6 +26,8 @@ from glamod_marine_processing.qc_suite.modules import Extended_IMMA_sb as ex
 from glamod_marine_processing.qc_suite.modules import noc_auxiliary, qc
 from glamod_marine_processing.utilities import load_json
 
+from ._qc_settings import outcols_
+
 
 def read_icoads_file(
     year,
@@ -80,30 +82,7 @@ def read_icoads_file(
             filename,
             sep="|",
             header=None,
-            names=[
-                "YR",
-                "MO",
-                "DY",
-                "HR",
-                "LAT",
-                "LON",
-                "DS",
-                "VS",
-                "ID",
-                "AT",
-                "SST",
-                "DPT",
-                "DCK",
-                "SLP",
-                "SID",
-                "PT",
-                "UID",
-                "W",
-                "D",
-                "IRF",
-                "bad_data",
-                "outfile",
-            ],
+            names=outcols_,
             low_memory=False,
         )
 
