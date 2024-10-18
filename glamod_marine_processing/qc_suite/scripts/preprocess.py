@@ -586,7 +586,7 @@ for yr in range(y_init - 1, y_end + 2):
             fn = os.path.join(
                 in_dir,
                 dl,
-                "observations-ws-"
+                "observations-wd-"
                 + str(yr)
                 + "-"
                 + f"{mo:02d}"
