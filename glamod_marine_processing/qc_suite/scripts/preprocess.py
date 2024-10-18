@@ -14,6 +14,8 @@ import numpy as np
 import pandas as pd
 from cdm_reader_mapper.cdm_mapper import read_tables
 
+from ._qc_settings import obs_vals_, selcols_, usecols_, outcols_, excols_ 
+
 """
 simplified version of preprocess.py in qc_suite
  It reads in:
@@ -26,11 +28,6 @@ It exports a psv file
 print("########################")
 print("Running preprocessing")
 print("########################")
-
-obs_vals = ["AT","SST","DPT","SLP","W","D"]
-usecols_ = ["YR","MO","DY","HR","LAT","LON","ID","DCK","SID","PT","UID","IRF","DS","VS"]
-setcols_ = usecols_ + obs_vals_
-outcols_ = ["YR","MO","DY","HR","LAT","LON","DS","VS","ID","AT","SST","DPT","DCK","SLP","SID","PT","UID","W","D","IRF","bad_data","outfile"]
 
 parser = argparse.ArgumentParser(description="Marine QC system, preprocessing program")
 parser.add_argument(
@@ -151,7 +148,7 @@ for yr in range(y_init - 1, y_end + 2):
                 data_dl.loc[loc0].IRF = 1
                 data_dl.loc[loc1].IRF = 0
                 data_dl = data_dl.set_index("UID")
-            for obs_val in obs_vals:
+            for obs_val in obs_vals_:
                 # %%from obsevations_at,
                 tmp = read_tables(
                     os.path.join(in_dir, dl),
@@ -185,123 +182,13 @@ for yr in range(y_init - 1, y_end + 2):
             )
             if os.path.exists(fn):
                 print("Looking for drifters")
-                rn = [
-                    "YR",
-                    "MO",
-                    "DY",
-                    "HR",
-                    "LAT",
-                    "LON",
-                    "IM",
-                    "ATTC",
-                    "TI",
-                    "LI",
-                    "DS",
-                    "VS",
-                    "NID",
-                    "II",
-                    "ID",
-                    "C1",
-                    "DI",
-                    "D",
-                    "WI",
-                    "W",
-                    "VI",
-                    "VV",
-                    "WW",
-                    "W1",
-                    "SLP",
-                    "A",
-                    "PPP",
-                    "IT",
-                    "AT",
-                    "WBTI",
-                    "WBT",
-                    "DPTI",
-                    "DPT",
-                    "SI",
-                    "SST",
-                    "N",
-                    "NH",
-                    "CL",
-                    "HI",
-                    "H",
-                    "CM",
-                    "CH",
-                    "WD",
-                    "WP",
-                    "WH",
-                    "SD",
-                    "SP",
-                    "SH",
-                    "ATTI",
-                    "ATTL",
-                    "BSI",
-                    "B10",
-                    "B1",
-                    "DCK",
-                    "SID",
-                    "PT",
-                    "DUPS",
-                    "DUPC",
-                    "TC",
-                    "PB",
-                    "WX",
-                    "SX",
-                    "C2",
-                    "SQZ",
-                    "SQA",
-                    "AQZ",
-                    "AQA",
-                    "UQZ",
-                    "UQA",
-                    "VQZ",
-                    "VQA",
-                    "PQZ",
-                    "PQA",
-                    "DQZ",
-                    "DQA",
-                    "ND",
-                    "SF",
-                    "AF",
-                    "UF",
-                    "VF",
-                    "PF",
-                    "RF",
-                    "ZNC",
-                    "WNC",
-                    "BNC",
-                    "XNC",
-                    "YNC",
-                    "PNC",
-                    "ANC",
-                    "GNC",
-                    "DNC",
-                    "SNC",
-                    "CNC",
-                    "ENC",
-                    "FNC",
-                    "TNC",
-                    "QCE",
-                    "LZ",
-                    "QCZ",
-                    "c1_ATTI",
-                    "c1_ATTL",
-                    "UID",
-                    "RN1",
-                    "RN2",
-                    "RN3",
-                    "RSA",
-                    "IRF",
-                ]
-
                 drifters = pd.read_csv(
                     fn,
                     delimiter="|",
                     dtype="object",
                     header=None,
                     skiprows=2,
-                    names=rn,
+                    names=excols_,
                     usecols=lambda c: c in set(selcols_),
                 )
 
@@ -376,9 +263,7 @@ for yr in range(y_init - 1, y_end + 2):
             data = data.sort_values(
                 ["YR", "MO", "DY", "HR", "UID"], axis=0, ascending=True
             )
-            data = data.reindex(
-                columns=outcols_
-            )
+            data = data.reindex(columns=outcols_)
             data.to_csv(
                 os.path.join(out_dir, f"{yr:04d}-{mo:02d}.psv"),
                 sep="|",
