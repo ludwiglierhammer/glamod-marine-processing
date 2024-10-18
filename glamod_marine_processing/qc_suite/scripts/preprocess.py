@@ -214,446 +214,86 @@ for yr in range(y_init - 1, y_end + 2):
                 data_dl.loc[loc0].IRF = 1
                 data_dl.loc[loc1].IRF = 0
                 data_dl = data_dl.set_index("UID")
-            # %%from obsevations_at 'AT',
-            fn = os.path.join(
-                in_dir,
-                dl,
-                "observations-at-"
-                + str(yr)
-                + "-"
-                + f"{mo:02d}"
-                + f"-{rel_id}-{upd_id}.psv",
-            )
-            if os.path.exists(fn):
-                print(f"Reading AT data {fn}")
-                rn = [
-                    "observation_id",
-                    "report_id",
-                    "data_policy_licence",
-                    "date_time",
-                    "date_time_meaning",
-                    "observation_duration",
-                    "longitude",
-                    "latitude",
-                    "crs",
-                    "z_coordinate",
-                    "z_coordinate_type",
-                    "observation_height_above_station_surface",
-                    "observed_variable",
-                    "secondary_variable",
-                    "observation_value",
-                    "value_significance",
-                    "secondary_value",
-                    "units",
-                    "code_table",
-                    "conversion_flag",
-                    "location_method",
-                    "location_precision",
-                    "z_coordinate_method",
-                    "bbox_min_longitude",
-                    "bbox_max_longitude",
-                    "bbox_min_latitude",
-                    "bbox_max_latitude",
-                    "spatial_representativeness",
-                    "quality_flag",
-                    "numerical_precision",
-                    "sensor_id",
-                    "sensor_automation_status",
-                    "exposure_of_sensor",
-                    "original_precision",
-                    "original_units",
-                    "original_code_table",
-                    "original_value",
-                    "conversion_method",
-                    "processing_code",
-                    "processing_level",
-                    "adjustment_id",
-                    "traceability",
-                    "advanced_qc",
-                    "advanced_uncertainty",
-                    "advanced_homogenisation",
-                    "source_id",
-                ]
-                tmp = pd.read_csv(
-                    fn,
-                    delimiter="|",
-                    dtype="object",
-                    header=None,
-                    skiprows=1,
-                    names=rn,
+            for obs_val in ["AT", "SST", "DPT", "SLP", "WS", "WD"]:
+                # %%from obsevations_at,
+                fn = os.path.join(
+                    in_dir,
+                    dl,
+                    f"observations-{obs_val.lower()}-"
+                    + str(yr)
+                    + "-"
+                    + f"{mo:02d}"
+                    + f"-{rel_id}-{upd_id}.psv",
                 )
-                tmp.rename(columns={"report_id": "UID"}, inplace=True)
-                tmp.rename(columns={"observation_value": "AT"}, inplace=True)
-                tmp = tmp.astype({"AT": "float"})
-                tmp = tmp[["UID", "AT"]].set_index("UID")
-                tmp.AT = tmp.AT - 273.15  # reset to Celsius
-                data_dl = data_dl.merge(tmp, on="UID", how="left")
-            # %% from obsevations_sst 'SST',
-            fn = os.path.join(
-                in_dir,
-                dl,
-                "observations-sst-"
-                + str(yr)
-                + "-"
-                + f"{mo:02d}"
-                + f"-{rel_id}-{upd_id}.psv",
-            )
-            if os.path.exists(fn):
-                print("Reading sst data")
-                rn = [
-                    "observation_id",
-                    "report_id",
-                    "data_policy_licence",
-                    "date_time",
-                    "date_time_meaning",
-                    "observation_duration",
-                    "longitude",
-                    "latitude",
-                    "crs",
-                    "z_coordinate",
-                    "z_coordinate_type",
-                    "observation_height_above_station_surface",
-                    "observed_variable",
-                    "secondary_variable",
-                    "observation_value",
-                    "value_significance",
-                    "secondary_value",
-                    "units",
-                    "code_table",
-                    "conversion_flag",
-                    "location_method",
-                    "location_precision",
-                    "z_coordinate_method",
-                    "bbox_min_longitude",
-                    "bbox_max_longitude",
-                    "bbox_min_latitude",
-                    "bbox_max_latitude",
-                    "spatial_representativeness",
-                    "quality_flag",
-                    "numerical_precision",
-                    "sensor_id",
-                    "sensor_automation_status",
-                    "exposure_of_sensor",
-                    "original_precision",
-                    "original_units",
-                    "original_code_table",
-                    "original_value",
-                    "conversion_method",
-                    "processing_code",
-                    "processing_level",
-                    "adjustment_id",
-                    "traceability",
-                    "advanced_qc",
-                    "advanced_uncertainty",
-                    "advanced_homogenisation",
-                    "source_id",
-                ]
-                tmp = pd.read_csv(
-                    fn,
-                    delimiter="|",
-                    dtype="object",
-                    header=None,
-                    skiprows=1,
-                    names=rn,
-                )
-                tmp.rename(columns={"report_id": "UID"}, inplace=True)
-                tmp.rename(columns={"observation_value": "SST"}, inplace=True)
-                tmp = tmp[["UID", "SST"]].set_index("UID")
-                tmp = tmp.astype({"SST": "float"})
-                tmp.SST = tmp.SST - 273.15  # reset to Celsius
-                data_dl = data_dl.merge(tmp, on="UID", how="left")
-            # %% from obsevations_dpt 'DPT',
-            fn = os.path.join(
-                in_dir,
-                dl,
-                "observations-dpt-"
-                + str(yr)
-                + "-"
-                + f"{mo:02d}"
-                + f"-{rel_id}-{upd_id}.psv",
-            )
-            if os.path.exists(fn):
-                print("Reading dpt data")
-                rn = [
-                    "observation_id",
-                    "report_id",
-                    "data_policy_licence",
-                    "date_time",
-                    "date_time_meaning",
-                    "observation_duration",
-                    "longitude",
-                    "latitude",
-                    "crs",
-                    "z_coordinate",
-                    "z_coordinate_type",
-                    "observation_height_above_station_surface",
-                    "observed_variable",
-                    "secondary_variable",
-                    "observation_value",
-                    "value_significance",
-                    "secondary_value",
-                    "units",
-                    "code_table",
-                    "conversion_flag",
-                    "location_method",
-                    "location_precision",
-                    "z_coordinate_method",
-                    "bbox_min_longitude",
-                    "bbox_max_longitude",
-                    "bbox_min_latitude",
-                    "bbox_max_latitude",
-                    "spatial_representativeness",
-                    "quality_flag",
-                    "numerical_precision",
-                    "sensor_id",
-                    "sensor_automation_status",
-                    "exposure_of_sensor",
-                    "original_precision",
-                    "original_units",
-                    "original_code_table",
-                    "original_value",
-                    "conversion_method",
-                    "processing_code",
-                    "processing_level",
-                    "adjustment_id",
-                    "traceability",
-                    "advanced_qc",
-                    "advanced_uncertainty",
-                    "advanced_homogenisation",
-                    "source_id",
-                ]
-                tmp = pd.read_csv(
-                    fn,
-                    delimiter="|",
-                    dtype="object",
-                    header=None,
-                    skiprows=1,
-                    names=rn,
-                )
-                tmp.rename(columns={"report_id": "UID"}, inplace=True)
-                tmp.rename(columns={"observation_value": "DPT"}, inplace=True)
-                tmp = tmp[["UID", "DPT"]].set_index("UID")
-                tmp = tmp.astype({"DPT": "float"})
-                tmp.DPT = tmp.DPT - 273.15  # reset to Celsius
-                data_dl = data_dl.merge(tmp, on="UID", how="left")
-            # %% from obsevations_slp 'SLP',
-            fn = os.path.join(
-                in_dir,
-                dl,
-                "observations-slp-"
-                + str(yr)
-                + "-"
-                + f"{mo:02d}"
-                + f"-{rel_id}-{upd_id}.psv",
-            )
-            if os.path.exists(fn):
-                print("Reading slp data")
-                rn = [
-                    "observation_id",
-                    "report_id",
-                    "data_policy_licence",
-                    "date_time",
-                    "date_time_meaning",
-                    "observation_duration",
-                    "longitude",
-                    "latitude",
-                    "crs",
-                    "z_coordinate",
-                    "z_coordinate_type",
-                    "observation_height_above_station_surface",
-                    "observed_variable",
-                    "secondary_variable",
-                    "observation_value",
-                    "value_significance",
-                    "secondary_value",
-                    "units",
-                    "code_table",
-                    "conversion_flag",
-                    "location_method",
-                    "location_precision",
-                    "z_coordinate_method",
-                    "bbox_min_longitude",
-                    "bbox_max_longitude",
-                    "bbox_min_latitude",
-                    "bbox_max_latitude",
-                    "spatial_representativeness",
-                    "quality_flag",
-                    "numerical_precision",
-                    "sensor_id",
-                    "sensor_automation_status",
-                    "exposure_of_sensor",
-                    "original_precision",
-                    "original_units",
-                    "original_code_table",
-                    "original_value",
-                    "conversion_method",
-                    "processing_code",
-                    "processing_level",
-                    "adjustment_id",
-                    "traceability",
-                    "advanced_qc",
-                    "advanced_uncertainty",
-                    "advanced_homogenisation",
-                    "source_id",
-                ]
-                tmp = pd.read_csv(
-                    fn,
-                    delimiter="|",
-                    dtype="object",
-                    header=None,
-                    skiprows=1,
-                    names=rn,
-                )
-                tmp.rename(columns={"report_id": "UID"}, inplace=True)
-                tmp.rename(columns={"observation_value": "SLP"}, inplace=True)
-                tmp = tmp[["UID", "SLP"]].set_index("UID")
-                tmp = tmp.astype({"SLP": "float"})
-                tmp.SLP = tmp.SLP / 100  # reset to hPa
-                data_dl = data_dl.merge(tmp, on="UID", how="left")
-            # %% from obsevations_ws 'W',
-            fn = os.path.join(
-                in_dir,
-                dl,
-                "observations-ws-"
-                + str(yr)
-                + "-"
-                + f"{mo:02d}"
-                + f"-{rel_id}-{upd_id}.psv",
-            )
-            if os.path.exists(fn):
-                print("Reading W data")
-                rn = [
-                    "observation_id",
-                    "report_id",
-                    "data_policy_licence",
-                    "date_time",
-                    "date_time_meaning",
-                    "observation_duration",
-                    "longitude",
-                    "latitude",
-                    "crs",
-                    "z_coordinate",
-                    "z_coordinate_type",
-                    "observation_height_above_station_surface",
-                    "observed_variable",
-                    "secondary_variable",
-                    "observation_value",
-                    "value_significance",
-                    "secondary_value",
-                    "units",
-                    "code_table",
-                    "conversion_flag",
-                    "location_method",
-                    "location_precision",
-                    "z_coordinate_method",
-                    "bbox_min_longitude",
-                    "bbox_max_longitude",
-                    "bbox_min_latitude",
-                    "bbox_max_latitude",
-                    "spatial_representativeness",
-                    "quality_flag",
-                    "numerical_precision",
-                    "sensor_id",
-                    "sensor_automation_status",
-                    "exposure_of_sensor",
-                    "original_precision",
-                    "original_units",
-                    "original_code_table",
-                    "original_value",
-                    "conversion_method",
-                    "processing_code",
-                    "processing_level",
-                    "adjustment_id",
-                    "traceability",
-                    "advanced_qc",
-                    "advanced_uncertainty",
-                    "advanced_homogenisation",
-                    "source_id",
-                ]
-                tmp = pd.read_csv(
-                    fn,
-                    delimiter="|",
-                    dtype="object",
-                    header=None,
-                    skiprows=1,
-                    names=rn,
-                )
-                tmp.rename(columns={"report_id": "UID"}, inplace=True)
-                tmp.rename(columns={"observation_value": "W"}, inplace=True)
-                tmp = tmp[["UID", "W"]].set_index("UID")
-                data_dl = data_dl.merge(tmp, on="UID", how="left")
-            # %% from obsevations_wd 'D',
-            fn = os.path.join(
-                in_dir,
-                dl,
-                "observations-wd-"
-                + str(yr)
-                + "-"
-                + f"{mo:02d}"
-                + f"-{rel_id}-{upd_id}.psv",
-            )
-            if os.path.exists(fn):
-                print("Reading WD data")
-                rn = [
-                    "observation_id",
-                    "report_id",
-                    "data_policy_licence",
-                    "date_time",
-                    "date_time_meaning",
-                    "observation_duration",
-                    "longitude",
-                    "latitude",
-                    "crs",
-                    "z_coordinate",
-                    "z_coordinate_type",
-                    "observation_height_above_station_surface",
-                    "observed_variable",
-                    "secondary_variable",
-                    "observation_value",
-                    "value_significance",
-                    "secondary_value",
-                    "units",
-                    "code_table",
-                    "conversion_flag",
-                    "location_method",
-                    "location_precision",
-                    "z_coordinate_method",
-                    "bbox_min_longitude",
-                    "bbox_max_longitude",
-                    "bbox_min_latitude",
-                    "bbox_max_latitude",
-                    "spatial_representativeness",
-                    "quality_flag",
-                    "numerical_precision",
-                    "sensor_id",
-                    "sensor_automation_status",
-                    "exposure_of_sensor",
-                    "original_precision",
-                    "original_units",
-                    "original_code_table",
-                    "original_value",
-                    "conversion_method",
-                    "processing_code",
-                    "processing_level",
-                    "adjustment_id",
-                    "traceability",
-                    "advanced_qc",
-                    "advanced_uncertainty",
-                    "advanced_homogenisation",
-                    "source_id",
-                ]
-                tmp = pd.read_csv(
-                    fn,
-                    delimiter="|",
-                    dtype="object",
-                    header=None,
-                    skiprows=1,
-                    names=rn,
-                )
-                tmp.rename(columns={"report_id": "UID"}, inplace=True)
-                tmp.rename(columns={"observation_value": "D"}, inplace=True)
-                tmp = tmp[["UID", "D"]].set_index("UID")
-                data_dl = data_dl.merge(tmp, on="UID", how="left")
+                if os.path.exists(fn):
+                    print(f"Reading {obs_val} data {fn}")
+                    rn = [
+                        "observation_id",
+                        "report_id",
+                        "data_policy_licence",
+                        "date_time",
+                        "date_time_meaning",
+                        "observation_duration",
+                        "longitude",
+                        "latitude",
+                        "crs",
+                        "z_coordinate",
+                        "z_coordinate_type",
+                        "observation_height_above_station_surface",
+                        "observed_variable",
+                        "secondary_variable",
+                        "observation_value",
+                        "value_significance",
+                        "secondary_value",
+                        "units",
+                        "code_table",
+                        "conversion_flag",
+                        "location_method",
+                        "location_precision",
+                        "z_coordinate_method",
+                        "bbox_min_longitude",
+                        "bbox_max_longitude",
+                        "bbox_min_latitude",
+                        "bbox_max_latitude",
+                        "spatial_representativeness",
+                        "quality_flag",
+                        "numerical_precision",
+                        "sensor_id",
+                        "sensor_automation_status",
+                        "exposure_of_sensor",
+                        "original_precision",
+                        "original_units",
+                        "original_code_table",
+                        "original_value",
+                        "conversion_method",
+                        "processing_code",
+                        "processing_level",
+                        "adjustment_id",
+                        "traceability",
+                        "advanced_qc",
+                        "advanced_uncertainty",
+                        "advanced_homogenisation",
+                        "source_id",
+                    ]
+                    tmp = pd.read_csv(
+                        fn,
+                        delimiter="|",
+                        dtype="object",
+                        header=None,
+                        skiprows=1,
+                        names=rn,
+                    )
+                    tmp.rename(columns={"report_id": "UID"}, inplace=True)
+                    tmp.rename(columns={"observation_value": obs_val}, inplace=True)
+                    if obs_val not in ["WS", "WD"]:
+                        tmp = tmp.astype({obs_val: "float"})
+                    tmp = tmp[["UID", obs_val]].set_index("UID")
+                    if obs_val in ["AT", "SST", "DPT"]:
+                        tmp[obs_val] = tmp[obs_val] - 273.15  # reset to Celsius
+                    elif obs_val == "SLP":
+                        tmp[obs_val] = tmp[obs_val] / 100
+                    data_dl = data_dl.merge(tmp, on="UID", how="left")
+
             # %% 'bad_data' set to False
             if not data_dl.empty:
                 data_dl.loc[:, "bad_data"] = False
