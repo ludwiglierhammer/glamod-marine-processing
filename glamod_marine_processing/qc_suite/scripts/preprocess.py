@@ -468,7 +468,7 @@ for yr in range(y_init - 1, y_end + 2):
                     drifters["UID"] = prepend + drifters.UID
                     drifters = drifters.set_index("UID")
                     # add to data dataframe
-                    data_dl = data_dl.append(drifters)
+                    data_dl = data_dl = data_dl.merge(drifters, on="UID", how="left")
 
             if data_dl.empty:
                 print("Dataframe is empty. Skipping")
