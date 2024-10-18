@@ -13,7 +13,7 @@ from types import SimpleNamespace
 import click
 
 from .cli import CONTEXT_SETTINGS, Cli, add_options
-from .utilities import add_to_config, mkdir, save_json
+from .utilities import add_to_config, load_json, mkdir, save_json
 
 
 @click.command(context_settings=CONTEXT_SETTINGS)
@@ -23,7 +23,6 @@ def QcCli(
     release,
     update,
     dataset,
-    corrections_version,
     data_directory,
     work_directory,
     external_qc_files,
@@ -161,10 +160,11 @@ def QcCli(
     obs_config_directory = os.path.join(
         p.home_directory, "obs_suite", "configuration_files", release, update, dataset
     )
-    dck_list = os.path.join(obs_config_directory, "source_deck_list.txt")
-    dck_period = os.path.join(obs_config_directory, "source_deck_periods.json")
-    corrections = os.path.join(
-        p.data_directory, release, "NOC_corrections", corrections_version
+    which_list = os.path.join(obs_config_directory, "level1d.json.txt")
+    json_list = load_json(which_list)
+    dck_list = os.path.join(obs_config_directory, json_list.get("process_list_file"))
+    dck_period = os.path.join(
+        obs_config_directory, json_list.get("release_periods_file")
     )
     qc_destination = os.path.join(
         p.data_directory, release, "metoffice_qc", "corrected"
@@ -174,12 +174,11 @@ def QcCli(
         preproc_script = "preprocess.py"
         preproc_script = os.path.join(p.scripts_directory, preproc_script)
         os.system(
-            "python {} -source={} -dck_list={} -dck_period={} -corrections={} -destination={} -release={} -update={}".format(
+            "python {} -source={} -dck_list={} -dck_period={} -destination={} -release={} -update={}".format(
                 preproc_script,
                 qc_source,
                 dck_list,
                 dck_period,
-                corrections,
                 qc_destination,
                 release,
                 update,
