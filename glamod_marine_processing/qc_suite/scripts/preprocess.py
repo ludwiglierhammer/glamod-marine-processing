@@ -14,7 +14,7 @@ import numpy as np
 import pandas as pd
 from cdm_reader_mapper.cdm_mapper import read_tables
 
-from ._qc_settings import obs_vals_, selcols_, usecols_, outcols_, excols_ 
+from ._qc_settings import excols_, obs_vals_, outcols_, selcols_, usecols_
 
 """
 simplified version of preprocess.py in qc_suite
