@@ -78,7 +78,8 @@ def drop_qualities(df, drop_dict):
     for column, values in drop_dict.items():
         if not isinstance(values, list):
             values = [values]
-        df = df.drop(~df[column].isin(values))
+        df = df[~df[column].isin(values)]
+
     return df
 
 
@@ -97,7 +98,7 @@ else:
     logging.error("Need arguments to run!")
     sys.exit(1)
 
-process_options = ["correction_version", "corrections", "histories", "duplicates"]
+process_options = ["correction_version", "corrections", "histories", "duplicates", "drop_qualities"]
 params = script_setup(process_options, args, "level1b", "level1a")
 
 cor_ext = ".txt.gz"
@@ -127,6 +128,7 @@ for table in cdm.properties.cdm_tables:
     table_df = cdm.read_tables(
         params.prev_level_path, params.prev_fileID, cdm_subset=[table]
     )
+
     if len(table_df) == 0:
         logging.warning(f"Empty or non-existing table {table}")
         correction_dict[table]["read"] = 0
