@@ -98,7 +98,13 @@ else:
     logging.error("Need arguments to run!")
     sys.exit(1)
 
-process_options = ["correction_version", "corrections", "histories", "duplicates", "drop_qualities"]
+process_options = [
+    "correction_version",
+    "corrections",
+    "histories",
+    "duplicates",
+    "drop_qualities",
+]
 params = script_setup(process_options, args, "level1b", "level1a")
 
 cor_ext = ".txt.gz"
