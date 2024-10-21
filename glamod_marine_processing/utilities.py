@@ -53,6 +53,9 @@ def make_release_source_tree(
     # Go --------------------------------------------------------------------------
     os.umask(0)
     # READ LIST OF SID-DCKS FOR RELEASE
+    if not level:
+        warn(f"No level selected. Skip making release source tree.")
+        return
     if deck_list is None:
         path_ = os.path.join(config_path, release, update, dataset)
         json_file = os.path.join(path_, f"{level}.json")
