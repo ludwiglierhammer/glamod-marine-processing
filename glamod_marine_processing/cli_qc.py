@@ -156,7 +156,7 @@ def QcCli(
     qc_config = os.path.join(p.release_directory, qc_config)
     save_json(config, qc_config)
 
-    qc_source = os.path.join(p.data_directory, release, dataset, "level1d")
+    qc_source = os.path.join(p.data_directory, release, dataset, "level1a")
     obs_config_directory = os.path.join(
         p.home_directory, "obs_suite", "configuration_files", release, update, dataset
     )
