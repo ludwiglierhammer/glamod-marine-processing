@@ -28,6 +28,9 @@ Breaking changes
 * ``qc_suite``: no need for NOC correction files (:pull:`39`)
 * ``obs_suite``: new ICOADS_R3.0.2T deck list after level 1a (:pull:`40`)
 * ``obs_suite``: starting with year 2014 (:pull:`40`)
+* set BASTION do default machine_ bastion01.core.ichec.ie (:pull:`37`)
+* ``obs_suite``: use duplicate checker from ``cdm_reader_mapper`` instead of NOc correction files in level1b (:pull:`37`)
+
 
 Bug fixes
 ^^^^^^^^^

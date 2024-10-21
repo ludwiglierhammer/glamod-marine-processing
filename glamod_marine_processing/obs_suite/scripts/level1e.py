@@ -415,7 +415,7 @@ if not os.path.isfile(header_filename):
 
 header_df = pd.DataFrame()
 header_df = cdm.read_tables(
-    params.prev_level_path, cdm_subset=["header"], na_values="null"
+    params.prev_level_path, params.prev_fileID, cdm_subset=["header"], na_values="null"
 )
 
 if len(header_df) == 0:
