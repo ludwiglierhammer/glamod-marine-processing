@@ -20,7 +20,6 @@ from ._qc_settings import excols_, obs_vals_, outcols_, selcols_, usecols_
 simplified version of preprocess.py in qc_suite
  It reads in:
     valid data from level1d
-    NOC_corrections duplicates
     level1a PT=7 data (in invalid or excluded directory)
 It exports a psv file
 """
@@ -33,17 +32,9 @@ parser = argparse.ArgumentParser(description="Marine QC system, preprocessing pr
 parser.add_argument(
     "-source", type=str, help="Path to level1d data files", required=True
 )
+parser.add_argument("-dck_list", type=str, help="Deck list txt file.", required=True)
 parser.add_argument(
-    "-dck_list", type=str, help="Path to source_deck_list.txt", required=True
-)
-parser.add_argument(
-    "-dck_period", type=str, help="Path to source_deck_periods.json", required=True
-)
-parser.add_argument(
-    "-corrections",
-    type=str,
-    help="Path to NOC correction data files",
-    required=True,
+    "-dck_period", type=str, help="Deck list period json file.", required=True
 )
 parser.add_argument(
     "-destination", type=str, help="Path to output directory", required=True
@@ -59,7 +50,6 @@ args = parser.parse_args()
 
 in_dir = args.source
 out_dir = args.destination
-corr = args.corrections
 dck_lst = args.dck_list
 dck_p = args.dck_period
 rel_id = args.release
@@ -71,10 +61,18 @@ with open(dck_lst) as fO:
 with open(dck_p) as fO:
     dck_period = json.load(fO)
 
-for dl in dck_list:
-    y_init = np.minimum(dck_period[dl].get("year_init"), 2022)
-    y_end = np.maximum(dck_period[dl].get("year_end"), 1948)
+if "year_init" in dck_period.keys():
+    yi = dck_period.get("year_init")
+    ye = dck_period.get("year_end")
+else:
+    for dl in dck_list[0]:
+        yi = dck_period[dl].get("year_init")
+        ye = dck_period[dl].get("year_end")
+        if yi and ye:
+            break
 
+y_init = np.minimum(yi, 2022)
+y_end = np.minimum(ye, 2022)
 
 for yr in range(y_init - 1, y_end + 2):
     # expanded to include dec of the privious year and jan of the following, for buddy checks (i think)
