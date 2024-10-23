@@ -239,11 +239,11 @@ for sid_dck in process_list:
         logging.info(f"process launching: {process}")
         jid = launch_process(process)
     else:
-        subprocess.call(f"chmod u+x {taskfarm_file}", shell=True)
+        subprocess.call(["chmod", "u+x", taskfarm_file], shell=False)
         if script_config["run_jobs"] is True:
             logging.info("Run jobs interactively.")
-            subprocess.call(f"{taskfarm_file}", shell=True)
+            subprocess.call([taskfarm_file], shell=False)
             logging.info(f"Check whether jobs was successful: {log_diri}")
         elif script_config["parallel_jobs"] is True:
             logging.info("Run jobs interactively in parallel.")
-            subprocess.call(f"parallel :::: {taskfarm_file}", shell=True)
+            subprocess.call(["parallel", "::::" taskfarm_file], shell=False)
