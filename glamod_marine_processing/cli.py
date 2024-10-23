@@ -169,6 +169,12 @@ class Options:
         self.run_jobs = click.option(
             "-run", "--run_jobs", is_flag=True, help="Run job scripts interactively."
         )
+        self.parallel_jobs = click.option(
+            "-parallel",
+            "--run_parallel",
+            is_flag=True,
+            help="Run job scripts interactively in parallel. This is mainly for BASTION machine.",
+        )
         self.level = click.option(
             "-l",
             "--level",

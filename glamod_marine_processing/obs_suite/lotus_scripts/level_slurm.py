@@ -232,16 +232,18 @@ for sid_dck in process_list:
             line = f"{line}\n"
             fh.writelines(line)
 
+    logging.info(f"{sid_dck}: launching array")
+    logging.info(f"Script {taskfarm_file} was created.")
     if script_config["submit_jobs"] is True:
-        logging.info(f"{sid_dck}: launching array")
         process = f"jid=$(sbatch {job_file} | cut -f 4 -d' ') && echo $jid"
         logging.info(f"process launching: {process}")
         jid = launch_process(process)
     else:
-        logging.info(f"{sid_dck}: create script")
-        logging.info(f"Script {taskfarm_file} was created.")
+        os.system(f"chmod u+x {taskfarm_file}")
         if script_config["run_jobs"] is True:
-            logging.info("Run interactively.")
-            os.system(f"chmod u+x {taskfarm_file}")
+            logging.info("Run jobs interactively.")
             os.system(f"{taskfarm_file}")
             logging.info(f"Check whether jobs was successful: {log_diri}")
+        elif script_config["parallel_jobs"] is True:
+            logging.info("Run jobs interactively in parallel.")
+            os.system(f"parallel :::: {taskfarm_file}")
