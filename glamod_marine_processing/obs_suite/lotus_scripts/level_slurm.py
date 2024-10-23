@@ -246,4 +246,6 @@ for sid_dck in process_list:
             logging.info(f"Check whether jobs was successful: {log_diri}")
         elif script_config["parallel_jobs"] is True:
             logging.info("Run jobs interactively in parallel.")
-            subprocess.call(["/bin/parallel", "--jobs", "10", "::::", taskfarm_file], shell=False)
+            subprocess.call(
+                ["/bin/parallel", "--jobs", "10", "::::", taskfarm_file], shell=False
+            )
