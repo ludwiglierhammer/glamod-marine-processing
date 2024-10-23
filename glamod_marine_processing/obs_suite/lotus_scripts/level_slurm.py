@@ -242,7 +242,7 @@ for sid_dck in process_list:
         subprocess.call(["chmod", "u+x", taskfarm_file], shell=False)
         if script_config["run_jobs"] is True:
             logging.info("Run jobs interactively.")
-            subprocess.call([taskfarm_file], shell=False)
+            subprocess.call(["sh", taskfarm_file], shell=False)
             logging.info(f"Check whether jobs was successful: {log_diri}")
         elif script_config["parallel_jobs"] is True:
             logging.info("Run jobs interactively in parallel.")
