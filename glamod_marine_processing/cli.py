@@ -171,7 +171,7 @@ class Options:
         )
         self.parallel_jobs = click.option(
             "-parallel",
-            "--run_parallel",
+            "--parallel_jobs",
             is_flag=True,
             help="Run job scripts interactively in parallel. This is mainly for BASTION machine.",
         )
