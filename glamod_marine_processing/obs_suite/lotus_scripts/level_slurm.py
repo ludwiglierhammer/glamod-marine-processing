@@ -71,8 +71,6 @@ logging.basicConfig(
     filename=None,
 )
 
-os.umask(0)
-
 # Get process coordinates and build paths -------------------------------------
 script_config_file = sys.argv[1]
 check_file_exist([script_config_file])
@@ -241,11 +239,11 @@ for sid_dck in process_list:
         logging.info(f"process launching: {process}")
         jid = launch_process(process)
     else:
-        #subprocess.call(f"chmod u+x {taskfarm_file}", shell=False)
+        subprocess.call(f"chmod u+x {taskfarm_file}", shell=True)
         if script_config["run_jobs"] is True:
             logging.info("Run jobs interactively.")
-            subprocess.call(f"{taskfarm_file}", shell=False)
+            subprocess.call(f"{taskfarm_file}", shell=True)
             logging.info(f"Check whether jobs was successful: {log_diri}")
         elif script_config["parallel_jobs"] is True:
             logging.info("Run jobs interactively in parallel.")
-            subprocess.call(f"parallel :::: {taskfarm_file}", shell=False)
+            subprocess.call(f"parallel :::: {taskfarm_file}", shell=True)
