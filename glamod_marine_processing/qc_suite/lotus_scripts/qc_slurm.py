@@ -124,7 +124,7 @@ header = read_txt(
 
 with open(slurmfile, "w") as fh:
     for line in header:
-        line = ast.literal_eval(line)
+        line = ast.literal_eval(str(line))
         line = f"{line}\n"
         fh.writelines(line)
 

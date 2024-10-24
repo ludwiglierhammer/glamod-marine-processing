@@ -229,7 +229,7 @@ for sid_dck in process_list:
 
     with open(job_file, "w") as fh:
         for line in header:
-            line = ast.literal_eval(line)
+            line = ast.literal_eval(str(line))
             line = f"{line}\n"
             fh.writelines(line)
 
