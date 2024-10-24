@@ -162,7 +162,7 @@ python_files = "test_*.py"
 testpaths = ["./tests"]
 
 [tool.ruff]
-src = ["xclim"]
+src = ["glamod_marine_processing"]
 line-length = 150
 target-version = "py39"
 exclude = [
@@ -184,7 +184,11 @@ extend-select = [
 ignore = [
   "D205", # blank-line-after-summary
   "D400", # ends-in-period
-  "D401" # non-imperative-mood
+  "D401", # non-imperative-mood
+  "S605", # starting process with shell
+  "S404", # subprocess module is insecure
+  "S602", # subprocess call with shell is True
+  "S603" # subprocess call with untrusted input
 ]
 preview = true
 select = [
@@ -204,7 +208,7 @@ check-typed-exception = true
 known-first-party = ["glamod_marine_processing"]
 case-sensitive = true
 detect-same-package = false
-lines-after-imports = 1
+lines-after-imports = 2
 no-lines-before = ["future"]
 required-imports = ["from __future__ import annotations"]
 
@@ -216,6 +220,7 @@ max-complexity = 15
 "tests/**/*test*.py" = ["D100", "D101", "D102", "D103", "N802", "S101"]
 "glamod_marine_processing/**/__init__.py" = ["F401", "F403"]
 "glamod_marine_processing/qc_suite/modules/*.py" = ["S101"]
+"glamod_marine_processing/obs_suite/scripts/*.py" = ["S105"]
 
 [tool.ruff.lint.pycodestyle]
 max-doc-length = 180
