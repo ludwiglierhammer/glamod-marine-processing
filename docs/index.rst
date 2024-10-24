@@ -42,7 +42,7 @@ files in level2 (header and observations-\*). Some levels are fed with data from
 additional external datasets or with the output of dedicated suites that run
 concurrently to the overall scheme (see figure below).
 
-.. figure:: ../figures/marine_data_flow.png
+.. figure:: figures/marine_data_flow.png
     :width: 600px
     :align: center
     :alt: alternate text
@@ -60,7 +60,7 @@ Processing levels
 As shown in the diagram below, the Observations Suite is a set of chained
 processes in which the source dataset transitions through the following levels:
 
-.. figure:: ../figures/obs_suite_levels.png
+.. figure:: figures/obs_suite_levels.png
     :width: 500px
     :align: center
     :alt: alternate text
@@ -100,7 +100,7 @@ The Observations Suite code is integrated in the file system designed for the
 C3S data deliveries. The general directory structure that holds this file system
 is shown in the figure.
 
-.. figure:: ../figures/marine_file_system.png
+.. figure:: figures/marine_file_system.png
     :width: 600px
     :align: center
     :alt: alternate text
@@ -155,19 +155,19 @@ To install the optional dependencies for the quality control workflow, run:
 
 .. code-block:: bash
 
-  pip install -e ".[qc]"
+  pip install -e .[qc]
 
 To install the optional dependencies for the observations workflow, run:
 
 .. code-block:: bash
 
-  pip install -e ".[obs]"
+  pip install -e .[obs]
 
 To install the all the above for complete dependenciy version, run:
 
 .. code-block:: bash
 
-  pip install -e ".[complete]"
+  pip install -e .[complete]
 
 This will also install all required dependencies.
 
@@ -258,7 +258,7 @@ in the release, and the associated periods (year resolution) to process.
 
 The figure below shows a sample of this file:
 
-.. literalinclude:: ../config_files/source_deck_periods.json
+.. literalinclude:: config_files/source_deck_periods.json
 
 .. _process_list_file:
 
@@ -273,7 +273,7 @@ can later be subsetted if a given process is to be run in batches.
 
 The figure below shows a sample of this file:
 
-.. literalinclude:: ../config_files/source_deck_list.txt
+.. literalinclude:: config_files/source_deck_list.txt
 
 .. _level1a_config_file:
 
@@ -287,7 +287,7 @@ filters used to select reports and mapping to apply convert the data to the CDM.
 
 The figure below shows a sample of this file:
 
-.. literalinclude:: ../config_files/level1a.json
+.. literalinclude:: config_files/level1a.json
 
 
 This file has its default configuration parameters in the outer keys.
@@ -315,7 +315,7 @@ from the cdm_reader_mapper module.
 
 The figure below shows a sample of this file:
 
-.. literalinclude:: ../config_files/level1b.json
+.. literalinclude:: config_files/level1b.json
 
 This file has its default configuration parameters in the outer keys.
 Source-deck specific configuration can be applied by specifying a configuration
@@ -340,7 +340,7 @@ script.
 
 The figure below shows a sample of this file:
 
-.. literalinclude:: ../config_files/level1c.json
+.. literalinclude:: config_files/level1c.json
 
 This file has its default configuration parameters in the outer keys.
 Source-deck specific configuration can be applied by specifying a configuration
@@ -382,7 +382,7 @@ to the next processing level without merging any metadata when it is not availab
 
 The figure below shows a sample of this file:
 
-.. literalinclude:: ../config_files/level1d.json
+.. literalinclude:: config_files/level1d.json
 
 This file has its default configuration parameters in the outer keys.
 Source-deck specific configuration can be applied by specifying a configuration
@@ -412,7 +412,7 @@ The level1e specific parameters included in this file are:
 
 The figure below shows a sample of this file:
 
-.. literalinclude:: ../config_files/level1e.json
+.. literalinclude:: config_files/level1e.json
 
 This file has its default configuration parameters in the outer keys.
 Source-deck specific configuration can be applied by specifying a configuration
@@ -456,11 +456,11 @@ After performing your level1a suite, you can put your decks together into one ne
 
 Old deck list:
 
-.. literalinclude:: ../config_files/source_deck_list.txt
+.. literalinclude:: config_files/source_deck_list.txt
 
 New deck list:
 
-.. literalinclude:: ../config_files/source_deck_list_post.txt
+.. literalinclude:: config_files/source_deck_list_post.txt
 
 This script executes an array of monthly subjobs per source and deck included in
 the process_list. The configuration for the process is directly accessed from
@@ -641,7 +641,7 @@ In the file sample below, all observations-wbt table files will be retained for
 level2, while observations-at will be dropped from level2 only in source-deck
 063-714.
 
-.. literalinclude:: ../config_files/level2.json
+.. literalinclude:: config_files/level2.json
 
 This script executes a job per source and deck included in the process_list.
 The configuration file for the process (level2.json) is directly accessed from
