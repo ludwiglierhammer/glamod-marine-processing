@@ -51,7 +51,7 @@ Contributors to this version: Ludwig Lierhammer (:user:`ludwiglierhammer`)
 
 Breaking changes
 ^^^^^^^^^^^^^^^^
-* delete emtpy and not used files, functions and folders (:pull:`3`)
+* delete empty and not used files, functions and folders (:pull:`3`)
 * create requirements for each suite (:pull:`3`)
 * rebuild to a installable python package (:pull:`3`)
 * install package and requirements via a pyproject.toml file (:pul::`3`)
