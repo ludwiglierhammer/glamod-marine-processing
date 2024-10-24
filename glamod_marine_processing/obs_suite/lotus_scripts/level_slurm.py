@@ -6,6 +6,7 @@ Created on Wed Jul 22 09:09:41 2020
 
 from __future__ import annotations
 
+import ast
 import glob
 import logging
 import os
@@ -198,19 +199,19 @@ for sid_dck in process_list:
     calc_tasks = False
     with open(taskfarm_file, "w") as fh:
         for i in range(array_size):
-            if os.path.isfile(f"{log_diri}/{i+1}.failure"):
-                logging.info(f"Task {i+1} failed. Try calculating again.")
-                os.remove(f"{log_diri}/{i+1}.failure")
-            elif os.path.isfile(f"{log_diri}/{i+1}.success"):
+            if os.path.isfile(f"{log_diri}/{i + 1}.failure"):
+                logging.info(f"Task {i + 1} failed. Try calculating again.")
+                os.remove(f"{log_diri}/{i + 1}.failure")
+            elif os.path.isfile(f"{log_diri}/{i + 1}.success"):
                 if overwrite is not True:
                     logging.info(
-                        f"Task {i+1} was already successful. Skip calculating again."
+                        f"Task {i + 1} was already successful. Skip calculating again."
                     )
                     continue
                 logging.info(
-                    f"Task {i+1} was already successful. However, calculate task again since option 'overwrite' was chosen."
+                    f"Task {i + 1} was already successful. However, calculate task again since option 'overwrite' was chosen."
                 )
-                os.remove(f"{log_diri}/{i+1}.success")
+                os.remove(f"{log_diri}/{i + 1}.success")
 
             fh.writelines(
                 "{0} {1}/{2}.input > {1}/{2}.out 2> {1}/{2}.out; if [ $? -eq 0 ]; "
@@ -228,7 +229,7 @@ for sid_dck in process_list:
 
     with open(job_file, "w") as fh:
         for line in header:
-            line = eval(line)
+            line = ast.literal_eval(line)
             line = f"{line}\n"
             fh.writelines(line)
 

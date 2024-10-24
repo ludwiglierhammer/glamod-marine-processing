@@ -158,7 +158,6 @@ for table in cdm.properties.cdm_tables:
         logging.info(f"Applying corrections for element {element}")
         columns = ["report_id", element, element + ".isChange"]
         if params.correction_version != "null":
-
             cor_path = os.path.join(
                 L1b_main_corrections, correction, params.fileID_date + cor_ext
             )

@@ -244,7 +244,7 @@ class imma:
 
     def md5(self, fname):
         """Return MD5 hash."""
-        hash_md5 = hashlib.md5()
+        hash_md5 = hashlib.md5()  # noqa: S324
         with open(fname, "rb") as f:
             for chunk in iter(lambda: f.read(4096), b""):
                 hash_md5.update(chunk)
@@ -367,7 +367,7 @@ class imma:
             converters=self.conv,
         )
 
-    def loadImma(
+    def load_imma(
         self,
         filename,
         sections=["core", " 1", "98"],

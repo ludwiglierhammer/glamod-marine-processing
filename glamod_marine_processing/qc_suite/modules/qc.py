@@ -1576,6 +1576,11 @@ def day_test(year, month, day, hour, lat, lon, time_since_sun_above_horizon=1.0)
         azimuth, elevation, rta, hra, sid, dec = sunangle(
             year2, day2, hour2, minute2, 0, 0, 0, lat2, lon2
         )
+        del azimuth
+        del rta
+        del hra
+        del sid
+        del dec
 
         if elevation > 0:
             result = 1

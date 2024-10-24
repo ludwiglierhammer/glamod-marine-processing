@@ -141,16 +141,16 @@ class deck_store:
         )
 
         if len(self.linecache) == maxLines:
-            self.writeCache()
+            self.write_cache()
 
-    def writeCache(self):
+    def write_cache(self):
         """Write line cache."""
         self.fh.writelines(self.linecache)
         self.linecache = list()
 
     def close(self):
         """Close file."""
-        self.writeCache()
+        self.write_cache()
         self.fh.close()
 
 

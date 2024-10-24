@@ -205,9 +205,7 @@ if md_avail:
         ):
             md_avail = False
             logging.warning(
-                "Metadata source available only in period {}-{}".format(
-                    str(params.md_first_yr_avail), str(params.md_last_yr_avail)
-                )
+                f"Metadata source available only in period {str(params.md_first_yr_avail)}-{str(params.md_last_yr_avail)}"
             )
             logging.warning("level1d data will be created with no merging")
         else:

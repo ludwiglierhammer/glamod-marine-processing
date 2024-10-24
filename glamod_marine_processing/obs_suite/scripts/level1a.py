@@ -244,7 +244,7 @@ for col in masked_columns:
                 [counts, edges] = np.histogram(values)
                 # Following binning approach only if at most 1 sign digit!
                 bins = [
-                    "-".join([f"{edges[i]:.1f}", f"{edges[i+1]:.1f}"])
+                    "-".join([f"{edges[i]:.1f}", f"{edges[i + 1]:.1f}"])
                     for i in range(0, len(edges) - 1)
                 ]
                 io_dict["invalid"][k].update(

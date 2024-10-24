@@ -1797,7 +1797,9 @@ class Voyage:
             shpspd, shpdis, shpdir, tdiff = (
                 self.reps[satcount[len(satcount) - 1]] - self.reps[satcount[0]]
             )
-
+            del shpspd
+            del shpdis
+            del shpdir
             if tdiff >= min_time_threshold:
                 for loc in satcount:
                     self.reps[loc].set_qc("DPT", "repsat", 1)
@@ -2159,6 +2161,8 @@ class Voyage:
 
             for t2 in range(lo, hi):
                 speed, distance, direction, time_diff = self.reps[t2] - self.reps[t1]
+                del speed
+                del direction
 
                 iquam_condition = max([abs(distance) - delta_d, 0.0]) / (
                     abs(time_diff) + delta_t
@@ -2242,6 +2246,8 @@ class Voyage:
         modal_speed = tc.modesp(self.get_speed())
         # set speed limits based on modal speed
         amax, amaxx, amin = tc.set_speed_limits(modal_speed)
+        del amaxx
+        del amin
         # compare reported speeds and positions if we have them
         forward_diff_from_estimated = self.distr1()
         reverse_diff_from_estimated = self.distr2()
@@ -2373,6 +2379,8 @@ class Voyage:
                     speed, distance, direction, time_diff = (
                         self.reps[t2] - self.reps[t1]
                     )
+                    del speed
+                    del direction
                     val_change = abs(self.getvar(t2, intype) - self.getvar(t1, intype))
 
                     iquam_condition = max(

@@ -90,6 +90,11 @@ def track_day_test(year, month, day, hour, lat, lon, elevdlim=-2.5):
     azimuth, elevation, rta, hra, sid, dec = sunangle(
         year2, day2, hour2, minute2, 0, 0, 0, lat2, lon2
     )
+    del azimuth
+    del rta
+    del hra
+    del sid
+    del dec
 
     if elevation > elevdlim:
         daytime = True

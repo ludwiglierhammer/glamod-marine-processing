@@ -398,9 +398,7 @@ if not os.path.isfile(qc_pos_filename):
     if file_date > last_date or file_date < first_date:
         qc_avail = False
         logging.warning(
-            "QC only available in period {} to {}".format(
-                str(params.qc_first_date_avail), str(params.qc_last_date_avail)
-            )
+            f"QC only available in period {str(params.qc_first_date_avail)} to {str(params.qc_last_date_avail)}"
         )
         logging.warning("level1e data will be created with no merging")
     else:

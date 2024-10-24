@@ -55,9 +55,9 @@ class IMMA:
 
             self.decode(
                 line,
-                getAttachment(Attachment),
-                getParameters(Attachment),
-                getDefinitions(Attachment),
+                get_attachment(Attachment),
+                get_parameters(Attachment),
+                get_definitions(Attachment),
             )
             self.attachments.append(int(Attachment))
             if Length is None or Length == 0:
@@ -76,7 +76,7 @@ class IMMA:
                     if Length != 0:
                         Length = int(Length) - 4
                         line = line[4 : len(line)]
-                if getAttachment(Attachment) is None:
+                if get_attachment(Attachment) is None:
                     raise ("Bad IMMA string: Unsupported attachment ID " + Attachment)
 
         return 1
@@ -86,7 +86,7 @@ class IMMA:
         Result = ""
         for Attachment in self.attachments:
             Result += self.encode(
-                Attachment, getParameters(Attachment), getDefinitions(Attachment)
+                Attachment, get_parameters(Attachment), get_definitions(Attachment)
             )
         Result = Result.rstrip()
         fh.write(Result + "\n")
@@ -116,7 +116,7 @@ class IMMA:
             # Blanks mean value is undefined
             if self[p].isspace():
                 self[p] = None
-                continue  #  Next parameter
+                continue  # Next parameter
 
             if definitions[p][6] == 2:
                 self[p] = decode_base36(self[p])
@@ -193,17 +193,17 @@ def read(fh):  # fh is a filehandle
     return imma_local
 
 
-def getAttachment(i):
+def get_attachment(i):
     """Get attachment."""
     return attachment["%02d" % i]
 
 
-def getParameters(i):
+def get_parameters(i):
     """.Get Parameter."""
     return parameters["%02d" % i]
 
 
-def getDefinitions(i):
+def get_definitions(i):
     """Get definitions."""
     return definitions["%02d" % i]
 
@@ -221,7 +221,7 @@ def encode_base36(t):
 
 
 ###
-### Data for each attachment type
+# Data for each attachment type
 ###
 
 attachment = {}  # Dictionaries, so indexed by %02d string

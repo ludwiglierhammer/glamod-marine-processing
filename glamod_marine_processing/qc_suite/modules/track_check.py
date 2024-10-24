@@ -517,6 +517,8 @@ def mds_track_check(invoyage):
     modal_speed = modesp(invoyage.get_speed())
     # set speed limits based on modal speed
     amax, amaxx, amin = set_speed_limits(modal_speed)
+    del amaxx
+    del amin
 
     # compare reported speeds and positions if we have them
     forward_diff_from_estimated = distr1(invoyage)
