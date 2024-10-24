@@ -6,7 +6,6 @@ Created on Wed Jul 22 09:09:41 2020
 
 from __future__ import annotations
 
-import ast
 import glob
 import logging
 import os
@@ -229,7 +228,7 @@ for sid_dck in process_list:
 
     with open(job_file, "w") as fh:
         for line in header:
-            line = ast.literal_eval(str(line))
+            line = eval(line)  # noqa: S307
             line = f"{line}\n"
             fh.writelines(line)
 

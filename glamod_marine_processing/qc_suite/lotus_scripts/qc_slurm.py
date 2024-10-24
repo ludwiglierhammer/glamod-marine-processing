@@ -2,7 +2,6 @@
 
 from __future__ import annotations
 
-import ast
 import logging
 import os
 import subprocess
@@ -124,7 +123,7 @@ header = read_txt(
 
 with open(slurmfile, "w") as fh:
     for line in header:
-        line = ast.literal_eval(str(line))
+        line = eval(line)  # noqa: S307
         line = f"{line}\n"
         fh.writelines(line)
 
