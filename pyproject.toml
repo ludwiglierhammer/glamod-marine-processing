@@ -181,12 +181,6 @@ line-ending = "auto"
 extend-select = [
   "RUF022" # unsorted-dunder-all
 ]
-extend-include = ["*.ipynb"]
-
-[tool.ruff.format]
-line-ending = "auto"
-
-[tool.ruff.lint]
 ignore = [
   "D205", # blank-line-after-summary
   "D400", # ends-in-period
