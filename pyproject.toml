@@ -181,6 +181,12 @@ line-ending = "auto"
 extend-select = [
   "RUF022" # unsorted-dunder-all
 ]
+extend-include = ["*.ipynb"]
+
+[tool.ruff.format]
+line-ending = "auto"
+
+[tool.ruff.lint]
 ignore = [
   "D205", # blank-line-after-summary
   "D400", # ends-in-period
@@ -200,19 +206,13 @@ select = [
 [tool.ruff.lint.flake8-bandit]
 check-typed-exception = true
 
-[tool.ruff.lint.flake8-import-conventions.aliases]
-"matplotlib.pyplot" = "plt"
-numpy = "np"
-pandas = "pd"
-scipy = "sp"
-xarray = "xr"
-
 [tool.ruff.lint.isort]
-known-first-party = ["xclim"]
+known-first-party = ["glamod_marine_processing"]
 case-sensitive = true
 detect-same-package = false
-lines-after-imports = 2
-no-lines-before = ["future", "standard-library"]
+lines-after-imports = 1
+no-lines-before = ["future"]
+required-imports = ["from __future__ import annotations"]
 
 [tool.ruff.lint.mccabe]
 max-complexity = 15

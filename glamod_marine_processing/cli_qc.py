@@ -27,11 +27,13 @@ def qc_cli(
     work_directory,
     external_qc_files,
     config_file,
-    submit_jobs,
     preprocessing,
     quality_control,
     high_resolution_qc,
+    submit_jobs,
     run_jobs,
+    parallel_jobs,
+    n_max_jobs,
     overwrite,
 ):
     """Entry point for the qc_suite command line interface."""
@@ -138,6 +140,8 @@ def qc_cli(
     )
     config["submit_jobs"] = submit_jobs
     config["run_jobs"] = run_jobs
+    config["parallel_jobs"] = parallel_jobs
+    config["n_max_jobs"] = n_max_jobs
 
     mkdir(qc_log_directory)
     mkdir(qc_hr_log_directory)
