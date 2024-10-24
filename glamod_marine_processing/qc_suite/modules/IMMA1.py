@@ -101,7 +101,7 @@ class IMMA:
     ):  # Attachment definitions hash
         """Extract the parameter values from the string representation."""
         if as_string is None:
-            raise ("Bad IMMA string: No data to decode")
+            raise ValueError("Bad IMMA string: No data to decode")
 
         Position = 0
         for p in parameters:

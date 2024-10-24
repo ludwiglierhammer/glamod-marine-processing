@@ -3,7 +3,7 @@ from __future__ import annotations
 from cdm_reader_mapper.common.getting_files import load_file
 
 
-def load_NOC_ANC_INFO(**kwargs):
+def load_noc_anc_info(**kwargs):
     """Load NOC ANC INFO data from cdm-testdata."""
     load_file(
         "NOC_ANC_INFO/json_files/dck992.json",
@@ -11,7 +11,7 @@ def load_NOC_ANC_INFO(**kwargs):
     )
 
 
-def load_Pub47(**kwargs):
+def load_pub47(**kwargs):
     """Load Pub47 data from cdm-testdata."""
     load_file(
         "Pub47/monthly/2022-01-01.csv",

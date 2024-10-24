@@ -9,8 +9,8 @@ from cdm_reader_mapper.cdm_mapper import read_tables
 from cdm_reader_mapper.common.getting_files import load_file
 
 add_data = {
-    "level1c": _load_data.load_NOC_ANC_INFO,
-    "level1d": _load_data.load_Pub47,
+    "level1c": _load_data.load_noc_anc_info,
+    "level1d": _load_data.load_pub47,
     "level1e": _load_data.load_metoffice_qc,
 }
 
@@ -38,7 +38,7 @@ def _obs_testing(dataset, level, capsys):
             cache_dir=f"./T{level}/release_7.0",
         )
 
-    cache_dir = _load_data.load_input(dataset, level, _settings)
+    _load_data.load_input(dataset, level, _settings)
 
     s = (
         "obs_suite "

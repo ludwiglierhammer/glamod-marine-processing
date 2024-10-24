@@ -314,7 +314,7 @@ class imma:
                 | (self.colTypes[column] == "float")
             ):
                 data[column] = self.numeric(data[column])
-                data = self.check_numeric_bad_data(data)
+                data = self.check_numeric_bad_data(data, column)
 
             if self.codetable[column] is not None:
                 # load code table
@@ -323,7 +323,7 @@ class imma:
                 ):
                     data[column] = self.to_str(data[column])
 
-                data = self.check_string_bad_data(data)
+                data = self.check_string_bad_data(data, column)
         return data
 
     def read_bufer(self, sections, block_size=None):

@@ -135,6 +135,7 @@ def main(argv):
         next_year, next_month = qc.next_month_is(year, month)
 
         reps = ex.Deck()
+        rep = None
         count = 0
 
         for readyear, readmonth in qc.year_month_gen(

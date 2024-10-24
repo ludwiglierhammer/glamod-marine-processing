@@ -1,5 +1,7 @@
 """Marine QC tracking module."""
 
+# noqa: S101
+
 from __future__ import annotations
 
 import copy
@@ -879,7 +881,7 @@ def sst_tail_check(
             short_err_std_n,
             short_win_n_bad,
             drif_inter,
-            drit_intra,
+            drif_intra,
             background_err_lim,
         ) = assert_window_drifters(
             long_win_len,
@@ -898,6 +900,7 @@ def sst_tail_check(
         reps,
         background_err_lim=background_err_lim,
     )
+    del bgvar_is_masked
 
     # set start and end tail flags to pass to ensure all obs receive flag
     # then exit if there are no obs suitable for assessment
@@ -1034,6 +1037,7 @@ def sst_biased_noisy_check(
         reps,
         background_err_lim=background_err_lim,
     )
+    del reps_ind
 
     # set bias and noise flags to pass to ensure all obs receive flag
     # then exit if there are no obs suitable for assessment
