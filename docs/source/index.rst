@@ -264,12 +264,12 @@ Create the configuration files for the release and dataset
 Every data release is identified in the file system with the following tags:
 
 * release: release name (eg. release_2.0)
-* update: udpate tag (eg. 000000)
+* update: update tag (eg. 000000)
 * dataset: dataset name (eg. ICOADS_R3.0.0T)
 
 Create a new directory *release*-*update*/*dataset*/ in the obs-suite
 configuration directory (*config_directory*) of the configuration repository
-(note the hyphen as field separator between *release* and *udpate*). We will now
+(note the hyphen as field separator between *release* and *update*). We will now
 refer to this directory as *release_config_dir*.
 
 The files described in the following sections need to be created, with the
