@@ -18,7 +18,7 @@ from .utilities import mkdir
 
 @click.command(context_settings=CONTEXT_SETTINGS)
 @add_options()
-def PreProcCli(
+def pre_proc_cli(
     machine,
     dataset,
     data_directory,

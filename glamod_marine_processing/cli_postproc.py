@@ -27,7 +27,7 @@ def open_deck_list_file(config_files_path, level_config_file):
 
 @click.command(context_settings=CONTEXT_SETTINGS)
 @add_options()
-def PostProcCli(
+def post_proc_cli(
     machine,
     release,
     update,

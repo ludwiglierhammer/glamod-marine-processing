@@ -19,7 +19,7 @@ from .utilities import add_to_config, load_json, save_json
 
 @click.command(context_settings=CONTEXT_SETTINGS)
 @add_options()
-def ObsCli(
+def obs_cli(
     machine,
     level,
     release,
