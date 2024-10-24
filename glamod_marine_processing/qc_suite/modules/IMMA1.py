@@ -77,7 +77,7 @@ class IMMA:
                         Length = int(Length) - 4
                         line = line[4 : len(line)]
                 if getAttachment(Attachment) is None:
-                    raise ("Bad IMMA string", "Unsupported attachment ID " + Attachment)
+                    raise ("Bad IMMA string: Unsupported attachment ID " + Attachment)
 
         return 1
 
@@ -101,7 +101,7 @@ class IMMA:
     ):  # Attachment definitions hash
         """Extract the parameter values from the string representation."""
         if as_string is None:
-            raise ("Bad IMMA string", "No data to decode")
+            raise ("Bad IMMA string: No data to decode")
 
         Position = 0
         for p in parameters:

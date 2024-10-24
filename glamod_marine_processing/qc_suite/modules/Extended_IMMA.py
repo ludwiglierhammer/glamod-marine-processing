@@ -1760,15 +1760,6 @@ class Voyage:
                 self.reps[i].setext("alt_distance", shpdis)
                 self.reps[i].setext("alt_time_diff", tdiff)
 
-    def find_matching_value_runs(self, intype1, intype2):
-        """
-        PLACEHOLDER
-
-        the idea is to have a QC check that compares say air temperature and SST
-        and flags both as bad if a significant fraction are identical
-        """
-        pass
-
     def find_saturated_runs(self, parameters):
         """
         Perform checks on persistence of 100% rh while going through the voyage.

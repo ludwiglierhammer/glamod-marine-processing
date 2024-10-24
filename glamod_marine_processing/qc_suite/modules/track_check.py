@@ -50,7 +50,8 @@ def modesp(awork):
         ifreq.append(0.0)
 
     ntime = len(awork)
-
+    atmode = 0
+    icmode = 0
     if ntime > 1:
         for i in range(1, ntime):
             # fixed so that indexing starts at zero

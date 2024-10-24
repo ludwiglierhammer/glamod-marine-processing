@@ -28,7 +28,7 @@ _dataset = "ICOADS_R3.0.2T"
 _source_pattern = "IMMA1_R3.0.*"
 
 
-def get_cell(lon, lat, xmin, xmax, xstep, ymin, ymax, ystep):
+def get_cell(lon, lat, xmin, xmax, xstep, ymin, ystep):
     """Get lat-lon cell."""
     nx = int((xmax - xmin) // xstep)
     xind = int((lon - xmin) // xstep)
@@ -92,7 +92,7 @@ class deck_store:
         dck = parse_line(line, "dck")
         platform = parse_line(line, "platformType")
         callsign = parse_line(line, "callsign")
-        cell = get_cell(longitude, latitude, -180, 180, 5, -90, 90, 5)
+        cell = get_cell(longitude, latitude, -180, 180, 5, -90, 5)
 
         if callsign in self.summary["callsigns"]:
             self.summary["callsigns"][callsign] += 1

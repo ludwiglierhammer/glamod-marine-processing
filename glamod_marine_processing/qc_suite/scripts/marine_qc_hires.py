@@ -18,6 +18,7 @@ import os
 import sys
 
 import pandas as pd
+from _qc_settings import outcols_
 
 from glamod_marine_processing.qc_suite.modules import IMMA1
 from glamod_marine_processing.qc_suite.modules import BackgroundField as bf
@@ -25,8 +26,6 @@ from glamod_marine_processing.qc_suite.modules import Climatology as clim
 from glamod_marine_processing.qc_suite.modules import Extended_IMMA_sb as ex
 from glamod_marine_processing.qc_suite.modules import noc_auxiliary, qc
 from glamod_marine_processing.utilities import load_json
-
-from ._qc_settings import outcols_
 
 
 def main(argv):
