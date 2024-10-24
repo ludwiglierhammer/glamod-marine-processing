@@ -1,7 +1,0 @@
-{
-  "dck": 876,
-  "patterns": {
-    "4digit_buoy_number": "^[0-9]{4}$"
-  },
-  "corrections": {}
-}
