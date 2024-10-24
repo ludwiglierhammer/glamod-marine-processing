@@ -19,7 +19,6 @@ repos:
       - id: debug-statements
       - id: pretty-format-json
         args: [ '--autofix', '--no-ensure-ascii', '--no-sort-keys' ]
-        exclude: '.ipynb'
   - repo: https://github.com/pappasam/toml-sort
     rev: v0.23.1
     hooks:
@@ -67,12 +66,6 @@ repos:
         additional_dependencies: [ 'black==23.12.1' ]
       - id: nbqa-isort
         additional_dependencies: [ 'isort==5.13.2' ]
-  - repo: https://github.com/kynan/nbstripout
-    rev: 0.7.1
-    hooks:
-      - id: nbstripout
-        files: '.ipynb'
-        args: [ '--extra-keys', 'metadata.kernelspec' ]
   - repo: https://github.com/keewis/blackdoc
     rev: v0.3.9
     hooks:
