@@ -5,6 +5,7 @@ channels:
     - nodefaults
 
 dependencies:
+    - python>=3.10, <3.13
     # https://github.com/openforcefield/openff-nagl/issues/106
     #documentation
     - ipython
