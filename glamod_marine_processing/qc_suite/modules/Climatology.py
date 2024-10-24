@@ -36,6 +36,8 @@ class Climatology:
         :type infile: string
         :type var: string
         """
+        latitudes = None
+        longitudes = None
         if infile is not None:
             climatology = Dataset(infile)
             field = climatology.variables[var][:]

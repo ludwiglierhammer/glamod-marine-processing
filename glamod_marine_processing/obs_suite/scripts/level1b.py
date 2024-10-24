@@ -29,7 +29,7 @@ Inargs:
 -------
 data_path: marine data path in file system
 release: release tag
-update: udpate tag
+update: update tag
 dataset: dataset tag
 config_path: configuration file path
 sid_dck: source-deck data partition (optional, from config_file otherwise)
@@ -158,7 +158,6 @@ for table in cdm.properties.cdm_tables:
         logging.info(f"Applying corrections for element {element}")
         columns = ["report_id", element, element + ".isChange"]
         if params.correction_version != "null":
-
             cor_path = os.path.join(
                 L1b_main_corrections, correction, params.fileID_date + cor_ext
             )
@@ -214,7 +213,7 @@ for table in cdm.properties.cdm_tables:
                 correction_dict[table]["corrections"][element]["number"]
             )
         )
-        # THIS IS A DIRTY THNIG TO DO, BUT WILL LEAVE IT AS IT IS FOR THIS RUN:
+        # THIS IS A DIRTY THING TO DO, BUT WILL LEAVE IT AS IT IS FOR THIS RUN:
         # we only keep a lineage of the changes applied to the header
         # (some of these are shared with obs tables like position and datetime, although the name for the cdm element might not be the same....)
         if table == "header":

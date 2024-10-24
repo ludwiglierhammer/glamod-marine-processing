@@ -18,7 +18,7 @@ from .utilities import add_to_config, load_json, mkdir, save_json
 
 @click.command(context_settings=CONTEXT_SETTINGS)
 @add_options()
-def QcCli(
+def qc_cli(
     machine,
     release,
     update,

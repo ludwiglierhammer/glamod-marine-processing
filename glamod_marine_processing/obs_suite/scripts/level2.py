@@ -7,7 +7,7 @@ inspection of data.
 The processing unit is the source-deck.
 
 Outputs included data to /<data_path>/<release>/<source>/level2/<sid-dck>/table[i]-fileID.psv
-Outputs exluded data to /<data_path>/<release>/<source>/level2/excluded/<sid-dck>/table[i]-fileID.psv
+Outputs excluded data to /<data_path>/<release>/<source>/level2/excluded/<sid-dck>/table[i]-fileID.psv
 
 where fileID is yyyy-mm-release_tag-update_tag
 
@@ -76,11 +76,13 @@ logging.basicConfig(
     datefmt="%Y%m%d %H:%M:%S",
     filename=None,
 )
+args = []
 if len(sys.argv) > 1:
     logging.info("Reading command line arguments")
     args = sys.argv
 else:
     logging.error("Need arguments to run!")
+
 
 level = "level2"
 params = script_setup([], args, level, "level1e")
@@ -165,7 +167,7 @@ try:
             pattern = os.path.join(params.prev_level_path, f"*{str(year)}-??-*.psv")
             copyfiles(pattern, params.level_excluded_path)
 
-    logging.info("Level2 data succesfully created")
+    logging.info("Level2 data successfully created")
 except Exception:
     logging.error("Error creating level2 data", exc_info=True)
     logging.info(f"Level2 data {params.sid_dck} removed")

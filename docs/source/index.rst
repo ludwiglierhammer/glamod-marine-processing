@@ -53,16 +53,6 @@ concurrently to the overall scheme (see figure below).
 
 .. _versions:
 
-Note on versions
-----------------
-
-This manual was written at the time of transition between glamod-marine-processing
-v1.1 and its migration to the SLURM scheduler.
-
-Consequently, this manual describes the Observations Suite as available in the
-HEAD of the repository (hence v1.1+), not in the last tagged version at that
-time (v1.1).
-
 
 Processing levels
 =================
@@ -130,7 +120,7 @@ the repository needs to be cloned:
 
 .. code-block:: bash
 
-  git clone git@git.noc.ac.uk:iregon/glamod-marine-processing.git --branch version
+  git clone https://github.com/glamod/glamod-marine-processing
 
 where:
 
@@ -147,66 +137,39 @@ script file and set the environment variables as indicated below:
 * code_directory: full path to the obs-suite code.
 * home_directory_smf: full path to the obs-suite configuration.
 * data_directory: full path to marine data file system.
-* scratch_directory: this is system dependent and is currently set as available in CEDA-JASMIN
+* scratch_directory: this is system dependent
 
-The obs-suite/setenv0.sh script initialises the processing environment. It needs
-to be edited and the pyEnvironment_directory environmental variable set to the
-path of the corresponding python environment installation (obs-suite/pyenvs/env0).
-It also needs to be modified to include the path to the system python libraries
-in the LD_LIBRARY_PATH variable.
+These paths are pre-defined for KAY, MeluXina and BASTION. The default machine is BASTION.
+You can set the paths via the command-line interface.
 
-Once the these scripts have been modified, the python virtual environment needs
-to be initialised with the following block of code:
+Installation
+------------
 
-.. code-block:: bash
-
-  cd obs-suite/env
-  module load jaspy/3.7
-  virtualenv -–system-site-packages env0
-  source env0/bin/activate
-  pip install -r requirements_env0.txt
-
-
-Adding modules
---------------
-
-Four additional python modules have been developed for this suite. The table
-below lists these modules and which versions are compatible with the current
-marine code version (v1.1 and HEAD).
-
-.. list-table:: Title
-   :widths: 30 30 55 10
-   :header-rows: 1
-
-   * - module
-     - module_local
-     - module_repo_url
-     - version
-   * - CDM mapper
-     - cdm
-     - git@git.noc.ac.uk:iregon/cdm-mapper.git
-     - v1.2
-   * - Data reader
-     - mdf_reader
-     - git@git.noc.ac.uk:iregon/mdf_reader.git
-     - v1.2
-   * - Metadata fixes
-     - metmetpy
-     - git@git.noc.ac.uk:iregon/metmetpy.git
-     - v1.0
-   * - Pandas operations
-     - pandas_operations
-     - git@git.noc.ac.uk:iregon/pandas_operations.git
-     - v1.2
-
-For each module listed the following needs to be run:
-
+To install the minimum dependency version, run:
 
 .. code-block:: bash
 
-  cd obs-suite/modules/python
-  git clone module_repo_url --branch version --single-branch module_local
+  pip install -e .
 
+To install the optional dependencies for the quality control workflow, run:
+
+.. code-block:: bash
+
+  pip install -e ".[qc]"
+
+To install the optional dependencies for the observations workflow, run:
+
+.. code-block:: bash
+
+  pip install -e ".[obs]"
+
+To install the all the above for complete dependenciy version, run:
+
+.. code-block:: bash
+
+  pip install -e ".[complete]"
+
+This will also install all required dependencies.
 
 Common paths
 ============
@@ -227,7 +190,7 @@ Configuration repository
 ------------------------
 
 The glamod-marine-config repository
-(git@git.noc.ac.uk:iregon/glamod-marine-config.git) serves as container for the
+(https://github.com/glamod/glamod-marine-processing) serves as container for the
 configuration used to create the different data releases for C3S. The
 Observations Suite configuration files are stored in
 obs-suite/*release*-*update*/*dataset* directories within this repository.
@@ -249,7 +212,10 @@ Currently, the following configuration sets are available:
      - v1.1
    * - Demo release
      - release_demo-000000/ICOADS_R3.0.0T
-     - v1.1+ (HEAD)
+     - v1.1
+   * - Stable release
+     - release_7.0/000000/ICOADS_R3.0.2T
+     - v7.0.1
 
 Up until v1.1 (release_2.0), the configuration files were not maintained in
 the configuration repository, but in the code repository. They have been now
@@ -263,13 +229,13 @@ Create the configuration files for the release and dataset
 
 Every data release is identified in the file system with the following tags:
 
-* release: release name (eg. release_2.0)
-* update: udpate tag (eg. 000000)
-* dataset: dataset name (eg. ICOADS_R3.0.0T)
+* release: release name (eg. release_7.0)
+* update: update tag (eg. 000000)
+* dataset: dataset name (eg. ICOADS_R3.0.2T)
 
 Create a new directory *release*-*update*/*dataset*/ in the obs-suite
 configuration directory (*config_directory*) of the configuration repository
-(note the hyphen as field separator between *release* and *udpate*). We will now
+(note the hyphen as field separator between *release* and *update*). We will now
 refer to this directory as *release_config_dir*.
 
 The files described in the following sections need to be created, with the
@@ -333,7 +299,6 @@ that will use its own parameters.
 Configuration parameters job* are only used by the slurm launchers, while the
 rest by the corresponding level1a.py script.
 
-
 .. _level1b_config_file:
 
 Level 1b configuration file
@@ -345,7 +310,8 @@ This file contains information on
 the NOC corrections version to be used and the correspondences between the
 CDM tables fields on which the corrections are applied and the subdirectories
 where these corrections can be found. The CDM history stamp for every correction
-is also configured in this file.
+is also configured in this file. Alternatively, you can use the duplicate checker
+from the cdm_reader_mapper module.
 
 The figure below shows a sample of this file:
 
@@ -453,31 +419,6 @@ Source-deck specific configuration can be applied by specifying a configuration
 parameter under a *sid-dck* key. In the sample above, only the default
 configuration is applied.
 
-Set up the release data directory
----------------------------------
-
-Every new release or new dataset in a release needs to have its corresponding
-directory structure initialised in the file system:
-
-
-.. code-block:: bash
-
-  cd obs-suite
-  source setpaths.sh
-  source setenv0.sh
-  cd scripts
-  python make_release_source_tree.py $data_directory $config_directory release update dataset
-
-where:
-
-* release: release identifier in file system
-* update: release update identifier in file system
-* dataset: dataset identifier in file system
-
-
-This script does not overwrite existing directories and is safe to run on an
-existing directory structure if new source-decks have to be added.
-
 
 Level 1a
 ========
@@ -488,58 +429,50 @@ Level 1a contains the initial data converted from the input data sources
 Every monthly file of the individual source-deck ICOADS dataset partitions is
 converted with the following command:
 
-.. code:: bash
+Command to create level1a observation suite scripts:
 
-  cd obs-suite
-  source setpaths.sh
-  source setenv0.sh
-  cd scripts
-  python level1a.py $data_directory release update dataset level1a_config sid-dck year month
+.. code-block:: bash
+  obs_suite -l level1a
 
-where:
+Command to run level1a observation suite scripts:
 
-* release: release identifier in file system
-* update: release update identifier in file system
-* dataset: dataset identifier in file system
-* level1a_config: path to the level1a configuration file ( :ref:`level1a_config_file`)
-* sid-dck: source-deck identifier
-* year: file year, format yyyy
-* month: file month, format mm
+.. code-block:: bash
+  obs_suite -l level1a -run
 
+Command to run level1a observation suite scripts in parallel:
 
-To facilitate the processing of a large number of files level1a.py can be run
-in batch mode:
+.. code-block:: bash
+  obs_suite -l level1a -parallel
 
-.. code:: bash
+For more details run:
 
-  cd obs-suite
-  source setpaths.sh
-  source setenv0.sh
-  cd lotus_scripts
-  python level1a_slurm.py release update dataset $config_directory process_list --failed_only yes|no
+.. code-block:: bash
+  obs_suite -h
 
-where:
+After performing your level1a suite, you can put your decks together into one new deck. See:
 
-* release: release identifier in file system
-* update: release update identifier in file system
-* dataset: dataset identifier in file system
-* process_list: full path to file with the list of source-deck partitions to
-  process. This file can be either :ref:`process_list_file` or a subset of it.
-* failed_only: optional (yes|no). Defaults to no. Setting this argument to 'yes'
-  means that only the monthly files with a \*.failed log file will be processed.
+.. code-block:: bash
+  pre_proc -h
+
+Old deck list:
+
+.. literalinclude:: ../config_files/source_deck_list.txt
+
+New deck list:
+
+.. literalinclude:: ../config_files/source_deck_list_post.txt
 
 This script executes an array of monthly subjobs per source and deck included in
 the process_list. The configuration for the process is directly accessed from
 the release configuration directory: the data period processed is as configured
 per source and deck in the release periods file ( :ref:`release_periods_file`)
-and the level1a configuration is retrieved from :ref:`level1a_config_file`.
+and the level1d configuration is retrieved from :ref:`level1e_config_file`.
 
-This script logs to *data_dir*/release/dataset/level1a/log/sid-dck/. Log files
+This script logs to *data_dir*/release/dataset/level1e/log/sid-dck/. Log files
 are yyyy-mm-<release>-<update>.ext with ext either ok or failed depending on the
 subjob termination status.
 
-List  \*.failed in the sid-dck level1a log directories to find if any went wrong.
-
+List  \*.failed in the sid-dck level1e log directories to find if any went wrong.
 
 Level 1b
 ========
@@ -558,86 +491,24 @@ The external files need to be copied to the datasets directory in the marine
 data directory prior to processing (datasets/NOC_corrections/*cor_version*).
 Once copied to the required directory structure the files need to be reformatted
 for integration with the level1a files. This is processing is done via python
-and shell scripts using the SLURM scheduler. The following block needs to be run
-once for each of the options id, datepos or duplicates:
+and shell scripts using the SLURM scheduler.
 
-.. code:: bash
+For more details run:
 
-  cd obs-suite
-  source setpaths.sh
-  source setenv0.sh
-  cd scripts
-  option=option
-  sbatch -J $option -o $option.out -e $option.out -p short-serial -t 03:00:00 --mem 1000 --open-mode truncate --wrap="./noc_corrections_postprocess.sh release cor_version $option year_init year_end"
-
-where:
-
-* release: release tag
-* option: id, datepos or duplicates
-* cor_version: NOC correction version (v1x2019 for release 1 and release 2)
-* year_init|end: first|last year of data release.
-
-This step places the reformatted correction files in the release directory in
-the marine data directory (*release*/NOC_corrections/*cor_version*) ready to be
-merged with the CDM data files. The time needed will depend on the period
-pre-processed. However if the job terminates due to insufficient time allocation,
-the period remaining to be pre-processed can be launched independently, and it
-will not affect the files already processed.
-
-
-The reformatted files are merged with the level1a data by the following command:
-
-.. code:: bash
-
-  cd obs-suite
-  source setpaths.sh
-  source setenv0.sh
-  cd scripts
-  python level1b.py $data_directory release update dataset level1b_config sid-dck year month
-
-where:
-
-* release: release identifier in file system
-* update: release update identifier in file system
-* dataset: dataset identifier in file system
-* level1b_config: path to the level1b configuration file ( :ref:`level1b_config_file`)
-* sid-dck: source-deck identifier
-* year: file year, format yyyy
-* month: file month, format mm
-
-To facilitate the processing of a large number of files level1b.py can be run
-in batch mode:
-
-.. code:: bash
-
-  cd obs-suite
-  source setpaths.sh
-  source setenv0.sh
-  cd lotus_scripts
-  python level1b_slurm.py release update dataset $config_directory process_list --failed_only yes|no
-
-where:
-
-* release: release identifier in file system
-* update: release update identifier in file system
-* dataset: dataset identifier in file system
-* process_list: full path to file with the list of source-deck partitions to
-  process. This file can be either :ref:`process_list_file` or a subset of it.
-* failed_only: optional (yes|no). Defaults to no. Setting this argument to 'yes'
-  means that only the monthly files with a \*.failed log file will be processed.
+.. code-block:: bash
+  obs_suite -h
 
 This script executes an array of monthly subjobs per source and deck included in
 the process_list. The configuration for the process is directly accessed from
 the release configuration directory: the data period processed is as configured
 per source and deck in the release periods file ( :ref:`release_periods_file`)
-and the level1b configuration is retrieved from :ref:`level1b_config_file`.
+and the level1d configuration is retrieved from :ref:`level1e_config_file`.
 
-This script logs to *data_dir*/release/dataset/level1b/log/sid-dck/. Log files
+This script logs to *data_dir*/release/dataset/level1e/log/sid-dck/. Log files
 are yyyy-mm-<release>-<update>.ext with ext either ok or failed depending on the
 subjob termination status.
 
-List  \*.failed in the sid-dck level1b log directories to find if any went wrong.
-
+List  \*.failed in the sid-dck level1e log directories to find if any went wrong.
 
 Level 1c
 ========
@@ -649,63 +520,22 @@ corrections applied previously in level1b, can potentially result in reports
 being relocated to a different month. These reports are moved to their correct
 monthly file in this level.
 
-To generate level1c files, the individual sid-dck monthly files in level1b are
-processed with:
+For more details run:
 
-.. code:: bash
-
-  cd obs-suite
-  source setpaths.sh
-  source setenv0.sh
-  cd scripts
-  python level1c.py $data_directory release update dataset level1c_config sid-dck year month
-
-where:
-
-* release: release identifier in file system
-* update: release update identifier in file system
-* dataset: dataset identifier in file system
-* level1c_config: path to the level1c configuration file ( :ref:`level1c_config_file`)
-* sid-dck: source-deck identifier
-* year: file year, format yyyy
-* month: file month, format mm
-
-To facilitate the processing of a large number of files level1c.py can be run
-in batch mode:
-
-.. code:: bash
-
-  cd obs-suite
-  source setpaths.sh
-  source setenv0.sh
-  cd lotus_scripts
-  python level1c_slurm.py release update dataset $config_directory process_list --failed_only yes|no --remove_source yes|no
-
-where:
-
-* release: release identifier in file system
-* update: release update identifier in file system
-* dataset: dataset identifier in file system
-* process_list: full path to file with the list of source-deck partitions to
-  process. This file can be either :ref:`process_list_file` or a subset of it.
-* failed_only: optional (yes|no). Defaults to no. Setting this argument to 'yes'
-  means that only the monthly files with a \*.failed log file will be processed.
-* remove_source: optional (yes|no). Defaults to no. Setting this argument to 'yes'
-  implies removal of the source level (level1b) data files if the full set of
-  monthly data files of a given source-deck is successfully processed.
+.. code-block:: bash
+  obs_suite -h
 
 This script executes an array of monthly subjobs per source and deck included in
 the process_list. The configuration for the process is directly accessed from
 the release configuration directory: the data period processed is as configured
 per source and deck in the release periods file ( :ref:`release_periods_file`)
-and the level1c configuration is retrieved from :ref:`level1c_config_file`.
+and the level1d configuration is retrieved from :ref:`level1e_config_file`.
 
-This script logs to *data_dir*/release/dataset/level1c/log/sid-dck/. Log files
+This script logs to *data_dir*/release/dataset/level1e/log/sid-dck/. Log files
 are yyyy-mm-<release>-<update>.ext with ext either ok or failed depending on the
 subjob termination status.
 
-List  \*.failed in the sid-dck level1c log directories to find if any went wrong.
-
+List  \*.failed in the sid-dck level1e log directories to find if any went wrong.
 
 Level 1d
 ========
@@ -719,63 +549,30 @@ a process that run independently to this data flow (add ref). After
 pre-processing, this info needs to be made available to the release in directory
 *data_directory*/*release*/wmo_publication_47/monthly/.
 
+For more details run:
 
-To generate level1d files, the individual sid-dck monthly files in level1c are
-processed with:
-
-.. code:: bash
-
-  cd obs-suite
-  source setpaths.sh
-  source setenv0.sh
-  cd scripts
-  python level1d.py $data_directory release update dataset level1d_config sid-dck year month
-
-where:
-
-* release: release identifier in file system
-* update: release update identifier in file system
-* dataset: dataset identifier in file system
-* level1d_config: path to the level1d configuration file ( :ref:`level1d_config_file`)
-* sid-dck: source-deck identifier
-* year: file year, format yyyy
-* month: file month, format mm
-
-To facilitate the processing of a large number of files level1d.py can be run
-in batch mode:
-
-.. code:: bash
-
-  cd obs-suite
-  source setpaths.sh
-  source setenv0.sh
-  cd lotus_scripts
-  python level1d_slurm.py release update dataset $config_directory process_list --failed_only yes|no --remove_source yes|no
-
-where:
-
-* release: release identifier in file system
-* update: release update identifier in file system
-* dataset: dataset identifier in file system
-* process_list: full path to file with the list of source-deck partitions to
-  process. This file can be either :ref:`process_list_file` or a subset of it.
-* failed_only: optional (yes|no). Defaults to no. Setting this argument to 'yes'
-  means that only the monthly files with a \*.failed log file will be processed.
-* remove_source: optional (yes|no). Defaults to no. Setting this argument to 'yes'
-  implies removal of the source level (level1c) data files if the full set of
-  monthly data files of a given source-deck is successfully processed.
+.. code-block:: bash
+  obs_suite -h
 
 This script executes an array of monthly subjobs per source and deck included in
 the process_list. The configuration for the process is directly accessed from
 the release configuration directory: the data period processed is as configured
 per source and deck in the release periods file ( :ref:`release_periods_file`)
-and the level1d configuration is retrieved from :ref:`level1d_config_file`.
+and the level1d configuration is retrieved from :ref:`level1e_config_file`.
 
-This script logs to *data_dir*/release/dataset/level1d/log/sid-dck/. Log files
+This script logs to *data_dir*/release/dataset/level1e/log/sid-dck/. Log files
 are yyyy-mm-<release>-<update>.ext with ext either ok or failed depending on the
 subjob termination status.
 
-List  \*.failed in the sid-dck level1d log directories to find if any went wrong.
+List  \*.failed in the sid-dck level1e log directories to find if any went wrong.
+
+QualityControl
+==============
+
+Between level1d and level1e, please run the quality control suite:
+
+.. code-block:: bash
+  qc_suite -h
 
 
 Level 1e
@@ -785,50 +582,7 @@ The level1e processing merges the data quality flags from the Met Office QC
 suite (add ref) with the data from level 1d. The QC software generates two sets
 of QC files, one basic QC of the observations from all platforms and an enhanced
 track and quality check for drifting buoy data. The basic QC flags are stored in
-*data_directory*/*release*/*dataset*/metoffice_qc/base/ and merged with the
-following script:
-
-.. code:: bash
-
-  cd obs-suite
-  source setpaths.sh
-  source setenv0.sh
-  cd scripts
-  python level1e.py $data_directory release update dataset level1e_config sid-dck year month
-
-where:
-
-* release: release identifier in file system
-* update: release update identifier in file system
-* dataset: dataset identifier in file system
-* level1e_config: path to the level1e configuration file ( :ref:`level1e_config_file`)
-* sid-dck: source-deck identifier
-* year: file year, format yyyy
-* month: file month, format mm
-
-To facilitate the processing of a large number of files level1e.py can be run
-in batch mode:
-
-.. code:: bash
-
-  cd obs-suite
-  source setpaths.sh
-  source setenv0.sh
-  cd lotus_scripts
-  python level1e_slurm.py release update dataset $config_directory process_list --failed_only yes|no --remove_source yes|no
-
-where:
-
-* release: release identifier in file system
-* update: release update identifier in file system
-* dataset: dataset identifier in file system
-* process_list: full path to file with the list of source-deck partitions to
-  process. This file can be either :ref:`process_list_file` or a subset of it.
-* failed_only: optional (yes|no). Defaults to no. Setting this argument to 'yes'
-  means that only the monthly files with a \*.failed log file will be processed.
-* remove_source: optional (yes|no). Defaults to no. Setting this argument to 'yes'
-  implies removal of the source level (level1d) data files if the full set of
-  monthly data files of a given source-deck is successfully processed.
+*data_directory*/*release*/*dataset*/metoffice_qc/base/.
 
 This script executes an array of monthly subjobs per source and deck included in
 the process_list. The configuration for the process is directly accessed from
@@ -861,21 +615,7 @@ rejecting a full sid-dck dataset or an observational table or change the period
 of data to release. The level1e data composition that has been used to generate
 the level2 product of every release is configured in level2.json file available
 in the release configuration directory. Prior to first use this file needs to be
-created. This can be done using the following commands:
-
-.. code:: bash
-
-  cd obs-suite
-  source setpaths.sh
-  source setenv0.sh
-  cd scripts
-  python level2_config.py release_period_file year_ini year_end
-
-where:
-
-* release_periods_file: full path to the release periods file ( :ref:`release_periods_file` )
-* year_ini: first year in data release period.
-* year_end: last year in data release period.
+created.
 
 This script creates the selection file level2.json in the execution directory.
 The parameters year_init and year_end are used to set the final period of data
@@ -902,45 +642,6 @@ level2, while observations-at will be dropped from level2 only in source-deck
 063-714.
 
 .. literalinclude:: ../config_files/level2.json
-
-
-The level 2 processing is then run using:
-
-.. code:: bash
-
-  cd obs-suite
-  source setpaths.sh
-  source setenv0.sh
-  cd scripts
-  python level2.py data_directory release update dataset level2_config sid-dck
-
-where:
-
-* release: release identifier in file system
-* update: release update identifier in file system
-* dataset: dataset identifier in file system
-* level2_config: path to the level2 configuration file
-* sid-dck: source-deck identifier
-
-
-The launcher script for level2 is run with:
-
-.. code:: bash
-
-  cd obs-suite
-  source setpaths.sh
-  source setenv0.sh
-  cd lotus_scripts
-  python level2_slurm.py release update dataset $config_directory process_list
-
-where:
-
-* release: release identifier in file system
-* update: release update identifier in file system
-* dataset: dataset identifier in file system
-* process_list: full path to file with the list of source-deck partitions to
-  process. This file can be either :ref:`process_list_file` or a subset of it.
-
 
 This script executes a job per source and deck included in the process_list.
 The configuration file for the process (level2.json) is directly accessed from

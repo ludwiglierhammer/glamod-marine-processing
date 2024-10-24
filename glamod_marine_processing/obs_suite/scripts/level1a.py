@@ -13,7 +13,7 @@ Script to generate the C3S CDM Marine level1a data.
 The processing unit is the source-deck monthly file.
 Outputs data to /<data_path>/<release>/<dataset>/level1a/<sid-dck>/table[i]-fileID.psv
 Outputs invalid data to /<data_path>/<release>/<dataset>/level1a/invalid/<sid-dck>/fileID-data|mask.psv
-Outputs exluded data to /<data_path>/<release>/<dataset>/level1a/excluded/<sid-dck>/fileID-<element>.psv
+Outputs excluded data to /<data_path>/<release>/<dataset>/level1a/excluded/<sid-dck>/fileID-<element>.psv
 Outputs quicklook info to:  /<data_path>/<release>/<dataset>/level1a/quicklooks/<sid-dck>/fileID.json
 where fileID is year-month-release-update
 Before processing starts:
@@ -33,7 +33,7 @@ Inargs:
 -------
 data_path: marine data path in file system
 release: release tag
-update: udpate tag
+update: update tag
 dataset: dataset tag
 config_path: configuration file path
 sid_dck: source-deck data partition (optional, from config_file otherwise)
@@ -244,7 +244,7 @@ for col in masked_columns:
                 [counts, edges] = np.histogram(values)
                 # Following binning approach only if at most 1 sign digit!
                 bins = [
-                    "-".join([f"{edges[i]:.1f}", f"{edges[i+1]:.1f}"])
+                    "-".join([f"{edges[i]:.1f}", f"{edges[i + 1]:.1f}"])
                     for i in range(0, len(edges) - 1)
                 ]
                 io_dict["invalid"][k].update(
@@ -321,7 +321,7 @@ with open(L1a_io_filename, "w") as fileObj:
         ignore_nan=True,
     )
 
-# Output exluded and invalid ---------------------------------------------
+# Output excluded and invalid ---------------------------------------------
 if params.filter_reports_by:
     for k, v in data_excluded["data"].items():
         if inspect.get_length(data_excluded["data"][k]) > 0:

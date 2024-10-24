@@ -76,10 +76,9 @@ def post_processing(
             year_month = get_year_month(table_df, time_axis)
             for ym, df in table_df.groupby(year_month):
                 oname = os.path.join(odir, f"{table}-{ym}-{release}-{update}.psv")
+                header = None
+                mode = "a"
                 if not os.path.isfile(oname):
                     mode = "w"
                     header = df.columns
-                if os.path.isfile(oname):
-                    mode = "a"
-                    header = None
                 df.to_csv(oname, sep="|", header=header, mode=mode, index=False)

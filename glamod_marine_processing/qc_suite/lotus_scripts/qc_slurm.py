@@ -14,7 +14,7 @@ from glamod_marine_processing.utilities import load_json, read_txt
 
 
 def launch_process(process):
-    """Lauch process."""
+    """Launch process."""
     proc = subprocess.Popen(
         [process], shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE
     )
@@ -123,7 +123,7 @@ header = read_txt(
 
 with open(slurmfile, "w") as fh:
     for line in header:
-        line = eval(line)
+        line = eval(line)  # noqa: S307
         line = f"{line}\n"
         fh.writelines(line)
 

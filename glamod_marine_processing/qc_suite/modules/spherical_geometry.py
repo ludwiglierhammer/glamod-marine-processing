@@ -31,7 +31,7 @@ def sphere_distance(lat1, lon1, lat2, lon2):
     :rtype: float
 
     The great circle distance is the shortest distance between any two points on the Earths surface.
-    The calculation is done by first calulating the angular distance between the points and then
+    The calculation is done by first calculating the angular distance between the points and then
     multiplying that by the radius of the Earth. The angular distance calculation is handled by
     another function.
     """

@@ -145,7 +145,7 @@ def clean_previous_ok_logs(
     mkdir(sid_dck_log_dir)
     job_file = glob.glob(os.path.join(sid_dck_log_dir, sid_dck + ".slurm"))
 
-    # check is seperate configuration for this source / deck
+    # check is separate configuration for this source / deck
     config = script_config.get(sid_dck)
     if config is None:
         config = script_config
@@ -241,7 +241,3 @@ def main(
         )
 
     return 0
-
-
-if __name__ == "__main__":
-    main()

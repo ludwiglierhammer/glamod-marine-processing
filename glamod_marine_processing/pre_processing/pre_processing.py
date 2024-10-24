@@ -9,7 +9,7 @@ from pathlib import Path
 
 # number of lines to store in each cache
 maxLines = 1000
-# columns for resepective variables
+# columns for respective variables
 parse_dict = {
     "dck": [118, 121],
     "sid": [121, 124],
@@ -28,7 +28,7 @@ _dataset = "ICOADS_R3.0.2T"
 _source_pattern = "IMMA1_R3.0.*"
 
 
-def get_cell(lon, lat, xmin, xmax, xstep, ymin, ymax, ystep):
+def get_cell(lon, lat, xmin, xmax, xstep, ymin, ystep):
     """Get lat-lon cell."""
     nx = int((xmax - xmin) // xstep)
     xind = int((lon - xmin) // xstep)
@@ -92,7 +92,7 @@ class deck_store:
         dck = parse_line(line, "dck")
         platform = parse_line(line, "platformType")
         callsign = parse_line(line, "callsign")
-        cell = get_cell(longitude, latitude, -180, 180, 5, -90, 90, 5)
+        cell = get_cell(longitude, latitude, -180, 180, 5, -90, 5)
 
         if callsign in self.summary["callsigns"]:
             self.summary["callsigns"][callsign] += 1
@@ -141,16 +141,16 @@ class deck_store:
         )
 
         if len(self.linecache) == maxLines:
-            self.writeCache()
+            self.write_cache()
 
-    def writeCache(self):
+    def write_cache(self):
         """Write line cache."""
         self.fh.writelines(self.linecache)
         self.linecache = list()
 
     def close(self):
         """Close file."""
-        self.writeCache()
+        self.write_cache()
         self.fh.close()
 
 
@@ -185,7 +185,7 @@ def pre_processing(
     infiles = sorted(glob.glob(f"{idir}/{source_pattern}"))
     # get number of files
     nfiles = len(infiles)
-    print(f"{nfiles} files found in foler {idir}")
+    print(f"{nfiles} files found in folder {idir}")
     # initialise dictionary to store data
     decks = dict()
     # now iterate over files

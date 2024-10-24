@@ -352,7 +352,7 @@ class ClimVariable:
 
     def setclim(self, clim, intype="clim"):
         """
-        Set the climatological vlaue of the climate variable
+        Set the climatological value of the climate variable
 
         :param clim: climatological average
         :param intype: which part of the ClimVariable do you want to set 'clim' or 'stdev', default is 'clim'
@@ -687,7 +687,7 @@ class MarineReport:
         """
         Set a particular variable in the data
 
-        :param varvalue: valie of variable to be set
+        :param varvalue: value of variable to be set
         :param varname: variable name to be set in the extended data
         :type varvalue: float
         :type varname: string
@@ -1733,15 +1733,6 @@ class Voyage:
                 self.reps[i].setext("alt_distance", shpdis)
                 self.reps[i].setext("alt_time_diff", tdiff)
 
-    def find_matching_value_runs(self, intype1, intype2):
-        """
-        PLACEHOLDER
-
-        the idea is to have a QC check that compares say air temperature and SST
-        and flags both as bad if a significant fraction are identical
-        """
-        pass
-
     def find_saturated_runs(self, parameters):
         """
         Perform checks on persistence of 100% rh while going through the voyage.
@@ -1779,6 +1770,9 @@ class Voyage:
             shpspd, shpdis, shpdir, tdiff = (
                 self.reps[satcount[len(satcount) - 1]] - self.reps[satcount[0]]
             )
+            del shpspd
+            del shpdis
+            del shpdir
 
             if tdiff >= min_time_threshold:
                 for loc in satcount:
@@ -1989,7 +1983,7 @@ class Voyage:
 
         This takes the speed and direction reported by the ship and projects it forwards half a time step, it then
         projects it forwards another half time step using the speed and direction for the next report, to which the
-        projected location is then compared. The distances between the projeted and actual locations is returned
+        projected location is then compared. The distances between the projected and actual locations is returned
         """
         km_to_nm = 0.539957
 
@@ -2141,6 +2135,8 @@ class Voyage:
 
             for t2 in range(lo, hi):
                 speed, distance, direction, time_diff = self.reps[t2] - self.reps[t1]
+                del speed
+                del direction
 
                 iquam_condition = max([abs(distance) - delta_d, 0.0]) / (
                     abs(time_diff) + delta_t
@@ -2224,6 +2220,9 @@ class Voyage:
         modal_speed = tc.modesp(self.get_speed())
         # set speed limits based on modal speed
         amax, amaxx, amin = tc.set_speed_limits(modal_speed)
+        del amaxx
+        del amin
+
         # compare reported speeds and positions if we have them
         forward_diff_from_estimated = self.distr1()
         reverse_diff_from_estimated = self.distr2()
@@ -2355,6 +2354,8 @@ class Voyage:
                     speed, distance, direction, time_diff = (
                         self.reps[t2] - self.reps[t1]
                     )
+                    del speed
+                    del direction
                     val_change = abs(self.getvar(t2, intype) - self.getvar(t1, intype))
 
                     iquam_condition = max(
@@ -2800,7 +2801,7 @@ class Np_Super_Ob:
         self.nobs = np.zeros((360, 180, 73))
 
     def add_rep(self, lat, lon, year, month, day, anom):
-        """Add an anomaly to the grid from specifed lat lon and date."""
+        """Add an anomaly to the grid from specified lat lon and date."""
         xindex = qc.mds_lon_to_xindex(lon)
         yindex = qc.mds_lat_to_yindex(lat)
         pindex = qc.which_pentad(month, day) - 1

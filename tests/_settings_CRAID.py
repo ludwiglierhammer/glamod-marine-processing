@@ -1,7 +1,5 @@
 from __future__ import annotations
 
-import numpy as np
-
 data_model = "craid"
 deck = "1260810"
 input_dir = data_model

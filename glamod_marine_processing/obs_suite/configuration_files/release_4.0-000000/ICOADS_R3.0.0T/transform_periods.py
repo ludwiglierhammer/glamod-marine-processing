@@ -1,4 +1,4 @@
-"""Module to transfrom old file with period to new format."""
+"""Module to transform old file with period to new format."""
 
 work = "/ichec/work/glamod/"
 file_in = (
