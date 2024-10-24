@@ -36,6 +36,7 @@ def ObsCli(
     submit_jobs,
     run_jobs,
     parallel_jobs,
+    n_max_jobs,
     overwrite,
 ):
     """Entry point for the obs_suite command line interface."""
@@ -75,6 +76,7 @@ def ObsCli(
     level_config["submit_jobs"] = submit_jobs
     level_config["run_jobs"] = run_jobs
     level_config["parallel_jobs"] = parallel_jobs
+    level_config["n_max_jobs"] = n_max_jobs
     level_config["level"] = level
     level_config["overwrite"] = overwrite
     if isinstance(process_list, str):
