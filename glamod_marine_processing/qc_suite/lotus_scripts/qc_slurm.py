@@ -8,7 +8,8 @@ import os
 import subprocess
 import sys
 
-from glamod_marine_processing.qc_suite.lotus_scripts import parser, slurm_preferences
+from glamod_marine_processing.qc_suite.lotus_scripts import (parser,
+                                                             slurm_preferences)
 from glamod_marine_processing.utilities import load_json, read_txt
 
 # %%------------------------------------------------------------------------------
