@@ -127,16 +127,20 @@ with open(slurmfile, "w") as fh:
         line = f"{line}\n"
         fh.writelines(line)
 
+logging.info(f"Script {taskfile} was created.")
 if script_config["submit_jobs"] is True:
-    logging.info(f"{taskfile}: launching taskfarm")
     process = f"jid=$(sbatch {slurmfile}) && echo $jid"
     logging.info(f"process launching: {process}")
     jid = launch_process(process)
 else:
-    logging.info(f"{taskfile}: create script")
-    logging.info(f"Script {slurmfile} was created.")
+    subprocess.call(["/bin/chmod", "u+x", taskfile], shell=False)
     if script_config["run_jobs"] is True:
-        logging.info("Run interactively.")
-        os.system(f"chmod u+x {taskfile}")
-        os.system(f"{taskfile}")
+        logging.info("Run job interactively.")
+        subprocess.call(["/bin/sh", taskfile], shell=False)
         logging.info(f"Check whether jobs was successful: {logdir}")
+    elif script_config["parallel_jobs"] is True:
+        logging.info("Run jobs interactively in parallel.")
+        subprocess.call(
+            ["/bin/parallel", "--jobs", script_config["_n_max_jobs"], "::::", taskfile],
+            shell=False,
+        )

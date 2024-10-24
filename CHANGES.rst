@@ -16,6 +16,7 @@ New features and enhancements
 * ``obs_suite``: optionally, set both release period init and end year (:pull:`25`)
 * ``obs_suite``: configuration files for C-RAID (:pull:`25`)
 * ``obs_suite``: running with C-RAID data (:pull:`25`)
+* ``obs_suite`` and ``qc_suite``: optionally, run jobs in parallel with gnu_parallel (:pull:`41`)
 
 Breaking changes
 ^^^^^^^^^^^^^^^^

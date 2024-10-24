@@ -102,6 +102,12 @@ exclude = [
   "build",
   "tests"
 ]
+extend-include = ["*.ipynb"]
+
+[tool.ruff.format]
+line-ending = "auto"
+
+[tool.ruff.lint]
 ignore = [
   "D205",
   "D400",
@@ -115,31 +121,29 @@ select = [
   "W"
 ]
 
-[tool.ruff.flake8-bandit]
+[tool.ruff.lint.flake8-bandit]
 check-typed-exception = true
 
-[tool.ruff.format]
-line-ending = "auto"
-
-[tool.ruff.isort]
+[tool.ruff.lint.isort]
 known-first-party = ["glamod_marine_processing"]
 case-sensitive = true
 detect-same-package = false
 lines-after-imports = 1
-no-lines-before = ["future", "standard-library"]
+no-lines-before = ["future"]
+required-imports = ["from __future__ import annotations"]
 
-[tool.ruff.mccabe]
+[tool.ruff.lint.mccabe]
 max-complexity = 15
 
-[tool.ruff.per-file-ignores]
+[tool.ruff.lint.per-file-ignores]
 "docs/*.py" = ["D100", "D101", "D102", "D103"]
 "tests/*.py" = ["D100", "D101", "D102", "D103"]
 "cdm_reader_mapper/**/__init__.py" = ["F401", "F403", "I001"]
 
-[tool.ruff.pycodestyle]
+[tool.ruff.lint.pycodestyle]
 max-doc-length = 180
 
-[tool.ruff.pydocstyle]
+[tool.ruff.lint.pydocstyle]
 convention = "numpy"
 
 [tool.setuptools]
