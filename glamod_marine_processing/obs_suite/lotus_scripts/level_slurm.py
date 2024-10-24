@@ -204,11 +204,11 @@ for sid_dck in process_list:
             elif os.path.isfile(f"{log_diri}/{i+1}.success"):
                 if overwrite is not True:
                     logging.info(
-                        f"Task {i+1} was already succesfull. Skip calculating again."
+                        f"Task {i+1} was already successful. Skip calculating again."
                     )
                     continue
                 logging.info(
-                    f"Task {i+1} was already succesfull. However, calculate task again since option 'overwrite' was chosen."
+                    f"Task {i+1} was already successful. However, calculate task again since option 'overwrite' was chosen."
                 )
                 os.remove(f"{log_diri}/{i+1}.success")
 

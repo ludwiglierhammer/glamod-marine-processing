@@ -389,7 +389,7 @@ class ClimVariable:
             return self.clim
 
     def setclim(self, clim, intype="clim"):
-        """Set the climatological vlaue of the climate variable.
+        """Set the climatological value of the climate variable.
 
         :param clim: climatological average
         :param intype: which part of the ClimVariable do you want to set 'clim' or 'stdev', default is 'clim'
@@ -724,7 +724,7 @@ class MarineReport:
         """
         Set a particular variable in the data
 
-        :param varvalue: valie of variable to be set
+        :param varvalue: value of variable to be set
         :param varname: variable name to be set in the extended data
         :type varvalue: float
         :type varname: string
@@ -2016,7 +2016,7 @@ class Voyage:
 
         This takes the speed and direction reported by the ship and projects it forwards half a time step, it then
         projects it forwards another half time step using the speed and direction for the next report, to which the
-        projected location is then compared. The distances between the projeted and actual locations is returned
+        projected location is then compared. The distances between the projected and actual locations is returned
         """
         km_to_nm = 0.539957
 
@@ -2818,7 +2818,7 @@ class Np_Super_Ob:
         self.nobs = np.zeros((360, 180, 73))
 
     def add_rep(self, lat, lon, year, month, day, anom):
-        """Add an anomaly to the grid from specifed lat lon and date."""
+        """Add an anomaly to the grid from specified lat lon and date."""
         xindex = qc.mds_lon_to_xindex(lon)
         yindex = qc.mds_lat_to_yindex(lat)
         pindex = qc.which_pentad(month, day) - 1

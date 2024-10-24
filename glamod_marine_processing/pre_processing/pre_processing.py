@@ -9,7 +9,7 @@ from pathlib import Path
 
 # number of lines to store in each cache
 maxLines = 1000
-# columns for resepective variables
+# columns for respective variables
 parse_dict = {
     "dck": [118, 121],
     "sid": [121, 124],
@@ -185,7 +185,7 @@ def pre_processing(
     infiles = sorted(glob.glob(f"{idir}/{source_pattern}"))
     # get number of files
     nfiles = len(infiles)
-    print(f"{nfiles} files found in foler {idir}")
+    print(f"{nfiles} files found in folder {idir}")
     # initialise dictionary to store data
     decks = dict()
     # now iterate over files

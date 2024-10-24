@@ -43,7 +43,7 @@ parser.add_argument(
     "-release", type=str, help="Release identifier, e.g. release_5.1", required=True
 )
 parser.add_argument(
-    "-update", type=str, help="Update identifyer, e.g. 000000", required=True
+    "-update", type=str, help="Update identifier, e.g. 000000", required=True
 )
 
 args = parser.parse_args()
@@ -75,7 +75,7 @@ y_init = np.minimum(yi, 2022)
 y_end = np.minimum(ye, 2022)
 
 for yr in range(y_init - 1, y_end + 2):
-    # expanded to include dec of the privious year and jan of the following, for buddy checks (i think)
+    # expanded to include dec of the previous year and jan of the following, for buddy checks (i think)
     if yr == y_init - 1:
         mos = [12]
     elif yr == y_end + 1:
@@ -198,7 +198,7 @@ for yr in range(y_init - 1, y_end + 2):
             # %% merge duplicate flags
             # Need to replace NaNs in dup_flag column with 4s
             data_dl[["dup_flag"]] = data_dl[["dup_flag"]].fillna("4")
-            # For drifters we need to repalce dup with the IRF flag
+            # For drifters we need to replace dup with the IRF flag
 
             data_dl.loc[
                 (data_dl["PT"] == "7") & (data_dl["IRF"] == "1"), "dup_flag"

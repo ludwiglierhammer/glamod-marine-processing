@@ -226,7 +226,7 @@ def assert_window_drifters(
     drif_intra=1.00,
     background_err_lim=0.3,
 ):
-    """Assert drifter and windoe parameters."""
+    """Assert drifter and window parameters."""
     long_win_len = int(long_win_len)
     long_err_std_n = float(long_err_std_n)
     short_win_len = int(short_win_len)
@@ -362,7 +362,7 @@ def check_drifter_speed(
     max_win_period=None,
     iquam_track_ship=None,
 ):
-    """Check whether drifter is moving too fast and flag any occurences."""
+    """Check whether drifter is moving too fast and flag any occurrences."""
     nrep = len(reps)
     index_arr = np.array(range(0, nrep))
     i = 0
@@ -610,7 +610,7 @@ def aground_check(reps, smooth_win=41, min_win_period=8, max_win_period=10):
     than necessary as buoys that run aground for less than min_win_period will not be detected.
 
     Because temporal sampling can be erratic the time period over which an assessment is made is specified
-    as a range (bound by 'min_win_period' and 'max_win_period') - assesment uses the longest time separation
+    as a range (bound by 'min_win_period' and 'max_win_period') - assessment uses the longest time separation
     available within this range. If a drifter is deemed aground and subsequently starts moving (e.g. if a drifter
     has moved very slowly for a prolonged period) incorrectly flagged reports will be reinstated.
 
@@ -716,7 +716,7 @@ def speed_check(
     which seems reasonable. Conversley, the period of time chosen should not be too long so as to resolve
     short-lived burst of speed on manouvering ships. Larger positional errors may also trigger the check.
     Because temporal sampling can be erratic the time period over which this assessment is made is specified
-    as a range (bound by 'min_win_period' and 'max_win_period') - assesment uses the longest time separation
+    as a range (bound by 'min_win_period' and 'max_win_period') - assessment uses the longest time separation
     available within this range.
 
     IMPORTANT - for optimal performance, drifter records with observations failing this check should be
@@ -832,7 +832,7 @@ def sst_tail_check(
     background are flagged by the check. When making the comparison an allowance is made for background error
     variance and also normal drifter error (both bias and random measurement error). The correlation of the
     background error is treated as unknown and takes on a value which maximises background error dependent on the
-    assesment being made. A background error variance limit is also specified, beyond which the background is deemed
+    assessment being made. A background error variance limit is also specified, beyond which the background is deemed
     unreliable. Observations made during the day, in icy regions or where the background value is missing are
     excluded from the comparison.
 
@@ -840,7 +840,7 @@ def sst_tail_check(
     tail-check has finer resolution but lower sensitivity than the long tail-check and may pick off noisy data not
     picked up by the long tail check. Only observations that pass the long tail-check are passed to the short
     tail-check. Both of these tail checks proceed by moving a window over the data and assessing the data in each
-    window. Once good data are found the check stops and any bad data preceeding this are flagged. If unreliable
+    window. Once good data are found the check stops and any bad data preceding this are flagged. If unreliable
     background data are encountered the check stops. The checks are run forwards and backwards over the record so as
     to assess data at the start and end of the record. If the whole record fails no observations are flagged as there
     are then no 'tails' in the data (this is left for other checks). The long tail check looks for groups of

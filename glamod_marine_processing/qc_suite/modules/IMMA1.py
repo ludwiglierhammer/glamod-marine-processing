@@ -166,7 +166,7 @@ class IMMA:
 
                 Result += Tmp
 
-            else:  # Undefined data - make a blank string of the corect length
+            else:  # Undefined data - make a blank string of the correct length
                 if definitions[parameters[i]][0] is not None:
                     Lstring = "%%%ds" % (definitions[parameters[i]][0])
                     Result += Lstring % (" ")

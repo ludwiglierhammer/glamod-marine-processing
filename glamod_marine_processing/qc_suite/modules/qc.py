@@ -1464,7 +1464,7 @@ def sunangle(year, day, hour, minute, sec, zone, dasvtm, lat, lon):
     delyear = relative_year_number(year)
     # Find time in whole hours since midnight (allow for "daylight saving").
     time_in_hours = convert_time_in_hours(hour, minute, sec, zone, dasvtm)
-    # Make leapyear correction
+    # Make leap year correction
     time = leap_year_correction(time_in_hours, day, delyear)
     # Get sun parameters
     right_ascension, declination = calculate_sun_parameters(time)
@@ -1834,7 +1834,7 @@ def lon_to_xindex(lon, res=1):
 
     The routine assumes that the structure of the SST array is a grid that is 360 x 180 x 73
     i.e. one year of 1degree lat x 1degree lon data split up into pentads. The west-most box is at 180degrees W with
-    index 0 and the northern most box also has index zero. Inputs on the border betwen grid cells are pushed east.
+    index 0 and the northern most box also has index zero. Inputs on the border between grid cells are pushed east.
     """
     if res == 1:
         inlon = lon

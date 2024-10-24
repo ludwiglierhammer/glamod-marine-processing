@@ -51,7 +51,7 @@ Inargs:
 -------
 data_path: marine data path in file system
 release: release tag
-update: udpate tag
+update: update tag
 dataset: dataset tag
 config_path: configuration file path
 sid_dck: source-deck data partition (optional, from config_file otherwise)
@@ -78,7 +78,7 @@ TELL APART MISSING AND FAILED
 ** per qced report, but duplicates are not qced....vaya caña!
 
 Note also that since the qc files have a UID that is the imma UID, not the CDM
-report_id, with the source preprended (ICOADS-30-UID for source ICOADS_R3.0.0),
+report_id, with the source prepended (ICOADS-30-UID for source ICOADS_R3.0.0),
 and I still don't have the rules to build the CDM report_id from the source (any)
 UID:
 
@@ -157,14 +157,14 @@ def get_qc_flags(qc, qc_df_full):
         delimiter=qc_delimiter,
         on_bad_lines="skip",
     )
-    # Map UID to CDM (harcoded source ICOADS_R3.0.0T here!!!!!)
+    # Map UID to CDM (hardcoded source ICOADS_R3.0.0T here!!!!!)
     # and keep only reports from current monthly table
     # qc_df['UID'] = 'ICOADS-30-' + qc_df['UID']
     qc_df.set_index("UID", inplace=True, drop=True)
     qc_df = qc_df.reindex(header_df.index)
     if len(qc_df.dropna(how="all")) == 0:
         # We can have files with nothing other than duplicates (which are not qced):
-        # set qc to not available but don't fail: keep on generating level1e prodcut afterwards
+        # set qc to not available but don't fail: keep on generating level1e product afterwards
         logging.warning(f"No {qc} flags matching")
         qc_avail = False
         return qc_avail, qc_df_full

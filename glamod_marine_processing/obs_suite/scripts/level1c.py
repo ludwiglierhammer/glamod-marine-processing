@@ -21,7 +21,7 @@ of tables, rejecting reports not validating any of these two fields.
       (fail if any fails)
     - Drop corresponding records from all tables
 
-    - Log to json dropped per table per validated field and final numer of
+    - Log to json dropped per table per validated field and final number of
       records in the resulting tables
     - Log to json unique primary_station_id counts
     - Log to json primary_station_id validation rules numbers:
@@ -52,7 +52,7 @@ Inargs:
 -------
 data_path: marine data path in file system
 release: release tag
-update: udpate tag
+update: update tag
 dataset: dataset tag
 config_path: configuration file path
 sid_dck: source-deck data partition (optional, from config_file otherwise)
@@ -71,7 +71,7 @@ datetime corrections......
 ** HEADER.PRIMARY_STATION_ID VALIDATION **
 Due to various reasons, the validation is done in 3 stages and using different methods:
 
-    1. Callsign IDs: use set of validation patterns harcoded here
+    1. Callsign IDs: use set of validation patterns hardcoded here
     2. Rest of IDs: use set of valid patterns per dck in NOC_ANC_INFO json files
     3. All: set all that Liz's ID linkage modified to True. We are parsing the
        history field for a "Corrected primary_station_id" text...maybe it should

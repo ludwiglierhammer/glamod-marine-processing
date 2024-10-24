@@ -123,7 +123,7 @@ def mkdir(directory):
 
 
 def get_abs_path(path):
-    """Get absolut path."""
+    """Get absolute path."""
     return os.path.abspath(path)
 
 

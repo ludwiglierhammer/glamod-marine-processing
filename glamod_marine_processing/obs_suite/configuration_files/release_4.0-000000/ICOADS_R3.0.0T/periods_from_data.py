@@ -1,4 +1,4 @@
-"""Module to transfrom old file with periods to new format."""
+"""Module to transform old file with periods to new format."""
 
 from __future__ import annotations
 

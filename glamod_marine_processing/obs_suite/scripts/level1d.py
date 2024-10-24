@@ -30,7 +30,7 @@ Inargs:
 -------
 data_path: marine data path in file system
 release: release tag
-update: udpate tag
+update: update tag
 dataset: dataset tag
 config_path: configuration file path
 sid_dck: source-deck data partition (optional, from config_file otherwise)
@@ -78,7 +78,7 @@ reload(logging)  # This is to override potential previous config of logging
 
 def map_to_cdm(md_model, meta_df, log_level="INFO"):
     """Map to CDM."""
-    # Atts is a minimum info on vars the cdm mocule requires
+    # Atts is a minimum info on vars the cdm module requires
     meta_cdm_dict = cdm.map_model(meta_df, imodel=md_model, log_level=log_level)
     meta_cdm = pd.DataFrame()
     for table in cdm_tables:

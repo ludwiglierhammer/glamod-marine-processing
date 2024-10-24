@@ -223,7 +223,7 @@ def distr2(invoyage):
 
     This takes the speed and direction reported by the ship and projects it forwards half a time step, it then projects
     it forwards another half time step using the speed and direction for the next report, to which the projected
-    location is then compared. The distances between the projeted and actual locations is returned
+    location is then compared. The distances between the projected and actual locations is returned
     """
     # Compute difference between actual and expected positions after
     # two observations IN REVERSE ORDER
@@ -609,12 +609,12 @@ def mds_full_track_check(invoyage):
     """
     master_qc = mds_track_check(invoyage)
 
-    repititions = 0
+    repetitions = 0
 
     qcs = master_qc
 
     if len(qcs) > 0:
-        while max(qcs) > 0 and repititions < 4:
+        while max(qcs) > 0 and repetitions < 4:
             tempreps = ex.Voyage()
             qc_refs = []
 
@@ -630,7 +630,7 @@ def mds_full_track_check(invoyage):
             for i, qc_ref in enumerate(qc_refs):
                 master_qc[qc_ref] = qcs[i]
 
-            repititions += 1
+            repetitions += 1
 
     i = 0
     for rep in invoyage.rep_feed():
