@@ -13,10 +13,7 @@ import subprocess
 import sys
 
 from glamod_marine_processing.obs_suite.lotus_scripts import (
-    config_array,
-    parser,
-    slurm_preferences,
-)
+    config_array, parser, slurm_preferences)
 from glamod_marine_processing.utilities import load_json, read_txt
 
 
