@@ -63,8 +63,14 @@ from importlib import reload
 
 import pandas as pd
 import simplejson
-from _utilities import (FFS, date_handler, delimiter, paths_exist,
-                        script_setup, table_to_csv)
+from _utilities import (
+    FFS,
+    date_handler,
+    delimiter,
+    paths_exist,
+    script_setup,
+    table_to_csv,
+)
 from cdm_reader_mapper import cdm_mapper as cdm
 
 reload(logging)  # This is to override potential previous config of logging

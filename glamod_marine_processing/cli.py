@@ -10,9 +10,15 @@ import os
 
 import click
 
-from .utilities import (add_to_config, get_abs_path, get_base_path,
-                        get_configuration, load_json, make_release_source_tree,
-                        mkdir)
+from .utilities import (
+    add_to_config,
+    get_abs_path,
+    get_base_path,
+    get_configuration,
+    load_json,
+    make_release_source_tree,
+    mkdir,
+)
 
 CONTEXT_SETTINGS = dict(help_option_names=["-h", "--help"], show_default=True)
 
