@@ -7,6 +7,12 @@ v7.0.1 (unpublished)
 --------------------
 Contributors to this version: Ludwig Lierhammer (:user:`ludwiglierhammer`)
 
+Announcements
+^^^^^^^^^^^^^
+* make preparations for zenodo DOI assignment (:pull:`42`)
+* adding readthedocs documentation (:pull:`42`)
+ Now under Apache v2.0 license (:pull:`42`)
+
 New features and enhancements
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 * add quality checks for both Wind speed and wind direction in level1e script (:issue:`20`, :pull:`22`)
