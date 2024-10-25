@@ -42,7 +42,8 @@ Breaking changes
 Bug fixes
 ^^^^^^^^^
 * fixing observation suite level1e tests (:pull:`17`)
-* level1e: change QC mapping from ``v7.0.0`` is now running by setting values of ``location_quality`` and ``report_time_quality`` to ``str`` (:pull:`18`)
+* level1e: changed QC mapping from ``v7.0.0`` is now running by setting values of ``location_quality`` and ``report_time_quality`` to ``str`` (:pull:`18`)
+* level1c: use only observation reports that are also available in the header file (:pull:`44`)
 
 v7.0.0 (2024-06-13)
 -------------------
