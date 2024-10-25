@@ -169,6 +169,8 @@ for sid_dck in process_list:
     if array_size == 0:
         logging.warning(f"{sid_dck}: no jobs for partition")
         continue
+    if LEVEL in slurm_preferences.one_task:
+        array_size = 1
 
     job_file = os.path.join(log_diri, sid_dck + ".slurm")
     taskfarm_file = os.path.join(log_diri, sid_dck + ".tasks")
