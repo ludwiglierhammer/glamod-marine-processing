@@ -203,7 +203,9 @@ def process_table(table_df, table_name):
         params.level_path, FFS.join([table_name, params.fileID]) + ".psv"
     )
     cdm_columns = cdm_tables.get(table_name).keys()
-    table_mask = mask_df.loc[table_df.index]
+    table_df = table_df[table_df.index.isin(mask_df.index)]
+    table_mask = mask_df[mask_df.index.isin(table_df.index)]
+    table_mask = table_mask[~table_mask.index.duplicated()]
     if table_name == "header":
         table_df["history"] = table_df["history"] + f";{history_tstmp}. {history}"
         validation_dict["unique_ids"] = (
@@ -211,7 +213,6 @@ def process_table(table_df, table_name):
             .value_counts(dropna=False)
             .to_dict()
         )
-
     if len(table_df[table_mask["all"]]) > 0:
         table_to_csv(table_df[table_mask["all"]], odata_filename, columns=cdm_columns)
     else:
@@ -250,7 +251,6 @@ validation_dict = {table: {} for table in cdm.properties.cdm_tables}
 
 # -----------------------------------------------------------------------------
 # Settings in configuration file
-dataset_id = "icoads_r3000"
 validated = ["report_timestamp", "primary_station_id"]
 history = "Performed report_timestamp (date_time) and primary_station_id validation"
 history_tstmp = datetime.datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S")
@@ -332,7 +332,6 @@ for field in validated:
 # 4. REPORT INVALIDS PER FIELD  -----------------------------------------------
 # Now clean, keep only all valid:
 mask_df["all"] = mask_df.all(axis=1)
-
 # Report invalids
 validation_dict["invalid"] = {}
 validation_dict["invalid"]["total"] = len(table_df[~mask_df["all"]])
