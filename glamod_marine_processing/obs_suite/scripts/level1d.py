@@ -100,8 +100,10 @@ def process_table(table_df, table_name):
             logging.warning(f"Empty or non existing table {table_name}")
             return
         table_df.set_index("report_id", inplace=True, drop=False)
+        header_ = header_df.copy()
         # by this point, header_df has its index set to report_id, hopefully ;)
-        table_df["primary_station_id"] = header_df["primary_station_id"].loc[
+        table_df = table_df[table_df.index.isin(header_.index)]
+        table_df["primary_station_id"] = header_["primary_station_id"].loc[
             table_df.index
         ]
 

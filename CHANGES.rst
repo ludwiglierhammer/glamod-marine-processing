@@ -37,13 +37,14 @@ Breaking changes
 * ``obs_suite``: starting with year 2014 (:pull:`40`)
 * set BASTION do default machine_ bastion01.core.ichec.ie (:pull:`37`)
 * ``obs_suite``: use duplicate checker from ``cdm_reader_mapper`` instead of NOc correction files in level1b (:pull:`37`)
+* ``obs_suite``: create only one task for level2 (:pull:`45`)
 
 
 Bug fixes
 ^^^^^^^^^
-* fixing observation suite level1e tests (:pull:`17`)
-* level1e: changed QC mapping from ``v7.0.0`` is now running by setting values of ``location_quality`` and ``report_time_quality`` to ``str`` (:pull:`18`)
-* level1c: use only observation reports that are also available in the header file (:pull:`44`)
+* ``obs_suite``: fixing observation suite level1e tests (:pull:`17`)
+* ``obs_suite``: QC mapping from ``v7.0.0`` is now running by setting values of ``location_quality`` and ``report_time_quality`` to ``str`` (:pull:`18`)
+* ``obs_suite``: use only observation reports that are also available in the header file (:pull:`44`, :pull:`45`)
 
 v7.0.0 (2024-06-13)
 -------------------

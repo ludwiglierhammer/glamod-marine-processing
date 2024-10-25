@@ -21,6 +21,8 @@ source_pattern = {
     "level2": "header-????-??-*.psv",
 }
 
+one_task = ["level2"]
+
 nodesi = {
     "level1d": 1,
     "level2": 1,

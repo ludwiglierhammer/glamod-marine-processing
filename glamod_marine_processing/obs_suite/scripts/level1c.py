@@ -205,7 +205,6 @@ def process_table(table_df, table_name):
     cdm_columns = cdm_tables.get(table_name).keys()
     table_df = table_df[table_df.index.isin(mask_df.index)]
     table_mask = mask_df[mask_df.index.isin(table_df.index)]
-    table_mask = table_mask[~table_mask.index.duplicated()]
     if table_name == "header":
         table_df["history"] = table_df["history"] + f";{history_tstmp}. {history}"
         validation_dict["unique_ids"] = (
@@ -269,7 +268,6 @@ if len(table_df) == 0:
     sys.exit(1)
 
 table_df.set_index("report_id", inplace=True, drop=False)
-
 # Initialize mask
 mask_df = pd.DataFrame(index=table_df.index, columns=validated + ["all"])
 mask_df[validated] = True
