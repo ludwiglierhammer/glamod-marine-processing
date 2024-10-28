@@ -10,12 +10,6 @@ import pandas as pd
 from cdm_reader_mapper import cdm_mapper
 
 
-def get_outfile_name(basepath, tag, dataset, year, month):
-    """Generate output file name."""
-    filename = f"{dataset}_{tag}_{year:04d}-{month:02d}"
-    return f"{basepath}/{tag}/{os.path.basename(filename)}"
-
-
 def get_year_month(df, time_axis):
     """Group dataframe by year-month."""
     dates = df[time_axis]
