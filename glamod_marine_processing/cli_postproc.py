@@ -34,6 +34,7 @@ def post_proc_cli(
     dataset,
     data_directory,
     source_pattern,
+    available_date_information,
     overwrite,
 ):
     """Entry point for the pre-processing command line interface."""
@@ -68,5 +69,6 @@ def post_proc_cli(
         release=release,
         update=update,
         prev_deck_list=prev_deck_list,
+        date_avail=available_date_information,
         overwrite=overwrite,
     )
