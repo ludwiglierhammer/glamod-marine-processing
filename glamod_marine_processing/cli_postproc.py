@@ -34,6 +34,7 @@ def post_proc_cli(
     dataset,
     data_directory,
     source_pattern,
+    available_date_information,
     overwrite,
 ):
     """Entry point for the pre-processing command line interface."""
@@ -53,13 +54,7 @@ def post_proc_cli(
     future_deck = open_deck_list_file(p.config_files_path, f"{level}.json")
     prev_deck_list = open_deck_list_file(p.config_files_path, f"{prev_level}.json")
     input_dir = os.path.join(p.data_directory, release, dataset, "level1a")
-    output_dir = os.path.join(
-        p.data_directory,
-        release,
-        dataset,
-        "level1a",
-        future_deck[0],
-    )
+    output_dir = os.path.join(input_dir, future_deck[0])
     mkdir(output_dir)
 
     post_processing(
@@ -68,5 +63,6 @@ def post_proc_cli(
         release=release,
         update=update,
         prev_deck_list=prev_deck_list,
+        date_avail=available_date_information,
         overwrite=overwrite,
     )

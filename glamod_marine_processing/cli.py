@@ -256,6 +256,12 @@ class Options:
             is_flag=True,
             help="Do some preprocessing for qc_suite only.",
         )
+        self.available_date_information = click.option(
+            "-date_avail",
+            "--available_date_information",
+            is_flag=True,
+            help="Set if date information is available in input file names",
+        )
         self.overwrite = click.option(
             "-o",
             "--overwrite",
