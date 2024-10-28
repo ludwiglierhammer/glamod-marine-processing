@@ -3,9 +3,8 @@
 from __future__ import annotations
 
 import glob
+import itertools
 import os
-import subprocess
-from itertools import chain
 from pathlib import Path
 
 import pandas as pd
@@ -31,7 +30,7 @@ def get_file_dict(file_list):
     return file_dict
 
 
-def concat_open_files(idir, odir, table, release, update, prev_deck_list):
+def concat_unknow_date_files(idir, odir, table, release, update, prev_deck_list):
     """Open files and concat them."""
     if table == "header":
         time_axis = "report_timestamp"
@@ -53,17 +52,26 @@ def concat_open_files(idir, odir, table, release, update, prev_deck_list):
             df.to_csv(oname, sep="|", header=header, mode=mode, index=False)
 
 
-def concat_closed_files(idir, odir, table, release, update, prev_deck_list):
+def concat_know_date_files(idir, odir, table, release, update, prev_deck_list):
     """Concat file with subprocess."""
     file_list = [
-        glob.glob(os.path.join(idir, prev_deck, "*")) for prev_deck in prev_deck_list
+        glob.glob(os.path.join(idir, prev_deck, f"{table}-*"))
+        for prev_deck in prev_deck_list
     ]
-    file_list = list(chain(*file_list))
+    file_list = list(itertools.chain(*file_list))
     file_dict = get_file_dict(file_list)
     for name, flist in file_dict.items():
-        subprocess.call(
-            ["/bin/cat"] + flist + [">", os.path.join(odir, name)], shell=False
-        )
+        with open(os.path.join(odir, name), "w") as outfile:
+            i = 0
+            for fname in flist:
+                if i > 0:
+                    skip = 1
+                else:
+                    skip = 0
+                with open(fname) as infile:
+                    for line in itertools.islice(infile, skip, None):
+                        outfile.write(line)
+                i += 1
 
 
 def post_processing(
@@ -102,7 +110,7 @@ def post_processing(
 
     for table in cdm_mapper.properties.cdm_tables:
         if date_avail is True:
-            concat_closed_files(
+            concat_know_date_files(
                 idir=idir,
                 odir=odir,
                 table=table,
@@ -111,7 +119,7 @@ def post_processing(
                 prev_deck_list=prev_deck_list,
             )
         else:
-            concat_open_files(
+            concat_unknow_date_files(
                 idir=idir,
                 odir=odir,
                 table=table,
