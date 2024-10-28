@@ -39,7 +39,7 @@ parser.add_argument(
     "-destination", type=str, help="Path to output directory", required=True
 )
 parser.add_argument(
-    "-release", type=str, help="Release identifier, e.g. release_5.1", required=True
+    "-release", type=str, help="Release identifier, e.g. release_7.0", required=True
 )
 parser.add_argument(
     "-update", type=str, help="Update identifier, e.g. 000000", required=True
@@ -157,8 +157,8 @@ for yr in range(y_init - 1, y_end + 2):
 
             # %% load drifter data PT=7 from level1a excluded
             fn = os.path.join(
-                in_dir[:-8],
-                "level1a/excluded",
+                in_dir.replace({"level1d": "level1a"}),
+                "excluded",
                 dl,
                 str(yr) + "-" + f"{mo:02d}" + f"-{rel_id}-{upd_id}-c1_PT.psv",
             )
@@ -227,7 +227,6 @@ for yr in range(y_init - 1, y_end + 2):
             data_dl = data_dl[((~bad_data) & ship_mask & duplicate_mask)]
 
             data = pd.concat([data, data_dl])
-            print([(len(data_dl.index)), len(data.index)])
 
         data.reset_index(inplace=True)
         if data.empty:
