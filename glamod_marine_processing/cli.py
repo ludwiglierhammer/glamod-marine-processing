@@ -256,7 +256,7 @@ class Options:
             is_flag=True,
             help="Do some preprocessing for qc_suite only.",
         )
-        self.date_avail = click.option(
+        self.available_date_information = click.option(
             "-date_avail",
             "--available_date_information",
             is_flag=True,

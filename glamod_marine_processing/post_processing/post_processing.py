@@ -41,7 +41,8 @@ def concat_open_files(idir, odir, table, release, update, prev_deck_list):
 
 def concat_closed_files(idir, odir, table, release, update, prev_deck_list):
     """Concat file with subprocess."""
-    pass
+    print(1)
+    exit()
 
 
 def post_processing(
