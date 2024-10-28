@@ -68,9 +68,9 @@ def post_processing(
         Input data directory
     odir: str
         Output data directory
-    release: str, default: release_7.0
+    release: str
         Release name.
-    update: str, default: 000000
+    update: str
         Update name.
     prev_deck_list: list
         List of previous level1a decks.
