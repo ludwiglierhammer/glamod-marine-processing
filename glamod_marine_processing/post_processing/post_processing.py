@@ -28,12 +28,40 @@ def get_year_month(df, time_axis):
     return dates_pd.to_period("M")
 
 
+def concat_open_files(idir, odir, table, release, update, prev_deck_list):
+    """Open files and concat them."""
+    if table == "header":
+        time_axis = "report_timestamp"
+    else:
+        time_axis = "date_time"
+    for prev_deck in prev_deck_list:
+        table_dir = os.path.join(idir, prev_deck)
+        table_df = cdm_mapper.read_tables(table_dir, cdm_subset=table)
+        if table_df.empty:
+            continue
+        year_month = get_year_month(table_df, time_axis)
+        for ym, df in table_df.groupby(year_month):
+            oname = os.path.join(odir, f"{table}-{ym}-{release}-{update}.psv")
+            header = None
+            mode = "a"
+            if not os.path.isfile(oname):
+                mode = "w"
+                header = df.columns
+            df.to_csv(oname, sep="|", header=header, mode=mode, index=False)
+
+
+def concat_closed_files(idir, odir, table, release, update, prev_deck_list):
+    """Concat file with subprocess."""
+    pass
+
+
 def post_processing(
     idir,
     odir,
     release=None,
     update=None,
     prev_deck_list=None,
+    date_avail=False,
     overwrite=False,
 ):
     """Split ICOADS data into monthly deck files.
@@ -51,6 +79,8 @@ def post_processing(
         Update name.
     prev_deck_list: list
         List of previous level1a decks.
+    date_avail, bool
+        Set True if date information is in file names.
     overwrite: bool
         If True, overwrite already existing files.
     """
@@ -64,21 +94,20 @@ def post_processing(
         update = _update
 
     for table in cdm_mapper.properties.cdm_tables:
-        if table == "header":
-            time_axis = "report_timestamp"
-        else:
-            time_axis = "date_time"
-        for prev_deck in prev_deck_list:
-            table_dir = os.path.join(idir, prev_deck)
-            table_df = cdm_mapper.read_tables(table_dir, cdm_subset=table)
-            if table_df.empty:
-                continue
-            year_month = get_year_month(table_df, time_axis)
-            for ym, df in table_df.groupby(year_month):
-                oname = os.path.join(odir, f"{table}-{ym}-{release}-{update}.psv")
-                header = None
-                mode = "a"
-                if not os.path.isfile(oname):
-                    mode = "w"
-                    header = df.columns
-                df.to_csv(oname, sep="|", header=header, mode=mode, index=False)
+        if date_avail is True:
+            concat_closed_files(
+                idir=idir,
+                odir=odir,
+                table=table,
+                release=release,
+                update=update,
+                prev_deck_list=prev_deck_list,
+            )
+        concat_open_files(
+            idir=idir,
+            odir=odir,
+            table=table,
+            release=release,
+            update=update,
+            prev_deck_list=prev_deck_list,
+        )
