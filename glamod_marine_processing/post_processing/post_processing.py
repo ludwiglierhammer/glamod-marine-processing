@@ -9,11 +9,6 @@ from pathlib import Path
 import pandas as pd
 from cdm_reader_mapper import cdm_mapper
 
-# default input file source pattern
-_dataset = "C-RAID_1.2"
-_release = "release_7.0"
-_update = "000000"
-
 
 def get_outfile_name(basepath, tag, dataset, year, month):
     """Generate output file name."""
@@ -88,10 +83,6 @@ def post_processing(
         prev_deck_list = [
             Path(x).name for x in glob.glob(os.path.join(idir, "log", "*"))
         ]
-    if release is None:
-        release = _release
-    if update is None:
-        update = _update
 
     for table in cdm_mapper.properties.cdm_tables:
         if date_avail is True:
