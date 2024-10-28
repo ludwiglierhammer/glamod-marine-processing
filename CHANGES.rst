@@ -11,7 +11,7 @@ Announcements
 ^^^^^^^^^^^^^
 * make preparations for zenodo DOI assignment (:pull:`42`)
 * adding readthedocs documentation (:pull:`42`)
- Now under Apache v2.0 license (:pull:`42`)
+* Now under Apache v2.0 license (:pull:`42`)
 
 New features and enhancements
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -23,6 +23,7 @@ New features and enhancements
 * ``obs_suite``: configuration files for C-RAID (:pull:`25`)
 * ``obs_suite``: running with C-RAID data (:pull:`25`)
 * ``obs_suite`` and ``qc_suite``: optionally, run jobs in parallel with gnu_parallel (:pull:`41`)
+* ``post_proc``: optionally, post-processing for ICOADS data (:pull:`46`)
 
 Breaking changes
 ^^^^^^^^^^^^^^^^
