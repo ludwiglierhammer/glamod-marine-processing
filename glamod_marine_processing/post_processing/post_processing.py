@@ -4,6 +4,8 @@ from __future__ import annotations
 
 import glob
 import os
+import subprocess
+from itertools import chain
 from pathlib import Path
 
 import pandas as pd
@@ -15,6 +17,18 @@ def get_year_month(df, time_axis):
     dates = df[time_axis]
     dates_pd = pd.DatetimeIndex(dates)
     return dates_pd.to_period("M")
+
+
+def get_file_dict(file_list):
+    """Convert data file list to data file dict. Keys: file names."""
+    file_dict = {}
+    for ifile in file_list:
+        ifile_name = Path(ifile).name
+        if ifile_name in file_dict.keys():
+            file_dict[ifile_name].append(ifile)
+        else:
+            file_dict[ifile_name] = [ifile]
+    return file_dict
 
 
 def concat_open_files(idir, odir, table, release, update, prev_deck_list):
@@ -41,8 +55,15 @@ def concat_open_files(idir, odir, table, release, update, prev_deck_list):
 
 def concat_closed_files(idir, odir, table, release, update, prev_deck_list):
     """Concat file with subprocess."""
-    print(1)
-    exit()
+    file_list = [
+        glob.glob(os.path.join(idir, prev_deck, "*")) for prev_deck in prev_deck_list
+    ]
+    file_list = list(chain(*file_list))
+    file_dict = get_file_dict(file_list)
+    for name, flist in file_dict.items():
+        subprocess.call(
+            ["/bin/cat"] + flist + [">", os.path.join(odir, name)], shell=False
+        )
 
 
 def post_processing(
@@ -89,11 +110,12 @@ def post_processing(
                 update=update,
                 prev_deck_list=prev_deck_list,
             )
-        concat_open_files(
-            idir=idir,
-            odir=odir,
-            table=table,
-            release=release,
-            update=update,
-            prev_deck_list=prev_deck_list,
-        )
+        else:
+            concat_open_files(
+                idir=idir,
+                odir=odir,
+                table=table,
+                release=release,
+                update=update,
+                prev_deck_list=prev_deck_list,
+            )
