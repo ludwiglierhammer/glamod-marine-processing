@@ -46,6 +46,11 @@ Now you can install several dependency versions:
 
 This will install the package but you can still edit it and you don't need the package in your :code:`PYTHONPATH`.
 
+Documentation
+-------------
+
+The official documentation is at https://glamod-marine-processing.readthedocs.io/
+
 Usage
 -----
 ``glamod-marine-processing`` is a python tool for creating SLURM scripts for several GLAMOD marine processing workflows.
