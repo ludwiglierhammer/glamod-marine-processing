@@ -164,7 +164,7 @@ def qc_cli(
     obs_config_directory = os.path.join(
         p.home_directory, "obs_suite", "configuration_files", release, update, dataset
     )
-    which_list = os.path.join(obs_config_directory, "level1d.json.txt")
+    which_list = os.path.join(obs_config_directory, "level1d.json")
     json_list = load_json(which_list)
     dck_list = os.path.join(obs_config_directory, json_list.get("process_list_file_qc"))
     dck_period = os.path.join(
