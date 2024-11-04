@@ -14,7 +14,7 @@ def load_noc_anc_info(**kwargs):
 def load_pub47(**kwargs):
     """Load Pub47 data from cdm-testdata."""
     load_file(
-        "Pub47/monthly/2022-01-01.csv",
+        "Pub47/monthly/pub47-2022-01.csv",
         **kwargs,
     )
 

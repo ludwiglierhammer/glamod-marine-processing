@@ -193,13 +193,7 @@ if md_avail:
         params.data_path, params.release, params.md_subdir, "monthly"
     )
     logging.info(f"Setting MD path to {md_path}")
-    metadata_filename = os.path.join(
-        md_path, FFS.join([params.year, params.month, "01.csv"])
-    )
-    # removed .gz to make sure unzipping is not causing high I/O (just a guess)
-    metadata_fn_scratch = os.path.join(
-        scratch_path, FFS.join([params.year, params.month, "01.csv"])
-    )
+    metadata_filename = os.path.join(md_path, f"pub47-{params.year}-{params.month}.csv")
 
     if not os.path.isfile(metadata_filename):
         if int(params.year) > int(params.md_last_yr_avail) or int(params.year) < int(
