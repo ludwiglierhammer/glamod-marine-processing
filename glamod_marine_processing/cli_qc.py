@@ -9,6 +9,7 @@ from __future__ import annotations
 import datetime
 import os
 from types import SimpleNamespace
+from warnings import warn
 
 import click
 
@@ -160,13 +161,24 @@ def qc_cli(
     qc_config = os.path.join(p.release_directory, qc_config)
     save_json(config, qc_config)
 
-    qc_source = os.path.join(p.data_directory, release, dataset, "level1a")
+    qc_source = os.path.join(p.data_directory, release, dataset, "level1d")
     obs_config_directory = os.path.join(
         p.home_directory, "obs_suite", "configuration_files", release, update, dataset
     )
-    which_list = os.path.join(obs_config_directory, "level1d.json.txt")
+    which_list = os.path.join(obs_config_directory, "level1d.json")
     json_list = load_json(which_list)
-    dck_list = os.path.join(obs_config_directory, json_list.get("process_list_file"))
+    process_list = json_list.get("process_list_file_qc")
+    if process_list is None:
+        warn(
+            f"No QC-specific process list file (process_list_file_qc) is defined in {which_list}."
+            + "Try obs_suite level1d process list file (process_list_file)."
+        )
+    process_list = json_list.get("process_list_file")
+    if process_list is None:
+        raise FileNotFoundError(
+            f"No process list file (process_list_file) is defined in {which_list}."
+        )
+    dck_list = os.path.join(obs_config_directory, process_list)
     dck_period = os.path.join(
         obs_config_directory, json_list.get("release_periods_file")
     )

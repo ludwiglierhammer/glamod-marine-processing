@@ -74,7 +74,8 @@ if not os.path.isdir(logdir):
 
 # %%------------------------------------------------------------------------------
 
-job_ids = list(range(85, 97))
+job_dict = load_json(jobsfile)
+job_ids = [job["index"] for job in job_dict["jobs"]]
 
 taskfile = os.path.join(logdir, slurm_preferences.taskfile[mode])
 slurmfile = os.path.join(logdir, slurm_preferences.slurmfile[mode])
