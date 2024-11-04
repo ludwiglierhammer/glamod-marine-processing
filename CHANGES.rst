@@ -40,6 +40,7 @@ Breaking changes
 * ``obs_suite``: use duplicate checker from ``cdm_reader_mapper`` instead of NOc correction files in level1b (:pull:`37`)
 * ``obs_suite``: create only one task for level2 (:pull:`45`)
 * ``obs_suite``: rename Pub47 data from {year}-{month}-01.csv to pub47-{year}-{month}.csv in level1d script (:pull:`48`)
+* ``obs_suite``: set release period to 2015 to 2023 (:pull:`49`)
 
 
 Bug fixes
