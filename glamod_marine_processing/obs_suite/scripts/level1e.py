@@ -463,7 +463,11 @@ if qc_avail:
 pass_time = None
 if params.no_qc_suite:
     qc_avail = True
+    # Set report_quality to passed if report_quality is not checked
     qc_df["report_quality"] = header_df["report_quality"]
+    qc_df["report_quality"] = qc_df["report_quality"].mask(
+        qc_df["report_quality"] == "2", "0"
+    )
     pass_time = header_df["report_time_quality"]
 
 # 2. APPLY FLAGS, LOOP THROUGH TABLES -----------------------------------------
@@ -485,7 +489,7 @@ for table in obs_tables:
     flag = True if table in tables_in and qc_avail else False
     process_table(table, table, pass_time=pass_time)
 
-# 3 wind QC
+# 3. wind QC
 table_wd = cdm.read_tables(
     params.level_path, params.fileID, cdm_subset=["observations-wd"]
 )
