@@ -430,9 +430,10 @@ for table in obs_tables:
         tables_in.append(table)
 
 if len(tables_in) == 1:
-    logging.warning(
+    logging.error(
         f"NO OBS TABLES AVAILABLE: {params.sid_dck}, period {params.year}-{params.month}"
     )
+    sys.exit()
 
 # DO THE DATA PROCESSING ------------------------------------------------------
 header_df.set_index("report_id", inplace=True, drop=False)
