@@ -240,7 +240,18 @@ def process_table(table_df, table_name, pass_time=None):
             return
         table_df.set_index("report_id", inplace=True, drop=False)
 
-    qc_dict[table_name] = {"total": len(table_df)}
+    previous = len(table_df)
+    table_df = table_df[table_df["report_id"].isin(report_ids)]
+    total = len(table_df)
+    removed = previous - total
+    qc_dict[table_name] = {
+        "total": total,
+        "deleted": removed,
+    }
+    if table_df.empty:
+        logging.warning(f"Empty table {table_name}.")
+        return
+
     if flag:
         qc = table_qc.get(table_name).get("qc")
         element = table_qc.get(table_name).get("element")
@@ -290,6 +301,7 @@ def process_table(table_df, table_name, pass_time=None):
     odata_filename = os.path.join(
         params.level_path, FFS.join([table_name, params.fileID]) + ".psv"
     )
+
     table_to_csv(table_df, odata_filename, columns=cdm_columns)
 
 
@@ -434,6 +446,19 @@ if len(tables_in) == 1:
         f"NO OBS TABLES AVAILABLE: {params.sid_dck}, period {params.year}-{params.month}"
     )
     sys.exit()
+
+# Remove report_ids without any observations
+report_ids = pd.Series()
+for table_in in tables_in:
+    df_ = cdm.read_tables(
+        params.prev_level_path,
+        params.prev_fileID,
+        cdm_subset=table_in,
+        na_values="null",
+    )
+    report_ids = pd.concat([report_ids, df_["report_id"]], ignore_index=True)
+
+report_ids = report_ids[report_ids.duplicated()]
 
 # DO THE DATA PROCESSING ------------------------------------------------------
 header_df.set_index("report_id", inplace=True, drop=False)
