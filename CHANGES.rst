@@ -41,7 +41,8 @@ Breaking changes
 * ``obs_suite``: create only one task for level2 (:pull:`45`)
 * ``obs_suite``: rename Pub47 data from {year}-{month}-01.csv to pub47-{year}-{month}.csv in level1d script (:pull:`48`)
 * ``obs_suite``: set release period to 2015 to 2023 (:pull:`49`)
-
+* ``obs_suite``: if no qc files available: set report_quality from 2 (not checked) to 0 (passed) in level1e script (:pull:`50`)
+* ``obs_suite``: if report_id is not available in any observations: remove report_id from header (and vice versa) in level1e script (:pull:`50`)
 
 Bug fixes
 ^^^^^^^^^

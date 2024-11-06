@@ -225,6 +225,10 @@ for table in cdm.properties.cdm_tables:
         table_df.drop(element + ".former", axis=1)
         table_df.drop(element + ".isChange", axis=1)
 
+    if table_df.empty:
+        logging.warning("Empty table {table}")
+        continue
+
     # Track duplicate status
     if table == "header":
         correction_dict["duplicates"] = {}
@@ -249,6 +253,9 @@ for table in cdm.properties.cdm_tables:
     cdm_columns = cdm_tables.get(table).keys()
     # BECAUSE LIZ'S datetimes have UTC info:
     # ValueError: Tz-aware datetime.datetime cannot be converted to datetime64 unless utc=True
+    if table_df.empty:
+        continue
+
     table_df["monthly_period"] = pd.to_datetime(
         table_df[datetime_col], errors="coerce", utc=True
     ).dt.to_period("M")
