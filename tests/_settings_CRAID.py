@@ -79,7 +79,7 @@ manipulation = {
         ]
     },
     "level1e": {
-        ("header", "report_quality"): ["0", "0", "0", "0", "0", "0", "0", "0", "0", "0"]
+        ("header", "report_quality"): ["1", "0", "1", "0", "1", "0", "1", "0", "0", "0"]
     },
 }
 
