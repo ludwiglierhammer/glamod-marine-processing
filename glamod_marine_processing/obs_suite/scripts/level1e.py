@@ -497,6 +497,8 @@ if params.no_qc_suite:
     )
     pass_time = header_df["report_time_quality"]
 
+qc_df = qc_df[qc_df.index.isin(report_ids)]
+
 # 2. APPLY FLAGS, LOOP THROUGH TABLES -----------------------------------------
 
 # Test new things with 090-221. See 1984-03. What happens if not POS flags matching?
