@@ -456,7 +456,8 @@ for table_in in tables_in:
         cdm_subset=table_in,
         na_values="null",
     )
-    report_ids = pd.concat([report_ids, df_["report_id"]], ignore_index=True)
+    if not df_.empty:
+        report_ids = pd.concat([report_ids, df_["report_id"]], ignore_index=True)
 
 report_ids = report_ids[report_ids.duplicated()]
 
