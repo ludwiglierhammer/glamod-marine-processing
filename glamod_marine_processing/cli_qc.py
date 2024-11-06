@@ -9,7 +9,6 @@ from __future__ import annotations
 import datetime
 import os
 from types import SimpleNamespace
-from warnings import warn
 
 import click
 
@@ -167,12 +166,6 @@ def qc_cli(
     )
     which_list = os.path.join(obs_config_directory, "level1d.json")
     json_list = load_json(which_list)
-    process_list = json_list.get("process_list_file_qc")
-    if process_list is None:
-        warn(
-            f"No QC-specific process list file (process_list_file_qc) is defined in {which_list}."
-            + "Try obs_suite level1d process list file (process_list_file)."
-        )
     process_list = json_list.get("process_list_file")
     if process_list is None:
         raise FileNotFoundError(
