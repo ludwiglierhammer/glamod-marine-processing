@@ -9,7 +9,7 @@ Contributors to this version: Ludwig Lierhammer (:user:`ludwiglierhammer`)
 
 Announcements
 ^^^^^^^^^^^^^
-* make preparations for zenodo DOI assignment (:pull:`42`)
+* make preparations for zenodo DOI assignment (:issue:`4`, :pull:`42`)
 * adding readthedocs documentation (:pull:`42`)
 * Now under Apache v2.0 license (:pull:`42`)
 
