@@ -223,21 +223,6 @@ class Options:
             "--work_directory",
             help="Directory path of the log and template files. By default, take directory path from machine-depending configuration file.",
         )
-        self.split_files = click.option(
-            "-split",
-            "--split_files",
-            is_flag=True,
-            help="Step 1: Splitting PUB47 data files.",
-        )
-        self.merge_countries = click.option(
-            "-merge", "--merge_countries", is_flag=True, help="Step 2: Merge countries."
-        )
-        self.extract_for_cds = click.option(
-            "-extract",
-            "--extract_for_cds",
-            is_flag=True,
-            help="Step 3: Extract for CDS",
-        )
         self.corrections_version = click.option(
             "-c",
             "--corrections_version",
