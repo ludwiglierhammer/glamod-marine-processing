@@ -262,6 +262,13 @@ class Options:
             is_flag=True,
             help="Set if date information is available in input file names",
         )
+        self.additional_directories = click.option(
+            "-add_dirs",
+            "--additional_directories",
+            multiple=True,
+            default=["excluded", "invalid"],
+            help="Additional direcotires to merge included data.",
+        )
         self.overwrite = click.option(
             "-o",
             "--overwrite",
