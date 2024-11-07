@@ -104,19 +104,20 @@ for yr in range(y_init - 1, y_end + 2):
                 cdm_subset=["header"],
             )
             if not tmp.empty:
-                tmp.rename(columns={"latitude": "LAT"}, inplace=True)
-                tmp.rename(columns={"longitude": "LON"}, inplace=True)
-                tmp.rename(columns={"primary_station_id": "ID"}, inplace=True)
-                tmp.rename(
-                    columns={"platform_type": "PT"}, inplace=True
-                )  # this is transformed based on platform_type.json in code tables
-                tmp.rename(columns={"report_id": "UID"}, inplace=True)
-                tmp.rename(columns={"report_quality": "IRF"}, inplace=True)
-                tmp.rename(columns={"station_course": "DS"}, inplace=True)
-                tmp.rename(columns={"station_speed": "VS"}, inplace=True)
-                tmp.rename(columns={"duplicate_status": "dup_flag"}, inplace=True)
-                tmp.rename(columns={"duplicates": "dups"}, inplace=True)
-
+                tmp = tmp.rename(
+                    columns={
+                        "latitude": "LAT",
+                        "longitude": "LON",
+                        "primary_station_id": "ID",
+                        "platform_type": "PT",
+                        "report_id": "UID",
+                        "report_quality": "IRF",
+                        "station_course": "DS",
+                        "station_speed": "VS",
+                        "duplicate_status": "dup_flag",
+                        "duplicates": "dups",
+                    }
+                )
                 tmp["YR"] = tmp["report_timestamp"].apply(lambda x: x[0:4])
                 tmp["MO"] = tmp["report_timestamp"].apply(lambda x: x[5:7])
                 tmp["DY"] = tmp["report_timestamp"].apply(lambda x: x[8:10])
@@ -130,17 +131,22 @@ for yr in range(y_init - 1, y_end + 2):
                 data_dl.loc[loc0].IRF = 1
                 data_dl.loc[loc1].IRF = 0
                 data_dl = data_dl.set_index("UID")
-            for obs_val in obs_vals_:
+
+            for obs_val, obs_name in obs_vals_.items():
                 # %%from obsevations_at,
                 tmp = read_tables(
                     os.path.join(in_dir, dl),
                     f"{yr}-{mo:02d}-{rel_id}-{upd_id}",
-                    cdm_subset=["observations-{obs_val.lower()}"],
+                    cdm_subset=[f"observations-{obs_name}"],
                 )
                 if not tmp.empty:
-                    tmp.rename(columns={"report_id": "UID"}, inplace=True)
-                    tmp.rename(columns={"observation_value": obs_val}, inplace=True)
-                    if obs_val not in ["WS", "WD"]:
+                    tmp = tmp.rename(
+                        columns={
+                            "report_id": "UID",
+                            "observation_value": obs_val,
+                        }
+                    )
+                    if obs_val not in ["W", "D"]:
                         tmp = tmp.astype({obs_val: "float"})
                     tmp = tmp[["UID", obs_val]].set_index("UID")
                     if obs_val in ["AT", "SST", "DPT"]:
@@ -151,13 +157,13 @@ for yr in range(y_init - 1, y_end + 2):
 
             # %% 'bad_data' set to False
             if not data_dl.empty:
-                data_dl.loc[:, "bad_data"] = False
+                data_dl["bad_data"] = False
                 # #%% 'outfile' set to MSNG
-                data_dl.loc[:, "outfile"] = None
+                data_dl["outfile"] = None
 
             # %% load drifter data PT=7 from level1a excluded
             fn = os.path.join(
-                in_dir.replace({"level1d": "level1a"}),
+                in_dir.replace("level1d", "level1a"),
                 "excluded",
                 dl,
                 str(yr) + "-" + f"{mo:02d}" + f"-{rel_id}-{upd_id}-c1_PT.psv",
@@ -175,18 +181,17 @@ for yr in range(y_init - 1, y_end + 2):
                 )
 
                 drifters = drifters[drifters["PT"] == "7"]
-
                 if not drifters.empty:
                     print("Adding drifters")
-                    drifters.loc[:, "bad_data"] = False
-                    drifters.loc[:, "outfile"] = None
+                    drifters["bad_data"] = False
+                    drifters["outfile"] = None
+                    drifters["dup_flag"] = None
                     # here UID is source_uid; add prepend
                     prepend = "ICOADS-302-"
-                    # drifters.loc[:,"UID"] = drifters["UID"].apply(lambda x: f"{prepend+x}")
-                    drifters["UID"] = prepend + drifters.UID
+                    drifters["UID"] = prepend + drifters["UID"]
                     drifters = drifters.set_index("UID")
                     # add to data dataframe
-                    data_dl = data_dl.merge(drifters, on="UID", how="left")
+                    data_dl = pd.concat([data_dl, drifters])  # , ignore_index=True)
 
             if data_dl.empty:
                 print("Dataframe is empty. Skipping")
@@ -196,7 +201,7 @@ for yr in range(y_init - 1, y_end + 2):
             # unique_duplicates = list(set(duplicates))
             # %% merge duplicate flags
             # Need to replace NaNs in dup_flag column with 4s
-            data_dl[["dup_flag"]] = data_dl[["dup_flag"]].fillna("4")
+            data_dl["dup_flag"] = data_dl["dup_flag"].fillna("4")
             # For drifters we need to replace dup with the IRF flag
 
             data_dl.loc[
@@ -228,17 +233,18 @@ for yr in range(y_init - 1, y_end + 2):
 
             data = pd.concat([data, data_dl])
 
-        data.reset_index(inplace=True)
+        # data.reset_index(inplace=True)
         if data.empty:
             print("All dataframes are empty")
         else:
-            print("Writing file")
+            out_file = os.path.join(out_dir, f"{yr:04d}-{mo:02d}.psv")
+            print(f"Writing file: {out_file}")
             data = data.sort_values(
                 ["YR", "MO", "DY", "HR", "UID"], axis=0, ascending=True
             )
             data = data.reindex(columns=outcols_)
             data.to_csv(
-                os.path.join(out_dir, f"{yr:04d}-{mo:02d}.psv"),
+                out_file,
                 sep="|",
                 header=False,
                 index=False,
