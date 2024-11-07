@@ -242,6 +242,7 @@ for yr in range(y_init - 1, y_end + 2):
             data = data.sort_values(
                 ["YR", "MO", "DY", "HR", "UID"], axis=0, ascending=True
             )
+            data["UID"] = data.index
             data = data.reindex(columns=outcols_)
             data.to_csv(
                 out_file,
