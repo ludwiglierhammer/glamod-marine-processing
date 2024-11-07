@@ -71,7 +71,7 @@ else:
             break
 
 y_init = np.minimum(yi, 2022)
-y_end = np.minimum(ye, 2022)
+y_end = np.maximum(ye, 1948)
 
 for yr in range(y_init - 1, y_end + 2):
     # expanded to include dec of the previous year and jan of the following, for buddy checks (i think)
