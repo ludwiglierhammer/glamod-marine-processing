@@ -1119,7 +1119,6 @@ class MarineReport:
         # trim trailing comma off string and add newline
         repout = repout[:-1]
         repout.append("\n")
-        repout = list(map(str, repout))
         repout = "".join(repout)
         return repout
 
@@ -1159,7 +1158,6 @@ class MarineReport:
                 repout.append(",")
         repout = repout[:-1]
         repout.append("\n")
-        repout = list(map(str, repout))
         repout = "".join(repout)
         return repout
 
