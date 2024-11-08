@@ -83,13 +83,13 @@ This package was created with Cookiecutter_ and the `audreyfeldroy/cookiecutter-
 
 .. _C3S: https://climate.copernicus.eu/
 
-.. _Contributing Guidelines: https://github.com/glamod/glamod-marine-processing/blob/main/CONTRIBUTING.rst
+.. _Contributing Guidelines: https://github.com/glamod/glamod-marine-processing/blob/master/CONTRIBUTING.rst
 
 .. _Cookiecutter: https://github.com/cookiecutter/cookiecutter/
 
 .. _issue tracker: https://github.com/glamod/glamod-marine-processing/issues
 
-.. _LICENSE: https://github.com/glamod/glamod-marine-processing/blob/main/LICENSE
+.. _LICENSE: https://github.com/glamod/glamod-marine-processing/blob/master/LICENSE
 
 .. _NOC: https://noc.ac.uk/
 
