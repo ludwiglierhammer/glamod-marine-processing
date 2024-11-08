@@ -19,6 +19,8 @@ Contributors
 
 * Elizabeth Kent <eck@noc.ac.uk> `@lizkent <https://github.com/lizkent>`_
 
+* Joseph Siddons <joseph.siddons@noc.ac.uk> `@jtsiddons <https://github.com/jtsiddons>`_
+
 Previous Contributors
 ---------------------
 

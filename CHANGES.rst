@@ -9,9 +9,10 @@ Contributors to this version: Ludwig Lierhammer (:user:`ludwiglierhammer`)
 
 Announcements
 ^^^^^^^^^^^^^
-* make preparations for zenodo DOI assignment (:issue:`4`, :pull:`42`)
+* make preparations for zenodo DOI assignment (:issue:`4`, :pull:`42`: pull:`54`)
 * adding readthedocs documentation (:pull:`42`)
 * Now under Apache v2.0 license (:pull:`42`)
+* Thanks to NOC, Cookiecutter and GNU parallel (:issue:`53`, :pull:`54`)
 
 New features and enhancements
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
