@@ -13,7 +13,7 @@ GLAMOD marine processing: ``glamod-marine-processing`` toolbox
 +----------------------------+-----------------------------------------------------+
 | Development Status         | |status| |build| |coveralls|                        |
 +----------------------------+-----------------------------------------------------+
-| Funding                    | |funding|                                           |
+| Funding                    | |funding| |noc|                                     |
 +----------------------------+-----------------------------------------------------+
 
 ``glamod-marine-processing`` is a python tool for creating SLURM scripts for several GLAMOD marine processing workflows.
@@ -61,11 +61,15 @@ Credits
 
 ``glamod-marine-processing`` development is funded through Copernicus Climate Change Service (C3S_).
 
+Furthermore, acknowledgments go to National Oceanography Centre (NOC_).
+
 .. _C3S: https://climate.copernicus.eu/
 
 .. _Contributing Guidelines: https://github.com/glamod/glamod-marine-processing/blob/main/CONTRIBUTING.rst
 
 .. _issue tracker: https://github.com/glamod/glamod-marine-processing/issues
+
+.. _NOC: https://noc.ac.uk/
 
 .. |build| image:: https://github.com/glamod/glamod-marine-processing/actions/workflows/ci.yml/badge.svg
         :target: https://github.com/glamod/glamod-marine-processing/actions/workflows/ci.yml
@@ -98,6 +102,10 @@ Credits
 .. |license| image:: https://img.shields.io/github/license/glamod/glamod-marine-processing.svg
         :target: https://github.com/glamod/glamod-marine-processing/blob/main/LICENSE
         :alt: License
+
+.. |noc| image:: https://img.shields.io/badge/Thanks%20to-NOC-blue.svg
+        :target: https://noc.ac.uk/
+        :alt: NOC
 
 .. |pre-commit| image:: https://results.pre-commit.ci/badge/github/glamod/glamod-marine-processing/master.svg
    :target: https://results.pre-commit.ci/latest/github/glamod/glamod-marine-processing/master
