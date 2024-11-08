@@ -154,3 +154,7 @@ This package was created with Cookiecutter_ and the `audreyfeldroy/cookiecutter-
 .. |zenodo| image:: https://img.shields.io/badge/zenodo-package_or_version_not_found-red
         :target: https://zenodo.org/glamod-marine-processing
  	      :alt: DOI
+
+.. |noc| image:: https://img.shields.io/badge/Thanks%20to-NOC-blue.svg
+        :target: https://noc.ac.uk/
+        :alt: NOC
