@@ -58,10 +58,12 @@ If you would like to contribute code or documentation (which is greatly apprecia
 
 How to cite this library
 ------------------------
+
 If you wish to cite `glamod-marine-processing` in a research publication, we kindly ask that you refer to Zenodo: not available yet.
 
 License
 -------
+
 This is free software: you can redistribute it and/or modify it under the terms of the `Apache License 2.0`_. A copy of this license is provided in the code repository (`LICENSE`_).
 
 Credits
