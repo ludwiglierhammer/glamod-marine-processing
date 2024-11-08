@@ -88,7 +88,7 @@ master_doc = "index"
 
 # General information about the project.
 project = "glamod_marine_processing"
-copyright = "2019-2024, Ludwig Lierhammer, Axel Andersson, Tina Leiding, Richard Cornes and Elizabeth Kent"
+copyright = "2019-2024, Ludwig Lierhammer, Axel Andersson, Tina Leiding, Richard Cornes, Elizabeth Kent and Joseph Siddons"
 
 # The version info for the project you're documenting, acts as replacement for
 # |version| and |release|, also used in various other places throughout the
