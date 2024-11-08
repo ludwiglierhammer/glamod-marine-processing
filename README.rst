@@ -13,22 +13,20 @@ GLAMOD marine processing: ``glamod-marine-processing`` toolbox
 +----------------------------+-----------------------------------------------------+
 | Development Status         | |status| |build| |coveralls|                        |
 +----------------------------+-----------------------------------------------------+
-| Funding                    | |funding|                                           |
+| Funding                    | |funding| |noc|                                     |
 +----------------------------+-----------------------------------------------------+
 
-
-Installation
-------------
-Before you install ``glamod-marine-processing`` please install ``cdm_reader_mapper``.
+``glamod-marine-processing`` is a python tool for creating SLURM scripts for several GLAMOD marine processing workflows.
+Once installed you can use it as an command-line interface. For more information, please call the help functions:
 
 .. code-block:: console
 
-    git clone https://github.com/glamod/cdm_reader_mapper
-    cd cdm_reader_mapper
-    pip install -e .
-    cd ..
+    qc_suite --help        # Quality control workflow help page
+    obs_suite --help       # Observations workflow help page
 
-If you want to contribute, we recommend cloning the repository and installing the package in development mode, e.g.
+Installation
+------------
+Before you install ``glamod-marine-processing`` please clone the GitHub repository.
 
 .. code-block:: console
 
@@ -51,16 +49,51 @@ Documentation
 
 The official documentation is at https://glamod-marine-processing.readthedocs.io/
 
-Usage
------
-``glamod-marine-processing`` is a python tool for creating SLURM scripts for several GLAMOD marine processing workflows.
-Once installed you can use it as an command-line interface. For more information, please call the help functions:
+Contributing to glamod-marine-processing
+----------------------------------------
 
-.. code-block:: console
+If you're interested in participating in the development of `glamod-marine-processing` by suggesting new features, new indices or report bugs, please leave us a message on the `issue tracker`_.
 
-    qc_suite --help        # Quality control workflow help page
-    obs_suite --help       # Observations workflow help page
+If you would like to contribute code or documentation (which is greatly appreciated!), check out the `Contributing Guidelines`_ before you begin!
 
+How to cite this library
+------------------------
+
+If you wish to cite `glamod-marine-processing` in a research publication, we kindly ask that you refer to Zenodo: not available yet.
+
+License
+-------
+
+This is free software: you can redistribute it and/or modify it under the terms of the `Apache License 2.0`_. A copy of this license is provided in the code repository (`LICENSE`_).
+
+Credits
+-------
+
+``glamod-marine-processing`` development is funded through Copernicus Climate Change Service (C3S_).
+
+Furthermore, acknowledgments go to National Oceanography Centre (NOC_).
+
+We want to thank `GNU parallel`_ for optionally using the ``glamod-marine-processing`` suite cases in parallel.
+
+This package was created with Cookiecutter_ and the `audreyfeldroy/cookiecutter-pypackage`_ project template.
+
+.. _Apache License 2.0: https://opensource.org/license/apache-2-0/
+
+.. _audreyfeldroy/cookiecutter-pypackage: https://github.com/audreyfeldroy/cookiecutter-pypackage/
+
+.. _C3S: https://climate.copernicus.eu/
+
+.. _Contributing Guidelines: https://github.com/glamod/glamod-marine-processing/blob/master/CONTRIBUTING.rst
+
+.. _Cookiecutter: https://github.com/cookiecutter/cookiecutter/
+
+.. _issue tracker: https://github.com/glamod/glamod-marine-processing/issues
+
+.. _LICENSE: https://github.com/glamod/glamod-marine-processing/blob/master/LICENSE
+
+.. _NOC: https://noc.ac.uk/
+
+.. _GNU parallel: https://doi.org/10.5281/zenodo.12789352
 
 .. |build| image:: https://github.com/glamod/glamod-marine-processing/actions/workflows/ci.yml/badge.svg
         :target: https://github.com/glamod/glamod-marine-processing/actions/workflows/ci.yml
@@ -91,8 +124,12 @@ Once installed you can use it as an command-line interface. For more information
         :alt: Funding
 
 .. |license| image:: https://img.shields.io/github/license/glamod/glamod-marine-processing.svg
-        :target: https://github.com/glamod/glamod-marine-processing/blob/main/LICENSE
+        :target: https://github.com/glamod/glamod-marine-processing/blob/master/LICENSE
         :alt: License
+
+.. |noc| image:: https://img.shields.io/badge/Thanks%20to-NOC-blue.svg
+        :target: https://noc.ac.uk/
+        :alt: NOC
 
 .. |pre-commit| image:: https://results.pre-commit.ci/badge/github/glamod/glamod-marine-processing/master.svg
    :target: https://results.pre-commit.ci/latest/github/glamod/glamod-marine-processing/master

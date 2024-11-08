@@ -1,5 +1,6 @@
 {
   "title": "glamod-marine-processing: Toolbox for GLAMOD marine processing",
+  "description": "The glamod-marine-processing toolbox is a python tool for creating, running and submitting scripts for several GLAMOD marine processing workflows",
   "creators": [
     {
       "name": "Lierhammer, Ludwig",
@@ -24,6 +25,11 @@
       "name": "Kent, Elizabeth",
       "affiliation": "National Oceanography Centre, Southampton, United Kingdom",
       "orcid": "0000-0002-6209-4247"
+    },
+    {
+      "name": "Siddons, Joseph",
+      "affiliation": "National Oceanography Centre, Southampton, United Kingdom",
+      "orcid": "0009-0003-5558-2327"
     }
   ],
   "keywords": [
