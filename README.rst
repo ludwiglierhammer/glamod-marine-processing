@@ -49,12 +49,24 @@ Documentation
 
 The official documentation is at https://glamod-marine-processing.readthedocs.io/
 
-Contributing to cdm_reader_mapper
----------------------------------
+Contributing to glamod-marine-processing
+----------------------------------------
 
-If you're interested in participating in the development of `glamod-arine-processing` by suggesting new features, new indices or report bugs, please leave us a message on the `issue tracker`_.
+If you're interested in participating in the development of `glamod-marine-processing` by suggesting new features, new indices or report bugs, please leave us a message on the `issue tracker`_.
 
 If you would like to contribute code or documentation (which is greatly appreciated!), check out the `Contributing Guidelines`_ before you begin!
+
+How to cite this library
+------------------------
+If you wish to cite `glamod-marine-processing` in a research publication, we kindly ask that you refer to Zenodo: not available yet.
+
+
+License
+-------
+This is free software: you can redistribute it and/or modify it under the terms of the `Apache License 2.0`_. A copy of this license is provided in the code repository (`LICENSE`_).
+
+.. _Apache License 2.0: https://opensource.org/license/apache-2-0/
+.. _LICENSE: https://github.com/glamod/galmod-marine-processing/blob/main/LICENSE
 
 Credits
 -------
@@ -63,13 +75,23 @@ Credits
 
 Furthermore, acknowledgments go to National Oceanography Centre (NOC_).
 
+We want to thank `GNU parallel_` for optionally using the ``glamod-marine-processing`` suite cases in parallel.
+
+This package was created with Cookiecutter_ and the `audreyfeldroy/cookiecutter-pypackage`_ project template.
+
+.. _audreyfeldroy/cookiecutter-pypackage: https://github.com/audreyfeldroy/cookiecutter-pypackage/
+
 .. _C3S: https://climate.copernicus.eu/
 
 .. _Contributing Guidelines: https://github.com/glamod/glamod-marine-processing/blob/main/CONTRIBUTING.rst
 
+.. _Cookiecutter: https://github.com/cookiecutter/cookiecutter/
+
 .. _issue tracker: https://github.com/glamod/glamod-marine-processing/issues
 
 .. _NOC: https://noc.ac.uk/
+
+.. _GNU parallel: https://doi.org/10.5281/zenodo.12789352
 
 .. |build| image:: https://github.com/glamod/glamod-marine-processing/actions/workflows/ci.yml/badge.svg
         :target: https://github.com/glamod/glamod-marine-processing/actions/workflows/ci.yml
