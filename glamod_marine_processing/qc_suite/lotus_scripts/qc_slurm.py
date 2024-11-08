@@ -142,6 +142,6 @@ else:
     elif script_config["parallel_jobs"] is True:
         logging.info("Run jobs interactively in parallel.")
         subprocess.call(
-            ["/bin/parallel", "--jobs", script_config["_n_max_jobs"], "::::", taskfile],
+            ["/bin/parallel", "--jobs", script_config["n_max_jobs"], "::::", taskfile],
             shell=False,
         )
