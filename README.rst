@@ -65,8 +65,6 @@ License
 -------
 This is free software: you can redistribute it and/or modify it under the terms of the `Apache License 2.0`_. A copy of this license is provided in the code repository (`LICENSE`_).
 
-.. _Apache License 2.0: https://opensource.org/license/apache-2-0/
-.. _LICENSE: https://github.com/glamod/galmod-marine-processing/blob/main/LICENSE
 
 Credits
 -------
@@ -75,9 +73,11 @@ Credits
 
 Furthermore, acknowledgments go to National Oceanography Centre (NOC_).
 
-We want to thank `GNU parallel_` for optionally using the ``glamod-marine-processing`` suite cases in parallel.
+We want to thank `GNU parallel`_ for optionally using the ``glamod-marine-processing`` suite cases in parallel.
 
 This package was created with Cookiecutter_ and the `audreyfeldroy/cookiecutter-pypackage`_ project template.
+
+.. _Apache License 2.0: https://opensource.org/license/apache-2-0/
 
 .. _audreyfeldroy/cookiecutter-pypackage: https://github.com/audreyfeldroy/cookiecutter-pypackage/
 
@@ -88,6 +88,8 @@ This package was created with Cookiecutter_ and the `audreyfeldroy/cookiecutter-
 .. _Cookiecutter: https://github.com/cookiecutter/cookiecutter/
 
 .. _issue tracker: https://github.com/glamod/glamod-marine-processing/issues
+
+.. _LICENSE: https://github.com/glamod/glamod-marine-processing/blob/main/LICENSE
 
 .. _NOC: https://noc.ac.uk/
 
