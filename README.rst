@@ -13,12 +13,12 @@ GLAMOD marine processing: ``glamod-marine-processing`` toolbox
 +----------------------------+-----------------------------------------------------+
 | Development Status         | |status| |build| |coveralls|                        |
 +----------------------------+-----------------------------------------------------+
-| Funding                    | |funding|                                           |
+| Funding                    | |funding| |noc|                                     |
 +----------------------------+-----------------------------------------------------+
-
 
 Installation
 ------------
+
 Before you install ``glamod-marine-processing`` please install ``cdm_reader_mapper``.
 
 .. code-block:: console
@@ -53,6 +53,7 @@ The official documentation is at https://glamod-marine-processing.readthedocs.io
 
 Usage
 -----
+
 ``glamod-marine-processing`` is a python tool for creating SLURM scripts for several GLAMOD marine processing workflows.
 Once installed you can use it as an command-line interface. For more information, please call the help functions:
 
@@ -117,3 +118,7 @@ Once installed you can use it as an command-line interface. For more information
 .. |zenodo| image:: https://img.shields.io/badge/zenodo-package_or_version_not_found-red
         :target: https://zenodo.org/glamod-marine-processing
  	      :alt: DOI
+
+.. |noc| image:: https://img.shields.io/badge/Thanks%20to-NOC-blue.svg
+        :target: https://noc.ac.uk/
+        :alt: NOC

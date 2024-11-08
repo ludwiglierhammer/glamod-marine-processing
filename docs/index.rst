@@ -56,4 +56,41 @@ concurrently to the overall scheme (see figure below).
    authors
    changes
 
-.. include:: ../README.rst
+About
+-----
+
+:Version: |tag| |release|
+
+:Citation: |zenodo|
+
+:License: |license|
+
+|logo_c3s| |logo_noc| |logo_copernicus|
+
+.. |release| image:: https://img.shields.io/github/v/release/glamod/glamod-marine-processing.svg
+        :target: https://github.com/glamod/glamod-marine-processing/releases
+        :alt: Release
+
+.. |license| image:: https://img.shields.io/github/license/glamod/glamod-marine-processing.svg
+        :target: https://github.com/glamod/glamod-marine-processing/blob/main/LICENSE
+        :alt: License
+
+.. |tag| image:: https://img.shields.io/github/v/tag/glamod/glamod-marine-processing.svg
+        :target: https://github.com/glamod/glamod-marine-processing/tags
+        :alt: Tag
+
+.. |zenodo| image:: https://img.shields.io/badge/zenodo-package_or_version_not_found-red
+        :target: https://zenodo.org/glamod-marine-processing
+ 	      :alt: DOI
+
+.. |logo_c3s| image:: figures/logo_c3s-392x154.png
+        :width: 25%
+        :target: https://climate.copernicus.eu/
+
+.. |logo_noc| image:: figures/LOGO_2024_-_NOC_1_COLOUR.png
+        :width: 10%
+        :target: ttps://noc.ac.uk/
+
+.. |logo_copernicus| image:: figures/copernicus.png
+        :width: 25%
+        :target: https://www.copernicus.eu/en
