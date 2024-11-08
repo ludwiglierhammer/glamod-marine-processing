@@ -3,7 +3,7 @@ GLAMOD marine processing: ``glamod-marine-processing`` toolbox
 ==================================================================
 
 +----------------------------+-----------------------------------------------------+
-| Versions                   | |tag| |release|                                     |
+| Versions                   | |versions| |tag| |release|                          |
 +----------------------------+-----------------------------------------------------+
 | Documentation and Support  | |docs|                                              |
 +----------------------------+-----------------------------------------------------+
@@ -16,19 +16,17 @@ GLAMOD marine processing: ``glamod-marine-processing`` toolbox
 | Funding                    | |funding|                                           |
 +----------------------------+-----------------------------------------------------+
 
-
-Installation
-------------
-Before you install ``glamod-marine-processing`` please install ``cdm_reader_mapper``.
+``glamod-marine-processing`` is a python tool for creating SLURM scripts for several GLAMOD marine processing workflows.
+Once installed you can use it as an command-line interface. For more information, please call the help functions:
 
 .. code-block:: console
 
-    git clone https://github.com/glamod/cdm_reader_mapper
-    cd cdm_reader_mapper
-    pip install -e .
-    cd ..
+    qc_suite --help        # Quality control workflow help page
+    obs_suite --help       # Observations workflow help page
 
-If you want to contribute, we recommend cloning the repository and installing the package in development mode, e.g.
+Installation
+------------
+Before you install ``glamod-marine-processing`` please clone the GitHub repository.
 
 .. code-block:: console
 
@@ -51,16 +49,23 @@ Documentation
 
 The official documentation is at https://glamod-marine-processing.readthedocs.io/
 
-Usage
------
-``glamod-marine-processing`` is a python tool for creating SLURM scripts for several GLAMOD marine processing workflows.
-Once installed you can use it as an command-line interface. For more information, please call the help functions:
+Contributing to cdm_reader_mapper
+---------------------------------
 
-.. code-block:: console
+If you're interested in participating in the development of `glamod-arine-processing` by suggesting new features, new indices or report bugs, please leave us a message on the `issue tracker`_.
 
-    qc_suite --help        # Quality control workflow help page
-    obs_suite --help       # Observations workflow help page
+If you would like to contribute code or documentation (which is greatly appreciated!), check out the `Contributing Guidelines`_ before you begin!
 
+Credits
+-------
+
+``glamod-marine-processing`` development is funded through Copernicus Climate Change Service (C3S_).
+
+.. _C3S: https://climate.copernicus.eu/
+
+.. _Contributing Guidelines: https://github.com/glamod/glamod-marine-processing/blob/main/CONTRIBUTING.rst
+
+.. _issue tracker: https://github.com/glamod/glamod-marine-processing/issues
 
 .. |build| image:: https://github.com/glamod/glamod-marine-processing/actions/workflows/ci.yml/badge.svg
         :target: https://github.com/glamod/glamod-marine-processing/actions/workflows/ci.yml
