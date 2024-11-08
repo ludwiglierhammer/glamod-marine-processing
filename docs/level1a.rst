@@ -15,21 +15,25 @@ converted with the following command:
 Command to create level1a observation suite scripts:
 
 .. code-block:: bash
+
   obs_suite -l level1a
 
 Command to run level1a observation suite scripts:
 
 .. code-block:: bash
+
   obs_suite -l level1a -run
 
 Command to run level1a observation suite scripts in parallel:
 
 .. code-block:: bash
+
   obs_suite -l level1a -parallel
 
 For more details run:
 
 .. code-block:: bash
+
   obs_suite -h
 
 This script executes an array of monthly subjobs per source and deck included in

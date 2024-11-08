@@ -18,6 +18,12 @@ the release configuration directory: the data period processed is as configured
 per source and deck in the release periods file ( :ref:`release_periods_file`)
 and the level1e configuration is retrieved from :ref:`level1e_config_file`.
 
+For more details run:
+
+.. code-block:: bash
+
+  obs_suite -h
+
 This script logs to *data_dir*/release/dataset/level1e/log/sid-dck/. Log files
 are yyyy-mm-<release>-<update>.ext with ext either ok or failed depending on the
 subjob termination status.

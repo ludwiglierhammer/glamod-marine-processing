@@ -25,6 +25,7 @@ and shell scripts using the SLURM scheduler.
 For more details run:
 
 .. code-block:: bash
+
   obs_suite -h
 
 This script executes an array of monthly subjobs per source and deck included in

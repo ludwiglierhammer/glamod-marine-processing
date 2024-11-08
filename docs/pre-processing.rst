@@ -9,9 +9,11 @@ Pre-processing of level1a data
 Before performing your level1a suite, you have to split the level0 data into multiple decks. See:
 
 .. code-block:: bash
+
   pre_proc
 
 For more details run:
 
 .. code-block:: bash
+
   pre_proc -h

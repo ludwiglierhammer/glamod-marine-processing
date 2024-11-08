@@ -44,6 +44,12 @@ This script executes a job per source and deck included in the process_list.
 The configuration file for the process (level2.json) is directly accessed from
 the release configuration directory.
 
+For more details run:
+
+.. code-block:: bash
+
+  obs_suite -h
+
 This script logs to *data_dir*/release/dataset/level2/log/sid-dck/. Log files
 are *sid-dck*-*release*-*update*.ext with ext either ok or failed depending on the
 subjob termination status.

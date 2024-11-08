@@ -18,6 +18,7 @@ pre-processing, this info needs to be made available to the release in directory
 For more details run:
 
 .. code-block:: bash
+
   obs_suite -h
 
 This script executes an array of monthly subjobs per source and deck included in
