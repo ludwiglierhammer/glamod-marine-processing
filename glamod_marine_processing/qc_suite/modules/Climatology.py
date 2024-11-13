@@ -190,6 +190,10 @@ class Climatology:
         :return: climatology value at specified location and time.
         :rtype: float
         """
+        if month is None:
+            return
+        if day is None:
+            return
         if month < 1 or month > 12:
             return None
         ml = qc.get_month_lengths(2004)
