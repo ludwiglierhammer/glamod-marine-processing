@@ -1,0 +1,78 @@
+# label rules used by .github/workflows/label.yml
+
+# label 'ci' all automation-related steps and files
+#   Since this repository is in itself an automation process to deploy a server instance,
+#   we refer here to CI as the 'meta' configuration files for managing the code and integrations with the repository,
+#   not configurations related to the deployment process itself.
+#
+# idea from https://github.com/Ouranosinc/xclim/blob/main/.github/labeler.yml
+
+'CI':
+  - changed-files:
+    - any-glob-to-any-file:
+      - '.flake8'
+      - '.gitignore'
+      - '.pre-commit-config.yaml'
+      - '.pylintrc.toml'
+      - '.readthedocs.yaml'
+      - '.yamllint.yaml'
+      - '.github/workflows/*'
+      - 'docs/Makefile'
+      - 'Makefile'
+
+'docs':
+  - changed-files:
+    - any-glob-to-any-file:
+      - '.readthedocs.yaml'
+      - 'docs/**/*'
+      - 'AUTHORS.rst'
+      - 'CONTRIBUTING.rst'
+      - 'README.rst'
+      - 'CHANGES.rst'
+
+'obs_suite':
+  - changed-files:
+    - any-glob-to-any-file:
+      - 'glamod_marine_processing/obs_suite/*.py'
+      - 'glamod_marine_processing/obs_suite/**/*.py'
+      - 'glamod_marine_processing/obs_suite/**/*.txt'
+      - 'lamod_marine_processing/obs_suite/**/*.json'
+
+'qc_suite':
+  - changed-files:
+    - any-glob-to-any-file:
+      - 'glamod_marine_processing/qc_suite/*.py'
+      - 'glamod_marine_processing/qc_suite/**/*.py'
+      - 'glamod_marine_processing/obs_suite/**/*.txt'
+      - 'lamod_marine_processing/obs_suite/**/*.json'
+
+'pre_processing':
+  - changed-files:
+    - any-glob-to-any-file:
+      - 'glamod-marine-processing/pre_processing/*.py'
+
+'post_processing':
+  - changed-files:
+    - any-glob-to-any-file:
+      - 'glamod-marine-processing/post_processing/*.py'
+
+'information':
+  - changed-files:
+    - any-glob-to-any-file:
+      - 'CONTRIBUTING.rst'
+      - 'CHANGES.rst'
+
+'license':
+  - changed-files:
+    - any-glob-to-any-file:
+      - 'LICENSE'
+
+'zenodo':
+  - changed-files:
+    - any-glob-to-any-file:
+      - '.zenodo.json'
+
+'release':
+  - changed-files:
+    - any-glob-to-any-file:
+      - 'pyproject.toml'
