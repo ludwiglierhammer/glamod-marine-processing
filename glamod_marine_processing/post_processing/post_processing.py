@@ -52,7 +52,7 @@ def concat_unknow_date_files(idir, odir, table, release, update, prev_deck_list)
             df.to_csv(oname, sep="|", header=header, mode=mode, index=False)
 
 
-def concat_know_date_files(idir, odir, table, release, update, prev_deck_list):
+def concat_known_date_files(idir, odir, table, release, update, prev_deck_list):
     """Concat file with subprocess."""
     file_list = [
         glob.glob(os.path.join(idir, prev_deck, f"{table}-*"))
@@ -81,6 +81,7 @@ def post_processing(
     update=None,
     prev_deck_list=None,
     date_avail=False,
+    cdm_tables=True,
     overwrite=False,
 ):
     """Split ICOADS data into monthly deck files.
@@ -100,6 +101,8 @@ def post_processing(
         List of previous level1a decks.
     date_avail, bool
         Set True if date information is in file names.
+    cdm_tables, bool
+        Use cdm table names.
     overwrite: bool
         If True, overwrite already existing files.
     """
@@ -107,10 +110,13 @@ def post_processing(
         prev_deck_list = [
             Path(x).name for x in glob.glob(os.path.join(idir, "log", "*"))
         ]
-
-    for table in cdm_mapper.properties.cdm_tables:
+    if cdm_tables is True:
+        tables = cdm_mapper.properties.cdm_tables
+    else:
+        tables = ["*"]
+    for table in tables:
         if date_avail is True:
-            concat_know_date_files(
+            concat_known_date_files(
                 idir=idir,
                 odir=odir,
                 table=table,

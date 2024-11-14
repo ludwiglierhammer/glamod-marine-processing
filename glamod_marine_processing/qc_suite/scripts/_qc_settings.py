@@ -1,4 +1,4 @@
-obs_vals_ = ["AT", "SST", "DPT", "SLP", "W", "D"]
+obs_vals_ = {"AT": "at", "SST": "sst", "DPT": "dpt", "SLP": "slp", "W": "ws", "D": "wd"}
 usecols_ = [
     "YR",
     "MO",
@@ -14,8 +14,9 @@ usecols_ = [
     "IRF",
     "DS",
     "VS",
+    "dup_flag",
 ]
-selcols_ = usecols_ + obs_vals_
+selcols_ = usecols_ + list(obs_vals_.keys())
 outcols_ = [
     "YR",
     "MO",

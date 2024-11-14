@@ -108,7 +108,7 @@ with open(taskfile, "w") as fn:
             os.remove(os.path.join(logdir, f"{job_id}.success"))
         calc_tasks = True
         fn.writelines(
-            "python3 {0} -jobs {1} -job_index {2} -config {3} -tracking > {4}/{2}.out 2> {4}/{2}.err;"
+            "python {0} -jobs {1} -job_index {2} -config {3} -tracking > {4}/{2}.out 2> {4}/{2}.err;"
             " if [ $? -eq 0 ]; then touch {4}/{2}.success; else touch {4}/{2}.failure; fi \n".format(
                 pyscript, jobsfile, job_id, configfile, logdir
             )
@@ -142,6 +142,6 @@ else:
     elif script_config["parallel_jobs"] is True:
         logging.info("Run jobs interactively in parallel.")
         subprocess.call(
-            ["/bin/parallel", "--jobs", script_config["_n_max_jobs"], "::::", taskfile],
+            ["/bin/parallel", "--jobs", script_config["n_max_jobs"], "::::", taskfile],
             shell=False,
         )

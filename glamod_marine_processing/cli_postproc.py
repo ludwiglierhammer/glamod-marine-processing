@@ -34,6 +34,7 @@ def post_proc_cli(
     dataset,
     data_directory,
     source_pattern,
+    additional_directories,
     available_date_information,
     overwrite,
 ):
@@ -56,7 +57,6 @@ def post_proc_cli(
     input_dir = os.path.join(p.data_directory, release, dataset, "level1a")
     output_dir = os.path.join(input_dir, future_deck[0])
     mkdir(output_dir)
-
     post_processing(
         idir=input_dir,
         odir=output_dir,
@@ -66,3 +66,22 @@ def post_proc_cli(
         date_avail=available_date_information,
         overwrite=overwrite,
     )
+
+    if isinstance(additional_directories, str):
+        additional_directories = [additional_directories]
+    for additional_directory in additional_directories:
+        input_dir = os.path.join(
+            p.data_directory, release, dataset, "level1a", additional_directory
+        )
+        output_dir = os.path.join(input_dir, future_deck[0])
+        mkdir(output_dir)
+        post_processing(
+            idir=input_dir,
+            odir=output_dir,
+            release=release,
+            update=update,
+            prev_deck_list=prev_deck_list,
+            date_avail=available_date_information,
+            cdm_tables=False,
+            overwrite=overwrite,
+        )

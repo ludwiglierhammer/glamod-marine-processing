@@ -149,11 +149,15 @@ class Climatology:
         :return: climatology value at specified location and time.
         :rtype: float
         """
+        if month is None:
+            return
+        if day is None:
+            return
         if month < 1 or month > 12:
-            return None
+            return
         ml = qc.get_month_lengths(2004)
         if day < 1 or day > ml[month - 1]:
-            return None
+            return
 
         yindex = qc.mds_lat_to_yindex(lat)
         xindex = qc.mds_lon_to_xindex(lon)
@@ -186,6 +190,10 @@ class Climatology:
         :return: climatology value at specified location and time.
         :rtype: float
         """
+        if month is None:
+            return
+        if day is None:
+            return
         if month < 1 or month > 12:
             return None
         ml = qc.get_month_lengths(2004)
