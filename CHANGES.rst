@@ -25,6 +25,8 @@ New features and enhancements
 * ``obs_suite``: running with C-RAID data (:pull:`25`)
 * ``obs_suite`` and ``qc_suite``: optionally, run jobs in parallel with gnu_parallel (:pull:`41`)
 * ``post_proc``: optionally, post-processing for ICOADS data (:pull:`46`)
+* ``post_proc``: optionally, merge data from additional directories (invalid, excluded) to a new deck dataset (:pull:`52`)
+* ``qc_suite``: update job list for release 7.0 (:pull:`52`)
 
 Breaking changes
 ^^^^^^^^^^^^^^^^
@@ -44,6 +46,7 @@ Breaking changes
 * ``obs_suite``: set release period to 2015 to 2023 (:pull:`49`)
 * ``obs_suite``: if no qc files available: set report_quality from 2 (not checked) to 0 (passed) in level1e script (:pull:`50`)
 * ``obs_suite``: if report_id is not available in any observations: remove report_id from header (and vice versa) in level1e script (:pull:`50`)
+* ``qc_suite``: set minimum QC end year from 2022 to 1948 (:pull:`52`)
 
 Bug fixes
 ^^^^^^^^^
@@ -52,6 +55,7 @@ Bug fixes
 * ``obs_suite``: use only observation reports that are also available in the header file (:pull:`44`, :pull:`45`)
 * ``qc_suite``: take qc source data from level1d files instead of level1a (:pull:`47`)
 * ``qc_suite``: update deck list for quality control (:pull:`47`)
+* ``qc_suite``: ignore reports with invalid date time information (:pull:`52`)
 
 v7.0.0 (2024-06-13)
 -------------------
