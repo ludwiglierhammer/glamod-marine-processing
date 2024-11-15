@@ -55,7 +55,7 @@ Bug fixes
 * ``obs_suite``: use only observation reports that are also available in the header file (:pull:`44`, :pull:`45`)
 * ``qc_suite``: take qc source data from level1d files instead of level1a (:pull:`47`)
 * ``qc_suite``: update deck list for quality control (:pull:`47`)
-* ``qc_suite``: ignore reports with invalid date time information (:pull:`52`)
+* ``qc_suite``: ignore reports with invalid date time information (:pull:`52`, :pull:`58`)
 
 v7.0.0 (2024-06-13)
 -------------------
