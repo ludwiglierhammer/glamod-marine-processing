@@ -1637,13 +1637,7 @@ def time_difference(year1, month1, day1, hour1, year2, month2, day2, hour2):
     :rtype: float
     """
     # return time difference in hours
-    if hour1 is None or hour2 is None:
-        return
-    if day1 is None or day2 is None:
-        return
-    if month1 is None or month2 is None:
-        return
-    if year1 is None or year2 is None:
+    if None in [year1, year2, month1, month2, day1, day2, hour1, hour2]:
         return
 
     assert 0 <= hour1 < 24 and 0 <= hour2 < 24
