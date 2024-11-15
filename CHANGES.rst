@@ -57,6 +57,7 @@ Bug fixes
 * ``qc_suite``: take qc source data from level1d files instead of level1a (:pull:`47`)
 * ``qc_suite``: update deck list for quality control (:pull:`47`)
 * ``qc_suite``: ignore reports with invalid date time information (:pull:`52`, :pull:`58`)
+* ``obs_suite``: allow mixed date time formats in level1c (:pull:`62`)
 
 v7.0.0 (2024-06-13)
 -------------------
