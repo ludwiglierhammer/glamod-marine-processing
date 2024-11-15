@@ -7,7 +7,7 @@ GLAMOD marine processing: ``glamod-marine-processing`` toolbox
 +----------------------------+-----------------------------------------------------+
 | Documentation and Support  | |docs|                                              |
 +----------------------------+-----------------------------------------------------+
-| Open Source                | |license| |zenodo|                                  |
+| Open Source                | |license| |zenodo| |fair-software|                  |
 +----------------------------+-----------------------------------------------------+
 | Coding Standards           | |black| |ruff| |pre-commit| |fossa| |codefactor|    |
 +----------------------------+-----------------------------------------------------+
@@ -114,6 +114,10 @@ This package was created with Cookiecutter_ and the `audreyfeldroy/cookiecutter-
 .. |docs| image:: https://readthedocs.org/projects/glamod_marine_processing/badge/?version=latest
         :target: https://glamod-marine-processing.readthedocs.io/en/latest/?version=latest
         :alt: Documentation Status
+
+.. |fair-software| image:: https://img.shields.io/badge/fair--software.eu-%E2%97%8F%20%20%E2%97%8F%20%20%E2%97%8B%20%20%E2%97%8F%20%20%E2%97%8B-orange
+   	    :target: https://fair-software.eu
+	      :alt: FAIR-software
 
 .. |fossa| image:: https://app.fossa.com/api/projects/git%2Bgithub.com%2Fglamod%2Fglamod-marine-processing.svg?type=shield
         :target: https://app.fossa.com/projects/git%2Bgithub.com%2Fglamod%2Fglamod-marine-processing?ref=badge_shield
