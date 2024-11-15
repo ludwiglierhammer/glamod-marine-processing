@@ -13,6 +13,7 @@ Announcements
 * adding readthedocs documentation (:pull:`42`)
 * Now under Apache v2.0 license (:pull:`42`)
 * Thanks to NOC, Cookiecutter and GNU parallel (:issue:`53`, :pull:`54`)
+* glamd-marine-processing has migrated its development branch name from master to main. 
 
 New features and enhancements
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
