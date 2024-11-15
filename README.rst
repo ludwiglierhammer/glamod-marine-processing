@@ -139,9 +139,9 @@ This package was created with Cookiecutter_ and the `audreyfeldroy/cookiecutter-
         :target: https://github.com/astral-sh/ruff
         :alt: Ruff
 
-.. |status| image:: https://www.repostatus.org/badges/latest/wip.svg
-        :target: https://www.repostatus.org/#wip
-        :alt: Project Status: WIP: Initial development is in progress, but there has not yet been a stable, usable release suitable for the public.
+.. |status| image:: https://www.repostatus.org/badges/latest/active.svg
+        :target: https://www.repostatus.org/#active
+        :alt: Project Status: Active – The project has reached a stable, usable state and is being actively developed.
 
 .. |release| image:: https://img.shields.io/github/v/release/glamod/glamod-marine-processing.svg
         :target: https://github.com/glamod/glamod-marine-processing/releases
