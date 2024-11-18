@@ -13,8 +13,9 @@ requires-python = ">=3.9"
 license = {file = "LICENSE"}
 keywords = ["glamod_marine_processing"]
 classifiers = [
-  "Development Status :: 2 - Pre-Alpha",
+  "Development Status :: 5 - Production/Stable",
   "Intended Audience :: Developers",
+  "Intended Audience :: Science/Research",
   "License :: OSI Approved :: Apache Software License",
   "Natural Language :: English",
   "Programming Language :: Python :: 3",
