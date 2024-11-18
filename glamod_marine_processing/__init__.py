@@ -8,4 +8,4 @@ from .pre_processing import pre_processing  # noqa
 
 __author__ = """Ludwig Lierhammer"""
 __email__ = "ludwiglierhammer@dwd.de"
-__version__ = "0.7.1"
+__version__ = "7.1.0"
