@@ -14,7 +14,7 @@ Announcements
 * Now under Apache v2.0 license (:pull:`42`)
 * Thanks to NOC, Cookiecutter and GNU parallel (:issue:`53`, :pull:`54`)
 * glamd-marine-processing has migrated its development branch name from master to main.
-* final GLAMOD marine processing data release 7.0 version
+* final GLAMOD marine processing data release 7.0 version (:pull:`63`)
 
 New features and enhancements
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
