@@ -85,18 +85,35 @@ release_periods_file = os.path.join(config_files_path, release_periods_file)
 
 args = parser.get_parser_args()
 
-LEVEL = script_config["level"]
-LEVEL_SOURCE = script_config["level_source"]
-LEVEL_DEST = script_config["level_destination"]
-if not LEVEL_SOURCE:
-    LEVEL_SOURCE = slurm_preferences.level_source[LEVEL]
-if "source_pattern" in script_config.keys():
-    SOURCE_PATTERN = script_config["source_pattern"]
-else:
-    SOURCE_PATTERN = slurm_preferences.source_pattern[LEVEL]
+release_source = script_config["release_source"]
+release_dest = script_config["reelase_destination"]
+if not release_source:
+  release_source = release
+if not reelase_dest:
+  release_dest = release
 
-if isinstance(SOURCE_PATTERN, dict):
-    SOURCE_PATTERN = SOURCE_PATTERN[dataset]
+dataset_source = script_config["dataset_source"]
+dataset_dest = script_config["dataset_destination"]
+if not dataset_source:
+  dataset_source = dataset
+if not dataset_dest:
+  dataset_dest = dataset
+
+level = script_config["level"]
+level_source = script_config["level_source"]
+level_dest = script_config["level_destination"]
+if not level_source:
+    level_source = slurm_preferences.level_source[level]
+if not level_dest:
+    level_dest = level
+
+if "source_pattern" in script_config.keys():
+    source_pattern = script_config["source_pattern"]
+else:
+    source_pattern = slurm_preferences.source_pattern[level]
+
+if isinstance(source_pattern, dict):
+    source_pattern = source_pattern[dataset]
 
 PYSCRIPT = f"{LEVEL}.py"
 MACHINE = script_config["scripts"]["machine"].lower()
@@ -114,9 +131,9 @@ data_dir = script_config["paths"]["data_directory"]
 scratch_dir = script_config["paths"]["scratch_directory"]
 
 # Build process specific paths
-level_dir = os.path.join(data_dir, release, dataset, LEVEL)
-level_source = source_dataset(LEVEL, release)
-level_source_dir = os.path.join(data_dir, level_source, dataset, LEVEL_SOURCE)
+level_dir = os.path.join(data_dir, release_dest, dataset_dest, level_dest)
+release_source = source_dataset(level, release_source)
+level_source_dir = os.path.join(data_dir, release_source, dataset_source, level_source)
 log_dir = os.path.join(level_dir, "log")
 
 # Get further configuration -----------------------------------------------------------
@@ -139,7 +156,7 @@ if script_config["year_end"]:
     release_periods["year_end"] = script_config["year_end"]
 
 # Optionally, add CMD add file
-add_file = os.path.join(config_files_path, f"{LEVEL}_cmd_add.json")
+add_file = os.path.join(config_files_path, f"{level}_cmd_add.json")
 if os.path.isfile(add_file):
     script_config["cmd_add_file"] = add_file
 
@@ -147,7 +164,7 @@ if os.path.isfile(add_file):
 logging.info("CONFIGURING JOB ARRAYS...")
 status = config_array.main(
     level_source_dir,
-    SOURCE_PATTERN,
+    source_pattern,
     log_dir,
     script_config,
     release_periods,
