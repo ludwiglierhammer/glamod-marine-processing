@@ -86,18 +86,18 @@ release_periods_file = os.path.join(config_files_path, release_periods_file)
 args = parser.get_parser_args()
 
 release_source = script_config["release_source"]
-release_dest = script_config["reelase_destination"]
+release_dest = script_config["release_destination"]
 if not release_source:
-  release_source = release
-if not reelase_dest:
-  release_dest = release
+    release_source = release
+if not release_dest:
+    release_dest = release
 
 dataset_source = script_config["dataset_source"]
 dataset_dest = script_config["dataset_destination"]
 if not dataset_source:
-  dataset_source = dataset
+    dataset_source = dataset
 if not dataset_dest:
-  dataset_dest = dataset
+    dataset_dest = dataset
 
 level = script_config["level"]
 level_source = script_config["level_source"]
@@ -115,14 +115,9 @@ else:
 if isinstance(source_pattern, dict):
     source_pattern = source_pattern[dataset]
 
-PYSCRIPT = f"{LEVEL}.py"
+PYSCRIPT = f"{level}.py"
 MACHINE = script_config["scripts"]["machine"].lower()
 overwrite = script_config["overwrite"]
-
-release_source = script_config["release_source"]
-release_dest = script_config["release_destination"]
-dataset_source = script_config["dataset_source"]
-dataset_dest = script_config["dataset_destination"]
 
 # Get lotus paths
 lotus_dir = script_config["paths"]["lotus_scripts_directory"]
@@ -133,6 +128,10 @@ scratch_dir = script_config["paths"]["scratch_directory"]
 # Build process specific paths
 level_dir = os.path.join(data_dir, release_dest, dataset_dest, level_dest)
 release_source = source_dataset(level, release_source)
+print(data_dir)
+print(release_source)
+print(dataset_source)
+print(level_source)
 level_source_dir = os.path.join(data_dir, release_source, dataset_source, level_source)
 log_dir = os.path.join(level_dir, "log")
 
@@ -194,26 +193,26 @@ for sid_dck in process_list:
     if array_size == 0:
         logging.warning(f"{sid_dck}: no jobs for partition")
         continue
-    if LEVEL in slurm_preferences.one_task:
+    if level in slurm_preferences.one_task:
         array_size = 1
 
     job_file = os.path.join(log_diri, sid_dck + ".slurm")
     taskfarm_file = os.path.join(log_diri, sid_dck + ".tasks")
 
-    if LEVEL in slurm_preferences.TaskPNi.keys():
-        TaskPNi = slurm_preferences.TaskPNi[LEVEL]
+    if level in slurm_preferences.TaskPNi.keys():
+        TaskPNi = slurm_preferences.TaskPNi[level]
     else:
         memi = script_config.get(sid_dck, {}).get("job_memo_mb")
         memi = mem if not memi else memi
         TaskPNi = min(int(190000.0 / float(memi)), 40)
 
-    if LEVEL in slurm_preferences.nodesi.keys():
-        nodesi = slurm_preferences.nodesi[LEVEL]
+    if level in slurm_preferences.nodesi.keys():
+        nodesi = slurm_preferences.nodesi[level]
     else:
         nodesi = array_size // TaskPNi + (array_size % TaskPNi > 0)
 
-    if LEVEL in slurm_preferences.ti.keys():
-        ti = slurm_preferences.ti[LEVEL]
+    if level in slurm_preferences.ti.keys():
+        ti = slurm_preferences.ti[level]
     else:
         t_hhi = script_config.get(sid_dck, {}).get("job_time_hr")
         t_mmi = script_config.get(sid_dck, {}).get("job_time_min")

@@ -116,6 +116,12 @@ class Cli:
             "dataset": self.dataset,
             "release_tag": self.release_update,
         }
+        config["level_source"] = self.level_source
+        config["level_destination"] = self.level_destination
+        config["release_source"] = self.release_source
+        config["release_destination"] = self.release_destination
+        config["dataset_source"] = self.dataset_source
+        config["dataset_destination"] = self.dataset_destination
 
         if self.data_directory is not None:
             config["paths"]["data_directory"] = self.data_directory

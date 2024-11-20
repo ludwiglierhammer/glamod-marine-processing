@@ -153,7 +153,8 @@ def clean_previous_ok_logs(
     if not os.path.isdir(sid_dck_log_dir):
         logging.error(f"Data partition log directory does not exist: {sid_dck_log_dir}")
         sys.exit(1)
-
+    print("------------------------------------")
+    print(sid_dck)
     year_init = int(get_year(release_periods, sid_dck, "year_init"))
     year_end = int(get_year(release_periods, sid_dck, "year_end"))
     # Make sure there are not previous input files
