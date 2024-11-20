@@ -213,7 +213,7 @@ class Options:
             help="Name of the source data level.",
         )
         self.level_destination = click.option(
-            "-lo",
+            "-ld",
             "--level_destination",
             help="Name of the destination data level.",
         )
@@ -242,7 +242,7 @@ class Options:
         self.dataset_source = click.option(
             "-ds", "--dataset_source", help="Name of the source data release dataset"
         )
-        self.dataset_destiantion = click.option(
+        self.dataset_destination = click.option(
             "-dd",
             "--dataset_destination",
             help="Name of the destination data release dataset",
