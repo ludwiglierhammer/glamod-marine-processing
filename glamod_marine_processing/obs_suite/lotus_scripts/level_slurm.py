@@ -86,7 +86,10 @@ release_periods_file = os.path.join(config_files_path, release_periods_file)
 args = parser.get_parser_args()
 
 LEVEL = script_config["level"]
-LEVEL_SOURCE = slurm_preferences.level_source[LEVEL]
+LEVEL_SOURCE = script_config["level_source"]
+LEVEL_DEST = script_config["level_destination"]
+if not LEVEL_SOURCE:
+    LEVEL_SOURCE = slurm_preferences.level_source[LEVEL]
 if "source_pattern" in script_config.keys():
     SOURCE_PATTERN = script_config["source_pattern"]
 else:
@@ -98,6 +101,11 @@ if isinstance(SOURCE_PATTERN, dict):
 PYSCRIPT = f"{LEVEL}.py"
 MACHINE = script_config["scripts"]["machine"].lower()
 overwrite = script_config["overwrite"]
+
+release_source = script_config["release_source"]
+release_dest = script_config["release_destination"]
+dataset_source = script_config["dataset_source"]
+dataset_dest = script_config["dataset_destination"]
 
 # Get lotus paths
 lotus_dir = script_config["paths"]["lotus_scripts_directory"]
