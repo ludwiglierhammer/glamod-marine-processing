@@ -22,7 +22,9 @@ from .utilities import add_to_config, load_json, save_json
 def obs_cli(
     machine,
     level,
+    level_source,
     release,
+    release_source,
     update,
     dataset,
     process_list,

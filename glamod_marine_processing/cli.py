@@ -49,7 +49,9 @@ class Cli:
         self,
         machine="",
         level="",
+        level_source="",
         release="",
+        release_source="",
         update="",
         dataset="",
         data_directory=None,
@@ -61,7 +63,9 @@ class Cli:
     ):
         self.machine = machine.lower()
         self.level = level
+        self.level_source = (level_source,)
         self.release = release
+        self.release_source = (release_source,)
         self.update = update
         self.dataset = dataset
         self.data_directory = data_directory
@@ -195,6 +199,11 @@ class Options:
             * level2: Make data ready to ingest in the database.
             """,
         )
+        self.level_source = click.option(
+            "-ls",
+            "--level_source",
+            help="Name of the source data level.",
+        )
         self.release = click.option(
             "-r", "--release", default="release_7.0", help="Name of the data release."
         )
@@ -207,11 +216,11 @@ class Options:
             default="ICOADS_R3.0.2T",
             help="Name of the data release dataset.",
         )
-        self.previous_release = click.option(
-            "-pr",
-            "--previous_release",
+        self.release_source = click.option(
+            "-rs",
+            "--release_souce",
             default="release_6.0",
-            help="Name of the previous data release.",
+            help="Name of the source data release.",
         )
         self.data_directory = click.option(
             "-data_dir",
