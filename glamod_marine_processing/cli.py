@@ -50,8 +50,10 @@ class Cli:
         machine="",
         level="",
         level_source="",
+        level_destination="",
         release="",
         release_source="",
+        release_destination="",
         update="",
         dataset="",
         data_directory=None,
@@ -63,9 +65,11 @@ class Cli:
     ):
         self.machine = machine.lower()
         self.level = level
-        self.level_source = (level_source,)
+        self.level_source = level_source
+        self.level_destination = level_destination
         self.release = release
-        self.release_source = (release_source,)
+        self.release_source = release_source
+        self.release_destination = release_destination
         self.update = update
         self.dataset = dataset
         self.data_directory = data_directory
@@ -204,8 +208,23 @@ class Options:
             "--level_source",
             help="Name of the source data level.",
         )
+        self.level_destination = click.option(
+            "-lo",
+            "--level_destination",
+            help="Name of the destination data level.",
+        )
         self.release = click.option(
             "-r", "--release", default="release_7.0", help="Name of the data release."
+        )
+        self.release_source = click.option(
+            "-rs",
+            "--release_source",
+            help="Name of the source data release",
+        )
+        self.release_destination = click.option(
+            "-rd",
+            "--release_destination",
+            help="Name of the destination data release.",
         )
         self.update = click.option(
             "-u", "--update", default="000000", help="Name of the data release update."
@@ -215,12 +234,6 @@ class Options:
             "--dataset",
             default="ICOADS_R3.0.2T",
             help="Name of the data release dataset.",
-        )
-        self.release_source = click.option(
-            "-rs",
-            "--release_souce",
-            default="release_6.0",
-            help="Name of the source data release.",
         )
         self.data_directory = click.option(
             "-data_dir",
