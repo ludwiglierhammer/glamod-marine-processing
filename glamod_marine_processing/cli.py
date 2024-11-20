@@ -56,6 +56,8 @@ class Cli:
         release_destination="",
         update="",
         dataset="",
+        dataset_source="",
+        dataset_destination="",
         data_directory=None,
         work_directory=None,
         config_file=None,
@@ -72,6 +74,8 @@ class Cli:
         self.release_destination = release_destination
         self.update = update
         self.dataset = dataset
+        self.dataset_source = dataset_source
+        self.dataset_destination = dataset_destination
         self.data_directory = data_directory
         self.work_directory = work_directory
         self.config_file = config_file
@@ -234,6 +238,14 @@ class Options:
             "--dataset",
             default="ICOADS_R3.0.2T",
             help="Name of the data release dataset.",
+        )
+        self.dataset_source = click.option(
+            "-ds", "--dataset_source", help="Name of the source data release dataset"
+        )
+        self.dataset_destiantion = click.option(
+            "-dd",
+            "--dataset_destination",
+            help="Name of the destination data release dataset",
         )
         self.data_directory = click.option(
             "-data_dir",
