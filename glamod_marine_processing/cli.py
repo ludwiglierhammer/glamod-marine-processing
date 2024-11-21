@@ -263,19 +263,19 @@ class Options:
             "--work_directory",
             help="Directory path of the log and template files. By default, take directory path from machine-depending configuration file.",
         )
-        self.NOC_version = click.option(
+        self.noc_version = click.option(
             "-noc_v",
-            "--NOC_version",
+            "--noc_version",
             help="Name of the NOC corrections version (obs_suite: level1b).",
         )
-        self.NOC_path = click.option(
+        self.noc_path = click.option(
             "-noc_p",
-            "--NOC_path",
+            "--noc_path",
             help="Path to the NOC correction files (obs_suite: level1b).",
         )
-        self.Pub47_path = click.option(
+        self.pub47_path = click.option(
             "-pub47_p",
-            "--Pub47_path",
+            "--pub47_path",
             help="Path to the Pub47 files (obs_suite: level1d).",
         )
         self.config_file = click.option(

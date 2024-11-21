@@ -185,8 +185,8 @@ paths_exist(params.level_log_path)
 md_avail = True if not params.md_not_avail else False
 
 if md_avail:
-    if params.correction.get("Pub47_path"):
-        md_path = params.correction.get("Pub47_path")
+    if params.correction.get("pub47_path"):
+        md_path = params.correction.get("pub47_path")
     else:
         md_path = os.path.join(
             params.data_path, params.release, params.md_subdir, "monthly"

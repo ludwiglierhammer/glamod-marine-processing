@@ -38,9 +38,9 @@ def obs_cli(
     prev_file_id,
     data_directory,
     work_directory,
-    NOC_version,
-    NOC_path,
-    Pub47_path,
+    noc_version,
+    noc_path,
+    pub47_path,
     config_file,
     submit_jobs,
     run_jobs,
@@ -89,9 +89,9 @@ def obs_cli(
 
     config = add_to_config(
         config,
-        NOC_version=NOC_version,
-        NOC_path=NOC_path,
-        Pub47_path=Pub47_path,
+        noc_version=noc_version,
+        noc_path=noc_path,
+        pub47_path=pub47_path,
         key="corrections",
     )
 

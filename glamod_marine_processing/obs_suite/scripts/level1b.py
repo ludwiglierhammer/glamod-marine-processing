@@ -108,11 +108,11 @@ process_options = [
 params = script_setup(process_options, args)
 
 cor_ext = ".txt.gz"
-if params.corrections.get("NOC_version"):
-    params.correction_version = params.corrections.get("NOC_version")
+if params.corrections.get("noc_version"):
+    params.correction_version = params.corrections.get("noc_version")
 
-if params.corrections.get("NOC_path"):
-    L1b_main_corrections = params.corrections.get("NOC_path")
+if params.corrections.get("noc_path"):
+    L1b_main_corrections = params.corrections.get("noc_path")
     params.correction_version = "not_null"
 else:
     L1b_main_corrections = os.path.join(
