@@ -87,7 +87,9 @@ class script_setup:
         if self.prev_fileID is None:
             self.prev_fileID = self.fileID
 
-        self.prev_level_path = config["paths"]["source_directory"]
+        self.prev_level_path = os.path.join(
+            config["paths"]["source_directory"], sid_dck
+        )
         level_path = config["paths"]["destination_directory"]
         self.level_path = os.path.join(level_path, sid_dck)
         self.level_ql_path = os.path.join(level_path, "quicklooks", sid_dck)
