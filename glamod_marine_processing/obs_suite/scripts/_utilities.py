@@ -39,6 +39,7 @@ class script_setup:
         try:
             with open(configfile) as fileObj:
                 config = json.load(fileObj)
+                self.config = config
         except Exception:
             logging.error(f"Opening configuration file: {configfile}", exc_info=True)
             self.flag = False
@@ -51,6 +52,7 @@ class script_setup:
         self.dataset = config["abbreviations"].get("dataset")
 
         sid_dck = config.get("sid_dck")
+        self.sid_dck = sid_dck
         self.year = config.get("yyyy")
         self.month = config.get("mm")
 
