@@ -73,6 +73,9 @@ class script_setup:
             )
             self.flag = False
 
+        self.data_path = config["paths"].get("data_directory")
+        self.release = config["abbreviations"].get("release")
+
         self.filename = config.get("filename")
         self.level2_list = config.get("cmd_add_file")
         self.prev_fileID = config.get("prev_fileID")
