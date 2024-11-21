@@ -263,11 +263,20 @@ class Options:
             "--work_directory",
             help="Directory path of the log and template files. By default, take directory path from machine-depending configuration file.",
         )
-        self.corrections_version = click.option(
-            "-c",
-            "--corrections_version",
-            default="v1x2023",
-            help="Name of the NOC corrections version.",
+        self.NOC_version = click.option(
+            "-noc_v",
+            "--NOC_version",
+            help="Name of the NOC corrections version (obs_suite: level1b).",
+        )
+        self.NOC_path = click.option(
+            "-noc_p",
+            "--NOC_path",
+            help="Path to the NOC correction files (obs_suite: level1b).",
+        )
+        self.Pub47_path = click.option(
+            "-pub47_p",
+            "--Pub47_path",
+            help="Path to the Pub47 files (obs_suite: level1d).",
         )
         self.config_file = click.option(
             "-cfg",
@@ -279,20 +288,20 @@ class Options:
             "-preproc",
             "--preprocessing",
             is_flag=True,
-            help="Do some preprocessing for qc_suite only.",
+            help="Do some preprocessing for qc_suite only (qc_suite).",
         )
         self.available_date_information = click.option(
             "-date_avail",
             "--available_date_information",
             is_flag=True,
-            help="Set if date information is available in input file names",
+            help="Set if date information is available in input file names (postproc).",
         )
         self.additional_directories = click.option(
             "-add_dirs",
             "--additional_directories",
             multiple=True,
             default=["excluded", "invalid"],
-            help="Additional direcotires to merge included data.",
+            help="Additional direcotires to merge included data (postproc).",
         )
         self.overwrite = click.option(
             "-o",
@@ -304,18 +313,18 @@ class Options:
             "-hi_qc",
             "--high_resolution_qc",
             is_flag=True,
-            help="Do high resolution QC for qc_suite only.",
+            help="Do high resolution QC for qc_suite only (qc_suite).",
         )
         self.quality_control = click.option(
             "-qc",
             "--quality_control",
             is_flag=True,
-            help="Do quality control for qc_suite only.",
+            help="Do quality control for qc_suite only (qc_suite).",
         )
         self.source_pattern = click.option(
             "-sp",
             "--source_pattern",
-            help="User-defined input source pattern.",
+            help="User-defined input source pattern (obs_suite).",
         )
         self.prev_file_id = click.option(
             "-p_id",
@@ -325,18 +334,18 @@ class Options:
         self.external_qc_files = click.option(
             "-ext_qc",
             "--external_qc_files",
-            help="Path to external QC files. Default: <data_directory>/external_files.",
+            help="Path to external QC files. Default: <data_directory>/external_files (qc_suite).",
         )
         self.process_list = click.option(
             "-p_list",
             "--process_list",
-            help="List of decks to process. Take default from level configuration file.",
+            help="List of decks to process. Take default from level configuration file (obs_suite).",
         )
         self.year_init = click.option(
-            "-year_i", "--year_init", help="Initial release period year."
+            "-year_i", "--year_init", help="Initial release period year (obs_suite)."
         )
         self.year_end = click.option(
-            "-year_e", "--year_end", help="End release period year."
+            "-year_e", "--year_end", help="End release period year (obs_suite)."
         )
 
 

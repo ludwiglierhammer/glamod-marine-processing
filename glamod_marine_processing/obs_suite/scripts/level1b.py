@@ -108,10 +108,16 @@ process_options = [
 params = script_setup(process_options, args)
 
 cor_ext = ".txt.gz"
+if params.corrections.get("NOC_version"):
+    params.correction_version = params.corrections.get("NOC_version")
 
-L1b_main_corrections = os.path.join(
-    params.data_path, params.release, "NOC_corrections", params.correction_version
-)
+if params.corrections.get("NOC_path"):
+    L1b_main_corrections = params.corrections.get("NOC_path")
+    params.correction_version = "not_null"
+else:
+    L1b_main_corrections = os.path.join(
+        params.data_path, params.release, "NOC_corrections", params.correction_version
+    )
 
 logging.info(f"Setting corrections path to {L1b_main_corrections}")
 if params.correction_version != "null":

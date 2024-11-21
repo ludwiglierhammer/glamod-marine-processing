@@ -38,6 +38,9 @@ def obs_cli(
     prev_file_id,
     data_directory,
     work_directory,
+    NOC_version,
+    NOC_path,
+    Pub47_path,
     config_file,
     submit_jobs,
     run_jobs,
@@ -82,6 +85,14 @@ def obs_cli(
         level_config_file=level_config_file,
         machine=machine,
         key="scripts",
+    )
+
+    config = add_to_config(
+        config,
+        NOC_version=NOC_version,
+        NOC_path=NOC_path,
+        Pub47_path=Pub47_path,
+        key="corrections",
     )
 
     level_config = load_json(level_config_file)
