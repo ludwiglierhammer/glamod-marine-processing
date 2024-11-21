@@ -128,12 +128,10 @@ scratch_dir = script_config["paths"]["scratch_directory"]
 # Build process specific paths
 level_dir = os.path.join(data_dir, release_dest, dataset_dest, level_dest)
 release_source = source_dataset(level, release_source)
-print(data_dir)
-print(release_source)
-print(dataset_source)
-print(level_source)
 level_source_dir = os.path.join(data_dir, release_source, dataset_source, level_source)
 log_dir = os.path.join(level_dir, "log")
+script_config["paths"]["destination_directory"] = level_dir
+script_config["paths"]["source_directory"] = level_source_dir
 
 # Get further configuration -----------------------------------------------------------
 if script_config["process_list"]:
@@ -176,7 +174,7 @@ if status != 0:
 
 # Build jobs ------------------------------------------------------------------
 py_path = os.path.join(scripts_dir, PYSCRIPT)
-pycommand = f"python {py_path} {data_dir} {release} {update} {dataset}"
+pycommand = f"python {py_path}"
 
 # Set default job params
 mem = script_config["job_memo_mb"]

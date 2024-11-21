@@ -105,7 +105,7 @@ process_options = [
     "duplicates",
     "drop_qualities",
 ]
-params = script_setup(process_options, args, "level1b", "level1a")
+params = script_setup(process_options, args)
 
 cor_ext = ".txt.gz"
 

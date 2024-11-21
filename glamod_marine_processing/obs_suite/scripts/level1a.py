@@ -108,7 +108,7 @@ process_options = [
     "read_sections",
     "filter_reports_by",
 ]
-params = script_setup(process_options, args, "level1a", "level0")
+params = script_setup(process_options, args)
 
 if not params.flag:
     logging.error("Error parsing initial configuration")

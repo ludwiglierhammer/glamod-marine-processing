@@ -178,12 +178,8 @@ process_options = [
     "md_last_yr_avail",
     "md_not_avail",
 ]
-level = "level1d"
-params = script_setup(process_options, args, level, "level1c")
+params = script_setup(process_options, args)
 
-scratch_ = os.path.join(params.release_path, level, "scratch")
-scratch_path = os.path.join(scratch_, params.sid_dck)
-os.makedirs(scratch_path, exist_ok=True)
 paths_exist(params.level_log_path)
 
 md_avail = True if not params.md_not_avail else False

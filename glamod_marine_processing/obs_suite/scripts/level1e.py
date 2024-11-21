@@ -381,7 +381,7 @@ process_options = [
     "qc_last_date_avail",
     "no_qc_suite",
 ]
-params = script_setup(process_options, args, "level1e", "level1d")
+params = script_setup(process_options, args)
 
 if params.config.get("year_init"):
     setattr(params, "qc_first_date_avail", f"{params.config.get('year_init')}-01")

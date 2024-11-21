@@ -83,9 +83,7 @@ if len(sys.argv) > 1:
 else:
     logging.error("Need arguments to run!")
 
-
-level = "level2"
-params = script_setup([], args, level, "level1e")
+params = script_setup([], args)
 
 # These to build the brace expansions for the out of release periods
 left_min_period = 1600
