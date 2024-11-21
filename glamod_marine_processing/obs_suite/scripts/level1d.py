@@ -185,7 +185,7 @@ paths_exist(params.level_log_path)
 md_avail = True if not params.md_not_avail else False
 
 if md_avail:
-    if params.correction.get("pub47_path"):
+    if params.corrections_mod.get("pub47_path"):
         md_path = params.corrections_mod.get("pub47_path")
     else:
         md_path = os.path.join(
