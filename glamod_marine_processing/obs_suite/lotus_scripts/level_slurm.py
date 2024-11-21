@@ -87,25 +87,15 @@ args = parser.get_parser_args()
 
 release_source = script_config["release_source"]
 release_dest = script_config["release_destination"]
-if not release_source:
-    release_source = release
-if not release_dest:
-    release_dest = release
 
 dataset_source = script_config["dataset_source"]
 dataset_dest = script_config["dataset_destination"]
-if not dataset_source:
-    dataset_source = dataset
-if not dataset_dest:
-    dataset_dest = dataset
 
 level = script_config["level"]
 level_source = script_config["level_source"]
 level_dest = script_config["level_destination"]
 if not level_source:
     level_source = slurm_preferences.level_source[level]
-if not level_dest:
-    level_dest = level
 
 if "source_pattern" in script_config.keys():
     source_pattern = script_config["source_pattern"]

@@ -49,6 +49,16 @@ def obs_cli(
     overwrite,
 ):
     """Entry point for the obs_suite command line interface."""
+    if release_source is None:
+        release_source = release
+    if release_destination is None:
+        release_destination = release
+    if level_destination is None:
+        level_destination = level
+    if dataset_source is None:
+        dataset_source = dataset
+    if dataset_destination is None:
+        dataset_destination = dataset
     config = Cli(
         machine=machine,
         level=level,
