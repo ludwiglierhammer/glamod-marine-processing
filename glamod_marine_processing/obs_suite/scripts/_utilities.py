@@ -37,7 +37,7 @@ class script_setup:
         configfile = inargs[1]
 
         try:
-            with open(self.configfile) as fileObj:
+            with open(configfile) as fileObj:
                 config = json.load(fileObj)
         except Exception:
             logging.error(f"Opening configuration file: {configfile}", exc_info=True)
