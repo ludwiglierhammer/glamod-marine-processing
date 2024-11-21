@@ -63,6 +63,7 @@ class script_setup:
         else:
             self.dck = sid_dck
         self.corrections = config.get("corrections")
+        self.corrections_mod = config.get("corrections_mod")
 
         try:
             for opt in process_options:

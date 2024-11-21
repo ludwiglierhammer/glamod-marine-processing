@@ -92,7 +92,7 @@ def obs_cli(
         noc_version=noc_version,
         noc_path=noc_path,
         pub47_path=pub47_path,
-        key="corrections",
+        key="corrections_mod",
     )
 
     level_config = load_json(level_config_file)
