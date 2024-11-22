@@ -179,7 +179,7 @@ class Options:
             "-n_max",
             "--n_max_jobs",
             default="12",
-            help="Maximum number of jobs running in parallel. Use only if parallel_jobs is True",
+            help="Maximum number of jobs running in parallel. Use only with parallel_jobs.",
         )
         self.level = click.option(
             "-l",
@@ -252,7 +252,7 @@ class Options:
             "--additional_directories",
             multiple=True,
             default=["excluded", "invalid"],
-            help="Additional direcotires to merge included data.",
+            help="Merge data in additional directories too.",
         )
         self.overwrite = click.option(
             "-o",
