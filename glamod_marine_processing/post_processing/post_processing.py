@@ -1,4 +1,4 @@
-"""Split original ICOADS data into monthly source and deck files."""
+"""Merge decks from deck list into one single new deck."""
 
 from __future__ import annotations
 
@@ -84,8 +84,7 @@ def post_processing(
     cdm_tables=True,
     overwrite=False,
 ):
-    """Split ICOADS data into monthly deck files.
-    Use this function to create obs_suite level0 data.
+    """Merge decks from deck list into one single new deck.
 
     Parameters
     ----------

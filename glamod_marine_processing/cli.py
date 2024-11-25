@@ -200,7 +200,7 @@ class Options:
             "-n_max",
             "--n_max_jobs",
             default="12",
-            help="Maximum number of jobs running in parallel. Use only if parallel_jobs is True",
+            help="Maximum number of jobs running in parallel. Use only with parallel_jobs.",
         )
         self.level = click.option(
             "-l",
@@ -297,14 +297,14 @@ class Options:
             "-date_avail",
             "--available_date_information",
             is_flag=True,
-            help="Set if date information is available in input file names (postproc).",
+            help="Set if date information is available in input file names (post_proc).",
         )
         self.additional_directories = click.option(
             "-add_dirs",
             "--additional_directories",
             multiple=True,
             default=["excluded", "invalid"],
-            help="Additional direcotires to merge included data (postproc).",
+            help="Merge data in additional directories too (post_proc).",
         )
         self.overwrite = click.option(
             "-o",

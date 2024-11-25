@@ -33,7 +33,6 @@ def post_proc_cli(
     update,
     dataset,
     data_directory,
-    source_pattern,
     additional_directories,
     available_date_information,
     overwrite,
