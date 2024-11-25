@@ -83,9 +83,7 @@ if len(sys.argv) > 1:
 else:
     logging.error("Need arguments to run!")
 
-
-level = "level2"
-params = script_setup([], args, level, "level1e")
+params = script_setup([], args)
 
 # These to build the brace expansions for the out of release periods
 left_min_period = 1600
@@ -121,10 +119,10 @@ if init_global:
 if end_global:
     year_end = year_end if year_end <= int(end_global) else int(end_global)
 
-if params.config.get("year_init"):
-    year_init = int(params.config.get("year_init"))
-if params.config.get("year_end"):
-    year_end = int(params.config.get("year_end"))
+if params.year_init:
+    year_init = int(params.year_init)
+if params.year_end:
+    year_end = int(params.year_end)
 
 exclude_sid_dck = include_list.get(params.sid_dck, {}).get("exclude")
 

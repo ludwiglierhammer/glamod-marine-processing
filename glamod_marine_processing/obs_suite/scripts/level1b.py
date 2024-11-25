@@ -105,13 +105,19 @@ process_options = [
     "duplicates",
     "drop_qualities",
 ]
-params = script_setup(process_options, args, "level1b", "level1a")
+params = script_setup(process_options, args)
 
 cor_ext = ".txt.gz"
+if params.corrections_mod.get("noc_version"):
+    params.correction_version = params.corrections_mod.get("noc_version")
 
-L1b_main_corrections = os.path.join(
-    params.data_path, params.release, "NOC_corrections", params.correction_version
-)
+if params.corrections_mod.get("noc_path"):
+    L1b_main_corrections = params.corrections_mod.get("noc_path")
+    params.correction_version = "not_null"
+else:
+    L1b_main_corrections = os.path.join(
+        params.data_path, params.release, "NOC_corrections", params.correction_version
+    )
 
 logging.info(f"Setting corrections path to {L1b_main_corrections}")
 if params.correction_version != "null":

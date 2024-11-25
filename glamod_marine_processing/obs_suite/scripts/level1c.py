@@ -236,7 +236,7 @@ else:
     logging.error("Need arguments to run!")
     sys.exit(1)
 
-params = script_setup([], args, "level1c", "level1b")
+params = script_setup([], args)
 
 id_validation_path = os.path.join(
     params.data_path, params.release, "NOC_ANC_INFO", "json_files"

@@ -381,12 +381,12 @@ process_options = [
     "qc_last_date_avail",
     "no_qc_suite",
 ]
-params = script_setup(process_options, args, "level1e", "level1d")
+params = script_setup(process_options, args)
 
-if params.config.get("year_init"):
-    setattr(params, "qc_first_date_avail", f"{params.config.get('year_init')}-01")
-if params.config.get("year_end"):
-    setattr(params, "qc_last_date_avail", f"{params.config.get('year_end')}-12")
+if params.year_init:
+    setattr(params, "qc_first_date_avail", f"{params.year_init}-01")
+if params.year_end:
+    setattr(params, "qc_last_date_avail", f"{params.year_end}-12")
 qc_path = os.path.join(params.data_path, params.release, "metoffice_qc", "base")
 
 # Check we have all the dirs!
