@@ -155,10 +155,11 @@ This package was created with Cookiecutter_ and the `audreyfeldroy/cookiecutter-
         :target: https://github.com/glamod/glamod-marine-processing/tags
         :alt: Tag
 
-.. |zenodo| image:: https://img.shields.io/badge/zenodo-package_or_version_not_found-red
-        :target: https://zenodo.org/glamod-marine-processing
- 	      :alt: DOI
+.. |zenodo| image:: https://zenodo.org/badge/DOI/10.5281/zenodo.14215566.svg
+  	:target: https://doi.org/10.5281/zenodo.14215566
+ 	:alt: DOI
 
+https://zenodo.org/records/14215566
 .. |noc| image:: https://img.shields.io/badge/Thanks%20to-NOC-blue.svg
         :target: https://noc.ac.uk/
         :alt: NOC
