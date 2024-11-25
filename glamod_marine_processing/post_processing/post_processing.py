@@ -1,4 +1,4 @@
-"""Merge decks from deck list into one singel new deck."""
+"""Merge decks from deck list into one single new deck."""
 
 from __future__ import annotations
 
@@ -84,7 +84,7 @@ def post_processing(
     cdm_tables=True,
     overwrite=False,
 ):
-    """Merge decks from deck list into one singel new deck.
+    """Merge decks from deck list into one single new deck.
 
     Parameters
     ----------
