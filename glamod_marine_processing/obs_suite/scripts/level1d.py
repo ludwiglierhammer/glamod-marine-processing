@@ -178,20 +178,19 @@ process_options = [
     "md_last_yr_avail",
     "md_not_avail",
 ]
-level = "level1d"
-params = script_setup(process_options, args, level, "level1c")
+params = script_setup(process_options, args)
 
-scratch_ = os.path.join(params.release_path, level, "scratch")
-scratch_path = os.path.join(scratch_, params.sid_dck)
-os.makedirs(scratch_path, exist_ok=True)
 paths_exist(params.level_log_path)
 
 md_avail = True if not params.md_not_avail else False
 
 if md_avail:
-    md_path = os.path.join(
-        params.data_path, params.release, params.md_subdir, "monthly"
-    )
+    if params.corrections_mod.get("pub47_path"):
+        md_path = params.corrections_mod.get("pub47_path")
+    else:
+        md_path = os.path.join(
+            params.data_path, params.release, params.md_subdir, "monthly"
+        )
     logging.info(f"Setting MD path to {md_path}")
     metadata_filename = os.path.join(md_path, f"pub47-{params.year}-{params.month}.csv")
 

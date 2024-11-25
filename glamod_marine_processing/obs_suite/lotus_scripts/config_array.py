@@ -11,6 +11,7 @@ import logging
 import os
 import re
 import sys
+from copy import deepcopy
 
 from glamod_marine_processing.utilities import mkdir
 
@@ -146,9 +147,11 @@ def clean_previous_ok_logs(
     job_file = glob.glob(os.path.join(sid_dck_log_dir, sid_dck + ".slurm"))
 
     # check is separate configuration for this source / deck
-    config = script_config.get(sid_dck)
-    if config is None:
-        config = script_config
+    config_sid_dck = script_config.get(sid_dck)
+    config = deepcopy(script_config)
+    if config_sid_dck is not None:
+        for k, v in config_sid_dck.items():
+            config[k] = v
 
     if not os.path.isdir(sid_dck_log_dir):
         logging.error(f"Data partition log directory does not exist: {sid_dck_log_dir}")

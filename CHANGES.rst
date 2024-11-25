@@ -13,32 +13,36 @@ Announcements
 * adding readthedocs documentation (:pull:`42`)
 * Now under Apache v2.0 license (:pull:`42`)
 * Thanks to NOC, Cookiecutter and GNU parallel (:issue:`53`, :pull:`54`)
-* glamd-marine-processing has migrated its development branch name from master to main.
+* glamod-marine-processing has migrated its development branch name from master to main.
 * final GLAMOD marine processing data release 7.0 version (:pull:`63`)
 
 New features and enhancements
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-* add quality checks for both Wind speed and wind direction in level1e script (:issue:`20`, :pull:`22`)
-* add pre-processing for ICOADS data (:pull:`24`)
-* add post processing for C-RAID level1a data (:pull:`26`)
+* ``obs_suite``: add quality checks for both Wind speed and wind direction in level1e script (:issue:`20`, :pull:`22`)
+* ``pre_proc``: add pre-processing for ICOADS data (:pull:`24`)
+* ``post_proc``: add post processing for C-RAID level1a data (:pull:`26`)
 * ``obs_suite``: optionally, set list of decks to process (:pull:`25`)
 * ``obs_suite``: optionally, set both release period init and end year (:pull:`25`)
-* ``obs_suite``: configuration files for C-RAID (:pull:`25`)
 * ``obs_suite``: running with C-RAID data (:pull:`25`)
-* ``obs_suite`` and ``qc_suite``: optionally, run jobs in parallel with gnu_parallel (:pull:`41`)
+* ``obs_suite``: optionally, set both source and destination level, release and dataset (:pull:`67`)
+* ``obs_suite``: optionally, set both path to NOC correction data and NOC version in level1b (:pull:`67`)
+* ``obs_suite``: optionally, set path to Pub47 data in level1d (:pull:`67`)
+* ``obs_suite`` and ``qc_suite``: optionally, run jobs in parallel with gnu_parallel (:pull:`41`)´
 * ``post_proc``: optionally, post-processing for ICOADS data (:pull:`46`)
 * ``post_proc``: optionally, merge data from additional directories (invalid, excluded) to a new deck dataset (:pull:`52`)
-* ``qc_suite``: update job list for release 7.0 (:pull:`52`)
+
+Internal changes
+^^^^^^^^^^^^^^^^
+* ``obs_suite``: take data paths from already created configuration files (:pull:`67`)
+* ``obs_suite``: configuration files for C-RAID (:pull:`25`)
+* ``obs_suite``: adjust  to ``cdm_reader_mapper`` version ``v0.4.0`` and further versions (:pull:`21`, :pull:`28`)
 
 Breaking changes
 ^^^^^^^^^^^^^^^^
 * delete metadata suite, config suite and not-used scripts/modules (:issue:`14`, :pull:`16`)
-* adjust ``obs_suite`` to ``cdm_reader_mapper`` version ``v0.4.0`` (yet unpublished) (:pull:`21`)
 * ``obs_suite``: date information is NOT mandatory in filenames anymore (:pull:`25`)
 * ``obs_suite``: pass tables if no correction or quality control file are available (:pull:`25`)
 * ``obs_suite``: adjust both process deck lists and processing init/end years to release7.0 requirements (:pull:`27`)
-* ``obs_suite``: adjust structure to ``cdm_reader_mapper`` structure (:pull:`28`)
-* ``qc_suite``: no need for NOC correction files (:pull:`39`)
 * ``obs_suite``: new ICOADS_R3.0.2T deck list after level 1a (:pull:`40`)
 * ``obs_suite``: starting with year 2014 (:pull:`40`)
 * set BASTION do default machine (bastion01.core.ichec.ie) (:pull:`37`)
@@ -48,7 +52,11 @@ Breaking changes
 * ``obs_suite``: set release period to 2015 to 2023 (:pull:`49`)
 * ``obs_suite``: if no qc files available: set report_quality from 2 (not checked) to 0 (passed) in level1e script (:pull:`50`)
 * ``obs_suite``: if report_id is not available in any observations: remove report_id from header (and vice versa) in level1e script (:pull:`50`)
+* ``obs_suite``: update configuration file structure of previous GLAMOD data releases (:pull:`67`)
+* ``qc_suite``: no need for NOC correction files (:pull:`39`)
 * ``qc_suite``: set minimum QC end year from 2022 to 1948 (:pull:`52`)
+* ``qc_suite``: update job list for release 7.0 (:pull:`52`)
+
 
 Bug fixes
 ^^^^^^^^^

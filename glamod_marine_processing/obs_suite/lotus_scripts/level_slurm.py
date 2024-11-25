@@ -85,17 +85,27 @@ release_periods_file = os.path.join(config_files_path, release_periods_file)
 
 args = parser.get_parser_args()
 
-LEVEL = script_config["level"]
-LEVEL_SOURCE = slurm_preferences.level_source[LEVEL]
+release_source = script_config["release_source"]
+release_dest = script_config["release_destination"]
+
+dataset_source = script_config["dataset_source"]
+dataset_dest = script_config["dataset_destination"]
+
+level = script_config["level"]
+level_source = script_config["level_source"]
+level_dest = script_config["level_destination"]
+if not level_source:
+    level_source = slurm_preferences.level_source[level]
+
 if "source_pattern" in script_config.keys():
-    SOURCE_PATTERN = script_config["source_pattern"]
+    source_pattern = script_config["source_pattern"]
 else:
-    SOURCE_PATTERN = slurm_preferences.source_pattern[LEVEL]
+    source_pattern = slurm_preferences.source_pattern[level]
 
-if isinstance(SOURCE_PATTERN, dict):
-    SOURCE_PATTERN = SOURCE_PATTERN[dataset]
+if isinstance(source_pattern, dict):
+    source_pattern = source_pattern[dataset]
 
-PYSCRIPT = f"{LEVEL}.py"
+PYSCRIPT = f"{level}.py"
 MACHINE = script_config["scripts"]["machine"].lower()
 overwrite = script_config["overwrite"]
 
@@ -106,10 +116,12 @@ data_dir = script_config["paths"]["data_directory"]
 scratch_dir = script_config["paths"]["scratch_directory"]
 
 # Build process specific paths
-level_dir = os.path.join(data_dir, release, dataset, LEVEL)
-level_source = source_dataset(LEVEL, release)
-level_source_dir = os.path.join(data_dir, level_source, dataset, LEVEL_SOURCE)
+level_dir = os.path.join(data_dir, release_dest, dataset_dest, level_dest)
+release_source = source_dataset(level, release_source)
+level_source_dir = os.path.join(data_dir, release_source, dataset_source, level_source)
 log_dir = os.path.join(level_dir, "log")
+script_config["paths"]["destination_directory"] = level_dir
+script_config["paths"]["source_directory"] = level_source_dir
 
 # Get further configuration -----------------------------------------------------------
 if script_config["process_list"]:
@@ -131,7 +143,7 @@ if script_config["year_end"]:
     release_periods["year_end"] = script_config["year_end"]
 
 # Optionally, add CMD add file
-add_file = os.path.join(config_files_path, f"{LEVEL}_cmd_add.json")
+add_file = os.path.join(config_files_path, f"{level}_cmd_add.json")
 if os.path.isfile(add_file):
     script_config["cmd_add_file"] = add_file
 
@@ -139,7 +151,7 @@ if os.path.isfile(add_file):
 logging.info("CONFIGURING JOB ARRAYS...")
 status = config_array.main(
     level_source_dir,
-    SOURCE_PATTERN,
+    source_pattern,
     log_dir,
     script_config,
     release_periods,
@@ -152,7 +164,7 @@ if status != 0:
 
 # Build jobs ------------------------------------------------------------------
 py_path = os.path.join(scripts_dir, PYSCRIPT)
-pycommand = f"python {py_path} {data_dir} {release} {update} {dataset}"
+pycommand = f"python {py_path}"
 
 # Set default job params
 mem = script_config["job_memo_mb"]
@@ -169,26 +181,26 @@ for sid_dck in process_list:
     if array_size == 0:
         logging.warning(f"{sid_dck}: no jobs for partition")
         continue
-    if LEVEL in slurm_preferences.one_task:
+    if level in slurm_preferences.one_task:
         array_size = 1
 
     job_file = os.path.join(log_diri, sid_dck + ".slurm")
     taskfarm_file = os.path.join(log_diri, sid_dck + ".tasks")
 
-    if LEVEL in slurm_preferences.TaskPNi.keys():
-        TaskPNi = slurm_preferences.TaskPNi[LEVEL]
+    if level in slurm_preferences.TaskPNi.keys():
+        TaskPNi = slurm_preferences.TaskPNi[level]
     else:
         memi = script_config.get(sid_dck, {}).get("job_memo_mb")
         memi = mem if not memi else memi
         TaskPNi = min(int(190000.0 / float(memi)), 40)
 
-    if LEVEL in slurm_preferences.nodesi.keys():
-        nodesi = slurm_preferences.nodesi[LEVEL]
+    if level in slurm_preferences.nodesi.keys():
+        nodesi = slurm_preferences.nodesi[level]
     else:
         nodesi = array_size // TaskPNi + (array_size % TaskPNi > 0)
 
-    if LEVEL in slurm_preferences.ti.keys():
-        ti = slurm_preferences.ti[LEVEL]
+    if level in slurm_preferences.ti.keys():
+        ti = slurm_preferences.ti[level]
     else:
         t_hhi = script_config.get(sid_dck, {}).get("job_time_hr")
         t_mmi = script_config.get(sid_dck, {}).get("job_time_min")

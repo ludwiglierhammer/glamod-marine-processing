@@ -49,9 +49,15 @@ class Cli:
         self,
         machine="",
         level="",
+        level_source="",
+        level_destination="",
         release="",
+        release_source="",
+        release_destination="",
         update="",
         dataset="",
+        dataset_source="",
+        dataset_destination="",
         data_directory=None,
         work_directory=None,
         config_file=None,
@@ -61,9 +67,15 @@ class Cli:
     ):
         self.machine = machine.lower()
         self.level = level
+        self.level_source = level_source
+        self.level_destination = level_destination
         self.release = release
+        self.release_source = release_source
+        self.release_destination = release_destination
         self.update = update
         self.dataset = dataset
+        self.dataset_source = dataset_source
+        self.dataset_destination = dataset_destination
         self.data_directory = data_directory
         self.work_directory = work_directory
         self.config_file = config_file
@@ -84,10 +96,13 @@ class Cli:
         make_release_source_tree(
             data_path=config["paths"]["data_directory"],
             config_path=config["paths"]["config_directory"],
-            release=self.release,
+            release_source=self.release_source,
+            release_destination=self.release_destination,
             update=self.update,
-            dataset=self.dataset,
+            dataset_source=self.dataset_source,
+            dataset_destination=self.dataset_destination,
             level=self.level,
+            level_destination=self.level_destination,
             deck_list=self.deck_list,
         )
         mkdir(config["paths"]["release_directory"])
@@ -104,6 +119,12 @@ class Cli:
             "dataset": self.dataset,
             "release_tag": self.release_update,
         }
+        config["level_source"] = self.level_source
+        config["level_destination"] = self.level_destination
+        config["release_source"] = self.release_source
+        config["release_destination"] = self.release_destination
+        config["dataset_source"] = self.dataset_source
+        config["dataset_destination"] = self.dataset_destination
 
         if self.data_directory is not None:
             config["paths"]["data_directory"] = self.data_directory
@@ -195,8 +216,28 @@ class Options:
             * level2: Make data ready to ingest in the database.
             """,
         )
+        self.level_source = click.option(
+            "-ls",
+            "--level_source",
+            help="Name of the source data level.",
+        )
+        self.level_destination = click.option(
+            "-ld",
+            "--level_destination",
+            help="Name of the destination data level.",
+        )
         self.release = click.option(
             "-r", "--release", default="release_7.0", help="Name of the data release."
+        )
+        self.release_source = click.option(
+            "-rs",
+            "--release_source",
+            help="Name of the source data release",
+        )
+        self.release_destination = click.option(
+            "-rd",
+            "--release_destination",
+            help="Name of the destination data release.",
         )
         self.update = click.option(
             "-u", "--update", default="000000", help="Name of the data release update."
@@ -207,11 +248,13 @@ class Options:
             default="ICOADS_R3.0.2T",
             help="Name of the data release dataset.",
         )
-        self.previous_release = click.option(
-            "-pr",
-            "--previous_release",
-            default="release_6.0",
-            help="Name of the previous data release.",
+        self.dataset_source = click.option(
+            "-ds", "--dataset_source", help="Name of the source data release dataset"
+        )
+        self.dataset_destination = click.option(
+            "-dd",
+            "--dataset_destination",
+            help="Name of the destination data release dataset",
         )
         self.data_directory = click.option(
             "-data_dir",
@@ -223,11 +266,20 @@ class Options:
             "--work_directory",
             help="Directory path of the log and template files. By default, take directory path from machine-depending configuration file.",
         )
-        self.corrections_version = click.option(
-            "-c",
-            "--corrections_version",
-            default="v1x2023",
-            help="Name of the NOC corrections version.",
+        self.noc_version = click.option(
+            "-noc_v",
+            "--noc_version",
+            help="Name of the NOC corrections version (obs_suite: level1b).",
+        )
+        self.noc_path = click.option(
+            "-noc_p",
+            "--noc_path",
+            help="Path to the NOC correction files (obs_suite: level1b).",
+        )
+        self.pub47_path = click.option(
+            "-pub47_p",
+            "--pub47_path",
+            help="Path to the Pub47 files (obs_suite: level1d).",
         )
         self.config_file = click.option(
             "-cfg",
@@ -239,20 +291,20 @@ class Options:
             "-preproc",
             "--preprocessing",
             is_flag=True,
-            help="Do some preprocessing for qc_suite only.",
+            help="Do some preprocessing for qc_suite only (qc_suite).",
         )
         self.available_date_information = click.option(
             "-date_avail",
             "--available_date_information",
             is_flag=True,
-            help="Set if date information is available in input file names",
+            help="Set if date information is available in input file names (postproc).",
         )
         self.additional_directories = click.option(
             "-add_dirs",
             "--additional_directories",
             multiple=True,
             default=["excluded", "invalid"],
-            help="Additional direcotires to merge included data.",
+            help="Additional direcotires to merge included data (postproc).",
         )
         self.overwrite = click.option(
             "-o",
@@ -264,18 +316,18 @@ class Options:
             "-hi_qc",
             "--high_resolution_qc",
             is_flag=True,
-            help="Do high resolution QC for qc_suite only.",
+            help="Do high resolution QC for qc_suite only (qc_suite).",
         )
         self.quality_control = click.option(
             "-qc",
             "--quality_control",
             is_flag=True,
-            help="Do quality control for qc_suite only.",
+            help="Do quality control for qc_suite only (qc_suite).",
         )
         self.source_pattern = click.option(
             "-sp",
             "--source_pattern",
-            help="User-defined input source pattern.",
+            help="User-defined input source pattern (obs_suite).",
         )
         self.prev_file_id = click.option(
             "-p_id",
@@ -285,18 +337,18 @@ class Options:
         self.external_qc_files = click.option(
             "-ext_qc",
             "--external_qc_files",
-            help="Path to external QC files. Default: <data_directory>/external_files.",
+            help="Path to external QC files. Default: <data_directory>/external_files (qc_suite).",
         )
         self.process_list = click.option(
             "-p_list",
             "--process_list",
-            help="List of decks to process. Take default from level configuration file.",
+            help="List of decks to process. Take default from level configuration file (obs_suite).",
         )
         self.year_init = click.option(
-            "-year_i", "--year_init", help="Initial release period year."
+            "-year_i", "--year_init", help="Initial release period year (obs_suite)."
         )
         self.year_end = click.option(
-            "-year_e", "--year_end", help="End release period year."
+            "-year_e", "--year_end", help="End release period year (obs_suite)."
         )
 
 

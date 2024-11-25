@@ -22,9 +22,15 @@ from .utilities import add_to_config, load_json, save_json
 def obs_cli(
     machine,
     level,
+    level_source,
+    level_destination,
     release,
+    release_source,
+    release_destination,
     update,
     dataset,
+    dataset_source,
+    dataset_destination,
     process_list,
     year_init,
     year_end,
@@ -32,6 +38,9 @@ def obs_cli(
     prev_file_id,
     data_directory,
     work_directory,
+    noc_version,
+    noc_path,
+    pub47_path,
     config_file,
     submit_jobs,
     run_jobs,
@@ -40,12 +49,28 @@ def obs_cli(
     overwrite,
 ):
     """Entry point for the obs_suite command line interface."""
+    if release_source is None:
+        release_source = release
+    if release_destination is None:
+        release_destination = release
+    if level_destination is None:
+        level_destination = level
+    if dataset_source is None:
+        dataset_source = dataset
+    if dataset_destination is None:
+        dataset_destination = dataset
     config = Cli(
         machine=machine,
         level=level,
+        level_source=level_source,
+        level_destination=level_destination,
         release=release,
+        release_source=release_source,
+        release_destination=release_destination,
         update=update,
         dataset=dataset,
+        dataset_source=dataset_source,
+        dataset_destination=dataset_destination,
         data_directory=data_directory,
         work_directory=work_directory,
         config_file=config_file,
@@ -70,6 +95,14 @@ def obs_cli(
         level_config_file=level_config_file,
         machine=machine,
         key="scripts",
+    )
+
+    config = add_to_config(
+        config,
+        noc_version=noc_version,
+        noc_path=noc_path,
+        pub47_path=pub47_path,
+        key="corrections_mod",
     )
 
     level_config = load_json(level_config_file)
