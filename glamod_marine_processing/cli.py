@@ -297,7 +297,7 @@ class Options:
             "-date_avail",
             "--available_date_information",
             is_flag=True,
-            help="Set if date information is available in input file names (postproc).",
+            help="Set if date information is available in input file names (post_proc).",
         )
         self.additional_directories = click.option(
             "-add_dirs",
