@@ -33,20 +33,14 @@ chunksizes = {
 class script_setup:
     """Create script."""
 
-    def __init__(self, process_options, inargs, level, level_prev, clean=False):
-        self.data_path = inargs[1]
-        self.release = inargs[2]
-        self.update = inargs[3]
-        self.dataset = inargs[4]
-        self.configfile = inargs[5]
+    def __init__(self, process_options, inargs, clean=False):
+        configfile = inargs[1]
 
         try:
-            with open(self.configfile) as fileObj:
-                self.config = json.load(fileObj)
+            with open(configfile) as fileObj:
+                config = json.load(fileObj)
         except Exception:
-            logging.error(
-                f"Opening configuration file :{self.configfile}", exc_info=True
-            )
+            logging.error(f"Opening configuration file: {configfile}", exc_info=True)
             self.flag = False
             return
 
@@ -54,39 +48,43 @@ class script_setup:
             logging.warning(
                 "Removed option to provide sid_dck, year and month as arguments. Use config file instead"
             )
-        if len(sys.argv) > 6:
-            self.sid_dck = inargs[6]
-            self.year = inargs[7]
-            self.month = inargs[8]
-        else:
-            self.sid_dck = self.config.get("sid_dck")
-            self.year = self.config.get("yyyy")
-            self.month = self.config.get("mm")
+        self.dataset = config["abbreviations"].get("dataset")
 
-        if "-" in self.sid_dck:
-            self.dck = self.sid_dck.split("-")[1]
+        sid_dck = config.get("sid_dck")
+        self.sid_dck = sid_dck
+        self.year = config.get("yyyy")
+        self.month = config.get("mm")
+
+        self.year_init = config.get("year_init")
+        self.year_end = config.get("year_end")
+
+        if "-" in sid_dck:
+            self.dck = sid_dck.split("-")[1]
         else:
-            self.dck = self.sid_dck
-        self.corrections = self.config.get("corrections")
+            self.dck = sid_dck
+        self.corrections = config.get("corrections")
+        self.corrections_mod = config.get("corrections_mod")
 
         try:
             for opt in process_options:
-                if not self.config.get(self.sid_dck, {}).get(opt):
-                    setattr(self, opt, self.config.get(opt))
+                if not config.get(sid_dck, {}).get(opt):
+                    setattr(self, opt, config.get(opt))
                 else:
-                    setattr(self, opt, self.config.get(self.sid_dck).get(opt))
+                    setattr(self, opt, config.get(sid_dck).get(opt))
             self.flag = True
         except Exception:
             logging.error(
-                f"Parsing configuration from file :{self.configfile}", exc_info=True
+                f"Parsing configuration from file: {configfile}", exc_info=True
             )
             self.flag = False
 
-        self.filename = self.config.get("filename")
-        self.level2_list = self.config.get("cmd_add_file")
-        self.prev_fileID = self.config.get("prev_fileID")
-        self.release_path = os.path.join(self.data_path, self.release, self.dataset)
-        self.release_id = FFS.join([self.release, self.update])
+        self.data_path = config["paths"].get("data_directory")
+        self.release = config["abbreviations"].get("release")
+
+        self.filename = config.get("filename")
+        self.level2_list = config.get("cmd_add_file")
+        self.prev_fileID = config.get("prev_fileID")
+        self.release_id = config["abbreviations"].get("release_tag")
         self.fileID = FFS.join(
             [str(self.year), str(self.month).zfill(2), self.release_id]
         )
@@ -94,36 +92,22 @@ class script_setup:
         if self.prev_fileID is None:
             self.prev_fileID = self.fileID
 
-        if level == "level1a":
-            self.prev_level_path = os.path.join(
-                self.data_path, "datasets", self.dataset, "level0", self.sid_dck
-            )
-        else:
-            self.prev_level_path = os.path.join(
-                self.release_path, level_prev, self.sid_dck
-            )
-        self.level_path = os.path.join(self.release_path, level, self.sid_dck)
-        self.level_ql_path = os.path.join(
-            self.release_path, level, "quicklooks", self.sid_dck
+        self.prev_level_path = os.path.join(
+            config["paths"]["source_directory"], sid_dck
         )
-        self.level_log_path = os.path.join(
-            self.release_path, level, "log", self.sid_dck
-        )
-        self.level_invalid_path = os.path.join(
-            self.release_path, level, "invalid", self.sid_dck
-        )
-        self.level_excluded_path = os.path.join(
-            self.release_path, level, "excluded", self.sid_dck
-        )
-        self.level_reports_path = os.path.join(
-            self.release_path, level, "reports", self.sid_dck
-        )
+        level_path = config["paths"]["destination_directory"]
+        self.level_path = os.path.join(level_path, sid_dck)
+        self.level_ql_path = os.path.join(level_path, "quicklooks", sid_dck)
+        self.level_log_path = os.path.join(level_path, "log", sid_dck)
+        self.level_invalid_path = os.path.join(level_path, "invalid", sid_dck)
+        self.level_excluded_path = os.path.join(level_path, "excluded", sid_dck)
+        self.level_reports_path = os.path.join(level_path, "reports", sid_dck)
         data_paths = [
             self.prev_level_path,
             self.level_path,
             self.level_ql_path,
         ]
-        for data_path in add_data_paths[level]:
+        for data_path in add_data_paths[config["level"]]:
             data_paths.append(getattr(self, data_path))
         paths_exist(data_paths)
 

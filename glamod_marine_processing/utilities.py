@@ -34,10 +34,13 @@ level_subdirs = {
 def make_release_source_tree(
     data_path=None,
     config_path=None,
-    release=None,
+    release_source=None,
+    release_destination=None,
     update=None,
-    dataset=None,
+    dataset_source=None,
+    dataset_destination=None,
     level=None,
+    level_destination=None,
     deck_list=None,
 ):
     """Make release source tree."""
@@ -57,7 +60,7 @@ def make_release_source_tree(
         warn("No level selected. Skip making release source tree.")
         return
     if deck_list is None:
-        path_ = os.path.join(config_path, release, update, dataset)
+        path_ = os.path.join(config_path, release_source, update, dataset_source)
         json_file = os.path.join(path_, f"{level}.json")
         json_dict = load_json(json_file)
 
@@ -74,9 +77,9 @@ def make_release_source_tree(
     level_subdirs_.extend(".")
 
     # CREATE DIRS
-    release_path = os.path.join(data_path, release)
-    source_path = os.path.join(release_path, dataset)
-    level_subdir = os.path.join(source_path, level)
+    release_path = os.path.join(data_path, release_destination)
+    source_path = os.path.join(release_path, dataset_destination)
+    level_subdir = os.path.join(source_path, level_destination)
     for sublevel in level_subdirs_:
         create_subdir(os.path.join(level_subdir, sublevel), deck_list)
 
