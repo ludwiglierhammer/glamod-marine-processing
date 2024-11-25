@@ -59,7 +59,7 @@ If you would like to contribute code or documentation (which is greatly apprecia
 How to cite this library
 ------------------------
 
-If you wish to cite `glamod-marine-processing` in a research publication, we kindly ask that you refer to Zenodo: not available yet.
+If you wish to cite `glamod-marine-processing` in a research publication, we kindly ask that you refer to Zenodo: https://doi.org/10.5281/zenodo.14215566.
 
 License
 -------
@@ -159,7 +159,6 @@ This package was created with Cookiecutter_ and the `audreyfeldroy/cookiecutter-
   	:target: https://doi.org/10.5281/zenodo.14215566
  	:alt: DOI
 
-https://zenodo.org/records/14215566
 .. |noc| image:: https://img.shields.io/badge/Thanks%20to-NOC-blue.svg
         :target: https://noc.ac.uk/
         :alt: NOC
