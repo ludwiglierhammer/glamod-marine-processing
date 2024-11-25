@@ -3,8 +3,8 @@
 Changelog
 =========
 
-v7.1.0 (unpublished)
---------------------
+v7.1.0 (2024-11-25)
+-------------------
 Contributors to this version: Ludwig Lierhammer (:user:`ludwiglierhammer`)
 
 Announcements
