@@ -28,7 +28,7 @@ level_subdirs = {
     "level1d": ["log", "quicklooks"],
     "level1e": ["log", "quicklooks", "reports"],
     "level2": ["log", "quicklooks", "excluded", "reports"],
-    "level3": ["log"],
+    "level3": ["log", "quicklooks"],
 }
 
 
