@@ -53,6 +53,21 @@ def copyfiles(pattern, dest, mode="excluded"):
         logging.info(f"{file_name} {mode} from level2 in {dest}")
 
 
+def process_table(table_df):
+    """Process table."""
+    cdm_obs_core_df = table_df[level3_columns]
+    new_cols = [col[1] for col in cdm_obs_core_df.columns]
+    cdm_obs_core_df.columns = new_cols
+
+    cdm_obs_core_df = cdm_obs_core_df[cdm_obs_core_df["observation_value"].notnull()]
+
+    odata_filename = os.path.join(
+        params.level_path, FFS.join([params.fileID, "pressure_data"]) + ".psv"
+    )
+    table_to_csv(cdm_obs_core_df, odata_filename)
+    logging.info(f"File written: {odata_filename}")
+
+
 # MAIN ------------------------------------------------------------------------
 
 # Process input and set up some things and make sure we can do something-------
@@ -71,10 +86,6 @@ else:
 
 params = script_setup([], args)
 
-# These to build the brace expansions for the out of release periods
-left_min_period = 1600
-right_max_period = 2100
-
 # DO THE DATA SELECTION -------------------------------------------------------
 # -----------------------------------------------------------------------------
 obs_table = "observations-slp"
@@ -86,25 +97,8 @@ history_tstmp = datetime.datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S")
 table_df = cdm.read_tables(
     params.prev_level_path, params.prev_fileID, cdm_subset=cdm_tables, na_values="null"
 )
-if table_df.empty:
-    logging.warning(f"No CDM tables available for: {params.pre_file_ID}.")
-    sys.exit(1)
 
-for col in level3_columns:
-    if col not in table_df.columns:
-        logging.warning(
-            f"Required column {col} not available for: {params.pre_file_ID}"
-        )
-        sys.exit(1)
-
-cdm_obs_core_df = table_df[level3_columns]
-new_cols = [col[1] for col in cdm_obs_core_df.columns]
-cdm_obs_core_df.columns = new_cols
-
-cdm_obs_core_df = cdm_obs_core_df[cdm_obs_core_df["observation_value"].notnull()]
-
-odata_filename = os.path.join(
-    params.level_path, FFS.join([params.fileID, "pressure_data"]) + ".psv"
-)
-table_to_csv(cdm_obs_core_df, odata_filename)
-logging.info(f"File written: {odata_filename}")
+if not table_df.empty:
+    process_table(table_df)
+else:
+    logging.warning(f"No CDM tables available for: {params.prev_fileID}.")
