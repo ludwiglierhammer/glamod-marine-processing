@@ -37,8 +37,7 @@ import sys
 from importlib import reload
 from pathlib import Path
 
-import pandas as pd
-from _utilities import level3_columns, paths_exist, script_setup
+from _utilities import FFS, level3_columns, script_setup, table_to_csv
 from cdm_reader_mapper import cdm_mapper as cdm
 
 reload(logging)  # This is to override potential previous config of logging
@@ -76,8 +75,6 @@ params = script_setup([], args)
 left_min_period = 1600
 right_max_period = 2100
 
-paths_exist([params.level_excluded_path, params.level_reports_path])
-
 # DO THE DATA SELECTION -------------------------------------------------------
 # -----------------------------------------------------------------------------
 obs_table = "observations-slp"
@@ -90,4 +87,15 @@ table_df = cdm.read_tables(
     params.prev_level_path, params.prev_fileID, cdm_subset=cdm_tables, na_values="null"
 )
 
-cdm_obs_core_df = pd.DataFrame(columns=level3_columns.keys())
+cdm_obs_core_df = table_df[level3_columns]
+new_cols = [col[1] for col in cdm_obs_core_df.columns]
+cdm_obs_core_df.columns = new_cols
+
+cdm_obs_core_df = cdm_obs_core_df[cdm_obs_core_df["observation_value"].notnull()]
+
+for name, df in cdm_obs_core_df.groupby("primary_station_id"):
+    odata_filename = os.path.join(
+        params.level_path, FFS.join([name, params.fileID, "pressure_data"]) + ".psv"
+    )
+    table_to_csv(df, odata_filename)
+    logging.info(f"File written: {odata_filename}")
