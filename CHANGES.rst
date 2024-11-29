@@ -10,6 +10,7 @@ Contributors to this version: Ludwig Lierhammer (:user:`ludwiglierhammer`)
 New features and enhancements
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 * ``obs_suite``: add new level3 for extracting pressure data and merging ``header`` and ``observations-slp`` tables into one single CDM-OBS-CORE table (:pull:`75`)
+* ``obs_suite``: add ICOADS_R3.0.0T configuration files for release_7.0 (:pull:`75`)
 
 v7.1.0 (2024-11-25)
 -------------------
