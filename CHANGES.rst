@@ -3,6 +3,14 @@
 Changelog
 =========
 
+v7.2.0 (unreleased)
+-------------------
+Contributors to this version: Ludwig Lierhammer (:user:`ludwiglierhammer`)
+
+New features and enhancements
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+* ``obs_suite``: add new level3 for extracting pressure data and merging ``header`` and ``observations-slp`` tables into one single table (:pull:`75`)
+
 v7.1.0 (2024-11-25)
 -------------------
 Contributors to this version: Ludwig Lierhammer (:user:`ludwiglierhammer`)
@@ -17,7 +25,7 @@ Announcements
 * final GLAMOD marine processing data release 7.0 version (:pull:`63`)
 
 New features and enhancements
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 * ``obs_suite``: add quality checks for both Wind speed and wind direction in level1e script (:issue:`20`, :pull:`22`)
 * ``pre_proc``: add pre-processing for ICOADS data (:pull:`24`)
 * ``post_proc``: add post processing for C-RAID level1a data (:pull:`26`)
