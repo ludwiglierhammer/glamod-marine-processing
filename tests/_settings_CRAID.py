@@ -34,6 +34,7 @@ prev_level = {
     "level1d": "level1c",
     "level1e": "level1d",
     "level2": "level1e",
+    "level3": "level2",
 }
 
 level_input = {
@@ -43,6 +44,7 @@ level_input = {
     "level1d": "release_7.0",
     "level1e": "release_7.0",
     "level2": "release_7.0",
+    "level3": "release_7.0",
 }
 
 which_tables = {
@@ -52,6 +54,7 @@ which_tables = {
     "level1d": table_names_next,
     "level1e": table_names_next,
     "level2": table_names_next,
+    "level3": table_names_next,
 }
 
 pattern = {
@@ -61,6 +64,7 @@ pattern = {
     "level1d": "header-craid_????-??-??_subset.psv",
     "level1e": "header-craid_????-??-??_subset.psv",
     "level2": "header-craid_????-??-??_subset.psv",
+    "level3": "header-craid_????-??-??_subset.psv",
 }
 
 manipulation = {
