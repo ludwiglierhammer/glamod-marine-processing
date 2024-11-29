@@ -86,6 +86,16 @@ history_tstmp = datetime.datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S")
 table_df = cdm.read_tables(
     params.prev_level_path, params.prev_fileID, cdm_subset=cdm_tables, na_values="null"
 )
+if table_df.empty:
+    logging.warning(f"No CDM tables available for: {params.pre_file_ID}.")
+    sys.exit(1)
+
+for col in level3_columns:
+    if col not in table_df.columns:
+        logging.warning(
+            f"Required column {col} not available for: {params.pre_file_ID}"
+        )
+        sys.exit(1)
 
 cdm_obs_core_df = table_df[level3_columns]
 new_cols = [col[1] for col in cdm_obs_core_df.columns]
