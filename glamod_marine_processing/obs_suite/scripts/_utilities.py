@@ -28,6 +28,27 @@ chunksizes = {
     "ICOADS_R3.0.0T": 200000,
 }
 
+level3_columns = {
+    "station_name": "header",
+    "primary_station_id": "header",
+    "report_id": "header",
+    "observation_id": "observations-slp",
+    "longitude": "header",
+    "latitude": "header",
+    "height_of_station_above_sea_level": "header",
+    "report_timestamp": "header",
+    "report_meaning_of_timestamp": "header",
+    "report_duration": "header",
+    "observed_variable": "observations-slp",
+    "units": "observations-slp",
+    "observed_value": "observations-slp",
+    "quality_flag": "observations-slp",
+    "source_id": "header",
+    "data_policy_license": "observations-slp",
+    "report_type": "header",
+    "value_significance": "observations-slp",
+}
+
 
 # Functions--------------------------------------------------------------------
 class script_setup:
