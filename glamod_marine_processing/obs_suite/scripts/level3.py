@@ -93,9 +93,8 @@ cdm_obs_core_df.columns = new_cols
 
 cdm_obs_core_df = cdm_obs_core_df[cdm_obs_core_df["observation_value"].notnull()]
 
-for name, df in cdm_obs_core_df.groupby("primary_station_id"):
-    odata_filename = os.path.join(
-        params.level_path, FFS.join([name, params.fileID, "pressure_data"]) + ".psv"
-    )
-    table_to_csv(df, odata_filename)
-    logging.info(f"File written: {odata_filename}")
+odata_filename = os.path.join(
+    params.level_path, FFS.join([params.fileID, "pressure_data"]) + ".psv"
+)
+table_to_csv(cdm_obs_core_df, odata_filename)
+logging.info(f"File written: {odata_filename}")
