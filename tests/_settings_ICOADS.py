@@ -74,6 +74,7 @@ pattern = {
     "level2": "header-icoads_r???_d???_????-??-??_subset.psv",
     "level3": "header-icoads_r???_d???_????-??-??_subset.psv",
 }
+pattern_out = {"level3": "2022-01-release_7.0-000000-pressure_data.psv"}
 
 manipulation = {
     "level1b": {
@@ -472,10 +473,31 @@ manipulation = {
             "1",
         ],
     },
+    "level3": [
+        ("header", "station_name"),
+        ("header", "primary_station_id"),
+        ("header", "report_id"),
+        ("observations-slp", "observation_id"),
+        ("header", "longitude"),
+        ("header", "latitude"),
+        ("header", "height_of_station_above_sea_level"),
+        ("header", "report_timestamp"),
+        ("header", "report_meaning_of_timestamp"),
+        ("header", "report_duration"),
+        ("observations-slp", "observed_variable"),
+        ("observations-slp", "units"),
+        ("observations-slp", "observation_value"),
+        ("observations-slp", "quality_flag"),
+        ("header", "source_id"),
+        ("observations-slp", "data_policy_licence"),
+        ("header", "report_type"),
+        ("observations-slp", "value_significance"),
+    ],
 }
 
 drops = {
     "level1a": [0, 5, 6, 7, 9, 10, 11],
     "level1c": [0, 3],
     "level1e": [2, 4],
+    "level3": [2, 4],
 }
