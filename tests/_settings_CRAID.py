@@ -91,4 +91,5 @@ manipulation = {
 
 drops = {
     "level1e": [0, 2, 4, 6],
+    "level3": [0, 2, 4, 6],
 }
