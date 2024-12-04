@@ -34,6 +34,7 @@ prev_level = {
     "level1d": "level1c",
     "level1e": "level1d",
     "level2": "level1e",
+    "level3": "level2",
 }
 
 level_input = {
@@ -43,6 +44,7 @@ level_input = {
     "level1d": "release_7.0",
     "level1e": "release_7.0",
     "level2": "release_7.0",
+    "level3": "release_7.0",
 }
 
 which_tables = {
@@ -52,6 +54,7 @@ which_tables = {
     "level1d": table_names_next,
     "level1e": table_names_next,
     "level2": table_names_next,
+    "level3": table_names_next,
 }
 
 pattern = {
@@ -61,7 +64,10 @@ pattern = {
     "level1d": "header-craid_????-??-??_subset.psv",
     "level1e": "header-craid_????-??-??_subset.psv",
     "level2": "header-craid_????-??-??_subset.psv",
+    "level3": "header-craid_????-??-??_subset.psv",
 }
+
+pattern_out = {"level3": "2004-12-release_7.0-000000-pressure_data.psv"}
 
 manipulation = {
     "level1b": {
@@ -81,8 +87,29 @@ manipulation = {
     "level1e": {
         ("header", "report_quality"): ["1", "0", "1", "0", "1", "0", "1", "0", "0", "0"]
     },
+    "level3": [
+        ("header", "station_name"),
+        ("header", "primary_station_id"),
+        ("header", "report_id"),
+        ("observations-slp", "observation_id"),
+        ("header", "longitude"),
+        ("header", "latitude"),
+        ("header", "height_of_station_above_sea_level"),
+        ("header", "report_timestamp"),
+        ("header", "report_meaning_of_timestamp"),
+        ("header", "report_duration"),
+        ("observations-slp", "observed_variable"),
+        ("observations-slp", "units"),
+        ("observations-slp", "observation_value"),
+        ("observations-slp", "quality_flag"),
+        ("header", "source_id"),
+        ("observations-slp", "data_policy_licence"),
+        ("header", "report_type"),
+        ("observations-slp", "value_significance"),
+    ],
 }
 
 drops = {
     "level1e": [0, 2, 4, 6],
+    "level3": [0, 2, 4, 6],
 }
