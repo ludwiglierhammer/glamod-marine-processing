@@ -87,9 +87,9 @@ def get_pattern(yyyy, mm, sid_dck):
     """Get SIDDCK_YEAR-MONTH pattern."""
     date = []
     if yyyy is not None:
-        date += yyyy
+        date += [yyyy]
     if mm is not None:
-        date += mm
+        date += [mm]
     date = "-".join(date)
     if len(date) > 0:
         date = f"_{date}"
@@ -209,8 +209,9 @@ for sid_dck in process_list:
 
     sid_dck_log_dir = os.path.join(log_dir, sid_dck)
     mkdir(sid_dck_log_dir)
-    job_file = f"{sid_dck_log_dir}.slurm"
-    taskfarm_file = f"{sid_dck_log_dir}.tasks"
+    file_ = os.path.join(sid_dck_log_dir, sid_dck)
+    job_file = f"{file_}.slurm"
+    taskfarm_file = f"{file_}.tasks"
 
     # check is separate configuration for this source / deck
     config = deepcopy(script_config)
@@ -224,7 +225,7 @@ for sid_dck in process_list:
 
     source_files = glob.glob(os.path.join(level_source_dir, sid_dck, source_pattern))
     if level in slurm_preferences.one_task:
-        source_files = source_files[0]
+        source_files = [source_files[0]]
 
     array_size = len(source_files)
     if level in slurm_preferences.TaskPNi.keys():
