@@ -23,8 +23,13 @@ def _obs_testing(dataset, level, capsys):
         if not hasattr(_settings, "manipulation"):
             return expected
         if level in _settings.manipulation.keys():
-            for index, values in _settings.manipulation[level].items():
-                expected[index] = values
+            if isinstance(_settings.manipulation[level], list):
+                expected = expected[_settings.manipulation[level]]
+                new_cols = [col[1] for col in expected.columns]
+                expected.columns = new_cols
+            else:
+                for index, values in _settings.manipulation[level].items():
+                    expected[index] = values
         if not hasattr(_settings, "drops"):
             return expected
         if level in _settings.drops.keys():
@@ -59,10 +64,16 @@ def _obs_testing(dataset, level, capsys):
     captured = capsys.readouterr()
     assert captured.out == ""
 
-    results = read_tables(
-        f"./T{level}/release_7.0/{dataset}/{level}/{_settings.process_list}",
-        cdm_subset=tables,
-    )
+    result_dir = f"./T{level}/release_7.0/{dataset}/{level}/{_settings.process_list}"
+    if _settings.pattern_out.get(level):
+        results = pd.read_csv(
+            os.path.join(result_dir, _settings.pattern_out[level]),
+            delimiter="|",
+            dtype="object",
+            keep_default_na=False,
+        )
+    else:
+        results = read_tables(result_dir, cdm_subset=tables)
 
     for table_name in tables:
         load_file(
@@ -77,8 +88,10 @@ def _obs_testing(dataset, level, capsys):
 
     expected = manipulate_expected(expected, level)
 
-    for deletion in [("header", "record_timestamp"), ("header", "history")]:
-        del results[deletion]
-        del expected[deletion]
-
+    if "header" in results.columns:
+        for deletion in [("header", "record_timestamp"), ("header", "history")]:
+            del results[deletion]
+            del expected[deletion]
+    print(results)
+    print(expected)
     pd.testing.assert_frame_equal(results, expected)
