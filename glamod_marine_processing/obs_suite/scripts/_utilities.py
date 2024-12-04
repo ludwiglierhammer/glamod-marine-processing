@@ -20,6 +20,7 @@ add_data_paths = {
     "level1d": ["level_log_path"],
     "level1e": ["level_log_path"],
     "level2": ["level_excluded_path", "level_reports_path"],
+    "level3": [],
 }
 
 chunksizes = {
@@ -27,6 +28,27 @@ chunksizes = {
     "ICOADS_R3.0.2T": 200000,
     "ICOADS_R3.0.0T": 200000,
 }
+
+level3_columns = [
+    ("header", "station_name"),
+    ("header", "primary_station_id"),
+    ("header", "report_id"),
+    ("observations-slp", "observation_id"),
+    ("header", "longitude"),
+    ("header", "latitude"),
+    ("header", "height_of_station_above_sea_level"),
+    ("header", "report_timestamp"),
+    ("header", "report_meaning_of_timestamp"),
+    ("header", "report_duration"),
+    ("observations-slp", "observed_variable"),
+    ("observations-slp", "units"),
+    ("observations-slp", "observation_value"),
+    ("observations-slp", "quality_flag"),
+    ("header", "source_id"),
+    ("observations-slp", "data_policy_licence"),
+    ("header", "report_type"),
+    ("observations-slp", "value_significance"),
+]
 
 
 # Functions--------------------------------------------------------------------
@@ -110,7 +132,6 @@ class script_setup:
         for data_path in add_data_paths[config["level"]]:
             data_paths.append(getattr(self, data_path))
         paths_exist(data_paths)
-
         if len(glob.glob(self.filename)) == 0:
             logging.error(f"Previous level header files not found: {self.filename}")
             sys.exit(1)
