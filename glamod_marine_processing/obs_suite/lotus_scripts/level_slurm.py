@@ -9,15 +9,13 @@ from __future__ import annotations
 import glob
 import logging
 import os
+import re
 import subprocess
 import sys
+from copy import deepcopy
 
-from glamod_marine_processing.obs_suite.lotus_scripts import (
-    config_array,
-    parser,
-    slurm_preferences,
-)
-from glamod_marine_processing.utilities import load_json, read_txt
+from glamod_marine_processing.obs_suite.lotus_scripts import slurm_preferences
+from glamod_marine_processing.utilities import load_json, mkdir, read_txt, save_json
 
 
 # %%------------------------------------------------------------------------------
@@ -61,6 +59,50 @@ def source_dataset(level, release):
     return release
 
 
+def get_yyyymm(filename):
+    """Extract date from filename."""
+    DATE_REGEX = r"([1-2]{1}[0-9]{3}\-(0[1-9]{1}|1[0-2]{1}))"
+    yyyy_mm = re.search(DATE_REGEX, os.path.basename(filename))
+    if not (yyyy_mm):
+        logging.warning(f"Could not extract date from filename {filename}")
+        return (None, None)
+    return yyyy_mm.group().split("-")
+
+
+def is_in_range(yyyy, mm, year_init, year_end):
+    """Check whether date is in time period range."""
+    add = False
+    if not all((yyyy, mm)):
+        add = True
+    elif int(yyyy) >= year_init and int(yyyy) <= year_end:
+        add = True
+    elif (int(yyyy) == year_init - 1 and int(mm) == 12) or (
+        int(yyyy) == year_end + 1 and int(mm) == 1
+    ):
+        add = True
+    return add
+
+
+def get_pattern(yyyy, mm, sid_dck):
+    """Get SIDDCK_YEAR-MONTH pattern."""
+    date = []
+    if yyyy is not None:
+        date += yyyy
+    if mm is not None:
+        date += mm
+    date = "-".join(date)
+    if len(date) > 0:
+        date = f"_{date}"
+    return f"{sid_dck}{date}"
+
+
+def get_year(periods, sid_dck, yr_str):
+    """Get period year."""
+    if sid_dck in periods.keys():
+        return periods[sid_dck].get(yr_str)
+    return periods.get(yr_str)
+
+
 # %%------------------------------------------------------------------------------
 
 
@@ -82,8 +124,6 @@ dataset = script_config["abbreviations"]["dataset"]
 config_files_path = script_config["paths"]["config_files_path"]
 release_periods_file = script_config["release_periods_file"]
 release_periods_file = os.path.join(config_files_path, release_periods_file)
-
-args = parser.get_parser_args()
 
 release_source = script_config["release_source"]
 release_dest = script_config["release_destination"]
@@ -147,21 +187,6 @@ add_file = os.path.join(config_files_path, f"{level}_cmd_add.json")
 if os.path.isfile(add_file):
     script_config["cmd_add_file"] = add_file
 
-# Build array input files -----------------------------------------------------
-logging.info("CONFIGURING JOB ARRAYS...")
-status = config_array.main(
-    level_source_dir,
-    source_pattern,
-    log_dir,
-    script_config,
-    release_periods,
-    process_list,
-    failed_only=args.failed_only,
-)
-if status != 0:
-    logging.error("Creating array inputs")
-    sys.exit(1)
-
 # Build jobs ------------------------------------------------------------------
 py_path = os.path.join(scripts_dir, PYSCRIPT)
 pycommand = f"python {py_path}"
@@ -175,6 +200,7 @@ t = ":".join([t_hh, t_mm, "00"])
 logging.info("SUBMITTING ARRAYS...")
 
 for sid_dck in process_list:
+
     logging.info(f"Creating scripts for {sid_dck}")
     log_diri = os.path.join(log_dir, sid_dck)
     array_size = len(glob.glob(os.path.join(log_diri, "*.input")))
@@ -184,8 +210,22 @@ for sid_dck in process_list:
     if level in slurm_preferences.one_task:
         array_size = 1
 
-    job_file = os.path.join(log_diri, sid_dck + ".slurm")
-    taskfarm_file = os.path.join(log_diri, sid_dck + ".tasks")
+    sid_dck_log_dir = os.path.join(log_dir, sid_dck)
+    mkdir(sid_dck_log_dir)
+    job_file = f"{sid_dck_log_dir}.slurm"
+    taskfarm_file = f"{sid_dck_log_dir}.tasks"
+
+    # check is separate configuration for this source / deck
+    config = deepcopy(script_config)
+    config_sid_dck = config.get(sid_dck)
+    if config_sid_dck is not None:
+        for k, v in config_sid_dck.items():
+            config[k] = v
+
+    year_init = int(get_year(release_periods, sid_dck, "year_init"))
+    year_end = int(get_year(release_periods, sid_dck, "year_end"))
+
+    source_files = glob.glob(os.path.join(level_source_dir, sid_dck, source_pattern))
 
     if level in slurm_preferences.TaskPNi.keys():
         TaskPNi = slurm_preferences.TaskPNi[level]
@@ -197,7 +237,7 @@ for sid_dck in process_list:
     if level in slurm_preferences.nodesi.keys():
         nodesi = slurm_preferences.nodesi[level]
     else:
-        nodesi = array_size // TaskPNi + (array_size % TaskPNi > 0)
+        nodesi = array_size // TaskPNi + (len(source_files) % TaskPNi > 0)
 
     if level in slurm_preferences.ti.keys():
         ti = slurm_preferences.ti[level]
@@ -211,27 +251,49 @@ for sid_dck in process_list:
 
     calc_tasks = False
     with open(taskfarm_file, "w") as fh:
-        for i in range(array_size):
-            if os.path.isfile(f"{log_diri}/{i + 1}.failure"):
-                logging.info(f"Task {i + 1} failed. Try calculating again.")
-                os.remove(f"{log_diri}/{i + 1}.failure")
-            elif os.path.isfile(f"{log_diri}/{i + 1}.success"):
-                if overwrite is not True:
-                    logging.info(
-                        f"Task {i + 1} was already successful. Skip calculating again."
-                    )
-                    continue
+        for source_file in source_files:
+            yyyy, mm = get_yyyymm(source_file)
+            add = is_in_range(yyyy, mm, year_init, year_end)
+
+            if add is False:
+                logging.warning(f"{yyyy} out of range: {year_init} to {year_end}.")
+                continue
+
+            pattern = get_pattern(yyyy, mm, sid_dck)
+
+            config_file_ = os.path.join(sid_dck_log_dir, f"{pattern}.input")
+            success_file_ = os.path.join(sid_dck_log_dir, f"{pattern}.success")
+            failed_file_ = os.path.join(sid_dck_log_dir, f"{pattern}.failure")
+
+            if overwrite is not True and os.path.isfile(success_file_):
                 logging.info(
-                    f"Task {i + 1} was already successful. However, calculate task again since option 'overwrite' was chosen."
+                    f"Task {pattern} was already successful. Skip calculating again."
                 )
-                os.remove(f"{log_diri}/{i + 1}.success")
+                continue
+
+            """Update configuration script."""
+            script_config.update({"sid_dck": sid_dck})
+            script_config.update({"yyyy": yyyy})
+            script_config.update({"mm": mm})
+            script_config.update({"filename": source_file})
+
+            if os.path.isfile(failed_file_):
+                logging.info(f"Task {pattern} failed. Try calculating again.")
+                os.remove(failed_file_)
+
+            if os.path.isfile(success_file_):
+                logging.info(
+                    f"Task {pattern} was already successful. However, calculate task again since option 'overwrite' was chosen."
+                )
+                os.remove(success_file_)
 
             fh.writelines(
                 "{0} {1}/{2}.input > {1}/{2}.out 2> {1}/{2}.out; if [ $? -eq 0 ]; "
                 "then touch {1}/{2}.success; else touch {1}/{2}.failure; fi  \n".format(
-                    pycommand, log_diri, i + 1
+                    pycommand, log_diri, pattern
                 )
             )
+            save_json(script_config, config_file_)
             calc_tasks = True
 
     if calc_tasks is False:
