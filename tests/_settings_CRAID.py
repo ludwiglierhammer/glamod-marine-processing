@@ -87,6 +87,26 @@ manipulation = {
     "level1e": {
         ("header", "report_quality"): ["1", "0", "1", "0", "1", "0", "1", "0", "0", "0"]
     },
+    "level3": [
+        ("header", "station_name"),
+        ("header", "primary_station_id"),
+        ("header", "report_id"),
+        ("observations-slp", "observation_id"),
+        ("header", "longitude"),
+        ("header", "latitude"),
+        ("header", "height_of_station_above_sea_level"),
+        ("header", "report_timestamp"),
+        ("header", "report_meaning_of_timestamp"),
+        ("header", "report_duration"),
+        ("observations-slp", "observed_variable"),
+        ("observations-slp", "units"),
+        ("observations-slp", "observation_value"),
+        ("observations-slp", "quality_flag"),
+        ("header", "source_id"),
+        ("observations-slp", "data_policy_licence"),
+        ("header", "report_type"),
+        ("observations-slp", "value_significance"),
+    ],
 }
 
 drops = {
