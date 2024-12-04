@@ -203,10 +203,7 @@ for sid_dck in process_list:
 
     logging.info(f"Creating scripts for {sid_dck}")
     log_diri = os.path.join(log_dir, sid_dck)
-    array_size = len(glob.glob(os.path.join(log_diri, "*.input")))
-    if array_size == 0:
-        logging.warning(f"{sid_dck}: no jobs for partition")
-        continue
+
     if level in slurm_preferences.one_task:
         array_size = 1
 
@@ -226,7 +223,10 @@ for sid_dck in process_list:
     year_end = int(get_year(release_periods, sid_dck, "year_end"))
 
     source_files = glob.glob(os.path.join(level_source_dir, sid_dck, source_pattern))
+    if level in slurm_preferences.one_task:
+        source_files = source_files[0]
 
+    array_size = len(source_files)
     if level in slurm_preferences.TaskPNi.keys():
         TaskPNi = slurm_preferences.TaskPNi[level]
     else:
@@ -237,7 +237,7 @@ for sid_dck in process_list:
     if level in slurm_preferences.nodesi.keys():
         nodesi = slurm_preferences.nodesi[level]
     else:
-        nodesi = array_size // TaskPNi + (len(source_files) % TaskPNi > 0)
+        nodesi = array_size // TaskPNi + (array_size % TaskPNi > 0)
 
     if level in slurm_preferences.ti.keys():
         ti = slurm_preferences.ti[level]
