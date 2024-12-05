@@ -110,10 +110,6 @@ process_options = [
 ]
 params = script_setup(process_options, args)
 
-if not params.flag:
-    logging.error("Error parsing initial configuration")
-    sys.exit(1)
-
 L0_filename = os.path.join(params.prev_level_path, params.filename)
 if not os.path.isfile(L0_filename):
     logging.error(f"Could not find data input file: {L0_filename}")

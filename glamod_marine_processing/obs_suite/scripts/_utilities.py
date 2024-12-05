@@ -63,8 +63,7 @@ class script_setup:
                 config = json.load(fileObj)
         except Exception:
             logging.error(f"Opening configuration file: {configfile}", exc_info=True)
-            self.flag = False
-            return
+            sys.exit(1)
 
         if len(sys.argv) >= 8:
             logging.warning(
@@ -93,12 +92,11 @@ class script_setup:
                     setattr(self, opt, config.get(opt))
                 else:
                     setattr(self, opt, config.get(sid_dck).get(opt))
-            self.flag = True
         except Exception:
             logging.error(
                 f"Parsing configuration from file: {configfile}", exc_info=True
             )
-            self.flag = False
+            sys.exit(1)
 
         self.data_path = config["paths"].get("data_directory")
         self.release = config["abbreviations"].get("release")
