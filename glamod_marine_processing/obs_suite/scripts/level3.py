@@ -68,12 +68,12 @@ logging.basicConfig(
     datefmt="%Y%m%d %H:%M:%S",
     filename=None,
 )
-args = []
 if len(sys.argv) > 1:
     logging.info("Reading command line arguments")
     args = sys.argv
 else:
     logging.error("Need arguments to run!")
+    sys.exit(1)
 
 params = script_setup([], args)
 
