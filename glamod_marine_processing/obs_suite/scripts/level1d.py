@@ -69,7 +69,7 @@ from _utilities import (
     read_cdm_tables,
     save_quicklook,
     script_setup,
-    write_cdm_tables,
+    table_to_csv,
 )
 from cdm_reader_mapper import cdm_mapper as cdm
 
@@ -142,7 +142,7 @@ def process_table(table_df, table):
             locs = table_df["primary_station_id"].isin(updated_locs)
             table_df["history"].loc[locs] = table_df["history"].loc[locs] + history_add
 
-    write_cdm_tables(params, table_df, header=table)
+    tables_to_csv(params, table_df)
 
 
 # END FUNCTIONS ---------------------------------------------------------------

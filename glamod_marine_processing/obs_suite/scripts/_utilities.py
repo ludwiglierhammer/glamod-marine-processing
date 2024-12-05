@@ -203,14 +203,29 @@ def read_cdm_tables(params, table):
     )
 
 
-def write_cdm_tables(params, cdm_tables, header=None):
+def write_cdm_tables(params, cdm_tables):
     """Write CDM tables."""
-    if header:
-        cdm_tables.columns = [(header, c) for c in cdm_tables.columns]
     cdm_to_ascii(
         cdm_tables,
         log_level="DEBUG",
         out_dir=params.level_path,
         suffix=params.fileID,
         prefix=None,
+    )
+
+
+def table_to_csv(params, df, table=None, outname=None, **kwargs):
+    """Write table to disk."""
+    if df.empty:
+        return
+    if out_name is None:
+        out_name = os.path.join(params.level_path, FFS.join([table, params.fileID]))
+    df.to_csv(
+        out_name,
+        index=False,
+        sep=delimiter,
+        header=True,
+        mode="w",
+        na_rep="null",
+        **kwargs,
     )

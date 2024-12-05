@@ -112,7 +112,7 @@ from _utilities import (
     read_cdm_tables,
     save_quicklook,
     script_setup,
-    write_cdm_tables,
+    table_to_csv,
 )
 from cdm_reader_mapper import cdm_mapper as cdm
 
@@ -204,7 +204,7 @@ def process_table(table_df, table):
             .to_dict()
         )
     if not table_df[table_mask["all"]].empty:
-        write_cdm_tables(params, table_df[table_mask["all"]], header=table)
+        tabel_to_csv(params, table_df[table_mask["all"]], table=table)
     else:
         logging.warning(f"Table {table} is empty. No file will be produced")
 
@@ -307,7 +307,7 @@ ql_dict["id_validation_rules"]["noncallsign"] = len(np.where(~callsigns)[0])
 cdm_columns = cdm_tables.get(table).keys()
 for field in validated:
     if False in mask_df[field].value_counts().index:
-        write_cdm_tables(params, table_df[~mask_df[field]], header="header")
+        table_to_csv(params, table_df[~mask_df[field]], table="header")
 
 
 # 4. REPORT INVALIDS PER FIELD  -----------------------------------------------

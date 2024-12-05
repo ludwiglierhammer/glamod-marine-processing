@@ -135,6 +135,7 @@ from _utilities import (
     read_cdm_tables,
     save_quicklook,
     script_setup,
+    table_to_csv,
     write_cdm_tables,
 )
 from cdm_reader_mapper import cdm_mapper as cdm
@@ -301,7 +302,7 @@ def process_table(table_df, table, pass_time=None):
     if table == "header":
         table_df["report_quality"] = compare_quality_checks(table_df["report_quality"])
 
-    write_cdm_tables(params, table_df, header=table)
+    tabel_to_csv(params, table_df)
 
 
 # ------------------------------------------------------------------------------

@@ -34,13 +34,7 @@ import os
 import sys
 from importlib import reload
 
-from _utilities import (
-    FFS,
-    level3_columns,
-    read_cdm_tables,
-    script_setup,
-    write_cdm_tables,
-)
+from _utilities import FFS, level3_columns, read_cdm_tables, script_setup, table_to_csv
 
 reload(logging)  # This is to override potential previous config of logging
 
@@ -57,7 +51,7 @@ def process_table(table_df):
     odata_filename = os.path.join(
         params.level_path, FFS.join([params.fileID, "pressure_data"]) + ".psv"
     )
-    write_cdm_tables(params, table_df)
+    table_to_csv(params, table_df, table="pressure_data")
     logging.info(f"File written: {odata_filename}")
 
 
