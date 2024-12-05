@@ -286,7 +286,7 @@ if process:
 
 logging.info("Saving json quicklook")
 save_quicklook(
-    params.level_qc_path, params.fileID, params.fileID_date, io_dict, date_handler
+    params, io_dict, date_handler
 )
 
 

@@ -196,8 +196,8 @@ def paths_exist(data_paths):
         sys.exit(1)
 
 
-def save_quicklook(level_ql_path, fileID, fileID_date, ql_dict, date_handler):
-    ql_filename = os.path.join(level_ql_path, f"{fileID}.json")
+def save_quicklook(params, ql_dict, date_handler):
+    ql_filename = os.path.join(params.level_ql_path, f"{params.fileID}.json")
     ql_dict["date processed"] = datetime.datetime.now()
-    ql_dict = {fileID_date: ql_dict}
+    ql_dict = {params.fileID_date: ql_dict}
     save_json(ql_dict, ql_filename, default=date_handler, indent=4, ignore_nan=True)

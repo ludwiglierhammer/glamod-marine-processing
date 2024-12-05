@@ -267,5 +267,5 @@ for table in obs_tables:
 # 4. SAVE QUICKLOOK -----------------------------------------------------------
 logging.info("Saving json quicklook")
 save_quicklook(
-    params.level_qc_path, params.fileID, params.fileID_date, ql_dict, date_handler
+    params, ql_dict, date_handler
 )

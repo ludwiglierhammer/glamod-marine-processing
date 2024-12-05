@@ -543,5 +543,5 @@ table_to_csv(windQC.wind_speed, odata_filename_ws, columns=cdm_columns)
 # CHECKOUT --------------------------------------------------------------------
 logging.info("Saving json quicklook")
 save_quicklook(
-    params.level_qc_path, params.fileID, params.fileID_date, ql_dict, date_handler
+    params, ql_dict, date_handler
 )
