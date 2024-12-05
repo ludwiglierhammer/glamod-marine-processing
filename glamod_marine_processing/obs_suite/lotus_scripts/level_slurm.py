@@ -204,9 +204,6 @@ for sid_dck in process_list:
     logging.info(f"Creating scripts for {sid_dck}")
     log_diri = os.path.join(log_dir, sid_dck)
 
-    if level in slurm_preferences.one_task:
-        array_size = 1
-
     sid_dck_log_dir = os.path.join(log_dir, sid_dck)
     mkdir(sid_dck_log_dir)
     file_ = os.path.join(sid_dck_log_dir, sid_dck)
