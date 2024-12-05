@@ -274,7 +274,7 @@ if io_dict["processed"]["total"] == 0:
 # 3. Map to common data model and output files
 if process:
     logging.info("Mapping to CDM")
-    tables = cdm.cdm_tables
+    tables = cdm.properties.cdm_tables
     io_dict.update({table: {} for table in tables})
     logging.debug(f"Mapping attributes: {data_in.attrs}")
     cdm_tables = cdm.map_model(data_in.data, imodel=data_model, log_level="INFO")

@@ -12,7 +12,7 @@ import sys
 
 from cdm_reader_mapper.cdm_mapper import cdm_to_ascii, read_tables
 
-from glamod_marine_processing.utilities import save_json
+from glamod_marine_processing.utilities import save_simplejson
 
 delimiter = "|"
 FFS = "-"
@@ -188,7 +188,9 @@ def save_quicklook(params, ql_dict, date_handler):
     ql_filename = os.path.join(params.level_ql_path, f"{params.fileID}.json")
     ql_dict["date processed"] = datetime.datetime.now()
     ql_dict = {params.fileID_date: ql_dict}
-    save_json(ql_dict, ql_filename, default=date_handler, indent=4, ignore_nan=True)
+    save_simplejson(
+        ql_dict, ql_filename, default=date_handler, indent=4, ignore_nan=True
+    )
 
 
 def read_cdm_tables(params, table):

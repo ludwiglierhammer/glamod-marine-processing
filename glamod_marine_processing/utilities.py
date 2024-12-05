@@ -7,6 +7,8 @@ import json
 import os
 from warnings import warn
 
+import simplejson
+
 try:
     from importlib.resources import files as _files
 except ImportError:
@@ -107,6 +109,12 @@ def save_json(json_dict, json_file, **kwargs):
     """Save json file on disk."""
     with open(json_file, "w") as f:
         json.dump(json_dict, f, **kwargs)
+
+
+def save_simplejson(json_dict, json_file, **kwargs):
+    """Save json file with simplejson on disk."""
+    with open(json_file, "w") as f:
+        simplejson.dump(json_dict, f, **kwargs)
 
 
 def read_txt(txt_file):
