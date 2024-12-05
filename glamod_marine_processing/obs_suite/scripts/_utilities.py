@@ -10,6 +10,8 @@ import logging
 import os
 import sys
 
+from glamod_marine_processing.utilities import save_json
+
 delimiter = "|"
 FFS = "-"
 
@@ -192,3 +194,10 @@ def paths_exist(data_paths):
             logging.error(f"Could not find data paths: {data_path}")
     if exit is True:
         sys.exit(1)
+
+
+def save_quicklook(level_ql_path, fileID, fileID_date, ql_dict, date_handler):
+    ql_filename = os.path.join(level_ql_path, f"{fileID}.json")
+    ql_dict["date processed"] = datetime.datetime.now()
+    ql_dict = {fileID_date: ql_dict}
+    save_json(ql_dict, ql_filename, default=date_handler, indent=4, ignore_nan=True)

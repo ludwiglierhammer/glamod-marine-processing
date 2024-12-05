@@ -103,10 +103,10 @@ def load_json(json_file):
         return json.load(f)
 
 
-def save_json(json_dict, json_file):
+def save_json(json_dict, json_file, **kwargs):
     """Save json file on disk."""
     with open(json_file, "w") as f:
-        json.dump(json_dict, f)
+        json.dump(json_dict, f, **kwargs)
 
 
 def read_txt(txt_file):

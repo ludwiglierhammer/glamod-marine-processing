@@ -128,9 +128,15 @@ from importlib import reload
 
 import numpy as np
 import pandas as pd
-import simplejson
 from _qc import wind_qc
-from _utilities import FFS, date_handler, paths_exist, script_setup, table_to_csv
+from _utilities import (
+    FFS,
+    date_handler,
+    paths_exist,
+    save_quicklook,
+    script_setup,
+    table_to_csv,
+)
 from cdm_reader_mapper import cdm_mapper as cdm
 
 reload(logging)  # This is to override potential previous config of logging
@@ -244,7 +250,7 @@ def process_table(table_df, table_name, pass_time=None):
     table_df = table_df[table_df["report_id"].isin(report_ids)]
     total = len(table_df)
     removed = previous - total
-    qc_dict[table_name] = {
+    ql_dict[table_name] = {
         "total": total,
         "deleted": removed,
     }
@@ -262,7 +268,7 @@ def process_table(table_df, table_name, pass_time=None):
         updated_locs = qc_table.loc[qc_table.notna().all(axis=1)].index
 
         if table_name != "header":
-            qc_dict[table_name]["quality_flag"] = (
+            ql_dict[table_name]["quality_flag"] = (
                 table_df[element].value_counts(dropna=False).to_dict()
             )
 
@@ -270,10 +276,10 @@ def process_table(table_df, table_name, pass_time=None):
             table_df.update(qc_df["report_quality"])
             history_add = f";{history_tstmp}. {params.history_explain}"
             table_df["report_time_quality"] = pass_time
-            qc_dict[table_name]["location_quality_flag"] = (
+            ql_dict[table_name]["location_quality_flag"] = (
                 table_df["location_quality"].value_counts(dropna=False).to_dict()
             )
-            qc_dict[table_name]["report_quality_flag"] = (
+            ql_dict[table_name]["report_quality_flag"] = (
                 table_df["report_quality"].value_counts(dropna=False).to_dict()
             )
             table_df["history"].loc[updated_locs] = (
@@ -457,7 +463,7 @@ report_ids = report_ids[report_ids.duplicated()]
 
 # DO THE DATA PROCESSING ------------------------------------------------------
 header_df.set_index("report_id", inplace=True, drop=False)
-qc_dict = {}
+ql_dict = {}
 
 # 1. PROCESS QC FLAGS ---------------------------------------------------------
 # GET THE QC FILES WE NEED FOR THE CURRENT SET OF CDM TABLES
@@ -535,15 +541,7 @@ cdm_columns = cdm_tables.get("observations-ws").keys()
 table_to_csv(windQC.wind_speed, odata_filename_ws, columns=cdm_columns)
 
 # CHECKOUT --------------------------------------------------------------------
-qc_dict["date processed"] = datetime.datetime.now()
-
 logging.info("Saving json quicklook")
-level_io_filename = os.path.join(params.level_ql_path, params.fileID + ".json")
-with open(level_io_filename, "w") as fileObj:
-    simplejson.dump(
-        {"-".join([params.year, params.month]): qc_dict},
-        fileObj,
-        default=date_handler,
-        indent=4,
-        ignore_nan=True,
-    )
+save_quicklook(
+    params.level_qc_path, params.fileID, params.fileID_date, ql_dict, date_handler
+)

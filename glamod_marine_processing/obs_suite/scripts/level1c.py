@@ -105,8 +105,14 @@ from importlib import reload
 
 import numpy as np
 import pandas as pd
-import simplejson
-from _utilities import FFS, date_handler, paths_exist, script_setup, table_to_csv
+from _utilities import (
+    FFS,
+    date_handler,
+    paths_exist,
+    save_quicklook,
+    script_setup,
+    table_to_csv,
+)
 from cdm_reader_mapper import cdm_mapper as cdm
 
 reload(logging)  # This is to override potential previous config of logging
@@ -185,7 +191,7 @@ def read_table_files(table):
             leaks_in += len(table_dfi)
             table_df = pd.concat([table_df, table_dfi], axis=0, sort=False)
     if len(table_df) > 0:
-        validation_dict[table] = {"leaks_in": leaks_in}
+        ql_dict[table] = {"leaks_in": leaks_in}
     return table_df
 
 
@@ -207,7 +213,7 @@ def process_table(table_df, table_name):
     table_mask = mask_df[mask_df.index.isin(table_df.index)]
     if table_name == "header":
         table_df["history"] = table_df["history"] + f";{history_tstmp}. {history}"
-        validation_dict["unique_ids"] = (
+        ql_dict["unique_ids"] = (
             table_df.loc[table_mask["all"], "primary_station_id"]
             .value_counts(dropna=False)
             .to_dict()
@@ -217,7 +223,7 @@ def process_table(table_df, table_name):
     else:
         logging.warning(f"Table {table_name} is empty. No file will be produced")
 
-    validation_dict[table_name]["total"] = len(table_df[table_mask["all"]])
+    ql_dict[table_name]["total"] = len(table_df[table_mask["all"]])
 
 
 # MAIN ------------------------------------------------------------------------
@@ -238,7 +244,7 @@ id_validation_path = os.path.join(
 
 paths_exist([id_validation_path, params.level_invalid_path])
 
-validation_dict = {table: {} for table in cdm.properties.cdm_tables}
+ql_dict = {table: {} for table in cdm.properties.cdm_tables}
 
 # DO THE DATA PROCESSING ------------------------------------------------------
 
@@ -275,7 +281,7 @@ mask_df[field] = pd.to_datetime(
 
 # 2.2. Validate primary_station_id
 field = "primary_station_id"
-validation_dict["id_validation_rules"] = {}
+ql_dict["id_validation_rules"] = {}
 
 # First get callsigns:
 logging.info("Applying callsign id validation")
@@ -307,10 +313,10 @@ linked_IDs_no = (linked_IDs).sum()
 
 if linked_IDs_no > 0:
     mask_df.loc[linked_IDs, field] = True
-    validation_dict["id_validation_rules"]["idcorrected"] = linked_IDs_no
+    ql_dict["id_validation_rules"]["idcorrected"] = linked_IDs_no
 
-validation_dict["id_validation_rules"]["callsign"] = len(np.where(callsigns)[0])
-validation_dict["id_validation_rules"]["noncallsign"] = len(np.where(~callsigns)[0])
+ql_dict["id_validation_rules"]["callsign"] = len(np.where(callsigns)[0])
+ql_dict["id_validation_rules"]["noncallsign"] = len(np.where(~callsigns)[0])
 
 # 3. OUTPUT INVALID REPORTS - HEADER ------------------------------------------
 cdm_columns = cdm_tables.get(table).keys()
@@ -327,10 +333,10 @@ for field in validated:
 # Now clean, keep only all valid:
 mask_df["all"] = mask_df.all(axis=1)
 # Report invalids
-validation_dict["invalid"] = {}
-validation_dict["invalid"]["total"] = len(table_df[~mask_df["all"]])
+ql_dict["invalid"] = {}
+ql_dict["invalid"]["total"] = len(table_df[~mask_df["all"]])
 for field in validated:
-    validation_dict["invalid"][field] = len(mask_df[field].loc[~mask_df[field]])
+    ql_dict["invalid"][field] = len(mask_df[field].loc[~mask_df[field]])
 
 # 5. CLEAN AND OUTPUT TABLES  -------------------------------------------------
 # Now process tables and log final numbers and some specifics in header table
@@ -346,12 +352,6 @@ for table in obs_tables:
         process_table(table, table)
 
 logging.info("Saving json quicklook")
-L1b_io_filename = os.path.join(params.level_ql_path, params.fileID + ".json")
-with open(L1b_io_filename, "w") as fileObj:
-    simplejson.dump(
-        {"-".join([params.year, params.month]): validation_dict},
-        fileObj,
-        default=date_handler,
-        indent=4,
-        ignore_nan=True,
-    )
+save_quicklook(
+    params.level_qc_path, params.fileID, params.fileID_date, ql_dict, date_handler
+)
