@@ -63,6 +63,7 @@ from _utilities import (
     date_handler,
     delimiter,
     paths_exist,
+    read_cdm_tables,
     save_quicklook,
     script_setup,
     table_to_csv,
@@ -131,9 +132,7 @@ for table in cdm.properties.cdm_tables:
     logging.info(params.prev_level_path)
     logging.info(params.prev_fileID)
     logging.info(table)
-    table_df = cdm.read_tables(
-        params.prev_level_path, params.prev_fileID, cdm_subset=[table]
-    )
+    table_df = read_cdm_tables(params, table)
 
     if len(table_df) == 0:
         logging.warning(f"Empty or non-existing table {table}")

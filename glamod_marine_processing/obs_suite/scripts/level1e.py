@@ -133,6 +133,7 @@ from _utilities import (
     FFS,
     date_handler,
     paths_exist,
+    read_cdm_tables,
     save_quicklook,
     script_setup,
     table_to_csv,
@@ -224,25 +225,23 @@ def compare_quality_checks(df):
 
 
 # This is to apply the qc flags and write out flagged tables
-def process_table(table_df, table_name, pass_time=None):
+def process_table(table_df, table, pass_time=None):
     """Process table."""
     if pass_time is None:
         pass_time = "2"
     not_checked_report = "2"
     not_checked_location = "3"
     not_checked_param = "2"
-    logging.info(f"Processing table {table_name}")
+    logging.info(f"Processing table {table}")
 
     if isinstance(table_df, str):
         # Assume 'header' and in a DF in table_df otherwise
         # Open table and reindex
         table_df = pd.DataFrame()
-        table_df = cdm.read_tables(
-            params.prev_level_path, params.prev_fileID, cdm_subset=[table_name]
-        )
+        table_df = read_cdm_tables(params, table)
 
         if table_df is None or len(table_df) == 0:
-            logging.warning(f"Empty or non existing table {table_name}")
+            logging.warning(f"Empty or non existing table {table}")
             return
         table_df.set_index("report_id", inplace=True, drop=False)
 
@@ -250,36 +249,36 @@ def process_table(table_df, table_name, pass_time=None):
     table_df = table_df[table_df["report_id"].isin(report_ids)]
     total = len(table_df)
     removed = previous - total
-    ql_dict[table_name] = {
+    ql_dict[table] = {
         "total": total,
         "deleted": removed,
     }
     if table_df.empty:
-        logging.warning(f"Empty table {table_name}.")
+        logging.warning(f"Empty table {table}.")
         return
 
     if flag:
-        qc = table_qc.get(table_name).get("qc")
-        element = table_qc.get(table_name).get("element")
+        qc = table_qc.get(table).get("qc")
+        element = table_qc.get(table).get("element")
         qc_table = qc_df[[qc]]
         qc_table = qc_table.rename({qc: element}, axis=1)
         table_df.update(qc_table)
 
         updated_locs = qc_table.loc[qc_table.notna().all(axis=1)].index
 
-        if table_name != "header":
-            ql_dict[table_name]["quality_flag"] = (
+        if table != "header":
+            ql_dict[table]["quality_flag"] = (
                 table_df[element].value_counts(dropna=False).to_dict()
             )
 
-        if table_name == "header":
+        if table == "header":
             table_df.update(qc_df["report_quality"])
             history_add = f";{history_tstmp}. {params.history_explain}"
             table_df["report_time_quality"] = pass_time
-            ql_dict[table_name]["location_quality_flag"] = (
+            ql_dict[table]["location_quality_flag"] = (
                 table_df["location_quality"].value_counts(dropna=False).to_dict()
             )
-            ql_dict[table_name]["report_quality_flag"] = (
+            ql_dict[table]["report_quality_flag"] = (
                 table_df["report_quality"].value_counts(dropna=False).to_dict()
             )
             table_df["history"].loc[updated_locs] = (
@@ -290,22 +289,22 @@ def process_table(table_df, table_name, pass_time=None):
     # Test new things with 090-221. See 1984-03.
     # What happens if not POS flags matching?
     else:
-        if table_name != "header":
+        if table != "header":
             table_df["quality_flag"] = not_checked_param
         else:
             table_df["report_time_quality"] = pass_time
             table_df["report_quality"] = not_checked_report
             table_df["location_quality"] = not_checked_location
 
-    if table_name != "header":
+    if table != "header":
         table_df["quality_flag"] = compare_quality_checks(table_df["quality_flag"])
 
-    if table_name == "header":
+    if table == "header":
         table_df["report_quality"] = compare_quality_checks(table_df["report_quality"])
 
-    cdm_columns = cdm_tables.get(table_name).keys()
+    cdm_columns = cdm_tables.get(table).keys()
     odata_filename = os.path.join(
-        params.level_path, FFS.join([table_name, params.fileID]) + ".psv"
+        params.level_path, FFS.join([table, params.fileID]) + ".psv"
     )
 
     table_to_csv(table_df, odata_filename, columns=cdm_columns)

@@ -34,7 +34,7 @@ import os
 import sys
 from importlib import reload
 
-from _utilities import FFS, level3_columns, script_setup, table_to_csv
+from _utilities import FFS, level3_columns, read_cdm_tables, script_setup, table_to_csv
 from cdm_reader_mapper import cdm_mapper as cdm
 
 reload(logging)  # This is to override potential previous config of logging
@@ -76,9 +76,7 @@ cdm_tables = [header_table, obs_table]
 
 history_tstmp = datetime.datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S")
 
-table_df = cdm.read_tables(
-    params.prev_level_path, params.prev_fileID, cdm_subset=cdm_tables, na_values="null"
-)
+table_df = read_cdm_tables(params, cdm_tables)
 
 if not table_df.empty:
     process_table(table_df)

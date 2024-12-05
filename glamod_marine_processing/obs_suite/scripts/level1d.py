@@ -67,6 +67,7 @@ from _utilities import (
     date_handler,
     delimiter,
     paths_exist,
+    read_cdm_tables,
     save_quicklook,
     script_setup,
     table_to_csv,
@@ -93,9 +94,7 @@ def process_table(table_df, table_name):
     if isinstance(table_df, str):
         # Assume 'header' and in a DF in table_df otherwise
         # Open table and reindex
-        table_df = cdm.read_tables(
-            params.prev_level_path, params.prev_fileID, cdm_subset=[table_name]
-        )
+        table_df = read_cdm_tables(params, table)
         if table_df is None or len(table_df) == 0:
             logging.warning(f"Empty or non existing table {table_name}")
             return
@@ -215,10 +214,7 @@ obs_tables = [x for x in cdm_tables.keys() if x != "header"]
 # 1. SEE STATION ID's FROM BOTH DATA STREAMS AND SEE IF THERE'S ANYTHING TO
 # MERGE AT ALL
 # Read the header table
-table = "header"
-header_df = cdm.read_tables(
-    params.prev_level_path, params.prev_fileID, cdm_subset=[table], na_values="null"
-)
+header_df = read_cdm_tables(params, "header")
 
 if len(header_df) == 0:
     logging.error("Empty or non-existing header table")
@@ -256,8 +252,7 @@ if merge:
 
 # 3. UPDATE CDM WITH PUB47 OR JUST COPY PREV LEVEL TO CURRENT -----------------
 # This is only valid for the header
-table = "header"
-process_table(header_df, table)
+process_table(header_df, "header")
 
 header_df.set_index("report_id", inplace=True, drop=False)
 # for obs

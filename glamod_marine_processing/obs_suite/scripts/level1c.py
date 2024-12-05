@@ -109,6 +109,7 @@ from _utilities import (
     FFS,
     date_handler,
     paths_exist,
+    read_cdm_tables,
     save_quicklook,
     script_setup,
     table_to_csv,
@@ -156,15 +157,7 @@ def read_table_files(table):
     # First read the master file, if any, then append leaks
     # If no yyyy-mm master file, can still have reports from datetime leaks
     # On reading 'header' read null as NaN so that we can validate null ids as NaN easily
-    # table_df = cdm.read_tables(
-    #    prev_level_path, fileID, cdm_subset=[table], na_values="null"
-    # )
-    table_df = cdm.read_tables(
-        params.prev_level_path,
-        params.prev_fileID,
-        cdm_subset=[table],
-        na_values="null",
-    )
+    table_df = read_cdm_tables(params, table)
     try:
         len(table_df)
     except Exception:
@@ -182,9 +175,7 @@ def read_table_files(table):
             logging.info(f"Reading datetime leak file {leak_file}")
             file_base = os.path.splitext(os.path.basename(leak_file))[0]
             fileIDi = "-".join(file_base.split("-")[-6:])
-            table_dfi = cdm.read_tables(
-                params.prev_level_path, fileIDi, cdm_subset=[table], na_values="null"
-            )
+            table_dfi = read_cdm_tables(params, table)
             if len(table_dfi) == 0:
                 logging.error(f"Could not read leak file or is empty {leak_file}")
                 sys.exit(1)
