@@ -34,8 +34,13 @@ import os
 import sys
 from importlib import reload
 
-from _utilities import FFS, level3_columns, read_cdm_tables, script_setup, table_to_csv
-from cdm_reader_mapper import cdm_mapper as cdm
+from _utilities import (
+    FFS,
+    level3_columns,
+    read_cdm_tables,
+    script_setup,
+    write_cdm_tables,
+)
 
 reload(logging)  # This is to override potential previous config of logging
 
@@ -52,7 +57,7 @@ def process_table(table_df):
     odata_filename = os.path.join(
         params.level_path, FFS.join([params.fileID, "pressure_data"]) + ".psv"
     )
-    table_to_csv(cdm_obs_core_df, odata_filename)
+    write_cdm_tables(params, table_df)
     logging.info(f"File written: {odata_filename}")
 
 

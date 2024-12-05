@@ -10,7 +10,7 @@ import logging
 import os
 import sys
 
-from cdm_reader_mapper.cdm_mapper import read_tables
+from cdm_reader_mapper.cdm_mapper import cdm_to_ascii, read_tables
 
 from glamod_marine_processing.utilities import save_json
 
@@ -158,21 +158,6 @@ def date_handler(obj):
         return obj.isoformat()
 
 
-def table_to_csv(df, out_name, **kwargs):
-    """Write table to disk."""
-    if len(df) == 0:
-        return
-    df.to_csv(
-        out_name,
-        index=False,
-        sep=delimiter,
-        header=True,
-        mode="w",
-        na_rep="null",
-        **kwargs,
-    )
-
-
 def clean_level(filenames):
     """Clean level."""
     filenames = list(itertools.chain(*filenames))
@@ -205,8 +190,25 @@ def save_quicklook(params, ql_dict, date_handler):
     ql_dict = {params.fileID_date: ql_dict}
     save_json(ql_dict, ql_filename, default=date_handler, indent=4, ignore_nan=True)
 
+
 def read_cdm_tables(params, table):
     """Read CDM tables."""
     return read_tables(
-        params.prev_level_path, params.prev_fileID, cdm_subset=[table], na_values="null",
+        params.prev_level_path,
+        params.prev_fileID,
+        cdm_subset=[table],
+        na_values="null",
+    )
+
+
+def write_cdm_tables(params, cdm_tables, header=None):
+    """Write CDM tables."""
+    if header:
+        cdm_tables.columns = [(header, c) for c in cdm_tables.columns]
+    cdm_to_ascii(
+        cdm_tables,
+        log_level="DEBUG",
+        out_dir=params.level_path,
+        suffix=params.fileID,
+        prefix=None,
     )

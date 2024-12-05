@@ -130,13 +130,12 @@ import numpy as np
 import pandas as pd
 from _qc import wind_qc
 from _utilities import (
-    FFS,
     date_handler,
     paths_exist,
     read_cdm_tables,
     save_quicklook,
     script_setup,
-    table_to_csv,
+    write_cdm_tables,
 )
 from cdm_reader_mapper import cdm_mapper as cdm
 
@@ -302,12 +301,7 @@ def process_table(table_df, table, pass_time=None):
     if table == "header":
         table_df["report_quality"] = compare_quality_checks(table_df["report_quality"])
 
-    cdm_columns = cdm_tables.get(table).keys()
-    odata_filename = os.path.join(
-        params.level_path, FFS.join([table, params.fileID]) + ".psv"
-    )
-
-    table_to_csv(table_df, odata_filename, columns=cdm_columns)
+    write_cdm_tables(params, table_df, header=table)
 
 
 # ------------------------------------------------------------------------------
@@ -527,20 +521,9 @@ table_ws = cdm.read_tables(
 
 windQC = wind_qc(table_wd=table_wd, table_ws=table_ws)
 
-odata_filename_wd = os.path.join(
-    params.level_path, FFS.join(["observations-wd", params.fileID]) + ".psv"
-)
-cdm_columns = cdm_tables.get("observations-wd").keys()
-table_to_csv(windQC.wind_direction, odata_filename_wd, columns=cdm_columns)
-
-odata_filename_ws = os.path.join(
-    params.level_path, FFS.join(["observations-ws", params.fileID]) + ".psv"
-)
-cdm_columns = cdm_tables.get("observations-ws").keys()
-table_to_csv(windQC.wind_speed, odata_filename_ws, columns=cdm_columns)
+write_cdm_tables(params, windQC.wind_direction, header="observations-wd")
+write_cdm_tables(params, windQC.wind_speed, header="observations-ws")
 
 # CHECKOUT --------------------------------------------------------------------
 logging.info("Saving json quicklook")
-save_quicklook(
-    params, ql_dict, date_handler
-)
+save_quicklook(params, ql_dict, date_handler)

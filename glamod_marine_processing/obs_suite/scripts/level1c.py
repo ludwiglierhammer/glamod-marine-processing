@@ -112,7 +112,7 @@ from _utilities import (
     read_cdm_tables,
     save_quicklook,
     script_setup,
-    table_to_csv,
+    write_cdm_tables,
 )
 from cdm_reader_mapper import cdm_mapper as cdm
 
@@ -173,8 +173,6 @@ def read_table_files(table):
     if len(leak_files) > 0:
         for leak_file in leak_files:
             logging.info(f"Reading datetime leak file {leak_file}")
-            file_base = os.path.splitext(os.path.basename(leak_file))[0]
-            fileIDi = "-".join(file_base.split("-")[-6:])
             table_dfi = read_cdm_tables(params, table)
             if len(table_dfi) == 0:
                 logging.error(f"Could not read leak file or is empty {leak_file}")
@@ -186,35 +184,31 @@ def read_table_files(table):
     return table_df
 
 
-def process_table(table_df, table_name):
+def process_table(table_df, table):
     """Process table."""
     if isinstance(table_df, str):
         # Open table and reindex
-        table_df = read_table_files(table_name)
+        table_df = read_table_files(table)
         if table_df is None or len(table_df) == 0:
-            logging.warning(f"Empty or non existing table {table_name}")
+            logging.warning(f"Empty or non existing table {table}")
             return
         table_df.set_index("report_id", inplace=True, drop=False)
 
-    odata_filename = os.path.join(
-        params.level_path, FFS.join([table_name, params.fileID]) + ".psv"
-    )
-    cdm_columns = cdm_tables.get(table_name).keys()
     table_df = table_df[table_df.index.isin(mask_df.index)]
     table_mask = mask_df[mask_df.index.isin(table_df.index)]
-    if table_name == "header":
+    if table == "header":
         table_df["history"] = table_df["history"] + f";{history_tstmp}. {history}"
         ql_dict["unique_ids"] = (
             table_df.loc[table_mask["all"], "primary_station_id"]
             .value_counts(dropna=False)
             .to_dict()
         )
-    if len(table_df[table_mask["all"]]) > 0:
-        table_to_csv(table_df[table_mask["all"]], odata_filename, columns=cdm_columns)
+    if not table_df[table_mask["all"]].empty:
+        write_cdm_tables(params, table_df[table_mask["all"]], header=table)
     else:
-        logging.warning(f"Table {table_name} is empty. No file will be produced")
+        logging.warning(f"Table {table} is empty. No file will be produced")
 
-    ql_dict[table_name]["total"] = len(table_df[table_mask["all"]])
+    ql_dict[table]["total"] = len(table_df[table_mask["all"]])
 
 
 # MAIN ------------------------------------------------------------------------
@@ -313,11 +307,7 @@ ql_dict["id_validation_rules"]["noncallsign"] = len(np.where(~callsigns)[0])
 cdm_columns = cdm_tables.get(table).keys()
 for field in validated:
     if False in mask_df[field].value_counts().index:
-        idata_filename = os.path.join(
-            params.level_invalid_path,
-            FFS.join(["header", params.fileID, field]) + ".psv",
-        )
-        table_to_csv(table_df[~mask_df[field]], idata_filename, columns=cdm_columns)
+        write_cdm_tables(params, table_df[~mask_df[field]], header="header")
 
 
 # 4. REPORT INVALIDS PER FIELD  -----------------------------------------------
@@ -343,6 +333,4 @@ for table in obs_tables:
         process_table(table, table)
 
 logging.info("Saving json quicklook")
-save_quicklook(
-    params, ql_dict, date_handler
-)
+save_quicklook(params, ql_dict, date_handler)

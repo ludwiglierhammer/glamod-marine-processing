@@ -64,7 +64,14 @@ from io import StringIO
 
 import numpy as np
 import pandas as pd
-from _utilities import FFS, chunksizes, date_handler, save_quicklook, script_setup
+from _utilities import (
+    FFS,
+    chunksizes,
+    date_handler,
+    save_quicklook,
+    script_setup,
+    write_cdm_tables,
+)
 from cdm_reader_mapper import cdm_mapper as cdm
 from cdm_reader_mapper import mdf_reader, metmetpy
 from cdm_reader_mapper.common import pandas_TextParser_hdlr
@@ -273,21 +280,13 @@ if process:
     cdm_tables = cdm.map_model(data_in.data, imodel=data_model, log_level="INFO")
 
     logging.info("Printing tables to psv files")
-    cdm.cdm_to_ascii(
-        cdm_tables,
-        log_level="DEBUG",
-        out_dir=params.level_path,
-        suffix=params.fileID,
-        prefix=None,
-    )
+    write_cdm_tables(params, cdm_tables)
 
     for table in tables:
         io_dict[table]["total"] = inspect.get_length(cdm_tables[table]["data"])
 
 logging.info("Saving json quicklook")
-save_quicklook(
-    params, io_dict, date_handler
-)
+save_quicklook(params, io_dict, date_handler)
 
 
 # Output excluded and invalid ---------------------------------------------

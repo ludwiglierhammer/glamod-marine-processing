@@ -66,7 +66,7 @@ from _utilities import (
     read_cdm_tables,
     save_quicklook,
     script_setup,
-    table_to_csv,
+    write_cdm_tables,
 )
 from cdm_reader_mapper import cdm_mapper as cdm
 from cdm_reader_mapper.operations import replace
@@ -275,12 +275,8 @@ for table in cdm.properties.cdm_tables:
                 source_mon_period.strftime("%Y-%m"), table
             )
         )
-        filename = os.path.join(
-            params.level_path, FFS.join([table, params.fileID]) + ".psv"
-        )
-        table_to_csv(
-            table_df.loc[[source_mon_period], :], filename, columns=cdm_columns
-        )
+        write_cdm_tables(params, table_df.loc[[source_mon_period], :], header=table)
+
         table_df.drop(source_mon_period, inplace=True)
         len_df_i = len_df
         len_df = len(table_df)
@@ -308,8 +304,7 @@ for table in cdm.properties.cdm_tables:
                     source_mon_period.strftime("%Y-%m"),
                 ]
             )
-            filename = os.path.join(params.level_path, L1b_idl + ".psv")
-            table_to_csv(table_df.loc[[leak], :], filename, columns=cdm_columns)
+            write_cdm_tables(params, table_df.loc[[leak], :], header=table)
             table_df.drop(leak, inplace=True)
             len_df_i = len_df
             len_df = len(table_df)
@@ -321,6 +316,4 @@ for table in cdm.properties.cdm_tables:
         ql_dict[table]["date leak out"]["total"] = 0
 
 logging.info("Saving json quicklook")
-save_quicklook(
-    params, ql_dict, date_handler
-)
+save_quicklook(params, ql_dict, date_handler)

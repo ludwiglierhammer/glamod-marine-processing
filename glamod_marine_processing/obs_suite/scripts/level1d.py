@@ -63,14 +63,13 @@ from importlib import reload
 
 import pandas as pd
 from _utilities import (
-    FFS,
     date_handler,
     delimiter,
     paths_exist,
     read_cdm_tables,
     save_quicklook,
     script_setup,
-    table_to_csv,
+    write_cdm_tables,
 )
 from cdm_reader_mapper import cdm_mapper as cdm
 
@@ -88,15 +87,15 @@ def map_to_cdm(md_model, meta_df, log_level="INFO"):
     return meta_cdm
 
 
-def process_table(table_df, table_name):
+def process_table(table_df, table):
     """Process table."""
-    logging.info(f"Processing table {table_name}")
+    logging.info(f"Processing table {table}")
     if isinstance(table_df, str):
         # Assume 'header' and in a DF in table_df otherwise
         # Open table and reindex
         table_df = read_cdm_tables(params, table)
         if table_df is None or len(table_df) == 0:
-            logging.warning(f"Empty or non existing table {table_name}")
+            logging.warning(f"Empty or non existing table {table}")
             return
         table_df.set_index("report_id", inplace=True, drop=False)
         header_ = header_df.copy()
@@ -106,22 +105,22 @@ def process_table(table_df, table_name):
             table_df.index
         ]
 
-    ql_dict[table_name] = {"total": len(table_df), "updated": 0}
+    ql_dict[table] = {"total": len(table_df), "updated": 0}
     if merge:
-        ql_dict[table_name] = {"total": len(table_df), "updated": 0}
+        ql_dict[table] = {"total": len(table_df), "updated": 0}
         table_df.set_index("primary_station_id", drop=False, inplace=True)
 
-        if table_name == "header":
-            meta_table = meta_cdm[[x for x in meta_cdm if x[0] == table_name]]
+        if table == "header":
+            meta_table = meta_cdm[[x for x in meta_cdm if x[0] == table]]
             meta_table.columns = [x[1] for x in meta_table]
-            # which should be equivalent to: (but more felxible if table_name !=header)
-            # meta_table = meta_cdm.loc[:, table_name]
+            # which should be equivalent to: (but more felxible if table !=header)
+            # meta_table = meta_cdm.loc[:, table]
         else:
             meta_table = meta_cdm[
                 [
                     x
                     for x in meta_cdm
-                    if x[0] == table_name
+                    if x[0] == table
                     or (x[0] == "header" and x[1] == "primary_station_id")
                 ]
             ]
@@ -131,9 +130,9 @@ def process_table(table_df, table_name):
         table_df.update(meta_table[~meta_table.index.duplicated()])
 
         updated_locs = [x for x in table_df.index if x in meta_table.index]
-        ql_dict[table_name]["updated"] = len(updated_locs)
+        ql_dict[table]["updated"] = len(updated_locs)
 
-        if table_name == "header":
+        if table == "header":
             missing_ids = [x for x in table_df.index if x not in meta_table.index]
             if len(missing_ids) > 0:
                 ql_dict["non " + params.md_model + " ids"] = {
@@ -143,11 +142,7 @@ def process_table(table_df, table_name):
             locs = table_df["primary_station_id"].isin(updated_locs)
             table_df["history"].loc[locs] = table_df["history"].loc[locs] + history_add
 
-    cdm_columns = cdm_tables.get(table_name).keys()
-    odata_filename = os.path.join(
-        params.level_path, FFS.join([table_name, params.fileID]) + ".psv"
-    )
-    table_to_csv(table_df, odata_filename, columns=cdm_columns)
+    write_cdm_tables(params, table_df, header=table)
 
 
 # END FUNCTIONS ---------------------------------------------------------------
@@ -261,6 +256,4 @@ for table in obs_tables:
 
 # 4. SAVE QUICKLOOK -----------------------------------------------------------
 logging.info("Saving json quicklook")
-save_quicklook(
-    params, ql_dict, date_handler
-)
+save_quicklook(params, ql_dict, date_handler)
