@@ -229,14 +229,8 @@ logging.basicConfig(
     datefmt="%Y%m%d %H:%M:%S",
     filename=None,
 )
-if len(sys.argv) > 1:
-    logging.info("Reading command line arguments")
-    args = sys.argv
-else:
-    logging.error("Need arguments to run!")
-    sys.exit(1)
 
-params = script_setup([], args)
+params = script_setup([], sys.argv)
 
 id_validation_path = os.path.join(
     params.data_path, params.release, "NOC_ANC_INFO", "json_files"

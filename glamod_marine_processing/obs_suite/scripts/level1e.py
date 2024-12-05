@@ -368,12 +368,6 @@ logging.basicConfig(
     datefmt="%Y%m%d %H:%M:%S",
     filename=None,
 )
-if len(sys.argv) > 1:
-    logging.info("Reading command line arguments")
-    args = sys.argv
-else:
-    logging.error("Need arguments to run!")
-    sys.exit(1)
 
 process_options = [
     "history_explain",
@@ -381,7 +375,7 @@ process_options = [
     "qc_last_date_avail",
     "no_qc_suite",
 ]
-params = script_setup(process_options, args)
+params = script_setup(process_options, sys.argv)
 
 if params.year_init:
     setattr(params, "qc_first_date_avail", f"{params.year_init}-01")

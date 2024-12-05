@@ -56,6 +56,10 @@ class script_setup:
     """Create script."""
 
     def __init__(self, process_options, inargs, clean=False):
+        if len(inargs) <= 1:
+            logging.error("Need arguments to run!")
+            sys.exit(1)
+
         configfile = inargs[1]
 
         try:

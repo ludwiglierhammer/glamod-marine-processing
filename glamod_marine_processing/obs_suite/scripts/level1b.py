@@ -91,12 +91,6 @@ logging.basicConfig(
     datefmt="%Y%m%d %H:%M:%S",
     filename=None,
 )
-if len(sys.argv) > 1:
-    logging.info("Reading command line arguments")
-    args = sys.argv
-else:
-    logging.error("Need arguments to run!")
-    sys.exit(1)
 
 process_options = [
     "correction_version",
@@ -105,7 +99,7 @@ process_options = [
     "duplicates",
     "drop_qualities",
 ]
-params = script_setup(process_options, args)
+params = script_setup(process_options, sys.argv)
 
 cor_ext = ".txt.gz"
 if params.corrections_mod.get("noc_version"):

@@ -96,19 +96,13 @@ logging.basicConfig(
     datefmt="%Y%m%d %H:%M:%S",
     filename=None,
 )
-if len(sys.argv) > 1:
-    logging.info("Reading command line arguments")
-    args = sys.argv
-else:
-    logging.error("Need arguments to run!")
-    sys.exit(1)
 
 process_options = [
     "data_model",
     "read_sections",
     "filter_reports_by",
 ]
-params = script_setup(process_options, args)
+params = script_setup(process_options, sys.argv)
 
 L0_filename = os.path.join(params.prev_level_path, params.filename)
 if not os.path.isfile(L0_filename):

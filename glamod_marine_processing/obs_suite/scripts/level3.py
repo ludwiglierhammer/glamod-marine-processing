@@ -29,13 +29,10 @@ source: source dataset identifier
 from __future__ import annotations
 
 import datetime
-import glob
 import logging
 import os
-import shutil
 import sys
 from importlib import reload
-from pathlib import Path
 
 from _utilities import FFS, level3_columns, script_setup, table_to_csv
 from cdm_reader_mapper import cdm_mapper as cdm
@@ -68,14 +65,8 @@ logging.basicConfig(
     datefmt="%Y%m%d %H:%M:%S",
     filename=None,
 )
-if len(sys.argv) > 1:
-    logging.info("Reading command line arguments")
-    args = sys.argv
-else:
-    logging.error("Need arguments to run!")
-    sys.exit(1)
 
-params = script_setup([], args)
+params = script_setup([], sys.argv)
 
 # DO THE DATA SELECTION -------------------------------------------------------
 # -----------------------------------------------------------------------------
