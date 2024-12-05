@@ -44,15 +44,6 @@ reload(logging)  # This is to override potential previous config of logging
 
 
 # FUNCTIONS -------------------------------------------------------------------
-def copyfiles(pattern, dest, mode="excluded"):
-    """Copy file pattern to dest."""
-    file_list = glob.glob(pattern)
-    for file_ in file_list:
-        file_name = Path(file_).name
-        shutil.copyfile(file_, os.path.join(dest, file_name))
-        logging.info(f"{file_name} {mode} from level2 in {dest}")
-
-
 def process_table(table_df):
     """Process table."""
     cdm_obs_core_df = table_df[level3_columns]
