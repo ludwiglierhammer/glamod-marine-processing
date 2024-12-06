@@ -304,7 +304,8 @@ for table in cdm.properties.cdm_tables:
                     source_mon_period.strftime("%Y-%m"),
                 ]
             )
-            table_to_csv(params, table_df.loc[[leak], :], table=table)
+            filename = os.path.join(params.level_path, L1b_idl + ".psv")
+            table_to_csv(params, table_df.loc[[leak], :], outname=filename)
             table_df.drop(leak, inplace=True)
             len_df_i = len_df
             len_df = len(table_df)
