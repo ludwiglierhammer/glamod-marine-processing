@@ -136,7 +136,6 @@ from _utilities import (
     save_quicklook,
     script_setup,
     table_to_csv,
-    write_cdm_tables,
 )
 from cdm_reader_mapper import cdm_mapper as cdm
 
@@ -302,7 +301,7 @@ def process_table(table_df, table, pass_time=None):
     if table == "header":
         table_df["report_quality"] = compare_quality_checks(table_df["report_quality"])
 
-    tabel_to_csv(params, table_df)
+    table_to_csv(params, table_df, table=table)
 
 
 # ------------------------------------------------------------------------------
@@ -522,8 +521,8 @@ table_ws = cdm.read_tables(
 
 windQC = wind_qc(table_wd=table_wd, table_ws=table_ws)
 
-write_cdm_tables(params, windQC.wind_direction, header="observations-wd")
-write_cdm_tables(params, windQC.wind_speed, header="observations-ws")
+table_to_csv(params, windQC.wind_direction, table="observations-wd")
+table_to_csv(params, windQC.wind_speed, table="observations-ws")
 
 # CHECKOUT --------------------------------------------------------------------
 logging.info("Saving json quicklook")

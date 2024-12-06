@@ -218,10 +218,10 @@ def table_to_csv(params, df, table=None, outname=None, **kwargs):
     """Write table to disk."""
     if df.empty:
         return
-    if out_name is None:
-        out_name = os.path.join(params.level_path, FFS.join([table, params.fileID]))
+    if outname is None:
+        outname = os.path.join(params.level_path, FFS.join([table, params.fileID]))
     df.to_csv(
-        out_name,
+        outname,
         index=False,
         sep=delimiter,
         header=True,

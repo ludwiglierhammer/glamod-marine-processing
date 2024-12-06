@@ -275,7 +275,7 @@ for table in cdm.properties.cdm_tables:
                 source_mon_period.strftime("%Y-%m"), table
             )
         )
-        tabel_to_csv(params, table, table_df.loc[[source_mon_period], :])
+        table_to_csv(params, table_df.loc[[source_mon_period], :], table=table)
 
         table_df.drop(source_mon_period, inplace=True)
         len_df_i = len_df
@@ -304,7 +304,7 @@ for table in cdm.properties.cdm_tables:
                     source_mon_period.strftime("%Y-%m"),
                 ]
             )
-            write_cdm_tables(params, table_df.loc[[leak], :], table=table)
+            table_to_csv(params, table_df.loc[[leak], :], table=table)
             table_df.drop(leak, inplace=True)
             len_df_i = len_df
             len_df = len(table_df)

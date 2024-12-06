@@ -204,7 +204,7 @@ def process_table(table_df, table):
             .to_dict()
         )
     if not table_df[table_mask["all"]].empty:
-        tabel_to_csv(params, table_df[table_mask["all"]], table=table)
+        table_to_csv(params, table_df[table_mask["all"]], table=table)
     else:
         logging.warning(f"Table {table} is empty. No file will be produced")
 

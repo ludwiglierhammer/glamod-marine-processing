@@ -142,7 +142,7 @@ def process_table(table_df, table):
             locs = table_df["primary_station_id"].isin(updated_locs)
             table_df["history"].loc[locs] = table_df["history"].loc[locs] + history_add
 
-    tables_to_csv(params, table_df)
+    table_to_csv(params, table_df, table=table)
 
 
 # END FUNCTIONS ---------------------------------------------------------------
