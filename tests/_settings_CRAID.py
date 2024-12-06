@@ -67,7 +67,7 @@ pattern = {
     "level3": "header-craid_????-??-??_subset.psv",
 }
 
-pattern_out = {"level3": "2004-12-release_7.0-000000-pressure_data.psv"}
+pattern_out = {"level3": "pressure-data-2004-12-release_7.0-000000.psv"}
 
 manipulation = {
     "level1b": {

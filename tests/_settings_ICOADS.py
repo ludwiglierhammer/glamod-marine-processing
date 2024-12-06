@@ -74,7 +74,7 @@ pattern = {
     "level2": "header-icoads_r???_d???_????-??-??_subset.psv",
     "level3": "header-icoads_r???_d???_????-??-??_subset.psv",
 }
-pattern_out = {"level3": "2022-01-release_7.0-000000-pressure_data.psv"}
+pattern_out = {"level3": "pressure-data-2022-01-release_7.0-000000.psv"}
 
 manipulation = {
     "level1b": {

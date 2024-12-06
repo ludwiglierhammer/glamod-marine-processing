@@ -48,11 +48,7 @@ def process_table(table_df):
 
     cdm_obs_core_df = cdm_obs_core_df[cdm_obs_core_df["observation_value"].notnull()]
 
-    odata_filename = os.path.join(
-        params.level_path, FFS.join([params.fileID, "pressure_data"]) + ".psv"
-    )
-    table_to_csv(params, table_df, table="pressure_data")
-    logging.info(f"File written: {odata_filename}")
+    table_to_csv(params, cdm_obs_core_df, table="pressure-data")
 
 
 # MAIN ------------------------------------------------------------------------
