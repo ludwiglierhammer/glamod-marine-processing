@@ -219,7 +219,9 @@ def table_to_csv(params, df, table=None, outname=None, **kwargs):
     if df.empty:
         return
     if outname is None:
-        outname = os.path.join(params.level_path, FFS.join([table, params.fileID]))
+        outname = os.path.join(
+            params.level_path, f"{FFS.join([table, params.fileID])}.psv"
+        )
     df.to_csv(
         outname,
         index=False,
