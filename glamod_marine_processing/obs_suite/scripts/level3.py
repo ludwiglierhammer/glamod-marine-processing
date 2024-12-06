@@ -30,11 +30,10 @@ from __future__ import annotations
 
 import datetime
 import logging
-import os
 import sys
 from importlib import reload
 
-from _utilities import FFS, level3_columns, read_cdm_tables, script_setup, table_to_csv
+from _utilities import level3_columns, read_cdm_tables, script_setup, table_to_csv
 
 reload(logging)  # This is to override potential previous config of logging
 
