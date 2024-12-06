@@ -307,7 +307,13 @@ ql_dict["id_validation_rules"]["noncallsign"] = len(np.where(~callsigns)[0])
 cdm_columns = cdm_tables.get(table).keys()
 for field in validated:
     if False in mask_df[field].value_counts().index:
-        table_to_csv(params, table_df[~mask_df[field]], table="header")
+        ioutname = os.path.join(
+            params.level_invalid_path,
+            FFS.join(["header", params.fileID, field]) + ".psv",
+        )
+        table_to_csv(
+            params, table_df[~mask_df[field]], outname=ioutname, columns=cdm_columns
+        )
 
 
 # 4. REPORT INVALIDS PER FIELD  -----------------------------------------------
