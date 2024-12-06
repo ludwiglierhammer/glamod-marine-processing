@@ -62,12 +62,12 @@ from collections import Counter
 from importlib import reload
 
 import pandas as pd
-import simplejson
 from _utilities import (
-    FFS,
     date_handler,
     delimiter,
     paths_exist,
+    read_cdm_tables,
+    save_quicklook,
     script_setup,
     table_to_csv,
 )
@@ -87,17 +87,15 @@ def map_to_cdm(md_model, meta_df, log_level="INFO"):
     return meta_cdm
 
 
-def process_table(table_df, table_name):
+def process_table(table_df, table):
     """Process table."""
-    logging.info(f"Processing table {table_name}")
+    logging.info(f"Processing table {table}")
     if isinstance(table_df, str):
         # Assume 'header' and in a DF in table_df otherwise
         # Open table and reindex
-        table_df = cdm.read_tables(
-            params.prev_level_path, params.prev_fileID, cdm_subset=[table_name]
-        )
+        table_df = read_cdm_tables(params, table)
         if table_df is None or len(table_df) == 0:
-            logging.warning(f"Empty or non existing table {table_name}")
+            logging.warning(f"Empty or non existing table {table}")
             return
         table_df.set_index("report_id", inplace=True, drop=False)
         header_ = header_df.copy()
@@ -107,22 +105,22 @@ def process_table(table_df, table_name):
             table_df.index
         ]
 
-    meta_dict[table_name] = {"total": len(table_df), "updated": 0}
+    ql_dict[table] = {"total": len(table_df), "updated": 0}
     if merge:
-        meta_dict[table_name] = {"total": len(table_df), "updated": 0}
+        ql_dict[table] = {"total": len(table_df), "updated": 0}
         table_df.set_index("primary_station_id", drop=False, inplace=True)
 
-        if table_name == "header":
-            meta_table = meta_cdm[[x for x in meta_cdm if x[0] == table_name]]
+        if table == "header":
+            meta_table = meta_cdm[[x for x in meta_cdm if x[0] == table]]
             meta_table.columns = [x[1] for x in meta_table]
-            # which should be equivalent to: (but more felxible if table_name !=header)
-            # meta_table = meta_cdm.loc[:, table_name]
+            # which should be equivalent to: (but more felxible if table !=header)
+            # meta_table = meta_cdm.loc[:, table]
         else:
             meta_table = meta_cdm[
                 [
                     x
                     for x in meta_cdm
-                    if x[0] == table_name
+                    if x[0] == table
                     or (x[0] == "header" and x[1] == "primary_station_id")
                 ]
             ]
@@ -132,23 +130,20 @@ def process_table(table_df, table_name):
         table_df.update(meta_table[~meta_table.index.duplicated()])
 
         updated_locs = [x for x in table_df.index if x in meta_table.index]
-        meta_dict[table_name]["updated"] = len(updated_locs)
+        ql_dict[table]["updated"] = len(updated_locs)
 
-        if table_name == "header":
+        if table == "header":
             missing_ids = [x for x in table_df.index if x not in meta_table.index]
             if len(missing_ids) > 0:
-                meta_dict["non " + params.md_model + " ids"] = {
+                ql_dict["non " + params.md_model + " ids"] = {
                     k: v for k, v in Counter(missing_ids).items()
                 }
             history_add = ";{}. {}".format(history_tstmp, "metadata fix")
             locs = table_df["primary_station_id"].isin(updated_locs)
             table_df["history"].loc[locs] = table_df["history"].loc[locs] + history_add
 
-    cdm_columns = cdm_tables.get(table_name).keys()
-    odata_filename = os.path.join(
-        params.level_path, FFS.join([table_name, params.fileID]) + ".psv"
-    )
-    table_to_csv(table_df, odata_filename, columns=cdm_columns)
+    cdm_columns = cdm_tables.get(table).keys()
+    table_to_csv(params, table_df, table=table, columns=cdm_columns)
 
 
 # END FUNCTIONS ---------------------------------------------------------------
@@ -163,12 +158,6 @@ logging.basicConfig(
     datefmt="%Y%m%d %H:%M:%S",
     filename=None,
 )
-if len(sys.argv) > 1:
-    logging.info("Reading command line arguments")
-    args = sys.argv
-else:
-    logging.error("Need arguments to run!")
-    sys.exit(1)
 
 process_options = [
     "md_model",
@@ -178,7 +167,7 @@ process_options = [
     "md_last_yr_avail",
     "md_not_avail",
 ]
-params = script_setup(process_options, args)
+params = script_setup(process_options, sys.argv)
 
 paths_exist(params.level_log_path)
 
@@ -210,7 +199,7 @@ else:
     logging.info(f"Metadata not available for data source-deck {params.sid_dck}")
     logging.info("level1d data will be created with no merging")
 
-meta_dict = {}
+ql_dict = {}
 
 # DO THE DATA PROCESSING ------------------------------------------------------
 # -----------------------------------------------------------------------------
@@ -221,10 +210,7 @@ obs_tables = [x for x in cdm_tables.keys() if x != "header"]
 # 1. SEE STATION ID's FROM BOTH DATA STREAMS AND SEE IF THERE'S ANYTHING TO
 # MERGE AT ALL
 # Read the header table
-table = "header"
-header_df = cdm.read_tables(
-    params.prev_level_path, params.prev_fileID, cdm_subset=[table], na_values="null"
-)
+header_df = read_cdm_tables(params, "header")
 
 if len(header_df) == 0:
     logging.error("Empty or non-existing header table")
@@ -262,8 +248,7 @@ if merge:
 
 # 3. UPDATE CDM WITH PUB47 OR JUST COPY PREV LEVEL TO CURRENT -----------------
 # This is only valid for the header
-table = "header"
-process_table(header_df, table)
+process_table(header_df, "header")
 
 header_df.set_index("report_id", inplace=True, drop=False)
 # for obs
@@ -272,14 +257,4 @@ for table in obs_tables:
 
 # 4. SAVE QUICKLOOK -----------------------------------------------------------
 logging.info("Saving json quicklook")
-level_io_filename = os.path.join(params.level_ql_path, params.fileID + ".json")
-with open(level_io_filename, "w") as fileObj:
-    simplejson.dump(
-        {"-".join([params.year, params.month]): meta_dict},
-        fileObj,
-        default=date_handler,
-        indent=4,
-        ignore_nan=True,
-    )
-
-logging.info("End")
+save_quicklook(params, ql_dict, date_handler)

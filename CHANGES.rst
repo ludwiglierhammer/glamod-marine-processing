@@ -15,6 +15,13 @@ New features and enhancements
 Internal changes
 ^^^^^^^^^^^^^^^^
 * ``obs_suite``: update ICOADS_R3.0.0T release_4.0 time period list (:pull:`73`)
+* ``obs_suite``: combine loops over decks in ``level_slurm.py`` and ``config_array.py`` to one single loop (:issue:`74`, :pull:`79`)
+* ``obs_suie``: name log files according to the date of the source files instead of simply numbering them consecutively (:issue:`74`, :pull:`79`)
+* ``obs_suite``: standardize level scripts (:pull:`79`)
+
+Breaking changes
+^^^^^^^^^^^^^^^^
+* ``obs_suite``: rename level3 output from <YYYY>-<MM>-<RELEASE>-<UPDATE>-pressure_data.psv to pressure-data-<YYYY>-<MM>-<RELEASE>-<UPDATE>.psv (:pull:`79`)
 
 v7.1.0 (2024-11-25)
 -------------------

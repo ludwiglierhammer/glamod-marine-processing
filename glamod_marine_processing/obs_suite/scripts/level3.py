@@ -29,30 +29,16 @@ source: source dataset identifier
 from __future__ import annotations
 
 import datetime
-import glob
 import logging
-import os
-import shutil
 import sys
 from importlib import reload
-from pathlib import Path
 
-from _utilities import FFS, level3_columns, script_setup, table_to_csv
-from cdm_reader_mapper import cdm_mapper as cdm
+from _utilities import level3_columns, read_cdm_tables, script_setup, table_to_csv
 
 reload(logging)  # This is to override potential previous config of logging
 
 
 # FUNCTIONS -------------------------------------------------------------------
-def copyfiles(pattern, dest, mode="excluded"):
-    """Copy file pattern to dest."""
-    file_list = glob.glob(pattern)
-    for file_ in file_list:
-        file_name = Path(file_).name
-        shutil.copyfile(file_, os.path.join(dest, file_name))
-        logging.info(f"{file_name} {mode} from level2 in {dest}")
-
-
 def process_table(table_df):
     """Process table."""
     cdm_obs_core_df = table_df[level3_columns]
@@ -61,11 +47,7 @@ def process_table(table_df):
 
     cdm_obs_core_df = cdm_obs_core_df[cdm_obs_core_df["observation_value"].notnull()]
 
-    odata_filename = os.path.join(
-        params.level_path, FFS.join([params.fileID, "pressure_data"]) + ".psv"
-    )
-    table_to_csv(cdm_obs_core_df, odata_filename)
-    logging.info(f"File written: {odata_filename}")
+    table_to_csv(params, cdm_obs_core_df, table="pressure-data")
 
 
 # MAIN ------------------------------------------------------------------------
@@ -77,14 +59,8 @@ logging.basicConfig(
     datefmt="%Y%m%d %H:%M:%S",
     filename=None,
 )
-args = []
-if len(sys.argv) > 1:
-    logging.info("Reading command line arguments")
-    args = sys.argv
-else:
-    logging.error("Need arguments to run!")
 
-params = script_setup([], args)
+params = script_setup([], sys.argv)
 
 # DO THE DATA SELECTION -------------------------------------------------------
 # -----------------------------------------------------------------------------
@@ -94,9 +70,7 @@ cdm_tables = [header_table, obs_table]
 
 history_tstmp = datetime.datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S")
 
-table_df = cdm.read_tables(
-    params.prev_level_path, params.prev_fileID, cdm_subset=cdm_tables, na_values="null"
-)
+table_df = read_cdm_tables(params, cdm_tables)
 
 if not table_df.empty:
     process_table(table_df)

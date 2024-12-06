@@ -58,12 +58,13 @@ from importlib import reload
 
 import numpy as np
 import pandas as pd
-import simplejson
 from _utilities import (
     FFS,
     date_handler,
     delimiter,
     paths_exist,
+    read_cdm_tables,
+    save_quicklook,
     script_setup,
     table_to_csv,
 )
@@ -91,12 +92,6 @@ logging.basicConfig(
     datefmt="%Y%m%d %H:%M:%S",
     filename=None,
 )
-if len(sys.argv) > 1:
-    logging.info("Reading command line arguments")
-    args = sys.argv
-else:
-    logging.error("Need arguments to run!")
-    sys.exit(1)
 
 process_options = [
     "correction_version",
@@ -105,7 +100,7 @@ process_options = [
     "duplicates",
     "drop_qualities",
 ]
-params = script_setup(process_options, args)
+params = script_setup(process_options, sys.argv)
 
 cor_ext = ".txt.gz"
 if params.corrections_mod.get("noc_version"):
@@ -123,7 +118,7 @@ logging.info(f"Setting corrections path to {L1b_main_corrections}")
 if params.correction_version != "null":
     paths_exist(L1b_main_corrections)
 
-correction_dict = {table: {} for table in cdm.properties.cdm_tables}
+ql_dict = {table: {} for table in cdm.properties.cdm_tables}
 
 # Do the data processing ------------------------------------------------------
 isChange = "1"
@@ -137,17 +132,15 @@ for table in cdm.properties.cdm_tables:
     logging.info(params.prev_level_path)
     logging.info(params.prev_fileID)
     logging.info(table)
-    table_df = cdm.read_tables(
-        params.prev_level_path, params.prev_fileID, cdm_subset=[table]
-    )
+    table_df = read_cdm_tables(params, table)
 
     if len(table_df) == 0:
         logging.warning(f"Empty or non-existing table {table}")
-        correction_dict[table]["read"] = 0
+        ql_dict[table]["read"] = 0
         continue
 
     table_df.set_index("report_id", inplace=True, drop=False)
-    correction_dict[table]["read"] = len(table_df)
+    ql_dict[table]["read"] = len(table_df)
 
     if params.corrections is None:
         table_corrections = {}
@@ -156,11 +149,11 @@ for table in cdm.properties.cdm_tables:
     if len(table_corrections) == 0:
         logging.warning(f"No corrections defined for table {table}")
 
-    correction_dict[table]["date leak out"] = {}
-    correction_dict[table]["corrections"] = {}
+    ql_dict[table]["date leak out"] = {}
+    ql_dict[table]["corrections"] = {}
 
     for correction, element in table_corrections.items():
-        correction_dict[table]["corrections"][element] = {"applied": 1, "number": 0}
+        ql_dict[table]["corrections"][element] = {"applied": 1, "number": 0}
         logging.info(f"Applying corrections for element {element}")
         columns = ["report_id", element, element + ".isChange"]
         if params.correction_version != "null":
@@ -193,7 +186,7 @@ for table in cdm.properties.cdm_tables:
                 )
                 continue
 
-        correction_dict[table]["corrections"][element]["applied"] = 0
+        ql_dict[table]["corrections"][element]["applied"] = 0
         table_df[element + ".former"] = table_df[element]
         table_df[element + ".isChange"] = ""
         table_df = replace.replace_columns(
@@ -211,12 +204,10 @@ for table in cdm.properties.cdm_tables:
         table_df[element].loc[not_replaced] = table_df[element + ".former"].loc[
             not_replaced
         ]
-        correction_dict[table]["corrections"][element]["number"] = len(
-            np.where(replaced)[0]
-        )
+        ql_dict[table]["corrections"][element]["number"] = len(np.where(replaced)[0])
         logging.info(
             "No. of corrections applied {}".format(
-                correction_dict[table]["corrections"][element]["number"]
+                ql_dict[table]["corrections"][element]["number"]
             )
         )
         # THIS IS A DIRTY THING TO DO, BUT WILL LEAVE IT AS IT IS FOR THIS RUN:
@@ -237,7 +228,7 @@ for table in cdm.properties.cdm_tables:
 
     # Track duplicate status
     if table == "header":
-        correction_dict["duplicates"] = {}
+        ql_dict["duplicates"] = {}
         if params.correction_version == "null":
             if params.drop_qualities:
                 table_df = drop_qualities(table_df, params.drop_qualities)
@@ -249,11 +240,11 @@ for table in cdm.properties.cdm_tables:
         if len(np.where(contains_info)[0]) > 0:
             counts = table_df["duplicate_status"].value_counts()
             for k in counts.index:
-                correction_dict["duplicates"][k] = int(
+                ql_dict["duplicates"][k] = int(
                     counts.loc[k]
                 )  # otherwise prints null to json!!!
         else:
-            correction_dict["duplicates"][dupNotEval] = correction_dict[table]["read"]
+            ql_dict["duplicates"][dupNotEval] = ql_dict[table]["read"]
 
     # Now get ready to write out, extracting eventual leaks of data to a different monthly table
     cdm_columns = cdm_tables.get(table).keys()
@@ -284,18 +275,14 @@ for table in cdm.properties.cdm_tables:
                 source_mon_period.strftime("%Y-%m"), table
             )
         )
-        filename = os.path.join(
-            params.level_path, FFS.join([table, params.fileID]) + ".psv"
-        )
-        table_to_csv(
-            table_df.loc[[source_mon_period], :], filename, columns=cdm_columns
-        )
+        table_to_csv(params, table_df.loc[[source_mon_period], :], table=table)
+
         table_df.drop(source_mon_period, inplace=True)
         len_df_i = len_df
         len_df = len(table_df)
-        correction_dict[table]["total"] = len_df_i - len_df
+        ql_dict[table]["total"] = len_df_i - len_df
     else:
-        correction_dict[table]["total"] = 0
+        ql_dict[table]["total"] = 0
         logging.warning(
             "No original period ({}) data found in table {} after datetime reordering".format(
                 source_mon_period.strftime("%Y-%m"), table
@@ -318,29 +305,16 @@ for table in cdm.properties.cdm_tables:
                 ]
             )
             filename = os.path.join(params.level_path, L1b_idl + ".psv")
-            table_to_csv(table_df.loc[[leak], :], filename, columns=cdm_columns)
+            table_to_csv(params, table_df.loc[[leak], :], outname=filename)
             table_df.drop(leak, inplace=True)
             len_df_i = len_df
             len_df = len(table_df)
-            correction_dict[table]["date leak out"][leak.strftime("%Y-%m")] = (
-                len_df_i - len_df
-            )
-        correction_dict[table]["date leak out"]["total"] = sum(
-            [v for k, v in correction_dict[table]["date leak out"].items()]
+            ql_dict[table]["date leak out"][leak.strftime("%Y-%m")] = len_df_i - len_df
+        ql_dict[table]["date leak out"]["total"] = sum(
+            [v for k, v in ql_dict[table]["date leak out"].items()]
         )
     else:
-        correction_dict[table]["date leak out"]["total"] = 0
-
-
-correction_dict["date processed"] = datetime.datetime.now()
+        ql_dict[table]["date leak out"]["total"] = 0
 
 logging.info("Saving json quicklook")
-L1b_io_filename = os.path.join(params.level_ql_path, params.fileID + ".json")
-with open(L1b_io_filename, "w") as fileObj:
-    simplejson.dump(
-        {"-".join([params.year, params.month]): correction_dict},
-        fileObj,
-        default=date_handler,
-        indent=4,
-        ignore_nan=True,
-    )
+save_quicklook(params, ql_dict, date_handler)
