@@ -132,7 +132,7 @@ io_dict["read"] = {"total": len(data_in)}
 # we now do the dirty trick here: dataset_metmetpy = icoads_r3000
 
 logging.info("Applying platform type fixtures")
-data_in = data_in.correct_pt()
+data_in.correct_pt(inplace=True)
 # 2.2. Apply record selection (filter by) criteria: PT types.....
 if params.filter_reports_by:
     logging.info("Applying selection filters")
@@ -150,7 +150,9 @@ if params.filter_reports_by:
         data_in, data_excluded["data"][k] = data_in.select_from_list(
             selection, return_invalid=True, out_rejected=True
         )
-        data_in.select_from_index(data_in.index, data="mask", out_rejected=True)
+        data_in.select_from_index(
+            data_in.index, data="mask", inplace=True, out_rejected=True
+        )
         io_dict["not_selected"][k]["total"] = inspect.get_length(
             data_excluded["data"][k]
         )
@@ -242,10 +244,7 @@ for col in masked_columns:
 # 2.4. Discard invalid data.
 data_invalid = {}
 data_in, data_invalid["data"] = data_in.select_true(
-    return_invalid=True, out_rejected=True
-)
-data_in, data_invalid["valid_mask"] = data_in.select_true(
-    data="mask", return_invalid=True, out_rejected=True
+    mask=True, return_invalid=True, out_rejected=True
 )
 io_dict["invalid"]["total"] = inspect.get_length(data_invalid["data"])
 io_dict["processed"] = {"total": inspect.get_length(data_in.data)}
@@ -265,11 +264,10 @@ if process:
     data_in.map_model(log_level="INFO")
 
     logging.info("Printing tables to psv files")
-    data_in.write_tables(
+    data_in.write(
         out_dir=params.level_path,
         suffix=params.fileID,
     )
-    # write_cdm_tables(params, cdm_tables)
 
     for table in tables:
         io_dict[table]["total"] = inspect.get_length(data_in.tables[table])

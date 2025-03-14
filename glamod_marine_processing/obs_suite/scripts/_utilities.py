@@ -195,11 +195,33 @@ def save_quicklook(params, ql_dict, date_handler):
 
 def read_cdm_tables(params, table):
     """Read CDM tables."""
-    if isinstance(table, str):
-        table = [table]
+    # if isinstance(table, str):
+    #    table = [table]
     return read_tables(
         params.prev_level_path,
-        params.prev_fileID,
+        suffix=params.prev_fileID,
         cdm_subset=table,
         na_values="null",
     )
+
+
+def write_cdm_tables(params, df, tables=[], outname=None, **kwargs):
+    """Write table to disk."""
+    if df.empty:
+        return
+    if isinstance(tables, str):
+        tables = [tables]
+    for table in tables:
+        if outname is None:
+            outname = os.path.join(
+                params.level_path, f"{FFS.join([table, params.fileID])}.psv"
+            )
+        df.to_csv(
+            outname,
+            index=False,
+            sep=delimiter,
+            header=True,
+            mode="w",
+            na_rep="null",
+            **kwargs,
+        )
