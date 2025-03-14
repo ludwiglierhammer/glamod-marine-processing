@@ -85,8 +85,8 @@ def _obs_testing(dataset, level, capsys):
     expected = read_tables(
         f"./E{level}/{dataset}/{level}/{_settings.deck}", cdm_subset=tables
     )
-    expected = manipulate_expected(expected.tables, level)
-    results = results.tables
+    expected = manipulate_expected(expected.data, level)
+    results = results.data
 
     if "header" in results.columns:
         for deletion in [("header", "record_timestamp"), ("header", "history")]:
