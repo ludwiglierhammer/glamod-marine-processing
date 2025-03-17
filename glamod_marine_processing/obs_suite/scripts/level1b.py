@@ -122,7 +122,6 @@ ql_dict = {table: {} for table in properties.cdm_tables}
 # Do the data processing ------------------------------------------------------
 isChange = "1"
 dupNotEval = "4"
-# cdm_tables = cdm.get_cdm_atts()
 
 # 1. Do it a table at a time....
 history_tstmp = datetime.datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S")
