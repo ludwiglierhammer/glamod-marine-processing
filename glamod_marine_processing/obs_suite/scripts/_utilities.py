@@ -216,7 +216,7 @@ def write_cdm_tables(params, df, tables=[], outname=None, **kwargs):
             outname = os.path.join(
                 params.level_path, f"{FFS.join([table, params.fileID])}.psv"
             )
-        df.to_csv(
+        df[table].to_csv(
             outname,
             index=False,
             sep=delimiter,
