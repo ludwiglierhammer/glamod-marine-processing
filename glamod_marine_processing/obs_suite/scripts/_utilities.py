@@ -216,8 +216,10 @@ def write_cdm_tables(params, df, tables=[], outname=None, **kwargs):
             outname = os.path.join(
                 params.level_path, f"{FFS.join([table, params.fileID])}.psv"
             )
-        if table in df:
+        try:
             df = df[table]
+        except KeyError:
+            print(f"{table} not found.")
         df.to_csv(
             outname,
             index=False,
