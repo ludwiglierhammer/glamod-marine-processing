@@ -73,7 +73,7 @@ def _obs_testing(dataset, level, capsys):
             keep_default_na=False,
         )
     else:
-        results = read_tables(result_dir, cdm_subset=tables)
+        results = read_tables(result_dir, cdm_subset=tables).data
 
     for table_name in tables:
         load_file(
@@ -86,7 +86,6 @@ def _obs_testing(dataset, level, capsys):
         f"./E{level}/{dataset}/{level}/{_settings.deck}", cdm_subset=tables
     )
     expected = manipulate_expected(expected.data, level)
-    results = results.data
 
     if "header" in results.columns:
         for deletion in [("header", "record_timestamp"), ("header", "history")]:
