@@ -261,7 +261,7 @@ if process:
     tables = properties.cdm_tables
     io_dict.update({table: {} for table in tables})
     logging.debug(f"Mapping attributes: {data_in.dtypes}")
-    data_in.map_model(log_level="INFO")
+    data_in.map_model(log_level="INFO", inplace=True)
 
     logging.info("Printing tables to psv files")
     data_in.write(
@@ -270,7 +270,7 @@ if process:
     )
 
     for table in tables:
-        io_dict[table]["total"] = inspect.get_length(data_in.tables[table])
+        io_dict[table]["total"] = inspect.get_length(data_in.data[table])
 
 logging.info("Saving json quicklook")
 save_quicklook(params, io_dict, date_handler)

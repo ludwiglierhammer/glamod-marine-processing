@@ -230,7 +230,7 @@ for table in properties.cdm_tables:
         ql_dict["duplicates"] = {}
         if params.correction_version == "null":
             if params.drop_qualities:
-                table_db = drop_qualities(table_db, params.drop_qualities)
+                table_db[table] = drop_qualities(table_db[table], params.drop_qualities)
             table_db.duplicate_check(**params.duplicates)
             table_db.flag_duplicates(inplace=True)
         contains_info = table_db[(table, "duplicate_status")] != dupNotEval

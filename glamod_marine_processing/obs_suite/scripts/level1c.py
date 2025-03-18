@@ -321,6 +321,7 @@ mask_df["all"] = mask_df.all(axis=1)
 ql_dict["invalid"] = {}
 ql_dict["invalid"]["total"] = len(table_db[~mask_df["all"]])
 for field in validated:
+    mask_df = mask_df.fillna(False)
     ql_dict["invalid"][field] = len(mask_df[field].loc[~mask_df[field]])
 
 # 5. CLEAN AND OUTPUT TABLES  -------------------------------------------------
