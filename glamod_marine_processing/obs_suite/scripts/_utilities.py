@@ -219,7 +219,7 @@ def write_cdm_tables(params, df, tables=[], outname=None, **kwargs):
         try:
             df = df[table]
         except KeyError:
-            print(f"{table} not found.")
+            logging.info(f"{table} not found.")
         df.to_csv(
             outname,
             index=False,
