@@ -231,7 +231,7 @@ for table in properties.cdm_tables:
         if params.correction_version == "null":
             if params.drop_qualities:
                 table_db[table] = drop_qualities(table_db[table], params.drop_qualities)
-            table_db.duplicate_check(**params.duplicates)
+            table_db.duplicate_check(**params.duplicates, inplace=True)
             table_db.flag_duplicates(inplace=True)
         contains_info = table_db[(table, "duplicate_status")] != dupNotEval
         logging.info("Logging duplicate status info")
