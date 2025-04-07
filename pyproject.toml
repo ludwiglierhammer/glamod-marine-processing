@@ -26,14 +26,13 @@ classifiers = [
 ]
 dynamic = ["version"]
 dependencies = [
-  "cdm_reader_mapper",
-  "simplejson"
+  "cdm_reader_mapper"
 ]
 
 [project.optional-dependencies]
 obs = ["simplejson"]
 qc = []
-complete = ["glamod_marine_processing[obs]", "glamod_marine_processing[qc]"]
+all = ["glamod_marine_processing[obs]", "glamod_marine_processing[qc]"]
 
 [project.scripts]
 qc_suite = "glamod_marine_processing.cli_qc:qc_cli"
