@@ -273,15 +273,15 @@ def process_table(table_df, table, pass_time=None):
         if table == "header":
             table_df.update(qc_df["report_quality"])
             history_add = f";{history_tstmp}. {params.history_explain}"
-            table_df["report_time_quality"] = pass_time
+            table_df.loc[:, "report_time_quality"] = pass_time
             ql_dict[table]["location_quality_flag"] = (
                 table_df["location_quality"].value_counts(dropna=False).to_dict()
             )
             ql_dict[table]["report_quality_flag"] = (
                 table_df["report_quality"].value_counts(dropna=False).to_dict()
             )
-            table_df["history"].loc[updated_locs] = (
-                table_df["history"].loc[updated_locs] + history_add
+            table_df.update(
+                table_df.loc[updated_locs, "history"].apply(lambda x: x + history_add)
             )
     # Here very last minute change to account for reports not in QC files:
     # need to make sure it is all not-checked!
@@ -289,16 +289,20 @@ def process_table(table_df, table, pass_time=None):
     # What happens if not POS flags matching?
     else:
         if table != "header":
-            table_df["quality_flag"] = not_checked_param
+            table_df.loc[:, "quality_flag"] = not_checked_param
         else:
-            table_df["report_time_quality"] = pass_time
-            table_df["report_quality"] = not_checked_report
-            table_df["location_quality"] = not_checked_location
+            table_df.loc[:, "report_time_quality"] = pass_time
+            table_df.loc[:, "report_quality"] = not_checked_report
+            table_df.loc[:, "location_quality"] = not_checked_location
 
     if table != "header":
-        table_df["quality_flag"] = compare_quality_checks(table_df["quality_flag"])
+        table_df.loc[:, "quality_flag"] = compare_quality_checks(
+            table_df["quality_flag"]
+        )
     if table == "header":
-        table_df["report_quality"] = compare_quality_checks(table_df["report_quality"])
+        table_df.loc[:, "report_quality"] = compare_quality_checks(
+            table_df["report_quality"]
+        )
 
     write_cdm_tables(params, table_df, tables=table)
 
@@ -354,7 +358,7 @@ qc_delimiter = ","
 cdm_atts = get_cdm_atts()
 obs_tables = [x for x in cdm_atts.keys() if x != "header"]
 
-history_tstmp = datetime.datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S")
+history_tstmp = datetime.datetime.now(datetime.UTC).strftime("%Y-%m-%d %H:%M:%S")
 # -----------------------------------------------------------------------------
 
 # MAIN ------------------------------------------------------------------------

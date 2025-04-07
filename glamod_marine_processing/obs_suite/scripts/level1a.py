@@ -130,7 +130,6 @@ io_dict["read"] = {"total": len(data_in)}
 # dataset = ICOADS_R3.0.0T is not "registered" in metmetpy, but icoads_r3000
 # Modify metmetpy so that it maps ICOADS_R3.0.0T to its own alliaeses
 # we now do the dirty trick here: dataset_metmetpy = icoads_r3000
-
 logging.info("Applying platform type fixtures")
 data_in.correct_pt(inplace=True)
 
@@ -148,17 +147,12 @@ if params.filter_reports_by:
         col = filter_location[0] if len(filter_location) == 1 else filter_location
         values = v
         selection = {col: values}
-        data_in, data_excluded["data"][k] = data_in.select_from_list(
-            selection, mask=True, return_invalid=True, out_rejected=True
-        )
-        io_dict["not_selected"][k]["total"] = inspect.get_length(
-            data_excluded["data"][k]
-        )
+        data_in, data_excl = data_in.split_by_column_entries(selection)
+        data_excluded["data"][k] = data_excl.data
+        io_dict["not_selected"][k]["total"] = len(data_excl)
         if io_dict["not_selected"][k]["total"] > 0:
             if data_in.dtype.get(col, {}) in ["str", "object", "key"]:
-                io_dict["not_selected"][k].update(
-                    inspect.count_by_cat(data_excluded["data"][k], col)
-                )
+                io_dict["not_selected"][k].update(data_excl.unique(columns=col))
     io_dict["not_selected"]["total"] = sum(
         [v.get("total") for k, v in io_dict["not_selected"].items()]
     )
@@ -241,18 +235,16 @@ for col in masked_columns:
 
 # 2.4. Discard invalid data.
 data_invalid = {}
-data_in, data_invalid["data"] = data_in.select_true(
-    mask=True, return_invalid=True, out_rejected=True
-)
-
-io_dict["invalid"]["total"] = inspect.get_length(data_invalid["data"])
-io_dict["processed"] = {"total": inspect.get_length(data_in.data)}
+data_in, data_false = data_in.split_by_boolean_true()
+data_invalid["data"] = data_false.data
+data_invalid["valid_mask"] = data_false.mask
+io_dict["invalid"]["total"] = len(data_false)
+io_dict["processed"] = {"total": len(data_in)}
 
 process = True
 if io_dict["processed"]["total"] == 0:
     process = False
     logging.warning("No data to map to CDM after selection and cleaning")
-
 
 # 3. Map to common data model and output files
 if process:

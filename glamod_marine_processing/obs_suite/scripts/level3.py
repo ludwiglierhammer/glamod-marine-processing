@@ -68,7 +68,7 @@ obs_table = "observations-slp"
 header_table = "header"
 cdm_tables = [header_table, obs_table]
 
-history_tstmp = datetime.datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S")
+history_tstmp = datetime.datetime.now(datetime.UTC).strftime("%Y-%m-%d %H:%M:%S")
 
 table_df = read_cdm_tables(params, cdm_tables)
 

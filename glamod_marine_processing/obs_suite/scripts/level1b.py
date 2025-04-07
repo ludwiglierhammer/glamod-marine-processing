@@ -124,7 +124,7 @@ isChange = "1"
 dupNotEval = "4"
 
 # 1. Do it a table at a time....
-history_tstmp = datetime.datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S")
+history_tstmp = datetime.datetime.now(datetime.UTC).strftime("%Y-%m-%d %H:%M:%S")
 for table in properties.cdm_tables:
     datetime_col = (
         ("header", "report_timestamp") if table == "header" else (table, "date_time")
@@ -231,7 +231,7 @@ for table in properties.cdm_tables:
         if params.correction_version == "null":
             if params.drop_qualities:
                 table_db[table] = drop_qualities(table_db[table], params.drop_qualities)
-            table_db.duplicate_check(**params.duplicates)
+            table_db.duplicate_check(**params.duplicates, inplace=True)
             table_db.flag_duplicates(inplace=True)
         contains_info = table_db[(table, "duplicate_status")] != dupNotEval
         logging.info("Logging duplicate status info")
@@ -254,11 +254,10 @@ for table in properties.cdm_tables:
         table_db[datetime_col], errors="coerce", utc=True
     ).dt.to_period("M")
     monthly_periods = list(table_db[(table, "monthly_period")].dropna().unique())
-    source_mon_period = (
-        pd.Series(data=[datetime.datetime(int(params.year), int(params.month), 1)])
-        .dt.to_period("M")
-        .iloc[0]
+    source_mon_period = pd.Period(
+        year=int(params.year), month=int(params.month), freq="M"
     )
+
     # This is to account for files with no datetime and no datetime correction: we have to assume it pertains to
     # the date in the file
     if len(monthly_periods) == 0:

@@ -237,8 +237,7 @@ ql_dict = {table: {} for table in properties.cdm_tables}
 # Settings in configuration file
 validated = ["report_timestamp", "primary_station_id"]
 history = "Performed report_timestamp (date_time) and primary_station_id validation"
-history_tstmp = datetime.datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S")
-
+history_tstmp = datetime.datetime.now(datetime.UTC).strftime("%Y-%m-%d %H:%M:%S")
 # 1. READ THE DATA-------------------------------------------------------------
 
 # Read the header table file(s) and init the mask to True
