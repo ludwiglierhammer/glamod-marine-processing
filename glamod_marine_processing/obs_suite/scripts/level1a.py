@@ -133,6 +133,7 @@ io_dict["read"] = {"total": len(data_in)}
 
 logging.info("Applying platform type fixtures")
 data_in.correct_pt(inplace=True)
+
 # 2.2. Apply record selection (filter by) criteria: PT types.....
 if params.filter_reports_by:
     logging.info("Applying selection filters")
@@ -148,10 +149,7 @@ if params.filter_reports_by:
         values = v
         selection = {col: values}
         data_in, data_excluded["data"][k] = data_in.select_from_list(
-            selection, return_invalid=True, out_rejected=True
-        )
-        data_in.select_from_index(
-            data_in.index, data="mask", inplace=True, out_rejected=True
+            selection, mask=True, return_invalid=True, out_rejected=True
         )
         io_dict["not_selected"][k]["total"] = inspect.get_length(
             data_excluded["data"][k]
@@ -246,6 +244,7 @@ data_invalid = {}
 data_in, data_invalid["data"] = data_in.select_true(
     mask=True, return_invalid=True, out_rejected=True
 )
+
 io_dict["invalid"]["total"] = inspect.get_length(data_invalid["data"])
 io_dict["processed"] = {"total": inspect.get_length(data_in.data)}
 
