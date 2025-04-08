@@ -95,8 +95,8 @@ This package was created with Cookiecutter_ and the `audreyfeldroy/cookiecutter-
 
 .. _GNU parallel: https://doi.org/10.5281/zenodo.12789352
 
-.. |build| image:: https://github.com/glamod/glamod-marine-processing/actions/workflows/ci.yml/badge.svg
-        :target: https://github.com/glamod/glamod-marine-processing/actions/workflows/ci.yml
+.. |build| image:: https://github.com/glamod/glamod-marine-processing/actions/workflows/testing_suite.yml/badge.svg
+        :target: https://github.com/glamod/glamod-marine-processing/actions/workflows/testing_suite.yml
         :alt: Build Status
 
 .. |black| image:: https://img.shields.io/badge/code%20style-black-000000.svg
