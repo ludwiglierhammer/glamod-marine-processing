@@ -35,7 +35,8 @@ classifiers = [
 ]
 dynamic = ["version"]
 dependencies = [
-  "cdm_reader_mapper"
+  "cdm_reader_mapper",
+  "simplejson"
 ]
 
 [project.optional-dependencies]
@@ -72,9 +73,7 @@ docs = [
   "sphinx-copybutton",
   "sphinx-book-theme >=1.0"
 ]
-obs = ["simplejson"]
-qc = []
-all = ["glamod_marine_processing[obs]", "glamod_marine_processing[qc]", "glamod_marine_processing[dev]", "glamod_marine_processing[docs]"]
+all = ["glamod_marine_processing[dev]", "glamod_marine_processing[docs]"]
 
 [project.scripts]
 qc_suite = "glamod_marine_processing.cli_qc:qc_cli"
