@@ -17,11 +17,6 @@ New features and enhancements
 * ``obs_suite``: add ICOADS_R3.0.0T configuration files for release_7.0 (:pull:`75`)
 * add environment.yml file (:pull:`76`)
 
-Internal changes
-^^^^^^^^^^^^^^^^^
-* rename ci/requirements to CI, tidy up requirements and add add dependencies to pyp
-roject.toml file (:pull:`76`)
-
 CI changes
 ^^^^^^^^^^
 * rename GitHub workflow ``ci`` to ``testing_suite`` (:pull:`76`)
@@ -33,6 +28,7 @@ Internal changes
 * ``obs_suite``: combine loops over decks in ``level_slurm.py`` and ``config_array.py`` to one single loop (:issue:`74`, :pull:`79`)
 * ``obs_suie``: name log files according to the date of the source files instead of simply numbering them consecutively (:issue:`74`, :pull:`79`)
 * ``obs_suite``: standardize level scripts (:pull:`79`)
+* rename ci/requirements to CI, tidy up requirements and add dependencies to pyproject.toml file (:pull:`76`)
 
 Breaking changes
 ^^^^^^^^^^^^^^^^
