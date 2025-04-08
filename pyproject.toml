@@ -6,10 +6,18 @@ build-backend = "flit_core.buildapi"
 name = "glamod_marine_processing"
 description = "GLAMOD marine processing toolbox"
 authors = [
+  {name = "Ludwig Lierhammer", email = "ludwig.lierhammer@dwd.de"},
+  {name = "Axel Andersson", email = "axel.andersson@dwd.de"},
+  {name = "Tina Leiding", email = "tina.leiding@dwd.de"},
+  {name = "Richard Cornes", email = "richard.cornes@noc.ac.uk"},
+  {name = "Elizabeth Kent", email = "eck@noc.ac.uk"},
+  {name = "Joseph Siddons", email = "joseph.siddons@noc.ac.uk"}
+]
+maintainers = [
   {name = "Ludwig Lierhammer", email = "ludwig.lierhammer@dwd.de"}
 ]
 readme = {file = "README.rst", content-type = "text/x-rst"}
-requires-python = ">=3.9"
+requires-python = ">=3.10"
 license = {file = "LICENSE"}
 keywords = ["glamod_marine_processing"]
 classifiers = [
@@ -18,21 +26,54 @@ classifiers = [
   "Intended Audience :: Science/Research",
   "License :: OSI Approved :: Apache Software License",
   "Natural Language :: English",
+  "Operating System :: OS Independent",
   "Programming Language :: Python :: 3",
-  "Programming Language :: Python :: 3.9",
   "Programming Language :: Python :: 3.10",
   "Programming Language :: Python :: 3.11",
-  "Programming Language :: Python :: 3.12"
+  "Programming Language :: Python :: 3.12",
+  "Programming Language :: Python :: 3.13"
 ]
 dynamic = ["version"]
 dependencies = [
-  "cdm_reader_mapper"
+  "cdm_reader_mapper",
+  "simplejson"
 ]
 
 [project.optional-dependencies]
-obs = ["simplejson"]
-qc = []
-all = ["glamod_marine_processing[obs]", "glamod_marine_processing[qc]"]
+dev = [
+  "black[jupyter] ==25.1.0",
+  "blackdoc ==0.3.9",
+  "codespell ==2.4.1",
+  "coverage >=7.5.0",
+  "coveralls >=4.0.1",
+  "deptry ==0.23.0",
+  "distributed >=2.0",
+  "flake8 >=7.1.1",
+  "flake8-rst-docstrings >=0.3.0",
+  "flit >=3.9.0",
+  "isort ==6.0.1",
+  "notebook",
+  "pip >=24.2.0",
+  "pre-commit >=3.7",
+  "pylint >=3.3.1",
+  "pytest>=8.3.4",
+  "pytest-cov>=6.0.0",
+  "pytest-env>=1.1.5",
+  "ruff >=0.7.0",
+  "vulture ==2.14"
+]
+docs = [
+  "ipykernel",
+  "ipython >=8.5.0",
+  "myst-nb >=1.2.0",
+  "nbconvert >=7.16.4",
+  "numpydoc >=1.8.0",
+  "sphinx >=7.0.0",
+  "sphinx-autodoc-typehints",
+  "sphinx-copybutton",
+  "sphinx-book-theme >=1.0"
+]
+all = ["glamod_marine_processing[dev]", "glamod_marine_processing[docs]"]
 
 [project.scripts]
 qc_suite = "glamod_marine_processing.cli_qc:qc_cli"
@@ -50,7 +91,6 @@ post_proc = "glamod_marine_processing.cli_postproc:post_proc_cli"
 
 [tool.black]
 target-version = [
-  "py39",
   "py310",
   "py311",
   "py312"
@@ -93,7 +133,7 @@ omit = ["tests/*.py"]
 [tool.deptry]
 extend_exclude = ["docs"]
 ignore_notebooks = true
-pep621_dev_dependency_groups = ["all", "dev", "docs"]
+pep621_dev_dependency_groups = ["all", "dev", "docs", "obs", "qc"]
 
 [tool.deptry.package_module_name_map]
 "scikit-learn" = "sklearn"
@@ -112,12 +152,14 @@ include = [
   "LICENSE",
   "Makefile",
   "README.rst",
-  "ci/requirements/requirements.txt",
-  "ci/requirements/requirements_ob.txt",
-  "ci/requirements/requirements_qc.txt",
+  "CI/requirements_ci.txt",
   "docs/Makefile",
   "docs/make.bat",
-  "tests/**/*.py"
+  "tests/**/*.py",
+  "glamod_marine_processing/**/*.json",
+  "glamod_marine_processing/**/*.py",
+  "glamod_marine_processing/**/*.txt",
+  "glamod_marine_processing/**/*.yml"
 ]
 exclude = [
   "**/*.py[co]",
@@ -130,12 +172,12 @@ exclude = [
 
 [tool.isort]
 profile = "black"
-py_version = 310
+py_version = 312
 append_only = true
 add_imports = "from __future__ import annotations"
 
 [tool.mypy]
-python_version = 3.10
+python_version = 3.12
 show_error_codes = true
 warn_return_any = true
 warn_unused_configs = true
@@ -164,7 +206,7 @@ testpaths = ["./tests"]
 [tool.ruff]
 src = ["glamod_marine_processing"]
 line-length = 150
-target-version = "py39"
+target-version = "py312"
 exclude = [
   ".git",
   "build",
@@ -203,6 +245,13 @@ select = [
 
 [tool.ruff.lint.flake8-bandit]
 check-typed-exception = true
+
+[tool.ruff.lint.flake8-import-conventions.aliases]
+"matplotlib.pyplot" = "plt"
+numpy = "np"
+pandas = "pd"
+scipy = "sp"
+xarray = "xr"
 
 [tool.ruff.lint.isort]
 known-first-party = ["glamod_marine_processing"]
