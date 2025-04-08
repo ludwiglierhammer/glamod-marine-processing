@@ -7,10 +7,25 @@ v7.2.0 (unreleased)
 -------------------
 Contributors to this version: Ludwig Lierhammer (:user:`ludwiglierhammer`)
 
+Announcements
+^^^^^^^^^^^^^
+This release drops support for Python 3.9 and adds support for Python 3.13 (:pull:`76`).
+
 New features and enhancements
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 * ``obs_suite``: add new level3 for extracting pressure data and merging ``header`` and ``observations-slp`` tables into one single CDM-OBS-CORE table (:pull:`75`)
 * ``obs_suite``: add ICOADS_R3.0.0T configuration files for release_7.0 (:pull:`75`)
+* add environment.yml file (:pull:`76`)
+
+Internal changes
+^^^^^^^^^^^^^^^^^
+* rename ci/requirements to CI, tidy up requirements and add add dependencies to pyp
+roject.toml file (:pull:`76`)
+
+CI changes
+^^^^^^^^^^
+* rename GitHub workflow ``ci`` to ``testing_suite`` (:pull:`76`)
+* GitHub workflow for ``testing_suite`` now uses ``uv`` for environment management, replacing ``micromamba`` (:pull:`76`)
 
 Internal changes
 ^^^^^^^^^^^^^^^^
