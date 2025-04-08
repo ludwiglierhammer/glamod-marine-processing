@@ -56,7 +56,6 @@ settings:
 
 from __future__ import annotations
 
-import datetime
 import logging
 import os
 import sys
@@ -65,8 +64,14 @@ from io import StringIO
 
 import numpy as np
 import pandas as pd
-import simplejson
-from _utilities import FFS, chunksizes, date_handler, script_setup
+from _utilities import (
+    FFS,
+    chunksizes,
+    date_handler,
+    save_quicklook,
+    script_setup,
+    write_cdm_tables,
+)
 from cdm_reader_mapper import cdm_mapper as cdm
 from cdm_reader_mapper import mdf_reader, metmetpy
 from cdm_reader_mapper.common import pandas_TextParser_hdlr
@@ -96,23 +101,13 @@ logging.basicConfig(
     datefmt="%Y%m%d %H:%M:%S",
     filename=None,
 )
-if len(sys.argv) > 1:
-    logging.info("Reading command line arguments")
-    args = sys.argv
-else:
-    logging.error("Need arguments to run!")
-    sys.exit(1)
 
 process_options = [
     "data_model",
     "read_sections",
     "filter_reports_by",
 ]
-params = script_setup(process_options, args)
-
-if not params.flag:
-    logging.error("Error parsing initial configuration")
-    sys.exit(1)
+params = script_setup(process_options, sys.argv)
 
 L0_filename = os.path.join(params.prev_level_path, params.filename)
 if not os.path.isfile(L0_filename):
@@ -279,47 +274,20 @@ if io_dict["processed"]["total"] == 0:
 # 3. Map to common data model and output files
 if process:
     logging.info("Mapping to CDM")
-    tables = [
-        "header",
-        "observations-at",
-        "observations-sst",
-        "observations-dpt",
-        "observations-wbt",
-        "observations-wd",
-        "observations-ws",
-        "observations-slp",
-    ]
-    obs_tables = tables[1:]
+    tables = cdm.properties.cdm_tables
     io_dict.update({table: {} for table in tables})
     logging.debug(f"Mapping attributes: {data_in.attrs}")
     cdm_tables = cdm.map_model(data_in.data, imodel=data_model, log_level="INFO")
 
     logging.info("Printing tables to psv files")
-    cdm.cdm_to_ascii(
-        cdm_tables,
-        log_level="DEBUG",
-        out_dir=params.level_path,
-        suffix=params.fileID,
-        prefix=None,
-    )
+    write_cdm_tables(params, cdm_tables)
 
     for table in tables:
         io_dict[table]["total"] = inspect.get_length(cdm_tables[table]["data"])
 
-io_dict["date processed"] = datetime.datetime.now()
 logging.info("Saving json quicklook")
-L1a_io_filename = os.path.join(params.level_ql_path, params.fileID + ".json")
-if isinstance(params.year, str):
-    io_dict = {"-".join([params.year, params.month]): io_dict}
+save_quicklook(params, io_dict, date_handler)
 
-with open(L1a_io_filename, "w") as fileObj:
-    simplejson.dump(
-        io_dict,
-        fileObj,
-        default=date_handler,
-        indent=4,
-        ignore_nan=True,
-    )
 
 # Output excluded and invalid ---------------------------------------------
 if params.filter_reports_by:

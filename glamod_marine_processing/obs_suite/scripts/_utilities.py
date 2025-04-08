@@ -10,6 +10,10 @@ import logging
 import os
 import sys
 
+from cdm_reader_mapper.cdm_mapper import cdm_to_ascii, read_tables
+
+from glamod_marine_processing.utilities import save_simplejson
+
 delimiter = "|"
 FFS = "-"
 
@@ -56,6 +60,10 @@ class script_setup:
     """Create script."""
 
     def __init__(self, process_options, inargs, clean=False):
+        if len(inargs) <= 1:
+            logging.error("Need arguments to run!")
+            sys.exit(1)
+
         configfile = inargs[1]
 
         try:
@@ -63,8 +71,7 @@ class script_setup:
                 config = json.load(fileObj)
         except Exception:
             logging.error(f"Opening configuration file: {configfile}", exc_info=True)
-            self.flag = False
-            return
+            sys.exit(1)
 
         if len(sys.argv) >= 8:
             logging.warning(
@@ -93,12 +100,11 @@ class script_setup:
                     setattr(self, opt, config.get(opt))
                 else:
                     setattr(self, opt, config.get(sid_dck).get(opt))
-            self.flag = True
         except Exception:
             logging.error(
                 f"Parsing configuration from file: {configfile}", exc_info=True
             )
-            self.flag = False
+            sys.exit(1)
 
         self.data_path = config["paths"].get("data_directory")
         self.release = config["abbreviations"].get("release")
@@ -152,21 +158,6 @@ def date_handler(obj):
         return obj.isoformat()
 
 
-def table_to_csv(df, out_name, **kwargs):
-    """Write table to disk."""
-    if len(df) == 0:
-        return
-    df.to_csv(
-        out_name,
-        index=False,
-        sep=delimiter,
-        header=True,
-        mode="w",
-        na_rep="null",
-        **kwargs,
-    )
-
-
 def clean_level(filenames):
     """Clean level."""
     filenames = list(itertools.chain(*filenames))
@@ -190,3 +181,58 @@ def paths_exist(data_paths):
             logging.error(f"Could not find data paths: {data_path}")
     if exit is True:
         sys.exit(1)
+
+
+def save_quicklook(params, ql_dict, date_handler):
+    """Save quicklook file."""
+    ql_filename = os.path.join(params.level_ql_path, f"{params.fileID}.json")
+    ql_dict["date processed"] = datetime.datetime.now()
+    ql_dict = {params.fileID_date: ql_dict}
+    save_simplejson(
+        ql_dict, ql_filename, default=date_handler, indent=4, ignore_nan=True
+    )
+
+
+def read_cdm_tables(params, table):
+    """Read CDM tables."""
+    print(params.prev_level_path)
+    print(params.prev_fileID)
+    print(table)
+    if isinstance(table, str):
+        table = [table]
+    return read_tables(
+        params.prev_level_path,
+        params.prev_fileID,
+        cdm_subset=table,
+        na_values="null",
+    )
+
+
+def write_cdm_tables(params, cdm_tables):
+    """Write CDM tables."""
+    cdm_to_ascii(
+        cdm_tables,
+        log_level="DEBUG",
+        out_dir=params.level_path,
+        suffix=params.fileID,
+        prefix=None,
+    )
+
+
+def table_to_csv(params, df, table=None, outname=None, **kwargs):
+    """Write table to disk."""
+    if df.empty:
+        return
+    if outname is None:
+        outname = os.path.join(
+            params.level_path, f"{FFS.join([table, params.fileID])}.psv"
+        )
+    df.to_csv(
+        outname,
+        index=False,
+        sep=delimiter,
+        header=True,
+        mode="w",
+        na_rep="null",
+        **kwargs,
+    )
