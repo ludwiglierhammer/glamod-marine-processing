@@ -35,6 +35,7 @@ classifiers = [
 ]
 dynamic = ["version"]
 dependencies = [
+  "cdm_reader_mapper",
   "simplejson"
 ]
 
