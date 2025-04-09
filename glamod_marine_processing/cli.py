@@ -65,6 +65,16 @@ class Cli:
         deck_list=None,
         overwrite=False,
     ):
+        if not release_source:
+            release_source = release
+        if not release_destination:
+            release_destination = release
+        if not level_destination:
+            level_destination = level
+        if not dataset_source:
+            dataset_source = dataset
+        if not dataset_destination:
+            dataset_destination = dataset
         self.machine = machine.lower()
         self.level = level
         self.level_source = level_source

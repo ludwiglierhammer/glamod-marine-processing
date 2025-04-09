@@ -76,14 +76,8 @@ logging.basicConfig(
     datefmt="%Y%m%d %H:%M:%S",
     filename=None,
 )
-args = []
-if len(sys.argv) > 1:
-    logging.info("Reading command line arguments")
-    args = sys.argv
-else:
-    logging.error("Need arguments to run!")
 
-params = script_setup([], args)
+params = script_setup([], sys.argv)
 
 # These to build the brace expansions for the out of release periods
 left_min_period = 1600

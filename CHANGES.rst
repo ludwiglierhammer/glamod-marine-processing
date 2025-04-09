@@ -3,6 +3,26 @@
 Changelog
 =========
 
+v7.2.0 (unreleased)
+-------------------
+Contributors to this version: Ludwig Lierhammer (:user:`ludwiglierhammer`)
+
+New features and enhancements
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+* ``obs_suite``: add new level3 for extracting pressure data and merging ``header`` and ``observations-slp`` tables into one single CDM-OBS-CORE table (:pull:`75`)
+* ``obs_suite``: add ICOADS_R3.0.0T configuration files for release_7.0 (:pull:`75`)
+
+Internal changes
+^^^^^^^^^^^^^^^^
+* ``obs_suite``: update ICOADS_R3.0.0T release_4.0 time period list (:pull:`73`)
+* ``obs_suite``: combine loops over decks in ``level_slurm.py`` and ``config_array.py`` to one single loop (:issue:`74`, :pull:`79`)
+* ``obs_suie``: name log files according to the date of the source files instead of simply numbering them consecutively (:issue:`74`, :pull:`79`)
+* ``obs_suite``: standardize level scripts (:pull:`79`)
+
+Breaking changes
+^^^^^^^^^^^^^^^^
+* ``obs_suite``: rename level3 output from <YYYY>-<MM>-<RELEASE>-<UPDATE>-pressure_data.psv to pressure-data-<YYYY>-<MM>-<RELEASE>-<UPDATE>.psv (:pull:`79`)
+
 v7.1.0 (2024-11-25)
 -------------------
 Contributors to this version: Ludwig Lierhammer (:user:`ludwiglierhammer`)
@@ -17,7 +37,7 @@ Announcements
 * final GLAMOD marine processing data release 7.0 version (:pull:`63`)
 
 New features and enhancements
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 * ``obs_suite``: add quality checks for both Wind speed and wind direction in level1e script (:issue:`20`, :pull:`22`)
 * ``pre_proc``: add pre-processing for ICOADS data (:pull:`24`)
 * ``post_proc``: add post processing for C-RAID level1a data (:pull:`26`)

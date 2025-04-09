@@ -7,6 +7,7 @@ level_source = {
     "level1d": "level1c",
     "level1e": "level1d",
     "level2": "level1e",
+    "level3": "level2",
 }
 
 source_pattern = {
@@ -19,6 +20,7 @@ source_pattern = {
     "level1d": "header-????-??-*.psv",
     "level1e": "header-????-??-*.psv",
     "level2": "header-????-??-*.psv",
+    "level3": "header-????-??-*.psv",
 }
 
 one_task = ["level2"]

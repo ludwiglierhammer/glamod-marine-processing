@@ -128,9 +128,15 @@ from importlib import reload
 
 import numpy as np
 import pandas as pd
-import simplejson
 from _qc import wind_qc
-from _utilities import FFS, date_handler, paths_exist, script_setup, table_to_csv
+from _utilities import (
+    date_handler,
+    paths_exist,
+    read_cdm_tables,
+    save_quicklook,
+    script_setup,
+    table_to_csv,
+)
 from cdm_reader_mapper import cdm_mapper as cdm
 
 reload(logging)  # This is to override potential previous config of logging
@@ -218,25 +224,23 @@ def compare_quality_checks(df):
 
 
 # This is to apply the qc flags and write out flagged tables
-def process_table(table_df, table_name, pass_time=None):
+def process_table(table_df, table, pass_time=None):
     """Process table."""
     if pass_time is None:
         pass_time = "2"
     not_checked_report = "2"
     not_checked_location = "3"
     not_checked_param = "2"
-    logging.info(f"Processing table {table_name}")
+    logging.info(f"Processing table {table}")
 
     if isinstance(table_df, str):
         # Assume 'header' and in a DF in table_df otherwise
         # Open table and reindex
         table_df = pd.DataFrame()
-        table_df = cdm.read_tables(
-            params.prev_level_path, params.prev_fileID, cdm_subset=[table_name]
-        )
+        table_df = read_cdm_tables(params, table)
 
         if table_df is None or len(table_df) == 0:
-            logging.warning(f"Empty or non existing table {table_name}")
+            logging.warning(f"Empty or non existing table {table}")
             return
         table_df.set_index("report_id", inplace=True, drop=False)
 
@@ -244,36 +248,36 @@ def process_table(table_df, table_name, pass_time=None):
     table_df = table_df[table_df["report_id"].isin(report_ids)]
     total = len(table_df)
     removed = previous - total
-    qc_dict[table_name] = {
+    ql_dict[table] = {
         "total": total,
         "deleted": removed,
     }
     if table_df.empty:
-        logging.warning(f"Empty table {table_name}.")
+        logging.warning(f"Empty table {table}.")
         return
 
     if flag:
-        qc = table_qc.get(table_name).get("qc")
-        element = table_qc.get(table_name).get("element")
+        qc = table_qc.get(table).get("qc")
+        element = table_qc.get(table).get("element")
         qc_table = qc_df[[qc]]
         qc_table = qc_table.rename({qc: element}, axis=1)
         table_df.update(qc_table)
 
         updated_locs = qc_table.loc[qc_table.notna().all(axis=1)].index
 
-        if table_name != "header":
-            qc_dict[table_name]["quality_flag"] = (
+        if table != "header":
+            ql_dict[table]["quality_flag"] = (
                 table_df[element].value_counts(dropna=False).to_dict()
             )
 
-        if table_name == "header":
+        if table == "header":
             table_df.update(qc_df["report_quality"])
             history_add = f";{history_tstmp}. {params.history_explain}"
             table_df["report_time_quality"] = pass_time
-            qc_dict[table_name]["location_quality_flag"] = (
+            ql_dict[table]["location_quality_flag"] = (
                 table_df["location_quality"].value_counts(dropna=False).to_dict()
             )
-            qc_dict[table_name]["report_quality_flag"] = (
+            ql_dict[table]["report_quality_flag"] = (
                 table_df["report_quality"].value_counts(dropna=False).to_dict()
             )
             table_df["history"].loc[updated_locs] = (
@@ -284,25 +288,20 @@ def process_table(table_df, table_name, pass_time=None):
     # Test new things with 090-221. See 1984-03.
     # What happens if not POS flags matching?
     else:
-        if table_name != "header":
+        if table != "header":
             table_df["quality_flag"] = not_checked_param
         else:
             table_df["report_time_quality"] = pass_time
             table_df["report_quality"] = not_checked_report
             table_df["location_quality"] = not_checked_location
 
-    if table_name != "header":
+    if table != "header":
         table_df["quality_flag"] = compare_quality_checks(table_df["quality_flag"])
 
-    if table_name == "header":
+    if table == "header":
         table_df["report_quality"] = compare_quality_checks(table_df["report_quality"])
 
-    cdm_columns = cdm_tables.get(table_name).keys()
-    odata_filename = os.path.join(
-        params.level_path, FFS.join([table_name, params.fileID]) + ".psv"
-    )
-
-    table_to_csv(table_df, odata_filename, columns=cdm_columns)
+    table_to_csv(params, table_df, table=table)
 
 
 # ------------------------------------------------------------------------------
@@ -368,12 +367,6 @@ logging.basicConfig(
     datefmt="%Y%m%d %H:%M:%S",
     filename=None,
 )
-if len(sys.argv) > 1:
-    logging.info("Reading command line arguments")
-    args = sys.argv
-else:
-    logging.error("Need arguments to run!")
-    sys.exit(1)
 
 process_options = [
     "history_explain",
@@ -381,7 +374,7 @@ process_options = [
     "qc_last_date_avail",
     "no_qc_suite",
 ]
-params = script_setup(process_options, args)
+params = script_setup(process_options, sys.argv)
 
 if params.year_init:
     setattr(params, "qc_first_date_avail", f"{params.year_init}-01")
@@ -463,7 +456,7 @@ report_ids = report_ids[report_ids.duplicated()]
 
 # DO THE DATA PROCESSING ------------------------------------------------------
 header_df.set_index("report_id", inplace=True, drop=False)
-qc_dict = {}
+ql_dict = {}
 
 # 1. PROCESS QC FLAGS ---------------------------------------------------------
 # GET THE QC FILES WE NEED FOR THE CURRENT SET OF CDM TABLES
@@ -528,28 +521,9 @@ table_ws = cdm.read_tables(
 
 windQC = wind_qc(table_wd=table_wd, table_ws=table_ws)
 
-odata_filename_wd = os.path.join(
-    params.level_path, FFS.join(["observations-wd", params.fileID]) + ".psv"
-)
-cdm_columns = cdm_tables.get("observations-wd").keys()
-table_to_csv(windQC.wind_direction, odata_filename_wd, columns=cdm_columns)
-
-odata_filename_ws = os.path.join(
-    params.level_path, FFS.join(["observations-ws", params.fileID]) + ".psv"
-)
-cdm_columns = cdm_tables.get("observations-ws").keys()
-table_to_csv(windQC.wind_speed, odata_filename_ws, columns=cdm_columns)
+table_to_csv(params, windQC.wind_direction, table="observations-wd")
+table_to_csv(params, windQC.wind_speed, table="observations-ws")
 
 # CHECKOUT --------------------------------------------------------------------
-qc_dict["date processed"] = datetime.datetime.now()
-
 logging.info("Saving json quicklook")
-level_io_filename = os.path.join(params.level_ql_path, params.fileID + ".json")
-with open(level_io_filename, "w") as fileObj:
-    simplejson.dump(
-        {"-".join([params.year, params.month]): qc_dict},
-        fileObj,
-        default=date_handler,
-        indent=4,
-        ignore_nan=True,
-    )
+save_quicklook(params, ql_dict, date_handler)
