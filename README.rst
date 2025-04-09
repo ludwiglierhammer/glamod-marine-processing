@@ -38,9 +38,6 @@ Now you can install several dependency versions:
 .. code-block:: console
 
     pip install -e .           # Install minimum dependency version
-    pip install -e .[qc]       # Install optional dependencies for the quality control workflow
-    pip install -e .[obs]      # Install optional dependencies for the observations workflow
-    pip install -e .[complete]  # Install all the above for complete dependency version
 
 This will install the package but you can still edit it and you don't need the package in your :code:`PYTHONPATH`.
 
@@ -95,8 +92,8 @@ This package was created with Cookiecutter_ and the `audreyfeldroy/cookiecutter-
 
 .. _GNU parallel: https://doi.org/10.5281/zenodo.12789352
 
-.. |build| image:: https://github.com/glamod/glamod-marine-processing/actions/workflows/ci.yml/badge.svg
-        :target: https://github.com/glamod/glamod-marine-processing/actions/workflows/ci.yml
+.. |build| image:: https://github.com/glamod/glamod-marine-processing/actions/workflows/testing_suite.yml/badge.svg
+        :target: https://github.com/glamod/glamod-marine-processing/actions/workflows/testing_suite.yml
         :alt: Build Status
 
 .. |black| image:: https://img.shields.io/badge/code%20style-black-000000.svg
