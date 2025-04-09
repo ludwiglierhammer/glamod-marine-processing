@@ -124,7 +124,11 @@ isChange = "1"
 dupNotEval = "4"
 
 # 1. Do it a table at a time....
-history_tstmp = datetime.datetime.now(datetime.UTC).strftime("%Y-%m-%d %H:%M:%S")
+try:
+    history_tstmp = datetime.datetime.now(datetime.UTC).strftime("%Y-%m-%d %H:%M:%S")
+except AttributeError:  # for python < 3.11
+    history_tstmp = datetime.datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S")
+
 for table in properties.cdm_tables:
     datetime_col = (
         ("header", "report_timestamp") if table == "header" else (table, "date_time")

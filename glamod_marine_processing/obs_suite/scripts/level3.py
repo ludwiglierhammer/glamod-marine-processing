@@ -64,11 +64,14 @@ params = script_setup([], sys.argv)
 
 # DO THE DATA SELECTION -------------------------------------------------------
 # -----------------------------------------------------------------------------
+try:
+    history_tstmp = datetime.datetime.now(datetime.UTC).strftime("%Y-%m-%d %H:%M:%S")
+except AttributeError:  # for python < 3.11
+    history_tstmp = datetime.datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S")
+
 obs_table = "observations-slp"
 header_table = "header"
 cdm_tables = [header_table, obs_table]
-
-history_tstmp = datetime.datetime.now(datetime.UTC).strftime("%Y-%m-%d %H:%M:%S")
 
 table_df = read_cdm_tables(params, cdm_tables)
 

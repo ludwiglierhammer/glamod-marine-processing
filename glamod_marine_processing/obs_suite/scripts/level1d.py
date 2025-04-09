@@ -205,7 +205,11 @@ ql_dict = {}
 
 # DO THE DATA PROCESSING ------------------------------------------------------
 # -----------------------------------------------------------------------------
-history_tstmp = datetime.datetime.now(datetime.UTC).strftime("%Y-%m-%d %H:%M:%S")
+try:
+    history_tstmp = datetime.datetime.now(datetime.UTC).strftime("%Y-%m-%d %H:%M:%S")
+except AttributeError:  # for python < 3.11
+    history_tstmp = datetime.datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S")
+
 cdm_atts = get_cdm_atts()
 obs_tables = [x for x in cdm_atts.keys() if x != "header"]
 
