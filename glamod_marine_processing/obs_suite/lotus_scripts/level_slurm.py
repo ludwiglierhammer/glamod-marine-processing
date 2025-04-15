@@ -247,7 +247,6 @@ for sid_dck in process_list:
             ti = t
 
     calc_tasks = False
-    print(source_files)
     with open(taskfarm_file, "w") as fh:
         for source_file in source_files:
             yyyy, mm = get_yyyymm(source_file)
