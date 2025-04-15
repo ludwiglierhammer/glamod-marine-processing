@@ -44,11 +44,11 @@ prev_level = {
 
 level_input = {
     "level1a": "datasets",
-    "level1b": "release_7.0",
-    "level1c": "release_7.0",
-    "level1d": "release_7.0",
-    "level1e": "release_7.0",
-    "level2": "release_7.0",
+    "level1b": "release_8.0",
+    "level1c": "release_8.0",
+    "level1d": "release_8.0",
+    "level1e": "release_8.0",
+    "level2": "release_8.0",
 }
 
 which_tables = {
