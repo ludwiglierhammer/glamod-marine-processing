@@ -17,7 +17,7 @@ New features and enhancements
 * ``obs_suite``: add ICOADS_R3.0.0T configuration files for release_7.0 (:pull:`75`)
 * add environment.yml file (:pull:`76`)
 * add dummy observation configuration files for release_8.0 (:issue:`113`, :pull:`102`)
-* make this tool running with `cdm_reader_mapper` >= 2.1.0 (:issue:`113`, :pull:`102`) 
+* make this tool running with `cdm_reader_mapper` >= 2.1.0 (:issue:`113`, :pull:`102`)
 
 CI changes
 ^^^^^^^^^^
