@@ -43,6 +43,7 @@ prev_level = {
     "level1d": "level1c",
     "level1e": "level1d",
     "level2": "level1e",
+    "level3": "level2"
 }
 
 level_input = {
@@ -52,6 +53,7 @@ level_input = {
     "level1d": release,
     "level1e": release,
     "level2": release,
+    "level3": release
 }
 
 which_tables = {
@@ -61,6 +63,7 @@ which_tables = {
     "level1d": table_names_next,
     "level1e": table_names_next,
     "level2": table_names_next,
+    "level3": table_names_next
 }
 
 pattern = {
@@ -70,6 +73,7 @@ pattern = {
     "level1d": "header-icoads_r???_d???_????-??-??_subset.psv",
     "level1e": "header-icoads_r???_d???_????-??-??_subset.psv",
     "level2": "header-icoads_r???_d???_????-??-??_subset.psv",
+    "level3": "header-icoads_r???_d???_????-??-??_subset.psv"
 }
 
 pattern_out = {}
