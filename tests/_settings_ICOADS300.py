@@ -76,4 +76,4 @@ pattern_out = {}
 
 manipulation = {}
 
-drops = {} 
+drops = {}
