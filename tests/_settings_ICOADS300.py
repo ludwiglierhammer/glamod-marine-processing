@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+import numpy as np
+
 data_model = "icoads"
 release = "r300"
 deck = "d706"
@@ -7,6 +9,7 @@ input_dir = f"{data_model}/{release}/{deck}"
 cdm = f"icoads_{release}_{deck}_1919-03-01_subset"
 suffix = "imma"
 level0 = f"{input_dir}/input/{cdm}.{suffix}"
+release = "release_8.0"
 
 process_list = "084-706"
 year_init = "1919"
@@ -44,11 +47,11 @@ prev_level = {
 
 level_input = {
     "level1a": "datasets",
-    "level1b": "release_8.0",
-    "level1c": "release_8.0",
-    "level1d": "release_8.0",
-    "level1e": "release_8.0",
-    "level2": "release_8.0",
+    "level1b": release,
+    "level1c": release,
+    "level1d": release,
+    "level1e": release,
+    "level2": release,
 }
 
 which_tables = {
@@ -68,3 +71,9 @@ pattern = {
     "level1e": "header-icoads_r???_d???_????-??-??_subset.psv",
     "level2": "header-icoads_r???_d???_????-??-??_subset.psv",
 }
+
+pattern_out = {}
+
+manipulation = {}
+
+drops = {} 
