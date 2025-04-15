@@ -9,7 +9,8 @@
     "read_sections": [
       "core",
       "c1",
-      "c98"
+      "c98",
+      "c99_data"
     ],
     "filter_reports_by": {
       "c1.PT": [
