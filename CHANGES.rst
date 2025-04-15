@@ -3,7 +3,7 @@
 Changelog
 =========
 
-v7.2.0 (unreleased)
+v8.0.0 (unreleased)
 -------------------
 Contributors to this version: Ludwig Lierhammer (:user:`ludwiglierhammer`)
 
@@ -16,6 +16,8 @@ New features and enhancements
 * ``obs_suite``: add new level3 for extracting pressure data and merging ``header`` and ``observations-slp`` tables into one single CDM-OBS-CORE table (:pull:`75`)
 * ``obs_suite``: add ICOADS_R3.0.0T configuration files for release_7.0 (:pull:`75`)
 * add environment.yml file (:pull:`76`)
+* add dummy observation configuration files for release_8.0 (:issue:`113`, :pull:`102`)
+* make this tool running with `cdm_reader_mapper` >= 2.1.0 (:issue:`113`, :pull:`102`)
 
 CI changes
 ^^^^^^^^^^
@@ -33,6 +35,7 @@ Internal changes
 Breaking changes
 ^^^^^^^^^^^^^^^^
 * ``obs_suite``: rename level3 output from <YYYY>-<MM>-<RELEASE>-<UPDATE>-pressure_data.psv to pressure-data-<YYYY>-<MM>-<RELEASE>-<UPDATE>.psv (:pull:`79`)
+* command-line interface: set default release from "release_7.0" to "release_8.0" (:issue:`113`, :pull:`102`)
 
 v7.1.0 (2024-11-25)
 -------------------
