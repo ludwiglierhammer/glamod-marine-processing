@@ -1,10 +1,6 @@
 from __future__ import annotations
 
-import _load_data
-import pytest
-from _settings import get_settings
-from cdm_reader_mapper import read_tables
-from cdm_reader_mapper.common.getting_files import load_file
+import pytest  # noqa
 
 from glamod_marine_processing.qc_suite.modules.next_level_qc import (
     do_base_dpt_qc,
@@ -97,10 +93,10 @@ def test_do_base_sst_qc():
 
 
 def test_do_base_wind_qc():
-    result = do_base_mat_qc(inputs)
+    result = do_base_wind_qc(inputs)
     assert result == expected_value
 
 
 def test_do_kate_mat_qc():
-    result = do_base_mat_qc(inputs)
+    result = do_kate_mat_qc(inputs)
     assert result == expected_value
