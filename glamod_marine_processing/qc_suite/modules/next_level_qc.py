@@ -1,3 +1,5 @@
+"""Module containing main QC functions which could be applied on a DataBundle."""
+
 from __future__ import annotations
 
 from . import qc
@@ -15,7 +17,7 @@ def is_buoy(pt):
     # Do we need this function?
     # Where/Why do we need "isbuoy" and "isdrifter"?
     # I think this function should return a boolean value, isn't it?
-    # I think we should use the CDM platfrom table?
+    # I think we should use the CDM platform table?
     # https://glamod.github.io/cdm-obs-documentation/tables/code_tables/platform_type/platform_type.html
     if pt in [6, 7]:
         self.set_qc("POS", "isbuoy", 1)
@@ -35,7 +37,7 @@ def is_ship(pt):
     """
     # Do we need this function?
     # I think this function should return a boolean value, isn't it?
-    # I think we should use the CDM platfrom table?
+    # I think we should use the CDM platform table?
     # https://glamod.github.io/cdm-obs-documentation/tables/code_tables/platform_type/platform_type.html
     if pt in [0, 1, 2, 3, 4, 5, 10, 11, 12, 17]:
         self.set_qc("POS", "isship", 1)
@@ -219,11 +221,29 @@ def do_base_dpt_qc(dpt, parameters):
     )
 
 
+def do_base_slp_qc(self, parameters):
+    """Run the base SLP QC checks, non-missing, climatology check and check for normal."""
+    # I think this should return a boolean value, isn't it?
+    assert "maximum_anomaly" in parameters
+    self.set_qc("SLP", "noval", qc.value_check(self.getvar("SLP")))
+    self.set_qc(
+        "SLP",
+        "clim",
+        qc.climatology_plus_stdev_with_lowbar(
+            self.getvar("SLP"),
+            self.getnorm("SLP"),
+            self.getnorm("SLP", "stdev"),
+            parameters["maximum_standardised_anomaly"],
+            parameters["lowbar"],
+        ),
+    )
+    #        self.set_qc('SLP', 'clim', qc.climatology_check(self.getvar('SLP'), self.getnorm('SLP'),
+    #                                                        parameters['maximum_anomaly']))
+    self.set_qc("SLP", "nonorm", qc.no_normal_check(self.getnorm("SLP")))
+
+
 def do_base_sst_qc(sst, parameters):
-    """
-    Run the base SST QC checks, non-missing, above freezing, climatology check
-    and check for normal
-    """
+    """Run the base SST QC checks, non-missing, above freezing, climatology check and check for normal."""
     # I think this should return a boolean value, isn't it?
     assert "freezing_point" in parameters
     assert "freeze_check_n_sigma" in parameters
@@ -302,12 +322,10 @@ def do_kate_mat_qc(at, parameters):
 
 
 def perform_base_qc(pt, latitude, longitude, timestamp, parameters):
-    """
-    Run all the base QC checks on the header file (CDM).
-    """
+    """Run all the base QC checks on the header file (CDM)."""
     # If one of those checks is missing we break. Is this reasonable to you?
 
-    # self.do_fix_missing_hour()  # this should already be fixed wihle mapping to the CDM
+    # self.do_fix_missing_hour()  # this should already be fixed while mapping to the CDM
 
     if is_buoy(pt):
         return "2"  # not checked, since we have no QC for buoys?
@@ -334,14 +352,13 @@ def perform_base_qc(pt, latitude, longitude, timestamp, parameters):
 
     is_day = do_day_check(
         parameters["base"]["time_since_sun_above_horizon"]
-    )  # maybe we need this variable afterwards
+    )  # do we need this variable afterwards ?
 
 
 def perform_obs_qc(
     at=None, dpt=None, slp=None, sst=None, wbt=None, wd=None, ws=None, parameters={}
 ):
     """Run all the base QC checks on the obsevation files (CDM)."""
-
     humidity_blacklist()
     mat_blacklist()
     wind_blacklist()
@@ -361,6 +378,12 @@ def perform_obs_qc(
 
     if sst is not None:
         return do_base_sst_qc(sst, parameters)
+
+    if wbt is not None:
+        return "3"  # not checked
+
+    if wd is not None:
+        return "3"  # not checked
 
     if ws is not None:  # I think "W" is "WS" in the CDM.
         return do_base_wind_qc(ws, parameters)
