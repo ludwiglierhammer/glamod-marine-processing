@@ -1991,7 +1991,7 @@ def year_month_gen(year1, month1, year2, month2):
     yield year, month
 
 
-def get_month_lengths(year):
+def get_month_lengths(year: int) -> list:
     """
     Return a list holding the lengths of the months in a given year
 

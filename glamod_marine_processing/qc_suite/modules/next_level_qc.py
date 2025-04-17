@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+import math
+
 from . import qc
 
 # This should be the raw structure.
@@ -7,170 +9,506 @@ from . import qc
 # I hop I did not forget anything.
 
 
-def is_buoy(pt):
+def is_buoy(platform_type: int) -> int:
     """
-    Identify whether report is from a moored or drifting buoy based
-    on ICOADS platform type PT. Set additional flag to pick out drifters only
+    Identify whether report is from a moored or drifting buoy based on ICOADS platform type PT.
+
+    Parameters
+    ----------
+    platform_type : int
+        Platform type
+
+    Returns
+    -------
+    int
+        Return 1 if observation is from a drifting or moored buoy and 0 otherwise
     """
     # Do we need this function?
     # Where/Why do we need "isbuoy" and "isdrifter"?
     # I think this function should return a boolean value, isn't it?
     # I think we should use the CDM platfrom table?
     # https://glamod.github.io/cdm-obs-documentation/tables/code_tables/platform_type/platform_type.html
-    if pt in [6, 7]:
-        self.set_qc("POS", "isbuoy", 1)
+    if platform_type in [6, 7]:
+        return 1
     else:
-        self.set_qc("POS", "isbuoy", 0)
-
-    if pt == 7:
-        self.set_qc("POS", "isdrifter", 1)
-    else:
-        self.set_qc("POS", "isdrifter", 0)
+        return 0
 
 
-def is_ship(pt):
+def is_drifter(platform_type: int) -> int:
     """
-    Identify whether report is from a ship based
-    on ICOADS platform type PT
+    Identify whether report is from a drifting buoy based on ICOADS platform type PT.
+    trackqc is only applied to drifting buoys. Used to filter drifting buoys.
+
+    Parameters
+    ----------
+    platform_type : int
+        Platform type
+
+    Returns
+    -------
+    int
+        Return 1 if observation is from a drifting buoy and 0 otherwise
+    """
+    if platform_type == 7:
+        return 1
+    else:
+        return 0
+
+
+def is_ship(platform_type: int) -> int:
+    """
+    Identify whether report is from a ship based on ICOADS platform type PT.
+    Marien Air Temperature QC only performed on reports from ships. Used to filter ships.
+
+    Parameters
+    ----------
+    platform_type : int
+        Platform type
+
+    Returns
+    -------
+    int
+        Return 1 if observation is from a ship and 0 otherwise
     """
     # Do we need this function?
     # I think this function should return a boolean value, isn't it?
     # I think we should use the CDM platfrom table?
     # https://glamod.github.io/cdm-obs-documentation/tables/code_tables/platform_type/platform_type.html
-    if pt in [0, 1, 2, 3, 4, 5, 10, 11, 12, 17]:
-        self.set_qc("POS", "isship", 1)
+    if platform_type in [0, 1, 2, 3, 4, 5, 10, 11, 12, 17]:
+        return 1
     else:
-        self.set_qc("POS", "isship", 0)
+        return 0
 
 
-def is_deck_780():
-    """Identify obs that are from ICOADS Deck 780 which consists of obs from WOD."""
+def is_deck_780(dck: int) -> int:
+    """
+    Identify obs that are from ICOADS Deck 780 which consists of obs from WOD.
+    Observations from deck 780 are not used so they are not included in QC.
+
+    Parameters
+    ----------
+    dck : int
+        Deck of observation
+
+    Returns
+    -------
+    int
+        return 1 if observation is in deck 780 and 0 otherwise
+    """
     # Do we need this function?
     # Where/Why do we need "is780"?
     # I think this function should return a boolean value, isn't it?
     # We do not have this information explicitly in the CDM.
-    if self.getvar("DCK") == 780:
-        self.set_qc("POS", "is780", 1)
+    if dck == 780:
+        return 1
     else:
-        self.set_qc("POS", "is780", 0)
+        return 0
 
 
-def do_position_check(latitude, longitude):
-    """Perform the positional QC check on the report."""
-    # I think this function should return a boolean value, isn't it?
-    # maybe return qc.position_check(latitude, longitude)
-    self.set_qc("POS", "pos", qc.position_check(latitude, longitude))
+def do_position_check(latitude: float, longitude: float) -> int:
+    """
+    Perform the positional QC check on the report. Simple check to make sure that the latitude and longitude are
+    within the bounds specified by the ICOADS documentation. Latitude is between -90 and 90. Longitude is between
+    -180 and 360
+
+    Parameters
+    ----------
+    latitude : float
+        latitude of observation to be checked in degrees
+    longitude : float
+        longitude of observation to be checked in degree
+
+    Returns
+    -------
+    int
+        1 if either latitude or longitude is invalid, 0 otherwise
+
+    Raises
+    ------
+    ValueError
+        When latitude or longitude is None or non-finite
+    """
+    if latitude is None or math.isnan(latitude):
+        raise ValueError("Latitude is None or non-finite")
+    if longitude is None or math.isnan(longitude):
+        raise ValueError("Longitude is None or non-finite")
+
+    result = 0
+    if latitude < -90 or latitude > 90:
+        result = 1
+    if longitude < -180 or longitude > 360:
+        result = 1
+
+    return result
 
 
-def do_date_check(year, month, day):
-    """Perform the date QC check on the report."""
+
+def do_date_check(year: int, month: int, day: int) -> int:
+    """
+    Perform the date QC check on the report. Check that the date is valid.
+
+    Parameters
+    ----------
+    year : int
+        Year of observation to be checked
+    month : int
+        Month of observation (1-12) to be checked
+    day : int
+        Day of observation to be checked
+
+    Returns
+    -------
+    int
+        1 if the date is invalid, 0 otherwise
+
+    Raises
+    ------
+    ValueError
+        when Year or Month is set to None
+    """
     # Do we need this function?
     # I think this function should return a boolean value, isn't it?
     # maybe return qc.date_check(latitude, longitude)
     # This should already be done while mapping to the CDM.
-    self.set_qc(
-        "POS",
-        "date",
-        qc.date_check(year, month, day),
-    )
+    if year is None:
+        raise ValueError("Year is set to None")
+    if month is None:
+        raise ValueError("Month is set to None")
+
+    result = 0
+
+    if year > 2024 or year < 1850:
+        result = 1
+
+    if month < 1 or month > 12:
+        result = 1
+
+    month_lengths = qc.get_month_lengths(year)
+
+    if day is None:
+        result = 1
+    else:
+        if day < 1 or day > month_lengths[month - 1]:
+            result = 1
+
+    return result
 
 
-def do_time_check(hour):
-    """Perform the time QC check on the report."""
-    # See do_date_check
-    self.set_qc("POS", "time", qc.time_check(hour))
+def do_time_check(hour: float):
+    """
+    Check that the time is valid i.e. in the range 0.0 to 23.99999...
+
+    Parameters
+    ----------
+    hour : float
+        hour of the time to be checked
+
+    Returns
+    -------
+    int
+        Return 1 if hour is invalid, 0 otherwise
+    """
+    result = 0
+
+    if hour is not None and (hour >= 24 or hour < 0):
+        result = 1
+
+    if hour is None:
+        result = 1
+
+    return result
 
 
-def do_blacklist():
-    """Do basic blacklisting on the report."""
-    # Why is this needed?
-    self.set_qc(
-        "POS",
-        "blklst",
-        qc.blacklist(
-            self.getvar("ID"),
-            self.getvar("DCK"),
-            self.getvar("YR"),
-            self.getvar("MO"),
-            self.lat(),
-            self.lon(),
-            self.getvar("PT"),
-        ),
-    )
 
+def do_blacklist(id: str, deck: int, year: int, month: int,
+                 latitude: float, longitude: float, platform_type: int) -> int:
+    """
+    Do basic blacklisting on the report. The blacklist is used to remove data that are known to be bad
+    and shouldn't be passed to the QC.
 
-def do_day_check(time_since_sun_above_horizon):
-    """Set the day/night flag on the report."""
+    If the report is from Deck 732, compares the observations year and location to a table of pre-identified
+    regions in which Deck 732 observations are known to be dubious - see Rayner et al. 2006 and Kennedy et al.
+    2011b. Observations at 0 degrees latitude 0 degrees longitude are blacklisted as this is a common error.
+    C-MAN stations with platform type 13 are blacklisted. SEAS data from deck 874 are unreliable (SSTs were
+    often in excess of 50degC) and so the whole deck was removed from processing.
+
+    Parameters
+    ----------
+    id : str
+        ID of the report
+    deck : int
+        Deck of the report
+    year : int
+        Year of the report
+    month : int
+        Month of the report (1-12)
+    latitude: float
+        Latitude of the report
+    longitude : float
+        Longitude of the report
+    platform_type : int
+        Platform type of report
+
+    Returns
+    -------
+    int
+        1 if the report is blacklisted, 0 otherwise
+    """
+    """"""
+
+    # Fold longitudes into ICOADS range
+    if longitude > 180.0:
+        longitude -= 360
+
+    result = 0
+
+    if latitude == 0.0 and longitude == 0.0:
+        result = 1  # blacklist all obs at 0,0 as this is a common error.
+
+    if platform_type is not None and platform_type == 13:
+        result = 1  # C-MAN data - we do not want coastal stations
+
+    if id == "SUPERIGORINA":
+        result = 1
+
+    # these are the definitions of the regions which are blacklisted for Deck 732
+    region = {
+        1: [-175, 40, -170, 55],
+        2: [-165, 40, -160, 60],
+        3: [-145, 40, -140, 50],
+        4: [-140, 30, -135, 40],
+        5: [-140, 50, -130, 55],
+        6: [-70, 35, -60, 40],
+        7: [-50, 45, -40, 50],
+        8: [5, 70, 10, 80],
+        9: [0, -10, 10, 0],
+        10: [-30, -25, -25, -20],
+        11: [-60, -50, -55, -45],
+        12: [75, -20, 80, -15],
+        13: [50, -30, 60, -20],
+        14: [30, -40, 40, -30],
+        15: [20, 60, 25, 65],
+        16: [0, -40, 10, -30],
+        17: [-135, 30, -130, 40],
+    }
+
+    # this dictionary contains the regions that are to be excluded for this year
+    year_to_regions = {
+        1958: [1, 2, 3, 4, 5, 6, 14, 15],
+        1959: [1, 2, 3, 4, 5, 6, 14, 15],
+        1960: [1, 2, 3, 5, 6, 9, 14, 15],
+        1961: [1, 2, 3, 5, 6, 14, 15, 16],
+        1962: [1, 2, 3, 5, 12, 13, 14, 15, 16],
+        1963: [1, 2, 3, 5, 6, 12, 13, 14, 15, 16],
+        1964: [1, 2, 3, 5, 6, 12, 13, 14, 16],
+        1965: [1, 2, 6, 10, 12, 13, 14, 15, 16],
+        1966: [1, 2, 6, 9, 14, 15, 16],
+        1967: [1, 2, 5, 6, 9, 14, 15],
+        1968: [1, 2, 3, 5, 6, 9, 14, 15],
+        1969: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 13, 14, 15, 16],
+        1970: [1, 2, 3, 4, 5, 6, 8, 9, 14, 15],
+        1971: [1, 2, 3, 4, 5, 6, 7, 8, 9, 13, 14, 16],
+        1972: [4, 7, 8, 9, 10, 11, 13, 16, 17],
+        1973: [4, 7, 8, 10, 11, 13, 16, 17],
+        1974: [4, 7, 8, 10, 11, 16, 17],
+    }
+
+    if deck == 732:
+        if year in year_to_regions:
+            regions_to_check = year_to_regions[year]
+            for regid in regions_to_check:
+                thisreg = region[regid]
+                if (
+                    thisreg[0] <= longitude <= thisreg[2]
+                    and thisreg[1] <= latitude <= thisreg[3]
+                ):
+                    result = 1
+
+    if deck == 874:
+        result = 1  # SEAS data gets blacklisted
+
+    # For a short period, observations from drifting buoys with these IDs had very erroneous values in the
+    # Tropical Pacific. These were identified offline and added to the blacklist
     if (
-        self.get_qc("POS", "pos") == 0
-        and self.get_qc("POS", "date") == 0
-        and self.get_qc("POS", "time") == 0
+        (year == 2005 and month == 11)
+        or (year == 2005 and month == 12)
+        or (year == 2006 and month == 1)
     ):
-        self.set_qc(
-            "POS",
-            "day",
-            qc.day_test(
-                self.getvar("YR"),
-                self.getvar("MO"),
-                self.getvar("DY"),
-                self.getvar("HR"),
-                self.lat(),
-                self.lon(),
-                time_since_sun_above_horizon,
-            ),
-        )
+        if id in [
+            "53521    ", "53522    ", "53566    ", "53567    ", "53568    ", "53571    ", "53578    ",
+            "53580    ", "53582    ", "53591    ", "53592    ", "53593    ", "53594    ", "53595    ",
+            "53596    ", "53599    ", "53600    ", "53601    ", "53602    ", "53603    ", "53604    ",
+            "53605    ", "53606    ", "53607    ", "53608    ", "53609    ", "53901    ", "53902    ",
+        ]:
+            result = 1
+
+    return result
+
+
+
+def do_day_check(year, month, day, hour, latitude, longitude, time_since_sun_above_horizon):
+    """
+    Given year month day hour lat and long calculate if the sun was above the horizon an hour ago.
+
+    This is the "day" test used to decide whether a Marine Air Temperature (MAT) measurement is
+    a Night MAT (NMAT) or a Day (MAT). This is important because solar heating of the ship biases
+    the MAT measurements. It uses the function sunangle to calculate the elevation of the sun.
+
+    Parameters
+    ----------
+    year : int
+        Year of report
+    month : int
+        Month of report
+    day : int
+        Day of report
+    hour : float
+        Hour of report with minutes as decimal part of hour
+    latitude : float
+        Latitude of report in degrees
+    longitude : float
+        Longitude of report in degrees
+    time_since_sun_above_horizon : float
+        Maximum time sun can have been above horizon (or below) to still count as night. Original QC test had this set
+        to 1.0 i.e. it was night between one hour after sundown and one hour after sunrise.
+
+    Returns
+    -------
+    int
+        Set to 1 if it is day, 0 otherwise.
+    """
+
+    # Defaults to FAIL if the location, date or time are bad
+    if (
+            do_position_check(latitude, longitude) == 1 or
+            do_date_check(year, month, day) == 1 or
+            do_time_check(hour) == 1
+    ):
+        return 1
+
+    if not (1 <= month <= 12):
+        raise ValueError("Month not in range 1-12")
+    if not (1 <= day <= 31):
+        raise ValueError("Day not in range 1-31")
+    if not (0 <= hour <= 24):
+        raise ValueError("Hour not in range 0-24")
+    if not(90 >= latitude >= -90):
+        raise ValueError("Latitude not in range -90 to 90")
+
+    if year is None or month is None or day is None or hour is None:
+        return 0
+
+    year2 = year
+    day2 = qc.dayinyear(year, month, day)
+    hour2 = math.floor(hour)
+    minute2 = (hour - math.floor(hour)) * 60.0
+
+    # go back one hour and test if the sun was above the horizon
+    hour2 = hour2 - time_since_sun_above_horizon
+    if hour2 < 0:
+        hour2 = hour2 + 24.0
+        day2 = day2 - 1
+        if day2 <= 0:
+            year2 = year2 - 1
+            day2 = qc.dayinyear(year2, 12, 31)
+
+    lat2 = latitude
+    lon2 = longitude
+    if latitude == 0:
+        lat2 = 0.0001
+    if longitude == 0:
+        lon2 = 0.0001
+
+    azimuth, elevation, rta, hra, sid, dec = qc.sunangle(
+        year2, day2, hour2, minute2, 0, 0, 0, lat2, lon2
+    )
+    del azimuth
+    del rta
+    del hra
+    del sid
+    del dec
+
+    result = 0
+    if elevation > 0:
+        result = 1
+
+    return result
+
+
+def humidity_blacklist(platform_type: int) -> int:
+    """
+    Flag certain sources as ineligible for humidity QC.
+
+    Parameters
+    ----------
+    platform_type : int
+        Platform type of report
+
+    Returns
+    -------
+    int
+    """
+    if platform_type in [0, 1, 2, 3, 4, 5, 6, 8, 9, 10, 15]:
+        return 0
     else:
-        self.set_qc("POS", "day", 1)
+        return 1
 
 
-def humidity_blacklist(self):
-    """Flag certain sources as ineligible for humidity QC."""
-    self.set_qc("DPT", "hum_blacklist", 0)
-    if self.getvar("PT") in [0, 1, 2, 3, 4, 5, 6, 8, 9, 10, 15]:
-        self.set_qc("DPT", "hum_blacklist", 0)
-    else:
-        self.set_qc("DPT", "hum_blacklist", 1)
-
-
-def mat_blacklist(self):
+def mat_blacklist(platform_type, deck, latitude, longitude, year):
     """
     Flag certain decks, areas and other sources as ineligible for MAT QC.
     These exclusions are based on Kent et al. HadNMAT2 paper and include
     Deck 780 which is oceanographic data and the North Atlantic, Suez,
     Indian Ocean area in the 19th Century.
+
+    https://agupubs.onlinelibrary.wiley.com/doi/full/10.1002/jgrd.50152
     """
-    # See Kent et al. HadNMAT2 QC section
-    self.set_qc("AT", "mat_blacklist", 0)
+    result = 0
 
-    if self.getvar("PT") == 5 and self.getvar("DCK") == 780:
-        self.set_qc("AT", "mat_blacklist", 1)
+    # Observations from ICOADS Deck 780 with platform type 5 (originating from
+    # the World Ocean Database) [Boyer et al., 2009] were found to be erroneous (Z. Ji and S. Worley, personal
+    # communication, 2011) and were excluded from HadNMAT2.
+    if platform_type == 5 and deck == 780:
+        result = 1
 
-    # make sure lons are in range -180 to 180
-    lon = self.lon()
-    lat = self.lat()
     # North Atlantic, Suez and indian ocean to be excluded from MAT processing
+    # See figure 8 from Kent et al.
     if (
-        self.getvar("DCK") == 193
-        and 1880 <= self.getvar("YR") <= 1892
+        deck == 193
+        and 1880 <= year <= 1892
         and (
-            (-80.0 <= lon <= 0.0 and 40.0 <= lat <= 55.0)
-            or (-10.0 <= lon <= 30.0 and 35.0 <= lat <= 45.0)
-            or (15.0 <= lon <= 45.0 and -10.0 <= lat <= 40.0)
-            or (15.0 <= lon <= 95.0 and lat >= -10.0 and lat <= 15.0)
-            or (95.0 <= lon <= 105.0 and -10.0 <= lat <= 5.0)
+            (-80.0 <= longitude <= 0.0 and 40.0 <= latitude <= 55.0)
+            or (-10.0 <= longitude <= 30.0 and 35.0 <= latitude <= 45.0)
+            or (15.0 <= longitude <= 45.0 and -10.0 <= latitude <= 40.0)
+            or (15.0 <= longitude <= 95.0 and latitude >= -10.0 and latitude <= 15.0)
+            or (95.0 <= longitude <= 105.0 and -10.0 <= latitude <= 5.0)
         )
     ):
-        self.set_qc("AT", "mat_blacklist", 1)
+        result = 1
+
+    return result
 
 
-def wind_blacklist(self):
-    """Flag certain sources as ineligible for wind QC. Based on Shawn Smith's list."""
-    self.set_qc("W", "wind_blacklist", 0)
+def wind_blacklist(deck):
+    """
+    Flag certain sources as ineligible for wind QC. Based on Shawn Smith's list.
 
-    if self.getvar("DCK") in [708, 780]:
-        self.set_qc("W", "wind_blacklist", 1)
+    Parameters
+    ----------
+    deck : int
+        Deck of report
 
-    pass
+    Returns
+    -------
+    int
+        Set to 1 if deck is in black list, 0 otherwise
+    """
+    """"""
+    result = 0
+    if deck in [708, 780]:
+        result = 1
+
+    return result
 
 
 def do_base_mat_qc(at, parameters):

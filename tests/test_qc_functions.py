@@ -27,58 +27,173 @@ from glamod_marine_processing.qc_suite.modules.next_level_qc import (
 
 
 def test_is_buoy():
-    result = is_buoy(inputs)
-    assert result == expected_value
-
+    # For all platform types in ICOADS, flag set to 1 only if platform type corresponds to drifting buoy or
+    # drifting buoy
+    for pt in range(0, 47):
+        result = is_buoy(pt)
+        if pt in [6,7]:
+            assert result == 1
+        else:
+            assert result == 0
 
 def test_is_ship():
-    result = is_ship(inputs)
-    assert result == expected_value
+    # For all platform types in ICOADS, flag set to 1 only if platform type corresponds to drifting buoy or
+    # drifting buoy
+    for pt in range(0, 47):
+       result = is_ship(pt)
+       if pt in [0, 1, 2, 3, 4, 5, 10, 11, 12, 17]:
+           assert result == 1
+       else:
+           assert result == 0
 
 
 def test_is_deck_780():
-    result = is_deck_780(inputs)
-    assert result == expected_value
+    result = is_deck_780(780)
+    assert result == 1
 
 
 def test_do_position_check():
-    result = do_position_check(inputs)
-    assert result == expected_value
+    # Test values are [latitude, longitude, expected result of QC test]
+    test_values = [
+        [0.0, 0.0, 0],
+        [91.0, 0.0, 1],
+        [-91.0, 0.0, 1],
+        [0.0, -180.1, 1],
+        [0.0, 360.1, 1]
+    ]
+
+    for test_set in test_values:
+        latitude, longitude, expected = test_set
+        result = do_position_check(latitude, longitude)
+        assert result == expected
+
+    # Make sure that an exception is raised if latitude or longitude is missing
+    with pytest.raises(ValueError):
+        result = do_position_check(None, 0.0)
+    with pytest.raises(ValueError):
+        result = do_position_check(0.0, None)
 
 
 def test_do_date_check():
-    result = do_date_check(inputs)
-    assert result == expected_value
+
+    # Test values are lists of [year, month, day, expected flag]
+    test_values = [
+        [2023, 1, 1, 0], # 1st January 2023 PASS
+        [2023, 2, 29, 1], # 29th February 2023 FAIL
+        [2023, 1, 31, 0], # 31st January 2023 PASS
+        [0, 0, 0, 1], # 0th of 0 0 FAIL
+        [2024, 2, 29, 0], # 29th February 2024 PASS
+        [2000, 2, 29, 0], # 29th February 2000 PASS
+        [1900, 2, 29, 1], # 29th February 1900 FAIL
+        [1899, 3, None, 1] # Missing day FAIL
+    ]
+
+    for test_set in test_values:
+        year, month, day, expected = test_set
+        result = do_date_check(year, month, day)
+        assert result == expected
+
+   # Make sure that an exception is raised if year or month is set to None
+    with pytest.raises(ValueError):
+        result = do_date_check(None, 1,1)
+    with pytest.raises(ValueError):
+        result = do_date_check(1850, None, 1)
 
 
 def test_do_time_check():
-    result = do_time_check(inputs)
-    assert result == expected_value
+
+    test_values = [
+        [-1.0, 1], # no negative hours
+        [0.0, 0],
+        [23.99, 0],
+        [24.0, 1], # 24 hours not allowed
+        [29.2, 1], # nothing over 24 either
+        [6.34451, 0] # check floats
+    ]
+
+    for test_set in test_values:
+        hour, expected = test_set
+        result = do_time_check(hour)
+        assert result == expected
 
 
 def test_do_blacklist():
-    result = do_blacklist(inputs)
-    assert result == expected_value
+
+    test_values = [
+        ['', 980, 1850, 1, 0, 0, 1, 1], # fails lat/lon = 0 zero check
+        ['', 874, 1850, 1, 0, 1, 1, 1], # Deck 874 SEAS fail
+        ['', 732, 1850, 1, 0, 1, 13, 1], # C-MAN station fail
+        ['', 732, 1850, 1, 0, 1, 1, 0], # Deck 732 pass
+        ['', 732, 1958, 1, 45, -172, 1, 1], # Deck 732 fail
+        ['', 732, 1974, 1, -47, -60, 1, 1], # Deck 732 fail
+        ['', 732, 1958, 1, 45, -172 + 360, 1, 1], # Deck 732 with shifted longitude fail
+        ['', 732, 1974, 1, -47, -60 + 360, 1, 1], # Deck 732 with shifted longitude fail
+        ['', 731, 1958, 1, 45, -172, 1, 0], # Same are but not in Deck 732 should pass
+        ['', 731, 1974, 1, -47, -60, 1, 0], # Same are but not in Deck 732 should pass
+        ['', 732, 1957, 1, 45, -172, 1, 0], # Same area but wrong year should pass
+        ['', 732, 1975, 1, -47, -60, 1, 0], # Same area but wrong year should pass
+    ]
+
+    for test_set in test_values:
+        id, deck, year, month, latitude, longitude, platform_type, expected = test_set
+        result = do_blacklist(id, deck, year, month, latitude, longitude, platform_type)
+        assert result == expected
 
 
 def test_do_day_check():
-    result = do_day_check(inputs)
-    assert result == expected_value
+
+    test_values = [
+        [2015, 10, 15, 7.8000, 50.7365, -3.5344, 1.0, 1],  # Known values from direct observation
+        [2018, 9, 25, 11.5000, 50.7365, -3.5344, 1.0, 1],   # Known values from direct observation
+        [2015, 10, 15, 7.5000, 50.7365, -3.5344, 1.0, 0],   # Known values from direct observation
+        [2025, 4, 17, 16.04, 49.160383, 5.383146, 1.0, 1],   # Known values from direct observation
+        [2015, 0, 15, 7.5000, 50.7365, -3.5344, 1.0, 1], # bad month value should trigger fail
+        [2015, 10, 0, 7.5000, 50.7365, -3.5344, 1.0, 1], # bad day value should trigger fail
+        [2015, 10, 15, -7.5000, 50.7365, -3.5344, 1.0, 1] # bad hour value should trigger fail
+    ]
+
+    for test_set in test_values:
+        year, month, day, hour, latitude, longitude, time, expected = test_set
+        result = do_day_check(year, month, day, hour, latitude, longitude, time)
+        assert result == expected
+
 
 
 def test_humidity_blacklist():
-    result = humidity_blacklist(inputs)
-    assert result == expected_value
+
+    for platform_type in range(0,47):
+        result = humidity_blacklist(platform_type)
+        if platform_type in [0, 1, 2, 3, 4, 5, 6, 8, 9, 10, 15]:
+            assert result == 0
+        else:
+            assert result == 1
 
 
 def test_mat_blacklist():
-    result = mat_blacklist(inputs)
-    assert result == expected_value
+
+    test_values = [
+        [5, 780, 0.5, 2.0, 2011, 1],  # Check Deck 780 platform type 5 combination that fails
+        [5, 781, 0.5, 2.0, 2011, 0],  # and variants that should pass
+        [6, 780, 0.5, 2.0, 2011, 0],  # and variants that should pass
+        [1, 193, 45.0, -40.0, 1885, 1],  # In the exclusion zone
+        [1, 193, 25.0, -40.0, 1885, 0],  # Outside the exclusion zone (in space)
+        [1, 193, 45.0, -40.0, 1877, 0],  # Outside the exclusion zone (in time)
+        [1, 193, 45.0, -40.0, 1999, 0],  # Outside the exclusion zone (in time)
+    ]
+
+    for test_set in test_values:
+        platform_type, deck, latitude, longitude, year, expected = test_set
+        result = mat_blacklist(platform_type, deck, latitude, longitude, year)
+        assert result == expected
 
 
 def test_wind_blacklist():
-    result = wind_blacklist(inputs)
-    assert result == expected_value
+    for deck in range(1,1000):
+        result = wind_blacklist(deck)
+        if deck in [708, 780]:
+            assert result == 1
+        else:
+            assert result == 0
 
 
 def test_do_base_mat_qc():
