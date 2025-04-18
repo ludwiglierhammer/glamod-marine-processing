@@ -511,50 +511,213 @@ def wind_blacklist(deck):
     return result
 
 
-def do_base_mat_qc(at, parameters):
-    """Run the base MAT QC checks, non-missing, climatology check and check for normal etc."""
-    # I think this should return a boolean value, isn't it?
-    assert "maximum_anomaly" in parameters
-
-    self.set_qc("AT", "noval", qc.value_check(self.getvar("AT")))
-    self.set_qc(
-        "AT",
-        "clim",
-        qc.climatology_check(
-            self.getvar("AT"), self.getnorm("AT"), parameters["maximum_anomaly"]
-        ),
-    )
-    self.set_qc("AT", "nonorm", qc.no_normal_check(self.getnorm("AT")))
-    self.set_qc(
-        "AT",
-        "hardlimit",
-        qc.hard_limit(self.getvar("AT"), parameters["hard_limits"]),
-    )
-
-
-def do_base_dpt_qc(dpt, parameters):
+def do_air_temperature_missing_value_check(at):
     """
-    Run the base DPT checks, non missing, modified climatology check, check for normal,
-    supersaturation etc.
+    Check that air temperature value exists
+
+    Parameters
+    ----------
+    at : float
+        Air temperature
+
+    Returns
+    -------
+    int
+        1 if value is missing, 0 otherwise
     """
-    # I think this should return a boolean value, isn't it?
-    self.set_qc(
-        "DPT",
-        "clim",
-        qc.climatology_plus_stdev_check(
-            self.getvar("DPT"),
-            self.getnorm("DPT"),
-            self.getnorm("DPT", "stdev"),
-            parameters["minmax_standard_deviation"],
-            parameters["maximum_standardised_anomaly"],
-        ),
+    return qc.value_check(at)
+
+
+def do_air_temperature_anomaly_check(at, at_climatology, parameters):
+    """
+    Check that the air temperature is within the prescribed distance from climatology/
+
+    Parameters
+    ----------
+    at : float
+        Air temperature
+    at_climatology: float
+        Climatological air temperature value
+    parameters : dict
+        Dictionary containing QC parameters. Must contain key "maximum_anomaly"
+
+    Returns
+    -------
+    int
+        1 if air temperature anomaly is outside allowed bounds, 0 otherwise
+
+    Raises
+    ------
+    KeyError
+        When maximum anomaly is not in parameters dictionary
+    """
+    if "maximum_anomaly" not in parameters:
+        raise KeyError('"maximum anomaly" not in parameters dictionary.')
+
+    return qc.climatology_check(at, at_climatology, parameters["maximum_anomaly"])
+
+def do_air_temperature_no_normal_check(at_climatology):
+    """
+    Check that climatological value is present
+
+    Parameters
+    ----------
+    at_climatology : float
+        Air temperature climatology value
+
+    Returns
+    -------
+    int
+        1 if climatology value is missing, 0 otherwise
+    """
+    return qc.no_normal_check(at_climatology)
+
+def do_air_temperature_hard_limit_check(at, parameters):
+    """
+    Check that air temperature is within hard limits specified by parameters["hard_limits"]
+
+    Parameters
+    ----------
+    at : float
+        Air temperature to be checked
+    parameters : dict
+        Dictionary containing QC parameters. Must contain key "hard_limits"
+
+    Returns
+    -------
+    int
+        1 if air temperature is outside of hard limits, 0 otherwise
+
+    Raises
+    ------
+    KeyError
+        When "hard_limits" is not in parameters dictionary
+    """
+    if "hard_limits" not in parameters:
+        raise KeyError('"hard_limits" not in parameters dictionary.')
+    return qc.hard_limit(at, parameters["hard_limits"])
+
+"""
+Replaced the do_base_mat_qc by four separate functions see above 
+"""
+# def do_base_mat_qc(at, parameters):
+#     """Run the base MAT QC checks, non-missing, climatology check and check for normal etc."""
+#     # I think this should return a boolean value, isn't it?
+#     assert "maximum_anomaly" in parameters
+#
+#     self.set_qc("AT", "noval", qc.value_check(self.getvar("AT")))
+#     self.set_qc(
+#         "AT",
+#         "clim",
+#         qc.climatology_check(
+#             self.getvar("AT"), self.getnorm("AT"), parameters["maximum_anomaly"]
+#         ),
+#     )
+#     self.set_qc("AT", "nonorm", qc.no_normal_check(self.getnorm("AT")))
+#     self.set_qc(
+#         "AT",
+#         "hardlimit",
+#         qc.hard_limit(self.getvar("AT"), parameters["hard_limits"]),
+#     )
+
+
+def do_dpt_climatology_plus_stdev_check(dpt, dpt_climatology, dpt_stdev, parameters):
+    if "minmax_standard_deviation" not in parameters:
+        raise KeyError('"minmax_standard_deviation" not in parameters')
+    if "maximum_standardised_anomaly" not in parameters:
+        raise KeyError('"maximum_standardised_anomaly" not in parameters')
+    return qc.climatology_plus_stdev_check(
+        dpt,
+        dpt_climatology,
+        dpt_stdev,
+        parameters["minmax_standard_deviation"],
+        parameters["maximum_standardised_anomaly"]
     )
 
-    self.set_qc("DPT", "noval", qc.value_check(self.getvar("DPT")))
-    self.set_qc("DPT", "nonorm", qc.no_normal_check(self.getnorm("DPT")))
-    self.set_qc(
-        "DPT", "ssat", qc.supersat_check(self.getvar("DPT"), self.getvar("AT2"))
-    )
+def do_dpt_missing_value_check(dpt):
+    """
+    Check that dew point temperature value exists
+
+    Parameters
+    ----------
+    dpt : float
+        Dew point temperature
+
+    Returns
+    -------
+    int
+        1 if value is missing, 0 otherwise
+    """
+    return qc.value_check(dpt)
+
+def do_dpt_no_normal_check(dpt_climatology):
+    """
+    Check that climatological value is present
+
+    Parameters
+    ----------
+    dpt_climatology : float
+        Dew point temperature climatology value
+
+    Returns
+    -------
+    int
+        1 if climatology value is missing, 0 otherwise
+    """
+    return qc.no_normal_check(dpt_climatology)
+
+
+def do_supersaturation_check(dpt, at2):
+    """
+    Perform the super saturation check. Check if a valid dewpoint temperature is greater than a valid air temperature
+
+    Parameters
+    ----------
+    dpt : float
+        Dewpoint temperature
+    at2 : float
+        Air temperature
+
+    Returns
+    -------
+    int
+        Set to 1 if supersaturation is detected, 0 otherwise
+    """
+    result = 0
+    if (dpt is None) | (at2 is None):
+        result = 1
+    elif dpt > at2:
+        result = 1
+
+    return result
+
+
+"""
+Replaced do_base_dpt_qc with four new functions
+"""
+# def do_base_dpt_qc(dpt, parameters):
+#     """
+#     Run the base DPT checks, non missing, modified climatology check, check for normal,
+#     supersaturation etc.
+#     """
+#     # I think this should return a boolean value, isn't it?
+#     self.set_qc(
+#         "DPT",
+#         "clim",
+#         qc.climatology_plus_stdev_check(
+#             self.getvar("DPT"),
+#             self.getnorm("DPT"),
+#             self.getnorm("DPT", "stdev"),
+#             parameters["minmax_standard_deviation"],
+#             parameters["maximum_standardised_anomaly"],
+#         ),
+#     )
+#
+#     self.set_qc("DPT", "noval", qc.value_check(self.getvar("DPT")))
+#     self.set_qc("DPT", "nonorm", qc.no_normal_check(self.getnorm("DPT")))
+#     self.set_qc(
+#         "DPT", "ssat", qc.supersat_check(self.getvar("DPT"), self.getvar("AT2"))
+#     )
 
 
 def do_base_sst_qc(sst, parameters):
