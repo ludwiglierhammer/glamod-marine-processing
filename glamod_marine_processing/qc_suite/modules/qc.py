@@ -9,6 +9,7 @@ from __future__ import annotations
 import calendar
 import math
 from datetime import datetime, timedelta
+from typing import List, Tuple
 
 import numpy as np
 
@@ -16,27 +17,46 @@ import numpy as np
 degrad = np.pi / 180.0
 
 
-def month_match(y1, m1, y2, m2):
-    """Check whether month matches."""
+def month_match(y1: int, m1: int, y2: int, m2: int) -> int:
+    """
+    Check whether two year,month combinations match.
+
+    Parameters
+    ----------
+    y1 : int
+        year of first month
+    m1 : int
+        month of first month
+    y2 : int
+        year of second year
+    m2 : int
+        month of second month
+
+    Returns
+    -------
+    int
+        1 if the two months match, 0 otherwise.
+    """
     if y1 == y2 and m1 == m2:
         return 1
     else:
         return 0
 
 
-def yesterday(year, month, day):
-    """'
+def yesterday(year: int, month: int, day: int) -> (int, int, int):
+    """
     For specified year month and day return the year month and day of the day before.
 
-    :param year: year
-    :param month: month
-    :param day: day
-    :type year: integer
-    :type month: integer
-    :type day: integer
+    Parameters
+    ----------
+    year : int
+    month : int
+    day : int
 
-    :return: tuple of year, month and day, returns None if the input day does not exist (e.g. Feb 30th)
-    :rtype: integer
+    Returns
+    -------
+    int, int, int
+        tuple of year, month and day, returns None if the input day does not exist (e.g. Feb 30th)
     """
     try:
         dt = datetime(year, month, day)
@@ -47,15 +67,18 @@ def yesterday(year, month, day):
         return None, None, None
 
 
-def season(month):
+def season(month: int) -> str:
     """
     Return short season name for given month, None for months like 13 that do not exist
 
-    :param month: month
-    :type month: integer
+    Parameters
+    ----------
+    month : int
 
-    :return: DJF, MAM, JJA, or SON or None if the input month is non-existent (e.g. 13)
-    :rtype: string
+    Returns
+    -------
+    str
+        DJF, MAM, JJA, or SON or None if the input month is non-existent (e.g. 13)
     """
     if month < 0 or month > 12:
         return None
@@ -76,15 +99,19 @@ def season(month):
     return ssnlist[month - 1]
 
 
-def pentad_to_month_day(p):
+def pentad_to_month_day(p: int) -> (int, int):
     """
     Given a pentad number, return the month and day of the first day in the pentad
 
-    :param p: pentad number from 1 to 73
-    :type p: integer
+    Parameters
+    ----------
+    p : int
+        pentad number from 1 to 73
 
-    :return: month and day of the first day of the pentad
-    :rtype: integer
+    Returns
+    -------
+    (int, int)
+         month and day of the first day of the pentad
     """
     assert 0 < p < 74, "p outside allowed range 1-73 " + str(p)
     m = [
@@ -240,20 +267,24 @@ def pentad_to_month_day(p):
     return m[p - 1], d[p - 1]
 
 
-def which_pentad(inmonth, inday):
+def which_pentad(inmonth: int, inday: int) -> int:
     """
     take month and day as inputs and return pentad in range 1-73.
 
-    :param inmonth: month containing the day for which we want to calculate the pentad
-    :param inday: day for the day for which we want to calculate the pentad
-    :type inmonth: integer
-    :type inday: integer
-
-    :return: pentad (5-day period) containing input day, from 1 (1 Jan-5 Jan) to 73 (27-31 Dec)
-    :rtype: integer
-
     The calculation is rather simple. It just loops through the year and adds up days till it reaches
     the day we are interested in. February 29th is treated as though it were March 1st in a regular year.
+
+    Parameters
+    ----------
+    inmonth : int
+        month containing the day for which we want to calculate the pentad
+    inday : int
+        day for the day for which we want to calculate the pentad
+
+    Returns
+    -------
+    int
+        pentad (5-day period) containing input day, from 1 (1 Jan-5 Jan) to 73 (27-31 Dec)
     """
     assert 12 >= inmonth >= 1
     assert 31 >= inday >= 1
@@ -267,24 +298,31 @@ def which_pentad(inmonth, inday):
     return pentad
 
 
-def day_in_year(month, day):
+def day_in_year(month: int, day: int) -> int:
     """
     Find the day number of a particular day from Jan 1st which is 1
     to Dec 31st which is 365.
 
-    :param month: month to be processed
-    :param day: day in the month
-    :type month: integer
-    :type day: integer
+    29 February is treated as 1 March
 
-    :return: day number in year 1-365
-    :rtype: integer
+    Parameters
+    ----------
+    month : int
+        month to be processed
+    day : int
+        day in the month
+
+    Returns
+    -------
+    int
+        day number in year 1-365
     """
-    assert month >= 1
-    assert month <= 12, str(month)
+    if month < 1 or month > 12:
+        raise ValueError("Month not in range 1-12")
     month_lengths = get_month_lengths(2004)
-    assert day >= 1
-    assert day <= month_lengths[month - 1]
+    if day < 1 or day > month_lengths[month-1]:
+        raise ValueError(f"Day not in range 1-{month_lengths[month-1]}")
+
     month_lengths = get_month_lengths(2003)
 
     if month == 1:
@@ -297,31 +335,37 @@ def day_in_year(month, day):
     return dindex
 
 
-def get_hires_sst(lat, lon, month, day, hires_field):
+def get_hires_sst(lat: float, lon: float, month: int, day: int, hires_field) -> float:
     """
     Get a value from a high resolution ie 0.25 degree daily SST field
 
-    :param lat: latitude of point to extract
-    :param lon: longitude of point to extract
-    :param month: month of point to extract
-    :param day: day in month of point to extract
-    :param hires_field: the field from which to extract the point
-    :type lat: float
-    :type lon: float
-    :type month: int
-    :type day: int
-    :type hires_field: numpy array
-    :return: the SST from the field at the specified point
+    Parameters
+    ----------
+    lat : float
+        latitude of point to extract
+    lon : float
+        longitude of point to extract
+    month : int
+        month of point to extract
+    day : int
+        day in month of point to extract
+    hires_field : ndarray(dtype=float, ndim=3)
+        the field from which to extract the point
+
+    Returns
+    -------
+    float
+        the SST from the field at the specified point
     """
-    assert lat >= -90.0
-    assert lat <= 90.0
-    assert lon >= -180.00
-    assert lon <= 360.00
-    assert month >= 1
-    assert month <= 12
+    if lat < -90.0 or lat > 90.0:
+        raise ValueError(f"Latitude {lat} outside range -90 to 90")
+    if lon < -180.0 or lon > 360.0:
+        raise ValueError(f"Longitude {lon} outside range -180 to 360")
+    if month < 1 or month > 12:
+        raise ValueError(f"Month ({month}) outside range 1-12")
     month_lengths = get_month_lengths(2004)
-    assert day >= 1
-    assert day <= month_lengths[month - 1]
+    if day < 1 or day > month_lengths[month - 1]:
+        raise ValueError(f"Day ({day}) outside range 1-{month_lengths[month-1]}")
 
     dindex = day_in_year(month, day) - 1
     yindex = lat_to_yindex(lat, 0.25)
@@ -336,16 +380,36 @@ def get_hires_sst(lat, lon, month, day, hires_field):
 
 
 def get_sst_daily(lat, lon, month, day, sst):
-    """Get SST from pentad climatology interpolated to day."""
-    assert lat >= -90.0
-    assert lat <= 90.0
-    assert lon >= -185.00
-    assert lon <= 365.00
-    assert month >= 1
-    assert month <= 12
+    """
+    Get SST from pentad climatology interpolated to day.
+
+    Parameters
+    ----------
+    lat : float
+        latitude of point to extract
+    lon : float
+        longitude of point to extract
+    month : int
+        month of point to extract
+    day : int
+        day of point to extract
+    sst : ndarray(dtype=float, ndim=3)
+        the field from which to extract the point
+
+    Returns
+    -------
+    float
+
+    """
+    if lat < -90.0 or lat > 90.0:
+        raise ValueError(f"Latitude {lat} outside range -90 to 90")
+    if lon < -185.0 or lon > 365.0:
+        raise ValueError(f"Longitude {lon} outside range -180 to 360")
+    if month < 1 or month > 12:
+        raise ValueError(f"Month ({month}) outside range 1-12")
     month_lengths = get_month_lengths(2004)
-    assert day >= 1
-    assert day <= month_lengths[month - 1]
+    if day < 1 or day > month_lengths[month - 1]:
+        raise ValueError(f"Day ({day}) outside range 1-{month_lengths[month-1]}")
 
     dindex = day_in_year(month, day) - 1
     yindex = mds_lat_to_yindex(lat)
@@ -369,34 +433,37 @@ def get_sst(lat, lon, month, day, sst):
     when given an array (sst) of appropriate type, extracts the value associated with that pentad,
     latitude and longitude.
 
-    :param lat: latitude of the point
-    :param lon: longitude of the point
-    :param month: month of the point
-    :param day: day of the point
-    :param sst: an array holding the 1x1x5-day gridded values
-    :type lat: float
-    :type lon: float
-    :type month: integer
-    :type day: integer
-    :type sst: numpy array
-    :return: value in array at this point
-    :rtype: float
-
     The structure of the SST array has to be quite specific it assumes a grid that is 360 x 180 x 73
     i.e. one year of 1degree lat x 1degree lon data split up into pentads. The west-most box is at 180degrees with
     index 0 and the northern most box also has index zero.
+
+    Parameters
+    ----------
+    lat : float
+        latitude of the point
+    lon : float
+        longitude of the point
+    month : int
+        month of the point
+    day : int
+        day of the point
+    sst : ndarray(dtype=float, ndim=3)
+        an array holding the 1x1x5-day gridded values
+
+    Returns
+    -------
+    float
+        value in array at this point
     """
-    assert lat >= -90.0
-    assert lat <= 90.0
-    assert lon >= -185.00
-    assert lon <= 365.00
-    assert month >= 1
-    assert month <= 12
-
+    if lat < -90.0 or lat > 90.0:
+        raise ValueError(f"Latitude {lat} outside range -90 to 90")
+    if lon < -185.0 or lon > 365.0:
+        raise ValueError(f"Longitude {lon} outside range -180 to 360")
+    if month < 1 or month > 12:
+        raise ValueError(f"Month ({month}) outside range 1-12")
     month_lengths = get_month_lengths(2004)
-
-    assert day >= 1
-    assert day <= month_lengths[month - 1]
+    if day < 1 or day > month_lengths[month - 1]:
+        raise ValueError(f"Day ({day}) outside range 1-{month_lengths[month-1]}")
 
     if len(sst[:, 0, 0]) == 1:
         result = get_sst_single_field(lat, lon, sst)
@@ -447,12 +514,45 @@ def bilinear_interp(x1, x2, y1, y2, x, y, q11, q12, q21, q22):
     Perform a bilinear interpolation at the point x,y from the rectangular grid
     defined by x1,y1 and x2,y2 with values at the four corners equal to Q11, Q12,
     Q21 and Q22.
+
+    Parameters
+    ----------
+    x1 : float
+        x coordinate of leftmost values
+    x2 : float
+        x coordinate of rightmost values
+    y1 : float
+        y coordinate of lower values
+    y2 : float
+        y coordinate of upper values
+    x : float
+        x coordinate of point for which interpolated value is required
+    y : float
+        y coordinate of point for which interpolated value is required
+    q11 : float
+        value in lower left grid cell
+    q12 : float
+        value in upper left grid cell
+    q21 : float
+        value in lower right grid cell
+    q22 : float
+        value in  upper right grid cell
+
+    Returns
+    -------
+    float
+       Interpolated value
     """
-    assert x1 <= x <= x2
-    assert y1 <= y <= y2
-    assert x2 > x1
-    assert y2 > y1
-    assert q11 is not None and q12 is not None and q21 is not None and q22 is not None
+    if not(x1 <= x <= x2):
+        raise ValueError("X point not between x1 and x2")
+    if not(y1 <= y <= y2):
+        raise ValueError("Y point not between y1 and y2")
+    if x2 < x1:
+        raise ValueError("x2 not greater than x1")
+    if y2 < y1:
+        raise ValueError("y2 not greater than y1")
+    if q11 is None or q12 is None or q21 is None or q22 is None:
+        raise ValueError("One or more data values not specified")
 
     val = q11 * (x2 - x) * (y2 - y)
     val += q21 * (x - x1) * (y2 - y)
@@ -470,7 +570,18 @@ def bilinear_interp(x1, x2, y1, y2, x, y, q11, q12, q21, q22):
 
 
 def missing_mean(inarr):
-    """Return mean value or None."""
+    """
+    Return mean of input array
+
+    Parameters
+    ----------
+    inarr : list
+        list of values for which mean is required. Missing values represented by None in list
+    Returns
+    -------
+    float
+         mean of non-missing values or None
+    """
     result = 0.0
     num = 0.0
     for val in inarr:
@@ -483,10 +594,26 @@ def missing_mean(inarr):
         return result / num
 
 
-def fill_missing_vals(q11, q12, q21, q22):
+def fill_missing_vals(q11: float, q12: float, q21: float, q22: float) -> (float, float, float, float):
     """
-    For a group of four neighbouring grid boxes which form a square,
+    For a group of four neighbouring grid boxes which form a square, with values q11, q12, q21, q22,
     fill gaps using means of neighbours.
+
+    Parameters
+    ----------
+    q11 : float
+        Value of first gridbox
+    q12 : float
+        Value of second gridbox
+    q21 : float
+        Value of third gridbox
+    q22 : float
+        Value of fourth gridbox
+
+    Returns
+    -------
+    (float, float, float, float)
+        Neighbour mean
     """
     outq11 = q11
     outq12 = q12
@@ -517,7 +644,7 @@ def fill_missing_vals(q11, q12, q21, q22):
 
 
 def get_four_surrounding_points(lat, lon, max90=1):
-    """Get fur surrounding points."""
+    """Get four surrounding points."""
     assert -90.0 <= lat <= 90.0
     assert -180.0 <= lon <= 180.0
 
@@ -676,140 +803,140 @@ def get_sst_single_field(lat, lon, sst):
     return result
 
 
-def blacklist(inid, indeck, inyear, inmonth, inlat, inlon, inpt=1):
-    """
-    Blacklisting of observations from Deck 732 and others as needed
-
-    :param inid: ID of the report
-    :param indeck: Deck of the report
-    :param inyear: year of the report
-    :param inmonth: month of the report
-    :param inlat: latitude of the report
-    :param inlon: longitude of the report
-    :param inpt: pentad of the report
-    :type inid: string
-    :type indeck: integer
-    :type inyear: integer
-    :type inmonth: integer
-    :type inlat: float
-    :type inlon: float
-    :type inpt: integer
-
-    If the report is from Deck 732, compares the observations year and location to a table of pre-identified
-    regions in which Deck 732 observations are known to be dubious - see Rayner et al. 2006 and Kennedy et al.
-    2011b. Observations at 0 degrees latitude 0 degrees longitude are blacklisted as this is a common error.
-    C-MAN stations with platform type 13 are blacklisted. SEAS data from deck 874 are unreliable (SSTs were
-    often in excess of 50degC) and so the deck was removed.
-    """
-    if inlon > 180.0:
-        inlon -= 360
-
-    result = 0
-
-    if inlat == 0.0 and inlon == 0.0:
-        result = 1  # blacklist all obs at 0,0
-
-    if inpt is not None and inpt == 13:
-        result = 1  # C-MAN data
-
-    if inid == "SUPERIGORINA":
-        result = 1
-
-    # these are the definitions of the regions which are blacklisted for Deck 732
-    region = {
-        1: [-175, 40, -170, 55],
-        2: [-165, 40, -160, 60],
-        3: [-145, 40, -140, 50],
-        4: [-140, 30, -135, 40],
-        5: [-140, 50, -130, 55],
-        6: [-70, 35, -60, 40],
-        7: [-50, 45, -40, 50],
-        8: [5, 70, 10, 80],
-        9: [0, -10, 10, 0],
-        10: [-30, -25, -25, -20],
-        11: [-60, -50, -55, -45],
-        12: [75, -20, 80, -15],
-        13: [50, -30, 60, -20],
-        14: [30, -40, 40, -30],
-        15: [20, 60, 25, 65],
-        16: [0, -40, 10, -30],
-        17: [-135, 30, -130, 40],
-    }
-
-    # this dictionary contains the regions that are to be excluded for this year
-    year_to_regions = {
-        1958: [1, 2, 3, 4, 5, 6, 14, 15],
-        1959: [1, 2, 3, 4, 5, 6, 14, 15],
-        1960: [1, 2, 3, 5, 6, 9, 14, 15],
-        1961: [1, 2, 3, 5, 6, 14, 15, 16],
-        1962: [1, 2, 3, 5, 12, 13, 14, 15, 16],
-        1963: [1, 2, 3, 5, 6, 12, 13, 14, 15, 16],
-        1964: [1, 2, 3, 5, 6, 12, 13, 14, 16],
-        1965: [1, 2, 6, 10, 12, 13, 14, 15, 16],
-        1966: [1, 2, 6, 9, 14, 15, 16],
-        1967: [1, 2, 5, 6, 9, 14, 15],
-        1968: [1, 2, 3, 5, 6, 9, 14, 15],
-        1969: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 13, 14, 15, 16],
-        1970: [1, 2, 3, 4, 5, 6, 8, 9, 14, 15],
-        1971: [1, 2, 3, 4, 5, 6, 7, 8, 9, 13, 14, 16],
-        1972: [4, 7, 8, 9, 10, 11, 13, 16, 17],
-        1973: [4, 7, 8, 10, 11, 13, 16, 17],
-        1974: [4, 7, 8, 10, 11, 16, 17],
-    }
-
-    if indeck == 732:
-        if inyear in year_to_regions:
-            regions_to_check = year_to_regions[inyear]
-            for regid in regions_to_check:
-                thisreg = region[regid]
-                if (
-                    thisreg[0] <= inlon <= thisreg[2]
-                    and thisreg[1] <= inlat <= thisreg[3]
-                ):
-                    result = 1
-
-    if indeck == 874:
-        result = 1  # SEAS data gets blacklisted
-
-    if (
-        (inyear == 2005 and inmonth == 11)
-        or (inyear == 2005 and inmonth == 12)
-        or (inyear == 2006 and inmonth == 1)
-    ):
-        if inid in [
-            "53521    ",
-            "53522    ",
-            "53566    ",
-            "53567    ",
-            "53568    ",
-            "53571    ",
-            "53578    ",
-            "53580    ",
-            "53582    ",
-            "53591    ",
-            "53592    ",
-            "53593    ",
-            "53594    ",
-            "53595    ",
-            "53596    ",
-            "53599    ",
-            "53600    ",
-            "53601    ",
-            "53602    ",
-            "53603    ",
-            "53604    ",
-            "53605    ",
-            "53606    ",
-            "53607    ",
-            "53608    ",
-            "53609    ",
-            "53901    ",
-            "53902    ",
-        ]:
-            result = 1
-
-    return result
-
+# def blacklist(inid, indeck, inyear, inmonth, inlat, inlon, inpt=1):
+#     """
+#     Blacklisting of observations from Deck 732 and others as needed
+#
+#     :param inid: ID of the report
+#     :param indeck: Deck of the report
+#     :param inyear: year of the report
+#     :param inmonth: month of the report
+#     :param inlat: latitude of the report
+#     :param inlon: longitude of the report
+#     :param inpt: pentad of the report
+#     :type inid: string
+#     :type indeck: integer
+#     :type inyear: integer
+#     :type inmonth: integer
+#     :type inlat: float
+#     :type inlon: float
+#     :type inpt: integer
+#
+#     If the report is from Deck 732, compares the observations year and location to a table of pre-identified
+#     regions in which Deck 732 observations are known to be dubious - see Rayner et al. 2006 and Kennedy et al.
+#     2011b. Observations at 0 degrees latitude 0 degrees longitude are blacklisted as this is a common error.
+#     C-MAN stations with platform type 13 are blacklisted. SEAS data from deck 874 are unreliable (SSTs were
+#     often in excess of 50degC) and so the deck was removed.
+#     """
+#     if inlon > 180.0:
+#         inlon -= 360
+#
+#     result = 0
+#
+#     if inlat == 0.0 and inlon == 0.0:
+#         result = 1  # blacklist all obs at 0,0
+#
+#     if inpt is not None and inpt == 13:
+#         result = 1  # C-MAN data
+#
+#     if inid == "SUPERIGORINA":
+#         result = 1
+#
+#     # these are the definitions of the regions which are blacklisted for Deck 732
+#     region = {
+#         1: [-175, 40, -170, 55],
+#         2: [-165, 40, -160, 60],
+#         3: [-145, 40, -140, 50],
+#         4: [-140, 30, -135, 40],
+#         5: [-140, 50, -130, 55],
+#         6: [-70, 35, -60, 40],
+#         7: [-50, 45, -40, 50],
+#         8: [5, 70, 10, 80],
+#         9: [0, -10, 10, 0],
+#         10: [-30, -25, -25, -20],
+#         11: [-60, -50, -55, -45],
+#         12: [75, -20, 80, -15],
+#         13: [50, -30, 60, -20],
+#         14: [30, -40, 40, -30],
+#         15: [20, 60, 25, 65],
+#         16: [0, -40, 10, -30],
+#         17: [-135, 30, -130, 40],
+#     }
+#
+#     # this dictionary contains the regions that are to be excluded for this year
+#     year_to_regions = {
+#         1958: [1, 2, 3, 4, 5, 6, 14, 15],
+#         1959: [1, 2, 3, 4, 5, 6, 14, 15],
+#         1960: [1, 2, 3, 5, 6, 9, 14, 15],
+#         1961: [1, 2, 3, 5, 6, 14, 15, 16],
+#         1962: [1, 2, 3, 5, 12, 13, 14, 15, 16],
+#         1963: [1, 2, 3, 5, 6, 12, 13, 14, 15, 16],
+#         1964: [1, 2, 3, 5, 6, 12, 13, 14, 16],
+#         1965: [1, 2, 6, 10, 12, 13, 14, 15, 16],
+#         1966: [1, 2, 6, 9, 14, 15, 16],
+#         1967: [1, 2, 5, 6, 9, 14, 15],
+#         1968: [1, 2, 3, 5, 6, 9, 14, 15],
+#         1969: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 13, 14, 15, 16],
+#         1970: [1, 2, 3, 4, 5, 6, 8, 9, 14, 15],
+#         1971: [1, 2, 3, 4, 5, 6, 7, 8, 9, 13, 14, 16],
+#         1972: [4, 7, 8, 9, 10, 11, 13, 16, 17],
+#         1973: [4, 7, 8, 10, 11, 13, 16, 17],
+#         1974: [4, 7, 8, 10, 11, 16, 17],
+#     }
+#
+#     if indeck == 732:
+#         if inyear in year_to_regions:
+#             regions_to_check = year_to_regions[inyear]
+#             for regid in regions_to_check:
+#                 thisreg = region[regid]
+#                 if (
+#                     thisreg[0] <= inlon <= thisreg[2]
+#                     and thisreg[1] <= inlat <= thisreg[3]
+#                 ):
+#                     result = 1
+#
+#     if indeck == 874:
+#         result = 1  # SEAS data gets blacklisted
+#
+#     if (
+#         (inyear == 2005 and inmonth == 11)
+#         or (inyear == 2005 and inmonth == 12)
+#         or (inyear == 2006 and inmonth == 1)
+#     ):
+#         if inid in [
+#             "53521    ",
+#             "53522    ",
+#             "53566    ",
+#             "53567    ",
+#             "53568    ",
+#             "53571    ",
+#             "53578    ",
+#             "53580    ",
+#             "53582    ",
+#             "53591    ",
+#             "53592    ",
+#             "53593    ",
+#             "53594    ",
+#             "53595    ",
+#             "53596    ",
+#             "53599    ",
+#             "53600    ",
+#             "53601    ",
+#             "53602    ",
+#             "53603    ",
+#             "53604    ",
+#             "53605    ",
+#             "53606    ",
+#             "53607    ",
+#             "53608    ",
+#             "53609    ",
+#             "53901    ",
+#             "53902    ",
+#         ]:
+#             result = 1
+#
+#     return result
+#
 
 def climatology_plus_stdev_with_lowbar(inval, inclimav, instdev, limit, lowbar):
     """
@@ -902,14 +1029,19 @@ def climatology_check(inval, inclimav, limit=8.0):
     return result
 
 
-def value_check(inval):
+def value_check(inval: float) -> int:
     """
     Check if a value is equal to None
 
-    :param inval: the input value
-    :param inval: float
-    :return: 1 if the input value is None, 0 otherwise
-    :return type: integer
+    Parameters
+    ----------
+    inval : float
+        The input value to be tested
+
+    Returns
+    -------
+    int
+        1 if the input value is None, 0 otherwise
     """
     result = 0
     if inval is None:
@@ -917,14 +1049,19 @@ def value_check(inval):
     return result
 
 
-def no_normal_check(inclimav):
+def no_normal_check(inclimav: float) -> int:
     """
     Check if a climatological average is equal to None
 
-    :param inclimav: the input value
-    :type inclimav: float
-    :return: 1 if the input value is None, 0 otherwise
-    :return type: integer
+    Parameters
+    ----------
+    inclimav: float
+        the input value
+
+    Returns
+    -------
+    int
+        1 if the input value is None, 0 otherwise
     """
     result = 0
     if inclimav is None:
@@ -932,17 +1069,21 @@ def no_normal_check(inclimav):
     return result
 
 
-def hard_limit(val, limits):
+def hard_limit(val : float, limits: List[float, float]) -> int:
     """
     Check if a value is outside specified limits
 
-    :param val: value to be tested
-    :param limits: two membered list of lower and upper limit
-    :type val: float
-    :type limits: list of floats
+    Parameters
+    ----------
+    val : float
+        value to be tested
+    limits : List[float, float]
+        two membered list of lower and upper limit
 
-    :return: 1 if the input is outside the limits, 0 otherwise
-    :return type: integer
+    Returns
+    -------
+    int
+        1 if the input is outside the limits, 0 otherwise
     """
     assert limits[1] > limits[0], "limits are not well specified"
     if val is None:
@@ -953,43 +1094,32 @@ def hard_limit(val, limits):
     return result
 
 
-def supersat_check(invaltd, invalt):
-    """
-    Check if a valid dewpoint temperature is
-    greater than a valid air temperature
-
-    :param invaltd: the input value for dewpoint temperature
-    :param invalt: the input value for air temperature
-    :type invaltd: float
-    :type invalt: float
-    :return: 1 if the input values are invalid/None
-    :return: 1 if the dewpoint temperature is greater than the air temperarture
-    :return: 0 otherwise
-    :return type: integer
-    """
-    result = 0
-    if (invaltd is None) | (invalt is None):
-        result = 1
-    elif invaltd > invalt:
-        result = 1
-
-    return result
+# def supersat_check(invaltd, invalt):
+#     """
+#     Check if a valid dewpoint temperature is
+#     greater than a valid air temperature
+#
+#     :param invaltd: the input value for dewpoint temperature
+#     :param invalt: the input value for air temperature
+#     :type invaltd: float
+#     :type invalt: float
+#     :return: 1 if the input values are invalid/None
+#     :return: 1 if the dewpoint temperature is greater than the air temperarture
+#     :return: 0 otherwise
+#     :return type: integer
+#     """
+#     result = 0
+#     if (invaltd is None) | (invalt is None):
+#         result = 1
+#     elif invaltd > invalt:
+#         result = 1
+#
+#     return result
 
 
 def sst_freeze_check(insst, sst_uncertainty=0.0, freezing_point=-1.80, n_sigma=2.0):
     """
     Compare an input SST to see if it is above freezing.
-
-    :param insst: the input SST
-    :param sst_uncertainty: the uncertainty in the SST value, defaults to zero
-    :param freezing_point: the freezing point of the water, defaults to -1.8C
-    :param n_sigma: number of sigma to use in the check
-    :type insst: float
-    :type sst_uncertainty: float
-    :type freezing_point: float
-    :type n_sigma: float
-    :return: 1 if the input SST is below freezing point by more than twice the uncertainty, 0 otherwise
-    :return type: integer
 
     This is a simple freezing point check made slightly more complex. We want to check if a
     measurement of SST is above freezing, but there are two problems. First, the freezing point
@@ -997,7 +1127,24 @@ def sst_freeze_check(insst, sst_uncertainty=0.0, freezing_point=-1.80, n_sigma=2
     in SST measurements. If we place a hard cut-off at -1.8, then we are likely to bias the average
     of many measurements too high when they are near the freezing point - observational error will
     push the measurements randomly higher and lower, and this test will trim out the lower tail, thus
-    biasing the result. The inclusion of an SST uncertainty parameter *might* mitigate that.
+    biasing the result. The inclusion of an SST uncertainty parameter *might* mitigate that and we allow
+    that possibility here.
+
+    Parameters
+    ----------
+    insst : float
+        input SST to be checked
+    sst_uncertainty : float
+        the uncertainty in the SST value, defaults to zero
+    freezing_point : float
+        the freezing point of the water, defaults to -1.8C
+    n_sigma : float
+        number of sigma to use in the check
+
+    Returns
+    -------
+    int
+        1 if the input SST is below freezing point by more than twice the uncertainty, 0 otherwise
     """
     assert sst_uncertainty is not None and freezing_point is not None
 
@@ -1007,116 +1154,115 @@ def sst_freeze_check(insst, sst_uncertainty=0.0, freezing_point=-1.80, n_sigma=2
         if insst < (freezing_point - n_sigma * sst_uncertainty):
             result = 1
 
-    assert result == 1 or result == 0
     return result
 
 
-def position_check(inlat, inlon):
-    """
-    Simple check to make sure that the latitude and longitude are within the bounds specified
-    by the ICOADS documentation. Latitude is between -90 and 90. Longitude is between -180 and 360
-
-    :param inlat: latitude
-    :param inlon: longitude
-    :type inlat: float
-    :type inlon: float
-    :return: 1 if either latitude or longitude is invalid, 0 otherwise
-    :return type: integer
-    """
-    # return 1 if lat or lon is invalid, 0 otherwise
-    assert inlat is not None and not (math.isnan(inlat))
-    assert inlon is not None and not (math.isnan(inlon))
-    result = 0
-    if inlat < -90 or inlat > 90:
-        result = 1
-    if inlon < -180 or inlon > 360:
-        result = 1
-    assert result == 1 or result == 0
-    return result
-
-
-def time_check(inhour):
-    """
-    Check that the time is valid
-
-    :param inhour: hour of the time to be checked
-    :type inhour: float
-    :return: 1 if the hour is invalid, 0 otherwise
-    :return type: integer
-    """
-    result = 0
-
-    if inhour is not None and (inhour >= 24 or inhour < 0):
-        result = 1
-
-    if inhour is None:
-        result = 1
-
-    return result
+# def position_check(inlat, inlon):
+#     """
+#     Simple check to make sure that the latitude and longitude are within the bounds specified
+#     by the ICOADS documentation. Latitude is between -90 and 90. Longitude is between -180 and 360
+#
+#     :param inlat: latitude
+#     :param inlon: longitude
+#     :type inlat: float
+#     :type inlon: float
+#     :return: 1 if either latitude or longitude is invalid, 0 otherwise
+#     :return type: integer
+#     """
+#     # return 1 if lat or lon is invalid, 0 otherwise
+#     assert inlat is not None and not (math.isnan(inlat))
+#     assert inlon is not None and not (math.isnan(inlon))
+#     result = 0
+#     if inlat < -90 or inlat > 90:
+#         result = 1
+#     if inlon < -180 or inlon > 360:
+#         result = 1
+#     assert result == 1 or result == 0
+#     return result
 
 
-def date_check(inyear, inmonth, inday):
-    """
-    Check that the date is valid
-
-    :param inyear: year of the date to be checked
-    :param inmonth: month of the data to be checked
-    :param inday: day of the date to be checked
-    :type inyear: integer
-    :type inmonth: integer
-    :type inday: integer
-    :return: 1 if any one of the inputs (or the combined inputs) is invalid, 0 otherwise
-    :return type: integer
-    """
-    # return 1 if date is valid. 0 otherwise
-    assert inyear is not None
-    assert inmonth is not None
-
-    result = 0
-
-    if inyear > 2024 or inyear < 1850:
-        result = 1
-
-    if inmonth < 1 or inmonth > 12:
-        result = 1
-
-    month_lengths = get_month_lengths(inyear)
-
-    if inday is None:
-        result = 1
-    else:
-        if inday < 1 or inday > month_lengths[inmonth - 1]:
-            result = 1
-
-    return result
+# def time_check(inhour):
+#     """
+#     Check that the time is valid
+#
+#     :param inhour: hour of the time to be checked
+#     :type inhour: float
+#     :return: 1 if the hour is invalid, 0 otherwise
+#     :return type: integer
+#     """
+#     result = 0
+#
+#     if inhour is not None and (inhour >= 24 or inhour < 0):
+#         result = 1
+#
+#     if inhour is None:
+#         result = 1
+#
+#     return result
 
 
-def wind_consistency(windspeed, winddirection, variablelimit):
-    """
-    Test to compare windspeed to winddirection.
-    :param windspeed:  wind speed
-    :param winddirection: wind direction in range 1-362
-    :param variablelimit: maximum wind speed consistent with variable wind direction
-    :type windspeed: float
-    :type winddirection: integer
-    :type variablelimit: float
-    :return: pass (0) or fail (1)
-    :rtype: integer
-    """
-    result = 0
+# def date_check(inyear, inmonth, inday):
+#     """
+#     Check that the date is valid
+#
+#     :param inyear: year of the date to be checked
+#     :param inmonth: month of the data to be checked
+#     :param inday: day of the date to be checked
+#     :type inyear: integer
+#     :type inmonth: integer
+#     :type inday: integer
+#     :return: 1 if any one of the inputs (or the combined inputs) is invalid, 0 otherwise
+#     :return type: integer
+#     """
+#     # return 1 if date is valid. 0 otherwise
+#     assert inyear is not None
+#     assert inmonth is not None
+#
+#     result = 0
+#
+#     if inyear > 2024 or inyear < 1850:
+#         result = 1
+#
+#     if inmonth < 1 or inmonth > 12:
+#         result = 1
+#
+#     month_lengths = get_month_lengths(inyear)
+#
+#     if inday is None:
+#         result = 1
+#     else:
+#         if inday < 1 or inday > month_lengths[inmonth - 1]:
+#             result = 1
+#
+#     return result
 
-    if winddirection is None or windspeed is None:
-        result = 1
-    else:
-        # direction 361 is Calm i.e. windspeed should be zero
-        if winddirection == 361 and windspeed != 0:
-            result = 1
 
-        # direction 363 is Variable i.e. low windspeed
-        if winddirection == 362 and windspeed > variablelimit:
-            result = 1
-
-    return result
+# def wind_consistency(windspeed, winddirection, variablelimit):
+#     """
+#     Test to compare windspeed to winddirection.
+#     :param windspeed:  wind speed
+#     :param winddirection: wind direction in range 1-362
+#     :param variablelimit: maximum wind speed consistent with variable wind direction
+#     :type windspeed: float
+#     :type winddirection: integer
+#     :type variablelimit: float
+#     :return: pass (0) or fail (1)
+#     :rtype: integer
+#     """
+#     result = 0
+#
+#     if winddirection is None or windspeed is None:
+#         result = 1
+#     else:
+#         # direction 361 is Calm i.e. windspeed should be zero
+#         if winddirection == 361 and windspeed != 0:
+#             result = 1
+#
+#         # direction 363 is Variable i.e. low windspeed
+#         if winddirection == 362 and windspeed > variablelimit:
+#             result = 1
+#
+#     return result
 
 
 def p_data_given_good(x, q, r_hi, r_lo, mu, sigma):
@@ -1125,20 +1271,25 @@ def p_data_given_good(x, q, r_hi, r_lo, mu, sigma):
     standard deviation of sigma, where x is constrained to fall between R_hi and R_lo
     and is known only to an integer multiple of Q, the quantization level.
 
-    :param x: observed value for which probability is required
-    :param q: quantization of x, i.e. x is an integer multiple of Q
-    :param r_hi: the upper limit on x imposed by previous QC choices.
-    :param r_lo: the lower limit on x imposed by previous QC choices.
-    :param mu: the mean of the distribution.
-    :param sigma: the standard deviation of the distribution
-    :type x: float
-    :type q: float
-    :type r_hi: float
-    :type r_lo: float
-    :type mu: float
-    :type sigma: float
-    :return: probability of the observed value given the specified distribution.
-    :rtype: float
+    Parameters
+    ----------
+    x : float
+        observed value for which probability is required
+    q : float
+        quantization of x, i.e. x is an integer multiple of Q
+    r_hi : float
+        the upper limit on x imposed by previous QC choices.
+    r_lo : float
+        the lower limit on x imposed by previous QC choices.
+    mu : float
+        the mean of the distribution.
+    sigma : float
+        the standard deviation of the distribution
+
+    Returns
+    -------
+    float
+        probability of the observed value given the specified distribution.
     """
     assert q > 0.0, "q <= 0" + str(q)
     assert sigma > 0.0, "sigma <= 0 " + str(sigma)
@@ -1166,31 +1317,36 @@ def p_data_given_good(x, q, r_hi, r_lo, mu, sigma):
     )
 
 
-def p_data_given_gross(q, r_hi, r_lo):
+def p_data_given_gross(q: float, r_hi: float, r_lo: float) -> float:
     """
     Calculate the probability of the data given a gross error
     assuming gross errors are uniformly distributed between
     R_low and R_high and that the quantization, rounding level is Q
 
-    :param q: quantization of x, i.e. x is an integer multiple of Q
-    :param r_hi: the upper limit on x imposed by previous QC choices.
-    :param r_lo: the lower limit on x imposed by previous QC choices.
-    :type q: float
-    :type r_hi: float
-    :type r_lo: float
-    :return: probability of the observed value given that its a gross error.
-    :rtpye: float
+    Parameters
+    ----------
+    q : float
+        quantization of x, i.e. x is an integer multiple of Q
+    r_hi : float
+        the upper limit on x imposed by previous QC choices.
+    r_lo : float
+        the lower limit on x imposed by previous QC choices.
+
+    Returns
+    -------
+    float
+        probability of the observed value given that its a gross error.
     """
-    assert r_hi > r_lo, (
-        "Limits not ascending r_lo " + str(r_lo) + " > r_hi " + str(r_hi)
-    )
-    assert q > 0.0, "q <= 0" + str(q)
+    if r_hi < r_lo:
+        raise ValueError(f"Limits not ascending r_lo {r_lo} > r_hi {r_hi}")
+    if q <= 0.0:
+        raise ValueError(f"q <= 0 {q}")
 
     r = r_hi - r_lo
     return 1.0 / (1.0 + (r / q))
 
 
-def p_gross(p0, q, r_hi, r_lo, x, mu, sigma):
+def p_gross(p0: float, q: float, r_hi: float, r_lo: float, x: float, mu: float, sigma: float) -> float:
     """
     Calculate the posterior probability of a gross error given the prior probability p0,
     the quantization level of the observed value, Q, previous limits on the observed value,
@@ -1198,28 +1354,35 @@ def p_gross(p0, q, r_hi, r_lo, x, mu, sigma):
     distribution of good observations assuming they are normally distributed. Gross errors are
     assumed to be uniformly distributed between R_lo and R_hi.
 
-    :param p0: prior probability of gross error
-    :param q: quantization of x, i.e. x is an integer multiple of Q
-    :param r_hi: the upper limit on x imposed by previous QC choices.
-    :param r_lo: the lower limit on x imposed by previous QC choices.
-    :param x: observed value for which probability is required
-    :param mu: the mean of the distribution of good obs.
-    :param sigma: the standard deviation of the distribution of good obs
-    :type q: float
-    :type r_hi: float
-    :type r_lo: float
-    :return: probability of gross error given an observed value
-    :rtpye: float
+    Parameters
+    ----------
+    p0 : float
+        prior probability of gross error
+    q : float
+        quantization of x, i.e. x is an integer multiple of Q
+    r_hi : float
+        the upper limit on x imposed by previous QC choices.
+    r_lo : float
+        the lower limit on x imposed by previous QC choices.
+    x : float
+        observed value for which probability is required
+    mu : float
+        the mean of the distribution of good obs.
+    sigma : float
+        the standard deviation of the distribution of good obs
+
+    Returns
+    -------
+    float
+        probability of gross error given an observed value
     """
-    assert p0 >= 0, "p0 <= 0 " + str(p0)
-    assert p0 <= 1, "p0 > 1 " + str(p0)
-    assert q > 0.0, "q <= 0 " + str(q)
-    assert r_hi > r_lo, (
-        "Limits not ascending r_lo " + str(r_lo) + " > r_hi " + str(r_hi)
-    )
-    assert x >= r_lo, "x below lower limit " + str(x) + " < r_lo " + str(r_lo)
-    assert x <= r_hi, "x above upper limit " + str(x) + " > r_hi " + str(r_hi)
-    assert sigma > 0.0, "sigma <= 0 " + str(sigma)
+    assert p0 >= 0, f"p0 <= 0 {p0}"
+    assert p0 <= 1, f"p0 > 1 {p0}"
+    assert q > 0.0, "q <= 0 {q}"
+    assert r_hi > r_lo, f"Limits not ascending r_lo {r_lo} > r_hi {r_hi}"
+    assert x >= r_lo, f"x below lower limit {x} < r_lo {r_lo}"
+    assert x <= r_hi, f"x above upper limit {x} > r_hi {r_hi}"
+    assert sigma > 0.0, f"sigma <= 0 {sigma}"
 
     pgross = (
         p0
@@ -1236,18 +1399,25 @@ def p_gross(p0, q, r_hi, r_lo, x, mu, sigma):
     return pgross
 
 
-def angle_diff(angle1, angle2):
+def angle_diff(angle1 : float, angle2: float) -> float:
     """
     Calculate the angular distance on a circle between two points given in radians
 
-    :param angle1: angle of first point
-    :param angle2: angle of second point
-    :type angle1: float
-    :type angle2: float
-    :return: angle between the two input points in radians
-    :return type: float
+    Parameters
+    ----------
+    angle1 : float
+        angle of first point in radians
+    angle2 : float
+        angle of second point in radians
+
+    Returns
+    -------
+    float
+        angle between the two input points in radians
     """
-    assert angle1 is not None and angle2 is not None
+    if angle1 is None or angle2 is None:
+        raise ValueError("One or both angles are None")
+
     # calculate angle between two angles
     diff = abs(angle1 - angle2)
     if diff > np.pi:
@@ -1255,13 +1425,47 @@ def angle_diff(angle1, angle2):
     return diff
 
 
-def relative_year_number(year, reference=1979):
-    """Get number of year relative to reference year."""
+def relative_year_number(year: int, reference:int=1979) -> int:
+    """
+    Get number of year relative to reference year (1979 by default).
+
+    Parameters
+    ----------
+    year : int
+        Year
+    reference : int
+        Reference year, defaults to 1979
+
+    Returns
+    -------
+    int
+        Number of year
+    """
     return year - (reference + 1)
 
 
-def convert_time_in_hours(hour, minute, sec, zone, dasvtm):
-    """Convert to time in hours."""
+def convert_time_in_hours(hour: int, minute: int, sec: int, zone: float, dasvtm: float) -> float:
+    """
+    Convert integer hour, minute, and second to time in decimal hours
+
+    Parameters
+    ----------
+    hour : int
+        Hour
+    minute : int
+        Minute
+    sec : int
+        Second
+    zone : float
+        Correction for timezone
+    dasvtm : float
+        Unknown
+
+    Returns
+    -------
+    float
+        Decimal hour in day
+    """
     return hour + (minute + sec / 60.0) / 60.0 + zone - dasvtm
 
 
@@ -1385,7 +1589,7 @@ def sun_azimuth(phi, declination):
 
 
 def convert_degrees(deg):
-    """Convert drgrees."""
+    """Convert degrees."""
     if deg < 0.0:
         deg = 360.0 + deg
     return deg
@@ -1863,20 +2067,25 @@ def lon_to_xindex(lon, res=1):
         return int(xindex)
 
 
-def id_is_generic(inid, inyear):
+def id_is_generic(inid: str, inyear: int) -> bool:
     """
     Test to see if an ID is one of the generic IDs
-
-    :param inid: ID from marine report
-    :param inyear: year we are checking for
-    :type inid: string
-    :type inyear: integer
-    :return: True if the ID is generic and False otherwise
-    :rtype: logical
 
     Certain callsigns are shared by large numbers of ships. e.g. SHIP, PLAT, 0120,
     MASK, MASKSTID. This simple routine has a list of known generic call signs.
     Some call signs are only generic between certain years.
+
+    Parameters
+    ----------
+    inid : str
+        ID from marine report
+    inyear : int
+        year we are checking for
+
+    Returns
+    -------
+    bool
+        True if the ID is generic and False otherwise
     """
     generic_ids = [
         None,
@@ -1923,14 +2132,21 @@ def id_is_generic(inid, inyear):
     return result
 
 
-def last_month_was(year, month):
+def last_month_was(year: int, month: int) -> tuple[int, int]:
     """
     Short function to get the previous month given a particular month of interest
 
-    :param year: year of interest
-    :param month: month of interest
-    :type year: integer
-    :type month: integer
+    Parameters
+    ----------
+    year : int
+        Year of interest
+    month : int
+        Month of interest
+
+    Returns
+    -------
+    tuple[int, int]
+        Year and month of previous month
     """
     last_year = year
     last_month = month - 1
@@ -1941,14 +2157,21 @@ def last_month_was(year, month):
     return last_year, last_month
 
 
-def next_month_is(year, month):
+def next_month_is(year: int, month: int) -> tuple[int, int]:
     """
     Short function to get the next month given a particular month of interest
 
-    :param year: year of interest
-    :param month: month of interest
-    :type year: integer
-    :type month: integer
+    Parameters
+    ----------
+    year : int
+        Year of interest
+    month : int
+        Month of interest
+
+    Returns
+    -------
+    Tuple[int, int]
+        Year and month of next month
     """
     next_year = year
     next_month = month + 1
@@ -1959,24 +2182,32 @@ def next_month_is(year, month):
     return next_year, next_month
 
 
-def year_month_gen(year1, month1, year2, month2):
+def year_month_gen(year1: int, month1: int, year2: int, month2: int) -> tuple[int, int]:
     """
-    A generator to loop one month at a time between
-    year1 month1 and year2 month2
+    A generator to loop one month at a time between year1 month1 and year2 month2
 
-    :param year1: first year to loop from
-    :param month1: month in first year to start from
-    :param year2: Last year to loop over
-    :param month2: last month in last year to loop over
-    :type year1: integer
-    :type month1: integer
-    :type year2: integer
-    :type month2: integer
-    :return: Return an iterator that yields tuples of a year and month
-    :rtype: Iterator[integer]
+    Parameters
+    ----------
+    year1 : int
+        Year of start month
+    month1 : int
+        Month of start month
+    year2 : int
+        Year of end month
+    month2 : int
+        Month of end month
+
+    Returns
+    -------
+    tuple[int, int]
+        Return an iterator that yields tuples of a year and month
     """
-    assert year2 >= year1, "Start year after end year"
-    assert 0 < month1 <= 12, "Month outside 1-12"
+    if year2 < year1:
+        raise ValueError(f"Start year {year1} after end year {year2}")
+    if not (0 < month1 <= 12):
+        raise ValueError(f"Start month {month1} outside range 1-12")
+    if not (0 < month2 <= 12):
+        raise ValueError(f"End month {month2} outside range 1-12")
 
     year = year1
     month = month1
@@ -1991,14 +2222,19 @@ def year_month_gen(year1, month1, year2, month2):
     yield year, month
 
 
-def get_month_lengths(year: int) -> list:
+def get_month_lengths(year: int) -> List[int]:
     """
-    Return a list holding the lengths of the months in a given year
+     Return a list holding the lengths of the months in a given year
 
-    :param year: Year for which you want month lengths
-    :type year: int
-    :return: list of month lengths
-    :rtype: int
+    Parameters
+    ----------
+    year : int
+        Year for which you want month lengths
+
+    Returns
+    -------
+    List[int]
+        list of month lengths
     """
     if calendar.isleap(year):
         month_lengths = [31, 29, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31]
@@ -2008,95 +2244,95 @@ def get_month_lengths(year: int) -> list:
     return month_lengths
 
 
-def base_qc_report(rep):
-    """Take a marine report and do some base qc on it."""
-    # Basic positional QC
-    if rep.getvar("PT") in [6, 7]:
-        rep.set_qc("POS", "isbuoy", 1)
-    else:
-        rep.set_qc("POS", "isbuoy", 0)
-
-    if rep.getvar("PT") in [0, 1, 2, 3, 4, 5, 10, 11, 12, 17]:
-        rep.set_qc("POS", "isship", 1)
-    else:
-        rep.set_qc("POS", "isship", 0)
-
-    # See Kent et al. HadNMAT2 QC section
-    rep.set_qc("POS", "mat_blacklist", 0)
-    if rep.getvar("PT") == 5 and rep.getvar("DCK") == 780:
-        rep.set_qc("POS", "mat_blacklist", 1)
-
-    # make sure lons are in range -180 to 180
-    lon = rep.lon()
-    lat = rep.lat()
-    # North Atlantic, Suez and indian ocean to be excluded from MAT processing
-    if (
-        rep.getvar("DCK") == 193
-        and 1880 <= rep.getvar("YR") <= 1893
-        and (
-            (-80.0 <= lon <= 0.0 and 40.0 <= lat <= 55.0)
-            or (-10.0 <= lon <= 30.0 and 35.0 <= lat <= 45.0)
-            or (15.0 <= lon <= 45.0 and -10.0 <= lat <= 40.0)
-            or (15.0 <= lon <= 95.0 and lat >= -10.0 and lat <= 15.0)
-            or (95.0 <= lon <= 105.0 and -10.0 <= lat <= 5.0)
-        )
-    ):
-        rep.set_qc("POS", "mat_blacklist", 1)
-
-    if rep.getvar("DCK") == 780:
-        rep.set_qc("POS", "is780", 1)
-    else:
-        rep.set_qc("POS", "is780", 0)
-
-    rep.set_qc("POS", "pos", position_check(rep.lat(), rep.lon()))
-
-    rep.set_qc(
-        "POS", "date", date_check(rep.getvar("YR"), rep.getvar("MO"), rep.getvar("DY"))
-    )
-
-    if rep.get_qc("POS", "pos") == 0 and rep.get_qc("POS", "date") == 0:
-        rep.set_qc(
-            "POS",
-            "day",
-            day_test(
-                rep.getvar("YR"),
-                rep.getvar("MO"),
-                rep.getvar("DY"),
-                rep.getvar("HR"),
-                rep.lat(),
-                rep.lon(),
-            ),
-        )
-    else:
-        rep.set_qc("POS", "day", 1)
-
-    rep.set_qc(
-        "POS",
-        "blklst",
-        blacklist(
-            rep.getvar("ID"),
-            rep.getvar("DCK"),
-            rep.getvar("YR"),
-            rep.getvar("MO"),
-            rep.lat(),
-            rep.lon(),
-            rep.getvar("PT"),
-        ),
-    )
-
-    # SST base QC
-    rep.set_qc("SST", "noval", value_check(rep.getvar("SST")))
-    rep.set_qc("SST", "freez", sst_freeze_check(rep.getvar("SST"), 0.0))
-    rep.set_qc(
-        "SST", "clim", climatology_check(rep.getvar("SST"), rep.getnorm("SST"), 8.0)
-    )
-    rep.set_qc("SST", "nonorm", no_normal_check(rep.getnorm("SST")))
-
-    # MAT base QC
-    rep.set_qc("AT", "noval", value_check(rep.getvar("AT")))
-    rep.set_qc(
-        "AT", "clim", climatology_check(rep.getvar("AT"), rep.getnorm("AT"), 10.0)
-    )
-    rep.set_qc("AT", "nonorm", no_normal_check(rep.getnorm("AT")))
-
-    return rep
+# def base_qc_report(rep):
+#     """Take a marine report and do some base qc on it."""
+#     # Basic positional QC
+#     if rep.getvar("PT") in [6, 7]:
+#         rep.set_qc("POS", "isbuoy", 1)
+#     else:
+#         rep.set_qc("POS", "isbuoy", 0)
+#
+#     if rep.getvar("PT") in [0, 1, 2, 3, 4, 5, 10, 11, 12, 17]:
+#         rep.set_qc("POS", "isship", 1)
+#     else:
+#         rep.set_qc("POS", "isship", 0)
+#
+#     # See Kent et al. HadNMAT2 QC section
+#     rep.set_qc("POS", "mat_blacklist", 0)
+#     if rep.getvar("PT") == 5 and rep.getvar("DCK") == 780:
+#         rep.set_qc("POS", "mat_blacklist", 1)
+#
+#     # make sure lons are in range -180 to 180
+#     lon = rep.lon()
+#     lat = rep.lat()
+#     # North Atlantic, Suez and indian ocean to be excluded from MAT processing
+#     if (
+#         rep.getvar("DCK") == 193
+#         and 1880 <= rep.getvar("YR") <= 1893
+#         and (
+#             (-80.0 <= lon <= 0.0 and 40.0 <= lat <= 55.0)
+#             or (-10.0 <= lon <= 30.0 and 35.0 <= lat <= 45.0)
+#             or (15.0 <= lon <= 45.0 and -10.0 <= lat <= 40.0)
+#             or (15.0 <= lon <= 95.0 and lat >= -10.0 and lat <= 15.0)
+#             or (95.0 <= lon <= 105.0 and -10.0 <= lat <= 5.0)
+#         )
+#     ):
+#         rep.set_qc("POS", "mat_blacklist", 1)
+#
+#     if rep.getvar("DCK") == 780:
+#         rep.set_qc("POS", "is780", 1)
+#     else:
+#         rep.set_qc("POS", "is780", 0)
+#
+#     rep.set_qc("POS", "pos", position_check(rep.lat(), rep.lon()))
+#
+#     rep.set_qc(
+#         "POS", "date", date_check(rep.getvar("YR"), rep.getvar("MO"), rep.getvar("DY"))
+#     )
+#
+#     if rep.get_qc("POS", "pos") == 0 and rep.get_qc("POS", "date") == 0:
+#         rep.set_qc(
+#             "POS",
+#             "day",
+#             day_test(
+#                 rep.getvar("YR"),
+#                 rep.getvar("MO"),
+#                 rep.getvar("DY"),
+#                 rep.getvar("HR"),
+#                 rep.lat(),
+#                 rep.lon(),
+#             ),
+#         )
+#     else:
+#         rep.set_qc("POS", "day", 1)
+#
+#     rep.set_qc(
+#         "POS",
+#         "blklst",
+#         blacklist(
+#             rep.getvar("ID"),
+#             rep.getvar("DCK"),
+#             rep.getvar("YR"),
+#             rep.getvar("MO"),
+#             rep.lat(),
+#             rep.lon(),
+#             rep.getvar("PT"),
+#         ),
+#     )
+#
+#     # SST base QC
+#     rep.set_qc("SST", "noval", value_check(rep.getvar("SST")))
+#     rep.set_qc("SST", "freez", sst_freeze_check(rep.getvar("SST"), 0.0))
+#     rep.set_qc(
+#         "SST", "clim", climatology_check(rep.getvar("SST"), rep.getnorm("SST"), 8.0)
+#     )
+#     rep.set_qc("SST", "nonorm", no_normal_check(rep.getnorm("SST")))
+#
+#     # MAT base QC
+#     rep.set_qc("AT", "noval", value_check(rep.getvar("AT")))
+#     rep.set_qc(
+#         "AT", "clim", climatology_check(rep.getvar("AT"), rep.getnorm("AT"), 10.0)
+#     )
+#     rep.set_qc("AT", "nonorm", no_normal_check(rep.getnorm("AT")))
+#
+#     return rep

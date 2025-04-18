@@ -597,6 +597,20 @@ def do_air_temperature_hard_limit_check(at, parameters):
         raise KeyError('"hard_limits" not in parameters dictionary.')
     return qc.hard_limit(at, parameters["hard_limits"])
 
+def do_air_temperature_climatology_plus_stdev_check(at, at_climatology, at_stdev, parameters):
+    if "minmax_standard_deviation" not in parameters:
+        raise KeyError('"minmax_standard_deviation" not in parameters')
+    if "maximum_standardised_anomaly" not in parameters:
+        raise KeyError('"maximum_standardised_anomaly" not in parameters')
+    return qc.climatology_plus_stdev_check(
+        at,
+        at_climatology,
+        at_stdev,
+        parameters["minmax_standard_deviation"],
+        parameters["maximum_standardised_anomaly"]
+    )
+
+
 """
 Replaced the do_base_mat_qc by four separate functions see above 
 """
@@ -720,156 +734,290 @@ Replaced do_base_dpt_qc with four new functions
 #     )
 
 
-def do_base_sst_qc(sst, parameters):
+def do_sst_missing_value_check(sst):
     """
-    Run the base SST QC checks, non-missing, above freezing, climatology check
-    and check for normal
+    Check that sea surface temperature value exists
+
+    Parameters
+    ----------
+    sst : float
+        Sea surface temperature
+
+    Returns
+    -------
+    int
+        1 if value is missing, 0 otherwise
     """
-    # I think this should return a boolean value, isn't it?
-    assert "freezing_point" in parameters
-    assert "freeze_check_n_sigma" in parameters
-    assert "maximum_anomaly" in parameters
+    return qc.value_check(sst)
 
-    self.set_qc("SST", "noval", qc.value_check(self.getvar("SST")))
-
-    self.set_qc(
-        "SST",
-        "freez",
-        qc.sst_freeze_check(
-            self.getvar("SST"),
-            0.0,
-            parameters["freezing_point"],
-            parameters["freeze_check_n_sigma"],
-        ),
-    )
-
-    self.set_qc(
-        "SST",
-        "clim",
-        qc.climatology_check(
-            self.getvar("SST"), self.getnorm("SST"), parameters["maximum_anomaly"]
-        ),
-    )
-
-    self.set_qc("SST", "nonorm", qc.no_normal_check(self.getnorm("SST")))
-    self.set_qc(
-        "SST",
-        "hardlimit",
-        qc.hard_limit(self.getvar("SST"), parameters["hard_limits"]),
-    )
-
-
-def do_base_wind_qc(ws, parameters):
-    """Run the base Wind speed QC checks."""
-    self.set_qc("W", "noval", qc.value_check(self.getvar("W")))
-    self.set_qc(
-        "W", "hardlimit", qc.hard_limit(self.getvar("W"), parameters["hard_limits"])
-    )
-    self.set_qc(
-        "W",
-        "consistency",
-        qc.wind_consistency(
-            self.getvar("W"), self.getvar("D"), parameters["variable_limit"]
-        ),
-    )
-
-
-def do_kate_mat_qc(at, parameters):
+def do_sst_freeze_check(sst, parameters):
     """
-    Kate's modified MAT checks, non missing, modified climatology check, check for normal etc.
-    Has a mix of AT and AT2 because we want to keep two sets of climatologies and checks for humidity
+    Check that sea surface temperature is above freezing
+
+    Parameters
+    ----------
+    sst : float
+        Sea surface temperature
+    parameters : dict
+        Dictionary containing QC parameters. Must contain keys "freezing_point" and "freeze_check_n_sigma"
+
+    Returns
+    -------
+    int
+        Return 1 if SST below freezing, 0 otherwise
+
+    Raises
+    ------
+    KeyError
+        When
     """
-    # I think this should return a boolean value, isn't it?
-    # What is AT and AT2?
-    self.set_qc(
-        "AT2",
-        "clim",
-        qc.climatology_plus_stdev_check(
-            self.getvar("AT2"),
-            self.getnorm("AT2"),
-            self.getnorm("AT2", "stdev"),
-            parameters["minmax_standard_deviation"],
-            parameters["maximum_standardised_anomaly"],
-        ),
-    )
+    if "freezing_point" not in parameters:
+        raise KeyError('"freezing_point" not in parameters')
+    if "freeze_check_n_sigma" not in parameters:
+        raise KeyError('"freeze_check_n_sigma" not in parameters')
+    return qc.sst_freeze_check(sst, 0.0, parameters["freezing_point"], parameters["freeze_check_n_sigma"])
 
-    self.set_qc("AT2", "noval", qc.value_check(self.getvar("AT2")))
-    self.set_qc("AT2", "nonorm", qc.no_normal_check(self.getnorm("AT2")))
-    self.set_qc(
-        "AT2",
-        "hardlimit",
-        qc.hard_limit(self.getvar("AT"), parameters["hard_limits"]),
-    )
-
-
-def perform_base_qc(pt, latitude, longitude, timestamp, parameters):
+def do_sst_anomaly_check(sst, sst_climatology, parameters):
     """
-    Run all the base QC checks on the header file (CDM).
+    Check that the sea surface temperature is within the prescribed distance from climatology/
+
+    Parameters
+    ----------
+    sst : float
+        Sea surface temperature
+    sst_climatology: float
+        Climatological sea surface temperature value
+    parameters : dict
+        Dictionary containing QC parameters. Must contain key "maximum_anomaly"
+
+    Returns
+    -------
+    int
+        1 if sea surface temperature anomaly is outside allowed bounds, 0 otherwise
+
+    Raises
+    ------
+    KeyError
+        When maximum anomaly is not in parameters dictionary
     """
-    # If one of those checks is missing we break. Is this reasonable to you?
+    if "maximum_anomaly" not in parameters:
+        raise KeyError('"maximum anomaly" not in parameters dictionary.')
 
-    # self.do_fix_missing_hour()  # this should already be fixed wihle mapping to the CDM
-
-    if is_buoy(pt):
-        return "2"  # not checked, since we have no QC for buoys?
-
-    if not is_ship(pt):
-        return "2"  # not checked, since we have a QC for ships only?
-
-    if is_deck_780():
-        return "?"  # I have no idea what do do here
-
-    # Should we filter buoy, ship, deck_780 before this routine?
-    # I think this is too ICOADS-specific, isn't it?
-
-    if not do_position_check(latitude, longitude):
-        return "1"  # failed
-
-    if not do_date_check(year=timestamp.year, month=timestamp.month, day=timestamp.day):
-        return "1"  # failed
-
-    if not do_time_check(timestamp.hour):
-        return "1"  # failed
-
-    do_blacklist()  # I have no idea what do do here
-
-    is_day = do_day_check(
-        parameters["base"]["time_since_sun_above_horizon"]
-    )  # maybe we need this variable afterwards
+    return qc.climatology_check(sst, sst_climatology, parameters["maximum_anomaly"])
 
 
-def perform_obs_qc(
-    at=None, dpt=None, slp=None, sst=None, wbt=None, wd=None, ws=None, parameters={}
-):
-    """Run all the base QC checks on the obsevation files (CDM)."""
+def do_sst_no_normal_check(sst_climatology):
+    """
+    Check that climatological value is present
 
-    humidity_blacklist()
-    mat_blacklist()
-    wind_blacklist()
+    Parameters
+    ----------
+    sst_climatology : float
+        Sea surface temperature climatology value
 
-    # Should we do those blacklisting before this routine?
-    # Maybe as extra parameters of this function: do_humidity_qc, do_mat_qc, do_wind_qc?
+    Returns
+    -------
+    int
+        1 if climatology value is missing, 0 otherwise
+    """
+    return qc.no_normal_check(sst_climatology)
 
-    if at is not None:
-        return do_base_mat_qc(at, parameters)
-        # How should we implement this: self.do_kate_mat_qc(parameters["AT"]) ??
+# def do_base_sst_qc(sst, parameters):
+#     """
+#     Run the base SST QC checks, non-missing, above freezing, climatology check
+#     and check for normal
+#     """
+#     # I think this should return a boolean value, isn't it?
+#     assert "freezing_point" in parameters
+#     assert "freeze_check_n_sigma" in parameters
+#     assert "maximum_anomaly" in parameters
+#
+#     self.set_qc("SST", "noval", qc.value_check(self.getvar("SST")))
+#
+#     self.set_qc(
+#         "SST",
+#         "freez",
+#         qc.sst_freeze_check(
+#             self.getvar("SST"),
+#             0.0,
+#             parameters["freezing_point"],
+#             parameters["freeze_check_n_sigma"],
+#         ),
+#     )
+#
+#     self.set_qc(
+#         "SST",
+#         "clim",
+#         qc.climatology_check(
+#             self.getvar("SST"), self.getnorm("SST"), parameters["maximum_anomaly"]
+#         ),
+#     )
+#
+#     self.set_qc("SST", "nonorm", qc.no_normal_check(self.getnorm("SST")))
+#     self.set_qc(
+#         "SST",
+#         "hardlimit",
+#         qc.hard_limit(self.getvar("SST"), parameters["hard_limits"]),
+#     )
 
-    if dpt is not None:
-        return do_base_dpt_qc(dpt, parameters)
 
-    if slp is not None:
-        return do_base_slp_qc(slp, parameters)
+def do_wind_missing_value_check(w):
+    return qc.value_check(w)
 
-    if sst is not None:
-        return do_base_sst_qc(sst, parameters)
+def do_wind_hard_limits_check(w, parameters):
+    return qc.hard_limit(w, parameters["hard_limits"])
 
-    if ws is not None:  # I think "W" is "WS" in the CDM.
-        return do_base_wind_qc(ws, parameters)
+def do_wind_consistency_check(wind_speed, wind_direction, parameters):
+    """
+    Test to compare windspeed to winddirection.
 
-    # special check for silly values in all humidity-related variables
-    # and set DPT hardlimit flag if necessary
-    # How to implement this?
-    self.set_qc("DPT", "hardlimit", 0)
-    for var in ["AT", "DPT", "SHU", "RH"]:
-        if qc.hard_limit(self.getvar(var), parameters[var]["hard_limits"]) == 1:
-            self.set_qc("DPT", "hardlimit", 1)
+    Parameters
+    ----------
+    wind_speed : float
+        Wind speed
+    wind_direction : int
+        Wind direction in range 1-362 (see ICOADS documentation)
+    parameters : dict
+        QC with "variable_limit" which is a single value that specifies a maximum wind speed that can correspond to
+        variable wind direction.
+
+    Returns
+    -------
+    int
+        1 if windspeed and direction are inconsistent, 0 otherwise
+    """
+    if "variable_limit" not in parameters:
+        raise KeyError('"variable_limit" not in parameters')
+
+    result = 0
+
+    if wind_direction is None or wind_speed is None:
+        result = 1
+    else:
+        # direction 361 is Calm i.e. wind speed should be zero
+        if wind_direction == 361 and wind_speed != 0:
+            result = 1
+
+        # direction 363 is Variable i.e. low wind speed
+        if wind_direction == 362 and wind_speed > parameters["variable_limit"]:
+            result = 1
+
+    return result
+
+"""do base wind qc replaced by preceding three functions"""
+# def do_base_wind_qc(ws, parameters):
+#     """Run the base Wind speed QC checks."""
+#     self.set_qc("W", "noval", qc.value_check(self.getvar("W")))
+#     self.set_qc(
+#         "W", "hardlimit", qc.hard_limit(self.getvar("W"), parameters["hard_limits"])
+#     )
+#     self.set_qc(
+#         "W",
+#         "consistency",
+#         qc.wind_consistency(
+#             self.getvar("W"), self.getvar("D"), parameters["variable_limit"]
+#         ),
+#     )
+
+
+
+"""Only one QC check from do_kate_mat_qc was unique to the function so I added it to air temperature checks above"""
+# def do_kate_mat_qc(at, parameters):
+#     """
+#     Kate's modified MAT checks, non missing, modified climatology check, check for normal etc.
+#     Has a mix of AT and AT2 because we want to keep two sets of climatologies and checks for humidity
+#     """
+#     # I think this should return a boolean value, isn't it?
+#     # What is AT and AT2?
+#     self.set_qc(
+#         "AT2",
+#         "clim",
+#         qc.climatology_plus_stdev_check(
+#             self.getvar("AT2"),
+#             self.getnorm("AT2"),
+#             self.getnorm("AT2", "stdev"),
+#             parameters["minmax_standard_deviation"],
+#             parameters["maximum_standardised_anomaly"],
+#         ),
+#     )
+#
+#     self.set_qc("AT2", "noval", qc.value_check(self.getvar("AT2")))
+#     self.set_qc("AT2", "nonorm", qc.no_normal_check(self.getnorm("AT2")))
+#     self.set_qc(
+#         "AT2",
+#         "hardlimit",
+#         qc.hard_limit(self.getvar("AT"), parameters["hard_limits"]),
+#     )
+
+
+# def perform_base_qc(pt, latitude, longitude, timestamp, parameters):
+#     """
+#     Run all the base QC checks on the header file (CDM).
+#     """
+#     # If one of those checks is missing we break. Is this reasonable to you?
+#
+#     # self.do_fix_missing_hour()  # this should already be fixed wihle mapping to the CDM
+#
+#     if is_buoy(pt):
+#         return "2"  # not checked, since we have no QC for buoys?
+#
+#     if not is_ship(pt):
+#         return "2"  # not checked, since we have a QC for ships only?
+#
+#     if is_deck_780():
+#         return "?"  # I have no idea what do do here
+#
+#     # Should we filter buoy, ship, deck_780 before this routine?
+#     # I think this is too ICOADS-specific, isn't it?
+#
+#     if not do_position_check(latitude, longitude):
+#         return "1"  # failed
+#
+#     if not do_date_check(year=timestamp.year, month=timestamp.month, day=timestamp.day):
+#         return "1"  # failed
+#
+#     if not do_time_check(timestamp.hour):
+#         return "1"  # failed
+#
+#     do_blacklist()  # I have no idea what do do here
+#
+#     is_day = do_day_check(
+#         parameters["base"]["time_since_sun_above_horizon"]
+#     )  # maybe we need this variable afterwards
+#
+#
+# def perform_obs_qc(
+#     at=None, dpt=None, slp=None, sst=None, wbt=None, wd=None, ws=None, parameters={}
+# ):
+#     """Run all the base QC checks on the obsevation files (CDM)."""
+#
+#     humidity_blacklist()
+#     mat_blacklist()
+#     wind_blacklist()
+#
+#     # Should we do those blacklisting before this routine?
+#     # Maybe as extra parameters of this function: do_humidity_qc, do_mat_qc, do_wind_qc?
+#
+#     if at is not None:
+#         return do_base_mat_qc(at, parameters)
+#         # How should we implement this: self.do_kate_mat_qc(parameters["AT"]) ??
+#
+#     if dpt is not None:
+#         return do_base_dpt_qc(dpt, parameters)
+#
+#     if slp is not None:
+#         return do_base_slp_qc(slp, parameters)
+#
+#     if sst is not None:
+#         return do_base_sst_qc(sst, parameters)
+#
+#     if ws is not None:  # I think "W" is "WS" in the CDM.
+#         return do_base_wind_qc(ws, parameters)
+#
+#     # special check for silly values in all humidity-related variables
+#     # and set DPT hardlimit flag if necessary
+#     # How to implement this?
+#     self.set_qc("DPT", "hardlimit", 0)
+#     for var in ["AT", "DPT", "SHU", "RH"]:
+#         if qc.hard_limit(self.getvar(var), parameters[var]["hard_limits"]) == 1:
+#             self.set_qc("DPT", "hardlimit", 1)
