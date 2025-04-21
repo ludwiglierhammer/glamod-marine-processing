@@ -379,11 +379,7 @@ def do_day_check(year, month, day, hour, latitude, longitude, time_since_sun_abo
     """
 
     # Defaults to FAIL if the location, date or time are bad
-    if (
-            do_position_check(latitude, longitude) == 1 or
-            do_date_check(year, month, day) == 1 or
-            do_time_check(hour) == 1
-    ):
+    if do_position_check(latitude, longitude) == 1 or  do_date_check(year, month, day) == 1 or do_time_check(hour) == 1:
         return 1
 
     if not (1 <= month <= 12):
@@ -572,21 +568,21 @@ def do_air_temperature_no_normal_check(at_climatology):
     """
     return qc.no_normal_check(at_climatology)
 
-def do_air_temperature_hard_limit_check(at, parameters):
+def do_air_temperature_hard_limit_check(at: float, parameters: dict) -> int:
     """
-    Check that air temperature is within hard limits specified by parameters["hard_limits"]
+    Check that air temperature is within hard limits specified by "hard_limits".
 
     Parameters
     ----------
     at : float
-        Air temperature to be checked
+        Air temperature to be checked.
     parameters : dict
-        Dictionary containing QC parameters. Must contain key "hard_limits"
+        Dictionary containing QC parameters. Must contain key "hard_limits".
 
     Returns
     -------
     int
-        1 if air temperature is outside of hard limits, 0 otherwise
+        1 if air temperature is outside hard limits, 0 otherwise
 
     Raises
     ------
@@ -612,7 +608,7 @@ def do_air_temperature_climatology_plus_stdev_check(at, at_climatology, at_stdev
 
 
 """
-Replaced the do_base_mat_qc by four separate functions see above 
+Replaced the do_base_mat_qc by four separate functions see above
 """
 # def do_base_mat_qc(at, parameters):
 #     """Run the base MAT QC checks, non-missing, climatology check and check for normal etc."""

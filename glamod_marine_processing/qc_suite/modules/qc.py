@@ -577,6 +577,7 @@ def missing_mean(inarr):
     ----------
     inarr : list
         list of values for which mean is required. Missing values represented by None in list
+
     Returns
     -------
     float
