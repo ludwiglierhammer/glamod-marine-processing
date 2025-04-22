@@ -9,11 +9,11 @@ from cdm_reader_mapper import read_tables
 from cdm_reader_mapper.common.getting_files import load_file
 
 from glamod_marine_processing.qc_suite.modules.next_level_qc import (
-#    do_base_dpt_qc,
-#    do_base_mat_qc,
-#    do_base_sst_qc,
-#    do_base_wind_qc,
-#    do_kate_mat_qc,
+    #    do_base_dpt_qc,
+    #    do_base_mat_qc,
+    #    do_base_sst_qc,
+    #    do_base_wind_qc,
+    #    do_kate_mat_qc,
     do_blacklist,
     do_date_check,
     do_day_check,
@@ -43,31 +43,35 @@ from glamod_marine_processing.qc_suite.modules.next_level_qc import (
     do_wind_hard_limits_check
 )
 
+import glamod_marine_processing.qc_suite.modules.qc as qc
+
 
 def test_is_buoy():
     # For all platform types in ICOADS, flag set to 1 only if platform type corresponds to drifting buoy or
     # drifting buoy
     for pt in range(0, 47):
         result = is_buoy(pt)
-        if pt in [6,7]:
+        if pt in [6, 7]:
             assert result == 1
         else:
             assert result == 0
+
 
 def test_is_ship():
     # For all platform types in ICOADS, flag set to 1 only if platform type corresponds to drifting buoy or
     # drifting buoy
     for pt in range(0, 47):
-       result = is_ship(pt)
-       if pt in [0, 1, 2, 3, 4, 5, 10, 11, 12, 17]:
-           assert result == 1
-       else:
-           assert result == 0
+        result = is_ship(pt)
+        if pt in [0, 1, 2, 3, 4, 5, 10, 11, 12, 17]:
+            assert result == 1
+        else:
+            assert result == 0
 
 
 def test_is_deck_780():
     result = is_deck_780(780)
     assert result == 1
+
 
 @pytest.mark.parametrize(
     "latitude, longitude, expected",
@@ -83,12 +87,14 @@ def test_do_position_check(latitude, longitude, expected):
     result = do_position_check(latitude, longitude)
     assert result == expected
 
+
 def test_do_position_check_raises_value_error():
     # Make sure that an exception is raised if latitude or longitude is missing
     with pytest.raises(ValueError):
         result = do_position_check(None, 0.0)
     with pytest.raises(ValueError):
         result = do_position_check(0.0, None)
+
 
 @pytest.mark.parametrize(
     "year, month, day, expected",
@@ -107,12 +113,14 @@ def test_do_date_check(year, month, day, expected):
     result = do_date_check(year, month, day)
     assert result == expected
 
+
 def test_do_date_check_raises_value_error():
-   # Make sure that an exception is raised if year or month is set to None
+    # Make sure that an exception is raised if year or month is set to None
     with pytest.raises(ValueError):
-        result = do_date_check(None, 1,1)
+        result = do_date_check(None, 1, 1)
     with pytest.raises(ValueError):
         result = do_date_check(1850, None, 1)
+
 
 @pytest.mark.parametrize(
     "hour, expected",
@@ -151,6 +159,7 @@ def test_do_blacklist(id, deck, year, month, latitude, longitude, platform_type,
     result = do_blacklist(id, deck, year, month, latitude, longitude, platform_type)
     assert result == expected
 
+
 @pytest.mark.parametrize(
     "year, month, day, hour, latitude, longitude, time, expected",
     [
@@ -168,14 +177,14 @@ def test_do_day_check(year, month, day, hour, latitude, longitude, time, expecte
     assert result == expected
 
 
-
 def test_humidity_blacklist():
-    for platform_type in range(0,47):
+    for platform_type in range(0, 47):
         result = humidity_blacklist(platform_type)
         if platform_type in [0, 1, 2, 3, 4, 5, 6, 8, 9, 10, 15]:
             assert result == 0
         else:
             assert result == 1
+
 
 @pytest.mark.parametrize(
     "platform_type, deck, latitude, longitude, year, expected",
@@ -195,23 +204,25 @@ def test_mat_blacklist(platform_type, deck, latitude, longitude, year, expected)
 
 
 def test_wind_blacklist():
-    for deck in range(1,1000):
+    for deck in range(1, 1000):
         result = wind_blacklist(deck)
         if deck in [708, 780]:
             assert result == 1
         else:
             assert result == 0
 
+
 @pytest.mark.parametrize(
     "at, expected",
     [
-        (5.6,0),
+        (5.6, 0),
         (None, 1),
         (np.nan, 0)
     ]
 )
 def test_do_air_temperature_missing_value_check(at, expected):
     assert do_air_temperature_missing_value_check(at) == expected
+
 
 @pytest.mark.parametrize(
     "at, at_climatology, parameters, expected",
@@ -224,9 +235,11 @@ def test_do_air_temperature_missing_value_check(at, expected):
 def test_do_air_temperature_anomaly_check(at, at_climatology, parameters, expected):
     assert do_air_temperature_anomaly_check(at, at_climatology, parameters) == expected
 
+
 def test_do_air_temperature_anomaly_check_raises_key_error():
     with pytest.raises(KeyError):
         result = do_air_temperature_anomaly_check(5.6, 2.2, {'bad_parameter_name': 10.0})
+
 
 @pytest.mark.parametrize(
     "at_climatology, expected",
@@ -252,9 +265,11 @@ def test_do_air_temperature_no_normal_check(at_climatology, expected):
 def test_do_air_temperature_hard_limit_check(at, parameters, expected):
     assert do_air_temperature_hard_limit_check(at, parameters) == expected
 
+
 def test_do_air_temperature_hard_limit_check_raises_key_error():
     with pytest.raises(KeyError):
         _ = do_air_temperature_hard_limit_check(5.6, {'bad_parameter_name': [-10.0, 10.0]})
+
 
 @pytest.mark.parametrize(
     "at, at_climatology, at_stdev, parameters, expected",
@@ -270,6 +285,7 @@ def test_do_air_temperature_hard_limit_check_raises_key_error():
 def test_do_air_temperature_climatology_plus_stdev_check(at, at_climatology, at_stdev, parameters, expected):
     assert do_air_temperature_climatology_plus_stdev_check(at, at_climatology, at_stdev, parameters) == expected
 
+
 def test_do_air_temperature_climatology_plus_stdev_check_raises_key_error():
     test_parameters = {'minmax_standard_deviation': [1.0, 10.0], 'bad_parameter_name': 2.0}
     with pytest.raises(KeyError):
@@ -283,13 +299,14 @@ def test_do_air_temperature_climatology_plus_stdev_check_raises_key_error():
 @pytest.mark.parametrize(
     "dpt, expected",
     [
-        (5.6,0),
+        (5.6, 0),
         (None, 1),
         (np.nan, 0)
     ]
 )
 def test_do_dpt_missing_value_check(dpt, expected):
     assert do_dpt_missing_value_check(dpt) == expected
+
 
 @pytest.mark.parametrize(
     "dpt, dpt_climatology, dpt_stdev, parameters, expected",
@@ -305,6 +322,7 @@ def test_do_dpt_missing_value_check(dpt, expected):
 def test_do_dpt_climatology_plus_stdev_check(dpt, dpt_climatology, dpt_stdev, parameters, expected):
     assert do_dpt_climatology_plus_stdev_check(dpt, dpt_climatology, dpt_stdev, parameters) == expected
 
+
 def test_do_dpt_climatology_plus_stdev_check_raises_key_error():
     test_parameters = {'minmax_standard_deviation': [1.0, 10.0], 'bad_parameter_name': 2.0}
     with pytest.raises(KeyError):
@@ -313,6 +331,7 @@ def test_do_dpt_climatology_plus_stdev_check_raises_key_error():
     test_parameters = {'bad_parameter_name': [1.0, 10.0], 'maximum_standardised_anomaly': 2.0}
     with pytest.raises(KeyError):
         result = do_dpt_climatology_plus_stdev_check(5.6, 2.2, 3.3, test_parameters)
+
 
 @pytest.mark.parametrize(
     "dpt_climatology, expected",
@@ -331,25 +350,26 @@ def test_do_dpt_temperature_no_normal_check(dpt_climatology, expected):
     [
         (3.6, 5.6, 0),  # clearly unsaturated
         (5.6, 5.6, 0),  # 100% saturation
-        (15.6, 13.6, 1), # clearly supersaturated
-        (None, 12.0, 1), # missing dpt FAIL
-        (12.0, None, 1) # missing at FAIL
+        (15.6, 13.6, 1),  # clearly supersaturated
+        (None, 12.0, 1),  # missing dpt FAIL
+        (12.0, None, 1)  # missing at FAIL
     ]
 )
-def test_do_supersaturation_check(dpt,at, expected):
+def test_do_supersaturation_check(dpt, at, expected):
     assert do_supersaturation_check(dpt, at) == expected
 
 
 @pytest.mark.parametrize(
     "sst, expected",
     [
-        (5.6,0),
+        (5.6, 0),
         (None, 1),
         (np.nan, 0)
     ]
 )
 def test_do_sst_missing_value_check(sst, expected):
     assert do_sst_missing_value_check(sst) == expected
+
 
 @pytest.mark.parametrize(
     "sst, sst_climatology, parameters, expected",
@@ -362,9 +382,11 @@ def test_do_sst_missing_value_check(sst, expected):
 def test_do_sst_anomaly_check(sst, sst_climatology, parameters, expected):
     assert do_sst_anomaly_check(sst, sst_climatology, parameters) == expected
 
+
 def test_do_sst_anomaly_check_raises_key_error():
     with pytest.raises(KeyError):
         result = do_sst_anomaly_check(5.6, 2.2, {'bad_parameter_name': 10.0})
+
 
 @pytest.mark.parametrize(
     "sst_climatology, expected",
@@ -390,6 +412,7 @@ def test_do_sst_no_normal_check(sst_climatology, expected):
 def test_do_sst_freeze_check(sst, parameters, expected):
     assert do_sst_freeze_check(sst, parameters) == expected
 
+
 def test_do_sst_freeze_check_raises_key_error():
     test_parameters = {'bad_parameter_name': -1.8, 'freeze_check_n_sigma': 2.0}
     with pytest.raises(KeyError):
@@ -400,17 +423,17 @@ def test_do_sst_freeze_check_raises_key_error():
         _ = do_sst_freeze_check(5.6, test_parameters)
 
 
-
 @pytest.mark.parametrize(
     "w, expected",
     [
-        (5.6,0),
+        (5.6, 0),
         (None, 1),
         (np.nan, 0)
     ]
 )
 def test_do_wind_missing_value_check(w, expected):
     assert do_wind_missing_value_check(w) == expected
+
 
 @pytest.mark.parametrize(
     "w, parameters, expected",
@@ -424,14 +447,16 @@ def test_do_wind_missing_value_check(w, expected):
 def test_do_wind_hard_limit_check(w, parameters, expected):
     assert do_wind_hard_limits_check(w, parameters) == expected
 
+
 def test_do_wind_hard_limit_check_raises_key_error():
     with pytest.raises(KeyError):
         _ = do_wind_hard_limits_check(5.6, {'bad_parameter_name': [-10.0, 10.0]})
 
+
 @pytest.mark.parametrize(
     "wind_speed, wind_direction, parameters, expected",
     [
-        (None, 4, {"variable_limit": 3}, 1),  #missing wind speed
+        (None, 4, {"variable_limit": 3}, 1),  # missing wind speed
         (4, None, {"variable_limit": 3}, 1),
         (0, 361, {"variable_limit": 3}, 0),
         (5, 361, {"variable_limit": 3}, 1)
@@ -440,6 +465,100 @@ def test_do_wind_hard_limit_check_raises_key_error():
 def test_do_wind_consistency_check(wind_speed, wind_direction, parameters, expected):
     assert do_wind_consistency_check(wind_speed, wind_direction, parameters) == expected
 
+
 def test_do_wind_consistency_check_raises_key_error():
     with pytest.raises(KeyError):
         _ = do_wind_consistency_check(0, 361, {"bad_parameter_name": 3})
+
+
+@pytest.mark.parametrize(
+    "y1, m1, y2, m2, expected",
+    [
+        (2024, 1, 2024, 1, 1),
+        (2023, 1, 2024, 1, 0),
+        (2024, 1, 2024, 2, 0),
+        (2021, 12, 2025, 3, 0)
+    ]
+)
+def test_month_match(y1, m1, y2, m2, expected):
+    assert qc.month_match(y1, m1, y2, m2) == expected
+
+
+@pytest.mark.parametrize(
+    "year, month, day, expected_year, expected_month, expected_day",
+    [
+        (2024, 1, 1, 2023, 12, 31),
+        (2024, 3, 1, 2024, 2, 29),
+        (2023, 3, 1, 2023, 2, 28),
+        (2024, 12, 31, 2024, 12, 30),
+        (2024, 2, 29, 2024, 2, 28),
+        (2025, 2, 29, None, None, None),
+    ]
+)
+def test_yesterday(year, month, day, expected_year, expected_month, expected_day):
+    assert qc.yesterday(year, month, day) == (expected_year, expected_month, expected_day)
+
+
+@pytest.mark.parametrize(
+    "month, expected",
+    [
+        (1, 'DJF'),
+        (2, 'DJF'),
+        (3, 'MAM'),
+        (4, 'MAM'),
+        (5, 'MAM'),
+        (6, 'JJA'),
+        (7, 'JJA'),
+        (8, 'JJA'),
+        (9, 'SON'),
+        (10, 'SON'),
+        (11, 'SON'),
+        (12, 'DJF'),
+        (0, None),
+        (-1, None),
+        (13, None),
+    ]
+)
+def test_seasons(month, expected):
+    assert qc.season(month) == expected
+
+
+def test_pentad_to_mont():
+    for p in range(1, 74):
+        m, d = qc.pentad_to_month_day(p)
+        assert p == qc.which_pentad(m, d)
+
+
+@pytest.mark.parametrize(
+    "month, day, expected",
+    [
+        (1, 6, 2),
+        (1, 21, 5),
+        (12, 26, 72),
+        (1, 1, 1),
+        (12, 31, 73),
+        (2, 29, 12),
+        (3, 1, 12),
+    ]
+)
+def test_which_pentad(month, day, expected):
+    assert qc.which_pentad(month, day) == expected
+
+
+def test_which_pentad_raises_value_error():
+    with pytest.raises(ValueError):
+        qc.which_pentad(13, 1)
+    with pytest.raises(ValueError):
+        qc.which_pentad(1, 41)
+
+
+def test_day_in_year_leap_year():
+    assert qc.day_in_year(2, 29) == qc.day_in_year(3, 1)
+
+    # Just test all days
+    month_lengths = [31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31]
+    count = 1
+    for month in range(1, 13):
+        for day in range(1, month_lengths[month - 1] + 1):
+            assert qc.day_in_year(month, day) == count
+            count += 1

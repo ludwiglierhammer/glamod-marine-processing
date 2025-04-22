@@ -80,7 +80,7 @@ def season(month: int) -> str:
     str
         DJF, MAM, JJA, or SON or None if the input month is non-existent (e.g. 13)
     """
-    if month < 0 or month > 12:
+    if month < 1 or month > 12:
         return None
     ssnlist = [
         "DJF",
@@ -286,8 +286,10 @@ def which_pentad(inmonth: int, inday: int) -> int:
     int
         pentad (5-day period) containing input day, from 1 (1 Jan-5 Jan) to 73 (27-31 Dec)
     """
-    assert 12 >= inmonth >= 1
-    assert 31 >= inday >= 1
+    if not(12 >= inmonth >= 1):
+        raise ValueError(f"Month {inmonth} not in range 1-12")
+    if not(31 >= inday >= 1):
+        raise ValueError(f"Day {inday} not in range 1-31")
 
     pentad = int((day_in_year(inmonth, inday) - 1) / 5)
     pentad = pentad + 1
@@ -316,6 +318,11 @@ def day_in_year(month: int, day: int) -> int:
     -------
     int
         day number in year 1-365
+
+    Raises
+    ------
+    ValueError
+        When month not in range 1-12 or day not in range 1-31
     """
     if month < 1 or month > 12:
         raise ValueError("Month not in range 1-12")
@@ -356,6 +363,12 @@ def get_hires_sst(lat: float, lon: float, month: int, day: int, hires_field) -> 
     -------
     float
         the SST from the field at the specified point
+
+    Raises
+    ------
+    ValueError
+        When latitude outside range -90 to 90, longitude is outside range -180 to 360, month is outside
+        range 1-12 or day is outside range 1-number of days in month
     """
     if lat < -90.0 or lat > 90.0:
         raise ValueError(f"Latitude {lat} outside range -90 to 90")
