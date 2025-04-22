@@ -11,32 +11,62 @@ import math
 from datetime import datetime, timedelta
 
 import numpy as np
+from Extended_IMMA_sb import MarineReport
 
 # Conversion factor between degrees and radians
 degrad = np.pi / 180.0
 
 
-def month_match(y1, m1, y2, m2):
-    """Check whether month matches."""
+def month_match(
+    y1: int,
+    m1: int,
+    y2: int,
+    m2: int,
+) -> int:
+    """Check whether month matches.
+
+    Parameters
+    ----------
+    y1: int
+        First year to check.
+    m1: int
+        First month to check.
+    y2: int
+        Second year to check.
+    m2: int
+        Second month to check.
+
+    Returns
+    -------
+    int
+        Returns 1 if both `y1` and `y2` and `m1` and `m2` match, else 0.
+    """
     if y1 == y2 and m1 == m2:
         return 1
     else:
         return 0
 
 
-def yesterday(year, month, day):
-    """'
-    For specified year month and day return the year month and day of the day before.
+def yesterday(
+    year: int,
+    month: int,
+    day: int,
+) -> (int, int, int) | (None, None, None):
+    """For specified year, month and day return the year, month and day of the day before.
 
-    :param year: year
-    :param month: month
-    :param day: day
-    :type year: integer
-    :type month: integer
-    :type day: integer
+    Parameters
+    ----------
+    year: int
+        Current year.
+    month: int
+        Current month.
+    day: int
+        Current day.
 
-    :return: tuple of year, month and day, returns None if the input day does not exist (e.g. Feb 30th)
-    :rtype: integer
+    Returns
+    -------
+    (int, int, int, int) or (None, None, None, None)
+        year, month and day of the day before, returns a tuple of ``None`` values if the input day does not exist (e.g. Feb 30th).
     """
     try:
         dt = datetime(year, month, day)
@@ -47,15 +77,18 @@ def yesterday(year, month, day):
         return None, None, None
 
 
-def season(month):
-    """
-    Return short season name for given month, None for months like 13 that do not exist
+def season(month: int) -> str | None:
+    """Return short season name for given month, ``None`` for months like 13 that do not exist.
 
-    :param month: month
-    :type month: integer
+    Parameters
+    ----------
+    month: int
+        Current month.
 
-    :return: DJF, MAM, JJA, or SON or None if the input month is non-existent (e.g. 13)
-    :rtype: string
+    Returns
+    -------
+    str or None
+        Name of the season with includes `month` (DJF, MAM, JJA, or SON) or ``None`` if the input month is non-existent (e.g. 13).
     """
     if month < 0 or month > 12:
         return None
@@ -76,15 +109,18 @@ def season(month):
     return ssnlist[month - 1]
 
 
-def pentad_to_month_day(p):
-    """
-    Given a pentad number, return the month and day of the first day in the pentad
+def pentad_to_month_day(p: int) -> (int, int):
+    """Given a pentad number, return the month and day of the first day in the pentad.
 
-    :param p: pentad number from 1 to 73
-    :type p: integer
+    Parameters
+    ----------
+    p: int
+        Pentad number from 1 to 73
 
-    :return: month and day of the first day of the pentad
-    :rtype: integer
+    Returns
+    -------
+    (int, int)
+        Month and day of the first day of the pentad.
     """
     assert 0 < p < 74, "p outside allowed range 1-73 " + str(p)
     m = [
@@ -240,18 +276,23 @@ def pentad_to_month_day(p):
     return m[p - 1], d[p - 1]
 
 
-def which_pentad(inmonth, inday):
-    """
-    take month and day as inputs and return pentad in range 1-73.
+def which_pentad(inmonth: int, inday: int) -> int:
+    """Take month and day as inputs and return pentad in range 1-73.
 
-    :param inmonth: month containing the day for which we want to calculate the pentad
-    :param inday: day for the day for which we want to calculate the pentad
-    :type inmonth: integer
-    :type inday: integer
+    Parameters
+    ----------
+    inmonth: int
+        Month containing the day for which we want to calculate the pentad.
+    inday: int
+        Day for the day for which we want to calculate the pentad.
 
-    :return: pentad (5-day period) containing input day, from 1 (1 Jan-5 Jan) to 73 (27-31 Dec)
-    :rtype: integer
+    Returns
+    -------
+    int
+        Pentad (5-day period) containing input day, from 1 (1 Jan-5 Jan) to 73 (27-31 Dec).
 
+    Note
+    ----
     The calculation is rather simple. It just loops through the year and adds up days till it reaches
     the day we are interested in. February 29th is treated as though it were March 1st in a regular year.
     """
@@ -267,18 +308,20 @@ def which_pentad(inmonth, inday):
     return pentad
 
 
-def day_in_year(month, day):
-    """
-    Find the day number of a particular day from Jan 1st which is 1
-    to Dec 31st which is 365.
+def day_in_year(month: int, day: int) -> int:
+    """Find the day number of a particular day from Jan 1st which is 1 to Dec 31st which is 365.
 
-    :param month: month to be processed
-    :param day: day in the month
-    :type month: integer
-    :type day: integer
+    Parameters
+    ----------
+    month: int
+        Month to be processed
+    day: int
+        Day in the month
 
-    :return: day number in year 1-365
-    :rtype: integer
+    Returns
+    -------
+    int
+        Day number in year 1-365.
     """
     assert month >= 1
     assert month <= 12, str(month)
@@ -297,21 +340,28 @@ def day_in_year(month, day):
     return dindex
 
 
-def get_hires_sst(lat, lon, month, day, hires_field):
-    """
-    Get a value from a high resolution ie 0.25 degree daily SST field
+def get_hires_sst(
+    lat: float, lon: float, month: int, day: int, hires_field: np.ndarray
+) -> int | float | None:
+    """Get a value from a high resolution ie 0.25 degree daily SST field.
 
-    :param lat: latitude of point to extract
-    :param lon: longitude of point to extract
-    :param month: month of point to extract
-    :param day: day in month of point to extract
-    :param hires_field: the field from which to extract the point
-    :type lat: float
-    :type lon: float
-    :type month: int
-    :type day: int
-    :type hires_field: numpy array
-    :return: the SST from the field at the specified point
+    Parameters
+    ----------
+    lat: float
+        Latitude of point to extract.
+    lon: float
+        Longitude of point to extract.
+    month: int
+        Month of point to extract.
+    day: int
+        Day in month of point to extract.
+    hires_field: np.ndarray
+        The field from which to extract the point.
+
+    Returns
+    -------
+    int or float or None
+      The SST from the field at the specified point.
     """
     assert lat >= -90.0
     assert lat <= 90.0
@@ -335,8 +385,29 @@ def get_hires_sst(lat, lon, month, day, hires_field):
     return result
 
 
-def get_sst_daily(lat, lon, month, day, sst):
-    """Get SST from pentad climatology interpolated to day."""
+def get_sst_daily(
+    lat: float, lon: float, month: int, day: int, sst: np.ndarray
+) -> int | float | None:
+    """Get SST from pentad climatology interpolated to day.
+
+    Parameters
+    ----------
+    lat: float
+        Latitude of point to extract.
+    lon: float
+        Longitude of point to extract.
+    month: int
+        Month of point to extract.
+    day: int
+        Day in month of point to extract.
+    sst: np.ndarray
+        The sst field from which to extract the point.
+
+    Returns
+    -------
+    int or float or None
+        The SST from the field at the specified point.
+    """
     assert lat >= -90.0
     assert lat <= 90.0
     assert lon >= -185.00
@@ -364,24 +435,31 @@ def get_sst_daily(lat, lon, month, day, sst):
     return result
 
 
-def get_sst(lat, lon, month, day, sst):
+def get_sst(
+    lat: float, lon: float, month: int, day: int, sst: np.ndarray
+) -> int | float | None:
     """
     when given an array (sst) of appropriate type, extracts the value associated with that pentad,
     latitude and longitude.
 
-    :param lat: latitude of the point
-    :param lon: longitude of the point
-    :param month: month of the point
-    :param day: day of the point
-    :param sst: an array holding the 1x1x5-day gridded values
-    :type lat: float
-    :type lon: float
-    :type month: integer
-    :type day: integer
-    :type sst: numpy array
-    :return: value in array at this point
-    :rtype: float
+    lat: float
+        Latitude of the point.
+    lon: float
+        Longitude of the point.
+    month: int
+        Month of the point.
+    day: int
+        Day of the point.
+    sst: np.ndarray
+        An array holding the 1x1x5-day gridded values
 
+    Returns
+    -------
+    int or float or None
+        The SST from the field at the specific point.
+
+    Note
+    ----
     The structure of the SST array has to be quite specific it assumes a grid that is 360 x 180 x 73
     i.e. one year of 1degree lat x 1degree lon data split up into pentads. The west-most box is at 180degrees with
     index 0 and the northern most box also has index zero.
@@ -422,14 +500,20 @@ def get_sst(lat, lon, month, day, sst):
     return result
 
 
-def get_hires_clim(rep, clim):
-    """
-    Get the climatological value for this particular observation
+def get_hires_clim(rep: MarineReport, clim: np.ndarray) -> float | None:
+    """Get the climatological value for this particular observation.
 
-    :param rep: a MarineReport
-    :param clim: a masked array containing the climatological averages
-    :type rep: MarineReport
-    :type clim: numpy array
+    Parameters
+    ----------
+    rep: MarineReport
+        Marine Report
+    clim: np.ndarray
+        A masked array containing the climatological averages.
+
+    Returns
+    -------
+    float or None
+        Climatological value for a particular observation.
     """
     try:
         rep_clim = get_hires_sst(
@@ -442,11 +526,39 @@ def get_hires_clim(rep, clim):
     return rep_clim
 
 
-def bilinear_interp(x1, x2, y1, y2, x, y, q11, q12, q21, q22):
+def bilinear_interp(
+    x1: int | float,
+    x2: int | float,
+    y1: int | float,
+    y2: int | float,
+    x: int | float,
+    y: int | float,
+    q11: int | float,
+    q12: int | float,
+    q21: int | float,
+    q22: int | float,
+) -> int | float:
     """
     Perform a bilinear interpolation at the point x,y from the rectangular grid
     defined by x1,y1 and x2,y2 with values at the four corners equal to Q11, Q12,
     Q21 and Q22.
+
+    Parameters
+    ----------
+    x1: int or float
+    x2: int or float
+    y1: int or float
+    y2: int or float
+    x: int or float
+    y: int or float
+    q11: int or float
+    q12: int or float
+    q21: int or float
+    q22: int or float
+
+    Returns
+    -------
+    int or float
     """
     assert x1 <= x <= x2
     assert y1 <= y <= y2
@@ -469,8 +581,19 @@ def bilinear_interp(x1, x2, y1, y2, x, y, q11, q12, q21, q22):
     return val
 
 
-def missing_mean(inarr):
-    """Return mean value or None."""
+def missing_mean(inarr: list) -> float | None:
+    """Return mean value or None.
+
+    Parameters
+    ----------
+    inarr: list
+        List containing values.
+
+    Returns
+    -------
+    float or None
+        Mean value.
+    """
     result = 0.0
     num = 0.0
     for val in inarr:
@@ -483,10 +606,19 @@ def missing_mean(inarr):
         return result / num
 
 
-def fill_missing_vals(q11, q12, q21, q22):
-    """
-    For a group of four neighbouring grid boxes which form a square,
-    fill gaps using means of neighbours.
+def fill_missing_vals(q11, q12, q21, q22) -> (int, int, int, int):
+    """For a group of four neighbouring grid boxes which form a square, fill gaps using means of neighbours.
+
+    Parameters
+    ----------
+    q11: int
+    q12: int
+    q21: int
+    q22: int
+
+    Returns
+    -------
+    (int, int, int, int)
     """
     outq11 = q11
     outq12 = q12
@@ -516,8 +648,24 @@ def fill_missing_vals(q11, q12, q21, q22):
     return outq11, outq12, outq21, outq22
 
 
-def get_four_surrounding_points(lat, lon, max90=1):
-    """Get fur surrounding points."""
+def get_four_surrounding_points(
+    lat: float, lon: float, max90: int = 1
+) -> (float, float, float, float):
+    """Get four surrounding points.
+
+    Parameters
+    ----------
+    lat: float
+        Latitude.
+    lon: float
+        Longitude.
+    max90: int
+        Max90.
+
+    Returns
+    -------
+    (float, float, float, float)
+    """
     assert -90.0 <= lat <= 90.0
     assert -180.0 <= lon <= 180.0
 
@@ -550,8 +698,18 @@ def get_four_surrounding_points(lat, lon, max90=1):
     return x1, x2, y1, y2
 
 
-def get_clim_interpolated(rep, clim):
-    """Get climatological interpolation."""
+def get_clim_interpolated(rep: MarineReport, clim: np.ndarray) -> int | float:
+    """Get climatological interpolation.
+
+    Parameters
+    ----------
+    rep: MarineReport
+    clim: np.ndarray
+
+    Returns
+    -------
+    int or float
+    """
     lat = rep.lat()
     lon = rep.lon()
     mo = rep.getvar("MO")
@@ -613,14 +771,19 @@ def get_clim_interpolated(rep, clim):
     return bilinear_interp(x1, x2, y1, y2, lon, lat, q11, q12, q21, q22)
 
 
-def get_clim(rep, clim):
-    """
-    Get the climatological value for this particular observation
+def get_clim(rep: MarineReport, clim: np.ndarray) -> float | None:
+    """Get the climatological value for this particular observation.
 
-    :param rep: a MarineReport
-    :param clim: a masked array containing the climatological averages
-    :type rep: MarineReport
-    :type clim: numpy array
+    Parameters
+    ----------
+    rep: MarineReport
+        Marine Report.
+    clim: np.ndarray
+        A masked array containing the climatological averages.
+
+    Returns
+    -------
+    float or None
     """
     try:
         rep_clim = get_sst(
@@ -633,20 +796,25 @@ def get_clim(rep, clim):
     return rep_clim
 
 
-def get_sst_single_field(lat, lon, sst):
-    """
-    when given an array (sst) of appropriate type, extracts the value associated with that pentad,
-    latitude and longitude.
+def get_sst_single_field(lat: float, lon: float, sst: np.ndarray) -> int | float:
+    """When given an array (sst) of appropriate type, extracts the value associated with that pentad, latitude and longitude.
 
-    :param lat: latitude of the point
-    :param lon: longitude of the point
-    :param sst: an array holding the 1x1x5-day gridded values
-    :type lat: float
-    :type lon: float
-    :type sst: numpy array
-    :return: value in array at this point
-    :rtype: float
+    Parameters
+    ----------
+    lat: float
+        Latitude of the point
+    lon: float
+        Longitude of the point
+    sst: np.ndarray
+        An array holding the 1x1x5-day gridded values.
 
+    Returns
+    -------
+    int or float
+        Value in array at this point
+
+    Note
+    ----
     The structure of the SST array has to be quite specific it assumes a grid that is 360 x 180 x 73
     i.e. one year of 1degree lat x 1degree lon data split up into pentads. The west-most box is at 180degrees with
     index 0 and the northern most box also has index zero.
@@ -676,25 +844,40 @@ def get_sst_single_field(lat, lon, sst):
     return result
 
 
-def blacklist(inid, indeck, inyear, inmonth, inlat, inlon, inpt=1):
-    """
-    Blacklisting of observations from Deck 732 and others as needed
+def blacklist(
+    inid: str,
+    indeck: int,
+    inyear: int,
+    inmonth: int,
+    inlat: float,
+    inlon: float,
+    inpt: int = 1,
+) -> int:
+    """Blacklisting of observations from Deck 732 and others as needed.
 
-    :param inid: ID of the report
-    :param indeck: Deck of the report
-    :param inyear: year of the report
-    :param inmonth: month of the report
-    :param inlat: latitude of the report
-    :param inlon: longitude of the report
-    :param inpt: pentad of the report
-    :type inid: string
-    :type indeck: integer
-    :type inyear: integer
-    :type inmonth: integer
-    :type inlat: float
-    :type inlon: float
-    :type inpt: integer
+    Parameters
+    ----------
+    inid: str
+        ID of the report
+    indeck: int
+        Deck of the report
+    inyear: int
+        Year of the report
+    inmonth: int
+        Month of the report
+    inlat: float
+        Latitude of the report
+    inlon: float
+        Longitude of the report
+    inpt: int
+        Pentad of the report
 
+    Returns
+    -------
+    int
+
+    Note
+    ----
     If the report is from Deck 732, compares the observations year and location to a table of pre-identified
     regions in which Deck 732 observations are known to be dubious - see Rayner et al. 2006 and Kennedy et al.
     2011b. Observations at 0 degrees latitude 0 degrees longitude are blacklisted as this is a common error.
@@ -811,16 +994,32 @@ def blacklist(inid, indeck, inyear, inmonth, inlat, inlon, inpt=1):
     return result
 
 
-def climatology_plus_stdev_with_lowbar(inval, inclimav, instdev, limit, lowbar):
-    """
-    Climatology check with standard deviation-based limits but with a minimum width
+def climatology_plus_stdev_with_lowbar(
+    inval: float | None,
+    inclimav: float | None,
+    instdev: float | None,
+    limit: float,
+    lowbar: float,
+) -> int:
+    """Climatology check with standard deviation-based limits but with a minimum width.
 
-    :param inval: value to be compared to climatology
-    :param inclimav: the climatological average to which it will be compared
-    :param instdev: the standard deviation which will be used to test the anomaly
-    :param limit: maximum standardised anomaly
-    :param lowbar: the anomaly must be greater than lowbar to fail regardless of standard deviation
-    :return: return 1 if the difference is outside the specified range, 0 otherwise.
+    Parameters
+    ----------
+    inval: float or None
+        Value to be compared to climatology.
+    inclimav: float or None
+        The climatological average to which it will be compared.
+    instdev: float or None
+        The standard deviation which will be used to test the anomaly.
+    limit: float
+        Maximum standardised anomaly.
+    lowbar: float
+        The anomaly must be greater than lowbar to fail regardless of standard deviation.
+
+    Returns
+    -------
+    int
+        Return 1 if the difference is outside the specified range, 0 otherwise.
     """
     assert limit > 0, "multiplier must be positive and non-zero"
 
@@ -836,22 +1035,32 @@ def climatology_plus_stdev_with_lowbar(inval, inclimav, instdev, limit, lowbar):
     return result
 
 
-def climatology_plus_stdev_check(inval, inclimav, instdev, stdev_limits, limit):
-    """
-    Climatology check which uses standardised anomalies.
+def climatology_plus_stdev_check(
+    inval: float | None,
+    inclimav: float | None,
+    instdev: float | None,
+    stdev_limits: list,
+    limit: float,
+) -> int:
+    """Climatology check which uses standardised anomalies.
 
-    :param inval: value to be compared to climatology
-    :param inclimav: the climatological average to which the value will be compared
-    :param instdev: the climatological standard deviation which will be used to standardise the anomaly
-    :param stdev_limits: upper and lower limits for standard deviation used in check
-    :param limit: the maximum allowed normalised anomaly
-    :type inval: float
-    :type inclimav: float
-    :type instdev: float
-    :type stdev_limits: two-membered list
-    :type limit: float
-    :return: return 1 if the difference is outside the specified limit, 0 otherwise (or if any input is None)
-    :rtype: integer
+    Parameters
+    ----------
+    inval: float or None
+        Value to be compared to climatology.
+    inclimav: float or None
+        The climatological average to which it will be compared.
+    instdev: float or None
+        The standard deviation which will be used to test the anomaly.
+    stdev_limits: list
+        Upper and lower limits for standard deviation used in check.
+    limit: float
+        Maximum standardised anomaly.
+
+    Returns
+    -------
+    int
+        Return 1 if the difference is outside the specified limit, 0 otherwise (or if any input is None).
     """
     assert stdev_limits[1] > stdev_limits[0], "limits are awry"
     assert limit > 0, "multiplier must be positive and non-zero"
@@ -874,19 +1083,27 @@ def climatology_plus_stdev_check(inval, inclimav, instdev, stdev_limits, limit):
     return result
 
 
-def climatology_check(inval, inclimav, limit=8.0):
-    """
-    Simple function to compare a value with a climatological average with some arbitrary limit on the difference
+def climatology_check(
+    inval: float | None, inclimav: float | None, limit: float = 8.0
+) -> int:
+    """Simple function to compare a value with a climatological average with some arbitrary limit on the difference.
 
-    :param inval: value to be compared to climatology
-    :param inclimav: the climatological average to which the value will be compared
-    :param limit: the maximum allowed difference between the two
-    :type inval: float
-    :type inclimav: float
-    :type limit: float
-    :return: return 1 if the difference is outside the specified limit, 0 otherwise
-    :rtype: integer
+    Parameters
+    ----------
+    inval: float or None
+        Value to be compared to climatology.
+    inclimav: float or None
+        The climatological average to which it will be compared.
+    limit: float
+        The maximum allowed difference between the two.
 
+    Returns
+    -------
+    int
+        Return 1 if the difference is outside the specified limit, 0 otherwise
+
+    Note
+    ----
     This may be the second simplest function I have ever written (see blacklist)
     """
     result = 0
@@ -902,14 +1119,18 @@ def climatology_check(inval, inclimav, limit=8.0):
     return result
 
 
-def value_check(inval):
-    """
-    Check if a value is equal to None
+def value_check(inval: float | None) -> int:
+    """Check if a value is equal to None.
 
-    :param inval: the input value
-    :param inval: float
-    :return: 1 if the input value is None, 0 otherwise
-    :return type: integer
+    Parameters
+    ----------
+    inval: float or None
+        The input value
+
+    Returns
+    -------
+    int
+        Returns 1 if the input value is None, 0 otherwise.
     """
     result = 0
     if inval is None:
@@ -917,14 +1138,18 @@ def value_check(inval):
     return result
 
 
-def no_normal_check(inclimav):
-    """
-    Check if a climatological average is equal to None
+def no_normal_check(inclimav: float | None) -> int:
+    """Check if a climatological average is equal to None.
 
-    :param inclimav: the input value
-    :type inclimav: float
-    :return: 1 if the input value is None, 0 otherwise
-    :return type: integer
+    Parameters
+    ----------
+    inclimav: float or None
+        The input value
+
+    Returns
+    -------
+    int
+        Returns 1 if the input value is None, 0 otherwise.
     """
     result = 0
     if inclimav is None:
@@ -932,17 +1157,20 @@ def no_normal_check(inclimav):
     return result
 
 
-def hard_limit(val, limits):
-    """
-    Check if a value is outside specified limits
+def hard_limit(val: float | None, limits: list) -> int:
+    """Check if a value is outside specified limits.
 
-    :param val: value to be tested
-    :param limits: two membered list of lower and upper limit
-    :type val: float
-    :type limits: list of floats
+    Parameters
+    ----------
+    val: float or None
+        Value to be tested.
+    limits: list
+        Two membered list of lower and upper limit.
 
-    :return: 1 if the input is outside the limits, 0 otherwise
-    :return type: integer
+    Returns
+    -------
+    int
+        Returns 1 if the input is outside the limits, 0 otherwise.
     """
     assert limits[1] > limits[0], "limits are not well specified"
     if val is None:
@@ -953,19 +1181,21 @@ def hard_limit(val, limits):
     return result
 
 
-def supersat_check(invaltd, invalt):
-    """
-    Check if a valid dewpoint temperature is
-    greater than a valid air temperature
+def supersat_check(invaltd: float | None, invalt: float | None) -> int:
+    """Check if a valid dewpoint temperature is  greater than a valid air temperature.
 
-    :param invaltd: the input value for dewpoint temperature
-    :param invalt: the input value for air temperature
-    :type invaltd: float
-    :type invalt: float
-    :return: 1 if the input values are invalid/None
-    :return: 1 if the dewpoint temperature is greater than the air temperarture
-    :return: 0 otherwise
-    :return type: integer
+    Parameters
+    ----------
+    invaltd: float or None
+        The input value for dewpoint temperature.
+    invalt: float or None
+        The input value for air temperature.
+
+    Returns
+    -------
+    int
+        Returns 1 if the input values are invalid/None or if the dewpoint temperature is greater than the air temperarture.
+        Returns 0 otherwise.
     """
     result = 0
     if (invaltd is None) | (invalt is None):
@@ -976,21 +1206,33 @@ def supersat_check(invaltd, invalt):
     return result
 
 
-def sst_freeze_check(insst, sst_uncertainty=0.0, freezing_point=-1.80, n_sigma=2.0):
+def sst_freeze_check(
+    insst: float | None,
+    sst_uncertainty: float = 0.0,
+    freezing_point: float = -1.80,
+    n_sigma: float = 2.0,
+) -> int:
     """
     Compare an input SST to see if it is above freezing.
 
-    :param insst: the input SST
-    :param sst_uncertainty: the uncertainty in the SST value, defaults to zero
-    :param freezing_point: the freezing point of the water, defaults to -1.8C
-    :param n_sigma: number of sigma to use in the check
-    :type insst: float
-    :type sst_uncertainty: float
-    :type freezing_point: float
-    :type n_sigma: float
-    :return: 1 if the input SST is below freezing point by more than twice the uncertainty, 0 otherwise
-    :return type: integer
+    Parameters
+    ----------
+    insst: float or None
+        The input SST.
+    sst_uncertainty: float
+        The uncertainty in the SST value, defaults to zero.
+    freezing_point: float
+        The freezing point of the water, defaults to -1.8C.
+    n_sigma: float
+        Number of sigma to use in the check.
 
+    Returns
+    -------
+    int
+        Returns 1 if the input SST is below freezing point by more than twice the uncertainty, 0 otherwise.
+
+    Note
+    ----
     This is a simple freezing point check made slightly more complex. We want to check if a
     measurement of SST is above freezing, but there are two problems. First, the freezing point
     can vary from place to place depending on the salinity of the water. Second, there is uncertainty
@@ -1011,17 +1253,21 @@ def sst_freeze_check(insst, sst_uncertainty=0.0, freezing_point=-1.80, n_sigma=2
     return result
 
 
-def position_check(inlat, inlon):
-    """
-    Simple check to make sure that the latitude and longitude are within the bounds specified
-    by the ICOADS documentation. Latitude is between -90 and 90. Longitude is between -180 and 360
+def position_check(inlat: float, inlon: float) -> int:
+    """Simple check to make sure that the latitude and longitude are within the bounds specified
+    by the ICOADS documentation. Latitude is between -90 and 90. Longitude is between -180 and 360.
 
-    :param inlat: latitude
-    :param inlon: longitude
-    :type inlat: float
-    :type inlon: float
-    :return: 1 if either latitude or longitude is invalid, 0 otherwise
-    :return type: integer
+    Parameters
+    ----------
+    inlat: float
+        Latitude.
+    inlon: float
+        Longitude.
+
+    Returns
+    -------
+    int
+        Returns 1 if either latitude or longitude is invalid, 0 otherwise.
     """
     # return 1 if lat or lon is invalid, 0 otherwise
     assert inlat is not None and not (math.isnan(inlat))
@@ -1035,14 +1281,18 @@ def position_check(inlat, inlon):
     return result
 
 
-def time_check(inhour):
-    """
-    Check that the time is valid
+def time_check(inhour: int) -> int:
+    """Check that the time is valid.
 
-    :param inhour: hour of the time to be checked
-    :type inhour: float
-    :return: 1 if the hour is invalid, 0 otherwise
-    :return type: integer
+    Parameters
+    ----------
+    inhour: int
+        Hour of the time to be checked.
+
+    Returns
+    -------
+    int
+        Returns 1 if the hour is invalid, 0 otherwise.
     """
     result = 0
 
@@ -1055,18 +1305,22 @@ def time_check(inhour):
     return result
 
 
-def date_check(inyear, inmonth, inday):
-    """
-    Check that the date is valid
+def date_check(inyear: int, inmonth: int, inday: int) -> int:
+    """Check that the date is valid.
 
-    :param inyear: year of the date to be checked
-    :param inmonth: month of the data to be checked
-    :param inday: day of the date to be checked
-    :type inyear: integer
-    :type inmonth: integer
-    :type inday: integer
-    :return: 1 if any one of the inputs (or the combined inputs) is invalid, 0 otherwise
-    :return type: integer
+    Parameters
+    ----------
+    inyear: int
+        Year of the date to be checked.
+    inmonth: int
+        Month of the data to be checked.
+    inday: int
+        Day of the date to be checked.
+
+    Returns
+    -------
+    int
+        Returns 1 if any one of the inputs (or the combined inputs) is invalid, 0 otherwise.
     """
     # return 1 if date is valid. 0 otherwise
     assert inyear is not None
@@ -1091,17 +1345,24 @@ def date_check(inyear, inmonth, inday):
     return result
 
 
-def wind_consistency(windspeed, winddirection, variablelimit):
-    """
-    Test to compare windspeed to winddirection.
-    :param windspeed:  wind speed
-    :param winddirection: wind direction in range 1-362
-    :param variablelimit: maximum wind speed consistent with variable wind direction
-    :type windspeed: float
-    :type winddirection: integer
-    :type variablelimit: float
-    :return: pass (0) or fail (1)
-    :rtype: integer
+def wind_consistency(
+    windspeed: float | None, winddirection: int | None, variablelimit: float
+) -> int:
+    """Test to compare windspeed to winddirection.
+
+    Parameters
+    ----------
+    windspeed: float or None
+        Wind speed.
+    winddirection: int or None
+        Wind direction in range 1-362.
+    variablelimit: float
+        Maximum wind speed consistent with variable wind direction.
+
+    Returns
+    -------
+    int
+        Returns 1 if windspeed is not consistent with winddirection, otherwise 0.
     """
     result = 0
 
@@ -1119,26 +1380,33 @@ def wind_consistency(windspeed, winddirection, variablelimit):
     return result
 
 
-def p_data_given_good(x, q, r_hi, r_lo, mu, sigma):
+def p_data_given_good(
+    x: float, q: float, r_hi: float, r_lo: float, mu: float, sigma: float
+) -> float:
     """
     Calculate the probability of an observed value x given a normal distribution with mean mu
     standard deviation of sigma, where x is constrained to fall between R_hi and R_lo
     and is known only to an integer multiple of Q, the quantization level.
 
-    :param x: observed value for which probability is required
-    :param q: quantization of x, i.e. x is an integer multiple of Q
-    :param r_hi: the upper limit on x imposed by previous QC choices.
-    :param r_lo: the lower limit on x imposed by previous QC choices.
-    :param mu: the mean of the distribution.
-    :param sigma: the standard deviation of the distribution
-    :type x: float
-    :type q: float
-    :type r_hi: float
-    :type r_lo: float
-    :type mu: float
-    :type sigma: float
-    :return: probability of the observed value given the specified distribution.
-    :rtype: float
+    Parameters
+    ----------
+    x: float
+        Observed value for which probability is required.
+    q: float
+        Quantization of x, i.e. x is an integer multiple of Q.
+    r_hi: float
+        The upper limit on x imposed by previous QC choices.
+    r_lo: float
+        The lower limit on x imposed by previous QC choices.
+    mu: float
+        The mean of the distribution.
+    sigma: float
+        The standard deviation of the distribution.
+
+    Returns
+    -------
+    float
+        Probability of the observed value given the specified distribution.
     """
     assert q > 0.0, "q <= 0" + str(q)
     assert sigma > 0.0, "sigma <= 0 " + str(sigma)
@@ -1166,20 +1434,23 @@ def p_data_given_good(x, q, r_hi, r_lo, mu, sigma):
     )
 
 
-def p_data_given_gross(q, r_hi, r_lo):
+def p_data_given_gross(q: float, r_hi: float, r_lo: float) -> float:
     """
     Calculate the probability of the data given a gross error
     assuming gross errors are uniformly distributed between
     R_low and R_high and that the quantization, rounding level is Q
 
-    :param q: quantization of x, i.e. x is an integer multiple of Q
-    :param r_hi: the upper limit on x imposed by previous QC choices.
-    :param r_lo: the lower limit on x imposed by previous QC choices.
-    :type q: float
-    :type r_hi: float
-    :type r_lo: float
-    :return: probability of the observed value given that its a gross error.
-    :rtpye: float
+    q: float
+        Quantization of x, i.e. x is an integer multiple of Q.
+    r_hi: float
+        The upper limit on x imposed by previous QC choices.
+    r_lo: float
+        The lower limit on x imposed by previous QC choices.
+
+    Returns
+    -------
+    float
+      Probability of the observed value given that its a gross error.
     """
     assert r_hi > r_lo, (
         "Limits not ascending r_lo " + str(r_lo) + " > r_hi " + str(r_hi)
@@ -1190,7 +1461,9 @@ def p_data_given_gross(q, r_hi, r_lo):
     return 1.0 / (1.0 + (r / q))
 
 
-def p_gross(p0, q, r_hi, r_lo, x, mu, sigma):
+def p_gross(
+    p0: float, q: float, r_hi: float, r_lo: float, x: float, mu: float, sigma: float
+) -> float:
     """
     Calculate the posterior probability of a gross error given the prior probability p0,
     the quantization level of the observed value, Q, previous limits on the observed value,
@@ -1198,18 +1471,27 @@ def p_gross(p0, q, r_hi, r_lo, x, mu, sigma):
     distribution of good observations assuming they are normally distributed. Gross errors are
     assumed to be uniformly distributed between R_lo and R_hi.
 
-    :param p0: prior probability of gross error
-    :param q: quantization of x, i.e. x is an integer multiple of Q
-    :param r_hi: the upper limit on x imposed by previous QC choices.
-    :param r_lo: the lower limit on x imposed by previous QC choices.
-    :param x: observed value for which probability is required
-    :param mu: the mean of the distribution of good obs.
-    :param sigma: the standard deviation of the distribution of good obs
-    :type q: float
-    :type r_hi: float
-    :type r_lo: float
-    :return: probability of gross error given an observed value
-    :rtpye: float
+    Parameters
+    ----------
+    p0: float
+        Prior probability of gross error.
+    q: float
+        Quantization of x, i.e. x is an integer multiple of Q.
+    r_hi: float
+        The upper limit on x imposed by previous QC choices.
+    r_lo: float
+        The lower limit on x imposed by previous QC choices.
+    x: float
+        Observed value for which probability is required.
+    mu: float
+        The mean of the distribution of good obs.
+    sigma: float
+        The standard deviation of the distribution of good obs.
+
+    Returns
+    -------
+    float
+        Probability of gross error given an observed value.
     """
     assert p0 >= 0, "p0 <= 0 " + str(p0)
     assert p0 <= 1, "p0 > 1 " + str(p0)
@@ -1236,16 +1518,20 @@ def p_gross(p0, q, r_hi, r_lo, x, mu, sigma):
     return pgross
 
 
-def angle_diff(angle1, angle2):
-    """
-    Calculate the angular distance on a circle between two points given in radians
+def angle_diff(angle1: float, angle2: float) -> float:
+    """Calculate the angular distance on a circle between two points given in radians.
 
-    :param angle1: angle of first point
-    :param angle2: angle of second point
-    :type angle1: float
-    :type angle2: float
-    :return: angle between the two input points in radians
-    :return type: float
+    Parameters
+    ----------
+    angle1: float
+        Angle of first point.
+    angle2: float
+        Angle of second point.
+
+    Returns
+    -------
+    float
+        Angle between the two input points in radians.
     """
     assert angle1 is not None and angle2 is not None
     # calculate angle between two angles
@@ -1255,28 +1541,90 @@ def angle_diff(angle1, angle2):
     return diff
 
 
-def relative_year_number(year, reference=1979):
-    """Get number of year relative to reference year."""
+def relative_year_number(year: int, reference: int = 1979) -> int:
+    """Get number of year relative to reference year.
+
+    Parameters
+    ----------
+    year: int
+    reference: int
+
+    Returns
+    -------
+    int
+        Number of year relateive to reference year.
+    """
     return year - (reference + 1)
 
 
-def convert_time_in_hours(hour, minute, sec, zone, dasvtm):
-    """Convert to time in hours."""
+def convert_time_in_hours(
+    hour: int, minute: int, sec: int, zone: int | float, dasvtm: int | float
+) -> float:
+    """Convert to time in hours.
+
+    Parameters
+    ----------
+    hour: int
+    minute: int
+    sec: int
+    zone: int or float
+    dasvtm: int or float
+
+    Returns
+    -------
+    float
+        Time converted in hours.
+    """
     return hour + (minute + sec / 60.0) / 60.0 + zone - dasvtm
 
 
-def leap_year(delyear):
-    """Get leap year."""
+def leap_year(delyear: int) -> int:
+    """Get leap year.
+
+    Parameters
+    ----------
+    delyear: int
+
+    Returns
+    -------
+    int
+        Get previous leap year.
+    """
     return math.floor(delyear / 4.0)
 
 
-def time_in_whole_days(time_in_hours, day, delyear, leap):
-    """Calculate from time in hours to time in whole days."""
+def time_in_whole_days(time_in_hours: int, day: int, delyear: int, leap: int) -> float:
+    """Calculate from time in hours to time in whole days.
+
+    Parameters
+    ----------
+    time_in_hours: int
+    day: int
+    delyear: int
+    leap: int
+
+    Returns
+    -------
+    float
+        Time in whole days.
+    """
     return delyear * 365 + leap + day - 1.0 + time_in_hours / 24.0
 
 
-def leap_year_correction(time_in_hours, day, delyear):
-    """Make eap year correction."""
+def leap_year_correction(time_in_hours: int, day: int, delyear: int) -> float:
+    """Make leap year correction.
+
+    Parameters
+    ----------
+    time_in_hours: int
+    day: int
+    delyear: int
+
+    Returns
+    -------
+    float
+        Leap year corrected time.
+    """
     leap = leap_year(delyear)
     time = time_in_whole_days(time_in_hours, day, delyear, leap)
     if delyear == leap * 4.0:
@@ -1286,18 +1634,49 @@ def leap_year_correction(time_in_hours, day, delyear):
     return time
 
 
-def sun_position(time):
-    """Find position of sun in celestial sphere, assuming circular orbit (radians)."""
+def sun_position(time: float) -> float:
+    """Find position of sun in celestial sphere, assuming circular orbit (radians).
+
+    Parameters
+    ----------
+    time: float
+
+    Returns
+    -------
+    float
+        Position of the sun.
+    """
     return (360.0 * time / 365.25) * degrad
 
 
-def mean_earth_anomaly(time, theta):
-    """Calculate mean anomaly of earth (g)."""
+def mean_earth_anomaly(time: float, theta: float) -> float:
+    """Calculate mean anomaly of earth (g).
+
+    Parameters
+    ----------
+    time: float
+    theta: float
+
+    Returns
+    -------
+    float
+        Mean anomaly of earth (g).
+    """
     return -0.031271 - 4.5396e-7 * time + theta
 
 
-def sun_longitude(time):
-    """Get longitude of sun."""
+def sun_longitude(time: float) -> float:
+    """Get longitude of sun.
+
+    Parameters
+    ----------
+    time: float
+
+    Returns
+    -------
+    float
+        Longitude of sun.
+    """
     theta = sun_position(time)
     mean_anomaly = mean_earth_anomaly(time, theta)
     return (
@@ -1309,13 +1688,37 @@ def sun_longitude(time):
     )
 
 
-def elliptic_angle(time):
-    """Get angle plane of elliptic to plane of celestial equator."""
+def elliptic_angle(time: float) -> float:
+    """Get angle plane of elliptic to plane of celestial equator.
+
+    Parameters
+    ----------
+    time: float
+
+    Returns
+    -------
+    float
+        Angle plane of elliptic to plane of celestial equator.
+    """
     return 0.409140 - 6.2149e-9 * time
 
 
-def sun_ascension(long_of_sun, sin_long_of_sun, angle_of_elliptic):
-    """Calculate right ascension."""
+def sun_ascension(
+    long_of_sun: float, sin_long_of_sun: float, angle_of_elliptic: float
+) -> float:
+    """Calculate right ascension.
+
+    Parameters
+    ----------
+    long_of_sun: float
+    sin_long_of_sun: float
+    angle_of elliptic: float
+
+    Returns
+    -------
+    float
+        Right ascension.
+    """
     a1 = sin_long_of_sun * math.cos(angle_of_elliptic)
     a2 = math.cos(long_of_sun)
     right_ascension = math.atan2(a1, a2)
@@ -1324,13 +1727,34 @@ def sun_ascension(long_of_sun, sin_long_of_sun, angle_of_elliptic):
     return right_ascension
 
 
-def sun_declination(sin_long_of_sun, angle_of_elliptic):
-    """Calculate declination of sun."""
+def sun_declination(sin_long_of_sun: float, angle_of_elliptic: float) -> float:
+    """Calculate declination of sun.
+
+    Parameters
+    ----------
+    sin_long_of_sun: float
+    angle_of_elliptic: float
+
+    Returns
+    -------
+    float
+        Declination of sun.
+    """
     return math.asin(sin_long_of_sun * math.sin(angle_of_elliptic))
 
 
-def calculate_sun_parameters(time):
-    """Calculate both right ascension and declination of sun."""
+def calculate_sun_parameters(time: float) -> (float, float):
+    """Calculate both right ascension and declination of sun.
+
+    Parameters
+    ----------
+    time: float
+
+    Returns
+    -------
+    (float, float)
+        Right ascension and declination of sun.
+    """
     long_of_sun = sun_longitude(time)
     angle_of_elliptic = elliptic_angle(time)
     sin_long_of_sun = math.sin(long_of_sun)
@@ -1339,16 +1763,42 @@ def calculate_sun_parameters(time):
     return rta, dec
 
 
-def to_siderial_time(time, delyear):
-    """Convert to siderial time."""
+def to_siderial_time(time: float, delyear: int) -> float:
+    """Convert to siderial time.
+
+    Parameters
+    ----------
+    time: float
+    delyear: int
+
+    Returns
+    -------
+    float
+        Siderial time.
+    """
     sid = 1.759335 + 2 * np.pi * (time / 365.25 - delyear) + 3.694e-7 * time
     if sid >= 2 * np.pi:
         sid = sid - 2 * np.pi
     return sid
 
 
-def to_local_siderial_time(time, time_in_hours, delyear, lon):
-    """Convert to local siderial time.."""
+def to_local_siderial_time(
+    time: float, time_in_hours: float, delyear: int, lon: float
+) -> float:
+    """Convert to local siderial time.
+
+    Parameters
+    ----------
+    time: float
+    time_in_hours: float
+    delyear: int
+    lon: float
+
+    Returns
+    -------
+    float
+        Local siderial time.
+    """
     siderial_time = to_siderial_time(time, delyear)
     lsid = siderial_time + (time_in_hours * 15.0 + lon) * degrad
     if lsid >= 2 * np.pi:
@@ -1356,16 +1806,39 @@ def to_local_siderial_time(time, time_in_hours, delyear, lon):
     return lsid
 
 
-def sun_hour_angle(local_siderial_time, right_ascension):
-    """Get hour angle."""
+def sun_hour_angle(local_siderial_time: float, right_ascension: float) -> float:
+    """Get hour angle.
+
+    Parameters
+    ----------
+    local_siderial_time: float
+    right_ascension: float
+
+    Returns
+    -------
+    float
+        Hour angle.
+    """
     hra = local_siderial_time - right_ascension
     if hra < 0:
         hra = hra + 2 * np.pi
     return hra
 
 
-def sin_of_elevation(phi, declination, hour_angle):
-    """Get sinus of geometric elevation."""
+def sin_of_elevation(phi: float, declination: float, hour_angle: float) -> float:
+    """Get sinus of geometric elevation.
+
+    Parameters
+    ----------
+    phi: float
+    declination: float
+    hour_angle: float
+
+    Returns
+    -------
+    float
+        Sinus of geometric elevation.
+    """
     sin_elevation = math.sin(phi) * math.sin(declination) + math.cos(phi) * math.cos(
         declination
     ) * math.cos(hour_angle)
@@ -1376,23 +1849,59 @@ def sin_of_elevation(phi, declination, hour_angle):
     return sin_elevation
 
 
-def sun_azimuth(phi, declination):
-    """Get azimuth."""
+def sun_azimuth(phi: float, declination: float) -> float:
+    """Get azimuth.
+
+    Parameters
+    ----------
+    phi: float
+    declination: float
+
+    Returns
+    -------
+    float
+        Azimuth.
+    """
     if (phi - declination) > 0:
         return 0
     else:
         return 180
 
 
-def convert_degrees(deg):
-    """Convert drgrees."""
+def convert_degrees(deg: float) -> float:
+    """Convert degrees.
+
+    Parameters
+    ----------
+    deg: float
+
+    Returns
+    -------
+    float
+        Degree (from 0 to 360).
+    """
     if deg < 0.0:
         deg = 360.0 + deg
     return deg
 
 
-def calculate_azimuth(declination, hour_angle, elevation, phi):
-    """Calculate azimuth."""
+def calculate_azimuth(
+    declination: float, hour_angle: float, elevation: float, phi: float
+) -> float:
+    """Calculate azimuth.
+
+    Parameters
+    ----------
+    declination: float
+    hour_angle: float
+    elevation: float
+    phi: float
+
+    Returns
+    -------
+    float
+        Azimuth.
+    """
     val_to_asin = math.cos(declination) * math.sin(hour_angle) / math.cos(elevation)
     if val_to_asin > 1.0:
         val_to_asin = 1.0
@@ -1405,8 +1914,22 @@ def calculate_azimuth(declination, hour_angle, elevation, phi):
     return 180.0 + azimuth
 
 
-def azimuth_elevation(lat, declination, hour_angle):
-    """Get both azimuth and geometric elevation of sun."""
+def azimuth_elevation(
+    lat: float, declination: float, hour_angle: float
+) -> (float, float):
+    """Get both azimuth and geometric elevation of sun.
+
+    Parameters
+    ----------
+    lat: float
+    declination: float
+    hour_angle: float
+
+    Returns
+    -------
+    (float, float)
+        Azimuth and geometric elevation of sun.
+    """
     phi = lat * degrad
     sin_elevation = sin_of_elevation(phi, declination, hour_angle)
     elevation = math.asin(sin_elevation)
@@ -1418,34 +1941,50 @@ def azimuth_elevation(lat, declination, hour_angle):
     return azimuth, elevation
 
 
-def sunangle(year, day, hour, minute, sec, zone, dasvtm, lat, lon):
+def sunangle(
+    year: int,
+    day: int,
+    hour: int,
+    minute: int,
+    sec: int,
+    zone: int,
+    dasvtm: int,
+    lat: float,
+    lon: float,
+) -> (float, float, float, float, float, float):
     """
     Calculate the local azimuth and elevation of the sun at a specified location and time.
 
-    :param year: year number
-    :param day: day number of year starting with 1 for Jan 1st and running up to 365/6
-    :param hour: hour
-    :param minute: minute
-    :param sec: second
-    :param zone: the local international time zone, counted westward from Greenwich
-    :param dasvtm: 1 if daylight saving time is in effect, otherwise 0
-    :param lat: latitude in degrees, north is positive
-    :param lon: longitude in degrees, east is positive
-    :type year: integer
-    :type day: integer
-    :type hour: integer
-    :type minute: integer
-    :type sec: integer
-    :type zone: integer
-    :type dasvtm: integer
-    :type lat: float
-    :type lon: float
+    Parameters
+    ----------
+    year: int
+        Year.
+    day: int
+        Day number of year starting with 1 for Jan 1st and running up to 365/6.
+    hour: int
+        Hour.
+    minute: int
+        Minute.
+    sec: int
+        Second.
+    zone: int
+        The local international time zone, counted westward from Greenwich.
+    dasvtm: int
+        1 if daylight saving time is in effect, otherwise 0.
+    lat: float
+        Latitude in degrees, north is positive.
+    lon: float
+        Longitude in degrees, east is positive.
 
-    :return:  Azimuth angle of the sun (degrees east of north), Elevation of sun (degrees),
-              Right ascension of sun (degrees), Hour angle of sun (degrees), Hour angle of
-              local siderial time (degrees), Declination of sun (degrees)
-    :rtype: float
+    Returns
+    -------
+    (float, float, float, float, float, float)
+        Azimuth angle of the sun (degrees east of north), Elevation of sun (degrees),
+        Right ascension of sun (degrees), Hour angle of sun (degrees), Hour angle of
+        local siderial time (degrees), Declination of sun (degrees)
 
+    Note
+    ----
     Copied from Rob Hackett's area 28 Apr 1998 by J.Arnott.
     Add protection for ASIN near +/- 90 degrees 07 Jan 2002 by J.Arnott.
     Pythonised 25/09/2015 by J.J. Kennedy
@@ -1488,18 +2027,22 @@ def sunangle(year, day, hour, minute, sec, zone, dasvtm, lat, lon):
     return azimuth, elevation, rta, hra, sid, declination
 
 
-def dayinyear(year, month, day):
-    """
-    Calculate the day in year, running from 1 for Jan 1st to 365 (or 366) for Dec 31st
+def dayinyear(year: int, month: int, day: int) -> int:
+    """Calculate the day in year, running from 1 for Jan 1st to 365 (or 366) for Dec 31st.
 
-    :param year: Year
-    :param month: Month
-    :param day: Day
-    :type year: integer
-    :type month: integer
-    :type day: integer
-    :return: day in year, between 1 and 366
-    :rtype: integer
+    Parameters
+    ----------
+    year: int
+        Year.
+    month: int
+        Month.
+    day: int
+        Day.
+
+    Returns
+    -------
+    int
+        Day in year, between 1 and 366.
     """
     assert 1 <= month <= 12
     assert day >= 1
@@ -1516,26 +2059,41 @@ def dayinyear(year, month, day):
     return result
 
 
-def day_test(year, month, day, hour, lat, lon, time_since_sun_above_horizon=1.0):
-    """
-    Given year month day hour lat and long calculate if the sun was above the horizon an hour ago.
+def day_test(
+    year: int,
+    month: int,
+    day: int,
+    hour: int,
+    lat: float,
+    lon: float,
+    time_since_sun_above_horizon: float = 1.0,
+) -> int:
+    """Given year month day hour lat and long calculate if the sun was above the horizon an hour ago.
 
-    :param year: Year
-    :param month: Month
-    :param day: Day
-    :param hour: Hour
-    :param lat: Latitude in degrees
-    :param lon: Longitude in degrees
-    :param time_since_sun_above_horizon: time since sun was above horizon for test
-    :type year: integer
-    :type month: integer
-    :type day: integer
-    :type hour: integer
-    :type lat: float
-    :type lon: float
-    :type time_since_sun_above_horizon: float
-    :return: 1 if the sun was above the horizon an hour ago, 0 otherwise.
+    Parameters
+    ----------
+    year: int
+        Year.
+    month: int
+        Month.
+    day: int
+        Day.
+    hour: int
+        Hour.
+    lat: float
+        Latitude in degrees.
+    lon: float
+        Longitude in degrees.
+    time_since_sun_above_horizon: float
+        Time since sun was above horizon for test.
 
+    Returns
+    -------
+    int
+        1 if the sun was above the horizon an hour ago, 0 otherwise.
+
+    Note
+    ----
     This is the "day" test used to decide whether a Marine Air Temperature (MAT) measurement is
     a Night MAT (NMAT) or a Day (MAT). This is important because solar heating of the ship biases
     the MAT measurements. It uses the function sunangle to calculate the elevation of the sun.
@@ -1589,19 +2147,25 @@ def day_test(year, month, day, hour, lat, lon, time_since_sun_above_horizon=1.0)
     return result
 
 
-def jul_day(year, month, day):
-    """
-    Routine to calculate julian day. This is the weird Astronomical thing which counts from 1 Jan 4713 BC.
+def jul_day(year: int, month: int, day: int) -> int:
+    """Routine to calculate julian day. This is the weird Astronomical thing which counts from 1 Jan 4713 BC.
 
-    :param year: Year
-    :param month: Month
-    :param day: Day
-    :type year: integer
-    :type month: integer
-    :type day: integer
-    :return: julian day
-    :rtype: integer
+    Parameters
+    ----------
+    year: int
+        Year.
+    month: int
+        Month.
+    day: int
+        Day.
 
+    Returns
+    -------
+    int
+        Julian day.
+
+    Note
+    ----
     This is one of those routines that looks baffling but works. No one is sure exactly how. It gets
     written once and then remains untouched for centuries, mysteriously working.
     """
@@ -1613,28 +2177,41 @@ def jul_day(year, month, day):
     return day + ((153 * m + 2) // 5) + 365 * y + y // 4 - y // 100 + y // 400 - 32045
 
 
-def time_difference(year1, month1, day1, hour1, year2, month2, day2, hour2):
-    """
-    Calculate time difference in hours between any two times
+def time_difference(
+    year1: int,
+    month1: int,
+    day1: int,
+    hour1: int,
+    year2: int,
+    month2: int,
+    day2: int,
+    hour2: int,
+) -> float:
+    """Calculate time difference in hours between any two times.
 
-    :param year1: Year of first time point
-    :param month1: Month of first time point
-    :param day1: Day of first time point
-    :param hour1: Hour of first time point
-    :param year2: Year of second time point
-    :param month2: Month of second time point
-    :param day2: Day of second time point
-    :param hour2: Hour of second time point
-    :type year1: integer
-    :type month1: integer
-    :type day1: integer
-    :type hour1: float
-    :type year2: integer
-    :type month2: integer
-    :type day2: integer
-    :type hour2: float
-    :return: difference in hours between the two times
-    :rtype: float
+    Parameters
+    ----------
+    year1: int
+        Year of first time point.
+    month1: int
+        Month of first time point.
+    day1: int
+        Day of first time point.
+    hour1: int
+        Hour of first time point.
+    year2: int
+        Year of second time point.
+    month2: int
+        Month of second time point.
+    day2: int
+        Day of second time point.
+    hour2: int
+        Hour of second time point.
+
+    Returns
+    -------
+    float
+        Difference in hours between the two times.
     """
     # return time difference in hours
     if None in [year1, year2, month1, month2, day1, day2, hour1, hour2]:
@@ -1660,15 +2237,21 @@ def time_difference(year1, month1, day1, hour1, year2, month2, day2, hour2):
     return timdif
 
 
-def winsorised_mean(inarr):
-    """
-    The winsorised mean is a resistant way of calculating an average.
+def winsorised_mean(inarr: list[float]) -> float:
+    """The winsorised mean is a resistant way of calculating an average.
 
-    :param inarr: input array to be averaged
-    :type inarr: List[float]
-    :return: the winsorised mean of the input array with a 25% trimming
-    :rtype: float
+    Parameters
+    ----------
+    inarr: list[float]
+        input array to be averaged
 
+    Returns
+    -------
+    float
+        The winsorised mean of the input array with a 25% trimming.
+
+    Note
+    ----
     The winsorised mean is that which you get if you set the first quarter of
     the sorted input array to the 1st quartile value and the the last quarter
     to the 3rd quartile and then take the mean. This is quite a heavy trimming of
@@ -1695,17 +2278,20 @@ def winsorised_mean(inarr):
     return total / length
 
 
-def trimmed_mean(inarr, trim):
-    """
-    Calculate a resistant (aka robust) mean of an input array given a trimming criteria.
+def trimmed_mean(inarr: list[float], trim: int) -> float:
+    """Calculate a resistant (aka robust) mean of an input array given a trimming criteria.
 
-    :param inarr: list of numbers
-    :param trim: trimming criteria. A value of 10 trims one tenth of the values off each end of the sorted array before
-        calculating the mean.
-    :type inarr: list of floats
-    :type trim: integer
-    :return: trimmed mean
-    :rtype: float
+    Parameters
+    ----------
+    inarr: list[float]
+        List of numbers.
+    trim: int
+        Trimming criteria. A value of 10 trims one tenth of the values off each end of the sorted array before calculating the mean.
+
+    Returns
+    -------
+    float
+        Trimmed mean.
     """
     if trim == 0:
         return np.mean(inarr)
@@ -1720,25 +2306,42 @@ def trimmed_mean(inarr, trim):
     return trim
 
 
-def yindex_to_lat(yindex, res=1):
-    """Convert yindex to latitude."""
+def yindex_to_lat(yindex: int, res: float = 1.0) -> float:
+    """Convert yindex to latitude.
+
+    Parameters
+    ----------
+    yindex: int
+    res: float
+
+    Returns
+    -------
+    float
+        Latitude (degrees).
+    """
     assert yindex >= 0
     assert yindex < 180 / res
     lat = 90.0 - yindex * res - res / 2.0
     return lat
 
 
-def mds_lat_to_yindex(lat, res=1.0):
-    """
-    For a given latitude return the y-index as it was in MDS2/3 in a 1x1 global grid
+def mds_lat_to_yindex(lat: float, res: float = 1.0) -> int:
+    """For a given latitude return the y-index as it was in MDS2/3 in a 1x1 global grid.
 
-    :param lat: Latitude of the point
-    :param res: resolution of grid in degrees
-    :type lat: float
-    :type res: float
-    :return: grid box index
-    :rtype: integer
+    Parameters
+    ----------
+    lat: float
+        Latitude of the point.
+    res: float
+        Resolution of grid in degrees.
 
+    Returns
+    -------
+    int
+        Grid box index.
+
+    Note
+    ----
     In the northern hemisphere, borderline latitudes which fall on grid boundaries are pushed north, except
     90 which goes south. In the southern hemisphere, they are pushed south, except -90 which goes north.
     At 0 degrees they are pushed south.
@@ -1760,17 +2363,23 @@ def mds_lat_to_yindex(lat, res=1.0):
     pass
 
 
-def lat_to_yindex(lat, res=1):
-    """
-    For a given latitude return the y index in a 1x1x5-day global grid
+def lat_to_yindex(lat: float, res: float = 1.0) -> int:
+    """For a given latitude return the y index in a 1x1x5-day global grid.
 
-    :param lat: Latitude of the point
-    :param res: resolution of the grid
-    :type lat: float
-    :type res: float
-    :return: grid box index
-    :rtype: integer
+    Parameters
+    ----------
+    lat: float
+        Latitude of the point.
+    res: float
+        Resolution of the grid.
 
+    Returns
+    -------
+    int
+        Grid box index
+
+    Note
+    ----
     The routine assumes that the structure of the SST array is a grid that is 360 x 180 x 73
     i.e. one year of 1degree lat x 1degree lon data split up into pentads. The west-most box is at 180degrees with
     index 0 and the northern most box also has index zero. Inputs on the border between grid cells are pushed south.
@@ -1791,25 +2400,42 @@ def lat_to_yindex(lat, res=1):
         return yindex
 
 
-def xindex_to_lon(xindex, res=1):
-    """Convert xindex to longitude."""
+def xindex_to_lon(xindex: int, res: float = 1.0) -> float:
+    """Convert xindex to longitude.
+
+    Parameters
+    ----------
+    xindex: int
+    res: float
+
+    Returns
+    -------
+    float
+        Longitude (degrees).
+    """
     assert xindex >= 0
     assert xindex < 360 / res
     lon = xindex * res - 180.0 + res / 2.0
     return lon
 
 
-def mds_lon_to_xindex(lon, res=1.0):
-    """
-    For a given longitude return the x-index as it was in MDS2/3 in a 1x1 global grid
+def mds_lon_to_xindex(lon: float, res: float = 1.0) -> int:
+    """For a given longitude return the x-index as it was in MDS2/3 in a 1x1 global grid.
 
-    :param lon: Longitude of the point
-    :param res: resolution of the field
-    :type lon: float
-    :type res: float
-    :return: grid box index
-    :rtype: integer
+    Parameters
+    ----------
+    lon: float
+        Longitude of the point.
+    res: float
+        Resolution of the field.
 
+    Returns
+    -------
+    int
+        Grid box index.
+
+    Note
+    ----
     In the western hemisphere, borderline longitudes which fall on grid boundaries are pushed west, except
     -180 which goes east. In the eastern hemisphere, they are pushed east, except 180 which goes west.
     At 0 degrees they are pushed west.
@@ -1826,17 +2452,24 @@ def mds_lon_to_xindex(lon, res=1.0):
         return int(int(long_local / res) + 180 / res - 1)
 
 
-def lon_to_xindex(lon, res=1):
-    """
-    For a given longitude return the x index in a 1x1x5-day global grid
+def lon_to_xindex(lon: float, res: float = 1.0) -> int:
+    """For a given longitude return the x index in a 1x1x5-day global grid.
 
-    :param lon: Longitude of the point
-    :param res: resolution of the grid
-    :type lon: float
-    :type res: float
-    :return: grid box index
-    :rtype: integer
+    Parameters
+    ----------
+    lon: float
+        Longitude of the point.
+    res: float
+        Resolution of the grid.
 
+
+    Returns
+    -------
+    int
+        Grid box index.
+
+    Note
+    ----
     The routine assumes that the structure of the SST array is a grid that is 360 x 180 x 73
     i.e. one year of 1degree lat x 1degree lon data split up into pentads. The west-most box is at 180degrees W with
     index 0 and the northern most box also has index zero. Inputs on the border between grid cells are pushed east.
@@ -1863,17 +2496,23 @@ def lon_to_xindex(lon, res=1):
         return int(xindex)
 
 
-def id_is_generic(inid, inyear):
-    """
-    Test to see if an ID is one of the generic IDs
+def id_is_generic(inid: str, inyear: int) -> bool:
+    """Test to see if an ID is one of the generic IDs.
 
-    :param inid: ID from marine report
-    :param inyear: year we are checking for
-    :type inid: string
-    :type inyear: integer
-    :return: True if the ID is generic and False otherwise
-    :rtype: logical
+    Parameters
+    ----------
+    inid: str
+        ID from marine report.
+    inyear: int
+        Year we are checking for.
 
+    Returns
+    -------
+    bool
+        True if the ID is generic and False otherwise.
+
+    Note
+    ----
     Certain callsigns are shared by large numbers of ships. e.g. SHIP, PLAT, 0120,
     MASK, MASKSTID. This simple routine has a list of known generic call signs.
     Some call signs are only generic between certain years.
@@ -1923,14 +2562,20 @@ def id_is_generic(inid, inyear):
     return result
 
 
-def last_month_was(year, month):
-    """
-    Short function to get the previous month given a particular month of interest
+def last_month_was(year: int, month: int) -> (int, int):
+    """Short function to get the previous month given a particular month of interest.
 
-    :param year: year of interest
-    :param month: month of interest
-    :type year: integer
-    :type month: integer
+    Parameters
+    ----------
+    year: int
+        Year of interest.
+    month: int
+        Month of interest.
+
+    Returns
+    -------
+    (int, int)
+        Previous year and previous month.
     """
     last_year = year
     last_month = month - 1
@@ -1941,14 +2586,20 @@ def last_month_was(year, month):
     return last_year, last_month
 
 
-def next_month_is(year, month):
-    """
-    Short function to get the next month given a particular month of interest
+def next_month_is(year: int, month: int) -> (int, int):
+    """Short function to get the next month given a particular month of interest.
 
-    :param year: year of interest
-    :param month: month of interest
-    :type year: integer
-    :type month: integer
+    Parameters
+    ----------
+    year: int
+        Year of interest.
+    month: int
+        Month of interest.
+
+    Returns
+    -------
+    (int, int)
+        Next year and next month.
     """
     next_year = year
     next_month = month + 1
@@ -1959,21 +2610,24 @@ def next_month_is(year, month):
     return next_year, next_month
 
 
-def year_month_gen(year1, month1, year2, month2):
-    """
-    A generator to loop one month at a time between
-    year1 month1 and year2 month2
+def year_month_gen(year1: int, month1: int, year2: int, month2: int) -> (int, int):
+    """A generator to loop one month at a time between year1 month1 and year2 month2.
 
-    :param year1: first year to loop from
-    :param month1: month in first year to start from
-    :param year2: Last year to loop over
-    :param month2: last month in last year to loop over
-    :type year1: integer
-    :type month1: integer
-    :type year2: integer
-    :type month2: integer
-    :return: Return an iterator that yields tuples of a year and month
-    :rtype: Iterator[integer]
+    Parameters
+    ----------
+    year1: int
+        First year to loop from.
+    month1: int
+        Month in first year to start from.
+    year2: int
+        Last year to loop over.
+    month2: int
+        last month in last year to loop over.
+
+    Returns
+    -------
+    (int, int)
+        Return an iterator that yields tuples of a year and month.
     """
     assert year2 >= year1, "Start year after end year"
     assert 0 < month1 <= 12, "Month outside 1-12"
@@ -1991,14 +2645,18 @@ def year_month_gen(year1, month1, year2, month2):
     yield year, month
 
 
-def get_month_lengths(year):
-    """
-    Return a list holding the lengths of the months in a given year
+def get_month_lengths(year: int) -> list[int]:
+    """Return a list holding the lengths of the months in a given year.
 
-    :param year: Year for which you want month lengths
-    :type year: int
-    :return: list of month lengths
-    :rtype: int
+    Parameters
+    ----------
+    year: int
+        Year for which you want month lengths.
+
+    Returns
+    -------
+    list[int]
+        List of month lengths.
     """
     if calendar.isleap(year):
         month_lengths = [31, 29, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31]
@@ -2008,8 +2666,18 @@ def get_month_lengths(year):
     return month_lengths
 
 
-def base_qc_report(rep):
-    """Take a marine report and do some base qc on it."""
+def base_qc_report(rep: MarineReport) -> MarineReport:
+    """Take a marine report and do some base qc on it.
+
+    Parameters
+    ----------
+    rep: MarineReport
+
+    Returns
+    -------
+    MarineReport
+        Base quality controlled Report.
+    """
     # Basic positional QC
     if rep.getvar("PT") in [6, 7]:
         rep.set_qc("POS", "isbuoy", 1)
