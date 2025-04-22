@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+import itertools
+
 import numpy as np
 import numpy.ma as ma
 
@@ -584,11 +586,12 @@ def hires_field():
 def test_get_hires_sst(lat, lon, month, day, expected, hires_field):
     assert qc.get_hires_sst(lat, lon, month, day, hires_field) == expected
 
+
 @pytest.fixture
 def midres_field_masked():
     outfield = np.zeros((365, 180, 360)) + 5.1
     outfield = outfield.view(ma.MaskedArray)
-    outfield[:, 179, :] = ma.masked # Emulate Antarctica having missing data
+    outfield[:, 179, :] = ma.masked  # Emulate Antarctica having missing data
     return outfield
 
 
@@ -602,3 +605,266 @@ def midres_field_masked():
 )
 def test_get_sst_daily(lat, lon, month, day, expected, midres_field_masked):
     assert qc.get_sst_daily(lat, lon, month, day, midres_field_masked) == expected
+
+
+@pytest.fixture
+def pentad_field():
+    """Construct a 1x1xpentad grid with entries equal to pentad + latitude/100."""
+    outfield = np.zeros((73, 180, 360))
+    for pp, yy in itertools.product(range(73), range(180)):
+        outfield[pp, yy, :] = pp + (89.5 - yy) / 100.
+    return outfield
+
+
+@pytest.fixture
+def single_field():
+    """Construct a 1x1xpentad grid with entries equal to pentad + latitude/100."""
+    outfield = np.zeros((1, 180, 360))
+    for pp, yy in itertools.product(range(1), range(180)):
+        outfield[pp, yy, :] = pp + (89.5 - yy) / 100.
+    return outfield
+
+
+@pytest.mark.parametrize(
+    "lat, lon, month, day, expected",
+    [
+        (89.9, 0.0, 12, 31, 72 + 0.895),
+        (89.9, 0.0, 1, 1, 0 + 0.895),
+        (-9.5, -179.5, 1, 1, 0 - 0.095),
+        (-10.5, -179.5, 12, 31, 72 - 0.105),
+        (89.9, 0.0, 1, 1, 0 + 0.895),
+        (89.9, 0.0, 1, 1, 0 + 0.895),
+        (0.5, -179.5, 1, 1, 0 + 0.005),
+        (-0.5, -179.5, 1, 1, 0 - 0.005),
+        (0.5, -179.5, 1, 1, 0 + 0.005),
+        (-0.5, -179.5, 1, 1, 0 - 0.005),
+        (-89.9, 0.0, 1, 1, 0 - 0.895),
+        (0, 0, 1, 1, 0 - 0.005)
+    ]
+)
+def test_get_sst(lat, lon, month, day, expected, pentad_field):
+    assert qc.get_sst(lat, lon, month, day, pentad_field) == expected
+
+
+@pytest.mark.parametrize(
+    "lat, lon, month, day, expected",
+    [
+        (89.9, 0.0, 12, 31, 0 + 0.895),
+        (89.9, 0.0, 1, 1, 0 + 0.895),
+        (-9.5, -179.5, 1, 1, 0 - 0.095),
+        (-10.5, -179.5, 12, 31, 0 - 0.105),
+        (89.9, 0.0, 1, 1, 0 + 0.895),
+        (89.9, 0.0, 1, 1, 0 + 0.895),
+        (0.5, -179.5, 1, 1, 0 + 0.005),
+        (-0.5, -179.5, 1, 1, 0 - 0.005),
+        (0.5, -179.5, 1, 1, 0 + 0.005),
+        (-0.5, -179.5, 1, 1, 0 - 0.005),
+        (-89.9, 0.0, 1, 1, 0 - 0.895),
+        (0, 0, 1, 1, 0 - 0.005)
+    ]
+)
+def test_get_sst_with_single_field(lat, lon, month, day, expected, single_field):
+    assert qc.get_sst(lat, lon, month, day, single_field) == expected
+
+@pytest.mark.parametrize(
+    "lat, lon, expected",
+    [
+        (89.9, 0.0, 0 + 0.895),
+        (89.9, 0.0, 0 + 0.895),
+        (-9.5, -179.5, 0 - 0.095),
+        (-10.5, -179.5, 0 - 0.105),
+        (89.9, 0.0, 0 + 0.895),
+        (89.9, 0.0, 0 + 0.895),
+        (0.5, -179.5, 0 + 0.005),
+        (-0.5, -179.5, 0 - 0.005),
+        (0.5, -179.5,  0 + 0.005),
+        (-0.5, -179.5,  0 - 0.005),
+        (-89.9, 0.0,0 - 0.895),
+        (0, 0, 0 - 0.005)
+    ]
+)
+def test_get_sst_single_field(lat, lon, expected, single_field):
+    assert qc.get_sst_single_field(lat, lon, single_field) == expected
+
+
+@pytest.mark.parametrize(
+    "x1, x2, y1, y2, x, y, q11, q12, q21, q22, expected",
+    [
+        (0., 1., 0., 1., 0., 0., 0., 0., 0., 0., 0.),  # zero when all zero
+        (0., 1., 0., 1., 0.5, 0.5, 0., 1., 1., 2., 1.0),  # test_gradient_across_square
+        (0., 1., 0., 1., 0.0, 0.0, 0., 1., 1., 2., 0.),
+        (0., 1., 0., 1., 1.0, 1.0, 0., 1., 1., 2., 2.0),
+        (0., 1., 0., 1., 0.0, 1.0, 0., 1., 1., 2., 1.0),
+        (0., 1., 0., 1., 1.0, 0.0, 0., 1., 1., 2., 1.0),
+        (0., 1., 0., 1., 0., 0., 0., 1., 1., 1., 0.0),  # test_zero_at_point_set_to_zero
+        (0., 1., 0., 1., 0., 1., 0., 1., 1., 1., 1.0),  # test_one_at_points_set_to_one
+        (0., 1., 0., 1., 1., 1., 0., 1., 1., 1., 1.0),
+        (0., 1., 0., 1., 1., 0., 0., 1., 1., 1., 1.0),
+        (0., 1., 0., 1., 0.5, 0., 0., 0., 1., 1., 0.5),  # test_half_at_point_halfway_between_zero_and_one
+        (0., 1., 0., 1., 0.5, 0.5, 0., 0., 1., 1., 0.5),
+    ]
+)
+def test_bilinear_interp(x1, x2, y1, y2, x, y, q11, q12, q21, q22, expected):
+    assert qc.bilinear_interp(x1, x2, y1, y2, x, y, q11, q12, q21, q22) == expected
+
+@pytest.mark.parametrize(
+    "array, expected",
+    [
+        ([None, None], None),
+        ([None, 7.3], 7.3),
+        ([994.2, None], 994.2),
+        ([1.0, 6.0], 3.5),
+    ]
+)
+def test_missing_mean(array, expected):
+    assert qc.missing_mean(array) == expected
+
+@pytest.mark.parametrize(
+    "q11, q12, q21, q22, expected",
+    [
+        (None, None, None, None, (None, None, None, None)),
+        (1., 2., 3., None, (1., 2., 3., 2.5)),
+        (None, 2., 3., None, (2.5, 2.0, 3.0, 2.5)),
+        (None, None, 3., None, (3.0, 3.0, 3.0, 3.0)),
+    ]
+)
+def test_fill_missing_values(q11, q12, q21, q22, expected):
+    assert qc.fill_missing_vals(q11, q12, q21, q22) == expected
+
+@pytest.mark.parametrize(
+    "lat, lon, max90, expected",
+    [
+        (0.4, 322.2 - 360, 1, (-38.5, -37.5, -0.5, 0.5)),
+        (89.9, 0.1, 1, (-0.5, 0.5, 89.5, 89.5)),
+        (89.9, 0.1, 0, (-0.5, 0.5, 89.5, 90.5)),
+        (0.1, 0.1, 1, (-0.5, 0.5, -0.5, 0.5)),
+        (0.0, 0.0, 1, (-0.5, 0.5, -0.5, 0.5)),
+        (0.0, 179.9, 1, (179.5, 180.5, -0.5, 0.5)),
+        (0.0, -179.9, 1, (-180.5, -179.5, -0.5, 0.5))
+    ]
+)
+def test_get_four_surrounding_points(lat, lon, max90, expected):
+    assert qc.get_four_surrounding_points(lat, lon, max90) == expected
+
+@pytest.mark.parametrize(
+    "value, climate_normal, standard_deviation, limit, lowbar, expected",
+    [
+        (None, 0.0, 1.0, 3.0, 0.5, 1), # check None returns fail
+        (1.0, None, 1.0, 3.0, 0.5, 1),
+        (1.0, 0.0, None, 3.0, 0.5, 1),
+        (1.0, 0.0, 2.0, 3.0, 0.1, 0), # Check simple pass 1.0 anomaly with 6.0 limits
+        (7.0, 0.0, 2.0, 3.0, 0.1, 1), # Check fail with 7.0 anomaly and 6.0 limits
+        (0.4, 0.0, 0.1, 3.0, 0.5, 0) # check lowbar works anomaly outside std limits but less than lowbar
+    ]
+)
+def test_climatology_plus_stdev_with_lowbar(value, climate_normal, standard_deviation, limit, lowbar, expected):
+    assert qc.climatology_plus_stdev_with_lowbar(value, climate_normal, standard_deviation, limit, lowbar) == expected
+
+@pytest.mark.parametrize(
+    "value, climate_normal, standard_deviation, stdev_limits, limit, expected",
+    [
+        (None, 0.0, 0.5, [0.0, 1.0], 5.0, 1), # fails with None
+        (2.0, None, 0.5, [0.0, 1.0], 5.0, 1), # fails with None
+        (2.0, 0.0, None, [0.0, 1.0], 5.0, 1), # fails with None
+        (2.0, 0.0, 0.5, [0.0, 1.0], 5.0, 0), # simple pass
+        (2.0, 0.0, 0.5, [0.0, 1.0], 3.0, 1), # simple fail
+        (3.0, 0.0, 1.5, [0.0, 1.0], 2.0, 1), # fail with limited stdev
+        (1.0, 0.0, 0.1, [0.5, 1.0], 5.0, 0), # pass with limited stdev
+    ]
+)
+def test_climatology_plus_stdev_check(value, climate_normal, standard_deviation, stdev_limits, limit, expected):
+    assert qc.climatology_plus_stdev_check(value, climate_normal, standard_deviation, stdev_limits, limit) == expected
+
+def test_climatology_plus_stdev_check_raises():
+    with pytest.raises(ValueError):
+        qc.climatology_plus_stdev_check(1.0, 0.0, 0.5, [1.0, 0.0], 5.0)
+    with pytest.raises(ValueError):
+        qc.climatology_plus_stdev_check(1.0, 0.0, 0.5, [0.0, 1.0], -1)
+
+@pytest.mark.parametrize(
+    "value, climate_normal, limit, expected",
+    [
+        (8.0, 0.0, 8.0, 0), # pass at limit
+        (9.0, 0.0, 8.0, 1), # fail with anomaly exceeding limit
+        (0.0, 9.0, 8.0, 1), # fail with same anomaly but negative
+        (9.0, 0.0, 11.0, 0), # pass with higher limit
+        (0.0, 9.0, 11.0, 0), # same with negative anomaly
+        (None, 0.0, 8.0, 1), # Fail with Nones as inputs
+        (9.0, None, 8.0, 1),
+        (9.0, 0.0, None, 1),
+    ]
+)
+def test_climatology_check(value, climate_normal, limit, expected):
+    assert qc.climatology_check(value, climate_normal, limit) == expected
+
+@pytest.mark.parametrize(
+    "value, expected",
+    [
+        (None, 1),
+        (5.7, 0),
+    ]
+)
+def test_value_check(value, expected):
+    assert qc.value_check(value) == expected
+
+@pytest.mark.parametrize(
+    "value, expected",
+    [
+        (None, 1),
+        (5.7, 0),
+    ]
+)
+def test_no_normal_check(value, expected):
+    assert qc.no_normal_check(value) == expected
+
+
+@pytest.mark.parametrize(
+    "value, limits, expected",
+    [
+        (5.0, [-20., 20.], 0),
+        (25.0, [-20., 20.], 1),
+        (-10.0, [-30, 15.], 0),
+    ]
+)
+def test_hard_limit(value, limits, expected):
+    assert qc.hard_limit(value, limits) == expected
+
+@pytest.mark.parametrize(
+    "sst, sst_uncertainty, freezing_point, n_sigma, expected",
+    [
+        (15.0, 0.0, -1.8, 2.0, 0),
+        (-15.0, 0.0, -1.8, 2.0, 1),
+        (-2.0, 0.0, -2.0, 2.0, 0),
+        (-2.0, 0.5, -1.8, 2.0, 0),
+        (-5.0, 0.5, -1.8, 2.0, 1)
+    ]
+)
+def test_sst_freeze_check(sst, sst_uncertainty, freezing_point, n_sigma, expected):
+    assert qc.sst_freeze_check(sst, sst_uncertainty, freezing_point, n_sigma) == expected
+
+def test_sst_freeze_check_defaults_and_raises():
+    with pytest.raises(ValueError):
+        qc.sst_freeze_check(0.0, None, -1.8, 2.0)
+    with pytest.raises(ValueError):
+        qc.sst_freeze_check(0.0, 0.0, None, 2.0)
+
+    assert qc.sst_freeze_check(0.0) == 0
+    assert qc.sst_freeze_check(-1.8) == 0
+    assert qc.sst_freeze_check(-2.0) == 1
+
+@pytest.mark.parametrize(
+    "angle1, angle2, expected",
+    [
+        (0., 1., 1.),
+        (0., 3*np.pi/2, np.pi/2),
+        (0, 2*np.pi, 0)
+    ]
+)
+def test_angle_diff(angle1, angle2, expected):
+    assert qc.angle_diff(angle1, angle2) == expected
+
+def test_angle_diff_raises():
+    with pytest.raises(ValueError):
+        qc.angle_diff(None, 1.0)
+    with pytest.raises(ValueError):
+        qc.angle_diff(1.0,None)
