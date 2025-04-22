@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import numpy as np
+import numpy.ma as ma
 
 import _load_data
 import pytest
@@ -562,3 +563,42 @@ def test_day_in_year_leap_year():
         for day in range(1, month_lengths[month - 1] + 1):
             assert qc.day_in_year(month, day) == count
             count += 1
+
+
+@pytest.fixture
+def hires_field():
+    outfield = np.zeros((365, 1, 180 * 4, 360 * 4))
+    outfield[:, :, -1, :] = -999
+    return outfield
+
+
+@pytest.mark.parametrize(
+    "lat, lon, month, day, expected",
+    [
+        (-89.9, -179.9, 1, 1, None),
+        (89.89, -179.9, 1, 1, 0),
+        (89.89, -179.9 + 0.25, 1, 1, 0),
+        (89.89, 179.9, 1, 1, 0),
+    ]
+)
+def test_get_hires_sst(lat, lon, month, day, expected, hires_field):
+    assert qc.get_hires_sst(lat, lon, month, day, hires_field) == expected
+
+@pytest.fixture
+def midres_field_masked():
+    outfield = np.zeros((365, 180, 360)) + 5.1
+    outfield = outfield.view(ma.MaskedArray)
+    outfield[:, 179, :] = ma.masked # Emulate Antarctica having missing data
+    return outfield
+
+
+@pytest.mark.parametrize(
+    "lat, lon, month, day, expected",
+    [
+        (-89.9, -179.9, 1, 1, None),
+        (89.89, -179.9, 1, 1, 5.1),
+        (89.89, 179.9, 1, 1, 5.1),
+    ]
+)
+def test_get_sst_daily(lat, lon, month, day, expected, midres_field_masked):
+    assert qc.get_sst_daily(lat, lon, month, day, midres_field_masked) == expected

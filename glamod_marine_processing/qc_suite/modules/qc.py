@@ -392,7 +392,7 @@ def get_hires_sst(lat: float, lon: float, month: int, day: int, hires_field) -> 
     return result
 
 
-def get_sst_daily(lat, lon, month, day, sst):
+def get_sst_daily(lat: float, lon: float, month: int, day: int, sst) -> float:
     """
     Get SST from pentad climatology interpolated to day.
 
@@ -412,7 +412,13 @@ def get_sst_daily(lat, lon, month, day, sst):
     Returns
     -------
     float
+        SST value at specified location
 
+    Raises
+    ------
+    ValueError
+        When latitude outside range -90 to 90, longitude is outside range -180 to 360, month is outside
+        range 1-12 or day is outside range 1-number of days in month
     """
     if lat < -90.0 or lat > 90.0:
         raise ValueError(f"Latitude {lat} outside range -90 to 90")
@@ -467,6 +473,12 @@ def get_sst(lat, lon, month, day, sst):
     -------
     float
         value in array at this point
+
+    Raises
+    ------
+    ValueError
+        When latitude outside range -90 to 90, longitude is outside range -180 to 360, month is outside
+        range 1-12 or day is outside range 1-number of days in month
     """
     if lat < -90.0 or lat > 90.0:
         raise ValueError(f"Latitude {lat} outside range -90 to 90")
