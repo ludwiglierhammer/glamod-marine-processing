@@ -1,3 +1,5 @@
+"""Module containing main QC functions which could be applied on a DataBundle."""
+
 from __future__ import annotations
 
 import math
@@ -26,7 +28,7 @@ def is_buoy(platform_type: int) -> int:
     # Do we need this function?
     # Where/Why do we need "isbuoy" and "isdrifter"?
     # I think this function should return a boolean value, isn't it?
-    # I think we should use the CDM platfrom table?
+    # I think we should use the CDM platform table?
     # https://glamod.github.io/cdm-obs-documentation/tables/code_tables/platform_type/platform_type.html
     if platform_type in [6, 7]:
         return 1
@@ -72,7 +74,7 @@ def is_ship(platform_type: int) -> int:
     """
     # Do we need this function?
     # I think this function should return a boolean value, isn't it?
-    # I think we should use the CDM platfrom table?
+    # I think we should use the CDM platform table?
     # https://glamod.github.io/cdm-obs-documentation/tables/code_tables/platform_type/platform_type.html
     if platform_type in [0, 1, 2, 3, 4, 5, 10, 11, 12, 17]:
         return 1
@@ -648,6 +650,7 @@ def do_dpt_missing_value_check(dpt):
     """
     Check that dew point temperature value exists
 
+
     Parameters
     ----------
     dpt : float
@@ -745,6 +748,7 @@ def do_sst_missing_value_check(sst):
         1 if value is missing, 0 otherwise
     """
     return qc.value_check(sst)
+
 
 def do_sst_freeze_check(sst, parameters):
     """
