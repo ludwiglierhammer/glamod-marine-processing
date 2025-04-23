@@ -6,5 +6,9 @@
   "job_time_min": "10",
   "params_exclude": [
     "observations-wbt"
-  ]
+  ],
+  include_list": {
+    "year_init": 1851,
+    "year_end": 2024
+  }  
 }
