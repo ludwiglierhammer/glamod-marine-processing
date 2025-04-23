@@ -1,7 +1,6 @@
 from __future__ import annotations
 
-import _load_data
-import pytest
+import pytest  # noqa
 from _settings import get_settings
 from cdm_reader_mapper import read_tables
 from cdm_reader_mapper.common.getting_files import load_file
@@ -11,7 +10,8 @@ from glamod_marine_processing.qc_suite.modules.next_level_qc import (
     perform_obs_qc,
 )
 
-_settings = get_settings("ICOADS_R3.0.2T")
+dataset = "ICOADS_R3.0.2T"
+_settings = get_settings(dataset)
 cache_dir = f"./Eqc/{dataset}/qc/{_settings.deck}"
 for table in [
     "header",
