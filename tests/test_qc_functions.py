@@ -5,11 +5,7 @@ import itertools
 import numpy as np
 import numpy.ma as ma
 
-import _load_data
 import pytest
-from _settings import get_settings
-from cdm_reader_mapper import read_tables
-from cdm_reader_mapper.common.getting_files import load_file
 
 from glamod_marine_processing.qc_suite.modules.next_level_qc import (
     #    do_base_dpt_qc,
