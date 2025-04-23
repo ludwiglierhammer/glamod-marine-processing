@@ -96,10 +96,16 @@ class script_setup:
 
         try:
             for opt in process_options:
-                if not config.get(sid_dck, {}).get(opt):
-                    setattr(self, opt, config.get(opt))
+                if config.get(sid_dck, {}).get(opt):
+                    config_opt = config[sid_dck][opt]
                 else:
-                    setattr(self, opt, config.get(sid_dck).get(opt))
+                    config_opt = config[opt]
+                if isinstance(config_opt, dict):
+                    if "base" in config_opt.keys() and "extra" in config_opt.keys():
+                        config_opt = config_opt["base"] + getattr(
+                            self, config_opt["extra"]
+                        )
+                setattr(self, opt, config_opt)
         except Exception:
             logging.error(
                 f"Parsing configuration from file: {configfile}", exc_info=True
