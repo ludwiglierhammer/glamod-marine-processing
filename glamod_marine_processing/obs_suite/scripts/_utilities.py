@@ -116,7 +116,7 @@ class script_setup:
         self.release = config["abbreviations"].get("release")
 
         self.filename = config.get("filename")
-        self.level2_list = config.get("cmd_add_file")
+        self.include_list = config.get("include_list")
         self.prev_fileID = config.get("prev_fileID")
         self.release_id = config["abbreviations"].get("release_tag")
         self.fileID = FFS.join(

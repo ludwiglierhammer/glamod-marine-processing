@@ -93,7 +93,7 @@ include_list = params.include_list
 
 if not include_list.get(params.sid_dck):
     logging.warning(
-        f"sid-dck {params.sid_dck} not registered in level2 list {params.level2_list}"
+        f"sid-dck {params.sid_dck} not registered in level2 list {include_list}"
     )
     year_init = int(include_list.get("year_init"))
     year_end = int(include_list.get("year_end"))
