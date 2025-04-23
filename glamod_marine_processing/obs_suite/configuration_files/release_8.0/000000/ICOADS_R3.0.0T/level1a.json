@@ -21,7 +21,7 @@
     ]
   },
   "data_model": {
-    "base": "icoads_r300_",
+    "base": "icoads_r300_d",
     "extra": "dck"
   },
   "069-701_form_type1": {
