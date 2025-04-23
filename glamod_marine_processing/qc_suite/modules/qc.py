@@ -11,7 +11,6 @@ import math
 from datetime import datetime, timedelta
 
 import numpy as np
-from Extended_IMMA_sb import MarineReport
 
 # Conversion factor between degrees and radians
 degrad = np.pi / 180.0
@@ -500,13 +499,21 @@ def get_sst(
     return result
 
 
-def get_hires_clim(rep: MarineReport, clim: np.ndarray) -> float | None:
+def get_hires_clim(
+    lat: float, lon: float, month: int, day: int, clim: np.ndarray
+) -> float | None:
     """Get the climatological value for this particular observation.
 
     Parameters
     ----------
-    rep: MarineReport
-        Marine Report
+    lat: float
+        Latitude of the point.
+    lon: float
+        Longitude of the point.
+    month: int
+        Month of the point.
+    day: int
+        Day of the point.
     clim: np.ndarray
         A masked array containing the climatological averages.
 
@@ -516,14 +523,10 @@ def get_hires_clim(rep: MarineReport, clim: np.ndarray) -> float | None:
         Climatological value for a particular observation.
     """
     try:
-        rep_clim = get_hires_sst(
-            rep.lat(), rep.lon(), rep.getvar("MO"), rep.getvar("DY"), clim
-        )
-        rep_clim = float(rep_clim)
+        rep_clim = get_hires_sst(lat, lon, month, day, clim)
+        return float(rep_clim)
     except Exception:
-        rep_clim = None
-
-    return rep_clim
+        return None
 
 
 def bilinear_interp(
@@ -698,37 +701,42 @@ def get_four_surrounding_points(
     return x1, x2, y1, y2
 
 
-def get_clim_interpolated(rep: MarineReport, clim: np.ndarray) -> int | float:
+def get_clim_interpolated(
+    lat: float, lon: float, month: int, day: int, clim: np.ndarray
+) -> int | float:
     """Get climatological interpolation.
 
     Parameters
     ----------
-    rep: MarineReport
+    lat: float
+        Latitude of the point.
+    lon: float
+        Longitude of the point.
+    month: int
+        Month of the point.
+    day: int
+        Day of the point.
     clim: np.ndarray
+        A masked array containing the climatological averages.
 
     Returns
     -------
     int or float
     """
-    lat = rep.lat()
-    lon = rep.lon()
-    mo = rep.getvar("MO")
-    dy = rep.getvar("DY")
-
     try:
-        pert1 = get_sst(lat + 0.001, lon + 0.001, mo, dy, clim)
+        pert1 = get_sst(lat + 0.001, lon + 0.001, month, day, clim)
     except Exception:
         pert1 = None
     try:
-        pert2 = get_sst(lat + 0.001, lon - 0.001, mo, dy, clim)
+        pert2 = get_sst(lat + 0.001, lon - 0.001, month, day, clim)
     except Exception:
         pert2 = None
     try:
-        pert3 = get_sst(lat - 0.001, lon + 0.001, mo, dy, clim)
+        pert3 = get_sst(lat - 0.001, lon + 0.001, month, day, clim)
     except Exception:
         pert3 = None
     try:
-        pert4 = get_sst(lat - 0.001, lon - 0.001, mo, dy, clim)
+        pert4 = get_sst(lat - 0.001, lon - 0.001, month, day, clim)
     except Exception:
         pert4 = None
     if pert1 is None and pert2 is None and pert3 is None and pert4 is None:
@@ -737,28 +745,28 @@ def get_clim_interpolated(rep: MarineReport, clim: np.ndarray) -> int | float:
     x1, x2, y1, y2 = get_four_surrounding_points(lat, lon, 1)
 
     try:
-        q11 = get_sst(y1, x1, mo, dy, clim)
+        q11 = get_sst(y1, x1, month, day, clim)
     except Exception:
         q11 = None
     if q11 is not None:
         q11 = float(q11)
 
     try:
-        q22 = get_sst(y2, x2, mo, dy, clim)
+        q22 = get_sst(y2, x2, month, day, clim)
     except Exception:
         q22 = None
     if q22 is not None:
         q22 = float(q22)
 
     try:
-        q12 = get_sst(y2, x1, mo, dy, clim)
+        q12 = get_sst(y2, x1, month, day, clim)
     except Exception:
         q12 = None
     if q12 is not None:
         q12 = float(q12)
 
     try:
-        q21 = get_sst(y1, x2, mo, dy, clim)
+        q21 = get_sst(y1, x2, month, day, clim)
     except Exception:
         q21 = None
     if q21 is not None:
@@ -771,13 +779,21 @@ def get_clim_interpolated(rep: MarineReport, clim: np.ndarray) -> int | float:
     return bilinear_interp(x1, x2, y1, y2, lon, lat, q11, q12, q21, q22)
 
 
-def get_clim(rep: MarineReport, clim: np.ndarray) -> float | None:
+def get_clim(
+    lat: float, lon: float, month: int, day: int, clim: np.ndarray
+) -> float | None:
     """Get the climatological value for this particular observation.
 
     Parameters
     ----------
-    rep: MarineReport
-        Marine Report.
+    lat: float
+        Latitude of the point.
+    lon: float
+        Longitude of the point.
+    month: int
+        Month of the point.
+    day: int
+        Day of the point.
     clim: np.ndarray
         A masked array containing the climatological averages.
 
@@ -786,14 +802,10 @@ def get_clim(rep: MarineReport, clim: np.ndarray) -> float | None:
     float or None
     """
     try:
-        rep_clim = get_sst(
-            rep.lat(), rep.lon(), rep.getvar("MO"), rep.getvar("DY"), clim
-        )
-        rep_clim = float(rep_clim)
+        rep_clim = get_sst(lat, lon, month, day, clim)
+        return float(rep_clim)
     except Exception:
-        rep_clim = None
-
-    return rep_clim
+        return
 
 
 def get_sst_single_field(lat: float, lon: float, sst: np.ndarray) -> int | float:
