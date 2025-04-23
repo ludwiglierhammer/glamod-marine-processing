@@ -1,7 +1,5 @@
 from __future__ import annotations
 
-import numpy as np
-
 data_model = "icoads"
 release = "r300"
 deck = "d706"
@@ -76,8 +74,31 @@ pattern = {
     "level3": "header-icoads_r???_d???_????-??-??_subset.psv",
 }
 
-pattern_out = {}
+pattern_out = {"level3": f"pressure-data-1919-03-{release}-000000.psv"}
 
-manipulation = {}
+manipulation = {
+    "level3": [
+        ("header", "station_name"),
+        ("header", "primary_station_id"),
+        ("header", "report_id"),
+        ("observations-slp", "observation_id"),
+        ("header", "longitude"),
+        ("header", "latitude"),
+        ("header", "height_of_station_above_sea_level"),
+        ("header", "report_timestamp"),
+        ("header", "report_meaning_of_timestamp"),
+        ("header", "report_duration"),
+        ("observations-slp", "observed_variable"),
+        ("observations-slp", "units"),
+        ("observations-slp", "observation_value"),
+        ("observations-slp", "quality_flag"),
+        ("header", "source_id"),
+        ("observations-slp", "data_policy_licence"),
+        ("header", "report_type"),
+        ("observations-slp", "value_significance"),
+    ],
+}
 
-drops = {}
+drops = {
+    "level3": [0, 3],
+}
