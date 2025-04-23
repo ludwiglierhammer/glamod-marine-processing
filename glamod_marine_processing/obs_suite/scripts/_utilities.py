@@ -99,7 +99,7 @@ class script_setup:
                 if config.get(sid_dck, {}).get(opt):
                     config_opt = config[sid_dck][opt]
                 else:
-                    config_opt = config[opt]
+                    config_opt = config.get(opt)
                 if isinstance(config_opt, dict):
                     if "base" in config_opt.keys() and "extra" in config_opt.keys():
                         config_opt = config_opt["base"] + getattr(
