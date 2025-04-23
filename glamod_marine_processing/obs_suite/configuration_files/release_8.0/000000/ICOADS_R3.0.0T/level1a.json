@@ -5,26 +5,26 @@
   "job_time_hr": "01",
   "job_time_min": "30",
   "read_sections": [
-      "core",
-      "c1",
-      "c98",
-      "c99_data"
-    ],
+    "core",
+    "c1",
+    "c98",
+    "c99_data"
+  ],
   "filter_reports_by": {
-      "c1.PT": [
-        "0",
-        "1",
-        "2",
-        "3",
-        "4",
-        "5"
-      ]
+    "c1.PT": [
+      "0",
+      "1",
+      "2",
+      "3",
+      "4",
+      "5"
+    ]
   },
   "data_model": {
-      "base": "icoads_r300_",
-      "extra": "dck"
+    "base": "icoads_r300_",
+    "extra": "dck"
   },
   "069-701_form_type1": {
-      "data_model" : "icoads_r300_d701_type1"
+    "data_model": "icoads_r300_d701_type1"
   }
 }
