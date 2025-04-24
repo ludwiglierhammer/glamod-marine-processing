@@ -703,7 +703,9 @@ Replaced the do_base_mat_qc by four separate functions see above
 #     )
 
 
-def do_dpt_climatology_plus_stdev_check(dpt: float, dpt_climatology: float, dpt_stdev: float, parameters: dict) -> int:
+def do_dpt_climatology_plus_stdev_check(
+    dpt: float, dpt_climatology: float, dpt_stdev: float, parameters: dict
+) -> int:
     """Check that standardised dewpoint temperature anomaly is within specified range.
 
     Temperature is converted into a standardised anomaly by subtracting the climatological normal and dividing by
@@ -985,7 +987,7 @@ def do_wind_missing_value_check(wind_speed: float | None) -> int:
 
 def do_wind_hard_limits_check(wind_speed: float, parameters: dict) -> int:
     """Check that wind speed is within hard limits specified by "hard_limits".
-    
+
     Parameters
     ----------
     wind_speed : float
