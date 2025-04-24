@@ -544,7 +544,7 @@ def wind_blacklist(deck):
     return result
 
 
-def do_air_temperature_missing_value_check(at):
+def do_air_temperature_missing_value_check(at: float) -> int:
     """
     Check that air temperature value exists
 
@@ -590,13 +590,13 @@ def do_air_temperature_anomaly_check(at, at_climatology, parameters):
     return qc.climatology_check(at, at_climatology, parameters["maximum_anomaly"])
 
 
-def do_air_temperature_no_normal_check(at_climatology):
+def do_air_temperature_no_normal_check(at_climatology: float | None) -> int:
     """
     Check that climatological value is present
 
     Parameters
     ----------
-    at_climatology : float
+    at_climatology : float or None
         Air temperature climatology value
 
     Returns
@@ -636,6 +636,36 @@ def do_air_temperature_hard_limit_check(at: float, parameters: dict) -> int:
 def do_air_temperature_climatology_plus_stdev_check(
     at, at_climatology, at_stdev, parameters
 ):
+    """Check that standardised air temperature anomaly is within specified range.
+
+    Temperature is converted into a standardised anomaly by subtracting the climatological normal and dividing by
+    the climatological standard deviation. If the climatological standard deviation is outside the range specified in
+    the parameters dictionary under "minmax_standard_deviation" then the standard deviation is set to whichever of
+    the lower or upper limits is closest. The test fails if the standardised anomaly is larger than the value
+    specified in the parameters dictionary under "maximum_standardised_anomaly".
+
+    Parameters
+    ----------
+    at : float
+        Air temperature.
+    at_climatology : float
+        Climatological normal of air temperatures.
+    at_stdev : float
+        Climatological standard deviation of air temperatures.
+    parameters : dict
+        Dictionary containing QC parameters. Must contain keys "minmax_standard_deviation" and
+        "maximum_standardised_anomaly"
+
+    Returns
+    -------
+    int
+        Returns 1 if standardised temperature anomaly is outside specified range, 0 otherwise.
+
+    Raises
+    ------
+    KeyError
+        When "minmax_standard_deviation" or "maximum_standardised_anomaly" is not in the dictionary.
+    """
     if "minmax_standard_deviation" not in parameters:
         raise KeyError('"minmax_standard_deviation" not in parameters')
     if "maximum_standardised_anomaly" not in parameters:
@@ -673,7 +703,37 @@ Replaced the do_base_mat_qc by four separate functions see above
 #     )
 
 
-def do_dpt_climatology_plus_stdev_check(dpt, dpt_climatology, dpt_stdev, parameters):
+def do_dpt_climatology_plus_stdev_check(dpt: float, dpt_climatology: float, dpt_stdev: float, parameters: dict) -> int:
+    """Check that standardised dewpoint temperature anomaly is within specified range.
+
+    Temperature is converted into a standardised anomaly by subtracting the climatological normal and dividing by
+    the climatological standard deviation. If the climatological standard deviation is outside the range specified in
+    the parameters dictionary under "minmax_standard_deviation" then the standard deviation is set to whichever of
+    the lower or upper limits is closest. The test fails if the standardised anomaly is larger than the value
+    specified in the parameters dictionary under "maximum_standardised_anomaly".
+
+    Parameters
+    ----------
+    dpt : float
+        Dewpoint temperature.
+    dpt_climatology : float
+        Climatological normal of dewpoint temperatures.
+    dpt_stdev : float
+        Climatological standard deviation of dewpoint temperatures.
+    parameters : dict
+        Dictionary containing QC parameters. Must contain keys "minmax_standard_deviation" and
+        "maximum_standardised_anomaly"
+
+    Returns
+    -------
+    int
+        Returns 1 if standardised temperature anomaly is outside specified range, 0 otherwise.
+
+    Raises
+    ------
+    KeyError
+        When "minmax_standard_deviation" or "maximum_standardised_anomaly" is not in the dictionary.
+    """
     if "minmax_standard_deviation" not in parameters:
         raise KeyError('"minmax_standard_deviation" not in parameters')
     if "maximum_standardised_anomaly" not in parameters:
@@ -792,7 +852,7 @@ def do_sst_missing_value_check(sst):
     return qc.value_check(sst)
 
 
-def do_sst_freeze_check(sst, parameters):
+def do_sst_freeze_check(sst: float, parameters: dict) -> int:
     """
     Check that sea surface temperature is above freezing
 
@@ -811,7 +871,7 @@ def do_sst_freeze_check(sst, parameters):
     Raises
     ------
     KeyError
-        When
+        When freezing_point or freeze_check_n_sigma is not in parameters
     """
     if "freezing_point" not in parameters:
         raise KeyError('"freezing_point" not in parameters')
@@ -907,12 +967,38 @@ def do_sst_no_normal_check(sst_climatology):
 #     )
 
 
-def do_wind_missing_value_check(w):
-    return qc.value_check(w)
+def do_wind_missing_value_check(wind_speed: float | None) -> int:
+    """Check that wind speed value exists
+
+    Parameters
+    ----------
+    wind_speed : float or None
+        Wind speed
+
+    Returns
+    -------
+    int
+        Returns 1 if wind speed is missing, 0 otherwise.
+    """
+    return qc.value_check(wind_speed)
 
 
-def do_wind_hard_limits_check(w, parameters):
-    return qc.hard_limit(w, parameters["hard_limits"])
+def do_wind_hard_limits_check(wind_speed: float, parameters: dict) -> int:
+    """Check that wind speed is within hard limits specified by "hard_limits".
+    
+    Parameters
+    ----------
+    wind_speed : float
+        Wind speed to be checked
+    parameters : dict
+        Dictionary containing QC parameters. Must contain key "hard_limits".
+
+    Returns
+    -------
+    int
+        Returns 1 if wind speed is outside of hard limits, 0 otherwise.
+    """
+    return qc.hard_limit(wind_speed, parameters["hard_limits"])
 
 
 def do_wind_consistency_check(wind_speed, wind_direction, parameters):
