@@ -346,7 +346,7 @@ def day_in_year(month: int, day: int) -> int:
     elif month == 2 and day == 29:
         dindex = day_in_year(3, 1)
     else:
-        dindex = np.sum(month_lengths[0: month - 1]) + day
+        dindex = np.sum(month_lengths[0 : month - 1]) + day
 
     return dindex
 
@@ -402,7 +402,7 @@ def get_hires_sst(lat: float, lon: float, month: int, day: int, hires_field) -> 
 
 
 def get_sst_daily(
-  lat: float, lon: float, month: int, day: int, sst: np.ndarray
+    lat: float, lon: float, month: int, day: int, sst: np.ndarray
 ) -> int | float | None:
     """Get SST from pentad climatology interpolated to day.
 
@@ -620,10 +620,10 @@ def bilinear_interp(
     val /= (x2 - x1) * (y2 - y1)
 
     assert val <= 0.0001 + max([q11, q12, q21, q22]), (
-            str(val) + " " + str(q11) + " " + str(q12) + " " + str(q21) + " " + str(q22)
+        str(val) + " " + str(q11) + " " + str(q12) + " " + str(q21) + " " + str(q22)
     )
     assert val >= -0.0001 + min([q11, q12, q21, q22]), (
-            str(val) + " " + str(q11) + " " + str(q12) + " " + str(q21) + " " + str(q22)
+        str(val) + " " + str(q11) + " " + str(q12) + " " + str(q21) + " " + str(q22)
     )
     return val
 
@@ -653,7 +653,9 @@ def missing_mean(inarr: list) -> float | None:
         return result / num
 
 
-def fill_missing_vals(q11: float, q12: float, q21: float, q22: float) -> (float, float, float, float):
+def fill_missing_vals(
+    q11: float, q12: float, q21: float, q22: float
+) -> (float, float, float, float):
     """
     For a group of four neighbouring grid boxes which form a square, with values q11, q12, q21, q22,
     fill gaps using means of neighbours.
@@ -702,7 +704,9 @@ def fill_missing_vals(q11: float, q12: float, q21: float, q22: float) -> (float,
     return outq11, outq12, outq21, outq22
 
 
-def get_four_surrounding_points(lat: float, lon: float, max90: int = 1) -> (float, float, float, float):
+def get_four_surrounding_points(
+    lat: float, lon: float, max90: int = 1
+) -> (float, float, float, float):
     """
     Get the four surrounding points of a specified latitude and longitude point.
 
@@ -754,6 +758,8 @@ def get_four_surrounding_points(lat: float, lon: float, max90: int = 1) -> (floa
 
 
 """It doesn't look like this routine is used"""
+
+
 def get_clim_interpolated(
     lat: float, lon: float, month: int, day: int, clim: np.ndarray
 ) -> int | float:
@@ -1042,8 +1048,14 @@ def get_sst_single_field(lat: float, lon: float, sst: np.ndarray) -> int | float
 #     return result
 #
 
-def climatology_plus_stdev_with_lowbar(value: float, climate_normal: float, standard_deviation: float,
-                                       limit: float, lowbar: float) -> int:
+
+def climatology_plus_stdev_with_lowbar(
+    value: float,
+    climate_normal: float,
+    standard_deviation: float,
+    limit: float,
+    lowbar: float,
+) -> int:
     """
     Climatology check with standard deviation-based limits but with a minimum width
 
@@ -1077,7 +1089,10 @@ def climatology_plus_stdev_with_lowbar(value: float, climate_normal: float, stan
     if value is None or climate_normal is None or standard_deviation is None:
         result = 1
     else:
-        if abs(value - climate_normal) / standard_deviation > limit and abs(value - climate_normal) > lowbar:
+        if (
+            abs(value - climate_normal) / standard_deviation > limit
+            and abs(value - climate_normal) > lowbar
+        ):
             result = 1
 
     assert result == 0 or result == 1
@@ -1086,11 +1101,11 @@ def climatology_plus_stdev_with_lowbar(value: float, climate_normal: float, stan
 
 
 def climatology_plus_stdev_check(
-  value: float | None, 
-  climate_normal: float | None, 
-  standard_deviation: float | None,
-  stdev_limits: list[float, float], 
-  limit: float
+    value: float | None,
+    climate_normal: float | None,
+    standard_deviation: float | None,
+    stdev_limits: list[float, float],
+    limit: float,
 ) -> int:
     """
     Climatology check which uses standardised anomalies. Lower and upper limits can be specified for the standard deviation using
@@ -1145,9 +1160,7 @@ def climatology_plus_stdev_check(
 
 
 def climatology_check(
-  value: float | None, 
-  climate_normal: float | None, 
-  limit: float = 8.0
+    value: float | None, climate_normal: float | None, limit: float = 8.0
 ) -> int:
     """Simple function to compare a value with a climatological average with some arbitrary limit on the difference.
     This may be the second simplest function I have ever written (see blacklist)
@@ -1271,8 +1284,12 @@ def hard_limit(val: float | None, limits: list) -> int:
 #     return result
 
 
-def sst_freeze_check(insst: float | None, sst_uncertainty: float = 0.0, freezing_point: float = -1.80,
-                     n_sigma: float = 2.0) -> int:
+def sst_freeze_check(
+    insst: float | None,
+    sst_uncertainty: float = 0.0,
+    freezing_point: float = -1.80,
+    n_sigma: float = 2.0,
+) -> int:
     """Compare an input SST to see if it is above freezing.
 
     This is a simple freezing point check made slightly more complex. We want to check if a
@@ -1461,31 +1478,31 @@ def p_data_given_good(
         When inputs are incorrectly specified: q<=0, sigma<=0, r_lo > r_hi, x < r_lo or x > r_hi
     """
     if q <= 0.0:
-        raise ValueError(f'q {q} <= 0')
+        raise ValueError(f"q {q} <= 0")
     if sigma <= 0.0:
-        raise ValueError(f'sigma {sigma} <= 0')
+        raise ValueError(f"sigma {sigma} <= 0")
     if r_lo >= r_hi:
-        raise ValueError(f'Limits not ascending r_lo {r_lo} > r_hi {r_hi}')
+        raise ValueError(f"Limits not ascending r_lo {r_lo} > r_hi {r_hi}")
     if x < r_lo:
-        raise ValueError(f'x below specified lower limit, {x} < r_lo {r_lo}')
+        raise ValueError(f"x below specified lower limit, {x} < r_lo {r_lo}")
     if x > r_hi:
-        raise ValueError(f'x above specified upper limit, {x} > r_hi {r_hi}')
+        raise ValueError(f"x above specified upper limit, {x} > r_hi {r_hi}")
 
     upper_x = min([x + 0.5 * q, r_hi + 0.5 * q])
     lower_x = max([x - 0.5 * q, r_lo - 0.5 * q])
 
     normalizer = 0.5 * (
-            math.erf((r_hi + 0.5 * q - mu) / (sigma * math.sqrt(2)))
-            - math.erf((r_lo - 0.5 * q - mu) / (sigma * math.sqrt(2)))
+        math.erf((r_hi + 0.5 * q - mu) / (sigma * math.sqrt(2)))
+        - math.erf((r_lo - 0.5 * q - mu) / (sigma * math.sqrt(2)))
     )
 
     return (
-            0.5
-            * (
-                    math.erf((upper_x - mu) / (sigma * math.sqrt(2)))
-                    - math.erf((lower_x - mu) / (sigma * math.sqrt(2)))
-            )
-            / normalizer
+        0.5
+        * (
+            math.erf((upper_x - mu) / (sigma * math.sqrt(2)))
+            - math.erf((lower_x - mu) / (sigma * math.sqrt(2)))
+        )
+        / normalizer
     )
 
 
@@ -1521,8 +1538,9 @@ def p_data_given_gross(q: float, r_hi: float, r_lo: float) -> float:
     return 1.0 / (1.0 + (r / q))
 
 
-def p_gross(p0: float, q: float, r_hi: float, r_lo: float, x: float, mu: float, sigma: float) -> float:
-
+def p_gross(
+    p0: float, q: float, r_hi: float, r_lo: float, x: float, mu: float, sigma: float
+) -> float:
     """
     Calculate the posterior probability of a gross error given the prior probability p0,
     the quantization level of the observed value, Q, previous limits on the observed value,
@@ -1561,24 +1579,24 @@ def p_gross(p0: float, q: float, r_hi: float, r_lo: float, x: float, mu: float, 
         raise ValueError(f"p0 <= 0 {p0}")
     if not (p0 <= 1):
         raise ValueError(f"p0 > 1 {p0}")
-    if not(q > 0.0):
+    if not (q > 0.0):
         raise ValueError(f"q <= 0 {q}")
-    if not(r_hi > r_lo):
+    if not (r_hi > r_lo):
         raise ValueError(f"Limits not ascending r_lo {r_lo} > r_hi {r_hi}")
-    if not(x >= r_lo):
+    if not (x >= r_lo):
         raise ValueError(f"x below lower limit {x} < r_lo {r_lo}")
-    if not(x <= r_hi):
+    if not (x <= r_hi):
         raise ValueError(f"x above upper limit {x} > r_hi {r_hi}")
-    if not(sigma > 0.0):
+    if not (sigma > 0.0):
         raise ValueError(f"sigma <= 0 {sigma}")
 
     pgross = (
-            p0
-            * p_data_given_gross(q, r_hi, r_lo)
-            / (
-                    p0 * p_data_given_gross(q, r_hi, r_lo)
-                    + (1 - p0) * p_data_given_good(x, q, r_hi, r_lo, mu, sigma)
-            )
+        p0
+        * p_data_given_gross(q, r_hi, r_lo)
+        / (
+            p0 * p_data_given_gross(q, r_hi, r_lo)
+            + (1 - p0) * p_data_given_good(x, q, r_hi, r_lo, mu, sigma)
+        )
     )
 
     assert pgross >= 0.0, pgross
@@ -1631,7 +1649,9 @@ def relative_year_number(year: int, reference: int = 1979) -> int:
     return year - (reference + 1)
 
 
-def convert_time_in_hours(hour: int, minute: int, sec: int, zone: int | float, dasvtm: float) -> float:
+def convert_time_in_hours(
+    hour: int, minute: int, sec: int, zone: int | float, dasvtm: float
+) -> float:
     """Convert integer hour, minute, and second to time in decimal hours
 
     Parameters
@@ -1757,11 +1777,11 @@ def sun_longitude(time: float) -> float:
     theta = sun_position(time)
     mean_anomaly = mean_earth_anomaly(time, theta)
     return (
-            4.900968
-            + 3.6747e-7 * time
-            + (0.033434 - 2.3e-9 * time) * math.sin(mean_anomaly)
-            + 0.000349 * math.sin(2.0 * mean_anomaly)
-            + theta
+        4.900968
+        + 3.6747e-7 * time
+        + (0.033434 - 2.3e-9 * time) * math.sin(mean_anomaly)
+        + 0.000349 * math.sin(2.0 * mean_anomaly)
+        + theta
     )
 
 
@@ -2130,7 +2150,7 @@ def dayinyear(year: int, month: int, day: int) -> int:
 
     result = day
     if month > 1:
-        result = result + sum(month_lengths[0: month - 1])
+        result = result + sum(month_lengths[0 : month - 1])
 
     assert 1 <= result <= 366
     return result
@@ -2297,10 +2317,10 @@ def time_difference(
     assert 0 <= hour1 < 24 and 0 <= hour2 < 24
 
     if (
-            (year1 > year2)
-            or (year1 == year2 and month1 > month2)
-            or (year1 == year2 and month1 == month2 and day1 > day2)
-            or (year1 == year2 and month1 == month2 and day1 == day2 and hour1 > hour2)
+        (year1 > year2)
+        or (year1 == year2 and month1 > month2)
+        or (year1 == year2 and month1 == month2 and day1 > day2)
+        or (year1 == year2 and month1 == month2 and day1 == day2 and hour1 > hour2)
     ):
         return -1 * time_difference(
             year2, month2, day2, hour2, year1, month1, day1, hour1
@@ -2378,7 +2398,7 @@ def trimmed_mean(inarr: list[float], trim: int) -> float:
 
     index1 = length / trim
 
-    trim = np.mean(inarr[index1: length - index1])
+    trim = np.mean(inarr[index1 : length - index1])
 
     return trim
 
@@ -2744,6 +2764,7 @@ def get_month_lengths(year: int) -> list[int]:
         month_lengths = [31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31]
 
     return month_lengths
+
 
 # def base_qc_report(rep):
 #     """Take a marine report and do some base qc on it."""

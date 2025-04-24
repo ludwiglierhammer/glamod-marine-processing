@@ -144,7 +144,6 @@ def do_position_check(latitude: float, longitude: float) -> int:
     return result
 
 
-
 def do_date_check(year: int, month: int, day: int) -> int:
     """
     Perform the date QC check on the report. Check that the date is valid.
@@ -221,9 +220,15 @@ def do_time_check(hour: float):
     return result
 
 
-
-def do_blacklist(id: str, deck: int, year: int, month: int,
-                 latitude: float, longitude: float, platform_type: int) -> int:
+def do_blacklist(
+    id: str,
+    deck: int,
+    year: int,
+    month: int,
+    latitude: float,
+    longitude: float,
+    platform_type: int,
+) -> int:
     """
     Do basic blacklisting on the report. The blacklist is used to remove data that are known to be bad
     and shouldn't be passed to the QC.
@@ -337,18 +342,43 @@ def do_blacklist(id: str, deck: int, year: int, month: int,
         or (year == 2006 and month == 1)
     ):
         if id in [
-            "53521    ", "53522    ", "53566    ", "53567    ", "53568    ", "53571    ", "53578    ",
-            "53580    ", "53582    ", "53591    ", "53592    ", "53593    ", "53594    ", "53595    ",
-            "53596    ", "53599    ", "53600    ", "53601    ", "53602    ", "53603    ", "53604    ",
-            "53605    ", "53606    ", "53607    ", "53608    ", "53609    ", "53901    ", "53902    ",
+            "53521    ",
+            "53522    ",
+            "53566    ",
+            "53567    ",
+            "53568    ",
+            "53571    ",
+            "53578    ",
+            "53580    ",
+            "53582    ",
+            "53591    ",
+            "53592    ",
+            "53593    ",
+            "53594    ",
+            "53595    ",
+            "53596    ",
+            "53599    ",
+            "53600    ",
+            "53601    ",
+            "53602    ",
+            "53603    ",
+            "53604    ",
+            "53605    ",
+            "53606    ",
+            "53607    ",
+            "53608    ",
+            "53609    ",
+            "53901    ",
+            "53902    ",
         ]:
             result = 1
 
     return result
 
 
-
-def do_day_check(year, month, day, hour, latitude, longitude, time_since_sun_above_horizon):
+def do_day_check(
+    year, month, day, hour, latitude, longitude, time_since_sun_above_horizon
+):
     """
     Given year month day hour lat and long calculate if the sun was above the horizon an hour ago.
 
@@ -381,7 +411,11 @@ def do_day_check(year, month, day, hour, latitude, longitude, time_since_sun_abo
     """
 
     # Defaults to FAIL if the location, date or time are bad
-    if do_position_check(latitude, longitude) == 1 or  do_date_check(year, month, day) == 1 or do_time_check(hour) == 1:
+    if (
+        do_position_check(latitude, longitude) == 1
+        or do_date_check(year, month, day) == 1
+        or do_time_check(hour) == 1
+    ):
         return 1
 
     if not (1 <= month <= 12):
@@ -390,7 +424,7 @@ def do_day_check(year, month, day, hour, latitude, longitude, time_since_sun_abo
         raise ValueError("Day not in range 1-31")
     if not (0 <= hour <= 24):
         raise ValueError("Hour not in range 0-24")
-    if not(90 >= latitude >= -90):
+    if not (90 >= latitude >= -90):
         raise ValueError("Latitude not in range -90 to 90")
 
     if year is None or month is None or day is None or hour is None:
@@ -554,6 +588,7 @@ def do_air_temperature_anomaly_check(at, at_climatology, parameters):
 
     return qc.climatology_check(at, at_climatology, parameters["maximum_anomaly"])
 
+
 def do_air_temperature_no_normal_check(at_climatology):
     """
     Check that climatological value is present
@@ -569,6 +604,7 @@ def do_air_temperature_no_normal_check(at_climatology):
         1 if climatology value is missing, 0 otherwise
     """
     return qc.no_normal_check(at_climatology)
+
 
 def do_air_temperature_hard_limit_check(at: float, parameters: dict) -> int:
     """
@@ -595,7 +631,10 @@ def do_air_temperature_hard_limit_check(at: float, parameters: dict) -> int:
         raise KeyError('"hard_limits" not in parameters dictionary.')
     return qc.hard_limit(at, parameters["hard_limits"])
 
-def do_air_temperature_climatology_plus_stdev_check(at, at_climatology, at_stdev, parameters):
+
+def do_air_temperature_climatology_plus_stdev_check(
+    at, at_climatology, at_stdev, parameters
+):
     if "minmax_standard_deviation" not in parameters:
         raise KeyError('"minmax_standard_deviation" not in parameters')
     if "maximum_standardised_anomaly" not in parameters:
@@ -605,7 +644,7 @@ def do_air_temperature_climatology_plus_stdev_check(at, at_climatology, at_stdev
         at_climatology,
         at_stdev,
         parameters["minmax_standard_deviation"],
-        parameters["maximum_standardised_anomaly"]
+        parameters["maximum_standardised_anomaly"],
     )
 
 
@@ -643,8 +682,9 @@ def do_dpt_climatology_plus_stdev_check(dpt, dpt_climatology, dpt_stdev, paramet
         dpt_climatology,
         dpt_stdev,
         parameters["minmax_standard_deviation"],
-        parameters["maximum_standardised_anomaly"]
+        parameters["maximum_standardised_anomaly"],
     )
+
 
 def do_dpt_missing_value_check(dpt):
     """
@@ -662,6 +702,7 @@ def do_dpt_missing_value_check(dpt):
         1 if value is missing, 0 otherwise
     """
     return qc.value_check(dpt)
+
 
 def do_dpt_no_normal_check(dpt_climatology):
     """
@@ -775,7 +816,10 @@ def do_sst_freeze_check(sst, parameters):
         raise KeyError('"freezing_point" not in parameters')
     if "freeze_check_n_sigma" not in parameters:
         raise KeyError('"freeze_check_n_sigma" not in parameters')
-    return qc.sst_freeze_check(sst, 0.0, parameters["freezing_point"], parameters["freeze_check_n_sigma"])
+    return qc.sst_freeze_check(
+        sst, 0.0, parameters["freezing_point"], parameters["freeze_check_n_sigma"]
+    )
+
 
 def do_sst_anomaly_check(sst, sst_climatology, parameters):
     """
@@ -822,6 +866,7 @@ def do_sst_no_normal_check(sst_climatology):
     """
     return qc.no_normal_check(sst_climatology)
 
+
 # def do_base_sst_qc(sst, parameters):
 #     """
 #     Run the base SST QC checks, non-missing, above freezing, climatology check
@@ -864,8 +909,10 @@ def do_sst_no_normal_check(sst_climatology):
 def do_wind_missing_value_check(w):
     return qc.value_check(w)
 
+
 def do_wind_hard_limits_check(w, parameters):
     return qc.hard_limit(w, parameters["hard_limits"])
+
 
 def do_wind_consistency_check(wind_speed, wind_direction, parameters):
     """
@@ -904,6 +951,7 @@ def do_wind_consistency_check(wind_speed, wind_direction, parameters):
 
     return result
 
+
 """do base wind qc replaced by preceding three functions"""
 # def do_base_wind_qc(ws, parameters):
 #     """Run the base Wind speed QC checks."""
@@ -918,7 +966,6 @@ def do_wind_consistency_check(wind_speed, wind_direction, parameters):
 #             self.getvar("W"), self.getvar("D"), parameters["variable_limit"]
 #         ),
 #     )
-
 
 
 """Only one QC check from do_kate_mat_qc was unique to the function so I added it to air temperature checks above"""
