@@ -1067,3 +1067,37 @@ def do_wind_consistency_check(wind_speed, wind_direction, parameters):
 #     for var in ["AT", "DPT", "SHU", "RH"]:
 #         if qc.hard_limit(self.getvar(var), parameters[var]["hard_limits"]) == 1:
 #             self.set_qc("DPT", "hardlimit", 1)
+
+
+def do_base_qc_header(
+    list_of_parameters_we_need, do_first_step=False, do_last_step=False
+):
+    """Basic row QC for header file.
+
+    Since we have only one QC flag in the header file:
+
+    report_quality
+    https://glamod.github.io/cdm-obs-documentation/tables/code_tables/quality_flag/quality_flag.html
+
+    we return "1" (failed) if one test fails.
+    """
+    if do_first_step is True:
+        flag = first_function(some_of_the_list_of_parameters_we_need)
+
+    if flag == "1":
+        return flag
+
+    if do_last_step is True:
+        flag = last_function(some_of_the_list_of_parameters_we_need)
+
+    return flag
+
+
+def do_base_qc_at(list_of_parameters_we_need, do_first_step=False, do_last_step=False):
+    """Basic row QC for observation file.
+
+    See do_base_qc_header
+
+    We copy and adjust thgis function for each observation value (sst, slp, wbt, wd, ws)
+    """
+    return
