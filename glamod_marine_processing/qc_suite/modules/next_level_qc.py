@@ -699,7 +699,9 @@ Replaced the do_base_mat_qc by four separate functions see above
 #     )
 
 
-def do_dpt_climatology_plus_stdev_check(dpt: float, dpt_climatology: float, dpt_stdev: float, parameters: dict) -> int:
+def do_dpt_climatology_plus_stdev_check(
+    dpt: float, dpt_climatology: float, dpt_stdev: float, parameters: dict
+) -> int:
     """Check that standardised dewpoint temperature anomaly is within specified range.
 
     Temperature is converted into a standardised anomaly by subtracting the climatological normal and dividing by
