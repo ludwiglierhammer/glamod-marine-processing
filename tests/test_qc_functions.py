@@ -31,8 +31,8 @@ from glamod_marine_processing.qc_suite.modules.next_level_qc import (  # do_base
     do_wind_missing_value_check,
     humidity_blacklist,
     is_buoy,
-    is_drifter,
     is_deck_780,
+    is_drifter,
     is_ship,
     mat_blacklist,
     wind_blacklist,
@@ -56,6 +56,7 @@ def test_is_drifter():
             assert is_drifter(pt) == 1
         else:
             assert is_drifter(pt) == 0
+
 
 def test_is_ship():
     # For all platform types in ICOADS, flag set to 1 only if platform type corresponds to drifting buoy or
@@ -129,7 +130,7 @@ def test_do_date_check_raises_value_error():
         (24.0, 1),  # 24 hours not allowed
         (29.2, 1),  # nothing over 24 either
         (6.34451, 0),  # check floats
-        (None, 1)
+        (None, 1),
     ],
 )
 def test_do_time_check(hour, expected):
@@ -436,14 +437,18 @@ def test_do_air_temperature_climatology_plus_stdev_check_raises_key_error():
         "bad_parameter_name": 2.0,
     }
     with pytest.raises(KeyError):
-        result = do_air_temperature_climatology_plus_stdev_check(5.6, 2.2, 3.3, test_parameters)
+        result = do_air_temperature_climatology_plus_stdev_check(
+            5.6, 2.2, 3.3, test_parameters
+        )
 
     test_parameters = {
         "bad_parameter_name": [1.0, 10.0],
         "maximum_standardised_anomaly": 2.0,
     }
     with pytest.raises(KeyError):
-        result = do_air_temperature_climatology_plus_stdev_check(5.6, 2.2, 3.3, test_parameters)
+        result = do_air_temperature_climatology_plus_stdev_check(
+            5.6, 2.2, 3.3, test_parameters
+        )
 
 
 @pytest.mark.parametrize("dpt, expected", [(5.6, 0), (None, 1), (np.nan, 0)])
@@ -644,7 +649,7 @@ def test_do_wind_hard_limit_check_raises_key_error():
         (4, None, {"variable_limit": 3}, 1),
         (0, 361, {"variable_limit": 3}, 0),
         (5, 361, {"variable_limit": 3}, 1),
-        (12., 362, {"variable_limit": 10.0}, 1)
+        (12.0, 362, {"variable_limit": 10.0}, 1),
     ],
 )
 def test_do_wind_consistency_check(wind_speed, wind_direction, parameters, expected):
