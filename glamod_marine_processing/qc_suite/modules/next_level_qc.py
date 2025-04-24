@@ -379,8 +379,7 @@ def do_blacklist(
 def do_day_check(
     year, month, day, hour, latitude, longitude, time_since_sun_above_horizon
 ):
-    """
-    Given year month day hour lat and long calculate if the sun was above the horizon an hour ago.
+    """Given year month day hour lat and long calculate if the sun was above the horizon an hour ago.
 
     This is the "day" test used to decide whether a Marine Air Temperature (MAT) measurement is
     a Night MAT (NMAT) or a Day (MAT). This is important because solar heating of the ship biases
@@ -1003,7 +1002,7 @@ def do_wind_consistency_check(wind_speed, wind_direction, parameters):
 #     """
 #     # If one of those checks is missing we break. Is this reasonable to you?
 #
-#     # self.do_fix_missing_hour()  # this should already be fixed wihle mapping to the CDM
+#     # self.do_fix_missing_hour()  # this should already be fixed while mapping to the CDM
 #
 #     if is_buoy(pt):
 #         return "2"  # not checked, since we have no QC for buoys?

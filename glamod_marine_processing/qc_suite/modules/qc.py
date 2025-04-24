@@ -1107,8 +1107,9 @@ def climatology_plus_stdev_check(
     stdev_limits: list[float, float],
     limit: float,
 ) -> int:
-    """
-    Climatology check which uses standardised anomalies. Lower and upper limits can be specified for the standard deviation using
+    """Climatology check which uses standardised anomalies. 
+    
+    Lower and upper limits can be specified for the standard deviation using
     stdev_limits. The value is converted to an anomaly by subtracting the climate normal and then standardised by
     dividing by the standard deviation. If the standardised anomaly is larger than the specified limit the test fails.
 
