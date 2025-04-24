@@ -417,17 +417,19 @@ def do_day_check(
     ):
         return 1
 
-    if not (1 <= month <= 12):
-        raise ValueError("Month not in range 1-12")
-    if not (1 <= day <= 31):
-        raise ValueError("Day not in range 1-31")
-    if not (0 <= hour <= 24):
-        raise ValueError("Hour not in range 0-24")
-    if not (90 >= latitude >= -90):
-        raise ValueError("Latitude not in range -90 to 90")
-
-    if year is None or month is None or day is None or hour is None:
-        return 0
+    # I don't think these tests will ever be reached because we already do three checks beforehand
+    # that rule them out.
+    # if not (1 <= month <= 12):
+    #     raise ValueError("Month not in range 1-12")
+    # if not (1 <= day <= 31):
+    #     raise ValueError("Day not in range 1-31")
+    # if not (0 <= hour <= 24):
+    #     raise ValueError("Hour not in range 0-24")
+    # if not (90 >= latitude >= -90):
+    #     raise ValueError("Latitude not in range -90 to 90")
+    #
+    # if year is None or month is None or day is None or hour is None:
+    #     return 0
 
     year2 = year
     day2 = qc.dayinyear(year, month, day)

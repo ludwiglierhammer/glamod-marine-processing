@@ -31,6 +31,7 @@ from glamod_marine_processing.qc_suite.modules.next_level_qc import (  # do_base
     do_wind_missing_value_check,
     humidity_blacklist,
     is_buoy,
+    is_drifter,
     is_deck_780,
     is_ship,
     mat_blacklist,
@@ -49,6 +50,13 @@ def test_is_buoy():
             assert result == 0
 
 
+def test_is_drifter():
+    for pt in range(0, 47):
+        if pt == 7:
+            assert is_drifter(pt) == 1
+        else:
+            assert is_drifter(pt) == 0
+
 def test_is_ship():
     # For all platform types in ICOADS, flag set to 1 only if platform type corresponds to drifting buoy or
     # drifting buoy
@@ -61,8 +69,12 @@ def test_is_ship():
 
 
 def test_is_deck_780():
-    result = is_deck_780(780)
-    assert result == 1
+    for deck in range(1000):
+        result = is_deck_780(deck)
+        if deck == 780:
+            assert result == 1
+        else:
+            assert result == 0
 
 
 @pytest.mark.parametrize(
@@ -117,11 +129,11 @@ def test_do_date_check_raises_value_error():
         (24.0, 1),  # 24 hours not allowed
         (29.2, 1),  # nothing over 24 either
         (6.34451, 0),  # check floats
+        (None, 1)
     ],
 )
 def test_do_time_check(hour, expected):
-    result = do_time_check(hour)
-    assert result == expected
+    assert do_time_check(hour) == expected
 
 
 @pytest.mark.parametrize(
@@ -157,6 +169,9 @@ def test_do_time_check(hour, expected):
         ("", 731, 1974, 1, -47, -60, 1, 0),  # Same are but not in Deck 732 should pass
         ("", 732, 1957, 1, 45, -172, 1, 0),  # Same area but wrong year should pass
         ("", 732, 1975, 1, -47, -60, 1, 0),  # Same area but wrong year should pass
+        ("SUPERIGORINA", 162, 1999, 2, -10, 179, 4, 1),
+        ("53521    ", 162, 2005, 11, -10, 179, 4, 1),
+        ("53521    ", 162, 2007, 11, -10, 179, 4, 0),
     ],
 )
 def test_do_blacklist(
@@ -239,6 +254,8 @@ def test_do_blacklist(
             1.0,
             1,
         ),  # bad hour value should trigger fail
+        (2015, 1, 1, 0.5, 0.0, 0.0, 1, 0),  # 0 lat 0 lon near midnight
+        (2015, 1, 1, None, 0.0, 0.0, 1, 1),  # missing hour fails
     ],
 )
 def test_do_day_check(year, month, day, hour, latitude, longitude, time, expected):
@@ -419,14 +436,14 @@ def test_do_air_temperature_climatology_plus_stdev_check_raises_key_error():
         "bad_parameter_name": 2.0,
     }
     with pytest.raises(KeyError):
-        result = do_dpt_climatology_plus_stdev_check(5.6, 2.2, 3.3, test_parameters)
+        result = do_air_temperature_climatology_plus_stdev_check(5.6, 2.2, 3.3, test_parameters)
 
     test_parameters = {
         "bad_parameter_name": [1.0, 10.0],
         "maximum_standardised_anomaly": 2.0,
     }
     with pytest.raises(KeyError):
-        result = do_dpt_climatology_plus_stdev_check(5.6, 2.2, 3.3, test_parameters)
+        result = do_air_temperature_climatology_plus_stdev_check(5.6, 2.2, 3.3, test_parameters)
 
 
 @pytest.mark.parametrize("dpt, expected", [(5.6, 0), (None, 1), (np.nan, 0)])
@@ -627,6 +644,7 @@ def test_do_wind_hard_limit_check_raises_key_error():
         (4, None, {"variable_limit": 3}, 1),
         (0, 361, {"variable_limit": 3}, 0),
         (5, 361, {"variable_limit": 3}, 1),
+        (12., 362, {"variable_limit": 10.0}, 1)
     ],
 )
 def test_do_wind_consistency_check(wind_speed, wind_direction, parameters, expected):
@@ -733,6 +751,15 @@ def test_day_in_year_leap_year():
         for day in range(1, month_lengths[month - 1] + 1):
             assert qc.day_in_year(month, day) == count
             count += 1
+
+    with pytest.raises(ValueError):
+        qc.day_in_year(13, 1)
+    with pytest.raises(ValueError):
+        qc.day_in_year(0, 1)
+    with pytest.raises(ValueError):
+        qc.day_in_year(2, 30)
+    with pytest.raises(ValueError):
+        qc.day_in_year(2, 0)
 
 
 @pytest.fixture
