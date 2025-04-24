@@ -7,7 +7,7 @@ import numpy.ma as ma
 import pytest
 
 import glamod_marine_processing.qc_suite.modules.qc as qc
-from glamod_marine_processing.qc_suite.modules.next_level_qc import (  # do_base_dpt_qc,; do_base_mat_qc,; do_base_sst_qc,; do_base_wind_qc,; do_kate_mat_qc,
+from glamod_marine_processing.qc_suite.modules.next_level_qc import (
     do_air_temperature_anomaly_check,
     do_air_temperature_climatology_plus_stdev_check,
     do_air_temperature_hard_limit_check,
@@ -90,9 +90,9 @@ def test_do_position_check(latitude, longitude, expected):
 def test_do_position_check_raises_value_error():
     # Make sure that an exception is raised if latitude or longitude is missing
     with pytest.raises(ValueError):
-        result = do_position_check(None, 0.0)
+        _ = do_position_check(None, 0.0)
     with pytest.raises(ValueError):
-        result = do_position_check(0.0, None)
+        _ = do_position_check(0.0, None)
 
 
 @pytest.mark.parametrize(
@@ -116,9 +116,9 @@ def test_do_date_check(year, month, day, expected):
 def test_do_date_check_raises_value_error():
     # Make sure that an exception is raised if year or month is set to None
     with pytest.raises(ValueError):
-        result = do_date_check(None, 1, 1)
+        _ = do_date_check(None, 1, 1)
     with pytest.raises(ValueError):
-        result = do_date_check(1850, None, 1)
+        _ = do_date_check(1850, None, 1)
 
 
 @pytest.mark.parametrize(

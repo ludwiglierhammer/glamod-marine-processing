@@ -261,8 +261,6 @@ def do_blacklist(
     int
         1 if the report is blacklisted, 0 otherwise
     """
-    """"""
-
     # Fold longitudes into ICOADS range
     if longitude > 180.0:
         longitude -= 360
@@ -408,7 +406,6 @@ def do_day_check(
     int
         Set to 1 if it is day, 0 otherwise.
     """
-
     # Defaults to FAIL if the location, date or time are bad
     if (
         do_position_check(latitude, longitude) == 1
@@ -536,7 +533,6 @@ def wind_blacklist(deck):
     int
         Set to 1 if deck is in black list, 0 otherwise
     """
-    """"""
     result = 0
     if deck in [708, 780]:
         result = 1
@@ -985,7 +981,7 @@ def do_wind_missing_value_check(wind_speed: float | None) -> int:
 
 def do_wind_hard_limits_check(wind_speed: float, parameters: dict) -> int:
     """Check that wind speed is within hard limits specified by "hard_limits".
-    
+
     Parameters
     ----------
     wind_speed : float
