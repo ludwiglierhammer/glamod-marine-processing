@@ -491,7 +491,14 @@ def humidity_blacklist(platform_type: int) -> int:
         return 1
 
 
-def mat_blacklist(platform_type, deck, latitude, longitude, year):
+def mat_blacklist(
+  platform_type: int, 
+  deck: int, 
+  latitude: float, 
+  longitude: float, 
+  year: int,
+) -> int:
+
     """
     Flag certain decks, areas and other sources as ineligible for MAT QC.
     These exclusions are based on Kent et al. HadNMAT2 paper and include
