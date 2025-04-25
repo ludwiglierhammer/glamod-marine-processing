@@ -946,7 +946,8 @@ def do_sst_anomaly_check(sst: float, sst_climatology: float, parameters: dict) -
     return qc.climatology_check(sst, sst_climatology, parameters["maximum_anomaly"])
 
 
-def do_sst_no_normal_check(sst_climatology):
+def do_sst_no_normal_check(sst_climatology: float) -> int:
+
     """
     Check that climatological value is present
 
