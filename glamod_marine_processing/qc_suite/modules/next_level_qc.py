@@ -800,7 +800,8 @@ def do_dpt_missing_value_check(dpt: float) -> int:
     return qc.value_check(dpt)
 
 
-def do_dpt_no_normal_check(dpt_climatology):
+def do_dpt_no_normal_check(dpt_climatology: float) -> int:
+
     """
     Check that climatological value is present
 
