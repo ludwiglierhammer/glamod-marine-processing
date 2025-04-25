@@ -501,10 +501,31 @@ def mat_blacklist(
 
     """
     Flag certain decks, areas and other sources as ineligible for MAT QC.
+    
     These exclusions are based on Kent et al. HadNMAT2 paper and include
     Deck 780 which is oceanographic data and the North Atlantic, Suez,
     Indian Ocean area in the 19th Century.
-
+    
+    Parameters
+    -------------
+    platform_type: int
+        Platform type of report
+    deck: int
+        Deck number of report
+    latitude: float
+        Latitude of the report
+    longitude: float
+         Longitude of the report
+    year: int
+        Year of the report
+        
+    Returns
+    ---------
+    int
+        Returns 1 if report is ineligible for MAT QC, otherwise 0.  
+        
+    References
+    ------------      
     https://agupubs.onlinelibrary.wiley.com/doi/full/10.1002/jgrd.50152
     """
     result = 0
