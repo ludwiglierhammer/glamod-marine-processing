@@ -917,7 +917,8 @@ def do_sst_freeze_check(sst: float, parameters: dict) -> int:
     )
 
 
-def do_sst_anomaly_check(sst, sst_climatology, parameters):
+def do_sst_anomaly_check(sst: float, sst_climatology: float, parameters: dict) -> int:
+
     """
     Check that the sea surface temperature is within the prescribed distance from climatology/
 
