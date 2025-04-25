@@ -1037,7 +1037,8 @@ def do_wind_hard_limits_check(wind_speed: float, parameters: dict) -> int:
     return qc.hard_limit(wind_speed, parameters["hard_limits"])
 
 
-def do_wind_consistency_check(wind_speed, wind_direction, parameters):
+def do_wind_consistency_check(wind_speed: float, wind_direction: float, parameters: dict) -> int:
+
     """
     Test to compare windspeed to winddirection.
 
