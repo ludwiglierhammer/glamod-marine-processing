@@ -375,15 +375,14 @@ def do_blacklist(
 
 
 def do_day_check(
-    year: int, 
-    month: int, 
-    day: int, 
-    hour: float, 
-    latitude: float, 
-    longitude: float, 
-    time_since_sun_above_horizon: float
+    year: int,
+    month: int,
+    day: int,
+    hour: float,
+    latitude: float,
+    longitude: float,
+    time_since_sun_above_horizon: float,
 ) -> int:
-
     """Given year month day hour lat and long calculate if the sun was above the horizon an hour ago.
 
     This is the "day" test used to decide whether a Marine Air Temperature (MAT) measurement is
@@ -493,13 +492,12 @@ def humidity_blacklist(platform_type: int) -> int:
 
 
 def mat_blacklist(
-  platform_type: int, 
-  deck: int, 
-  latitude: float, 
-  longitude: float, 
-  year: int,
+    platform_type: int,
+    deck: int,
+    latitude: float,
+    longitude: float,
+    year: int,
 ) -> int:
-
     """
     Flag certain decks, areas and other sources as ineligible for MAT QC.
     
