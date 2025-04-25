@@ -375,8 +375,15 @@ def do_blacklist(
 
 
 def do_day_check(
-    year, month, day, hour, latitude, longitude, time_since_sun_above_horizon
-):
+    year: int, 
+    month: int, 
+    day: int, 
+    hour: float, 
+    latitude: float, 
+    longitude: float, 
+    time_since_sun_above_horizon: float
+) -> int:
+
     """Given year month day hour lat and long calculate if the sun was above the horizon an hour ago.
 
     This is the "day" test used to decide whether a Marine Air Temperature (MAT) measurement is
