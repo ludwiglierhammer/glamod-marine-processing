@@ -781,7 +781,8 @@ def do_dpt_climatology_plus_stdev_check(
     )
 
 
-def do_dpt_missing_value_check(dpt):
+def do_dpt_missing_value_check(dpt: float) -> int:
+
     """
     Check that dew point temperature value exists
 
