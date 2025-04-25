@@ -782,7 +782,6 @@ def do_dpt_climatology_plus_stdev_check(
 
 
 def do_dpt_missing_value_check(dpt: float) -> int:
-
     """
     Check that dew point temperature value exists
 
@@ -801,7 +800,6 @@ def do_dpt_missing_value_check(dpt: float) -> int:
 
 
 def do_dpt_no_normal_check(dpt_climatology: float) -> int:
-
     """
     Check that climatological value is present
 
@@ -919,7 +917,6 @@ def do_sst_freeze_check(sst: float, parameters: dict) -> int:
 
 
 def do_sst_anomaly_check(sst: float, sst_climatology: float, parameters: dict) -> int:
-
     """
     Check that the sea surface temperature is within the prescribed distance from climatology/
 
@@ -949,7 +946,6 @@ def do_sst_anomaly_check(sst: float, sst_climatology: float, parameters: dict) -
 
 
 def do_sst_no_normal_check(sst_climatology: float) -> int:
-
     """
     Check that climatological value is present
 
@@ -1039,8 +1035,9 @@ def do_wind_hard_limits_check(wind_speed: float, parameters: dict) -> int:
     return qc.hard_limit(wind_speed, parameters["hard_limits"])
 
 
-def do_wind_consistency_check(wind_speed: float, wind_direction: float, parameters: dict) -> int:
-
+def do_wind_consistency_check(
+    wind_speed: float, wind_direction: float, parameters: dict
+) -> int:
     """
     Test to compare windspeed to winddirection.
 
