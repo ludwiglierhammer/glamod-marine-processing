@@ -506,7 +506,7 @@ def mat_blacklist(
     Indian Ocean area in the 19th Century.
 
     Parameters
-    -------------
+    ----------
     platform_type: int
         Platform type of report
     deck: int
@@ -519,12 +519,12 @@ def mat_blacklist(
         Year of the report
 
     Returns
-    ---------
+    -------
     int
         Returns 1 if report is ineligible for MAT QC, otherwise 0.
 
     References
-    ------------
+    ----------
     https://agupubs.onlinelibrary.wiley.com/doi/full/10.1002/jgrd.50152
     """
     result = 0

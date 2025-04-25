@@ -325,9 +325,7 @@ def test_do_air_temperature_anomaly_check(at, at_climatology, parameters, expect
 
 def test_do_air_temperature_anomaly_check_raises_key_error():
     with pytest.raises(KeyError):
-        result = do_air_temperature_anomaly_check(
-            5.6, 2.2, {"bad_parameter_name": 10.0}
-        )
+        do_air_temperature_anomaly_check(5.6, 2.2, {"bad_parameter_name": 10.0})
 
 
 @pytest.mark.parametrize("at_climatology, expected", [(5.5, 0), (None, 1), (np.nan, 0)])
@@ -437,18 +435,14 @@ def test_do_air_temperature_climatology_plus_stdev_check_raises_key_error():
         "bad_parameter_name": 2.0,
     }
     with pytest.raises(KeyError):
-        result = do_air_temperature_climatology_plus_stdev_check(
-            5.6, 2.2, 3.3, test_parameters
-        )
+        do_air_temperature_climatology_plus_stdev_check(5.6, 2.2, 3.3, test_parameters)
 
     test_parameters = {
         "bad_parameter_name": [1.0, 10.0],
         "maximum_standardised_anomaly": 2.0,
     }
     with pytest.raises(KeyError):
-        result = do_air_temperature_climatology_plus_stdev_check(
-            5.6, 2.2, 3.3, test_parameters
-        )
+        do_air_temperature_climatology_plus_stdev_check(5.6, 2.2, 3.3, test_parameters)
 
 
 @pytest.mark.parametrize("dpt, expected", [(5.6, 0), (None, 1), (np.nan, 0)])
@@ -536,14 +530,14 @@ def test_do_dpt_climatology_plus_stdev_check_raises_key_error():
         "bad_parameter_name": 2.0,
     }
     with pytest.raises(KeyError):
-        result = do_dpt_climatology_plus_stdev_check(5.6, 2.2, 3.3, test_parameters)
+        do_dpt_climatology_plus_stdev_check(5.6, 2.2, 3.3, test_parameters)
 
     test_parameters = {
         "bad_parameter_name": [1.0, 10.0],
         "maximum_standardised_anomaly": 2.0,
     }
     with pytest.raises(KeyError):
-        result = do_dpt_climatology_plus_stdev_check(5.6, 2.2, 3.3, test_parameters)
+        do_dpt_climatology_plus_stdev_check(5.6, 2.2, 3.3, test_parameters)
 
 
 @pytest.mark.parametrize(
@@ -586,7 +580,7 @@ def test_do_sst_anomaly_check(sst, sst_climatology, parameters, expected):
 
 def test_do_sst_anomaly_check_raises_key_error():
     with pytest.raises(KeyError):
-        result = do_sst_anomaly_check(5.6, 2.2, {"bad_parameter_name": 10.0})
+        do_sst_anomaly_check(5.6, 2.2, {"bad_parameter_name": 10.0})
 
 
 @pytest.mark.parametrize(
