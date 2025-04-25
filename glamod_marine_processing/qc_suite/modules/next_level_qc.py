@@ -591,7 +591,8 @@ def do_air_temperature_missing_value_check(at: float) -> int:
     return qc.value_check(at)
 
 
-def do_air_temperature_anomaly_check(at, at_climatology, parameters):
+def do_air_temperature_anomaly_check(at: float, at_climatology: float, parameters: dict) -> int:
+
     """
     Check that the air temperature is within the prescribed distance from climatology/
 
