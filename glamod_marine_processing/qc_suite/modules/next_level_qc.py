@@ -665,8 +665,9 @@ def do_air_temperature_hard_limit_check(at: float, parameters: dict) -> int:
 
 
 def do_air_temperature_climatology_plus_stdev_check(
-    at, at_climatology, at_stdev, parameters
-):
+    at: float, at_climatology: float, at_stdev: float, parameters: dict
+) -> int:
+
     """Check that standardised air temperature anomaly is within specified range.
 
     Temperature is converted into a standardised anomaly by subtracting the climatological normal and dividing by
