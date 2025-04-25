@@ -484,6 +484,7 @@ def humidity_blacklist(platform_type: int) -> int:
     Returns
     -------
     int
+        Return 1 if report is ineligible for humidity QC, otherwise 0.
     """
     if platform_type in [0, 1, 2, 3, 4, 5, 6, 8, 9, 10, 15]:
         return 0
