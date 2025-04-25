@@ -816,7 +816,8 @@ def do_dpt_no_normal_check(dpt_climatology):
     return qc.no_normal_check(dpt_climatology)
 
 
-def do_supersaturation_check(dpt, at2):
+def do_supersaturation_check(dpt: float, at2: float) -> int:
+
     """
     Perform the super saturation check. Check if a valid dewpoint temperature is greater than a valid air temperature
 
