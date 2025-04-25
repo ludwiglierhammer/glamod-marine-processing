@@ -500,11 +500,11 @@ def mat_blacklist(
 ) -> int:
     """
     Flag certain decks, areas and other sources as ineligible for MAT QC.
-    
+
     These exclusions are based on Kent et al. HadNMAT2 paper and include
     Deck 780 which is oceanographic data and the North Atlantic, Suez,
     Indian Ocean area in the 19th Century.
-    
+
     Parameters
     -------------
     platform_type: int
@@ -517,14 +517,14 @@ def mat_blacklist(
          Longitude of the report
     year: int
         Year of the report
-        
+
     Returns
     ---------
     int
-        Returns 1 if report is ineligible for MAT QC, otherwise 0.  
-        
+        Returns 1 if report is ineligible for MAT QC, otherwise 0.
+
     References
-    ------------      
+    ------------
     https://agupubs.onlinelibrary.wiley.com/doi/full/10.1002/jgrd.50152
     """
     result = 0
@@ -591,8 +591,9 @@ def do_air_temperature_missing_value_check(at: float) -> int:
     return qc.value_check(at)
 
 
-def do_air_temperature_anomaly_check(at: float, at_climatology: float, parameters: dict) -> int:
-
+def do_air_temperature_anomaly_check(
+    at: float, at_climatology: float, parameters: dict
+) -> int:
     """
     Check that the air temperature is within the prescribed distance from climatology/
 
@@ -667,7 +668,6 @@ def do_air_temperature_hard_limit_check(at: float, parameters: dict) -> int:
 def do_air_temperature_climatology_plus_stdev_check(
     at: float, at_climatology: float, at_stdev: float, parameters: dict
 ) -> int:
-
     """Check that standardised air temperature anomaly is within specified range.
 
     Temperature is converted into a standardised anomaly by subtracting the climatological normal and dividing by
@@ -817,7 +817,6 @@ def do_dpt_no_normal_check(dpt_climatology):
 
 
 def do_supersaturation_check(dpt: float, at2: float) -> int:
-
     """
     Perform the super saturation check. Check if a valid dewpoint temperature is greater than a valid air temperature
 
