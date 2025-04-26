@@ -45,17 +45,17 @@ def test_is_buoy():
     for pt in range(0, 47):
         result = is_buoy(pt)
         if pt in [6, 7]:
-            assert result == 1
-        else:
             assert result == 0
+        else:
+            assert result == 1
 
 
 def test_is_drifter():
     for pt in range(0, 47):
         if pt == 7:
-            assert is_drifter(pt) == 1
-        else:
             assert is_drifter(pt) == 0
+        else:
+            assert is_drifter(pt) == 1
 
 
 def test_is_ship():
@@ -64,18 +64,18 @@ def test_is_ship():
     for pt in range(0, 47):
         result = is_ship(pt)
         if pt in [0, 1, 2, 3, 4, 5, 10, 11, 12, 17]:
-            assert result == 1
-        else:
             assert result == 0
+        else:
+            assert result == 1
 
 
 def test_is_deck_780():
     for deck in range(1000):
         result = is_deck_780(deck)
         if deck == 780:
-            assert result == 1
-        else:
             assert result == 0
+        else:
+            assert result == 1
 
 
 @pytest.mark.parametrize(

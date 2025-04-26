@@ -23,17 +23,14 @@ def is_buoy(platform_type: int) -> int:
     Returns
     -------
     int
-        Return 1 if observation is from a drifting or moored buoy and 0 otherwise
+        Return 0 if observation is from a drifting or moored buoy and 1 otherwise
     """
-    # Do we need this function?
-    # Where/Why do we need "isbuoy" and "isdrifter"?
-    # I think this function should return a boolean value, isn't it?
     # I think we should use the CDM platform table?
     # https://glamod.github.io/cdm-obs-documentation/tables/code_tables/platform_type/platform_type.html
     if platform_type in [6, 7]:
-        return 1
-    else:
         return 0
+    else:
+        return 1
 
 
 def is_drifter(platform_type: int) -> int:
@@ -49,12 +46,12 @@ def is_drifter(platform_type: int) -> int:
     Returns
     -------
     int
-        Return 1 if observation is from a drifting buoy and 0 otherwise
+        Return 0 if observation is from a drifting buoy and 1 otherwise
     """
     if platform_type == 7:
-        return 1
-    else:
         return 0
+    else:
+        return 1
 
 
 def is_ship(platform_type: int) -> int:
@@ -70,16 +67,14 @@ def is_ship(platform_type: int) -> int:
     Returns
     -------
     int
-        Return 1 if observation is from a ship and 0 otherwise
+        Return 0 if observation is from a ship and 1 otherwise
     """
-    # Do we need this function?
-    # I think this function should return a boolean value, isn't it?
     # I think we should use the CDM platform table?
     # https://glamod.github.io/cdm-obs-documentation/tables/code_tables/platform_type/platform_type.html
     if platform_type in [0, 1, 2, 3, 4, 5, 10, 11, 12, 17]:
-        return 1
-    else:
         return 0
+    else:
+        return 1
 
 
 def is_deck_780(dck: int) -> int:
@@ -95,16 +90,16 @@ def is_deck_780(dck: int) -> int:
     Returns
     -------
     int
-        return 1 if observation is in deck 780 and 0 otherwise
+        return 0 if observation is in deck 780 and 1 otherwise
     """
     # Do we need this function?
     # Where/Why do we need "is780"?
     # I think this function should return a boolean value, isn't it?
     # We do not have this information explicitly in the CDM.
     if dck == 780:
-        return 1
-    else:
         return 0
+    else:
+        return 1
 
 
 def do_position_check(latitude: float, longitude: float) -> int:
