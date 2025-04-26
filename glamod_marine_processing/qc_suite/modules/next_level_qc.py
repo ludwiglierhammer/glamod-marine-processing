@@ -6,7 +6,6 @@ import math
 
 from . import qc
 
-
 # This should be the raw structure.
 # In general, I think, we do not need to set qc flags, we just return them (no self.set_qc)
 # I hop I did not forget anything.
@@ -217,13 +216,13 @@ def do_time_check(hour: float):
 
 
 def do_blacklist(
-        id: str,
-        deck: int,
-        year: int,
-        month: int,
-        latitude: float,
-        longitude: float,
-        platform_type: int,
+    id: str,
+    deck: int,
+    year: int,
+    month: int,
+    latitude: float,
+    longitude: float,
+    platform_type: int,
 ) -> int:
     """
     Do basic blacklisting on the report. The blacklist is used to remove data that are known to be bad
@@ -320,8 +319,8 @@ def do_blacklist(
             for regid in regions_to_check:
                 thisreg = region[regid]
                 if (
-                        thisreg[0] <= longitude <= thisreg[2]
-                        and thisreg[1] <= latitude <= thisreg[3]
+                    thisreg[0] <= longitude <= thisreg[2]
+                    and thisreg[1] <= latitude <= thisreg[3]
                 ):
                     result = 1
 
@@ -331,9 +330,9 @@ def do_blacklist(
     # For a short period, observations from drifting buoys with these IDs had very erroneous values in the
     # Tropical Pacific. These were identified offline and added to the blacklist
     if (
-            (year == 2005 and month == 11)
-            or (year == 2005 and month == 12)
-            or (year == 2006 and month == 1)
+        (year == 2005 and month == 11)
+        or (year == 2005 and month == 12)
+        or (year == 2006 and month == 1)
     ):
         if id in [
             "53521    ",
@@ -371,13 +370,13 @@ def do_blacklist(
 
 
 def do_day_check(
-        year: int,
-        month: int,
-        day: int,
-        hour: float,
-        latitude: float,
-        longitude: float,
-        time_since_sun_above_horizon: float,
+    year: int,
+    month: int,
+    day: int,
+    hour: float,
+    latitude: float,
+    longitude: float,
+    time_since_sun_above_horizon: float,
 ) -> int:
     """Given year month day hour lat and long calculate if the sun was above the horizon an hour ago.
 
@@ -410,9 +409,9 @@ def do_day_check(
     """
     # Defaults to FAIL if the location, date or time are bad
     if (
-            do_position_check(latitude, longitude) == 1
-            or do_date_check(year, month, day) == 1
-            or do_time_check(hour) == 1
+        do_position_check(latitude, longitude) == 1
+        or do_date_check(year, month, day) == 1
+        or do_time_check(hour) == 1
     ):
         return 1
 
@@ -488,11 +487,11 @@ def humidity_blacklist(platform_type: int) -> int:
 
 
 def mat_blacklist(
-        platform_type: int,
-        deck: int,
-        latitude: float,
-        longitude: float,
-        year: int,
+    platform_type: int,
+    deck: int,
+    latitude: float,
+    longitude: float,
+    year: int,
 ) -> int:
     """
     Flag certain decks, areas and other sources as ineligible for MAT QC.
@@ -534,15 +533,15 @@ def mat_blacklist(
     # North Atlantic, Suez and indian ocean to be excluded from MAT processing
     # See figure 8 from Kent et al.
     if (
-            deck == 193
-            and 1880 <= year <= 1892
-            and (
+        deck == 193
+        and 1880 <= year <= 1892
+        and (
             (-80.0 <= longitude <= 0.0 and 40.0 <= latitude <= 55.0)
             or (-10.0 <= longitude <= 30.0 and 35.0 <= latitude <= 45.0)
             or (15.0 <= longitude <= 45.0 and -10.0 <= latitude <= 40.0)
             or (15.0 <= longitude <= 95.0 and latitude >= -10.0 and latitude <= 15.0)
             or (95.0 <= longitude <= 105.0 and -10.0 <= latitude <= 5.0)
-    )
+        )
     ):
         result = 1
 
@@ -588,7 +587,7 @@ def do_air_temperature_missing_value_check(at: float) -> int:
 
 
 def do_air_temperature_anomaly_check(
-        at: float, at_climatology: float, maximum_anomaly: float
+    at: float, at_climatology: float, maximum_anomaly: float
 ) -> int:
     """
     Check that the air temperature is within the prescribed distance from climatology/
@@ -647,8 +646,11 @@ def do_air_temperature_hard_limit_check(at: float, hard_limits: list) -> int:
 
 
 def do_air_temperature_climatology_plus_stdev_check(
-        at: float, at_climatology: float, at_stdev: float,
-        minmax_standard_deviation: list, maximum_standardised_anomaly: float
+    at: float,
+    at_climatology: float,
+    at_stdev: float,
+    minmax_standard_deviation: list,
+    maximum_standardised_anomaly: float,
 ) -> int:
     """Check that standardised air temperature anomaly is within specified range.
 
@@ -681,7 +683,7 @@ def do_air_temperature_climatology_plus_stdev_check(
         at_climatology,
         at_stdev,
         minmax_standard_deviation,
-        maximum_standardised_anomaly
+        maximum_standardised_anomaly,
     )
 
 
@@ -712,8 +714,11 @@ Replaced the do_base_mat_qc by four separate functions see above
 
 
 def do_dpt_climatology_plus_stdev_check(
-        dpt: float, dpt_climatology: float, dpt_stdev: float,
-        minmax_standard_deviation: float, maximum_standardised_anomaly: float
+    dpt: float,
+    dpt_climatology: float,
+    dpt_stdev: float,
+    minmax_standard_deviation: float,
+    maximum_standardised_anomaly: float,
 ) -> int:
     """Check that standardised dewpoint temperature anomaly is within specified range.
 
@@ -746,7 +751,7 @@ def do_dpt_climatology_plus_stdev_check(
         dpt_climatology,
         dpt_stdev,
         minmax_standard_deviation,
-        maximum_standardised_anomaly
+        maximum_standardised_anomaly,
     )
 
 
@@ -857,7 +862,9 @@ def do_sst_missing_value_check(sst):
     return qc.value_check(sst)
 
 
-def do_sst_freeze_check(sst: float, freezing_point: float, freeze_check_n_sigma: float) -> int:
+def do_sst_freeze_check(
+    sst: float, freezing_point: float, freeze_check_n_sigma: float
+) -> int:
     """
     Check that sea surface temperature is above freezing
 
@@ -879,7 +886,9 @@ def do_sst_freeze_check(sst: float, freezing_point: float, freeze_check_n_sigma:
     return qc.sst_freeze_check(sst, 0.0, freezing_point, freeze_check_n_sigma)
 
 
-def do_sst_anomaly_check(sst: float, sst_climatology: float, maximum_anomaly: float) -> int:
+def do_sst_anomaly_check(
+    sst: float, sst_climatology: float, maximum_anomaly: float
+) -> int:
     """
     Check that the sea surface temperature is within the prescribed distance from climatology/
 
@@ -991,7 +1000,7 @@ def do_wind_hard_limits_check(wind_speed: float, hard_limits: list) -> int:
 
 
 def do_wind_consistency_check(
-        wind_speed: float, wind_direction: float, variable_limit: float
+    wind_speed: float, wind_direction: float, variable_limit: float
 ) -> int:
     """
     Test to compare windspeed to winddirection.
@@ -1147,7 +1156,7 @@ def do_wind_consistency_check(
 
 
 def do_base_qc_header(
-        list_of_parameters_we_need, do_first_step=False, do_last_step=False
+    list_of_parameters_we_need, do_first_step=False, do_last_step=False
 ):
     """Basic row QC for header file.
 
