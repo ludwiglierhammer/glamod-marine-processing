@@ -147,24 +147,24 @@ def test_do_time_check(hour, expected):
         ("", 732, 1958, 1, 45, -172, 1, 1),  # Deck 732 fail
         ("", 732, 1974, 1, -47, -60, 1, 1),  # Deck 732 fail
         (
-            "",
-            732,
-            1958,
-            1,
-            45,
-            -172 + 360,
-            1,
-            1,
+                "",
+                732,
+                1958,
+                1,
+                45,
+                -172 + 360,
+                1,
+                1,
         ),  # Deck 732 with shifted longitude fail
         (
-            "",
-            732,
-            1974,
-            1,
-            -47,
-            -60 + 360,
-            1,
-            1,
+                "",
+                732,
+                1974,
+                1,
+                -47,
+                -60 + 360,
+                1,
+                1,
         ),  # Deck 732 with shifted longitude fail
         ("", 731, 1958, 1, 45, -172, 1, 0),  # Same are but not in Deck 732 should pass
         ("", 731, 1974, 1, -47, -60, 1, 0),  # Same are but not in Deck 732 should pass
@@ -176,7 +176,7 @@ def test_do_time_check(hour, expected):
     ],
 )
 def test_do_blacklist(
-    id, deck, year, month, latitude, longitude, platform_type, expected
+        id, deck, year, month, latitude, longitude, platform_type, expected
 ):
     result = do_blacklist(id, deck, year, month, latitude, longitude, platform_type)
     assert result == expected
@@ -186,74 +186,74 @@ def test_do_blacklist(
     "year, month, day, hour, latitude, longitude, time, expected",
     [
         (
-            2015,
-            10,
-            15,
-            7.8000,
-            50.7365,
-            -3.5344,
-            1.0,
-            1,
+                2015,
+                10,
+                15,
+                7.8000,
+                50.7365,
+                -3.5344,
+                1.0,
+                1,
         ),  # Known values from direct observation
         (
-            2018,
-            9,
-            25,
-            11.5000,
-            50.7365,
-            -3.5344,
-            1.0,
-            1,
+                2018,
+                9,
+                25,
+                11.5000,
+                50.7365,
+                -3.5344,
+                1.0,
+                1,
         ),  # Known values from direct observation
         (
-            2015,
-            10,
-            15,
-            7.5000,
-            50.7365,
-            -3.5344,
-            1.0,
-            0,
+                2015,
+                10,
+                15,
+                7.5000,
+                50.7365,
+                -3.5344,
+                1.0,
+                0,
         ),  # Known values from direct observation
         (
-            2025,
-            4,
-            17,
-            16.04,
-            49.160383,
-            5.383146,
-            1.0,
-            1,
+                2025,
+                4,
+                17,
+                16.04,
+                49.160383,
+                5.383146,
+                1.0,
+                1,
         ),  # Known values from direct observation
         (
-            2015,
-            0,
-            15,
-            7.5000,
-            50.7365,
-            -3.5344,
-            1.0,
-            1,
+                2015,
+                0,
+                15,
+                7.5000,
+                50.7365,
+                -3.5344,
+                1.0,
+                1,
         ),  # bad month value should trigger fail
         (
-            2015,
-            10,
-            0,
-            7.5000,
-            50.7365,
-            -3.5344,
-            1.0,
-            1,
+                2015,
+                10,
+                0,
+                7.5000,
+                50.7365,
+                -3.5344,
+                1.0,
+                1,
         ),  # bad day value should trigger fail
         (
-            2015,
-            10,
-            15,
-            -7.5000,
-            50.7365,
-            -3.5344,
-            1.0,
-            1,
+                2015,
+                10,
+                15,
+                -7.5000,
+                50.7365,
+                -3.5344,
+                1.0,
+                1,
         ),  # bad hour value should trigger fail
         (2015, 1, 1, 0.5, 0.0, 0.0, 1, 0),  # 0 lat 0 lon near midnight
         (2015, 1, 1, None, 0.0, 0.0, 1, 1),  # missing hour fails
@@ -277,12 +277,12 @@ def test_humidity_blacklist():
     "platform_type, deck, latitude, longitude, year, expected",
     [
         (
-            5,
-            780,
-            0.5,
-            2.0,
-            2011,
-            1,
+                5,
+                780,
+                0.5,
+                2.0,
+                2011,
+                1,
         ),  # Check Deck 780 platform type 5 combination that fails
         (5, 781, 0.5, 2.0, 2011, 0),  # and variants that should pass
         (6, 780, 0.5, 2.0, 2011, 0),  # and variants that should pass
@@ -312,20 +312,15 @@ def test_do_air_temperature_missing_value_check(at, expected):
 
 
 @pytest.mark.parametrize(
-    "at, at_climatology, parameters, expected",
+    "at, at_climatology, maximum_anomaly, expected",
     [
-        (5.6, 2.2, {"maximum_anomaly": 10.0}, 0),
-        (None, 2.2, {"maximum_anomaly": 10.0}, 1),
-        (np.nan, 2.2, {"maximum_anomaly": 10.0}, 0),
+        (5.6, 2.2, 10.0, 0),
+        (None, 2.2, 10.0, 1),
+        (np.nan, 2.2, 10.0, 0),
     ],
 )
-def test_do_air_temperature_anomaly_check(at, at_climatology, parameters, expected):
-    assert do_air_temperature_anomaly_check(at, at_climatology, parameters) == expected
-
-
-def test_do_air_temperature_anomaly_check_raises_key_error():
-    with pytest.raises(KeyError):
-        do_air_temperature_anomaly_check(5.6, 2.2, {"bad_parameter_name": 10.0})
+def test_do_air_temperature_anomaly_check(at, at_climatology, maximum_anomaly, expected):
+    assert do_air_temperature_anomaly_check(at, at_climatology, maximum_anomaly) == expected
 
 
 @pytest.mark.parametrize("at_climatology, expected", [(5.5, 0), (None, 1), (np.nan, 0)])
@@ -334,115 +329,38 @@ def test_do_air_temperature_no_normal_check(at_climatology, expected):
 
 
 @pytest.mark.parametrize(
-    "at, parameters, expected",
+    "at, hard_limits, expected",
     [
-        (5.6, {"hard_limits": [-10.0, 10.0]}, 0),
-        (15.6, {"hard_limits": [-10.0, 10.0]}, 1),
-        (None, {"hard_limits": [-10.0, 10.0]}, 1),
-        (np.nan, {"hard_limits": [-10.0, 10.0]}, 1),
+        (5.6, [-10.0, 10.0], 0),
+        (15.6, [-10.0, 10.0], 1),
+        (None, [-10.0, 10.0], 1),
+        (np.nan, [-10.0, 10.0], 1),
     ],
 )
-def test_do_air_temperature_hard_limit_check(at, parameters, expected):
-    assert do_air_temperature_hard_limit_check(at, parameters) == expected
-
-
-def test_do_air_temperature_hard_limit_check_raises_key_error():
-    with pytest.raises(KeyError):
-        _ = do_air_temperature_hard_limit_check(
-            5.6, {"bad_parameter_name": [-10.0, 10.0]}
-        )
+def test_do_air_temperature_hard_limit_check(at, hard_limits, expected):
+    assert do_air_temperature_hard_limit_check(at, hard_limits) == expected
 
 
 @pytest.mark.parametrize(
-    "at, at_climatology, at_stdev, parameters, expected",
+    "at, at_climatology, at_stdev, minmax_standard_deviation, maximum_standardised_anomaly, expected",
     [
-        (
-            5.6,
-            2.2,
-            3.3,
-            {
-                "minmax_standard_deviation": [1.0, 10.0],
-                "maximum_standardised_anomaly": 2.0,
-            },
-            0,
-        ),
-        (
-            15.6,
-            0.6,
-            5.0,
-            {
-                "minmax_standard_deviation": [1.0, 10.0],
-                "maximum_standardised_anomaly": 2.0,
-            },
-            1,
-        ),
-        (
-            1.0,
-            0.0,
-            0.1,
-            {
-                "minmax_standard_deviation": [1.0, 10.0],
-                "maximum_standardised_anomaly": 2.0,
-            },
-            0,
-        ),
-        (
-            15.0,
-            0.0,
-            25.0,
-            {
-                "minmax_standard_deviation": [1.0, 4.0],
-                "maximum_standardised_anomaly": 2.0,
-            },
-            1,
-        ),
-        (
-            None,
-            2.2,
-            3.3,
-            {
-                "minmax_standard_deviation": [1.0, 10.0],
-                "maximum_standardised_anomaly": 2.0,
-            },
-            1,
-        ),
-        (
-            np.nan,
-            2.2,
-            3.3,
-            {
-                "minmax_standard_deviation": [1.0, 10.0],
-                "maximum_standardised_anomaly": 2.0,
-            },
-            0,
-        ),
+        (5.6, 2.2, 3.3, [1.0, 10.0], 2.0, 0,),
+        (15.6, 0.6, 5.0, [1.0, 10.0], 2.0, 1,),
+        (1.0, 0.0, 0.1, [1.0, 10.0], 2.0, 0,),
+        (15.0, 0.0, 25.0, [1.0, 4.0], 2.0, 1,),
+        (None, 2.2, 3.3, [1.0, 10.0], 2.0, 1,),
+        (np.nan, 2.2, 3.3, [1.0, 10.0], 2.0, 0,),
     ],
 )
 def test_do_air_temperature_climatology_plus_stdev_check(
-    at, at_climatology, at_stdev, parameters, expected
+        at, at_climatology, at_stdev, minmax_standard_deviation, maximum_standardised_anomaly, expected
 ):
     assert (
-        do_air_temperature_climatology_plus_stdev_check(
-            at, at_climatology, at_stdev, parameters
-        )
-        == expected
+            do_air_temperature_climatology_plus_stdev_check(
+                at, at_climatology, at_stdev, minmax_standard_deviation, maximum_standardised_anomaly
+            )
+            == expected
     )
-
-
-def test_do_air_temperature_climatology_plus_stdev_check_raises_key_error():
-    test_parameters = {
-        "minmax_standard_deviation": [1.0, 10.0],
-        "bad_parameter_name": 2.0,
-    }
-    with pytest.raises(KeyError):
-        do_air_temperature_climatology_plus_stdev_check(5.6, 2.2, 3.3, test_parameters)
-
-    test_parameters = {
-        "bad_parameter_name": [1.0, 10.0],
-        "maximum_standardised_anomaly": 2.0,
-    }
-    with pytest.raises(KeyError):
-        do_air_temperature_climatology_plus_stdev_check(5.6, 2.2, 3.3, test_parameters)
 
 
 @pytest.mark.parametrize("dpt, expected", [(5.6, 0), (None, 1), (np.nan, 0)])
@@ -451,93 +369,25 @@ def test_do_dpt_missing_value_check(dpt, expected):
 
 
 @pytest.mark.parametrize(
-    "dpt, dpt_climatology, dpt_stdev, parameters, expected",
+    "dpt, dpt_climatology, dpt_stdev, minmax_standard_deviation, maximum_standardised_anomaly, expected",
     [
-        (
-            5.6,
-            2.2,
-            3.3,
-            {
-                "minmax_standard_deviation": [1.0, 10.0],
-                "maximum_standardised_anomaly": 2.0,
-            },
-            0,
-        ),
-        (
-            15.6,
-            0.6,
-            5.0,
-            {
-                "minmax_standard_deviation": [1.0, 10.0],
-                "maximum_standardised_anomaly": 2.0,
-            },
-            1,
-        ),
-        (
-            1.0,
-            0.0,
-            0.1,
-            {
-                "minmax_standard_deviation": [1.0, 10.0],
-                "maximum_standardised_anomaly": 2.0,
-            },
-            0,
-        ),
-        (
-            15.0,
-            0.0,
-            25.0,
-            {
-                "minmax_standard_deviation": [1.0, 4.0],
-                "maximum_standardised_anomaly": 2.0,
-            },
-            1,
-        ),
-        (
-            None,
-            2.2,
-            3.3,
-            {
-                "minmax_standard_deviation": [1.0, 10.0],
-                "maximum_standardised_anomaly": 2.0,
-            },
-            1,
-        ),
-        (
-            np.nan,
-            2.2,
-            3.3,
-            {
-                "minmax_standard_deviation": [1.0, 10.0],
-                "maximum_standardised_anomaly": 2.0,
-            },
-            0,
-        ),
+        (5.6, 2.2, 3.3, [1.0, 10.0], 2.0, 0,),
+        (15.6, 0.6, 5.0, [1.0, 10.0], 2.0, 1,),
+        (1.0, 0.0, 0.1, [1.0, 10.0], 2.0, 0,),
+        (15.0, 0.0, 25.0, [1.0, 4.0], 2.0, 1,),
+        (None, 2.2, 3.3, [1.0, 10.0], 2.0, 1,),
+        (np.nan, 2.2, 3.3, [1.0, 10.0], 2.0, 0,),
     ],
 )
 def test_do_dpt_climatology_plus_stdev_check(
-    dpt, dpt_climatology, dpt_stdev, parameters, expected
+        dpt, dpt_climatology, dpt_stdev, minmax_standard_deviation, maximum_standardised_anomaly, expected
 ):
     assert (
-        do_dpt_climatology_plus_stdev_check(dpt, dpt_climatology, dpt_stdev, parameters)
-        == expected
+            do_dpt_climatology_plus_stdev_check(
+                dpt, dpt_climatology, dpt_stdev,
+                minmax_standard_deviation, maximum_standardised_anomaly)
+            == expected
     )
-
-
-def test_do_dpt_climatology_plus_stdev_check_raises_key_error():
-    test_parameters = {
-        "minmax_standard_deviation": [1.0, 10.0],
-        "bad_parameter_name": 2.0,
-    }
-    with pytest.raises(KeyError):
-        do_dpt_climatology_plus_stdev_check(5.6, 2.2, 3.3, test_parameters)
-
-    test_parameters = {
-        "bad_parameter_name": [1.0, 10.0],
-        "maximum_standardised_anomaly": 2.0,
-    }
-    with pytest.raises(KeyError):
-        do_dpt_climatology_plus_stdev_check(5.6, 2.2, 3.3, test_parameters)
 
 
 @pytest.mark.parametrize(
@@ -567,20 +417,15 @@ def test_do_sst_missing_value_check(sst, expected):
 
 
 @pytest.mark.parametrize(
-    "sst, sst_climatology, parameters, expected",
+    "sst, sst_climatology, maximum_anomaly, expected",
     [
-        (5.6, 2.2, {"maximum_anomaly": 10.0}, 0),
-        (None, 2.2, {"maximum_anomaly": 10.0}, 1),
-        (np.nan, 2.2, {"maximum_anomaly": 10.0}, 0),
+        (5.6, 2.2, 10.0, 0),
+        (None, 2.2, 10.0, 1),
+        (np.nan, 2.2, 10.0, 0),
     ],
 )
-def test_do_sst_anomaly_check(sst, sst_climatology, parameters, expected):
-    assert do_sst_anomaly_check(sst, sst_climatology, parameters) == expected
-
-
-def test_do_sst_anomaly_check_raises_key_error():
-    with pytest.raises(KeyError):
-        do_sst_anomaly_check(5.6, 2.2, {"bad_parameter_name": 10.0})
+def test_do_sst_anomaly_check(sst, sst_climatology, maximum_anomaly, expected):
+    assert do_sst_anomaly_check(sst, sst_climatology, maximum_anomaly) == expected
 
 
 @pytest.mark.parametrize(
@@ -591,26 +436,16 @@ def test_do_sst_no_normal_check(sst_climatology, expected):
 
 
 @pytest.mark.parametrize(
-    "sst, parameters, expected",
+    "sst, freezing_point, freeze_check_n_sigma, expected",
     [
-        (5.6, {"freezing_point": -1.8, "freeze_check_n_sigma": 2.0}, 0),
-        (-5.6, {"freezing_point": -1.8, "freeze_check_n_sigma": 2.0}, 1),
-        (0.0, {"freezing_point": -1.8, "freeze_check_n_sigma": 2.0}, 0),
-        (5.6, {"freezing_point": 11.8, "freeze_check_n_sigma": 2.0}, 1),
+        (5.6, -1.8, 2.0, 0),
+        (-5.6, -1.8, 2.0, 1),
+        (0.0, -1.8, 2.0, 0),
+        (5.6, 11.8, 2.0, 1),
     ],
 )
-def test_do_sst_freeze_check(sst, parameters, expected):
-    assert do_sst_freeze_check(sst, parameters) == expected
-
-
-def test_do_sst_freeze_check_raises_key_error():
-    test_parameters = {"bad_parameter_name": -1.8, "freeze_check_n_sigma": 2.0}
-    with pytest.raises(KeyError):
-        _ = do_sst_freeze_check(5.6, test_parameters)
-
-    test_parameters = {"freezing_point": -1.8, "bad_parameter_name": 2.0}
-    with pytest.raises(KeyError):
-        _ = do_sst_freeze_check(5.6, test_parameters)
+def test_do_sst_freeze_check(sst, freezing_point, freeze_check_n_sigma, expected):
+    assert do_sst_freeze_check(sst, freezing_point, freeze_check_n_sigma) == expected
 
 
 @pytest.mark.parametrize("w, expected", [(5.6, 0), (None, 1), (np.nan, 0)])
@@ -621,38 +456,28 @@ def test_do_wind_missing_value_check(w, expected):
 @pytest.mark.parametrize(
     "w, parameters, expected",
     [
-        (5.6, {"hard_limits": [-10.0, 10.0]}, 0),
-        (15.6, {"hard_limits": [-10.0, 10.0]}, 1),
-        (None, {"hard_limits": [-10.0, 10.0]}, 1),
-        (np.nan, {"hard_limits": [-10.0, 10.0]}, 1),
+        (5.6, [-10.0, 10.0], 0),
+        (15.6, [-10.0, 10.0], 1),
+        (None, [-10.0, 10.0], 1),
+        (np.nan, [-10.0, 10.0], 1),
     ],
 )
 def test_do_wind_hard_limit_check(w, parameters, expected):
     assert do_wind_hard_limits_check(w, parameters) == expected
 
 
-def test_do_wind_hard_limit_check_raises_key_error():
-    with pytest.raises(KeyError):
-        _ = do_wind_hard_limits_check(5.6, {"bad_parameter_name": [-10.0, 10.0]})
-
-
 @pytest.mark.parametrize(
-    "wind_speed, wind_direction, parameters, expected",
+    "wind_speed, wind_direction, variable_limit, expected",
     [
-        (None, 4, {"variable_limit": 3}, 1),  # missing wind speed
-        (4, None, {"variable_limit": 3}, 1),
-        (0, 361, {"variable_limit": 3}, 0),
-        (5, 361, {"variable_limit": 3}, 1),
-        (12.0, 362, {"variable_limit": 10.0}, 1),
+        (None, 4, 3, 1),  # missing wind speed
+        (4, None, 3, 1),
+        (0, 361, 3, 0),
+        (5, 361, 3, 1),
+        (12.0, 362, 10.0, 1),
     ],
 )
-def test_do_wind_consistency_check(wind_speed, wind_direction, parameters, expected):
-    assert do_wind_consistency_check(wind_speed, wind_direction, parameters) == expected
-
-
-def test_do_wind_consistency_check_raises_key_error():
-    with pytest.raises(KeyError):
-        _ = do_wind_consistency_check(0, 361, {"bad_parameter_name": 3})
+def test_do_wind_consistency_check(wind_speed, wind_direction, variable_limit, expected):
+    assert do_wind_consistency_check(wind_speed, wind_direction, variable_limit) == expected
 
 
 @pytest.mark.parametrize(
@@ -887,62 +712,62 @@ def test_get_sst_single_field(lat, lon, expected, single_field):
     [
         (0.0, 1.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0),  # zero when all zero
         (
-            0.0,
-            1.0,
-            0.0,
-            1.0,
-            0.5,
-            0.5,
-            0.0,
-            1.0,
-            1.0,
-            2.0,
-            1.0,
+                0.0,
+                1.0,
+                0.0,
+                1.0,
+                0.5,
+                0.5,
+                0.0,
+                1.0,
+                1.0,
+                2.0,
+                1.0,
         ),  # test_gradient_across_square
         (0.0, 1.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 1.0, 2.0, 0.0),
         (0.0, 1.0, 0.0, 1.0, 1.0, 1.0, 0.0, 1.0, 1.0, 2.0, 2.0),
         (0.0, 1.0, 0.0, 1.0, 0.0, 1.0, 0.0, 1.0, 1.0, 2.0, 1.0),
         (0.0, 1.0, 0.0, 1.0, 1.0, 0.0, 0.0, 1.0, 1.0, 2.0, 1.0),
         (
-            0.0,
-            1.0,
-            0.0,
-            1.0,
-            0.0,
-            0.0,
-            0.0,
-            1.0,
-            1.0,
-            1.0,
-            0.0,
+                0.0,
+                1.0,
+                0.0,
+                1.0,
+                0.0,
+                0.0,
+                0.0,
+                1.0,
+                1.0,
+                1.0,
+                0.0,
         ),  # test_zero_at_point_set_to_zero
         (
-            0.0,
-            1.0,
-            0.0,
-            1.0,
-            0.0,
-            1.0,
-            0.0,
-            1.0,
-            1.0,
-            1.0,
-            1.0,
+                0.0,
+                1.0,
+                0.0,
+                1.0,
+                0.0,
+                1.0,
+                0.0,
+                1.0,
+                1.0,
+                1.0,
+                1.0,
         ),  # test_one_at_points_set_to_one
         (0.0, 1.0, 0.0, 1.0, 1.0, 1.0, 0.0, 1.0, 1.0, 1.0, 1.0),
         (0.0, 1.0, 0.0, 1.0, 1.0, 0.0, 0.0, 1.0, 1.0, 1.0, 1.0),
         (
-            0.0,
-            1.0,
-            0.0,
-            1.0,
-            0.5,
-            0.0,
-            0.0,
-            0.0,
-            1.0,
-            1.0,
-            0.5,
+                0.0,
+                1.0,
+                0.0,
+                1.0,
+                0.5,
+                0.0,
+                0.0,
+                0.0,
+                1.0,
+                1.0,
+                0.5,
         ),  # test_half_at_point_halfway_between_zero_and_one
         (0.0, 1.0, 0.0, 1.0, 0.5, 0.5, 0.0, 0.0, 1.0, 1.0, 0.5),
     ],
@@ -1002,23 +827,23 @@ def test_get_four_surrounding_points(lat, lon, max90, expected):
         (1.0, 0.0, 2.0, 3.0, 0.1, 0),  # Check simple pass 1.0 anomaly with 6.0 limits
         (7.0, 0.0, 2.0, 3.0, 0.1, 1),  # Check fail with 7.0 anomaly and 6.0 limits
         (
-            0.4,
-            0.0,
-            0.1,
-            3.0,
-            0.5,
-            0,
+                0.4,
+                0.0,
+                0.1,
+                3.0,
+                0.5,
+                0,
         ),  # check lowbar works anomaly outside std limits but less than lowbar
     ],
 )
 def test_climatology_plus_stdev_with_lowbar(
-    value, climate_normal, standard_deviation, limit, lowbar, expected
+        value, climate_normal, standard_deviation, limit, lowbar, expected
 ):
     assert (
-        qc.climatology_plus_stdev_with_lowbar(
-            value, climate_normal, standard_deviation, limit, lowbar
-        )
-        == expected
+            qc.climatology_plus_stdev_with_lowbar(
+                value, climate_normal, standard_deviation, limit, lowbar
+            )
+            == expected
     )
 
 
@@ -1035,13 +860,13 @@ def test_climatology_plus_stdev_with_lowbar(
     ],
 )
 def test_climatology_plus_stdev_check(
-    value, climate_normal, standard_deviation, stdev_limits, limit, expected
+        value, climate_normal, standard_deviation, stdev_limits, limit, expected
 ):
     assert (
-        qc.climatology_plus_stdev_check(
-            value, climate_normal, standard_deviation, stdev_limits, limit
-        )
-        == expected
+            qc.climatology_plus_stdev_check(
+                value, climate_normal, standard_deviation, stdev_limits, limit
+            )
+            == expected
     )
 
 
@@ -1115,7 +940,7 @@ def test_hard_limit(value, limits, expected):
 )
 def test_sst_freeze_check(sst, sst_uncertainty, freezing_point, n_sigma, expected):
     assert (
-        qc.sst_freeze_check(sst, sst_uncertainty, freezing_point, n_sigma) == expected
+            qc.sst_freeze_check(sst, sst_uncertainty, freezing_point, n_sigma) == expected
     )
 
 
