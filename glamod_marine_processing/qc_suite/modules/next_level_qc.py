@@ -23,17 +23,14 @@ def is_buoy(platform_type: int) -> int:
     Returns
     -------
     int
-        Return 1 if observation is from a drifting or moored buoy and 0 otherwise
+        Return 0 if observation is from a drifting or moored buoy and 1 otherwise
     """
-    # Do we need this function?
-    # Where/Why do we need "isbuoy" and "isdrifter"?
-    # I think this function should return a boolean value, isn't it?
     # I think we should use the CDM platform table?
     # https://glamod.github.io/cdm-obs-documentation/tables/code_tables/platform_type/platform_type.html
     if platform_type in [6, 7]:
-        return 1
-    else:
         return 0
+    else:
+        return 1
 
 
 def is_drifter(platform_type: int) -> int:
@@ -49,12 +46,12 @@ def is_drifter(platform_type: int) -> int:
     Returns
     -------
     int
-        Return 1 if observation is from a drifting buoy and 0 otherwise
+        Return 0 if observation is from a drifting buoy and 1 otherwise
     """
     if platform_type == 7:
-        return 1
-    else:
         return 0
+    else:
+        return 1
 
 
 def is_ship(platform_type: int) -> int:
@@ -70,16 +67,14 @@ def is_ship(platform_type: int) -> int:
     Returns
     -------
     int
-        Return 1 if observation is from a ship and 0 otherwise
+        Return 0 if observation is from a ship and 1 otherwise
     """
-    # Do we need this function?
-    # I think this function should return a boolean value, isn't it?
     # I think we should use the CDM platform table?
     # https://glamod.github.io/cdm-obs-documentation/tables/code_tables/platform_type/platform_type.html
     if platform_type in [0, 1, 2, 3, 4, 5, 10, 11, 12, 17]:
-        return 1
-    else:
         return 0
+    else:
+        return 1
 
 
 def is_deck_780(dck: int) -> int:
@@ -95,16 +90,16 @@ def is_deck_780(dck: int) -> int:
     Returns
     -------
     int
-        return 1 if observation is in deck 780 and 0 otherwise
+        return 0 if observation is in deck 780 and 1 otherwise
     """
     # Do we need this function?
     # Where/Why do we need "is780"?
     # I think this function should return a boolean value, isn't it?
     # We do not have this information explicitly in the CDM.
     if dck == 780:
-        return 1
-    else:
         return 0
+    else:
+        return 1
 
 
 def do_position_check(latitude: float, longitude: float) -> int:
@@ -592,7 +587,7 @@ def do_air_temperature_missing_value_check(at: float) -> int:
 
 
 def do_air_temperature_anomaly_check(
-    at: float, at_climatology: float, parameters: dict
+    at: float, at_climatology: float, maximum_anomaly: float
 ) -> int:
     """
     Check that the air temperature is within the prescribed distance from climatology/
@@ -603,23 +598,15 @@ def do_air_temperature_anomaly_check(
         Air temperature
     at_climatology: float
         Climatological air temperature value
-    parameters : dict
-        Dictionary containing QC parameters. Must contain key "maximum_anomaly"
+    maximum_anomaly : float
+        Maximum_anomaly allowed anomaly
 
     Returns
     -------
     int
         1 if air temperature anomaly is outside allowed bounds, 0 otherwise
-
-    Raises
-    ------
-    KeyError
-        When maximum anomaly is not in parameters dictionary
     """
-    if "maximum_anomaly" not in parameters:
-        raise KeyError('"maximum anomaly" not in parameters dictionary.')
-
-    return qc.climatology_check(at, at_climatology, parameters["maximum_anomaly"])
+    return qc.climatology_check(at, at_climatology, maximum_anomaly)
 
 
 def do_air_temperature_no_normal_check(at_climatology: float | None) -> int:
@@ -639,7 +626,7 @@ def do_air_temperature_no_normal_check(at_climatology: float | None) -> int:
     return qc.no_normal_check(at_climatology)
 
 
-def do_air_temperature_hard_limit_check(at: float, parameters: dict) -> int:
+def do_air_temperature_hard_limit_check(at: float, hard_limits: list) -> int:
     """
     Check that air temperature is within hard limits specified by "hard_limits".
 
@@ -647,34 +634,30 @@ def do_air_temperature_hard_limit_check(at: float, parameters: dict) -> int:
     ----------
     at : float
         Air temperature to be checked.
-    parameters : dict
-        Dictionary containing QC parameters. Must contain key "hard_limits".
+    hard_limits : list
+        2-element list containing lower and upper hard limits for the QC check.
 
     Returns
     -------
     int
         1 if air temperature is outside hard limits, 0 otherwise
-
-    Raises
-    ------
-    KeyError
-        When "hard_limits" is not in parameters dictionary
     """
-    if "hard_limits" not in parameters:
-        raise KeyError('"hard_limits" not in parameters dictionary.')
-    return qc.hard_limit(at, parameters["hard_limits"])
+    return qc.hard_limit(at, hard_limits)
 
 
 def do_air_temperature_climatology_plus_stdev_check(
-    at: float, at_climatology: float, at_stdev: float, parameters: dict
+    at: float,
+    at_climatology: float,
+    at_stdev: float,
+    minmax_standard_deviation: list,
+    maximum_standardised_anomaly: float,
 ) -> int:
     """Check that standardised air temperature anomaly is within specified range.
 
     Temperature is converted into a standardised anomaly by subtracting the climatological normal and dividing by
-    the climatological standard deviation. If the climatological standard deviation is outside the range specified in
-    the parameters dictionary under "minmax_standard_deviation" then the standard deviation is set to whichever of
-    the lower or upper limits is closest. The test fails if the standardised anomaly is larger than the value
-    specified in the parameters dictionary under "maximum_standardised_anomaly".
+    the climatological standard deviation. If the climatological standard deviation is outside the range specified by
+    "minmax_standard_deviation" then the standard deviation is set to whichever of the lower or upper limits is
+    closest. The test fails if the standardised anomaly is larger than the "maximum_standardised_anomaly".
 
     Parameters
     ----------
@@ -684,36 +667,31 @@ def do_air_temperature_climatology_plus_stdev_check(
         Climatological normal of air temperatures.
     at_stdev : float
         Climatological standard deviation of air temperatures.
-    parameters : dict
-        Dictionary containing QC parameters. Must contain keys "minmax_standard_deviation" and
-        "maximum_standardised_anomaly"
+    minmax_standard_deviation : list
+        2-element list containing lower and upper limits for standard deviation. If the at_stdev is outside these
+        limits, at_stdev will be set to the nearest limit.
+    maximum_standardised_anomaly : float
+        Largest allowed standardised anomaly
 
     Returns
     -------
     int
         Returns 1 if standardised temperature anomaly is outside specified range, 0 otherwise.
-
-    Raises
-    ------
-    KeyError
-        When "minmax_standard_deviation" or "maximum_standardised_anomaly" is not in the dictionary.
     """
-    if "minmax_standard_deviation" not in parameters:
-        raise KeyError('"minmax_standard_deviation" not in parameters')
-    if "maximum_standardised_anomaly" not in parameters:
-        raise KeyError('"maximum_standardised_anomaly" not in parameters')
     return qc.climatology_plus_stdev_check(
         at,
         at_climatology,
         at_stdev,
-        parameters["minmax_standard_deviation"],
-        parameters["maximum_standardised_anomaly"],
+        minmax_standard_deviation,
+        maximum_standardised_anomaly,
     )
 
 
 """
 Replaced the do_base_mat_qc by four separate functions see above
 """
+
+
 # def do_base_mat_qc(at, parameters):
 #     """Run the base MAT QC checks, non-missing, climatology check and check for normal etc."""
 #     # I think this should return a boolean value, isn't it?
@@ -736,15 +714,18 @@ Replaced the do_base_mat_qc by four separate functions see above
 
 
 def do_dpt_climatology_plus_stdev_check(
-    dpt: float, dpt_climatology: float, dpt_stdev: float, parameters: dict
+    dpt: float,
+    dpt_climatology: float,
+    dpt_stdev: float,
+    minmax_standard_deviation: float,
+    maximum_standardised_anomaly: float,
 ) -> int:
     """Check that standardised dewpoint temperature anomaly is within specified range.
 
     Temperature is converted into a standardised anomaly by subtracting the climatological normal and dividing by
     the climatological standard deviation. If the climatological standard deviation is outside the range specified in
-    the parameters dictionary under "minmax_standard_deviation" then the standard deviation is set to whichever of
-    the lower or upper limits is closest. The test fails if the standardised anomaly is larger than the value
-    specified in the parameters dictionary under "maximum_standardised_anomaly".
+    "minmax_standard_deviation" then the standard deviation is set to whichever of the lower or upper limits is
+    closest. The test fails if the standardised anomaly is larger than the "maximum_standardised_anomaly".
 
     Parameters
     ----------
@@ -754,30 +735,23 @@ def do_dpt_climatology_plus_stdev_check(
         Climatological normal of dewpoint temperatures.
     dpt_stdev : float
         Climatological standard deviation of dewpoint temperatures.
-    parameters : dict
-        Dictionary containing QC parameters. Must contain keys "minmax_standard_deviation" and
-        "maximum_standardised_anomaly"
+    minmax_standard_deviation : float
+        2-element list containing lower and upper limits for standard deviation. If the at_stdev is outside these
+        limits, at_stdev will be set to the nearest limit.
+    maximum_standardised_anomaly : float
+        Largest allowed standardised anomaly
 
     Returns
     -------
     int
         Returns 1 if standardised temperature anomaly is outside specified range, 0 otherwise.
-
-    Raises
-    ------
-    KeyError
-        When "minmax_standard_deviation" or "maximum_standardised_anomaly" is not in the dictionary.
     """
-    if "minmax_standard_deviation" not in parameters:
-        raise KeyError('"minmax_standard_deviation" not in parameters')
-    if "maximum_standardised_anomaly" not in parameters:
-        raise KeyError('"maximum_standardised_anomaly" not in parameters')
     return qc.climatology_plus_stdev_check(
         dpt,
         dpt_climatology,
         dpt_stdev,
-        parameters["minmax_standard_deviation"],
-        parameters["maximum_standardised_anomaly"],
+        minmax_standard_deviation,
+        maximum_standardised_anomaly,
     )
 
 
@@ -844,6 +818,8 @@ def do_supersaturation_check(dpt: float, at2: float) -> int:
 """
 Replaced do_base_dpt_qc with four new functions
 """
+
+
 # def do_base_dpt_qc(dpt, parameters):
 #     """
 #     Run the base DPT checks, non missing, modified climatology check, check for normal,
@@ -886,7 +862,9 @@ def do_sst_missing_value_check(sst):
     return qc.value_check(sst)
 
 
-def do_sst_freeze_check(sst: float, parameters: dict) -> int:
+def do_sst_freeze_check(
+    sst: float, freezing_point: float, freeze_check_n_sigma: float
+) -> int:
     """
     Check that sea surface temperature is above freezing
 
@@ -894,29 +872,23 @@ def do_sst_freeze_check(sst: float, parameters: dict) -> int:
     ----------
     sst : float
         Sea surface temperature
-    parameters : dict
-        Dictionary containing QC parameters. Must contain keys "freezing_point" and "freeze_check_n_sigma"
+    freezing_point : float
+        Freezing point of seawater to be used in check
+    freeze_check_n_sigma : float
+        Number of uncertainty standard deviations that sea surface temperature can be below the freezing point
+        before the QC check fails.
 
     Returns
     -------
     int
         Return 1 if SST below freezing, 0 otherwise
-
-    Raises
-    ------
-    KeyError
-        When freezing_point or freeze_check_n_sigma is not in parameters
     """
-    if "freezing_point" not in parameters:
-        raise KeyError('"freezing_point" not in parameters')
-    if "freeze_check_n_sigma" not in parameters:
-        raise KeyError('"freeze_check_n_sigma" not in parameters')
-    return qc.sst_freeze_check(
-        sst, 0.0, parameters["freezing_point"], parameters["freeze_check_n_sigma"]
-    )
+    return qc.sst_freeze_check(sst, 0.0, freezing_point, freeze_check_n_sigma)
 
 
-def do_sst_anomaly_check(sst: float, sst_climatology: float, parameters: dict) -> int:
+def do_sst_anomaly_check(
+    sst: float, sst_climatology: float, maximum_anomaly: float
+) -> int:
     """
     Check that the sea surface temperature is within the prescribed distance from climatology/
 
@@ -926,23 +898,15 @@ def do_sst_anomaly_check(sst: float, sst_climatology: float, parameters: dict) -
         Sea surface temperature
     sst_climatology: float
         Climatological sea surface temperature value
-    parameters : dict
-        Dictionary containing QC parameters. Must contain key "maximum_anomaly"
+    maximum_anomaly: float
+        Largest allowed anomaly
 
     Returns
     -------
     int
         1 if sea surface temperature anomaly is outside allowed bounds, 0 otherwise
-
-    Raises
-    ------
-    KeyError
-        When maximum anomaly is not in parameters dictionary
     """
-    if "maximum_anomaly" not in parameters:
-        raise KeyError('"maximum anomaly" not in parameters dictionary.')
-
-    return qc.climatology_check(sst, sst_climatology, parameters["maximum_anomaly"])
+    return qc.climatology_check(sst, sst_climatology, maximum_anomaly)
 
 
 def do_sst_no_normal_check(sst_climatology: float) -> int:
@@ -1017,26 +981,26 @@ def do_wind_missing_value_check(wind_speed: float | None) -> int:
     return qc.value_check(wind_speed)
 
 
-def do_wind_hard_limits_check(wind_speed: float, parameters: dict) -> int:
+def do_wind_hard_limits_check(wind_speed: float, hard_limits: list) -> int:
     """Check that wind speed is within hard limits specified by "hard_limits".
 
     Parameters
     ----------
     wind_speed : float
         Wind speed to be checked
-    parameters : dict
-        Dictionary containing QC parameters. Must contain key "hard_limits".
+    hard_limits : list
+        2-element list containing lower and upper limits for QC check
 
     Returns
     -------
     int
         Returns 1 if wind speed is outside of hard limits, 0 otherwise.
     """
-    return qc.hard_limit(wind_speed, parameters["hard_limits"])
+    return qc.hard_limit(wind_speed, hard_limits)
 
 
 def do_wind_consistency_check(
-    wind_speed: float, wind_direction: float, parameters: dict
+    wind_speed: float, wind_direction: float, variable_limit: float
 ) -> int:
     """
     Test to compare windspeed to winddirection.
@@ -1047,18 +1011,14 @@ def do_wind_consistency_check(
         Wind speed
     wind_direction : int
         Wind direction in range 1-362 (see ICOADS documentation)
-    parameters : dict
-        QC with "variable_limit" which is a single value that specifies a maximum wind speed that can correspond to
-        variable wind direction.
+    variable_limit : float
+        Single value that specifies a maximum wind speed that can correspond to variable wind direction.
 
     Returns
     -------
     int
         1 if windspeed and direction are inconsistent, 0 otherwise
     """
-    if "variable_limit" not in parameters:
-        raise KeyError('"variable_limit" not in parameters')
-
     result = 0
 
     if wind_direction is None or wind_speed is None:
@@ -1069,7 +1029,7 @@ def do_wind_consistency_check(
             result = 1
 
         # direction 363 is Variable i.e. low wind speed
-        if wind_direction == 362 and wind_speed > parameters["variable_limit"]:
+        if wind_direction == 362 and wind_speed > variable_limit:
             result = 1
 
     return result
@@ -1092,6 +1052,8 @@ def do_wind_consistency_check(
 
 
 """Only one QC check from do_kate_mat_qc was unique to the function so I added it to air temperature checks above"""
+
+
 # def do_kate_mat_qc(at, parameters):
 #     """
 #     Kate's modified MAT checks, non missing, modified climatology check, check for normal etc.
