@@ -11,7 +11,7 @@ from . import qc
 # I hop I did not forget anything.
 
 
-def is_buoy(platform_type: int) -> int:
+def is_buoy(platform_type: int, valid_list: list | int = [6, 7]) -> int:
     """
     Identify whether report is from a moored or drifting buoy based on ICOADS platform type PT.
 
@@ -19,6 +19,8 @@ def is_buoy(platform_type: int) -> int:
     ----------
     platform_type : int
         Platform type
+    valid_list: list or int
+        List of valid platform types
 
     Returns
     -------
@@ -27,13 +29,15 @@ def is_buoy(platform_type: int) -> int:
     """
     # I think we should use the CDM platform table?
     # https://glamod.github.io/cdm-obs-documentation/tables/code_tables/platform_type/platform_type.html
-    if platform_type in [6, 7]:
+    if isinstance(valid_list, int):
+        valid_list = [valid_list]
+    if platform_type in valid_list:
         return 0
     else:
         return 1
 
 
-def is_drifter(platform_type: int) -> int:
+def is_drifter(platform_type: int, valid_list: list | int = 7) -> int:
     """
     Identify whether report is from a drifting buoy based on ICOADS platform type PT.
     trackqc is only applied to drifting buoys. Used to filter drifting buoys.
@@ -42,19 +46,25 @@ def is_drifter(platform_type: int) -> int:
     ----------
     platform_type : int
         Platform type
+    valid_list: list or int
+        List of valid platform types
 
     Returns
     -------
     int
         Return 0 if observation is from a drifting buoy and 1 otherwise
     """
-    if platform_type == 7:
+    if isinstance(valid_list, int):
+        valid_list = [valid_list]
+    if platform_type in valid_list:
         return 0
     else:
         return 1
 
 
-def is_ship(platform_type: int) -> int:
+def is_ship(
+    platform_type: int, valid_list: list | int = [0, 1, 2, 3, 4, 5, 10, 11, 12, 17]
+) -> int:
     """
     Identify whether report is from a ship based on ICOADS platform type PT.
     Marien Air Temperature QC only performed on reports from ships. Used to filter ships.
@@ -63,6 +73,8 @@ def is_ship(platform_type: int) -> int:
     ----------
     platform_type : int
         Platform type
+    valid_list: list or str
+        List of valid platform types
 
     Returns
     -------
@@ -71,13 +83,15 @@ def is_ship(platform_type: int) -> int:
     """
     # I think we should use the CDM platform table?
     # https://glamod.github.io/cdm-obs-documentation/tables/code_tables/platform_type/platform_type.html
-    if platform_type in [0, 1, 2, 3, 4, 5, 10, 11, 12, 17]:
+    if isinstance(valid_list, int):
+        valid_list = [valid_list]
+    if platform_type in valid_list:
         return 0
     else:
         return 1
 
 
-def is_deck_780(dck: int) -> int:
+def is_deck(dck: int, valid_list: list | int = 780) -> int:
     """
     Identify obs that are from ICOADS Deck 780 which consists of obs from WOD.
     Observations from deck 780 are not used so they are not included in QC.
@@ -86,6 +100,8 @@ def is_deck_780(dck: int) -> int:
     ----------
     dck : int
         Deck of observation
+    valid_list: list or int
+        List of valid deck numbers
 
     Returns
     -------
@@ -96,7 +112,9 @@ def is_deck_780(dck: int) -> int:
     # Where/Why do we need "is780"?
     # I think this function should return a boolean value, isn't it?
     # We do not have this information explicitly in the CDM.
-    if dck == 780:
+    if isinstance(valid_list, int):
+        valid_list = [valid_list]
+    if dck in valid_list:
         return 0
     else:
         return 1

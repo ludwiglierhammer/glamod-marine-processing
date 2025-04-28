@@ -31,7 +31,7 @@ from glamod_marine_processing.qc_suite.modules.next_level_qc import (
     do_wind_missing_value_check,
     humidity_blacklist,
     is_buoy,
-    is_deck_780,
+    is_deck,
     is_drifter,
     is_ship,
     mat_blacklist,
@@ -50,12 +50,31 @@ def test_is_buoy():
             assert result == 1
 
 
+def test_is_buoy_valid_list():
+    for pt in range(0, 47):
+        result = is_buoy(pt, valid_list=3)
+        if pt == 3:
+            assert result == 0
+        else:
+            assert result == 1
+
+
 def test_is_drifter():
     for pt in range(0, 47):
+        result = is_drifter(pt)
         if pt == 7:
-            assert is_drifter(pt) == 0
+            assert result == 0
         else:
-            assert is_drifter(pt) == 1
+            assert result == 1
+
+
+def test_is_drifter_valid_list():
+    for pt in range(0, 47):
+        result = is_drifter(pt, valid_list=[6, 8])
+        if pt in [6, 8]:
+            assert result == 0
+        else:
+            assert result == 1
 
 
 def test_is_ship():
@@ -69,10 +88,28 @@ def test_is_ship():
             assert result == 1
 
 
-def test_is_deck_780():
+def test_is_ship_valid_list():
+    for pt in range(0, 47):
+        result = is_ship(pt, valid_list=6)
+        if pt == 6:
+            assert result == 0
+        else:
+            assert result == 1
+
+
+def test_is_deck():
     for deck in range(1000):
-        result = is_deck_780(deck)
+        result = is_deck(deck)
         if deck == 780:
+            assert result == 0
+        else:
+            assert result == 1
+
+
+def test_is_deck_valid_list():
+    for deck in range(1000):
+        result = is_deck(deck, valid_list=[779, 781])
+        if deck in [779, 781]:
             assert result == 0
         else:
             assert result == 1
