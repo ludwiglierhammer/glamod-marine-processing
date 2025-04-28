@@ -423,7 +423,7 @@ def do_day_check(
     Returns
     -------
     int
-        Set to 1 if it is day, 0 otherwise.
+        Set to 0 if it is day, 1 otherwise.
     """
     # Defaults to FAIL if the location, date or time are bad
     if (
@@ -477,11 +477,10 @@ def do_day_check(
     del sid
     del dec
 
-    result = 0
     if elevation > 0:
-        result = 1
+        return 0
 
-    return result
+    return 1
 
 
 def humidity_blacklist(platform_type: int) -> int:

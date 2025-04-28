@@ -230,8 +230,8 @@ def test_do_blacklist(
             50.7365,
             -3.5344,
             1.0,
-            1,
-        ),  # Known values from direct observation
+            0,
+        ),  # Known values from direct observation (day); should trigger pass
         (
             2018,
             9,
@@ -240,8 +240,8 @@ def test_do_blacklist(
             50.7365,
             -3.5344,
             1.0,
-            1,
-        ),  # Known values from direct observation
+            0,
+        ),  # Known values from direct observation (day); should trigger pass
         (
             2015,
             10,
@@ -250,8 +250,8 @@ def test_do_blacklist(
             50.7365,
             -3.5344,
             1.0,
-            0,
-        ),  # Known values from direct observation
+            1,
+        ),  # Known values from direct observation (night); should trigger fail
         (
             2025,
             4,
@@ -261,7 +261,7 @@ def test_do_blacklist(
             5.383146,
             1.0,
             1,
-        ),  # Known values from direct observation
+        ),  # Known values from direct observation: year > 2024 should trigger fail
         (
             2015,
             0,
@@ -292,8 +292,17 @@ def test_do_blacklist(
             1.0,
             1,
         ),  # bad hour value should trigger fail
-        (2015, 1, 1, 0.5, 0.0, 0.0, 1, 0),  # 0 lat 0 lon near midnight
-        (2015, 1, 1, None, 0.0, 0.0, 1, 1),  # missing hour fails
+        (
+            2015,
+            1,
+            1,
+            0.5,
+            0.0,
+            0.0,
+            1,
+            1,
+        ),  # 0 lat 0 lon near midnight should trigger fail
+        (2015, 1, 1, None, 0.0, 0.0, 1, 1),  # missing hour should trigger fail
     ],
 )
 def test_do_day_check(year, month, day, hour, latitude, longitude, time, expected):
