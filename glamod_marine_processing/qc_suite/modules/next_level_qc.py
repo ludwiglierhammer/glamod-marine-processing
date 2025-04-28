@@ -3,8 +3,22 @@
 from __future__ import annotations
 
 import math
+from datetime import datetime
 
 from . import qc
+from .qc import failed, passed, untestable, untested
+
+
+def _split_date(date):
+    try:
+        year = int(date.year)
+        month = int(date.month)
+        day = int(date.month)
+        hour = date.hour
+    except ValueError:
+        return None
+    return {"year": year, "month": month, "day": day, "hour": hour}
+
 
 # This should be the raw structure.
 # In general, I think, we do not need to set qc flags, we just return them (no self.set_qc)
@@ -29,12 +43,11 @@ def is_buoy(platform_type: int, valid_list: list | int = [6, 7]) -> int:
     """
     # I think we should use the CDM platform table?
     # https://glamod.github.io/cdm-obs-documentation/tables/code_tables/platform_type/platform_type.html
-    if isinstance(valid_list, int):
+    if not isinstance(valid_list, list):
         valid_list = [valid_list]
     if platform_type in valid_list:
-        return 0
-    else:
-        return 1
+        return passed
+    return failed
 
 
 def is_drifter(platform_type: int, valid_list: list | int = 7) -> int:
@@ -54,12 +67,11 @@ def is_drifter(platform_type: int, valid_list: list | int = 7) -> int:
     int
         Return 0 if observation is from a drifting buoy and 1 otherwise
     """
-    if isinstance(valid_list, int):
+    if not isinstance(valid_list, list):
         valid_list = [valid_list]
     if platform_type in valid_list:
-        return 0
-    else:
-        return 1
+        return passed
+    return failed
 
 
 def is_ship(
@@ -83,12 +95,11 @@ def is_ship(
     """
     # I think we should use the CDM platform table?
     # https://glamod.github.io/cdm-obs-documentation/tables/code_tables/platform_type/platform_type.html
-    if isinstance(valid_list, int):
+    if not isinstance(valid_list, list):
         valid_list = [valid_list]
     if platform_type in valid_list:
-        return 0
-    else:
-        return 1
+        return passed
+    return failed
 
 
 def is_deck(dck: int, valid_list: list | int = 780) -> int:
@@ -115,9 +126,8 @@ def is_deck(dck: int, valid_list: list | int = 780) -> int:
     if isinstance(valid_list, int):
         valid_list = [valid_list]
     if dck in valid_list:
-        return 0
-    else:
-        return 1
+        return passed
+    return failed
 
 
 def do_position_check(latitude: float, longitude: float) -> int:
@@ -137,75 +147,75 @@ def do_position_check(latitude: float, longitude: float) -> int:
     -------
     int
         1 if either latitude or longitude is invalid, 0 otherwise
-
-    Raises
-    ------
-    ValueError
-        When latitude or longitude is None or non-finite
     """
-    if latitude is None or math.isnan(latitude):
-        raise ValueError("Latitude is None or non-finite")
-    if longitude is None or math.isnan(longitude):
-        raise ValueError("Longitude is None or non-finite")
+    if qc.isvalid(latitude):
+        return untestable
+    if qc.isvalid(longitude):
+        return untestable
 
-    result = 0
     if latitude < -90 or latitude > 90:
-        result = 1
+        return failed
     if longitude < -180 or longitude > 360:
-        result = 1
+        return failed
 
-    return result
+    return passed
 
 
-def do_date_check(year: int, month: int, day: int) -> int:
+def do_date_check(
+    date: datetime | None = None,
+    year: int | None = None,
+    month: int | None = None,
+    day: int | None = None,
+) -> int:
     """
     Perform the date QC check on the report. Check that the date is valid.
 
     Parameters
     ----------
-    year : int
+    date: datetime-like, optional
+        Date of observation to be checked
+    year : int, optional
         Year of observation to be checked
-    month : int
+    month : int, optional
         Month of observation (1-12) to be checked
-    day : int
+    day : int, optional
         Day of observation to be checked
 
     Returns
     -------
     int
         1 if the date is invalid, 0 otherwise
-
-    Raises
-    ------
-    ValueError
-        when Year or Month is set to None
     """
     # Do we need this function?
     # I think this function should return a boolean value, isn't it?
     # maybe return qc.date_check(latitude, longitude)
     # This should already be done while mapping to the CDM.
-    if year is None:
-        raise ValueError("Year is set to None")
-    if month is None:
-        raise ValueError("Month is set to None")
+    if isinstance(date, datetime):
+        date_ = _split_date(date)
+        if date_ is None:
+            return untestable
+        year = date_["year"]
+        month = date_["month"]
+        day = date_["day"]
+    if qc.isvalid(year) == failed:
+        return untestable
+    if qc.isvalid(month) == failed:
+        return untestable
+    if qc.isvalid(day) == failed:
+        return untestable
 
-    result = 0
-
-    if year > 2024 or year < 1850:
-        result = 1
+    if year > 2025 or year < 1850:
+        return failed
 
     if month < 1 or month > 12:
-        result = 1
+        return failed
 
     month_lengths = qc.get_month_lengths(year)
 
-    if day is None:
-        result = 1
-    else:
-        if day < 1 or day > month_lengths[month - 1]:
-            result = 1
+    if day < 1 or day > month_lengths[month - 1]:
+        return failed
 
-    return result
+    return passed
 
 
 def do_time_check(hour: float):
@@ -222,15 +232,13 @@ def do_time_check(hour: float):
     int
         Return 1 if hour is invalid, 0 otherwise
     """
-    result = 0
+    if qc.isvalid(hour) == failed:
+        return failed
 
-    if hour is not None and (hour >= 24 or hour < 0):
-        result = 1
+    if hour >= 24 or hour < 0:
+        return failed
 
-    if hour is None:
-        result = 1
-
-    return result
+    return passed
 
 
 def do_blacklist(
@@ -278,16 +286,14 @@ def do_blacklist(
     if longitude > 180.0:
         longitude -= 360
 
-    result = 0
-
     if latitude == 0.0 and longitude == 0.0:
-        result = 1  # blacklist all obs at 0,0 as this is a common error.
+        return failed  # blacklist all obs at 0,0 as this is a common error.
 
     if platform_type is not None and platform_type == 13:
-        result = 1  # C-MAN data - we do not want coastal stations
+        return failed  # C-MAN data - we do not want coastal stations
 
     if id == "SUPERIGORINA":
-        result = 1
+        return failed
 
     # these are the definitions of the regions which are blacklisted for Deck 732
     region = {
@@ -340,10 +346,10 @@ def do_blacklist(
                     thisreg[0] <= longitude <= thisreg[2]
                     and thisreg[1] <= latitude <= thisreg[3]
                 ):
-                    result = 1
+                    return failed
 
     if deck == 874:
-        result = 1  # SEAS data gets blacklisted
+        return failed  # SEAS data gets blacklisted
 
     # For a short period, observations from drifting buoys with these IDs had very erroneous values in the
     # Tropical Pacific. These were identified offline and added to the blacklist
@@ -382,19 +388,20 @@ def do_blacklist(
             "53901    ",
             "53902    ",
         ]:
-            result = 1
+            return failed
 
-    return result
+    return passed
 
 
 def do_day_check(
-    year: int,
-    month: int,
-    day: int,
-    hour: float,
-    latitude: float,
-    longitude: float,
-    time_since_sun_above_horizon: float,
+    date: datetime | None = None,
+    year: int | None = None,
+    month: int | None = None,
+    day: int | None = None,
+    hour: float | None = None,
+    latitude: float | None = None,
+    longitude: float | None = None,
+    time_since_sun_above_horizon: float = 1.0,
 ) -> int:
     """Given year month day hour lat and long calculate if the sun was above the horizon an hour ago.
 
@@ -404,13 +411,15 @@ def do_day_check(
 
     Parameters
     ----------
-    year : int
+    date: datetime-like, optional
+        Date of report
+    year : int, optional
         Year of report
-    month : int
+    month : int, optional
         Month of report
-    day : int
+    day : int, optional
         Day of report
-    hour : float
+    hour : float, optional
         Hour of report with minutes as decimal part of hour
     latitude : float
         Latitude of report in degrees
@@ -425,13 +434,22 @@ def do_day_check(
     int
         Set to 0 if it is day, 1 otherwise.
     """
+    if isinstance(date, datetime):
+        date_ = _split_date(date)
+        if date_ is None:
+            return failed
+        year = date_["year"]
+        month = date_["month"]
+        day = date_["day"]
+        hour = date_["hour"]
+
     # Defaults to FAIL if the location, date or time are bad
     if (
         do_position_check(latitude, longitude) == 1
-        or do_date_check(year, month, day) == 1
+        or do_date_check(year=year, month=month, day=day) == 1
         or do_time_check(hour) == 1
     ):
-        return 1
+        return failed
 
     # I don't think these tests will ever be reached because we already do three checks beforehand
     # that rule them out.
@@ -478,9 +496,9 @@ def do_day_check(
     del dec
 
     if elevation > 0:
-        return 0
+        return passed
 
-    return 1
+    return failed
 
 
 def humidity_blacklist(platform_type: int) -> int:
@@ -498,9 +516,9 @@ def humidity_blacklist(platform_type: int) -> int:
         Return 1 if report is ineligible for humidity QC, otherwise 0.
     """
     if platform_type in [0, 1, 2, 3, 4, 5, 6, 8, 9, 10, 15]:
-        return 0
+        return passed
     else:
-        return 1
+        return failed
 
 
 def mat_blacklist(
@@ -539,13 +557,11 @@ def mat_blacklist(
     ----------
     https://agupubs.onlinelibrary.wiley.com/doi/full/10.1002/jgrd.50152
     """
-    result = 0
-
     # Observations from ICOADS Deck 780 with platform type 5 (originating from
     # the World Ocean Database) [Boyer et al., 2009] were found to be erroneous (Z. Ji and S. Worley, personal
     # communication, 2011) and were excluded from HadNMAT2.
     if platform_type == 5 and deck == 780:
-        result = 1
+        return failed
 
     # North Atlantic, Suez and indian ocean to be excluded from MAT processing
     # See figure 8 from Kent et al.
@@ -560,9 +576,9 @@ def mat_blacklist(
             or (95.0 <= longitude <= 105.0 and -10.0 <= latitude <= 5.0)
         )
     ):
-        result = 1
+        return failed
 
-    return result
+    return passed
 
 
 def wind_blacklist(deck):
@@ -579,11 +595,10 @@ def wind_blacklist(deck):
     int
         Set to 1 if deck is in black list, 0 otherwise
     """
-    result = 0
     if deck in [708, 780]:
-        result = 1
+        return failed
 
-    return result
+    return passed
 
 
 def do_air_temperature_missing_value_check(at: float) -> int:
@@ -600,7 +615,7 @@ def do_air_temperature_missing_value_check(at: float) -> int:
     int
         1 if value is missing, 0 otherwise
     """
-    return qc.value_check(at)
+    return qc.isvalid(at)
 
 
 def do_air_temperature_anomaly_check(
@@ -640,7 +655,7 @@ def do_air_temperature_no_normal_check(at_climatology: float | None) -> int:
     int
         1 if climatology value is missing, 0 otherwise
     """
-    return qc.no_normal_check(at_climatology)
+    return qc.isvalid(at_climatology)
 
 
 def do_air_temperature_hard_limit_check(at: float, hard_limits: list) -> int:
@@ -787,7 +802,7 @@ def do_dpt_missing_value_check(dpt: float) -> int:
     int
         1 if value is missing, 0 otherwise
     """
-    return qc.value_check(dpt)
+    return qc.isvalid(dpt)
 
 
 def do_dpt_no_normal_check(dpt_climatology: float) -> int:
@@ -804,7 +819,7 @@ def do_dpt_no_normal_check(dpt_climatology: float) -> int:
     int
         1 if climatology value is missing, 0 otherwise
     """
-    return qc.no_normal_check(dpt_climatology)
+    return qc.isvalid(dpt_climatology)
 
 
 def do_supersaturation_check(dpt: float, at2: float) -> int:
@@ -823,13 +838,12 @@ def do_supersaturation_check(dpt: float, at2: float) -> int:
     int
         Set to 1 if supersaturation is detected, 0 otherwise
     """
-    result = 0
-    if (dpt is None) | (at2 is None):
-        result = 1
+    if qc.isvalid(dpt) == 1 or qc.isvalid(at2) == 1:
+        return failed
     elif dpt > at2:
-        result = 1
+        return failed
 
-    return result
+    return passed
 
 
 """
@@ -876,7 +890,7 @@ def do_sst_missing_value_check(sst):
     int
         1 if value is missing, 0 otherwise
     """
-    return qc.value_check(sst)
+    return qc.isvalid(sst)
 
 
 def do_sst_freeze_check(
@@ -995,10 +1009,10 @@ def do_wind_missing_value_check(wind_speed: float | None) -> int:
     int
         Returns 1 if wind speed is missing, 0 otherwise.
     """
-    return qc.value_check(wind_speed)
+    return qc.isvalid(wind_speed)
 
 
-def do_wind_hard_limits_check(wind_speed: float, hard_limits: list) -> int:
+def do_wind_hard_limit_check(wind_speed: float, hard_limits: list) -> int:
     """Check that wind speed is within hard limits specified by "hard_limits".
 
     Parameters
@@ -1036,20 +1050,18 @@ def do_wind_consistency_check(
     int
         1 if windspeed and direction are inconsistent, 0 otherwise
     """
-    result = 0
+    if qc.isvalid(wind_direction) == 1 or qc.isvalid(wind_speed) == 1:
+        return failed
 
-    if wind_direction is None or wind_speed is None:
-        result = 1
-    else:
-        # direction 361 is Calm i.e. wind speed should be zero
-        if wind_direction == 361 and wind_speed != 0:
-            result = 1
+    # direction 361 is Calm i.e. wind speed should be zero
+    if wind_direction == 361 and wind_speed != 0:
+        return failed
 
-        # direction 363 is Variable i.e. low wind speed
-        if wind_direction == 362 and wind_speed > variable_limit:
-            result = 1
+    # direction 363 is Variable i.e. low wind speed
+    if wind_direction == 362 and wind_speed > variable_limit:
+        return failed
 
-    return result
+    return passed
 
 
 """do base wind qc replaced by preceding three functions"""

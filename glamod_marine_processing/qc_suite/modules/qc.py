@@ -16,6 +16,11 @@ import numpy as np
 # Conversion factor between degrees and radians
 degrad = np.pi / 180.0
 
+passed = 0
+failed = 1
+untestable = 2
+untested = 3
+
 
 def month_match(
     y1: int,
@@ -42,9 +47,9 @@ def month_match(
         Returns 1 if both `y1` and `y2` and `m1` and `m2` match, else 0.
     """
     if y1 == y2 and m1 == m2:
-        return 1
+        return failed
     else:
-        return 0
+        return passed
 
 
 def yesterday(
@@ -297,9 +302,9 @@ def which_pentad(inmonth: int, inday: int) -> int:
     the day we are interested in. February 29th is treated as though it were March 1st in a regular year.
     """
     if not (12 >= inmonth >= 1):
-        raise ValueError(f"Month {inmonth} not in range 1-12")
+        return untestable
     if not (31 >= inday >= 1):
-        raise ValueError(f"Day {inday} not in range 1-31")
+        return untestable
 
     pentad = int((day_in_year(inmonth, inday) - 1) / 5)
     pentad = pentad + 1
@@ -334,10 +339,10 @@ def day_in_year(month: int, day: int) -> int:
         When month not in range 1-12 or day not in range 1-31
     """
     if month < 1 or month > 12:
-        raise ValueError("Month not in range 1-12")
+        return untestable
     month_lengths = get_month_lengths(2004)
     if day < 1 or day > month_lengths[month - 1]:
-        raise ValueError(f"Day not in range 1-{month_lengths[month - 1]}")
+        return untestable
 
     month_lengths = get_month_lengths(2003)
 
@@ -379,15 +384,15 @@ def get_hires_sst(lat: float, lon: float, month: int, day: int, hires_field) -> 
         range 1-12 or day is outside range 1-number of days in month
     """
     if lat < -90.0 or lat > 90.0:
-        raise ValueError(f"Latitude {lat} outside range -90 to 90")
+        return untestable
     if lon < -180.0 or lon > 360.0:
-        raise ValueError(f"Longitude {lon} outside range -180 to 360")
+        return untestable
     if month < 1 or month > 12:
-        raise ValueError(f"Month ({month}) outside range 1-12")
+        return untestable
 
     month_lengths = get_month_lengths(2004)
     if day < 1 or day > month_lengths[month - 1]:
-        raise ValueError(f"Day ({day}) outside range 1-{month_lengths[month - 1]}")
+        return untestable
 
     dindex = day_in_year(month, day) - 1
     yindex = lat_to_yindex(lat, 0.25)
@@ -431,15 +436,15 @@ def get_sst_daily(
         range 1-12 or day is outside range 1-number of days in month
     """
     if lat < -90.0 or lat > 90.0:
-        raise ValueError(f"Latitude {lat} outside range -90 to 90")
+        return untestable
     if lon < -185.0 or lon > 365.0:
-        raise ValueError(f"Longitude {lon} outside range -180 to 360")
+        return untestable
     if month < 1 or month > 12:
-        raise ValueError(f"Month ({month}) outside range 1-12")
+        return untestable
 
     month_lengths = get_month_lengths(2004)
     if day < 1 or day > month_lengths[month - 1]:
-        raise ValueError(f"Day ({day}) outside range 1-{month_lengths[month - 1]}")
+        return untestable
 
     dindex = day_in_year(month, day) - 1
     yindex = mds_lat_to_yindex(lat)
@@ -494,14 +499,14 @@ def get_sst(
         range 1-12 or day is outside range 1-number of days in month
     """
     if lat < -90.0 or lat > 90.0:
-        raise ValueError(f"Latitude {lat} outside range -90 to 90")
+        return untestable
     if lon < -185.0 or lon > 365.0:
-        raise ValueError(f"Longitude {lon} outside range -180 to 360")
+        return untestable
     if month < 1 or month > 12:
-        raise ValueError(f"Month ({month}) outside range 1-12")
+        return untestable
     month_lengths = get_month_lengths(2004)
     if day < 1 or day > month_lengths[month - 1]:
-        raise ValueError(f"Day ({day}) outside range 1-{month_lengths[month - 1]}")
+        return untestable
 
     if len(sst[:, 0, 0]) == 1:
         result = get_sst_single_field(lat, lon, sst)
@@ -603,15 +608,15 @@ def bilinear_interp(
        Interpolated value
     """
     if not (x1 <= x <= x2):
-        raise ValueError("X point not between x1 and x2")
+        return untestable
     if not (y1 <= y <= y2):
-        raise ValueError("Y point not between y1 and y2")
+        return untestable
     if x2 < x1:
-        raise ValueError("x2 not greater than x1")
+        return untestable
     if y2 < y1:
-        raise ValueError("y2 not greater than y1")
+        return untestable
     if q11 is None or q12 is None or q21 is None or q22 is None:
-        raise ValueError("One or more data values not specified")
+        return untestable
 
     val = q11 * (x2 - x) * (y2 - y)
     val += q21 * (x - x1) * (y2 - y)
@@ -1083,21 +1088,18 @@ def climatology_plus_stdev_with_lowbar(
         When limit is zero or negative
     """
     if limit <= 0:
-        raise ValueError(f"Multiplier {limit} must be greater than zero")
+        return untestable
 
-    result = 0
     if value is None or climate_normal is None or standard_deviation is None:
-        result = 1
-    else:
-        if (
-            abs(value - climate_normal) / standard_deviation > limit
-            and abs(value - climate_normal) > lowbar
-        ):
-            result = 1
+        return failed
 
-    assert result == 0 or result == 1
+    if (
+        abs(value - climate_normal) / standard_deviation > limit
+        and abs(value - climate_normal) > lowbar
+    ):
+        return failed
 
-    return result
+    return passed
 
 
 def climatology_plus_stdev_check(
@@ -1137,26 +1139,27 @@ def climatology_plus_stdev_check(
         When stdev_limits are in wrong order or limit is zero or negative.
     """
     if not (stdev_limits[1] > stdev_limits[0]):
-        raise ValueError("Limits are in wrong order")
+        return untestable
     if limit <= 0:
-        raise ValueError(f"multiplier {limit} must be positive and non-zero")
+        return untestable
 
-    result = 0
-    if value is None or climate_normal is None or standard_deviation is None:
-        result = 1
-    else:
-        stdev = standard_deviation
-        if stdev < stdev_limits[0]:
-            stdev = stdev_limits[0]
-        if stdev > stdev_limits[1]:
-            stdev = stdev_limits[1]
+    if (
+        isvalid(value) == 1
+        or isvalid(climate_normal) == 1
+        or isvalid(standard_deviation) == 1
+    ):
+        return failed
 
-        if abs(value - climate_normal) / stdev > limit:
-            result = 1
+    stdev = standard_deviation
+    if stdev < stdev_limits[0]:
+        stdev = stdev_limits[0]
+    if stdev > stdev_limits[1]:
+        stdev = stdev_limits[1]
 
-    assert result == 0 or result == 1
+    if abs(value - climate_normal) / stdev > limit:
+        return failed
 
-    return result
+    return passed
 
 
 def climatology_check(
@@ -1179,17 +1182,32 @@ def climatology_check(
     int
         Return 1 if the difference is outside the specified limit, 0 otherwise
     """
-    result = 0
+    # if value is None or climate_normal is None or limit is None:
+    if isvalid(value) == 1 or isvalid(climate_normal) == 1 or isvalid(limit) == 1:
+        return failed
 
-    if value is None or climate_normal is None or limit is None:
-        result = 1
-    else:
-        if abs(value - climate_normal) > limit:
-            result = 1
+    if abs(value - climate_normal) > limit:
+        return failed
 
-    assert result == 0 or result == 1
+    return passed
 
-    return result
+
+def isvalid(inval: float | None) -> int:
+    """Check if a value is numerically valid.
+
+    Parameters
+    ----------
+    inval : float or None
+        The input value to be tested
+
+    Returns
+    -------
+    int
+        Returns 1 if the input value is numerically invalid, 0 otherwise
+    """
+    if inval is None or math.isnan(inval):
+        return failed
+    return passed
 
 
 def value_check(inval: float | None) -> int:
@@ -1205,10 +1223,9 @@ def value_check(inval: float | None) -> int:
     int
         Returns 1 if the input value is None, 0 otherwise.
     """
-    result = 0
     if inval is None:
-        result = 1
-    return result
+        return failed
+    return passed
 
 
 def no_normal_check(inclimav: float | None) -> int:
@@ -1224,10 +1241,9 @@ def no_normal_check(inclimav: float | None) -> int:
     int
         Returns 1 if the input value is None, 0 otherwise.
     """
-    result = 0
     if inclimav is None:
-        result = 1
-    return result
+        return failed
+    return passed
 
 
 def hard_limit(val: float | None, limits: list) -> int:
@@ -1251,14 +1267,15 @@ def hard_limit(val: float | None, limits: list) -> int:
         When limits are specified in wrong order. First element should be lower than second
     """
     if not (limits[1] > limits[0]):
-        raise ValueError("Limits are in wrong order")
+        return untestable
 
-    if val is None:
-        return 1
-    result = 1
+    if isvalid(val) == failed:
+        return failed
+
     if limits[0] <= val <= limits[1]:
-        result = 0
-    return result
+        return passed
+
+    return failed
 
 
 # def supersat_check(invaltd, invalt):
@@ -1323,17 +1340,18 @@ def sst_freeze_check(
         When sst_uncertainty or freezing_point is None
     """
     if sst_uncertainty is None:
-        raise ValueError("sst_uncertainty is None")
+        return untestable
     if freezing_point is None:
-        raise ValueError("freezing point is None")
+        return untestable
 
     # fail if SST below the freezing point by more than twice the uncertainty
-    result = 0
-    if insst is not None:
-        if insst < (freezing_point - n_sigma * sst_uncertainty):
-            result = 1
+    if isvalid(insst) == failed:
+        return failed
 
-    return result
+    if insst < (freezing_point - n_sigma * sst_uncertainty):
+        return failed
+
+    return passed
 
 
 # def position_check(inlat, inlon):
@@ -1478,15 +1496,15 @@ def p_data_given_good(
         When inputs are incorrectly specified: q<=0, sigma<=0, r_lo > r_hi, x < r_lo or x > r_hi
     """
     if q <= 0.0:
-        raise ValueError(f"q {q} <= 0")
+        return untestable
     if sigma <= 0.0:
-        raise ValueError(f"sigma {sigma} <= 0")
+        return untestable
     if r_lo >= r_hi:
-        raise ValueError(f"Limits not ascending r_lo {r_lo} > r_hi {r_hi}")
+        return untestable
     if x < r_lo:
-        raise ValueError(f"x below specified lower limit, {x} < r_lo {r_lo}")
+        return untestable
     if x > r_hi:
-        raise ValueError(f"x above specified upper limit, {x} > r_hi {r_hi}")
+        return untestable
 
     upper_x = min([x + 0.5 * q, r_hi + 0.5 * q])
     lower_x = max([x - 0.5 * q, r_lo - 0.5 * q])
@@ -1530,9 +1548,9 @@ def p_data_given_gross(q: float, r_hi: float, r_lo: float) -> float:
         When limits are not ascending or q<=0
     """
     if r_hi < r_lo:
-        raise ValueError(f"Limits not ascending r_lo {r_lo} > r_hi {r_hi}")
+        return untestable
     if q <= 0.0:
-        raise ValueError(f"q <= 0 {q}")
+        return untestable
 
     r = r_hi - r_lo
     return 1.0 / (1.0 + (r / q))
@@ -1576,19 +1594,19 @@ def p_gross(
         When inputs are incorrectly specified: p0 < 0, p0 > 1, q <= 0, r_hi < r_lo, x < r_lo, x > r_hi, sigma <= 0
     """
     if not (p0 >= 0):
-        raise ValueError(f"p0 <= 0 {p0}")
+        return untestable
     if not (p0 <= 1):
-        raise ValueError(f"p0 > 1 {p0}")
+        return untestable
     if not (q > 0.0):
-        raise ValueError(f"q <= 0 {q}")
+        return untestable
     if not (r_hi > r_lo):
-        raise ValueError(f"Limits not ascending r_lo {r_lo} > r_hi {r_hi}")
+        return untestable
     if not (x >= r_lo):
-        raise ValueError(f"x below lower limit {x} < r_lo {r_lo}")
+        return untestable
     if not (x <= r_hi):
-        raise ValueError(f"x above upper limit {x} > r_hi {r_hi}")
+        return untestable
     if not (sigma > 0.0):
-        raise ValueError(f"sigma <= 0 {sigma}")
+        return untestable
 
     pgross = (
         p0
@@ -1622,7 +1640,7 @@ def angle_diff(angle1: float, angle2: float) -> float:
         Angle between the two input points in radians.
     """
     if angle1 is None or angle2 is None:
-        raise ValueError("One or both angles are None")
+        return untestable
 
     # calculate angle between two angles
     diff = abs(angle1 - angle2)
@@ -2726,11 +2744,11 @@ def year_month_gen(year1: int, month1: int, year2: int, month2: int) -> (int, in
         Return an iterator that yields tuples of a year and month
     """
     if year2 < year1:
-        raise ValueError(f"Start year {year1} after end year {year2}")
+        return untestable
     if not (0 < month1 <= 12):
-        raise ValueError(f"Start month {month1} outside range 1-12")
+        return untestable
     if not (0 < month2 <= 12):
-        raise ValueError(f"End month {month2} outside range 1-12")
+        return untestable
 
     year = year1
     month = month1
