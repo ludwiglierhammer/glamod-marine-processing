@@ -30,7 +30,7 @@ from glamod_marine_processing.qc_suite.modules.next_level_qc import (
     do_wind_missing_value_check,
     humidity_blacklist,
     is_buoy,
-    is_deck_780,
+    is_deck,
     is_drifter,
     is_ship,
     mat_blacklist,
