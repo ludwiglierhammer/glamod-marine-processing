@@ -27,7 +27,7 @@ from glamod_marine_processing.qc_suite.modules.next_level_qc import (
     do_supersaturation_check,
     do_time_check,
     do_wind_consistency_check,
-    do_wind_hard_limits_check,
+    do_wind_hard_limit_check,
     do_wind_missing_value_check,
     humidity_blacklist,
     is_buoy,
@@ -123,7 +123,6 @@ def test_do_position_check(latitude, longitude, expected):
     result = do_position_check(latitude, longitude)
     assert result == expected
 
-
 def test_do_position_check_raises_value_error():
     # Make sure that an exception is raised if latitude or longitude is missing
     with pytest.raises(ValueError):
@@ -148,7 +147,6 @@ def test_do_position_check_raises_value_error():
 def test_do_date_check(year, month, day, expected):
     result = do_date_check(year, month, day)
     assert result == expected
-
 
 def test_do_date_check_raises_value_error():
     # Make sure that an exception is raised if year or month is set to None
@@ -616,7 +614,7 @@ def test_do_wind_missing_value_check(w, expected):
     ],
 )
 def test_do_wind_hard_limit_check(w, parameters, expected):
-    assert do_wind_hard_limits_check(w, parameters) == expected
+    assert do_wind_hard_limit_check(w, parameters) == expected
 
 
 @pytest.mark.parametrize(
@@ -714,7 +712,6 @@ def test_pentad_to_mont():
 )
 def test_which_pentad(month, day, expected):
     assert qc.which_pentad(month, day) == expected
-
 
 def test_which_pentad_raises_value_error():
     with pytest.raises(ValueError):
@@ -1027,7 +1024,6 @@ def test_climatology_plus_stdev_check(
         == expected
     )
 
-
 def test_climatology_plus_stdev_check_raises():
     with pytest.raises(ValueError):
         qc.climatology_plus_stdev_check(1.0, 0.0, 0.5, [1.0, 0.0], 5.0)
@@ -1101,13 +1097,13 @@ def test_sst_freeze_check(sst, sst_uncertainty, freezing_point, n_sigma, expecte
         qc.sst_freeze_check(sst, sst_uncertainty, freezing_point, n_sigma) == expected
     )
 
-
-def test_sst_freeze_check_defaults_and_raises():
+def test_sst_freeze_check_raises():
     with pytest.raises(ValueError):
         qc.sst_freeze_check(0.0, None, -1.8, 2.0)
     with pytest.raises(ValueError):
         qc.sst_freeze_check(0.0, 0.0, None, 2.0)
 
+def test_sst_freeze_check_defaults():
     assert qc.sst_freeze_check(0.0) == 0
     assert qc.sst_freeze_check(-1.8) == 0
     assert qc.sst_freeze_check(-2.0) == 1

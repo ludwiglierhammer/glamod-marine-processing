@@ -1640,7 +1640,7 @@ def angle_diff(angle1: float, angle2: float) -> float:
         Angle between the two input points in radians.
     """
     if angle1 is None or angle2 is None:
-        return untestable
+        raise ValueError("One or more angles is None")
 
     # calculate angle between two angles
     diff = abs(angle1 - angle2)
