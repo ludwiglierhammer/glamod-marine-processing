@@ -162,15 +162,17 @@ def _test_do_position_check_raises_value_error():
         (2024, 2, 29, 0),  # 29th February 2024 PASS
         (2000, 2, 29, 0),  # 29th February 2000 PASS
         (1900, 2, 29, 1),  # 29th February 1900 FAIL
-        (1899, 3, None, 1),  # Missing day FAIL
+        (1899, 3, None, 2),  # Missing day UNTESTABLE
+        (None, 1, 1, 2),  # Missing year UNTESTABLE
+        (1850, None, 1, 2)  # Missing month UNTESTABLE
     ],
 )
 def test_do_date_check(year, month, day, expected):
-    result = do_date_check(year, month, day)
+    result = do_date_check(year=year, month=month, day=day)
     assert result == expected
 
 
-def test_do_date_check_raises_value_error():
+def _test_do_date_check_raises_value_error():
     # Make sure that an exception is raised if year or month is set to None
     with pytest.raises(ValueError):
         _ = do_date_check(None, 1, 1)
