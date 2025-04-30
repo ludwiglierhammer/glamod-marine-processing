@@ -141,7 +141,7 @@ def test_is_ship(testdata):
     pd.testing.assert_series_equal(results, expected)
 
 
-def test_is_deck(testdata):
+def _test_is_deck(testdata):
     # Deck is ICOADS specific.
     raise NotImplementedError
 
@@ -174,7 +174,7 @@ def test_do_time_check(testdata):
     pd.testing.assert_series_equal(results, expected)
 
 
-def test_do_blacklist(testdata):
+def _test_do_blacklist(testdata):
     raise NotImplementedError
 
 
@@ -192,15 +192,15 @@ def test_do_day_check(testdata):
     pd.testing.assert_series_equal(results, expected)
 
 
-def test_humidity_blacklist(testdata):
+def _test_humidity_blacklist(testdata):
     raise NotImplementedError
 
 
-def test_mat_blacklist(testdata):
+def _test_mat_blacklist(testdata):
     raise NotImplementedError
 
 
-def test_wind_blcklist(testdata):
+def _test_wind_blcklist(testdata):
     raise NotImplementedError
 
 
