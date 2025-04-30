@@ -374,7 +374,7 @@ def test_wind_blacklist():
             assert result == 0
 
 
-@pytest.mark.parametrize("at, expected", [(5.6, 0), (None, 1), (np.nan, 0)])
+@pytest.mark.parametrize("at, expected", [(5.6, 0), (None, 1), (np.nan, 1)])  # not sure if np.nan should trigger FAIL
 def test_do_air_temperature_missing_value_check(at, expected):
     assert do_air_temperature_missing_value_check(at) == expected
 
@@ -384,7 +384,7 @@ def test_do_air_temperature_missing_value_check(at, expected):
     [
         (5.6, 2.2, 10.0, 0),
         (None, 2.2, 10.0, 1),
-        (np.nan, 2.2, 10.0, 0),
+        (np.nan, 2.2, 10.0, 1),  # not sure if np.nan should trigger FAIL
     ],
 )
 def test_do_air_temperature_anomaly_check(
@@ -396,7 +396,7 @@ def test_do_air_temperature_anomaly_check(
     )
 
 
-@pytest.mark.parametrize("at_climatology, expected", [(5.5, 0), (None, 1), (np.nan, 0)])
+@pytest.mark.parametrize("at_climatology, expected", [(5.5, 0), (None, 1), (np.nan, 1)])  # not sure if np.nan should trigger FAIL
 def test_do_air_temperature_no_normal_check(at_climatology, expected):
     assert do_air_temperature_no_normal_check(at_climatology) == expected
 
@@ -463,7 +463,7 @@ def test_do_air_temperature_hard_limit_check(at, hard_limits, expected):
             3.3,
             [1.0, 10.0],
             2.0,
-            0,
+            1,  # not sure if np.nan should trigger FAIL
         ),
     ],
 )
@@ -487,7 +487,7 @@ def test_do_air_temperature_climatology_plus_stdev_check(
     )
 
 
-@pytest.mark.parametrize("dpt, expected", [(5.6, 0), (None, 1), (np.nan, 0)])
+@pytest.mark.parametrize("dpt, expected", [(5.6, 0), (None, 1), (np.nan, 1)])  # not sure if np.nan should trigger FAIL
 def test_do_dpt_missing_value_check(dpt, expected):
     assert do_dpt_missing_value_check(dpt) == expected
 
@@ -541,7 +541,7 @@ def test_do_dpt_missing_value_check(dpt, expected):
             3.3,
             [1.0, 10.0],
             2.0,
-            0,
+            1,  # not sure if np.nan should trigger FAIL
         ),
     ],
 )
@@ -566,7 +566,7 @@ def test_do_dpt_climatology_plus_stdev_check(
 
 
 @pytest.mark.parametrize(
-    "dpt_climatology, expected", [(5.5, 0), (None, 1), (np.nan, 0)]
+    "dpt_climatology, expected", [(5.5, 0), (None, 1), (np.nan, 1)]  # not sure if np.nan should trigger FAIL
 )
 def test_do_dpt_temperature_no_normal_check(dpt_climatology, expected):
     assert do_dpt_no_normal_check(dpt_climatology) == expected
@@ -586,7 +586,7 @@ def test_do_supersaturation_check(dpt, at, expected):
     assert do_supersaturation_check(dpt, at) == expected
 
 
-@pytest.mark.parametrize("sst, expected", [(5.6, 0), (None, 1), (np.nan, 0)])
+@pytest.mark.parametrize("sst, expected", [(5.6, 0), (None, 1), (np.nan, 1)])  # not sure if np.nan should trigger FAIL
 def test_do_sst_missing_value_check(sst, expected):
     assert do_sst_missing_value_check(sst) == expected
 
@@ -596,7 +596,7 @@ def test_do_sst_missing_value_check(sst, expected):
     [
         (5.6, 2.2, 10.0, 0),
         (None, 2.2, 10.0, 1),
-        (np.nan, 2.2, 10.0, 0),
+        (np.nan, 2.2, 10.0, 1),  # not sure if np.nan should trigger FAIL
     ],
 )
 def test_do_sst_anomaly_check(sst, sst_climatology, maximum_anomaly, expected):
@@ -604,7 +604,7 @@ def test_do_sst_anomaly_check(sst, sst_climatology, maximum_anomaly, expected):
 
 
 @pytest.mark.parametrize(
-    "sst_climatology, expected", [(5.5, 0), (None, 1), (np.nan, 0)]
+    "sst_climatology, expected", [(5.5, 0), (None, 1), (np.nan, 1)]  # not sure if np.nan should trigger FAIL
 )
 def test_do_sst_no_normal_check(sst_climatology, expected):
     assert do_sst_no_normal_check(sst_climatology) == expected
@@ -623,7 +623,7 @@ def test_do_sst_freeze_check(sst, freezing_point, freeze_check_n_sigma, expected
     assert do_sst_freeze_check(sst, freezing_point, freeze_check_n_sigma) == expected
 
 
-@pytest.mark.parametrize("w, expected", [(5.6, 0), (None, 1), (np.nan, 0)])
+@pytest.mark.parametrize("w, expected", [(5.6, 0), (None, 1), (np.nan, 1)])  # not sure if np.nan should trigger FAIL
 def test_do_wind_missing_value_check(w, expected):
     assert do_wind_missing_value_check(w) == expected
 

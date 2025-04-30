@@ -962,7 +962,7 @@ def do_sst_no_normal_check(sst_climatology: float) -> int:
     int
         1 if climatology value is missing, 0 otherwise
     """
-    return qc.no_normal_check(sst_climatology)
+    return qc.isvalid(sst_climatology)
 
 
 # def do_base_sst_qc(sst, parameters):
