@@ -38,42 +38,50 @@ from glamod_marine_processing.qc_suite.modules.next_level_qc import (
     wind_blacklist,
 )
 
-dataset = "ICOADS_R3.0.2T"
-_settings = get_settings(dataset)
-cache_dir = f"./Eqc/{dataset}/qc/{_settings.deck}"
-tables = [
-    "header",
-    "observations-at",
-    "observations-dpt",
-    "observations-slp",
-    "observations-sst",
-    "observations-wd",
-    "observations-ws",
-]
-for table in tables:
-    load_file(
-        f"{_settings.input_dir}/cdm_tables/{table}-{_settings.cdm}.psv",
-        cache_dir=cache_dir,
-        within_drs=False,
-    )
 
-data = {}
-db_tables = read_tables(cache_dir)
-
-for table in tables:
-    db_table = DataBundle()
-    db_table.data = db_tables[table].copy()
-    if table == "header":
-        db_table.data["platform_type"] = db_table["platform_type"].astype(int)
-        db_table.data["latitude"] = db_table["latitude"].astype(float)
-        db_table.data["longitude"] = db_table["longitude"].astype(float)
-        db_table.data["report_timestamp"] = pd.to_datetime(
-            db_table["report_timestamp"], format="%Y-%m-%d %H:%M:%S", errors="coerce"
+@pytest.fixture(scope="session")
+def testdata():
+    dataset = "ICOADS_R3.0.2T"
+    _settings = get_settings(dataset)
+    cache_dir = f"./Eqc/{dataset}/qc/{_settings.deck}"
+    tables = [
+        "header",
+        "observations-at",
+        "observations-dpt",
+        "observations-slp",
+        "observations-sst",
+        "observations-wd",
+        "observations-ws",
+    ]
+    for table in tables:
+        load_file(
+            f"{_settings.input_dir}/cdm_tables/{table}-{_settings.cdm}.psv",
+            cache_dir=cache_dir,
+            within_drs=False,
         )
-    else:
-        db_table.data["observation_value"] = db_table["observation_value"].astype(float)
 
-    data[table] = db_table
+    data_dict = {}
+    db_tables = read_tables(cache_dir)
+
+    for table in tables:
+        db_table = DataBundle()
+        db_table.data = db_tables[table].copy()
+        if table == "header":
+            db_table.data["platform_type"] = db_table["platform_type"].astype(int)
+            db_table.data["latitude"] = db_table["latitude"].astype(float)
+            db_table.data["longitude"] = db_table["longitude"].astype(float)
+            db_table.data["report_timestamp"] = pd.to_datetime(
+                db_table["report_timestamp"],
+                format="%Y-%m-%d %H:%M:%S",
+                errors="coerce",
+            )
+        else:
+            db_table.data["observation_value"] = db_table["observation_value"].astype(
+                float
+            )
+
+        data_dict[table] = db_table
+    return data_dict
 
 
 @pytest.mark.parametrize(
@@ -92,8 +100,8 @@ for table in tables:
         ["platform_type", 2, pd.Series([0] * 13)],  # platform type is 2 which is a ship
     ],
 )
-def test_is_in_valid_list(column, valid_list, expected):
-    db_ = data["header"].copy()
+def test_is_in_valid_list(testdata, column, valid_list, expected):
+    db_ = testdata["header"].copy()
     results = db_.apply(
         lambda row: is_in_valid_list(value=row[column], valid_list=valid_list),
         axis=1,
@@ -101,8 +109,8 @@ def test_is_in_valid_list(column, valid_list, expected):
     pd.testing.assert_series_equal(results, expected)
 
 
-def test_is_buoy():
-    db_ = data["header"].copy()
+def test_is_buoy(testdata):
+    db_ = testdata["header"].copy()
     results = db_.apply(
         lambda row: is_buoy(platform_type=row["platform_type"], valid_list=[4, 5, 6]),
         axis=1,
@@ -113,8 +121,8 @@ def test_is_buoy():
     pd.testing.assert_series_equal(results, expected)
 
 
-def test_is_drifter():
-    db_ = data["header"].copy()
+def test_is_drifter(testdata):
+    db_ = testdata["header"].copy()
     results = db_.apply(
         lambda row: is_drifter(platform_type=row["platform_type"], valid_list=5), axis=1
     )
@@ -124,8 +132,8 @@ def test_is_drifter():
     pd.testing.assert_series_equal(results, expected)
 
 
-def test_is_ship():
-    db_ = data["header"].copy()
+def test_is_ship(testdata):
+    db_ = testdata["header"].copy()
     results = db_.apply(
         lambda row: is_ship(platform_type=row["platform_type"], valid_list=2), axis=1
     )
@@ -133,13 +141,13 @@ def test_is_ship():
     pd.testing.assert_series_equal(results, expected)
 
 
-def test_is_deck():
+def test_is_deck(testdata):
     # Deck is ICOADS specific.
     raise NotImplementedError
 
 
-def test_do_position_check():
-    db_ = data["header"].copy()
+def test_do_position_check(testdata):
+    db_ = testdata["header"].copy()
     results = db_.apply(
         lambda row: do_position_check(
             latitude=row["latitude"], longitude=row["longitude"]
@@ -150,15 +158,15 @@ def test_do_position_check():
     pd.testing.assert_series_equal(results, expected)
 
 
-def test_do_date_check():
-    db_ = data["header"].copy()
+def test_do_date_check(testdata):
+    db_ = testdata["header"].copy()
     results = db_.apply(lambda row: do_date_check(date=row["report_timestamp"]), axis=1)
     expected = pd.Series([1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0])  # first entry is null
     pd.testing.assert_series_equal(results, expected)
 
 
-def test_do_time_check():
-    db_ = data["header"].copy()
+def test_do_time_check(testdata):
+    db_ = testdata["header"].copy()
     results = db_.apply(
         lambda row: do_time_check(hour=row["report_timestamp"].hour), axis=1
     )
@@ -166,12 +174,12 @@ def test_do_time_check():
     pd.testing.assert_series_equal(results, expected)
 
 
-def test_do_blacklist():
+def test_do_blacklist(testdata):
     raise NotImplementedError
 
 
-def test_do_day_check():
-    db_ = data["header"].copy()
+def test_do_day_check(testdata):
+    db_ = testdata["header"].copy()
     results = db_.apply(
         lambda row: do_day_check(
             date=row["report_timestamp"],
@@ -184,20 +192,20 @@ def test_do_day_check():
     pd.testing.assert_series_equal(results, expected)
 
 
-def test_humidity_blacklist():
+def test_humidity_blacklist(testdata):
     raise NotImplementedError
 
 
-def test_mat_blacklist():
+def test_mat_blacklist(testdata):
     raise NotImplementedError
 
 
-def test_wind_blcklist():
+def test_wind_blcklist(testdata):
     raise NotImplementedError
 
 
-def test_do_air_temperature_missing_value_check():
-    db_ = data["observations-at"].copy()
+def test_do_air_temperature_missing_value_check(testdata):
+    db_ = testdata["observations-at"].copy()
     results = db_.apply(
         lambda row: do_air_temperature_missing_value_check(at=row["observation_value"]),
         axis=1,
@@ -206,8 +214,8 @@ def test_do_air_temperature_missing_value_check():
     pd.testing.assert_series_equal(results, expected)
 
 
-def test_do_air_temperature_anomaly_check():
-    db_ = data["observations-at"].copy()
+def test_do_air_temperature_anomaly_check(testdata):
+    db_ = testdata["observations-at"].copy()
     db_.data["climatology"] = [
         277,
         278,
@@ -235,8 +243,8 @@ def test_do_air_temperature_anomaly_check():
     pd.testing.assert_series_equal(results, expected)
 
 
-def test_do_air_temperature_no_normal_check():
-    db_ = data["observations-at"].copy()
+def test_do_air_temperature_no_normal_check(testdata):
+    db_ = testdata["observations-at"].copy()
     results = db_.apply(
         lambda row: do_air_temperature_no_normal_check(
             at_climatology=row["observation_value"]
@@ -247,8 +255,8 @@ def test_do_air_temperature_no_normal_check():
     pd.testing.assert_series_equal(results, expected)
 
 
-def test_do_air_temperature_hard_limit_check():
-    db_ = data["observations-at"].copy()
+def test_do_air_temperature_hard_limit_check(testdata):
+    db_ = testdata["observations-at"].copy()
     results = db_.apply(
         lambda row: do_air_temperature_hard_limit_check(
             at=row["observation_value"],
@@ -260,8 +268,8 @@ def test_do_air_temperature_hard_limit_check():
     pd.testing.assert_series_equal(results, expected)
 
 
-def test_do_air_temperature_climatology_plus_stdev_check():
-    db_ = data["observations-at"].copy()
+def test_do_air_temperature_climatology_plus_stdev_check(testdata):
+    db_ = testdata["observations-at"].copy()
     db_.data["climatology"] = [
         277,
         278,
@@ -291,8 +299,8 @@ def test_do_air_temperature_climatology_plus_stdev_check():
     pd.testing.assert_series_equal(results, expected)
 
 
-def test_do_dpt_climatology_plus_stdev_check():
-    db_ = data["observations-dpt"].copy()
+def test_do_dpt_climatology_plus_stdev_check(testdata):
+    db_ = testdata["observations-dpt"].copy()
     db_.data["climatology"] = [
         268,
         269,
@@ -322,8 +330,8 @@ def test_do_dpt_climatology_plus_stdev_check():
     pd.testing.assert_series_equal(results, expected)
 
 
-def test_do_dpt_missing_value_check():
-    db_ = data["observations-dpt"].copy()
+def test_do_dpt_missing_value_check(testdata):
+    db_ = testdata["observations-dpt"].copy()
     results = db_.apply(
         lambda row: do_dpt_missing_value_check(dpt=row["observation_value"]),
         axis=1,
@@ -332,8 +340,8 @@ def test_do_dpt_missing_value_check():
     pd.testing.assert_series_equal(results, expected)
 
 
-def test_do_dpt_no_normal_check():
-    db_ = data["observations-dpt"].copy()
+def test_do_dpt_no_normal_check(testdata):
+    db_ = testdata["observations-dpt"].copy()
     results = db_.apply(
         lambda row: do_dpt_no_normal_check(dpt_climatology=row["observation_value"]),
         axis=1,
@@ -342,9 +350,9 @@ def test_do_dpt_no_normal_check():
     pd.testing.assert_series_equal(results, expected)
 
 
-def test_do_supersaturation_check():
-    db_ = data["observations-at"].copy()
-    db2_ = data["observations-dpt"].copy()
+def test_do_supersaturation_check(testdata):
+    db_ = testdata["observations-at"].copy()
+    db2_ = testdata["observations-dpt"].copy()
     db_.data["observation_value_dpt"] = db2_["observation_value"]
 
     results = db_.apply(
@@ -358,8 +366,8 @@ def test_do_supersaturation_check():
     pd.testing.assert_series_equal(results, expected)
 
 
-def test_do_sst_missing_value_check():
-    db_ = data["observations-sst"].copy()
+def test_do_sst_missing_value_check(testdata):
+    db_ = testdata["observations-sst"].copy()
     results = db_.apply(
         lambda row: do_sst_missing_value_check(sst=row["observation_value"]),
         axis=1,
@@ -368,8 +376,8 @@ def test_do_sst_missing_value_check():
     pd.testing.assert_series_equal(results, expected)
 
 
-def test_do_sst_freeze_check():
-    db_ = data["observations-sst"].copy()
+def test_do_sst_freeze_check(testdata):
+    db_ = testdata["observations-sst"].copy()
     results = db_.apply(
         lambda row: do_sst_freeze_check(
             sst=row["observation_value"],
@@ -382,8 +390,8 @@ def test_do_sst_freeze_check():
     pd.testing.assert_series_equal(results, expected)
 
 
-def test_do_sst_anomaly_check():
-    db_ = data["observations-sst"].copy()
+def test_do_sst_anomaly_check(testdata):
+    db_ = testdata["observations-sst"].copy()
     results = db_.apply(
         lambda row: do_air_temperature_anomaly_check(
             at=row["observation_value"], at_climatology=277, maximum_anomaly=1.0
@@ -394,8 +402,8 @@ def test_do_sst_anomaly_check():
     pd.testing.assert_series_equal(results, expected)
 
 
-def test_do_sst_no_normal_check():
-    db_ = data["observations-sst"].copy()
+def test_do_sst_no_normal_check(testdata):
+    db_ = testdata["observations-sst"].copy()
     results = db_.apply(
         lambda row: do_dpt_no_normal_check(dpt_climatology=row["observation_value"]),
         axis=1,
@@ -404,8 +412,8 @@ def test_do_sst_no_normal_check():
     pd.testing.assert_series_equal(results, expected)
 
 
-def test_do_wind_missing_value_check():
-    db_ = data["observations-ws"].copy()
+def test_do_wind_missing_value_check(testdata):
+    db_ = testdata["observations-ws"].copy()
     results = db_.apply(
         lambda row: do_wind_missing_value_check(wind_speed=row["observation_value"]),
         axis=1,
@@ -414,8 +422,8 @@ def test_do_wind_missing_value_check():
     pd.testing.assert_series_equal(results, expected)
 
 
-def test_do_wind_hard_limit_check():
-    db_ = data["observations-ws"].copy()
+def test_do_wind_hard_limit_check(testdata):
+    db_ = testdata["observations-ws"].copy()
     results = db_.apply(
         lambda row: do_wind_hard_limit_check(
             wind_speed=row["observation_value"],
@@ -427,9 +435,9 @@ def test_do_wind_hard_limit_check():
     pd.testing.assert_series_equal(results, expected)
 
 
-def test_do_wind_consistency_check():
-    db_ = data["observations-ws"].copy()
-    db2_ = data["observations-wd"].copy()
+def test_do_wind_consistency_check(testdata):
+    db_ = testdata["observations-ws"].copy()
+    db2_ = testdata["observations-wd"].copy()
     db_.data["observation_value_wd"] = db2_["observation_value"]
     results = db_.apply(
         lambda row: do_wind_consistency_check(
