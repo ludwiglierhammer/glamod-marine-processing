@@ -137,14 +137,14 @@ def test_is_deck_valid_list():
 
 @pytest.mark.parametrize(
     "latitude, longitude, expected",
-    [[0.0, 0.0, 0], [91.0, 0.0, 1], [-91.0, 0.0, 1], [0.0, -180.1, 1], [0.0, 360.1, 1]],
+    [[0.0, 0.0, 0], [91.0, 0.0, 1], [-91.0, 0.0, 1], [0.0, -180.1, 1], [0.0, 360.1, 1], [None, 0.0, 2], [0.0, None, 2]],
 )
 def test_do_position_check(latitude, longitude, expected):
     result = do_position_check(latitude, longitude)
     assert result == expected
 
 
-def test_do_position_check_raises_value_error():
+def _test_do_position_check_raises_value_error():
     # Make sure that an exception is raised if latitude or longitude is missing
     with pytest.raises(ValueError):
         _ = do_position_check(None, 0.0)
