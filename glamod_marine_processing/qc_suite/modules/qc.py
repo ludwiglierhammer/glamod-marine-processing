@@ -339,10 +339,10 @@ def day_in_year(month: int, day: int) -> int:
         When month not in range 1-12 or day not in range 1-31
     """
     if month < 1 or month > 12:
-        return untestable
+        raise ValueError("Month not in range 1-12")
     month_lengths = get_month_lengths(2004)
     if day < 1 or day > month_lengths[month - 1]:
-        return untestable
+        raise ValueError(f"Day not in range 1-{month_lengths[month - 1]}")
 
     month_lengths = get_month_lengths(2003)
 
@@ -384,15 +384,15 @@ def get_hires_sst(lat: float, lon: float, month: int, day: int, hires_field) -> 
         range 1-12 or day is outside range 1-number of days in month
     """
     if lat < -90.0 or lat > 90.0:
-        return untestable
+        raise ValueError(f"Latitude {lat} outside range -90 to 90")
     if lon < -180.0 or lon > 360.0:
-        return untestable
+        raise ValueError(f"Longitude {lon} outside range -180 to 360")
     if month < 1 or month > 12:
-        return untestable
+        raise ValueError(f"Month ({month}) outside range 1-12")
 
     month_lengths = get_month_lengths(2004)
     if day < 1 or day > month_lengths[month - 1]:
-        return untestable
+        raise ValueError(f"Day ({day}) outside range 1-{month_lengths[month - 1]}")
 
     dindex = day_in_year(month, day) - 1
     yindex = lat_to_yindex(lat, 0.25)
@@ -436,15 +436,15 @@ def get_sst_daily(
         range 1-12 or day is outside range 1-number of days in month
     """
     if lat < -90.0 or lat > 90.0:
-        return untestable
+        raise ValueError(f"Latitude {lat} outside range -90 to 90")
     if lon < -185.0 or lon > 365.0:
-        return untestable
+        raise ValueError(f"Longitude {lon} outside range -180 to 360")
     if month < 1 or month > 12:
-        return untestable
+        raise ValueError(f"Month ({month}) outside range 1-12")
 
     month_lengths = get_month_lengths(2004)
     if day < 1 or day > month_lengths[month - 1]:
-        return untestable
+        raise ValueError(f"Day ({day}) outside range 1-{month_lengths[month - 1]}")
 
     dindex = day_in_year(month, day) - 1
     yindex = mds_lat_to_yindex(lat)
@@ -499,14 +499,14 @@ def get_sst(
         range 1-12 or day is outside range 1-number of days in month
     """
     if lat < -90.0 or lat > 90.0:
-        return untestable
+        raise ValueError(f"Latitude {lat} outside range -90 to 90")
     if lon < -185.0 or lon > 365.0:
-        return untestable
+        raise ValueError(f"Longitude {lon} outside range -180 to 360")
     if month < 1 or month > 12:
-        return untestable
+        raise ValueError(f"Month ({month}) outside range 1-12")
     month_lengths = get_month_lengths(2004)
     if day < 1 or day > month_lengths[month - 1]:
-        return untestable
+        raise ValueError(f"Day ({day}) outside range 1-{month_lengths[month - 1]}")
 
     if len(sst[:, 0, 0]) == 1:
         result = get_sst_single_field(lat, lon, sst)
@@ -608,15 +608,15 @@ def bilinear_interp(
        Interpolated value
     """
     if not (x1 <= x <= x2):
-        return untestable
+        raise ValueError("X point not between x1 and x2")
     if not (y1 <= y <= y2):
-        return untestable
+        raise ValueError("Y point not between y1 and y2")
     if x2 < x1:
-        return untestable
+        raise ValueError("x2 not greater than x1")
     if y2 < y1:
-        return untestable
+        raise ValueError("y2 not greater than y1")
     if q11 is None or q12 is None or q21 is None or q22 is None:
-        return untestable
+        raise ValueError("One or more data values not specified")
 
     val = q11 * (x2 - x) * (y2 - y)
     val += q21 * (x - x1) * (y2 - y)
