@@ -302,9 +302,9 @@ def which_pentad(inmonth: int, inday: int) -> int:
     the day we are interested in. February 29th is treated as though it were March 1st in a regular year.
     """
     if not (12 >= inmonth >= 1):
-        return untestable
+        raise ValueError(f"Month {inmonth} not in range 1-12")
     if not (31 >= inday >= 1):
-        return untestable
+        raise ValueError(f"Day {inday} not in range 1-31")
 
     pentad = int((day_in_year(inmonth, inday) - 1) / 5)
     pentad = pentad + 1
