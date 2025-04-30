@@ -25,6 +25,30 @@ def _split_date(date):
 # I hop I did not forget anything.
 
 
+def is_in_valid_list(
+    value: str | int | float, valid_list: str | int | float | list
+) -> int:
+    """Identify whether a value is in a valid_list.
+
+    Parameters
+    ----------
+    value : str or int or float
+        Value to test
+    valid_list : list
+         List of valid values
+
+    Returns
+    -------
+    int
+        Return 0 if value is in valid list and 1 otherwise
+    """
+    if not isinstance(valid_list, list):
+        valid_list = [valid_list]
+    if value in valid_list:
+        return passed
+    return failed
+
+
 def is_buoy(platform_type: int, valid_list: list | int = [6, 7]) -> int:
     """
     Identify whether report is from a moored or drifting buoy based on ICOADS platform type PT.
@@ -43,11 +67,7 @@ def is_buoy(platform_type: int, valid_list: list | int = [6, 7]) -> int:
     """
     # I think we should use the CDM platform table?
     # https://glamod.github.io/cdm-obs-documentation/tables/code_tables/platform_type/platform_type.html
-    if not isinstance(valid_list, list):
-        valid_list = [valid_list]
-    if platform_type in valid_list:
-        return passed
-    return failed
+    return is_in_valid_list(platform_type, valid_list)
 
 
 def is_drifter(platform_type: int, valid_list: list | int = 7) -> int:
@@ -67,11 +87,7 @@ def is_drifter(platform_type: int, valid_list: list | int = 7) -> int:
     int
         Return 0 if observation is from a drifting buoy and 1 otherwise
     """
-    if not isinstance(valid_list, list):
-        valid_list = [valid_list]
-    if platform_type in valid_list:
-        return passed
-    return failed
+    return is_in_valid_list(platform_type, valid_list)
 
 
 def is_ship(
@@ -95,11 +111,7 @@ def is_ship(
     """
     # I think we should use the CDM platform table?
     # https://glamod.github.io/cdm-obs-documentation/tables/code_tables/platform_type/platform_type.html
-    if not isinstance(valid_list, list):
-        valid_list = [valid_list]
-    if platform_type in valid_list:
-        return passed
-    return failed
+    return is_in_valid_list(platform_type, valid_list)
 
 
 def is_deck(dck: int, valid_list: list | int = 780) -> int:
@@ -123,11 +135,7 @@ def is_deck(dck: int, valid_list: list | int = 780) -> int:
     # Where/Why do we need "is780"?
     # I think this function should return a boolean value, isn't it?
     # We do not have this information explicitly in the CDM.
-    if isinstance(valid_list, int):
-        valid_list = [valid_list]
-    if dck in valid_list:
-        return passed
-    return failed
+    return is_in_valid_list(dck, valid_list)
 
 
 def do_position_check(latitude: float, longitude: float) -> int:

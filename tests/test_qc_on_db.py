@@ -32,6 +32,7 @@ from glamod_marine_processing.qc_suite.modules.next_level_qc import (
     is_buoy,
     is_deck,
     is_drifter,
+    is_in_valid_list,
     is_ship,
     mat_blacklist,
     wind_blacklist,
@@ -73,6 +74,31 @@ for table in tables:
         db_table.data["observation_value"] = db_table["observation_value"].astype(float)
 
     data[table] = db_table
+
+
+@pytest.mark.parametrize(
+    "column, valid_list, expected",
+    [
+        [
+            "platform_type",
+            [4, 5, 6],
+            pd.Series([1] * 13),
+        ],  # platform type is 2 which is not a buoy (4: moored buoy, 5: drifting buoy, 6: ice buoy)
+        [
+            "platform_type",
+            5,
+            pd.Series([1] * 13),
+        ],  # platform type is 2 which is not a drfiting buoy (5: drifting buoy)
+        ["platform_type", 2, pd.Series([0] * 13)],  # platform type is 2 which is a ship
+    ],
+)
+def test_is_in_valid_list(column, valid_list, expected):
+    db_ = data["header"].copy()
+    results = db_.apply(
+        lambda row: is_in_valid_list(value=row[column], valid_list=valid_list),
+        axis=1,
+    )
+    pd.testing.assert_series_equal(results, expected)
 
 
 def test_is_buoy():

@@ -33,10 +33,30 @@ from glamod_marine_processing.qc_suite.modules.next_level_qc import (
     is_buoy,
     is_deck,
     is_drifter,
+    is_in_valid_list,
     is_ship,
     mat_blacklist,
     wind_blacklist,
 )
+
+
+@pytest.mark.parametrize(
+    "valid_list, expected_true",
+    [
+        [[1, 56, 831], [1, 56, 831]],
+        [["1", "56", "831"], []],
+        [["1", 56, 831], [56, 831]],
+        [3, [3]],
+        ["3", []],
+    ],
+)
+def test_is_in_valid_list(valid_list, expected_true):
+    for val in range(0, 1000):
+        result = is_in_valid_list(val, valid_list)
+        if val in expected_true:
+            assert result == 0
+        else:
+            assert result == 1
 
 
 def test_is_buoy():
