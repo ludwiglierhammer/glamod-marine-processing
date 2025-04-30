@@ -161,7 +161,7 @@ def test_do_position_check(testdata):
 def test_do_date_check(testdata):
     db_ = testdata["header"].copy()
     results = db_.apply(lambda row: do_date_check(date=row["report_timestamp"]), axis=1)
-    expected = pd.Series([1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0])  # first entry is null
+    expected = pd.Series([2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0])  # first entry is null
     pd.testing.assert_series_equal(results, expected)
 
 
