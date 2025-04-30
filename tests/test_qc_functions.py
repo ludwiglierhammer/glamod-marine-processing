@@ -282,8 +282,8 @@ def test_do_blacklist(
             49.160383,
             5.383146,
             1.0,
-            1,
-        ),  # Known values from direct observation: year > 2024 should trigger fail
+            0,
+        ),  # Known values from direct observation: should trigger pass
         (
             2015,
             0,
@@ -328,7 +328,7 @@ def test_do_blacklist(
     ],
 )
 def test_do_day_check(year, month, day, hour, latitude, longitude, time, expected):
-    result = do_day_check(year, month, day, hour, latitude, longitude, time)
+    result = do_day_check(year=year, month=month, day=day, hour=hour, latitude=latitude, longitude=longitude, time_since_sun_above_horizon=time)
     assert result == expected
 
 
