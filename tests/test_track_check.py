@@ -87,7 +87,7 @@ def test_zero_index_input():
         (20.0, 19.5),
         (2.0, 8.5),
         (200.0, 34.5),
-    ]
+    ],
 )
 def test_modesp_single_speed_input_over8point5(base_speed, expected):
     speeds = [base_speed / km_to_nm for i in range(8)]
@@ -106,8 +106,11 @@ def test_one_of_each_speed_input_min_under8point5():
     [
         (None, (15.00 / km_to_nm, 20.00 / km_to_nm, 0.00 / km_to_nm)),
         (5.5 / km_to_nm, (15.00 / km_to_nm, 20.00 / km_to_nm, 0.00 / km_to_nm)),
-        (9.5 / km_to_nm, (9.5 * 1.25 / km_to_nm, 30.00 / km_to_nm, 9.5 * 0.75 / km_to_nm))
-    ]
+        (
+            9.5 / km_to_nm,
+            (9.5 * 1.25 / km_to_nm, 30.00 / km_to_nm, 9.5 * 0.75 / km_to_nm),
+        ),
+    ],
 )
 def test_set_speed_limits(amode, expected):
     assert tc.set_speed_limits(amode) == expected
@@ -184,7 +187,9 @@ def test_ship_is_at_computed_location(trip1):
 def test_misplaced_ob_out_by_1degree_times_coslat(trip2):
     difference_from_estimated_location = tc.distr1(trip2)
     expected = (
-            (2 * np.pi * sg.earths_radius) * np.cos(trip2.reps[1].lat() * np.pi / 180.0) / 360
+        (2 * np.pi * sg.earths_radius)
+        * np.cos(trip2.reps[1].lat() * np.pi / 180.0)
+        / 360
     )
     assert pytest.approx(difference_from_estimated_location[1], 0.00001) == expected
 
@@ -204,7 +209,9 @@ def test_ship_is_at_computed_location_1(trip1):
 def test_misplaced_ob_out_by_1degree_times_coslat_1(trip2):
     difference_from_estimated_location = tc.distr2(trip2)
     expected = (
-            (2 * np.pi * sg.earths_radius) * np.cos(trip2.reps[1].lat() * np.pi / 180.0) / 360.0
+        (2 * np.pi * sg.earths_radius)
+        * np.cos(trip2.reps[1].lat() * np.pi / 180.0)
+        / 360.0
     )
     assert pytest.approx(difference_from_estimated_location[1], 0.00001) == expected
 
@@ -218,8 +225,10 @@ def test_first_and_last_are_missing_2(trip1):
 def test_midpt_1_deg_error_out_by_60coslat_2(trip2):
     midpoint_discrepancies = tc.midpt(trip2)
     assert (
-            pytest.approx(midpoint_discrepancies[1], 0.00001)
-            == (2 * np.pi * sg.earths_radius) * math.cos(trip2.reps[1].lat() * np.pi / 180) / 360.0
+        pytest.approx(midpoint_discrepancies[1], 0.00001)
+        == (2 * np.pi * sg.earths_radius)
+        * math.cos(trip2.reps[1].lat() * np.pi / 180)
+        / 360.0
     )
 
 
@@ -231,12 +240,11 @@ def test_midpt_at_computed_location_2(trip1):
             assert pytest.approx(pt, 1) == 0
 
 
-@pytest.mark.parametrize(
-    "angle", [0, 45, 90, 135, 180, 225, 270, 315, 360]
-)
+@pytest.mark.parametrize("angle", [0, 45, 90, 135, 180, 225, 270, 315, 360])
 def test_just_pass_and_just_fail(angle):
     assert 10 == tc.direction_continuity(angle, angle, angle + 60.1)
     assert 0 == tc.direction_continuity(angle, angle, angle + 59.9)
+
 
 def test_direction_continuity():
     with pytest.raises(ValueError):
@@ -244,17 +252,19 @@ def test_direction_continuity():
     with pytest.raises(ValueError):
         tc.direction_continuity(0, 1, 0 + 60.1)
 
+
 @pytest.mark.parametrize(
     "vsi, vsi_previous, max_speed_change, expected",
     [
         (12, 12, 12 / km_to_nm, 0),
         (12, 12, (12 + 10.01) / km_to_nm, 10),
         (12, 12, (12 + 9.99) / km_to_nm, 0),
-        (12, 12, None, 0)
-    ]
+        (12, 12, None, 0),
+    ],
 )
 def test_speed_continuity(vsi, vsi_previous, max_speed_change, expected):
     assert tc.speed_continuity(vsi, vsi_previous, max_speed_change) == expected
+
 
 @pytest.mark.parametrize(
     "vsi, vsi_previous, time_differences, fwd_diff_from_estimated, rev_diff_from_estimated, expected",
@@ -265,13 +275,22 @@ def test_speed_continuity(vsi, vsi_previous, max_speed_change, expected):
         (2.0, 2.0, 5.0, None, 5.0, 0.0),
         (2.0, 2.0, 5.0, 5.0, None, 0.0),
         (2.0, 2.0, 5.0, 5.0, 5.0, 0.0),
-        (2.0, 2.0, 1.0, 20.0, 20., 10.0)
-    ]
+        (2.0, 2.0, 1.0, 20.0, 20.0, 10.0),
+    ],
 )
 def test_check_distance_from_estimate(
-        vsi, vsi_previous, time_differences, fwd_diff_from_estimated, rev_diff_from_estimated, expected
+    vsi,
+    vsi_previous,
+    time_differences,
+    fwd_diff_from_estimated,
+    rev_diff_from_estimated,
+    expected,
 ):
-    result  = tc.check_distance_from_estimate(
-        vsi, vsi_previous, time_differences, fwd_diff_from_estimated, rev_diff_from_estimated
+    result = tc.check_distance_from_estimate(
+        vsi,
+        vsi_previous,
+        time_differences,
+        fwd_diff_from_estimated,
+        rev_diff_from_estimated,
     )
     assert result == expected
