@@ -128,7 +128,7 @@ def test_is_drifter(testdata):
     )
     expected = pd.Series(
         [1] * 13
-    )  # platform type is 2 which is not a drfiting buoy (5: drifting buoy)
+    )  # platform type is 2 which is not a drifting buoy (5: drifting buoy)
     pd.testing.assert_series_equal(results, expected)
 
 
@@ -405,7 +405,7 @@ def test_do_sst_anomaly_check(testdata):
 def test_do_sst_no_normal_check(testdata):
     db_ = testdata["observations-sst"].copy()
     results = db_.apply(
-        lambda row: do_dpt_no_normal_check(dpt_climatology=row["observation_value"]),
+        lambda row: do_sst_no_normal_check(sst_climatology=row["observation_value"]),
         axis=1,
     )
     expected = pd.Series([0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1])
