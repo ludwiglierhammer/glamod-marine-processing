@@ -95,7 +95,9 @@ def angular_distance(lat1: float, lon1: float, lat2: float, lon2: float) -> floa
     return delta
 
 
-def lat_lon_from_course_and_distance(lat1: float, lon1: float, tc: float, d: float) -> float:
+def lat_lon_from_course_and_distance(
+    lat1: float, lon1: float, tc: float, d: float
+) -> float:
     """
     calculate a latitude and longitude given a starting point, course (in radian) and
     angular distance (also in radians) #http://williams.best.vwh.net/avform.htm#LL
@@ -170,10 +172,10 @@ def course_between_points(lat1: float, lon1: float, lat2: float, lon2: float) ->
         else:
             if np.sin(lon2 - lon1) > 0:
                 if (
-                        1.0
-                        >= (np.sin(lat2) - np.sin(lat1) * np.cos(d))
-                        / (np.sin(d) * np.cos(lat1))
-                        >= -1.0
+                    1.0
+                    >= (np.sin(lat2) - np.sin(lat1) * np.cos(d))
+                    / (np.sin(d) * np.cos(lat1))
+                    >= -1.0
                 ):
                     tc1 = np.arccos(
                         (np.sin(lat2) - np.sin(lat1) * np.cos(d))
@@ -183,10 +185,10 @@ def course_between_points(lat1: float, lon1: float, lat2: float, lon2: float) ->
                     tc1 = float("nan")
             else:
                 if (
-                        1.0
-                        >= (np.sin(lat2) - np.sin(lat1) * np.cos(d))
-                        / (np.sin(d) * np.cos(lat1))
-                        >= -1.0
+                    1.0
+                    >= (np.sin(lat2) - np.sin(lat1) * np.cos(d))
+                    / (np.sin(d) * np.cos(lat1))
+                    >= -1.0
                 ):
                     tc1 = 2.0 * np.pi - np.arccos(
                         (np.sin(lat2) - np.sin(lat1) * np.cos(d))
@@ -211,7 +213,9 @@ def course_between_points(lat1: float, lon1: float, lat2: float, lon2: float) ->
     return tc1 / radians_per_degree
 
 
-def intermediate_point(lat1: float, lon1: float, lat2: float, lon2: float, f: float) -> float:
+def intermediate_point(
+    lat1: float, lon1: float, lat2: float, lon2: float, f: float
+) -> float:
     """Given two lat,lon point find the latitude and longitude that are a fraction f
     of the great circle distance between them http://williams.best.vwh.net/avform.htm#Intermediate
 

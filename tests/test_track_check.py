@@ -1,14 +1,14 @@
 from __future__ import annotations
 
-import pytest
-import numpy as np
 import math
 
-from glamod_marine_processing.qc_suite.modules.IMMA1 import IMMA
+import numpy as np
+import pytest
 
 import glamod_marine_processing.qc_suite.modules.Extended_IMMA as ex
-import glamod_marine_processing.qc_suite.modules.track_check as tc
 import glamod_marine_processing.qc_suite.modules.spherical_geometry as sg
+import glamod_marine_processing.qc_suite.modules.track_check as tc
+from glamod_marine_processing.qc_suite.modules.IMMA1 import IMMA
 
 km_to_nm = 0.539957
 
@@ -59,8 +59,8 @@ def test_ship_goes_southwest():
     ads = 225.0
     timdif = 2.0
     aud1, avd1 = tc.increment_position(alat1, alat2, avs, ads, timdif)
-    assert pytest.approx(avd1, 0.001) == -1. / np.sqrt(2)
-    assert pytest.approx(aud1, 0.001) == -1. / np.sqrt(2)
+    assert pytest.approx(avd1, 0.001) == -1.0 / np.sqrt(2)
+    assert pytest.approx(aud1, 0.001) == -1.0 / np.sqrt(2)
 
 
 def test_noinput():
@@ -103,22 +103,23 @@ def test_one_of_each_speed_input_min_under8point5():
 # .trip1.add_report(ex.MarineReport(rec))
 # shipid, lat, lon, sst, mat, year, month, day, hour, icoads_ds, icoads_vs, uid
 
+
 @pytest.fixture()
 def trip1():
     _trip1 = ex.Voyage()
-    speed1 = 18. / km_to_nm
+    speed1 = 18.0 / km_to_nm
     for hour in range(0, 24):
         rec = IMMA()
         v = {
-            'ID': 'SHIP1    ',
-            'YR': 2001,
-            'MO': 1,
-            'DY': 1,
-            'HR': hour,
-            'LAT': hour * speed1 * 360. / (2 * np.pi * 6371.0088),
-            'LON': 0.0,
-            'DS': 8,
-            'VS': 4
+            "ID": "SHIP1    ",
+            "YR": 2001,
+            "MO": 1,
+            "DY": 1,
+            "HR": hour,
+            "LAT": hour * speed1 * 360.0 / (2 * np.pi * 6371.0088),
+            "LON": 0.0,
+            "DS": 8,
+            "VS": 4,
         }
         for key in v:
             rec.data[key] = v[key]
@@ -130,24 +131,24 @@ def trip1():
 @pytest.fixture()
 def trip2():
     _trip2 = ex.Voyage()
-    speed1 = 18. / km_to_nm
+    speed1 = 18.0 / km_to_nm
     for hour in range(0, 3):
         rec = IMMA()
         v = {
-            'ID': 'SHIP1    ',
-            'YR': 2001,
-            'MO': 1,
-            'DY': 1,
-            'HR': hour,
-            'LAT': hour * speed1 * 360. / (2 * np.pi * 6371.0088),
-            'LON': 0.0,
-            'DS': 8,
-            'VS': 4
+            "ID": "SHIP1    ",
+            "YR": 2001,
+            "MO": 1,
+            "DY": 1,
+            "HR": hour,
+            "LAT": hour * speed1 * 360.0 / (2 * np.pi * 6371.0088),
+            "LON": 0.0,
+            "DS": 8,
+            "VS": 4,
         }
         for key in v:
             rec.data[key] = v[key]
         _trip2.add_report(ex.MarineReport(rec))
-    _trip2.reps[1].setvar('LON', 1.0)
+    _trip2.reps[1].setvar("LON", 1.0)
 
     return _trip2
 
@@ -166,7 +167,9 @@ def test_ship_is_at_computed_location(trip1):
 
 def test_misplaced_ob_out_by_1degree_times_coslat(trip2):
     difference_from_estimated_location = tc.distr1(trip2)
-    expected = (2 * np.pi * 6371.0088) * np.cos(trip2.reps[1].lat() * np.pi / 180.) / 360
+    expected = (
+        (2 * np.pi * 6371.0088) * np.cos(trip2.reps[1].lat() * np.pi / 180.0) / 360
+    )
     assert pytest.approx(difference_from_estimated_location[1], 0.00001) == expected
 
 
@@ -184,7 +187,9 @@ def test_ship_is_at_computed_location_1(trip1):
 
 def test_misplaced_ob_out_by_1degree_times_coslat_1(trip2):
     difference_from_estimated_location = tc.distr2(trip2)
-    expected = (2 * np.pi * 6371.0088) * np.cos(trip2.reps[1].lat() * np.pi / 180.) / 360.
+    expected = (
+        (2 * np.pi * 6371.0088) * np.cos(trip2.reps[1].lat() * np.pi / 180.0) / 360.0
+    )
     assert pytest.approx(difference_from_estimated_location[1], 0.00001) == expected
 
 
@@ -196,8 +201,10 @@ def test_first_and_last_are_missing_2(trip1):
 
 def test_midpt_1_deg_error_out_by_60coslat_2(trip2):
     midpoint_discrepancies = tc.midpt(trip2)
-    assert pytest.approx(midpoint_discrepancies[1], 0.00001) == (2 * np.pi * 6371.0088) * math.cos(
-        trip2.reps[1].lat() * np.pi / 180) / 360.
+    assert (
+        pytest.approx(midpoint_discrepancies[1], 0.00001)
+        == (2 * np.pi * 6371.0088) * math.cos(trip2.reps[1].lat() * np.pi / 180) / 360.0
+    )
 
 
 def test_midpt_at_computed_location_2(trip1):
