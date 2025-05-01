@@ -1,15 +1,15 @@
 from __future__ import annotations
 
 import itertools
+from datetime import date, datetime
 
 import numpy as np
 import numpy.ma as ma
 import pytest
 
-from datetime import datetime, date
-
 import glamod_marine_processing.qc_suite.modules.qc as qc
 from glamod_marine_processing.qc_suite.modules.next_level_qc import (
+    _split_date,
     do_air_temperature_anomaly_check,
     do_air_temperature_climatology_plus_stdev_check,
     do_air_temperature_hard_limit_check,
@@ -39,7 +39,6 @@ from glamod_marine_processing.qc_suite.modules.next_level_qc import (
     is_ship,
     mat_blacklist,
     wind_blacklist,
-    _split_date
 )
 
 
@@ -47,11 +46,16 @@ from glamod_marine_processing.qc_suite.modules.next_level_qc import (
     "date, expected_year, expected_month, expected_day, expected_hour",
     [
         (datetime(2002, 3, 27, 17, 30), 2002, 3, 27, 17.5),
-    ]
+    ],
 )
 def test_split_date(date, expected_year, expected_month, expected_day, expected_hour):
     result = _split_date(date)
-    expected = {"year": expected_year, "month": expected_month, "day": expected_day, "hour": expected_hour}
+    expected = {
+        "year": expected_year,
+        "month": expected_month,
+        "day": expected_day,
+        "hour": expected_hour,
+    }
     for key in expected:
         assert result[key] == expected[key]
 
@@ -243,19 +247,73 @@ def test_do_time_check(hour, expected):
         ("", 732, 1850, 1, 0, 1, 1, qc.passed),  # Deck 732 pass
         ("", 732, 1958, 1, 45, -172, 1, qc.failed),  # Deck 732 fail
         ("", 732, 1974, 1, -47, -60, 1, qc.failed),  # Deck 732 fail
-        ("", 732, 1958, 1, 45, -172 + 360, 1, qc.failed,),  # Deck 732 shifted longitude fail
-        ("", 732, 1974, 1, -47, -60 + 360, 1, qc.failed,),  # Deck 732 shifted longitude fail
-        ("", 731, 1958, 1, 45, -172, 1, qc.passed),  # Same are but not in Deck 732 should pass
-        ("", 731, 1974, 1, -47, -60, 1, qc.passed),  # Same are but not in Deck 732 should pass
-        ("", 732, 1957, 1, 45, -172, 1, qc.passed),  # Same area but wrong year should pass
-        ("", 732, 1975, 1, -47, -60, 1, qc.passed),  # Same area but wrong year should pass
+        (
+            "",
+            732,
+            1958,
+            1,
+            45,
+            -172 + 360,
+            1,
+            qc.failed,
+        ),  # Deck 732 shifted longitude fail
+        (
+            "",
+            732,
+            1974,
+            1,
+            -47,
+            -60 + 360,
+            1,
+            qc.failed,
+        ),  # Deck 732 shifted longitude fail
+        (
+            "",
+            731,
+            1958,
+            1,
+            45,
+            -172,
+            1,
+            qc.passed,
+        ),  # Same are but not in Deck 732 should pass
+        (
+            "",
+            731,
+            1974,
+            1,
+            -47,
+            -60,
+            1,
+            qc.passed,
+        ),  # Same are but not in Deck 732 should pass
+        (
+            "",
+            732,
+            1957,
+            1,
+            45,
+            -172,
+            1,
+            qc.passed,
+        ),  # Same area but wrong year should pass
+        (
+            "",
+            732,
+            1975,
+            1,
+            -47,
+            -60,
+            1,
+            qc.passed,
+        ),  # Same area but wrong year should pass
         ("SUPERIGORINA", 162, 1999, 2, -10, 179, 4, qc.failed),
         ("53521    ", 162, 2005, 11, -10, 179, 4, qc.failed),
         ("53521    ", 162, 2007, 11, -10, 179, 4, qc.passed),
     ],
 )
 def test_do_blacklist(
-        id, deck, year, month, latitude, longitude, platform_type, expected
+    id, deck, year, month, latitude, longitude, platform_type, expected
 ):
     result = do_blacklist(id, deck, year, month, latitude, longitude, platform_type)
     assert result == expected
@@ -265,84 +323,84 @@ def test_do_blacklist(
     "year, month, day, hour, latitude, longitude, time, expected",
     [
         (
-                2015,
-                10,
-                15,
-                7.8000,
-                50.7365,
-                -3.5344,
-                1.0,
-                qc.passed,
+            2015,
+            10,
+            15,
+            7.8000,
+            50.7365,
+            -3.5344,
+            1.0,
+            qc.passed,
         ),  # Known values from direct observation (day); should trigger pass
         (
-                2018,
-                9,
-                25,
-                11.5000,
-                50.7365,
-                -3.5344,
-                1.0,
-                qc.passed,
+            2018,
+            9,
+            25,
+            11.5000,
+            50.7365,
+            -3.5344,
+            1.0,
+            qc.passed,
         ),  # Known values from direct observation (day); should trigger pass
         (
-                2015,
-                10,
-                15,
-                7.5000,
-                50.7365,
-                -3.5344,
-                1.0,
-                qc.failed,
+            2015,
+            10,
+            15,
+            7.5000,
+            50.7365,
+            -3.5344,
+            1.0,
+            qc.failed,
         ),  # Known values from direct observation (night); should trigger fail
         (
-                2025,
-                4,
-                17,
-                16.04,
-                49.160383,
-                5.383146,
-                1.0,
-                qc.passed,
+            2025,
+            4,
+            17,
+            16.04,
+            49.160383,
+            5.383146,
+            1.0,
+            qc.passed,
         ),  # Known values from direct observation: should trigger pass
         (
-                2015,
-                0,
-                15,
-                7.5000,
-                50.7365,
-                -3.5344,
-                1.0,
-                qc.failed,
+            2015,
+            0,
+            15,
+            7.5000,
+            50.7365,
+            -3.5344,
+            1.0,
+            qc.failed,
         ),  # bad month value should trigger fail
         (
-                2015,
-                10,
-                0,
-                7.5000,
-                50.7365,
-                -3.5344,
-                1.0,
-                qc.failed,
+            2015,
+            10,
+            0,
+            7.5000,
+            50.7365,
+            -3.5344,
+            1.0,
+            qc.failed,
         ),  # bad day value should trigger fail
         (
-                2015,
-                10,
-                15,
-                -7.5000,
-                50.7365,
-                -3.5344,
-                1.0,
-                qc.failed,
+            2015,
+            10,
+            15,
+            -7.5000,
+            50.7365,
+            -3.5344,
+            1.0,
+            qc.failed,
         ),  # bad hour value should trigger fail
         (
-                2015,
-                1,
-                1,
-                0.5,
-                0.0,
-                0.0,
-                1,
-                qc.failed,
+            2015,
+            1,
+            1,
+            0.5,
+            0.0,
+            0.0,
+            1,
+            qc.failed,
         ),  # 0 lat 0 lon near midnight should trigger fail
         (2015, 1, 1, None, 0.0, 0.0, 1, qc.failed),  # missing hour should trigger fail
     ],
@@ -363,18 +421,65 @@ def test_do_day_check(year, month, day, hour, latitude, longitude, time, expecte
 @pytest.mark.parametrize(
     "year, month, day, hour, latitude, longitude, time, expected",
     [
-        (2015, 10, 15, 7.8000, 50.7365, -3.5344, 1.0, qc.passed,),
+        (
+            2015,
+            10,
+            15,
+            7.8000,
+            50.7365,
+            -3.5344,
+            1.0,
+            qc.passed,
+        ),
         # Known values from direct observation (day); should trigger pass
-        (2018, 9, 25, 11.5000, 50.7365, -3.5344, 1.0, qc.passed,),
+        (
+            2018,
+            9,
+            25,
+            11.5000,
+            50.7365,
+            -3.5344,
+            1.0,
+            qc.passed,
+        ),
         # Known values from direct observation (day); should trigger pass
-        (2015, 10, 15, 7.5000, 50.7365, -3.5344, 1.0, qc.failed,),
+        (
+            2015,
+            10,
+            15,
+            7.5000,
+            50.7365,
+            -3.5344,
+            1.0,
+            qc.failed,
+        ),
         # Known values from direct observation (night); should trigger fail
-        (2025, 4, 17, 16.04, 49.160383, 5.383146, 1.0, qc.passed,),
+        (
+            2025,
+            4,
+            17,
+            16.04,
+            49.160383,
+            5.383146,
+            1.0,
+            qc.passed,
+        ),
         # Known values from direct observation: should trigger pass
-        (2015, 1, 1, 0.5, 0.0, 0.0, 1, qc.failed,),  # 0 lat 0 lon near midnight should trigger fail
+        (
+            2015,
+            1,
+            1,
+            0.5,
+            0.0,
+            0.0,
+            1,
+            qc.failed,
+        ),  # 0 lat 0 lon near midnight should trigger fail
     ],
 )
-def test_do_day_check_using_date(year, month, day, hour, latitude, longitude, time, expected):
+def test_do_day_check_using_date(
+    year, month, day, hour, latitude, longitude, time, expected
+):
     truncated_hour = int(np.floor(hour))
     minute = int(60 * (hour - truncated_hour))
 
@@ -400,12 +505,12 @@ def test_humidity_blacklist():
     "platform_type, deck, latitude, longitude, year, expected",
     [
         (
-                5,
-                780,
-                0.5,
-                2.0,
-                2011,
-                1,
+            5,
+            780,
+            0.5,
+            2.0,
+            2011,
+            1,
         ),  # Check Deck 780 platform type 5 combination that fails
         (5, 781, 0.5, 2.0, 2011, qc.passed),  # and variants that should pass
         (6, 780, 0.5, 2.0, 2011, qc.passed),  # and variants that should pass
@@ -445,21 +550,17 @@ def test_do_air_temperature_missing_value_check(at, expected):
     ],
 )
 def test_do_air_temperature_anomaly_check(
-        at, at_climatology, maximum_anomaly, expected
+    at, at_climatology, maximum_anomaly, expected
 ):
     assert (
-            do_air_temperature_anomaly_check(at, at_climatology, maximum_anomaly)
-            == expected
+        do_air_temperature_anomaly_check(at, at_climatology, maximum_anomaly)
+        == expected
     )
 
 
 @pytest.mark.parametrize(
     "at_climatology, expected",
-    [
-        (5.5, qc.passed),
-        (None, qc.failed),
-        (np.nan, qc.failed)
-    ]
+    [(5.5, qc.passed), (None, qc.failed), (np.nan, qc.failed)],
 )  # not sure if np.nan should trigger FAIL
 def test_do_air_temperature_no_normal_check(at_climatology, expected):
     assert do_air_temperature_no_normal_check(at_climatology) == expected
@@ -482,72 +583,72 @@ def test_do_air_temperature_hard_limit_check(at, hard_limits, expected):
     "at, at_climatology, at_stdev, minmax_standard_deviation, maximum_standardised_anomaly, expected",
     [
         (
-                5.6,
-                2.2,
-                3.3,
-                [1.0, 10.0],
-                2.0,
-                qc.passed,
+            5.6,
+            2.2,
+            3.3,
+            [1.0, 10.0],
+            2.0,
+            qc.passed,
         ),
         (
-                15.6,
-                0.6,
-                5.0,
-                [1.0, 10.0],
-                2.0,
-                qc.failed,
+            15.6,
+            0.6,
+            5.0,
+            [1.0, 10.0],
+            2.0,
+            qc.failed,
         ),
         (
-                1.0,
-                0.0,
-                0.1,
-                [1.0, 10.0],
-                2.0,
-                qc.passed,
+            1.0,
+            0.0,
+            0.1,
+            [1.0, 10.0],
+            2.0,
+            qc.passed,
         ),
         (
-                15.0,
-                0.0,
-                25.0,
-                [1.0, 4.0],
-                2.0,
-                qc.failed,
+            15.0,
+            0.0,
+            25.0,
+            [1.0, 4.0],
+            2.0,
+            qc.failed,
         ),
         (
-                None,
-                2.2,
-                3.3,
-                [1.0, 10.0],
-                2.0,
-                qc.failed,
+            None,
+            2.2,
+            3.3,
+            [1.0, 10.0],
+            2.0,
+            qc.failed,
         ),
         (
-                np.nan,
-                2.2,
-                3.3,
-                [1.0, 10.0],
-                2.0,
-                qc.failed,  # not sure if np.nan should trigger FAIL
+            np.nan,
+            2.2,
+            3.3,
+            [1.0, 10.0],
+            2.0,
+            qc.failed,  # not sure if np.nan should trigger FAIL
         ),
     ],
 )
 def test_do_air_temperature_climatology_plus_stdev_check(
-        at,
-        at_climatology,
-        at_stdev,
-        minmax_standard_deviation,
-        maximum_standardised_anomaly,
-        expected,
+    at,
+    at_climatology,
+    at_stdev,
+    minmax_standard_deviation,
+    maximum_standardised_anomaly,
+    expected,
 ):
     assert (
-            do_air_temperature_climatology_plus_stdev_check(
-                at,
-                at_climatology,
-                at_stdev,
-                minmax_standard_deviation,
-                maximum_standardised_anomaly,
-            )
-            == expected
+        do_air_temperature_climatology_plus_stdev_check(
+            at,
+            at_climatology,
+            at_stdev,
+            minmax_standard_deviation,
+            maximum_standardised_anomaly,
+        )
+        == expected
     )
 
 
@@ -562,72 +663,72 @@ def test_do_dpt_missing_value_check(dpt, expected):
     "dpt, dpt_climatology, dpt_stdev, minmax_standard_deviation, maximum_standardised_anomaly, expected",
     [
         (
-                5.6,
-                2.2,
-                3.3,
-                [1.0, 10.0],
-                2.0,
-                qc.passed,
+            5.6,
+            2.2,
+            3.3,
+            [1.0, 10.0],
+            2.0,
+            qc.passed,
         ),
         (
-                15.6,
-                0.6,
-                5.0,
-                [1.0, 10.0],
-                2.0,
-                qc.failed,
+            15.6,
+            0.6,
+            5.0,
+            [1.0, 10.0],
+            2.0,
+            qc.failed,
         ),
         (
-                1.0,
-                0.0,
-                0.1,
-                [1.0, 10.0],
-                2.0,
-                qc.passed,
+            1.0,
+            0.0,
+            0.1,
+            [1.0, 10.0],
+            2.0,
+            qc.passed,
         ),
         (
-                15.0,
-                0.0,
-                25.0,
-                [1.0, 4.0],
-                2.0,
-                qc.failed,
+            15.0,
+            0.0,
+            25.0,
+            [1.0, 4.0],
+            2.0,
+            qc.failed,
         ),
         (
-                None,
-                2.2,
-                3.3,
-                [1.0, 10.0],
-                2.0,
-                qc.failed,
+            None,
+            2.2,
+            3.3,
+            [1.0, 10.0],
+            2.0,
+            qc.failed,
         ),
         (
-                np.nan,
-                2.2,
-                3.3,
-                [1.0, 10.0],
-                2.0,
-                qc.failed,  # not sure if np.nan should trigger FAIL
+            np.nan,
+            2.2,
+            3.3,
+            [1.0, 10.0],
+            2.0,
+            qc.failed,  # not sure if np.nan should trigger FAIL
         ),
     ],
 )
 def test_do_dpt_climatology_plus_stdev_check(
-        dpt,
-        dpt_climatology,
-        dpt_stdev,
-        minmax_standard_deviation,
-        maximum_standardised_anomaly,
-        expected,
+    dpt,
+    dpt_climatology,
+    dpt_stdev,
+    minmax_standard_deviation,
+    maximum_standardised_anomaly,
+    expected,
 ):
     assert (
-            do_dpt_climatology_plus_stdev_check(
-                dpt,
-                dpt_climatology,
-                dpt_stdev,
-                minmax_standard_deviation,
-                maximum_standardised_anomaly,
-            )
-            == expected
+        do_dpt_climatology_plus_stdev_check(
+            dpt,
+            dpt_climatology,
+            dpt_stdev,
+            minmax_standard_deviation,
+            maximum_standardised_anomaly,
+        )
+        == expected
     )
 
 
@@ -636,7 +737,7 @@ def test_do_dpt_climatology_plus_stdev_check(
     [
         (5.5, qc.passed),
         (None, qc.failed),
-        (np.nan, qc.failed)
+        (np.nan, qc.failed),
     ],  # not sure if np.nan should trigger FAIL
 )
 def test_do_dpt_temperature_no_normal_check(dpt_climatology, expected):
@@ -658,12 +759,7 @@ def test_do_supersaturation_check(dpt, at, expected):
 
 
 @pytest.mark.parametrize(
-    "sst, expected",
-    [
-        (5.6, qc.passed),
-        (None, qc.failed),
-        (np.nan, qc.failed)
-    ]
+    "sst, expected", [(5.6, qc.passed), (None, qc.failed), (np.nan, qc.failed)]
 )  # not sure if np.nan should trigger FAIL
 def test_do_sst_missing_value_check(sst, expected):
     assert do_sst_missing_value_check(sst) == expected
@@ -683,7 +779,11 @@ def test_do_sst_anomaly_check(sst, sst_climatology, maximum_anomaly, expected):
 
 @pytest.mark.parametrize(
     "sst_climatology, expected",
-    [(5.5, qc.passed), (None, qc.failed), (np.nan, qc.failed)],  # not sure if np.nan should trigger FAIL
+    [
+        (5.5, qc.passed),
+        (None, qc.failed),
+        (np.nan, qc.failed),
+    ],  # not sure if np.nan should trigger FAIL
 )
 def test_do_sst_no_normal_check(sst_climatology, expected):
     assert do_sst_no_normal_check(sst_climatology) == expected
@@ -703,12 +803,7 @@ def test_do_sst_freeze_check(sst, freezing_point, freeze_check_n_sigma, expected
 
 
 @pytest.mark.parametrize(
-    "w, expected",
-    [
-        (5.6, qc.passed),
-        (None, qc.failed),
-        (np.nan, qc.failed)
-    ]
+    "w, expected", [(5.6, qc.passed), (None, qc.failed), (np.nan, qc.failed)]
 )  # not sure if np.nan should trigger FAIL
 def test_do_wind_missing_value_check(w, expected):
     assert do_wind_missing_value_check(w) == expected
@@ -738,11 +833,11 @@ def test_do_wind_hard_limit_check(w, parameters, expected):
     ],
 )
 def test_do_wind_consistency_check(
-        wind_speed, wind_direction, variable_limit, expected
+    wind_speed, wind_direction, variable_limit, expected
 ):
     assert (
-            do_wind_consistency_check(wind_speed, wind_direction, variable_limit)
-            == expected
+        do_wind_consistency_check(wind_speed, wind_direction, variable_limit)
+        == expected
     )
 
 
@@ -980,62 +1075,62 @@ def test_get_sst_single_field(lat, lon, expected, single_field):
     [
         (0.0, 1.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0),  # zero when all zero
         (
-                0.0,
-                1.0,
-                0.0,
-                1.0,
-                0.5,
-                0.5,
-                0.0,
-                1.0,
-                1.0,
-                2.0,
-                1.0,
+            0.0,
+            1.0,
+            0.0,
+            1.0,
+            0.5,
+            0.5,
+            0.0,
+            1.0,
+            1.0,
+            2.0,
+            1.0,
         ),  # test_gradient_across_square
         (0.0, 1.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 1.0, 2.0, 0.0),
         (0.0, 1.0, 0.0, 1.0, 1.0, 1.0, 0.0, 1.0, 1.0, 2.0, 2.0),
         (0.0, 1.0, 0.0, 1.0, 0.0, 1.0, 0.0, 1.0, 1.0, 2.0, 1.0),
         (0.0, 1.0, 0.0, 1.0, 1.0, 0.0, 0.0, 1.0, 1.0, 2.0, 1.0),
         (
-                0.0,
-                1.0,
-                0.0,
-                1.0,
-                0.0,
-                0.0,
-                0.0,
-                1.0,
-                1.0,
-                1.0,
-                0.0,
+            0.0,
+            1.0,
+            0.0,
+            1.0,
+            0.0,
+            0.0,
+            0.0,
+            1.0,
+            1.0,
+            1.0,
+            0.0,
         ),  # test_zero_at_point_set_to_zero
         (
-                0.0,
-                1.0,
-                0.0,
-                1.0,
-                0.0,
-                1.0,
-                0.0,
-                1.0,
-                1.0,
-                1.0,
-                1.0,
+            0.0,
+            1.0,
+            0.0,
+            1.0,
+            0.0,
+            1.0,
+            0.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
         ),  # test_one_at_points_set_to_one
         (0.0, 1.0, 0.0, 1.0, 1.0, 1.0, 0.0, 1.0, 1.0, 1.0, 1.0),
         (0.0, 1.0, 0.0, 1.0, 1.0, 0.0, 0.0, 1.0, 1.0, 1.0, 1.0),
         (
-                0.0,
-                1.0,
-                0.0,
-                1.0,
-                0.5,
-                0.0,
-                0.0,
-                0.0,
-                1.0,
-                1.0,
-                0.5,
+            0.0,
+            1.0,
+            0.0,
+            1.0,
+            0.5,
+            0.0,
+            0.0,
+            0.0,
+            1.0,
+            1.0,
+            0.5,
         ),  # test_half_at_point_halfway_between_zero_and_one
         (0.0, 1.0, 0.0, 1.0, 0.5, 0.5, 0.0, 0.0, 1.0, 1.0, 0.5),
     ],
@@ -1092,20 +1187,48 @@ def test_get_four_surrounding_points(lat, lon, max90, expected):
         (None, 0.0, 1.0, 3.0, 0.5, qc.failed),  # check None returns fail
         (1.0, None, 1.0, 3.0, 0.5, qc.failed),
         (1.0, 0.0, None, 3.0, 0.5, qc.failed),
-        (1.0, 0.0, 2.0, 3.0, 0.1, qc.passed),  # Check simple pass 1.0 anomaly with 6.0 limits
-        (7.0, 0.0, 2.0, 3.0, 0.1, qc.failed),  # Check fail with 7.0 anomaly and 6.0 limits
-        (0.4, 0.0, 0.1, 3.0, 0.5, qc.passed,),  # Anomaly outside std limits but < lowbar
-        (0.4, 0.0, 0.1, -3.0, 0.5, qc.untestable,),  # Anomaly outside std limits but < lowbar
+        (
+            1.0,
+            0.0,
+            2.0,
+            3.0,
+            0.1,
+            qc.passed,
+        ),  # Check simple pass 1.0 anomaly with 6.0 limits
+        (
+            7.0,
+            0.0,
+            2.0,
+            3.0,
+            0.1,
+            qc.failed,
+        ),  # Check fail with 7.0 anomaly and 6.0 limits
+        (
+            0.4,
+            0.0,
+            0.1,
+            3.0,
+            0.5,
+            qc.passed,
+        ),  # Anomaly outside std limits but < lowbar
+        (
+            0.4,
+            0.0,
+            0.1,
+            -3.0,
+            0.5,
+            qc.untestable,
+        ),  # Anomaly outside std limits but < lowbar
     ],
 )
 def test_climatology_plus_stdev_with_lowbar(
-        value, climate_normal, standard_deviation, limit, lowbar, expected
+    value, climate_normal, standard_deviation, limit, lowbar, expected
 ):
     assert (
-            qc.climatology_plus_stdev_with_lowbar(
-                value, climate_normal, standard_deviation, limit, lowbar
-            )
-            == expected
+        qc.climatology_plus_stdev_with_lowbar(
+            value, climate_normal, standard_deviation, limit, lowbar
+        )
+        == expected
     )
 
 
@@ -1119,18 +1242,25 @@ def test_climatology_plus_stdev_with_lowbar(
         (2.0, 0.0, 0.5, [0.0, 1.0], 3.0, qc.failed),  # simple fail
         (3.0, 0.0, 1.5, [0.0, 1.0], 2.0, qc.failed),  # fail with limited stdev
         (1.0, 0.0, 0.1, [0.5, 1.0], 5.0, qc.passed),  # pass with limited stdev
-        (1.0, 0.0, 0.5, [1.0, 0.0], 5.0, qc.untestable),  # untestable with limited stdev
+        (
+            1.0,
+            0.0,
+            0.5,
+            [1.0, 0.0],
+            5.0,
+            qc.untestable,
+        ),  # untestable with limited stdev
         (1.0, 0.0, 0.5, [0.0, 1.0], -1, qc.untestable),  # untestable with limited stdev
     ],
 )
 def test_climatology_plus_stdev_check(
-        value, climate_normal, standard_deviation, stdev_limits, limit, expected
+    value, climate_normal, standard_deviation, stdev_limits, limit, expected
 ):
     assert (
-            qc.climatology_plus_stdev_check(
-                value, climate_normal, standard_deviation, stdev_limits, limit
-            )
-            == expected
+        qc.climatology_plus_stdev_check(
+            value, climate_normal, standard_deviation, stdev_limits, limit
+        )
+        == expected
     )
 
 
@@ -1206,7 +1336,7 @@ def test_hard_limit(value, limits, expected):
 )
 def test_sst_freeze_check(sst, sst_uncertainty, freezing_point, n_sigma, expected):
     assert (
-            qc.sst_freeze_check(sst, sst_uncertainty, freezing_point, n_sigma) == expected
+        qc.sst_freeze_check(sst, sst_uncertainty, freezing_point, n_sigma) == expected
     )
 
 

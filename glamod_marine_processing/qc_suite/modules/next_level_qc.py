@@ -14,7 +14,7 @@ def _split_date(date):
         year = int(date.year)
         month = int(date.month)
         day = int(date.day)
-        hour = date.hour + date.minute / 60. + date.second / 3600.
+        hour = date.hour + date.minute / 60.0 + date.second / 3600.0
     except ValueError:
         return None
     return {"year": year, "month": month, "day": day, "hour": hour}
