@@ -5,6 +5,7 @@ import pandas as pd
 
 import glamod_marine_processing.qc_suite.modules.spherical_geometry as sg
 
+
 def spike_check(df: pd.DataFrame) -> pd.DataFrame:
     """Perform IQUAM like spike check.
 
@@ -23,12 +24,12 @@ def spike_check(df: pd.DataFrame) -> pd.DataFrame:
     KeyError
         Raised when one of the required columns is missing from the DataFrame
     """
-    for key in ['sst', 'lat', 'lon', 'pt', 'date']:
+    for key in ["sst", "lat", "lon", "pt", "date"]:
         if key not in df:
-            raise KeyError(f'{key} not in dataframe')
+            raise KeyError(f"{key} not in dataframe")
 
     max_gradient_space = 0.5  # K/km
-    max_gradient_time =  1.0 # K/hr
+    max_gradient_time = 1.0  # K/hr
 
     ship_delta_t = 2.0  # K
     buoy_delta_t = 1.0  # K
@@ -37,7 +38,7 @@ def spike_check(df: pd.DataFrame) -> pd.DataFrame:
 
     numobs = len(df)
 
-    if df.iloc[0].pt in [6,7]:
+    if df.iloc[0].pt in [6, 7]:
         delta_t = buoy_delta_t
     else:
         delta_t = ship_delta_t
@@ -63,7 +64,10 @@ def spike_check(df: pd.DataFrame) -> pd.DataFrame:
             if row1.sst is not None and row2.sst is not None:
 
                 distance = sg.sphere_distance(row1.lat, row1.lon, row2.lat, row2.lon)
-                time_diff = abs((row2.date - row1.date).days * 24 + (row2.date - row1.date).seconds / 3600.)
+                time_diff = abs(
+                    (row2.date - row1.date).days * 24
+                    + (row2.date - row1.date).seconds / 3600.0
+                )
                 val_change = abs(row2.sst - row1.sst)
 
                 iquam_condition = max(
@@ -94,6 +98,6 @@ def spike_check(df: pd.DataFrame) -> pd.DataFrame:
         count_gradient_violations[most_fails] = 0
         count += 1
 
-    df['spike'] = spike_qc
+    df["spike"] = spike_qc
 
     return df
