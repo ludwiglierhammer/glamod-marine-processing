@@ -17,6 +17,11 @@ def spike_check(df: pd.DataFrame) -> pd.DataFrame:
     -------
     pd.DataFrame
         DataFrame as original but with 'spike' column added containing the spike check flags
+
+    Raises
+    ------
+    KeyError
+        Raised when one of the required columns is missing from the DataFrame
     """
     for key in ['sst', 'lat', 'lon', 'pt', 'date']:
         if key not in df:

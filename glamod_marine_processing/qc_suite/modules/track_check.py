@@ -25,7 +25,7 @@ def modesp(awork: list) -> float:
     The data are binned into 3-knot bins with the first from 0-3 knots having a
     bin centre of 1.5 and the highest containing all speed in excess of 33 knots
     with a bin centre of 34.5. The bin with the most speeds in it is found. The higher of
-    the modal speed or 8.5 is returned::
+    the modal speed or 8.5 is returned:
 
     Bins-   0-3, 3-6, 6-9, 9-12, 12-15, 15-18, 18-21, 21-24, 24-27, 27-30, 30-33, 33-36
     Centres-1.5, 4.5, 7.5, 10.5, 13.5,  16.5,  19.5,  22.5,  25.5,  28.5,  31.5,  34.5
@@ -33,19 +33,18 @@ def modesp(awork: list) -> float:
     Parameters
     ----------
     awork : list
-        list of input speeds in km/hr
+        List of input speeds in km/hr
 
     Returns
     -------
     float
-        bin-centre speed (expressed in km/ht) for the 3 knot bin which contains most speeds in
+        Bin-centre speed (expressed in km/ht) for the 3 knot bin which contains most speeds in
         input array, or 8.5, whichever is higher
     """
     # if there is one or no observations then return None
     # if the speed is on a bin edge then it rounds up to higher bin
     # if the modal speed is less than 8.50 then it is set to 8.50
     # anything exceeding 36 knots is assigned to the top bin
-
     ikmode = -32768
     acint = []
     ifreq = []
@@ -116,7 +115,7 @@ def set_speed_limits(amode: float) -> (float, float, float):
 
 
 def increment_position(
-    alat1: float, alon1: float, avs: float, ads: float, timdif: float
+        alat1: float, alon1: float, avs: float, ads: float, timdif: float
 ) -> (float, float):
     """Increment_position takes latitudes and longitude, a speed, a direction and a time difference and returns
     increments of latitude and longitude which correspond to half the time difference.
@@ -179,11 +178,11 @@ def distr1(invoyage: ex.Voyage) -> list:
 
     for i in range(1, nobs):
         if (
-            invoyage.getvar(i, "vsi") is not None
-            and invoyage.getvar(i - 1, "vsi") is not None
-            and invoyage.getvar(i, "dsi") is not None
-            and invoyage.getvar(i - 1, "dsi") is not None
-            and invoyage.getvar(i, "time_diff") is not None
+                invoyage.getvar(i, "vsi") is not None
+                and invoyage.getvar(i - 1, "vsi") is not None
+                and invoyage.getvar(i, "dsi") is not None
+                and invoyage.getvar(i - 1, "dsi") is not None
+                and invoyage.getvar(i, "time_diff") is not None
         ):
             # get increment from initial position
             lat1, lon1 = increment_position(
@@ -247,11 +246,11 @@ def distr2(invoyage: ex.Voyage) -> list:
 
     for i in range(nobs - 1, 0, -1):
         if (
-            invoyage.getvar(i, "vsi") is not None
-            and invoyage.getvar(i - 1, "vsi") is not None
-            and invoyage.getvar(i, "dsi") is not None
-            and invoyage.getvar(i - 1, "dsi") is not None
-            and invoyage.getvar(i, "time_diff") is not None
+                invoyage.getvar(i, "vsi") is not None
+                and invoyage.getvar(i - 1, "vsi") is not None
+                and invoyage.getvar(i, "dsi") is not None
+                and invoyage.getvar(i - 1, "dsi") is not None
+                and invoyage.getvar(i, "time_diff") is not None
         ):
             # get increment from initial position - backwards in time
             # means reversing the direction by 180 degrees
@@ -358,10 +357,10 @@ def midpt(invoyage: ex.Voyage) -> list:
 
 
 def direction_continuity(
-    dsi: float,
-    dsi_previous: float,
-    ship_directions: float,
-    max_direction_change: float = 60.0,
+        dsi: float,
+        dsi_previous: float,
+        ship_directions: float,
+        max_direction_change: float = 60.0,
 ) -> float:
     """Check that the reported direction at the previous time step and the actual
     direction taken are within max_direction_change degrees of one another.
@@ -395,13 +394,13 @@ def direction_continuity(
 
     if dsi is not None and dsi_previous is not None and ship_directions is not None:
         if (
-            max_direction_change
-            < abs(dsi - ship_directions)
-            < 360 - max_direction_change
+                max_direction_change
+                < abs(dsi - ship_directions)
+                < 360 - max_direction_change
         ) or (
-            max_direction_change
-            < abs(dsi_previous - ship_directions)
-            < 360 - max_direction_change
+                max_direction_change
+                < abs(dsi_previous - ship_directions)
+                < 360 - max_direction_change
         ):
             result = 10.0
 
@@ -409,7 +408,7 @@ def direction_continuity(
 
 
 def speed_continuity(
-    vsi: float, vsi_previous: float, speeds: float, max_speed_change: float = 10.0
+        vsi: float, vsi_previous: float, speeds: float, max_speed_change: float = 10.0
 ) -> float:
     """Check if reported speed at this and previous time step is within max_speed_change
     knots of calculated speed between those two time steps
@@ -433,8 +432,8 @@ def speed_continuity(
     result = 0.0
     if vsi is not None and vsi_previous is not None and speeds is not None:
         if (
-            abs(vsi / km_to_nm - speeds) > max_speed_change / km_to_nm
-            and abs(vsi_previous / km_to_nm - speeds) > max_speed_change / km_to_nm
+                abs(vsi / km_to_nm - speeds) > max_speed_change / km_to_nm
+                and abs(vsi_previous / km_to_nm - speeds) > max_speed_change / km_to_nm
         ):
             result = 10.0
 
@@ -442,11 +441,11 @@ def speed_continuity(
 
 
 def check_distance_from_estimate(
-    vsi: float,
-    vsi_previous: float,
-    time_differences: float,
-    fwd_diff_from_estimated: float,
-    rev_diff_from_estimated: float,
+        vsi: float,
+        vsi_previous: float,
+        time_differences: float,
+        fwd_diff_from_estimated: float,
+        rev_diff_from_estimated: float,
 ) -> float:
     """Check that distances from estimated positions (calculated forward and backwards in time) are less than
     time difference multiplied by the average reported speeds
@@ -474,11 +473,11 @@ def check_distance_from_estimate(
     result = 0.0
 
     if (
-        vsi is None
-        or vsi_previous is None
-        or time_differences is None
-        or fwd_diff_from_estimated is None
-        or rev_diff_from_estimated is None
+            vsi is None
+            or vsi_previous is None
+            or time_differences is None
+            or fwd_diff_from_estimated is None
+            or rev_diff_from_estimated is None
     ):
         return result
 
@@ -526,7 +525,7 @@ def mds_track_check(invoyage: ex.Voyage) -> list:
     # fewer than three obs - set the fewsome flag
     # deck 720 gets a pass prior to 1891 see Carella, Kent, Berry 2015 Appendix A3
     if nobs < 3 and not (
-        invoyage.getvar(0, "DCK") == 720 and invoyage.getvar(0, "YR") < 1891
+            invoyage.getvar(0, "DCK") == 720 and invoyage.getvar(0, "YR") < 1891
     ):
         qcs = []
         nobs = len(invoyage)
@@ -561,18 +560,18 @@ def mds_track_check(invoyage: ex.Voyage) -> list:
 
         # together these cover the speeds calculate from point i
         if (
-            invoyage.getvar(i, "speed") > amax
-            and invoyage.getvar(i - 1, "alt_speed") > amax
+                invoyage.getvar(i, "speed") > amax
+                and invoyage.getvar(i - 1, "alt_speed") > amax
         ):
             thisqc_a += 1.00
         elif (
-            invoyage.getvar(i + 1, "speed") > amax
-            and invoyage.getvar(i + 1, "alt_speed") > amax
+                invoyage.getvar(i + 1, "speed") > amax
+                and invoyage.getvar(i + 1, "alt_speed") > amax
         ):
             thisqc_a += 2.00
         elif (
-            invoyage.getvar(i, "speed") > amax
-            and invoyage.getvar(i + 1, "speed") > amax
+                invoyage.getvar(i, "speed") > amax
+                and invoyage.getvar(i + 1, "speed") > amax
         ):
             thisqc_a += 3.00
 
@@ -604,9 +603,9 @@ def mds_track_check(invoyage: ex.Voyage) -> list:
 
         # make the final decision
         if (
-            midpoint_diff_from_estimated[i] > 150.0 / km_to_nm
-            and thisqc_a > 0
-            and thisqc_b > 0
+                midpoint_diff_from_estimated[i] > 150.0 / km_to_nm
+                and thisqc_a > 0
+                and thisqc_b > 0
         ):
             qcs.append(1)
             invoyage.set_qc(i, "POS", "bad_track", 1)
