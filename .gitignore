@@ -105,3 +105,19 @@ ENV/
 # IDE settings
 .vscode/
 .idea/
+
+# Test directories
+Elevel1a
+Elevel1b
+Elevel1c
+Elevel1d
+Elevel1e
+Elevel2
+Eqc
+Tlevel1a
+Tlevel1b
+Tlevel1c
+Tlevel1d
+Tlevel1e
+Tlevel2
+Tlevel3

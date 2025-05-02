@@ -99,7 +99,7 @@ def lat_lon_from_course_and_distance(
     lat1: float, lon1: float, tc: float, d: float
 ) -> float:
     """
-    calculate a latitude and longitude given a starting point, course (in radian) and
+    calculate a latitude and longitude given a starting point, course (in radians) and
     angular distance (also in radians) #http://williams.best.vwh.net/avform.htm#LL
 
     Parameters

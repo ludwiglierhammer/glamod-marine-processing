@@ -490,184 +490,184 @@ def check_distance_from_estimate(
     return result
 
 
-def mds_track_check(invoyage: ex.Voyage) -> list:
-    """Perform one pass of the track check
-
-    This is an implementation of the MDS track check code which was originally written in the 1990s. I don't
-    know why this piece of historic trivia so exercises my mind, but it does: the 1990s! I wish my code
-    would last so long.
-
-    Parameters
-    ----------
-    invoyage : ex.Voyage
-        A list of class`.Voyage` that you want track checked
-
-    Returns
-    -------
-    list
-        list of QC flags 0 for pass and 1 for fail
-    """
-    nobs = len(invoyage)
-
-    # no obs in, no qc outcomes out
-    if nobs == 0:
-        return []
-
-    # Generic ids get a free pass on the track check
-    if qc.id_is_generic(invoyage.getvar(0, "ID"), invoyage.getvar(0, "YR")):
-        qcs = []
-        nobs = len(invoyage)
-        for i in range(0, nobs):
-            invoyage.set_qc(i, "POS", "bad_track", 0)
-            qcs.append(0)
-        return qcs
-
-    # fewer than three obs - set the fewsome flag
-    # deck 720 gets a pass prior to 1891 see Carella, Kent, Berry 2015 Appendix A3
-    if nobs < 3 and not (
-        invoyage.getvar(0, "DCK") == 720 and invoyage.getvar(0, "YR") < 1891
-    ):
-        qcs = []
-        nobs = len(invoyage)
-        for i in range(0, nobs):
-            invoyage.set_qc(i, "POS", "fewsome_check", 1)
-            qcs.append(0)
-        return qcs
-
-    # work out speeds and distances between alternating points
-    invoyage.calc_alternate_speeds()
-
-    # what are the mean and mode speeds?
-    modal_speed = modesp(invoyage.get_speed())
-    # set speed limits based on modal speed
-    amax, amaxx, amin = set_speed_limits(modal_speed)
-    del amaxx
-    del amin
-
-    # compare reported speeds and positions if we have them
-    forward_diff_from_estimated = distr1(invoyage)
-    reverse_diff_from_estimated = distr2(invoyage)
-    midpoint_diff_from_estimated = midpt(invoyage)
-
-    # do QC
-    qcs = [0]
-    invoyage.set_qc(0, "POS", "bad_track", 0)
-    invoyage.set_qc(0, "POS", "fewsome_check", 0)
-
-    for i in range(1, nobs - 1):
-        thisqc_a = 0
-        thisqc_b = 0
-
-        # together these cover the speeds calculate from point i
-        if (
-            invoyage.getvar(i, "speed") > amax
-            and invoyage.getvar(i - 1, "alt_speed") > amax
-        ):
-            thisqc_a += 1.00
-        elif (
-            invoyage.getvar(i + 1, "speed") > amax
-            and invoyage.getvar(i + 1, "alt_speed") > amax
-        ):
-            thisqc_a += 2.00
-        elif (
-            invoyage.getvar(i, "speed") > amax
-            and invoyage.getvar(i + 1, "speed") > amax
-        ):
-            thisqc_a += 3.00
-
-        # Quality-control by examining the distance
-        # between the calculated and reported second position.
-        thisqc_b += check_distance_from_estimate(
-            invoyage.getvar(i, "vsi"),
-            invoyage.getvar(i - 1, "vsi"),
-            invoyage.getvar(i, "time_diff"),
-            forward_diff_from_estimated[i],
-            reverse_diff_from_estimated[i],
-        )
-        # Check for continuity of direction
-        thisqc_b += direction_continuity(
-            invoyage.getvar(i, "dsi"),
-            invoyage.getvar(i - 1, "dsi"),
-            invoyage.getvar(i, "course"),
-        )
-        # Check for continuity of speed.
-        thisqc_b += speed_continuity(
-            invoyage.getvar(i, "vsi"),
-            invoyage.getvar(i - 1, "vsi"),
-            invoyage.getvar(i, "speed"),
-        )
-
-        # check for speeds in excess of 40.00 knots
-        if invoyage.getvar(i, "speed") > 40.00 / km_to_nm:
-            thisqc_b += 10.0
-
-        # make the final decision
-        if (
-            midpoint_diff_from_estimated[i] > 150.0 / km_to_nm
-            and thisqc_a > 0
-            and thisqc_b > 0
-        ):
-            qcs.append(1)
-            invoyage.set_qc(i, "POS", "bad_track", 1)
-            invoyage.set_qc(i, "POS", "fewsome_check", 0)
-        else:
-            qcs.append(0)
-            invoyage.set_qc(i, "POS", "bad_track", 0)
-            invoyage.set_qc(i, "POS", "fewsome_check", 0)
-
-    qcs.append(0)
-    invoyage.set_qc(nobs - 1, "POS", "bad_track", 0)
-    invoyage.set_qc(nobs - 1, "POS", "fewsome_check", 0)
-
-    return qcs
-
-
-def mds_full_track_check(invoyage: ex.Voyage) -> ex.Voyage:
-    """Do the full 5-pass track check (which sounds like a kung-fu move requiring years of dedication and
-    eating nothing but rainwater, but is, in fact, just doing the track check repeatedly). The basic 1-pass
-    track check is repeated 5 times, with obs failing track check excluded from subsequent passes.
-
-    Parameters
-    ----------
-    invoyage : ex.Voyage
-        object class`.Voyage` to be track checked
-
-    Returns
-    -------
-    ex.Voyage
-        Voyage with QC flags set
-    """
-    master_qc = mds_track_check(invoyage)
-
-    repetitions = 0
-
-    qcs = master_qc
-
-    if len(qcs) > 0:
-        while max(qcs) > 0 and repetitions < 4:
-            tempreps = ex.Voyage()
-            qc_refs = []
-
-            i = 0
-            for rep in invoyage.rep_feed():
-                if master_qc[i] == 0:
-                    tempreps.add_report(rep)
-                    qc_refs.append(i)
-                i += 1
-
-            qcs = mds_track_check(tempreps)
-
-            for i, qc_ref in enumerate(qc_refs):
-                master_qc[qc_ref] = qcs[i]
-
-            repetitions += 1
-
-    i = 0
-    for rep in invoyage.rep_feed():
-        if master_qc[i] == 0:
-            invoyage.set_qc(i, "POS", "bad_track", 0)
-        if master_qc[i] == 1:
-            invoyage.set_qc(i, "POS", "bad_track", 1)
-        i += 1
-
-    return invoyage
+# def mds_track_check(invoyage: ex.Voyage) -> list:
+#     """Perform one pass of the track check
+#
+#     This is an implementation of the MDS track check code which was originally written in the 1990s. I don't
+#     know why this piece of historic trivia so exercises my mind, but it does: the 1990s! I wish my code
+#     would last so long.
+#
+#     Parameters
+#     ----------
+#     invoyage : ex.Voyage
+#         A list of class`.Voyage` that you want track checked
+#
+#     Returns
+#     -------
+#     list
+#         list of QC flags 0 for pass and 1 for fail
+#     """
+#     nobs = len(invoyage)
+#
+#     # no obs in, no qc outcomes out
+#     if nobs == 0:
+#         return []
+#
+#     # Generic ids get a free pass on the track check
+#     if qc.id_is_generic(invoyage.getvar(0, "ID"), invoyage.getvar(0, "YR")):
+#         qcs = []
+#         nobs = len(invoyage)
+#         for i in range(0, nobs):
+#             invoyage.set_qc(i, "POS", "bad_track", 0)
+#             qcs.append(0)
+#         return qcs
+#
+#     # fewer than three obs - set the fewsome flag
+#     # deck 720 gets a pass prior to 1891 see Carella, Kent, Berry 2015 Appendix A3
+#     if nobs < 3 and not (
+#         invoyage.getvar(0, "DCK") == 720 and invoyage.getvar(0, "YR") < 1891
+#     ):
+#         qcs = []
+#         nobs = len(invoyage)
+#         for i in range(0, nobs):
+#             invoyage.set_qc(i, "POS", "fewsome_check", 1)
+#             qcs.append(0)
+#         return qcs
+#
+#     # work out speeds and distances between alternating points
+#     invoyage.calc_alternate_speeds()
+#
+#     # what are the mean and mode speeds?
+#     modal_speed = modesp(invoyage.get_speed())
+#     # set speed limits based on modal speed
+#     amax, amaxx, amin = set_speed_limits(modal_speed)
+#     del amaxx
+#     del amin
+#
+#     # compare reported speeds and positions if we have them
+#     forward_diff_from_estimated = distr1(invoyage)
+#     reverse_diff_from_estimated = distr2(invoyage)
+#     midpoint_diff_from_estimated = midpt(invoyage)
+#
+#     # do QC
+#     qcs = [0]
+#     invoyage.set_qc(0, "POS", "bad_track", 0)
+#     invoyage.set_qc(0, "POS", "fewsome_check", 0)
+#
+#     for i in range(1, nobs - 1):
+#         thisqc_a = 0
+#         thisqc_b = 0
+#
+#         # together these cover the speeds calculate from point i
+#         if (
+#             invoyage.getvar(i, "speed") > amax
+#             and invoyage.getvar(i - 1, "alt_speed") > amax
+#         ):
+#             thisqc_a += 1.00
+#         elif (
+#             invoyage.getvar(i + 1, "speed") > amax
+#             and invoyage.getvar(i + 1, "alt_speed") > amax
+#         ):
+#             thisqc_a += 2.00
+#         elif (
+#             invoyage.getvar(i, "speed") > amax
+#             and invoyage.getvar(i + 1, "speed") > amax
+#         ):
+#             thisqc_a += 3.00
+#
+#         # Quality-control by examining the distance
+#         # between the calculated and reported second position.
+#         thisqc_b += check_distance_from_estimate(
+#             invoyage.getvar(i, "vsi"),
+#             invoyage.getvar(i - 1, "vsi"),
+#             invoyage.getvar(i, "time_diff"),
+#             forward_diff_from_estimated[i],
+#             reverse_diff_from_estimated[i],
+#         )
+#         # Check for continuity of direction
+#         thisqc_b += direction_continuity(
+#             invoyage.getvar(i, "dsi"),
+#             invoyage.getvar(i - 1, "dsi"),
+#             invoyage.getvar(i, "course"),
+#         )
+#         # Check for continuity of speed.
+#         thisqc_b += speed_continuity(
+#             invoyage.getvar(i, "vsi"),
+#             invoyage.getvar(i - 1, "vsi"),
+#             invoyage.getvar(i, "speed"),
+#         )
+#
+#         # check for speeds in excess of 40.00 knots
+#         if invoyage.getvar(i, "speed") > 40.00 / km_to_nm:
+#             thisqc_b += 10.0
+#
+#         # make the final decision
+#         if (
+#             midpoint_diff_from_estimated[i] > 150.0 / km_to_nm
+#             and thisqc_a > 0
+#             and thisqc_b > 0
+#         ):
+#             qcs.append(1)
+#             invoyage.set_qc(i, "POS", "bad_track", 1)
+#             invoyage.set_qc(i, "POS", "fewsome_check", 0)
+#         else:
+#             qcs.append(0)
+#             invoyage.set_qc(i, "POS", "bad_track", 0)
+#             invoyage.set_qc(i, "POS", "fewsome_check", 0)
+#
+#     qcs.append(0)
+#     invoyage.set_qc(nobs - 1, "POS", "bad_track", 0)
+#     invoyage.set_qc(nobs - 1, "POS", "fewsome_check", 0)
+#
+#     return qcs
+#
+#
+# def mds_full_track_check(invoyage: ex.Voyage) -> ex.Voyage:
+#     """Do the full 5-pass track check (which sounds like a kung-fu move requiring years of dedication and
+#     eating nothing but rainwater, but is, in fact, just doing the track check repeatedly). The basic 1-pass
+#     track check is repeated 5 times, with obs failing track check excluded from subsequent passes.
+#
+#     Parameters
+#     ----------
+#     invoyage : ex.Voyage
+#         object class`.Voyage` to be track checked
+#
+#     Returns
+#     -------
+#     ex.Voyage
+#         Voyage with QC flags set
+#     """
+#     master_qc = mds_track_check(invoyage)
+#
+#     repetitions = 0
+#
+#     qcs = master_qc
+#
+#     if len(qcs) > 0:
+#         while max(qcs) > 0 and repetitions < 4:
+#             tempreps = ex.Voyage()
+#             qc_refs = []
+#
+#             i = 0
+#             for rep in invoyage.rep_feed():
+#                 if master_qc[i] == 0:
+#                     tempreps.add_report(rep)
+#                     qc_refs.append(i)
+#                 i += 1
+#
+#             qcs = mds_track_check(tempreps)
+#
+#             for i, qc_ref in enumerate(qc_refs):
+#                 master_qc[qc_ref] = qcs[i]
+#
+#             repetitions += 1
+#
+#     i = 0
+#     for rep in invoyage.rep_feed():
+#         if master_qc[i] == 0:
+#             invoyage.set_qc(i, "POS", "bad_track", 0)
+#         if master_qc[i] == 1:
+#             invoyage.set_qc(i, "POS", "bad_track", 1)
+#         i += 1
+#
+#     return invoyage
