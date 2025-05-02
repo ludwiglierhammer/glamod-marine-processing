@@ -3,9 +3,9 @@ from __future__ import annotations
 import numpy as np
 import pandas as pd
 
+import glamod_marine_processing.qc_suite.modules.qc as qc
 import glamod_marine_processing.qc_suite.modules.spherical_geometry as sg
 import glamod_marine_processing.qc_suite.modules.track_check as tc
-import glamod_marine_processing.qc_suite.modules.qc as qc
 
 km_to_nm = 0.539957
 
@@ -107,7 +107,9 @@ def spike_check(df: pd.DataFrame) -> pd.DataFrame:
     return df
 
 
-def row_difference(later_row: pd.DataFrame, earlier_row: pd.DataFrame) -> (float, float, float, float):
+def row_difference(
+    later_row: pd.DataFrame, earlier_row: pd.DataFrame
+) -> (float, float, float, float):
     """Subtracting one row from another to return the speed, distance, course and the time difference between the
     two rows. Originally this was coded as a subtraction: later_row minus earlier_row.
 
@@ -123,11 +125,19 @@ def row_difference(later_row: pd.DataFrame, earlier_row: pd.DataFrame) -> (float
     (float, float, float, float)
         Returns the speed, distance, course and time difference between the two rows
     """
-    distance = sg.sphere_distance(later_row.lat, later_row.lon, earlier_row.lat, earlier_row.lon)
+    distance = sg.sphere_distance(
+        later_row.lat, later_row.lon, earlier_row.lat, earlier_row.lon
+    )
 
     timediff = qc.time_difference(
-        earlier_row.date.year, earlier_row.date.month, earlier_row.date.day, earlier_row.date.hour,
-        later_row.date.year, later_row.date.month, later_row.date.day, later_row.date.hour
+        earlier_row.date.year,
+        earlier_row.date.month,
+        earlier_row.date.day,
+        earlier_row.date.hour,
+        later_row.date.year,
+        later_row.date.month,
+        later_row.date.day,
+        later_row.date.hour,
     )
     if timediff != 0 and timediff is not None:
         speed = distance / abs(timediff)
@@ -135,7 +145,9 @@ def row_difference(later_row: pd.DataFrame, earlier_row: pd.DataFrame) -> (float
         timediff = 0.0
         speed = distance
 
-    course = sg.course_between_points(earlier_row.lat, earlier_row.lon, later_row.lat, later_row.lon)
+    course = sg.course_between_points(
+        earlier_row.lat, earlier_row.lon, later_row.lat, later_row.lon
+    )
 
     return speed, distance, course, timediff
 
@@ -233,11 +245,11 @@ def distr1(df):
         time_diff = df.iloc[i].time_diff
 
         if (
-                vsi is not None
-                and vsi_minus_one is not None
-                and dsi is not None
-                and dsi_minus_one is not None
-                and time_diff is not None
+            vsi is not None
+            and vsi_minus_one is not None
+            and dsi is not None
+            and dsi_minus_one is not None
+            and time_diff is not None
         ):
             # get increment from initial position
             lat1, lon1 = tc.increment_position(
@@ -261,8 +273,7 @@ def distr1(df):
 
             # calculate distance between calculated position and the second reported position
             discrepancy = sg.sphere_distance(
-                df.iloc[i].lat, df.iloc[i].lon,
-                alatx, alonx
+                df.iloc[i].lat, df.iloc[i].lon, alatx, alonx
             )
 
             distance_from_est_location.append(discrepancy)
@@ -305,11 +316,11 @@ def distr2(df):
         time_diff = df.iloc[i].time_diff
 
         if (
-                vsi is not None
-                and vsi_minus_one is not None
-                and dsi is not None
-                and dsi_minus_one is not None
-                and time_diff is not None
+            vsi is not None
+            and vsi_minus_one is not None
+            and dsi is not None
+            and dsi_minus_one is not None
+            and time_diff is not None
         ):
             # get increment from initial position - backwards in time
             # means reversing the direction by 180 degrees
@@ -421,11 +432,11 @@ def track_check(df: pd.DataFrame):
     pd.DataFrame
         DataFrame with track check QC
     """
-    required_columns = ['id', 'date', 'pt', 'dck', 'dsi', 'vsi', 'lat', 'lon']
+    required_columns = ["id", "date", "pt", "dck", "dsi", "vsi", "lat", "lon"]
 
     for key in required_columns:
         if key not in df:
-            raise KeyError(f'{key} not in DataFrame')
+            raise KeyError(f"{key} not in DataFrame")
 
     max_direction_change = 60.0
     max_speed_change = 10.0
@@ -439,10 +450,7 @@ def track_check(df: pd.DataFrame):
         return
 
     # Generic ids and buoys get a free pass on the track check
-    if (
-            qc.id_is_generic(df.iloc[0].id, df.iloc[0].date.year)
-            or df.iloc[0].pt in [6, 7]
-    ):
+    if qc.id_is_generic(df.iloc[0].id, df.iloc[0].date.year) or df.iloc[0].pt in [6, 7]:
         for i in range(0, nobs):
             df["trk"] = np.zeros(nobs)
             df["few"] = np.zeros(nobs)
@@ -500,24 +508,24 @@ def track_check(df: pd.DataFrame):
 
         # together these cover the speeds calculate from point i
         if (
-                df.iloc[i].speed is not None
-                and df.iloc[i].speed > amax
-                and df.iloc[i - 1].alt_speed is not None
-                and df.iloc[i - 1].alt_speed > amax
+            df.iloc[i].speed is not None
+            and df.iloc[i].speed > amax
+            and df.iloc[i - 1].alt_speed is not None
+            and df.iloc[i - 1].alt_speed > amax
         ):
             thisqc_a += 1.00
         elif (
-                df.iloc[i + 1].speed is not None
-                and df.iloc[i + 1].speed > amax
-                and df.iloc[i + 1].alt_speed is not None
-                and df.iloc[i + 1].alt_speed > amax
+            df.iloc[i + 1].speed is not None
+            and df.iloc[i + 1].speed > amax
+            and df.iloc[i + 1].alt_speed is not None
+            and df.iloc[i + 1].alt_speed > amax
         ):
             thisqc_a += 2.00
         elif (
-                df.iloc[i].speed is not None
-                and df.iloc[i].speed > amax
-                and df.iloc[i + 1].speed is not None
-                and df.iloc[i + 1].speed > amax
+            df.iloc[i].speed is not None
+            and df.iloc[i].speed > amax
+            and df.iloc[i + 1].speed is not None
+            and df.iloc[i + 1].speed > amax
         ):
             thisqc_a += 3.00
 
@@ -551,9 +559,9 @@ def track_check(df: pd.DataFrame):
 
         # make the final decision
         if (
-                midpoint_diff_from_estimated[i] > max_midpoint_discrepancy / km_to_nm
-                and thisqc_a > 0
-                and thisqc_b > 0
+            midpoint_diff_from_estimated[i] > max_midpoint_discrepancy / km_to_nm
+            and thisqc_a > 0
+            and thisqc_b > 0
         ):
             trk[i] = 1
 

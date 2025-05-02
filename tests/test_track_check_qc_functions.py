@@ -1,18 +1,18 @@
 from __future__ import annotations
 
-import pandas as pd
 import numpy as np
+import pandas as pd
 import pytest
 
 from glamod_marine_processing.qc_suite.modules.next_level_track_check_qc import (
-    spike_check,
-    track_check,
-    row_difference,
+    calc_alternate_speeds,
+    calculate_speed_course_distance_time_difference,
     distr1,
     distr2,
-    calculate_speed_course_distance_time_difference,
-    calc_alternate_speeds,
-    km_to_nm
+    km_to_nm,
+    row_difference,
+    spike_check,
+    track_check,
 )
 
 
@@ -30,7 +30,16 @@ def generic_frame(in_pt):
     date = pd.date_range(start=f"1850-01-01", freq="1h", periods=len(pt))
 
     df = pd.DataFrame(
-        {"sst": sst, "date": date, "lat": lat, "lon": lon, "pt": pt, "vsi": vsi, "dsi": dsi, "dck": dck}
+        {
+            "sst": sst,
+            "date": date,
+            "lat": lat,
+            "lon": lon,
+            "pt": pt,
+            "vsi": vsi,
+            "dsi": dsi,
+            "dck": dck,
+        }
     )
 
     id = ["GOODTHING" for _ in range(30)]
@@ -111,8 +120,10 @@ def test_calculate_speed_course_distance_time_difference(ship_frame):
         if i > 0:
             assert pytest.approx(row.speed, 0.00001) == 11.119508064776555
             assert pytest.approx(row.distance, 0.00001) == 11.119508064776555
-            assert (pytest.approx(row.course, 0.00001) == 0 or pytest.approx(row.course, 0.00001) == 360.0)
+            assert (
+                pytest.approx(row.course, 0.00001) == 0
+                or pytest.approx(row.course, 0.00001) == 360.0
+            )
             assert pytest.approx(row.time_diff, 0.0000001) == 1.0
         else:
             assert np.isnan(row.speed)
-
