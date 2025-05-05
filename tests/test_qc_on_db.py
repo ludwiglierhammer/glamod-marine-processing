@@ -26,8 +26,10 @@ from glamod_marine_processing.qc_suite.modules.next_level_qc import (
     do_supersaturation_check,
     do_time_check,
     do_wind_consistency_check,
-    do_wind_hard_limit_check,
-    do_wind_missing_value_check,
+    do_wind_direction_hard_limit_check,
+    do_wind_direction_missing_value_check,
+    do_wind_speed_hard_limit_check,
+    do_wind_speed_missing_value_check,
     humidity_blacklist,
     is_buoy,
     is_deck,
@@ -412,26 +414,52 @@ def test_do_sst_no_normal_check(testdata):
     pd.testing.assert_series_equal(results, expected)
 
 
-def test_do_wind_missing_value_check(testdata):
+def test_do_wind_speed_missing_value_check(testdata):
     db_ = testdata["observations-ws"].copy()
     results = db_.apply(
-        lambda row: do_wind_missing_value_check(wind_speed=row["observation_value"]),
+        lambda row: do_wind_speed_missing_value_check(
+            wind_speed=row["observation_value"]
+        ),
         axis=1,
     )
     expected = pd.Series([0, 0, 1, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0])
     pd.testing.assert_series_equal(results, expected)
 
 
-def test_do_wind_hard_limit_check(testdata):
+def test_do_wind_speed_hard_limit_check(testdata):
     db_ = testdata["observations-ws"].copy()
     results = db_.apply(
-        lambda row: do_wind_hard_limit_check(
+        lambda row: do_wind_speed_hard_limit_check(
             wind_speed=row["observation_value"],
             hard_limits=[0, 13],
         ),
         axis=1,
     )
     expected = pd.Series([0, 0, 1, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0])
+    pd.testing.assert_series_equal(results, expected)
+
+
+def test_do_wind_direction_missing_value_check(testdata):
+    db_ = testdata["observations-wd"].copy()
+    results = db_.apply(
+        lambda row: do_wind_direction_missing_value_check(
+            wind_direction=row["observation_value"]
+        ),
+        axis=1,
+    )
+    expected = pd.Series([0, 0, 1, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0])
+    pd.testing.assert_series_equal(results, expected)
+
+
+def test_do_wind_direction_hard_limit_check(testdata):
+    db_ = testdata["observations-wd"].copy()
+    results = db_.apply(
+        lambda row: do_wind_direction_hard_limit_check(
+            wind_direction=row["observation_value"],
+        ),
+        axis=1,
+    )
+    expected = pd.Series([0, 0, 1, 0, 1, 0, 1, 1, 0, 0, 0, 0, 0])
     pd.testing.assert_series_equal(results, expected)
 
 
@@ -443,11 +471,10 @@ def test_do_wind_consistency_check(testdata):
         lambda row: do_wind_consistency_check(
             wind_speed=row["observation_value"],
             wind_direction=row["observation_value_wd"],
-            variable_limit=5.0,
         ),
         axis=1,
     )
-    expected = pd.Series([0, 0, 1, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0])
+    expected = pd.Series([0, 0, 1, 0, 1, 0, 0, 0, 1, 1, 1, 1, 1])
     pd.testing.assert_series_equal(results, expected)
 
 

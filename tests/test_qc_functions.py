@@ -29,8 +29,10 @@ from glamod_marine_processing.qc_suite.modules.next_level_qc import (
     do_supersaturation_check,
     do_time_check,
     do_wind_consistency_check,
-    do_wind_hard_limit_check,
-    do_wind_missing_value_check,
+    do_wind_direction_hard_limit_check,
+    do_wind_direction_missing_value_check,
+    do_wind_speed_hard_limit_check,
+    do_wind_speed_missing_value_check,
     humidity_blacklist,
     is_buoy,
     is_deck,
@@ -803,14 +805,14 @@ def test_do_sst_freeze_check(sst, freezing_point, freeze_check_n_sigma, expected
 
 
 @pytest.mark.parametrize(
-    "w, expected", [(5.6, qc.passed), (None, qc.failed), (np.nan, qc.failed)]
+    "ws, expected", [(5.6, qc.passed), (None, qc.failed), (np.nan, qc.failed)]
 )  # not sure if np.nan should trigger FAIL
-def test_do_wind_missing_value_check(w, expected):
-    assert do_wind_missing_value_check(w) == expected
+def test_do_wind_speed_missing_value_check(ws, expected):
+    assert do_wind_speed_missing_value_check(ws) == expected
 
 
 @pytest.mark.parametrize(
-    "w, parameters, expected",
+    "ws, hard_limits, expected",
     [
         (5.6, [-10.0, 10.0], qc.passed),
         (15.6, [-10.0, 10.0], qc.failed),
@@ -818,25 +820,79 @@ def test_do_wind_missing_value_check(w, expected):
         (np.nan, [-10.0, 10.0], qc.failed),
     ],
 )
-def test_do_wind_hard_limit_check(w, parameters, expected):
-    assert do_wind_hard_limit_check(w, parameters) == expected
+def test_do_wind_speed_hard_limit_check(ws, hard_limits, expected):
+    assert do_wind_speed_hard_limit_check(ws, hard_limits=hard_limits) == expected
+
+
+@pytest.mark.parametrize(
+    "ws, expected",
+    [
+        (5.6, qc.passed),
+        (-5.6, qc.failed),
+        (60.0, qc.failed),
+        (None, qc.failed),
+        (np.nan, qc.failed),
+    ],
+)
+def test_do_wind_speed_hard_limit_check_no_params(ws, expected):
+    assert do_wind_speed_hard_limit_check(ws) == expected
+
+
+@pytest.mark.parametrize(
+    "wd, expected", [(56, qc.passed), (None, qc.failed), (np.nan, qc.failed)]
+)  # not sure if np.nan should trigger FAIL
+def test_do_wind_direction_missing_value_check(wd, expected):
+    assert do_wind_direction_missing_value_check(wd) == expected
+
+
+@pytest.mark.parametrize(
+    "wd, hard_limits, expected",
+    [
+        (56, [-100, 100], qc.passed),
+        (156, [-100, 100], qc.failed),
+        (None, [-100, 100], qc.failed),
+        (np.nan, [-100, 100], qc.failed),
+    ],
+)
+def test_do_wind_direction_hard_limit_check(wd, hard_limits, expected):
+    assert do_wind_direction_hard_limit_check(wd, hard_limits=hard_limits) == expected
+
+
+@pytest.mark.parametrize(
+    "wd, expected",
+    [
+        (56, qc.passed),
+        (-56, qc.failed),
+        (600, qc.failed),
+        (None, qc.failed),
+        (np.nan, qc.failed),
+    ],
+)
+def test_do_wind_direction_hard_limit_check_no_params(wd, expected):
+    assert do_wind_direction_hard_limit_check(wd) == expected
 
 
 @pytest.mark.parametrize(
     "wind_speed, wind_direction, variable_limit, expected",
     [
-        (None, 4, 3, qc.failed),  # missing wind speed
-        (4, None, 3, qc.failed),
-        (0, 361, 3, qc.passed),
-        (5, 361, 3, qc.failed),
-        (12.0, 362, 10.0, qc.failed),
+        (None, 4, None, qc.failed),  # missing wind speed; failed
+        (4, None, None, qc.failed),  # missing wind directory; failed
+        (0, 0, None, qc.passed),
+        (0, 120, None, qc.failed),
+        (5.0, 0, None, qc.failed),
+        (5, 361, None, qc.passed),  # do not test hard limits; passed
+        (12.0, 362, None, qc.passed),  # do not test hard limits; passed
+        (5, 165, None, qc.passed),
+        (12.0, 73, None, qc.passed),
     ],
 )
 def test_do_wind_consistency_check(
     wind_speed, wind_direction, variable_limit, expected
 ):
     assert (
-        do_wind_consistency_check(wind_speed, wind_direction, variable_limit)
+        do_wind_consistency_check(
+            wind_speed, wind_direction, variable_limit=variable_limit
+        )
         == expected
     )
 

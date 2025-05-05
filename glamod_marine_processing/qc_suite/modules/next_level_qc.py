@@ -1004,7 +1004,7 @@ def do_sst_no_normal_check(sst_climatology: float) -> int:
 #     )
 
 
-def do_wind_missing_value_check(wind_speed: float | None) -> int:
+def do_wind_speed_missing_value_check(wind_speed: float | None) -> int:
     """Check that wind speed value exists
 
     Parameters
@@ -1020,12 +1020,14 @@ def do_wind_missing_value_check(wind_speed: float | None) -> int:
     return qc.isvalid(wind_speed)
 
 
-def do_wind_hard_limit_check(wind_speed: float, hard_limits: list) -> int:
+def do_wind_speed_hard_limit_check(
+    wind_speed: float | None, hard_limits: list = [0.0, 50.0]
+) -> int:
     """Check that wind speed is within hard limits specified by "hard_limits".
 
     Parameters
     ----------
-    wind_speed : float
+    wind_speed : float or None
         Wind speed to be checked
     hard_limits : list
         2-element list containing lower and upper limits for QC check
@@ -1038,8 +1040,46 @@ def do_wind_hard_limit_check(wind_speed: float, hard_limits: list) -> int:
     return qc.hard_limit(wind_speed, hard_limits)
 
 
+def do_wind_direction_missing_value_check(wind_direction: int | None) -> int:
+    """Check that wind direction value exists
+
+    Parameters
+    ----------
+    wind_direction : int or None
+        Wind direction
+
+    Returns
+    -------
+    int
+        Returns 1 if wind speed is missing, 0 otherwise.
+    """
+    return qc.isvalid(wind_direction)
+
+
+def do_wind_direction_hard_limit_check(
+    wind_direction: int | None, hard_limits: list = [0, 360]
+) -> int:
+    """Check that wind direction is within hard limits specified by "hard_limits".
+
+    Parameters
+    ----------
+    wind_direction : int or None
+        Wind direction to be checked
+    hard_limits : list
+        2-element list containing lower and upper limits for QC check
+
+    Returns
+    -------
+    int
+        Returns 1 if wind speed is outside of hard limits, 0 otherwise.
+    """
+    return qc.hard_limit(wind_direction, hard_limits)
+
+
 def do_wind_consistency_check(
-    wind_speed: float, wind_direction: float, variable_limit: float
+    wind_speed: float | None,
+    wind_direction: int | None,
+    variable_limit: float | None = None,
 ) -> int:
     """
     Test to compare windspeed to winddirection.
@@ -1049,8 +1089,8 @@ def do_wind_consistency_check(
     wind_speed : float
         Wind speed
     wind_direction : int
-        Wind direction in range 1-362 (see ICOADS documentation)
-    variable_limit : float
+        Wind direction
+    variable_limit : float or None
         Single value that specifies a maximum wind speed that can correspond to variable wind direction.
 
     Returns
@@ -1058,15 +1098,14 @@ def do_wind_consistency_check(
     int
         1 if windspeed and direction are inconsistent, 0 otherwise
     """
-    if qc.isvalid(wind_direction) == 1 or qc.isvalid(wind_speed) == 1:
+    if variable_limit is not None:
+        raise NotImplementedError
+    if qc.isvalid(wind_speed) == 1 or qc.isvalid(wind_direction) == 1:
+        return failed
+    if wind_speed == 0.0 and wind_direction != 0:
         return failed
 
-    # direction 361 is Calm i.e. wind speed should be zero
-    if wind_direction == 361 and wind_speed != 0:
-        return failed
-
-    # direction 363 is Variable i.e. low wind speed
-    if wind_direction == 362 and wind_speed > variable_limit:
+    if wind_speed != 0.0 and wind_direction == 0:
         return failed
 
     return passed
