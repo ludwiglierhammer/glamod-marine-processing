@@ -846,7 +846,7 @@ def do_supersaturation_check(dpt: float, at2: float) -> int:
     int
         Set to 1 if supersaturation is detected, 0 otherwise
     """
-    if qc.isvalid(dpt) == 1 or qc.isvalid(at2) == 1:
+    if qc.isvalid(dpt) == failed or qc.isvalid(at2) == failed:
         return failed
     elif dpt > at2:
         return failed
@@ -1100,7 +1100,7 @@ def do_wind_consistency_check(
     """
     if variable_limit is not None:
         raise NotImplementedError
-    if qc.isvalid(wind_speed) == 1 or qc.isvalid(wind_direction) == 1:
+    if qc.isvalid(wind_speed) == failed or qc.isvalid(wind_direction) == failed:
         return failed
     if wind_speed == 0.0 and wind_direction != 0:
         return failed

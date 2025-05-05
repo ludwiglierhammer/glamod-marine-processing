@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import itertools
-from datetime import date, datetime
+from datetime import datetime
 
 import numpy as np
 import numpy.ma as ma
@@ -165,8 +165,8 @@ def test_is_deck_valid_list():
         [-91.0, 0.0, qc.failed],
         [0.0, -180.1, qc.failed],
         [0.0, 360.1, qc.failed],
-        [None, 0.0, 2],
-        [0.0, None, 2],
+        [None, 0.0, qc.untestable],
+        [0.0, None, qc.untestable],
     ],
 )
 def test_do_position_check(latitude, longitude, expected):
@@ -192,9 +192,9 @@ def _test_do_position_check_raises_value_error():
         (2024, 2, 29, qc.passed),  # 29th February 2024 PASS
         (2000, 2, 29, qc.passed),  # 29th February 2000 PASS
         (1900, 2, 29, qc.failed),  # 29th February 1900 FAIL
-        (1899, 3, None, 2),  # Missing day UNTESTABLE
-        (None, 1, 1, 2),  # Missing year UNTESTABLE
-        (1850, None, 1, 2),  # Missing month UNTESTABLE
+        (1899, 3, None, qc.untestable),  # Missing day UNTESTABLE
+        (None, 1, 1, qc.untestable),  # Missing year UNTESTABLE
+        (1850, None, 1, qc.untestable),  # Missing month UNTESTABLE
     ],
 )
 def test_do_date_check(year, month, day, expected):
@@ -219,9 +219,9 @@ def test_do_date_chec_using_date(year, month, day, expected):
 def _test_do_date_check_raises_value_error():
     # Make sure that an exception is raised if year or month is set to None
     with pytest.raises(ValueError):
-        _ = do_date_check(None, 1, 1)
+        _ = do_date_check(year=None, month=1, day=1)
     with pytest.raises(ValueError):
-        _ = do_date_check(1850, None, 1)
+        _ = do_date_check(year=1850, month=None, day=1)
 
 
 @pytest.mark.parametrize(
@@ -500,7 +500,7 @@ def test_humidity_blacklist():
         if platform_type in [0, 1, 2, 3, 4, 5, 6, 8, 9, 10, 15]:
             assert result == qc.passed
         else:
-            assert result == 1
+            assert result == qc.failed
 
 
 @pytest.mark.parametrize(
@@ -655,7 +655,7 @@ def test_do_air_temperature_climatology_plus_stdev_check(
 
 
 @pytest.mark.parametrize(
-    "dpt, expected", [(5.6, 0), (None, 1), (np.nan, 1)]
+    "dpt, expected", [(5.6, qc.passed), (None, qc.failed), (np.nan, qc.failed)]
 )  # not sure if np.nan should trigger FAIL
 def test_do_dpt_missing_value_check(dpt, expected):
     assert do_dpt_missing_value_check(dpt) == expected
