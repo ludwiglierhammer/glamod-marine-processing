@@ -46,7 +46,7 @@ from glamod_marine_processing.qc_suite.modules.next_level_qc import (
 def testdata():
     dataset = "ICOADS_R3.0.2T"
     _settings = get_settings(dataset)
-    cache_dir = f"./Eqc/{dataset}/qc/{_settings.deck}"
+    cache_dir = f".pytest_cache/Eqc/{dataset}/qc/{_settings.deck}"
     tables = [
         "header",
         "observations-at",
