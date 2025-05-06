@@ -16,6 +16,7 @@ from glamod_marine_processing.qc_suite.modules.icoads_identify import (
 from glamod_marine_processing.qc_suite.modules.next_level_qc import (
     do_anomaly_check,
     do_climatology_plus_stdev_check,
+    do_climatology_plus_stdev_plus_lowbar_check,
     do_date_check,
     do_day_check,
     do_hard_limit_check,
@@ -377,6 +378,53 @@ def test_do_air_temperature_climatology_plus_stdev_check(testdata):
             qc.passed,
             qc.passed,
             qc.passed,
+        ]
+    )
+    pd.testing.assert_series_equal(results, expected)
+
+
+def test_do_slp_climatology_plus_stdev_plus_lowbar_check(testdata):
+    db_ = testdata["observations-slp"].copy()
+    db_.data["climatology"] = [
+        1013.25,
+        1013.75,
+        1014.00,
+        1013.25,
+        1013.75,
+        1014.00,
+        1013.25,
+        1013.75,
+        1014.00,
+        1013.25,
+        1013.75,
+        1014.00,
+        1013.25,
+    ]
+    results = db_.apply(
+        lambda row: do_climatology_plus_stdev_plus_lowbar_check(
+            value=row["observation_value"],
+            climatology=row["climatology"],
+            stdev=1.0,
+            limit=3.0,
+            lowbar=10.0,
+        ),
+        axis=1,
+    )
+    expected = pd.Series(
+        [
+            qc.failed,
+            qc.failed,
+            qc.passed,
+            qc.failed,
+            qc.passed,
+            qc.failed,
+            qc.failed,
+            qc.failed,
+            qc.failed,
+            qc.failed,
+            qc.failed,
+            qc.failed,
+            qc.failed,
         ]
     )
     pd.testing.assert_series_equal(results, expected)

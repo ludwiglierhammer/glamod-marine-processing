@@ -25,6 +25,7 @@ from glamod_marine_processing.qc_suite.modules.next_level_qc import (
     _split_date,
     do_anomaly_check,
     do_climatology_plus_stdev_check,
+    do_climatology_plus_stdev_plus_lowbar_check,
     do_date_check,
     do_day_check,
     do_hard_limit_check,
@@ -636,6 +637,79 @@ def test_do_air_temperature_climatology_plus_stdev_check(
             at_stdev,
             minmax_standard_deviation,
             maximum_standardised_anomaly,
+        )
+        == expected
+    )
+
+
+@pytest.mark.parametrize(
+    "slp, slp_climatology, slp_stdev, limit, lowbar, expected",
+    [
+        (
+            5.6,
+            2.2,
+            3.3,
+            1.0,
+            2.0,
+            qc.passed,
+        ),
+        (
+            15.6,
+            0.6,
+            5.0,
+            1.0,
+            2.0,
+            qc.failed,
+        ),
+        (
+            1.0,
+            0.0,
+            0.1,
+            1.0,
+            2.0,
+            qc.passed,
+        ),
+        (
+            15.0,
+            0.0,
+            25.0,
+            1.0,
+            2.0,
+            qc.failed,
+        ),
+        (
+            None,
+            2.2,
+            3.3,
+            1.0,
+            2.0,
+            qc.failed,
+        ),
+        (
+            np.nan,
+            2.2,
+            3.3,
+            1.0,
+            2.0,
+            qc.failed,  # not sure if np.nan should trigger FAIL
+        ),
+    ],
+)
+def test_do_slp_climatology_plus_stdev_plus_lowbar_check(
+    slp,
+    slp_climatology,
+    slp_stdev,
+    limit,
+    lowbar,
+    expected,
+):
+    assert (
+        do_climatology_plus_stdev_plus_lowbar_check(
+            slp,
+            slp_climatology,
+            slp_stdev,
+            limit,
+            lowbar,
         )
         == expected
     )
