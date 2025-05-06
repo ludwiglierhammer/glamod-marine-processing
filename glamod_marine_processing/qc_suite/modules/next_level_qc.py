@@ -239,71 +239,69 @@ def do_day_check(
     return failed
 
 
-def do_air_temperature_missing_value_check(at: float) -> int:
+def do_missing_value_check(value: float) -> int:
     """
-    Check that air temperature value exists
+    Check that value is not None or NaN.
 
     Parameters
     ----------
-    at : float
-        Air temperature
+    value : float
+        Value to be checked
 
     Returns
     -------
     int
         1 if value is missing, 0 otherwise
     """
-    return qc.isvalid(at)
+    return qc.isvalid(value)
 
 
-def do_air_temperature_anomaly_check(
-    at: float, at_climatology: float, maximum_anomaly: float
-) -> int:
+def do_anomaly_check(value: float, climatology: float, maximum_anomaly: float) -> int:
     """
-    Check that the air temperature is within the prescribed distance from climatology/
+    Check that the value is within the prescribed distance from climatology/
 
     Parameters
     ----------
-    at : float
-        Air temperature
-    at_climatology: float
-        Climatological air temperature value
+    value : float
+        Value to be checked
+    climatology: float
+        Reference climatological value
     maximum_anomaly : float
         Maximum_anomaly allowed anomaly
 
     Returns
     -------
     int
-        1 if air temperature anomaly is outside allowed bounds, 0 otherwise
+        1 if value anomaly is outside allowed bounds, 0 otherwise
     """
-    return qc.climatology_check(at, at_climatology, maximum_anomaly)
+    return qc.climatology_check(value, climatology, maximum_anomaly)
 
 
-def do_air_temperature_no_normal_check(at_climatology: float | None) -> int:
+def do_no_normal_check(climatology: float | None) -> int:
     """
     Check that climatological value is present
 
     Parameters
     ----------
-    at_climatology : float or None
-        Air temperature climatology value
+    climatology : float or None
+        Climatology value
 
     Returns
     -------
     int
         1 if climatology value is missing, 0 otherwise
     """
-    return qc.isvalid(at_climatology)
+    return qc.isvalid(climatology)
 
 
-def do_air_temperature_hard_limit_check(at: float, hard_limits: list) -> int:
+def do_hard_limit_check(value: float, hard_limits: list) -> int:
     """
-    Check that air temperature is within hard limits specified by "hard_limits".
+    Check that value is within hard limits specified by "hard_limits".
 
     Parameters
     ----------
-    at : float
-        Air temperature to be checked.
+    value : float
+        Value to be checked.
     hard_limits : list
         2-element list containing lower and upper hard limits for the QC check.
 
@@ -312,33 +310,33 @@ def do_air_temperature_hard_limit_check(at: float, hard_limits: list) -> int:
     int
         1 if air temperature is outside hard limits, 0 otherwise
     """
-    return qc.hard_limit(at, hard_limits)
+    return qc.hard_limit(value, hard_limits)
 
 
-def do_air_temperature_climatology_plus_stdev_check(
-    at: float,
-    at_climatology: float,
-    at_stdev: float,
+def do_climatology_plus_stdev_check(
+    value: float,
+    climatology: float,
+    stdev: float,
     minmax_standard_deviation: list,
     maximum_standardised_anomaly: float,
 ) -> int:
-    """Check that standardised air temperature anomaly is within specified range.
+    """Check that standardised value anomaly is within specified range.
 
-    Temperature is converted into a standardised anomaly by subtracting the climatological normal and dividing by
+    Value is converted into a standardised anomaly by subtracting the climatological normal and dividing by
     the climatological standard deviation. If the climatological standard deviation is outside the range specified by
     "minmax_standard_deviation" then the standard deviation is set to whichever of the lower or upper limits is
     closest. The test fails if the standardised anomaly is larger than the "maximum_standardised_anomaly".
 
     Parameters
     ----------
-    at : float
-        Air temperature.
-    at_climatology : float
-        Climatological normal of air temperatures.
-    at_stdev : float
-        Climatological standard deviation of air temperatures.
+    value : float
+        Value to be checked.
+    climatology : float
+        Climatological normal.
+    stdev : float
+        Climatological standard deviation.
     minmax_standard_deviation : list
-        2-element list containing lower and upper limits for standard deviation. If the at_stdev is outside these
+        2-element list containing lower and upper limits for standard deviation. If the stdev is outside these
         limits, at_stdev will be set to the nearest limit.
     maximum_standardised_anomaly : float
         Largest allowed standardised anomaly
@@ -346,97 +344,15 @@ def do_air_temperature_climatology_plus_stdev_check(
     Returns
     -------
     int
-        Returns 1 if standardised temperature anomaly is outside specified range, 0 otherwise.
+        Returns 1 if standardised value anomaly is outside specified range, 0 otherwise.
     """
     return qc.climatology_plus_stdev_check(
-        at,
-        at_climatology,
-        at_stdev,
+        value,
+        climatology,
+        stdev,
         minmax_standard_deviation,
         maximum_standardised_anomaly,
     )
-
-
-"""
-Replaced the do_base_mat_qc by four separate functions see above
-"""
-
-
-def do_dpt_climatology_plus_stdev_check(
-    dpt: float,
-    dpt_climatology: float,
-    dpt_stdev: float,
-    minmax_standard_deviation: float,
-    maximum_standardised_anomaly: float,
-) -> int:
-    """Check that standardised dewpoint temperature anomaly is within specified range.
-
-    Temperature is converted into a standardised anomaly by subtracting the climatological normal and dividing by
-    the climatological standard deviation. If the climatological standard deviation is outside the range specified in
-    "minmax_standard_deviation" then the standard deviation is set to whichever of the lower or upper limits is
-    closest. The test fails if the standardised anomaly is larger than the "maximum_standardised_anomaly".
-
-    Parameters
-    ----------
-    dpt : float
-        Dewpoint temperature.
-    dpt_climatology : float
-        Climatological normal of dewpoint temperatures.
-    dpt_stdev : float
-        Climatological standard deviation of dewpoint temperatures.
-    minmax_standard_deviation : float
-        2-element list containing lower and upper limits for standard deviation. If the at_stdev is outside these
-        limits, at_stdev will be set to the nearest limit.
-    maximum_standardised_anomaly : float
-        Largest allowed standardised anomaly
-
-    Returns
-    -------
-    int
-        Returns 1 if standardised temperature anomaly is outside specified range, 0 otherwise.
-    """
-    return qc.climatology_plus_stdev_check(
-        dpt,
-        dpt_climatology,
-        dpt_stdev,
-        minmax_standard_deviation,
-        maximum_standardised_anomaly,
-    )
-
-
-def do_dpt_missing_value_check(dpt: float) -> int:
-    """
-    Check that dew point temperature value exists
-
-
-    Parameters
-    ----------
-    dpt : float
-        Dew point temperature
-
-    Returns
-    -------
-    int
-        1 if value is missing, 0 otherwise
-    """
-    return qc.isvalid(dpt)
-
-
-def do_dpt_no_normal_check(dpt_climatology: float) -> int:
-    """
-    Check that climatological value is present
-
-    Parameters
-    ----------
-    dpt_climatology : float
-        Dew point temperature climatology value
-
-    Returns
-    -------
-    int
-        1 if climatology value is missing, 0 otherwise
-    """
-    return qc.isvalid(dpt_climatology)
 
 
 def do_supersaturation_check(dpt: float, at2: float) -> int:
@@ -463,28 +379,6 @@ def do_supersaturation_check(dpt: float, at2: float) -> int:
     return passed
 
 
-"""
-Replaced do_base_dpt_qc with four new functions
-"""
-
-
-def do_sst_missing_value_check(sst):
-    """
-    Check that sea surface temperature value exists
-
-    Parameters
-    ----------
-    sst : float
-        Sea surface temperature
-
-    Returns
-    -------
-    int
-        1 if value is missing, 0 otherwise
-    """
-    return qc.isvalid(sst)
-
-
 def do_sst_freeze_check(
     sst: float, freezing_point: float, freeze_check_n_sigma: float
 ) -> int:
@@ -494,7 +388,7 @@ def do_sst_freeze_check(
     Parameters
     ----------
     sst : float
-        Sea surface temperature
+        Sea surface temperature to be checked
     freezing_point : float
         Freezing point of seawater to be used in check
     freeze_check_n_sigma : float
@@ -507,118 +401,6 @@ def do_sst_freeze_check(
         Return 1 if SST below freezing, 0 otherwise
     """
     return qc.sst_freeze_check(sst, 0.0, freezing_point, freeze_check_n_sigma)
-
-
-def do_sst_anomaly_check(
-    sst: float, sst_climatology: float, maximum_anomaly: float
-) -> int:
-    """
-    Check that the sea surface temperature is within the prescribed distance from climatology/
-
-    Parameters
-    ----------
-    sst : float
-        Sea surface temperature
-    sst_climatology: float
-        Climatological sea surface temperature value
-    maximum_anomaly: float
-        Largest allowed anomaly
-
-    Returns
-    -------
-    int
-        1 if sea surface temperature anomaly is outside allowed bounds, 0 otherwise
-    """
-    return qc.climatology_check(sst, sst_climatology, maximum_anomaly)
-
-
-def do_sst_no_normal_check(sst_climatology: float) -> int:
-    """
-    Check that climatological value is present
-
-    Parameters
-    ----------
-    sst_climatology : float
-        Sea surface temperature climatology value
-
-    Returns
-    -------
-    int
-        1 if climatology value is missing, 0 otherwise
-    """
-    return qc.isvalid(sst_climatology)
-
-
-def do_wind_speed_missing_value_check(wind_speed: float | None) -> int:
-    """Check that wind speed value exists
-
-    Parameters
-    ----------
-    wind_speed : float or None
-        Wind speed
-
-    Returns
-    -------
-    int
-        Returns 1 if wind speed is missing, 0 otherwise.
-    """
-    return qc.isvalid(wind_speed)
-
-
-def do_wind_speed_hard_limit_check(
-    wind_speed: float | None, hard_limits: list = [0.0, 50.0]
-) -> int:
-    """Check that wind speed is within hard limits specified by "hard_limits".
-
-    Parameters
-    ----------
-    wind_speed : float or None
-        Wind speed to be checked
-    hard_limits : list
-        2-element list containing lower and upper limits for QC check
-
-    Returns
-    -------
-    int
-        Returns 1 if wind speed is outside of hard limits, 0 otherwise.
-    """
-    return qc.hard_limit(wind_speed, hard_limits)
-
-
-def do_wind_direction_missing_value_check(wind_direction: int | None) -> int:
-    """Check that wind direction value exists
-
-    Parameters
-    ----------
-    wind_direction : int or None
-        Wind direction
-
-    Returns
-    -------
-    int
-        Returns 1 if wind speed is missing, 0 otherwise.
-    """
-    return qc.isvalid(wind_direction)
-
-
-def do_wind_direction_hard_limit_check(
-    wind_direction: int | None, hard_limits: list = [0, 360]
-) -> int:
-    """Check that wind direction is within hard limits specified by "hard_limits".
-
-    Parameters
-    ----------
-    wind_direction : int or None
-        Wind direction to be checked
-    hard_limits : list
-        2-element list containing lower and upper limits for QC check
-
-    Returns
-    -------
-    int
-        Returns 1 if wind speed is outside of hard limits, 0 otherwise.
-    """
-    return qc.hard_limit(wind_direction, hard_limits)
 
 
 def do_wind_consistency_check(

@@ -23,28 +23,18 @@ from glamod_marine_processing.qc_suite.modules.icoads_identify import (
 )
 from glamod_marine_processing.qc_suite.modules.next_level_qc import (
     _split_date,
-    do_air_temperature_anomaly_check,
-    do_air_temperature_climatology_plus_stdev_check,
-    do_air_temperature_hard_limit_check,
-    do_air_temperature_missing_value_check,
-    do_air_temperature_no_normal_check,
+    do_anomaly_check,
+    do_climatology_plus_stdev_check,
     do_date_check,
     do_day_check,
-    do_dpt_climatology_plus_stdev_check,
-    do_dpt_missing_value_check,
-    do_dpt_no_normal_check,
+    do_hard_limit_check,
+    do_missing_value_check,
+    do_no_normal_check,
     do_position_check,
-    do_sst_anomaly_check,
     do_sst_freeze_check,
-    do_sst_missing_value_check,
-    do_sst_no_normal_check,
     do_supersaturation_check,
     do_time_check,
     do_wind_consistency_check,
-    do_wind_direction_hard_limit_check,
-    do_wind_direction_missing_value_check,
-    do_wind_speed_hard_limit_check,
-    do_wind_speed_missing_value_check,
 )
 
 
@@ -86,8 +76,6 @@ def test_is_in_valid_list(valid_list, expected_true):
 
 
 def test_is_buoy():
-    # For all platform types in ICOADS, flag set to 1 only if platform type corresponds to drifting buoy or
-    # drifting buoy
     for pt in range(0, 47):
         result = is_buoy(pt)
         if pt in [6, 7]:
@@ -124,8 +112,6 @@ def test_is_drifter_valid_list():
 
 
 def test_is_ship():
-    # For all platform types in ICOADS, flag set to 1 only if platform type corresponds to drifting buoy or
-    # drifting buoy
     for pt in range(0, 47):
         result = is_ship(pt)
         if pt in [0, 1, 2, 3, 4, 5, 10, 11, 12, 17]:
@@ -215,7 +201,7 @@ def test_do_date_check(year, month, day, expected):
         (2000, 2, 29, qc.passed),  # 29th February 2000 PASS
     ],
 )
-def test_do_date_chec_using_date(year, month, day, expected):
+def test_do_date_check_using_date(year, month, day, expected):
     result = do_date_check(date=datetime(year, month, day, 0))
     assert result == expected
 
@@ -544,7 +530,7 @@ def test_do_wind_blacklist():
     "at, expected", [(5.6, qc.passed), (None, qc.failed), (np.nan, qc.failed)]
 )  # not sure if np.nan should trigger FAIL
 def test_do_air_temperature_missing_value_check(at, expected):
-    assert do_air_temperature_missing_value_check(at) == expected
+    assert do_missing_value_check(at) == expected
 
 
 @pytest.mark.parametrize(
@@ -558,10 +544,7 @@ def test_do_air_temperature_missing_value_check(at, expected):
 def test_do_air_temperature_anomaly_check(
     at, at_climatology, maximum_anomaly, expected
 ):
-    assert (
-        do_air_temperature_anomaly_check(at, at_climatology, maximum_anomaly)
-        == expected
-    )
+    assert do_anomaly_check(at, at_climatology, maximum_anomaly) == expected
 
 
 @pytest.mark.parametrize(
@@ -569,7 +552,7 @@ def test_do_air_temperature_anomaly_check(
     [(5.5, qc.passed), (None, qc.failed), (np.nan, qc.failed)],
 )  # not sure if np.nan should trigger FAIL
 def test_do_air_temperature_no_normal_check(at_climatology, expected):
-    assert do_air_temperature_no_normal_check(at_climatology) == expected
+    assert do_no_normal_check(at_climatology) == expected
 
 
 @pytest.mark.parametrize(
@@ -582,7 +565,7 @@ def test_do_air_temperature_no_normal_check(at_climatology, expected):
     ],
 )
 def test_do_air_temperature_hard_limit_check(at, hard_limits, expected):
-    assert do_air_temperature_hard_limit_check(at, hard_limits) == expected
+    assert do_hard_limit_check(at, hard_limits) == expected
 
 
 @pytest.mark.parametrize(
@@ -647,7 +630,7 @@ def test_do_air_temperature_climatology_plus_stdev_check(
     expected,
 ):
     assert (
-        do_air_temperature_climatology_plus_stdev_check(
+        do_climatology_plus_stdev_check(
             at,
             at_climatology,
             at_stdev,
@@ -662,7 +645,7 @@ def test_do_air_temperature_climatology_plus_stdev_check(
     "dpt, expected", [(5.6, qc.passed), (None, qc.failed), (np.nan, qc.failed)]
 )  # not sure if np.nan should trigger FAIL
 def test_do_dpt_missing_value_check(dpt, expected):
-    assert do_dpt_missing_value_check(dpt) == expected
+    assert do_missing_value_check(dpt) == expected
 
 
 @pytest.mark.parametrize(
@@ -727,7 +710,7 @@ def test_do_dpt_climatology_plus_stdev_check(
     expected,
 ):
     assert (
-        do_dpt_climatology_plus_stdev_check(
+        do_climatology_plus_stdev_check(
             dpt,
             dpt_climatology,
             dpt_stdev,
@@ -747,7 +730,7 @@ def test_do_dpt_climatology_plus_stdev_check(
     ],  # not sure if np.nan should trigger FAIL
 )
 def test_do_dpt_temperature_no_normal_check(dpt_climatology, expected):
-    assert do_dpt_no_normal_check(dpt_climatology) == expected
+    assert do_no_normal_check(dpt_climatology) == expected
 
 
 @pytest.mark.parametrize(
@@ -768,7 +751,7 @@ def test_do_supersaturation_check(dpt, at, expected):
     "sst, expected", [(5.6, qc.passed), (None, qc.failed), (np.nan, qc.failed)]
 )  # not sure if np.nan should trigger FAIL
 def test_do_sst_missing_value_check(sst, expected):
-    assert do_sst_missing_value_check(sst) == expected
+    assert do_missing_value_check(sst) == expected
 
 
 @pytest.mark.parametrize(
@@ -780,7 +763,7 @@ def test_do_sst_missing_value_check(sst, expected):
     ],
 )
 def test_do_sst_anomaly_check(sst, sst_climatology, maximum_anomaly, expected):
-    assert do_sst_anomaly_check(sst, sst_climatology, maximum_anomaly) == expected
+    assert do_anomaly_check(sst, sst_climatology, maximum_anomaly) == expected
 
 
 @pytest.mark.parametrize(
@@ -792,7 +775,7 @@ def test_do_sst_anomaly_check(sst, sst_climatology, maximum_anomaly, expected):
     ],  # not sure if np.nan should trigger FAIL
 )
 def test_do_sst_no_normal_check(sst_climatology, expected):
-    assert do_sst_no_normal_check(sst_climatology) == expected
+    assert do_no_normal_check(sst_climatology) == expected
 
 
 @pytest.mark.parametrize(
@@ -812,7 +795,7 @@ def test_do_sst_freeze_check(sst, freezing_point, freeze_check_n_sigma, expected
     "ws, expected", [(5.6, qc.passed), (None, qc.failed), (np.nan, qc.failed)]
 )  # not sure if np.nan should trigger FAIL
 def test_do_wind_speed_missing_value_check(ws, expected):
-    assert do_wind_speed_missing_value_check(ws) == expected
+    assert do_missing_value_check(ws) == expected
 
 
 @pytest.mark.parametrize(
@@ -825,28 +808,14 @@ def test_do_wind_speed_missing_value_check(ws, expected):
     ],
 )
 def test_do_wind_speed_hard_limit_check(ws, hard_limits, expected):
-    assert do_wind_speed_hard_limit_check(ws, hard_limits=hard_limits) == expected
-
-
-@pytest.mark.parametrize(
-    "ws, expected",
-    [
-        (5.6, qc.passed),
-        (-5.6, qc.failed),
-        (60.0, qc.failed),
-        (None, qc.failed),
-        (np.nan, qc.failed),
-    ],
-)
-def test_do_wind_speed_hard_limit_check_no_params(ws, expected):
-    assert do_wind_speed_hard_limit_check(ws) == expected
+    assert do_hard_limit_check(ws, hard_limits=hard_limits) == expected
 
 
 @pytest.mark.parametrize(
     "wd, expected", [(56, qc.passed), (None, qc.failed), (np.nan, qc.failed)]
 )  # not sure if np.nan should trigger FAIL
 def test_do_wind_direction_missing_value_check(wd, expected):
-    assert do_wind_direction_missing_value_check(wd) == expected
+    assert do_missing_value_check(wd) == expected
 
 
 @pytest.mark.parametrize(
@@ -859,21 +828,7 @@ def test_do_wind_direction_missing_value_check(wd, expected):
     ],
 )
 def test_do_wind_direction_hard_limit_check(wd, hard_limits, expected):
-    assert do_wind_direction_hard_limit_check(wd, hard_limits=hard_limits) == expected
-
-
-@pytest.mark.parametrize(
-    "wd, expected",
-    [
-        (56, qc.passed),
-        (-56, qc.failed),
-        (600, qc.failed),
-        (None, qc.failed),
-        (np.nan, qc.failed),
-    ],
-)
-def test_do_wind_direction_hard_limit_check_no_params(wd, expected):
-    assert do_wind_direction_hard_limit_check(wd) == expected
+    assert do_hard_limit_check(wd, hard_limits=hard_limits) == expected
 
 
 @pytest.mark.parametrize(
