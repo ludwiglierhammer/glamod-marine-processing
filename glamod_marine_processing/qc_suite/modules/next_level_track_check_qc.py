@@ -40,7 +40,7 @@ def spike_check(df: pd.DataFrame) -> pd.DataFrame:
 
     n_neighbours = 5
 
-    numobs = len(df)
+    number_of_obs = len(df)
 
     if df.iloc[0].pt in [6, 7]:
         delta_t = buoy_delta_t
@@ -50,15 +50,15 @@ def spike_check(df: pd.DataFrame) -> pd.DataFrame:
     gradient_violations = []
     count_gradient_violations = []
 
-    spike_qc = np.zeros(numobs)
+    spike_qc = np.zeros(number_of_obs)  # type: np.ndarray
 
-    for t1 in range(numobs):
+    for t1 in range(number_of_obs):
 
         violations_for_this_report = []
         count_violations_this_report = 0.0
 
         lo = max(0, t1 - n_neighbours)
-        hi = min(numobs, t1 + n_neighbours + 1)
+        hi = min(number_of_obs, t1 + n_neighbours + 1)
 
         for t2 in range(lo, hi):
 
@@ -91,7 +91,7 @@ def spike_check(df: pd.DataFrame) -> pd.DataFrame:
 
     count = 0
     while np.sum(count_gradient_violations) > 0.0:
-        most_fails = np.argmax(count_gradient_violations)
+        most_fails = int(np.argmax(count_gradient_violations))
         spike_qc[most_fails] = 1
 
         for index in gradient_violations[most_fails]:
@@ -152,30 +152,43 @@ def row_difference(
     return speed, distance, course, timediff
 
 
-def calculate_speed_course_distance_time_difference(df):
-    """The speeds and courses calculated using consecutive reports."""
-    numobs = len(df)
+def calculate_speed_course_distance_time_difference(df: pd.DataFrame) -> pd.DataFrame:
+    """Calculates speeds, courses, distances and time differences using consecutive reports.
 
-    speed = np.empty(numobs)
-    course = np.empty(numobs)
-    distance = np.empty(numobs)
-    time_diff = np.empty(numobs)
+    Parameters
+    ----------
+    df : pd.DataFrame
+        Input DataFrame for which the speeds, courses, distances, and time differences are to be calculated.
+
+    Returns
+    -------
+    pd.DataFrame
+        Returns the DataFrame with additional columns "speed", "course", "distance", "time_diff"
+    """
+    number_of_obs = len(df)
+
+    speed = np.empty(number_of_obs)  # type: np.ndarray
+    course = np.empty(number_of_obs)  # type: np.ndarray
+    distance = np.empty(number_of_obs)  # type: np.ndarray
+    time_diff = np.empty(number_of_obs)  # type: np.ndarray
 
     speed.fill(np.nan)
     course.fill(np.nan)
     distance.fill(np.nan)
     time_diff.fill(np.nan)
 
-    if numobs > 1:
-        for i in range(1, numobs):
+    if number_of_obs > 1:
+        for i in range(1, number_of_obs):
             row2 = df.iloc[i]
             row1 = df.iloc[i - 1]
-            shpspd, shpdis, shpdir, tdiff = row_difference(row2, row1)
+            ship_speed, ship_distance, ship_direction, ship_time_difference = (
+                row_difference(row2, row1)
+            )
 
-            speed[i] = shpspd
-            course[i] = shpdir
-            distance[i] = shpdis
-            time_diff[i] = tdiff
+            speed[i] = ship_speed
+            course[i] = ship_direction
+            distance[i] = ship_distance
+            time_diff[i] = ship_time_difference
 
     df["speed"] = speed
     df["course"] = course
@@ -186,29 +199,42 @@ def calculate_speed_course_distance_time_difference(df):
 
 
 def calc_alternate_speeds(df):
-    """The speeds and courses can also be calculated using alternating reports."""
-    numobs = len(df)
+    """Calculates speeds, courses, distances and time differences using alternating reports.
 
-    alt_speed = np.empty(numobs)
-    alt_course = np.empty(numobs)
-    alt_distance = np.empty(numobs)
-    alt_time_diff = np.empty(numobs)
+    Parameters
+    ----------
+    df : pd.DataFrame
+        Input DataFrame for which the speeds, courses, distances, and time differences are to be calculated.
+
+    Returns
+    -------
+    pd.DataFrame
+        Returns the DataFrame with additional columns "alt_speed", "alt_course", "alt_distance", "alt_time_diff"
+    """
+    number_of_obs = len(df)
+
+    alt_speed = np.empty(number_of_obs)  # type: np.ndarray
+    alt_course = np.empty(number_of_obs)  # type: np.ndarray
+    alt_distance = np.empty(number_of_obs)  # type: np.ndarray
+    alt_time_diff = np.empty(number_of_obs)  # type: np.ndarray
 
     alt_speed.fill(np.nan)
     alt_course.fill(np.nan)
     alt_distance.fill(np.nan)
     alt_time_diff.fill(np.nan)
 
-    if numobs > 2:
-        for i in range(1, numobs - 1):
+    if number_of_obs > 2:
+        for i in range(1, number_of_obs - 1):
             row2 = df.iloc[i + 1]
             row1 = df.iloc[i - 1]
-            shpspd, shpdis, shpdir, tdiff = row_difference(row1, row2)
+            ship_speed, ship_distance, ship_direction, ship_time_difference = (
+                row_difference(row1, row2)
+            )
 
-            alt_speed[i] = shpspd
-            alt_course[i] = shpdir
-            alt_distance[i] = shpdis
-            alt_time_diff[i] = tdiff
+            alt_speed[i] = ship_speed
+            alt_course[i] = ship_direction
+            alt_distance[i] = ship_distance
+            alt_time_diff[i] = ship_time_difference
 
     df["alt_speed"] = alt_speed
     df["alt_course"] = alt_course
@@ -218,19 +244,25 @@ def calc_alternate_speeds(df):
     return df
 
 
-def distr1(df):
-    """
-    calculate what the distance is between the projected position (based on the reported
+def forward_discrepancy(df: pd.DataFrame) -> list:
+    """Calculate what the distance is between the projected position (based on the reported
     speed and heading at the current and previous time steps) and the actual position. The
     observations are taken in time order.
 
-    :return: list of distances from estimated positions
-    :rtype: list of floats
-
     This takes the speed and direction reported by the ship and projects it forwards half a
-    time step, it then projects it forwards another half time step using the speed and
+    time step, it then projects it forwards another half time-step using the speed and
     direction for the next report, to which the projected location
     is then compared. The distances between the projected and actual locations is returned
+
+    Parameters
+    ----------
+    df : pd.DataFrame
+        DataFrame for which the discrepancies are to be calculated.
+
+    Returns
+    -------
+    list
+        list of distances from estimated positions
     """
     nobs = len(df)
 
@@ -268,12 +300,12 @@ def distr1(df):
                 df.iloc[i].time_diff,
             )
             # apply increments to the lat and lon at i-1
-            alatx = df.iloc[i - 1].lat + lat1 + lat2
-            alonx = df.iloc[i - 1].lon + lon1 + lon2
+            updated_latitude = df.iloc[i - 1].lat + lat1 + lat2
+            updated_longitude = df.iloc[i - 1].lon + lon1 + lon2
 
             # calculate distance between calculated position and the second reported position
             discrepancy = sg.sphere_distance(
-                df.iloc[i].lat, df.iloc[i].lon, alatx, alonx
+                df.iloc[i].lat, df.iloc[i].lon, updated_latitude, updated_longitude
             )
 
             distance_from_est_location.append(discrepancy)
@@ -285,7 +317,7 @@ def distr1(df):
     return distance_from_est_location
 
 
-def distr2(df):
+def backward_discrepancy(df) -> list:
     """Calculate what the distance is between the projected position (based on the reported speed and
     heading at the current and previous time steps) and the actual position. The calculation proceeds from the
     final, later observation to the first (in contrast to distr1 which runs in time order)
@@ -297,6 +329,7 @@ def distr2(df):
     Parameters
     ----------
     df : pd.DataFrame
+        DataFrame for which the discrepancies are to be calculated.
 
     Returns
     -------
@@ -358,7 +391,7 @@ def distr2(df):
     return distance_from_est_location[::-1]
 
 
-def midpt(df: pd.DataFrame) -> list:
+def calculate_midpoint(df: pd.DataFrame) -> list:
     """Interpolate between alternate reports and compare the interpolated location to the actual location. e.g.
     take difference between reports 2 and 4 and interpolate to get an estimate for the position at the time
     of report 3. Then compare the estimated and actual positions at the time of report 3.
@@ -381,8 +414,8 @@ def midpt(df: pd.DataFrame) -> list:
     midpoint_discrepancies = [None]
 
     for i in range(1, nobs - 1):
-        t0 = df.iloc[i].time_diff  # self.getvar(i, "time_diff")
-        t1 = df.iloc[i + 1].time_diff  # self.getvar(i + 1, "time_diff")
+        t0 = df.iloc[i].time_diff
+        t1 = df.iloc[i + 1].time_diff
 
         if t0 is not None and t1 is not None:
             if t0 + t1 != 0:
@@ -395,7 +428,7 @@ def midpt(df: pd.DataFrame) -> list:
         if fraction_of_time_diff > 1.0:
             print(fraction_of_time_diff, t0, t1)
 
-        estimated_lat_at_midpt, estimated_lon_at_midpt = sg.intermediate_point(
+        estimated_lat_at_midpoint, estimated_lon_at_midpoint = sg.intermediate_point(
             df.iloc[i - 1].lat,
             df.iloc[i - 1].lon,
             df.iloc[i + 1].lat,
@@ -406,8 +439,8 @@ def midpt(df: pd.DataFrame) -> list:
         discrepancy = sg.sphere_distance(
             df.iloc[i].lat,
             df.iloc[i].lon,
-            estimated_lat_at_midpt,
-            estimated_lon_at_midpt,
+            estimated_lat_at_midpoint,
+            estimated_lon_at_midpoint,
         )
 
         midpoint_discrepancies.append(discrepancy)
@@ -417,7 +450,7 @@ def midpt(df: pd.DataFrame) -> list:
     return midpoint_discrepancies
 
 
-def track_check(df: pd.DataFrame):
+def track_check(df: pd.DataFrame) -> pd.DataFrame:
     """Perform one pass of the track check.  This is an implementation of the MDS track check code
     which was originally written in the 1990s. I don't know why this piece of historic trivia so exercises
     my mind, but it does: the 1990s! I wish my code would last so long.
@@ -447,14 +480,14 @@ def track_check(df: pd.DataFrame):
 
     # no obs in, no qc outcomes out
     if nobs == 0:
-        return
+        return df
 
     # Generic ids and buoys get a free pass on the track check
     if qc.id_is_generic(df.iloc[0].id, df.iloc[0].date.year) or df.iloc[0].pt in [6, 7]:
         for i in range(0, nobs):
             df["trk"] = np.zeros(nobs)
             df["few"] = np.zeros(nobs)
-        return
+        return df
 
     # fewer than three obs - set the fewsome flag
     # deck 720 gets a pass prior to 1891 see
@@ -463,14 +496,11 @@ def track_check(df: pd.DataFrame):
         if df.iloc[0].dck == 720 and df.iloc[0].date.year < 1891:
             df["trk"] = np.zeros(nobs)
             df["few"] = np.zeros(nobs)
-            return
+            return df
         else:
             df["trk"] = np.zeros(nobs)
             df["few"] = np.zeros(nobs) + 1
-            return
-
-    trk = np.zeros(nobs)
-    few = np.zeros(nobs)
+            return df
 
     # work out speeds and distances between alternating points
     df = calc_alternate_speeds(df)
@@ -481,26 +511,20 @@ def track_check(df: pd.DataFrame):
 
     # set speed limits based on modal speed
     amax, amaxx, amin = tc.set_speed_limits(modal_speed)
-    del amaxx
-    del amin
+
     # compare reported speeds and positions if we have them
-    forward_diff_from_estimated = distr1(df)
-    reverse_diff_from_estimated = distr2(df)
+    forward_diff_from_estimated = forward_discrepancy(df)
+    reverse_diff_from_estimated = backward_discrepancy(df)
 
     df["fwd_diff"] = forward_diff_from_estimated
     df["bwd_diff"] = reverse_diff_from_estimated
 
-    try:
-        midpoint_diff_from_estimated = midpt(df)
-    except Exception:
-        print(df.iloc[0].id)
-        assert False
-
+    midpoint_diff_from_estimated = calculate_midpoint(df)
     df["midpt"] = midpoint_diff_from_estimated
 
     # do QC
-    trk = np.zeros(nobs)
-    few = np.zeros(nobs)
+    trk = np.zeros(nobs)  # type: np.ndarray
+    few = np.zeros(nobs)  # type: np.ndarray
 
     for i in range(1, nobs - 1):
         thisqc_a = 0
@@ -570,5 +594,277 @@ def track_check(df: pd.DataFrame):
 
     df["trk"] = trk
     df["few"] = few
+
+    return df
+
+
+def find_saturated_runs(df: pd.DataFrame) -> pd.DataFrame:
+    """Perform checks on persistence of 100% rh while going through the voyage.
+    While going through the voyage repeated strings of 100 %rh (AT == DPT) are noted.
+    If a string extends beyond 20 reports and two days/48 hrs in time then all values are set to
+    fail the repsat qc flag.
+
+    Parameters
+    ----------
+    df : pd.DataFrame
+        DataFrame to be checked
+
+    Returns
+    -------
+    pd.DataFrame
+    """
+    for key in ["dpt", "at", "date"]:
+        if key not in df:
+            raise KeyError(f"{key} not in dataframe")
+
+    min_time_threshold = 48.0  # hours
+    shortest_run = 4  # number of obs
+
+    satcount = []
+
+    numobs = len(df)
+
+    repsat = np.zeros(numobs)  # type: np.ndarray
+
+    for i in range(numobs):
+
+        row = df.iloc[i]
+
+        saturated = row["dpt"] == row["at"]
+
+        if saturated:
+            satcount.append(i)
+        elif not saturated and len(satcount) > shortest_run:
+
+            row2 = df.iloc[satcount[len(satcount) - 1]]
+            row1 = df.iloc[satcount[0]]
+            _, _, _, tdiff = row_difference(row2, row1)
+
+            if tdiff >= min_time_threshold:
+                for loc in satcount:
+                    repsat[loc] = 1
+                satcount = []
+            else:
+                satcount = []
+
+        else:
+            satcount = []
+
+    if len(satcount) > shortest_run:
+        row2 = df.iloc[satcount[len(satcount) - 1]]
+        row1 = df.iloc[satcount[0]]
+        _, _, _, tdiff = row_difference(row2, row1)
+
+        if tdiff >= min_time_threshold:
+            for loc in satcount:
+                repsat[loc] = 1
+
+    df["repsat"] = repsat
+
+    return df
+
+
+def find_multiple_rounded_values(df: pd.DataFrame, intype: str) -> pd.DataFrame:
+    """Find instances when more than "threshold" of the observations are
+    whole numbers and set the 'round' flag. Used in the humidity QC
+    where there are times when the values are rounded and this may
+    have caused a bias.
+
+    Parameters
+    ----------
+    df : pd.DataFrame
+        DataFrame containing data to be checked
+    intype: str
+        Specifies which variable should be quality controlled
+
+    Returns
+    -------
+    pd.DataFrame
+        Returns dataframe with additional column "rounded" containing QC outcomes
+    """
+    allowed_variables = ["sst", "at", "dpt"]
+    if intype not in allowed_variables:
+        raise ValueError(f"{intype} not one of {allowed_variables}")
+
+    min_count = 20
+    threshold = 0.5
+
+    assert 0.0 <= threshold <= 1.0
+
+    numobs = len(df)
+    rounded = np.zeros(numobs)  # type: np.ndarray
+
+    valcount = {}
+    allcount = 0
+
+    for i in range(numobs):
+        row = df.iloc[i]
+        if row[intype] is not None:
+            allcount += 1
+            if str(row[intype]) in valcount:
+                valcount[str(row[intype])].append(i)
+            else:
+                valcount[str(row[intype])] = [i]
+
+    if allcount > min_count:
+        wholenums = 0
+        for key in valcount:
+            if float(key).is_integer():
+                wholenums = wholenums + len(valcount[key])
+
+        if float(wholenums) / float(allcount) >= threshold:
+            for key in valcount:
+                if float(key).is_integer():
+                    for i in valcount[key]:
+                        rounded[i] = 1
+
+    df["rounded"] = rounded
+
+    return df
+
+
+def find_repeated_values(df: pd.DataFrame, intype: str) -> pd.DataFrame:
+    """Find cases where more than a given proportion of SSTs have the same value
+
+    This function goes through a voyage and finds any cases where more than a threshold fraction of
+    the observations have the same values for a specified variable.
+
+
+    Parameters
+    ----------
+    df : pd.DataFrame
+        DataFrame containing data to be checked
+    intype: str
+        Specifies which variable should be quality controlled
+
+    Returns
+    -------
+    pd.DataFrame
+        Returns dataframe with additional column "rep" containing QC outcomes
+    """
+    allowed_variables = ["sst", "at", "dpt", "slp"]
+    if intype not in allowed_variables:
+        raise ValueError(f"{intype} not one of {allowed_variables}")
+
+    threshold = 0.7
+    assert 0.0 <= threshold <= 1.0
+    min_count = 20
+
+    numobs = len(df)
+    rep = np.zeros(numobs)  # type: np.ndarray
+
+    valcount = {}
+    allcount = 0
+
+    for i in range(numobs):
+        row = df.iloc[i]
+        value = row[intype]
+        if value is not None:
+            allcount += 1
+            if str(value) in valcount:
+                valcount[str(value)].append(i)
+            else:
+                valcount[str(value)] = [i]
+
+    if allcount > min_count:
+        for key in valcount:
+            if float(len(valcount[key])) / float(allcount) > threshold:
+                for i in valcount[key]:
+                    rep[i] = 1
+
+    df["rep"] = rep
+
+    return df
+
+
+def iquam_track_check(df: pd.DataFrame) -> pd.DataFrame:
+    """Perform the IQUAM track check as detailed in Xu and Ignatov 2013
+
+    The track check calculates speeds between pairs of observations and
+    counts how many exceed a threshold speed. The ob with the most
+    violations of this limit is flagged as bad and removed from the
+    calculation. Then the next worst is found and removed until no
+    violatios remain.
+
+    Parameters
+    ----------
+    df : pd.DataFrame
+        DataFrame containing data to be track checked.
+
+    Returns
+    -------
+    pd.DataFrame
+        Returns DataFrame with additional column "iquam_track" containing the outcomes of the QC
+    """
+    for key in ["lat", "lon", "id", "date"]:
+        if key not in df:
+            raise KeyError(f"{key} not in dataframe")
+
+    buoy_speed_limit = 15.0  # km/h
+    ship_speed_limit = 60.0  # km/h
+
+    delta_d = 1.11  # 0.1 degrees of latitude
+    delta_t = 0.01  # one hundredth of an hour
+
+    n_neighbours = 5
+
+    numobs = len(df)
+
+    if numobs == 0:
+        return df
+
+    if qc.id_is_generic(df.iloc[0].id, df.iloc[0].date.year):
+        df["iquam_track"] = np.zeros(numobs)
+        return df
+
+    if df.iloc[0].pt in [6, 7]:
+        speed_limit = buoy_speed_limit
+    else:
+        speed_limit = ship_speed_limit
+
+    speed_violations = []
+    count_speed_violations = []
+
+    iquam_track = np.zeros(numobs)  # type: np.ndarray
+
+    for t1 in range(0, numobs):
+        violations_for_this_report = []
+        count_violations_this_report = 0.0
+
+        lo = max(0, t1 - n_neighbours)
+        hi = min(numobs, t1 + n_neighbours + 1)
+
+        for t2 in range(lo, hi):
+
+            row2 = df.iloc[t2]
+            row1 = df.iloc[t1]
+
+            _, distance, _, time_diff = row_difference(row2, row1)
+
+            iquam_condition = max([abs(distance) - delta_d, 0.0]) / (
+                abs(time_diff) + delta_t
+            )
+
+            if iquam_condition > speed_limit:
+                violations_for_this_report.append(t2)
+                count_violations_this_report += 1.0
+
+        speed_violations.append(violations_for_this_report)
+        count_speed_violations.append(count_violations_this_report)
+
+    count = 0
+    while np.sum(count_speed_violations) > 0.0:
+        most_fails = int(np.argmax(count_speed_violations))
+        iquam_track[most_fails] = 1
+
+        for index in speed_violations[most_fails]:
+            if most_fails in speed_violations[index]:
+                speed_violations[index].remove(most_fails)
+                count_speed_violations[index] -= 1.0
+
+        count_speed_violations[most_fails] = 0
+        count += 1
+
+    df["iquam_track"] = iquam_track
 
     return df
