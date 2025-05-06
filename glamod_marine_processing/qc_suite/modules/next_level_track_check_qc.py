@@ -108,7 +108,7 @@ def spike_check(df: pd.DataFrame) -> pd.DataFrame:
 
 
 def row_difference(
-    later_row: pd.DataFrame, earlier_row: pd.DataFrame
+        later_row: pd.DataFrame, earlier_row: pd.DataFrame
 ) -> (float, float, float, float):
     """Subtracting one row from another to return the speed, distance, course and the time difference between the
     two rows. Originally this was coded as a subtraction: later_row minus earlier_row.
@@ -245,11 +245,11 @@ def distr1(df) -> list:
         time_diff = df.iloc[i].time_diff
 
         if (
-            vsi is not None
-            and vsi_minus_one is not None
-            and dsi is not None
-            and dsi_minus_one is not None
-            and time_diff is not None
+                vsi is not None
+                and vsi_minus_one is not None
+                and dsi is not None
+                and dsi_minus_one is not None
+                and time_diff is not None
         ):
             # get increment from initial position
             lat1, lon1 = tc.increment_position(
@@ -316,11 +316,11 @@ def distr2(df) -> list:
         time_diff = df.iloc[i].time_diff
 
         if (
-            vsi is not None
-            and vsi_minus_one is not None
-            and dsi is not None
-            and dsi_minus_one is not None
-            and time_diff is not None
+                vsi is not None
+                and vsi_minus_one is not None
+                and dsi is not None
+                and dsi_minus_one is not None
+                and time_diff is not None
         ):
             # get increment from initial position - backwards in time
             # means reversing the direction by 180 degrees
@@ -508,24 +508,24 @@ def track_check(df: pd.DataFrame):
 
         # together these cover the speeds calculate from point i
         if (
-            df.iloc[i].speed is not None
-            and df.iloc[i].speed > amax
-            and df.iloc[i - 1].alt_speed is not None
-            and df.iloc[i - 1].alt_speed > amax
+                df.iloc[i].speed is not None
+                and df.iloc[i].speed > amax
+                and df.iloc[i - 1].alt_speed is not None
+                and df.iloc[i - 1].alt_speed > amax
         ):
             thisqc_a += 1.00
         elif (
-            df.iloc[i + 1].speed is not None
-            and df.iloc[i + 1].speed > amax
-            and df.iloc[i + 1].alt_speed is not None
-            and df.iloc[i + 1].alt_speed > amax
+                df.iloc[i + 1].speed is not None
+                and df.iloc[i + 1].speed > amax
+                and df.iloc[i + 1].alt_speed is not None
+                and df.iloc[i + 1].alt_speed > amax
         ):
             thisqc_a += 2.00
         elif (
-            df.iloc[i].speed is not None
-            and df.iloc[i].speed > amax
-            and df.iloc[i + 1].speed is not None
-            and df.iloc[i + 1].speed > amax
+                df.iloc[i].speed is not None
+                and df.iloc[i].speed > amax
+                and df.iloc[i + 1].speed is not None
+                and df.iloc[i + 1].speed > amax
         ):
             thisqc_a += 3.00
 
@@ -559,9 +559,9 @@ def track_check(df: pd.DataFrame):
 
         # make the final decision
         if (
-            midpoint_diff_from_estimated[i] > max_midpoint_discrepancy / km_to_nm
-            and thisqc_a > 0
-            and thisqc_b > 0
+                midpoint_diff_from_estimated[i] > max_midpoint_discrepancy / km_to_nm
+                and thisqc_a > 0
+                and thisqc_b > 0
         ):
             trk[i] = 1
 
@@ -584,6 +584,7 @@ def find_saturated_runs(df: pd.DataFrame) -> pd.DataFrame:
     ----------
     df : pd.DataFrame
         DataFrame to be checked
+
     Returns
     -------
     pd.DataFrame
@@ -631,5 +632,202 @@ def find_saturated_runs(df: pd.DataFrame) -> pd.DataFrame:
                 repsat[loc] = 1
 
     df["repsat"] = repsat
+
+    return df
+
+
+def find_multiple_rounded_values(df: pd.DataFrame, intype: str) -> pd.DataFrame:
+    """Find instances when more than "threshold" of the observations are
+    whole numbers and set the 'round' flag. Used in the humidity QC
+    where there are times when the values are rounded and this may
+    have caused a bias.
+
+    Parameters
+    ----------
+    df : pd.DataFrame
+        DataFrame containing data to be checked
+    intype: str
+        Specifies which variable should be quality controlled
+
+    Returns
+    -------
+    pd.DataFrame
+        Returns dataframe with additional column "rounded" containing QC outcomes
+    """
+
+    assert intype in ["sst", "at", "dpt"]
+
+    min_count = 20
+    threshold = 0.5
+
+    assert 0.0 <= threshold <= 1.0
+
+    numobs = len(df)
+    rounded = np.zeros(numobs)  # type: np.ndarray
+
+    valcount = {}
+    allcount = 0
+
+    for i in range(numobs):
+        row = df.iloc[i]
+        if row[intype] is not None:
+            allcount += 1
+            if str(row[intype]) in valcount:
+                valcount[str(row[intype])].append(i)
+            else:
+                valcount[str(row[intype])] = [i]
+
+    if allcount > min_count:
+        wholenums = 0
+        for key in valcount:
+            if float(key).is_integer():
+                wholenums = wholenums + len(valcount[key])
+
+        if float(wholenums) / float(allcount) >= threshold:
+            for key in valcount:
+                if float(key).is_integer():
+                    for i in valcount[key]:
+                        rounded[i] = 1
+
+    df["rounded"] = rounded
+
+    return df
+
+
+def find_repeated_values(df: pd.DataFrame, intype: str) -> pd.DataFrame:
+    """Find cases where more than a given proportion of SSTs have the same value
+
+    This function goes through a voyage and finds any cases where more than a threshold fraction of
+    the observations have the same values for a specified variable.
+
+
+    Parameters
+    ----------
+    df : pd.DataFrame
+        DataFrame containing data to be checked
+    intype: str
+        Specifies which variable should be quality controlled
+
+    Returns
+    -------
+    pd.DataFrame
+        Returns dataframe with additional column "rep" containing QC outcomes
+    """
+    assert intype in ["sst", "at", "dpt", "slp"]
+
+    threshold = 0.7
+    assert 0.0 <= threshold <= 1.0
+    min_count = 20
+
+    numobs = len(df)
+    rep = np.zeros(numobs)  # type: np.ndarray
+
+    valcount = {}
+    allcount = 0
+
+    for i in range(numobs):
+        row = df.iloc[i]
+        value = row[intype]
+        if value is not None:
+            allcount += 1
+            if str(value) in valcount:
+                valcount[str(value)].append(i)
+            else:
+                valcount[str(value)] = [i]
+
+    if allcount > min_count:
+        for key in valcount:
+            if float(len(valcount[key])) / float(allcount) > threshold:
+                for i in valcount[key]:
+                    rep[i] = 1
+
+    df["rep"] = rep
+
+    return df
+
+
+def iquam_track_check(df: pd.DataFrame) -> pd.DataFrame:
+    """Perform the IQUAM track check as detailed in Xu and Ignatov 2013
+
+    The track check calculates speeds between pairs of observations and
+    counts how many exceed a threshold speed. The ob with the most
+    violations of this limit is flagged as bad and removed from the
+    calculation. Then the next worst is found and removed until no
+    violatios remain.
+
+    Parameters
+    ----------
+    df : pd.DataFrame
+        DataFrame containing data to be track checked.
+
+    Returns
+    -------
+    pd.DataFrame
+        Returns DataFrame with additional column "iquam_track" containing the outcomes of the QC
+    """
+    buoy_speed_limit = 15.0  # km/h
+    ship_speed_limit = 60.0  # km/h
+
+    delta_d = 1.11  # 0.1 degrees of latitude
+    delta_t = 0.01  # one hundredth of an hour
+
+    n_neighbours = 5
+
+    numobs = len(df)
+
+    if numobs == 0:
+        return df
+
+    if qc.id_is_generic(df.iloc[0].id, df.iloc[0].date.year):
+        df["iquam_track"] = np.zeros(numobs)
+        return df
+
+    if df.iloc[0].pt in [6, 7]:
+        speed_limit = buoy_speed_limit
+    else:
+        speed_limit = ship_speed_limit
+
+    speed_violations = []
+    count_speed_violations = []
+
+    iquam_track = np.zeros(numobs)  # type: np.ndarray
+
+    for t1 in range(0, numobs):
+        violations_for_this_report = []
+        count_violations_this_report = 0.0
+
+        lo = max(0, t1 - n_neighbours)
+        hi = min(numobs, t1 + n_neighbours + 1)
+
+        for t2 in range(lo, hi):
+
+            row2 = df.iloc[t2]
+            row1 = df.iloc[t1]
+
+            _, distance, _, time_diff = row_difference(row2, row1)
+
+            iquam_condition = max([abs(distance) - delta_d, 0.0]) / (abs(time_diff) + delta_t)
+
+            if iquam_condition > speed_limit:
+                violations_for_this_report.append(t2)
+                count_violations_this_report += 1.0
+
+        speed_violations.append(violations_for_this_report)
+        count_speed_violations.append(count_violations_this_report)
+
+    count = 0
+    while np.sum(count_speed_violations) > 0.0:
+        most_fails = int(np.argmax(count_speed_violations))
+        iquam_track[most_fails] = 1
+
+        for index in speed_violations[most_fails]:
+            if most_fails in speed_violations[index]:
+                speed_violations[index].remove(most_fails)
+                count_speed_violations[index] -= 1.0
+
+        count_speed_violations[most_fails] = 0
+        count += 1
+
+    df["iquam_track"] = iquam_track
 
     return df
