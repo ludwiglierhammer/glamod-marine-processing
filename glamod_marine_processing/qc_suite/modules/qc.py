@@ -1053,7 +1053,7 @@ def get_sst_single_field(lat: float, lon: float, sst: np.ndarray) -> int | float
 #
 
 
-def climatology_plus_stdev_with_lowbar(
+def climatology_plus_stdev_with_lowbar_check(
     value: float,
     climate_normal: float,
     standard_deviation: float,
