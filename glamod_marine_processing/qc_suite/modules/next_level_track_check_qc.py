@@ -689,7 +689,7 @@ def find_multiple_rounded_values(df: pd.DataFrame, intype: str) -> pd.DataFrame:
     """
     allowed_variables = ["sst", "at", "dpt"]
     if intype not in allowed_variables:
-        raise ValueError(f'{intype} not one of {allowed_variables}')
+        raise ValueError(f"{intype} not one of {allowed_variables}")
 
     min_count = 20
     threshold = 0.5
@@ -749,7 +749,7 @@ def find_repeated_values(df: pd.DataFrame, intype: str) -> pd.DataFrame:
     """
     allowed_variables = ["sst", "at", "dpt", "slp"]
     if intype not in allowed_variables:
-        raise ValueError(f'{intype} not one of {allowed_variables}')
+        raise ValueError(f"{intype} not one of {allowed_variables}")
 
     threshold = 0.7
     assert 0.0 <= threshold <= 1.0
