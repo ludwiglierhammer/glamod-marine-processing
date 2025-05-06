@@ -7,8 +7,8 @@ import pytest
 from glamod_marine_processing.qc_suite.modules.next_level_track_check_qc import (
     calc_alternate_speeds,
     calculate_speed_course_distance_time_difference,
-    distr1,
-    distr2,
+    forward_discrepancy,
+    backward_discrepancy,
     find_multiple_rounded_values,
     find_repeated_values,
     find_saturated_runs,

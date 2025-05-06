@@ -40,7 +40,7 @@ def spike_check(df: pd.DataFrame) -> pd.DataFrame:
 
     n_neighbours = 5
 
-    numobs = len(df)
+    number_of_obs = len(df)
 
     if df.iloc[0].pt in [6, 7]:
         delta_t = buoy_delta_t
@@ -50,15 +50,15 @@ def spike_check(df: pd.DataFrame) -> pd.DataFrame:
     gradient_violations = []
     count_gradient_violations = []
 
-    spike_qc = np.zeros(numobs)  # type: np.ndarray
+    spike_qc = np.zeros(number_of_obs)  # type: np.ndarray
 
-    for t1 in range(numobs):
+    for t1 in range(number_of_obs):
 
         violations_for_this_report = []
         count_violations_this_report = 0.0
 
         lo = max(0, t1 - n_neighbours)
-        hi = min(numobs, t1 + n_neighbours + 1)
+        hi = min(number_of_obs, t1 + n_neighbours + 1)
 
         for t2 in range(lo, hi):
 
@@ -158,35 +158,35 @@ def calculate_speed_course_distance_time_difference(df: pd.DataFrame) -> pd.Data
     Parameters
     ----------
     df : pd.DataFrame
-        Input DataFrame for which the speeds, courses, distances and time differences are to be calculated.
+        Input DataFrame for which the speeds, courses, distances, and time differences are to be calculated.
 
     Returns
     -------
     pd.DataFrame
         Returns the DataFrame with additional columns "speed", "course", "distance", "time_diff"
     """
-    numobs = len(df)
+    number_of_obs = len(df)
 
-    speed = np.empty(numobs)  # type: np.ndarray
-    course = np.empty(numobs)  # type: np.ndarray
-    distance = np.empty(numobs)  # type: np.ndarray
-    time_diff = np.empty(numobs)  # type: np.ndarray
+    speed = np.empty(number_of_obs)  # type: np.ndarray
+    course = np.empty(number_of_obs)  # type: np.ndarray
+    distance = np.empty(number_of_obs)  # type: np.ndarray
+    time_diff = np.empty(number_of_obs)  # type: np.ndarray
 
     speed.fill(np.nan)
     course.fill(np.nan)
     distance.fill(np.nan)
     time_diff.fill(np.nan)
 
-    if numobs > 1:
-        for i in range(1, numobs):
+    if number_of_obs > 1:
+        for i in range(1, number_of_obs):
             row2 = df.iloc[i]
             row1 = df.iloc[i - 1]
-            shpspd, shpdis, shpdir, tdiff = row_difference(row2, row1)
+            ship_speed, ship_distance, ship_direction, ship_time_difference = row_difference(row2, row1)
 
-            speed[i] = shpspd
-            course[i] = shpdir
-            distance[i] = shpdis
-            time_diff[i] = tdiff
+            speed[i] = ship_speed
+            course[i] = ship_direction
+            distance[i] = ship_distance
+            time_diff[i] = ship_time_difference
 
     df["speed"] = speed
     df["course"] = course
@@ -209,28 +209,28 @@ def calc_alternate_speeds(df):
     pd.DataFrame
         Returns the DataFrame with additional columns "alt_speed", "alt_course", "alt_distance", "alt_time_diff"
     """
-    numobs = len(df)
+    number_of_obs = len(df)
 
-    alt_speed = np.empty(numobs)  # type: np.ndarray
-    alt_course = np.empty(numobs)  # type: np.ndarray
-    alt_distance = np.empty(numobs)  # type: np.ndarray
-    alt_time_diff = np.empty(numobs)  # type: np.ndarray
+    alt_speed = np.empty(number_of_obs)  # type: np.ndarray
+    alt_course = np.empty(number_of_obs)  # type: np.ndarray
+    alt_distance = np.empty(number_of_obs)  # type: np.ndarray
+    alt_time_diff = np.empty(number_of_obs)  # type: np.ndarray
 
     alt_speed.fill(np.nan)
     alt_course.fill(np.nan)
     alt_distance.fill(np.nan)
     alt_time_diff.fill(np.nan)
 
-    if numobs > 2:
-        for i in range(1, numobs - 1):
+    if number_of_obs > 2:
+        for i in range(1, number_of_obs - 1):
             row2 = df.iloc[i + 1]
             row1 = df.iloc[i - 1]
-            shpspd, shpdis, shpdir, tdiff = row_difference(row1, row2)
+            ship_speed, ship_distance, ship_direction, ship_time_difference = row_difference(row1, row2)
 
-            alt_speed[i] = shpspd
-            alt_course[i] = shpdir
-            alt_distance[i] = shpdis
-            alt_time_diff[i] = tdiff
+            alt_speed[i] = ship_speed
+            alt_course[i] = ship_direction
+            alt_distance[i] = ship_distance
+            alt_time_diff[i] = ship_time_difference
 
     df["alt_speed"] = alt_speed
     df["alt_course"] = alt_course
@@ -240,13 +240,13 @@ def calc_alternate_speeds(df):
     return df
 
 
-def distr1(df: pd.DataFrame) -> list:
+def forward_discrepancy(df: pd.DataFrame) -> list:
     """Calculate what the distance is between the projected position (based on the reported
     speed and heading at the current and previous time steps) and the actual position. The
     observations are taken in time order.
 
     This takes the speed and direction reported by the ship and projects it forwards half a
-    time step, it then projects it forwards another half time step using the speed and
+    time step, it then projects it forwards another half time-step using the speed and
     direction for the next report, to which the projected location
     is then compared. The distances between the projected and actual locations is returned
 
@@ -296,12 +296,12 @@ def distr1(df: pd.DataFrame) -> list:
                 df.iloc[i].time_diff,
             )
             # apply increments to the lat and lon at i-1
-            alatx = df.iloc[i - 1].lat + lat1 + lat2
-            alonx = df.iloc[i - 1].lon + lon1 + lon2
+            updated_latitude = df.iloc[i - 1].lat + lat1 + lat2
+            updated_longitude = df.iloc[i - 1].lon + lon1 + lon2
 
             # calculate distance between calculated position and the second reported position
             discrepancy = sg.sphere_distance(
-                df.iloc[i].lat, df.iloc[i].lon, alatx, alonx
+                df.iloc[i].lat, df.iloc[i].lon, updated_latitude, updated_longitude
             )
 
             distance_from_est_location.append(discrepancy)
@@ -313,7 +313,7 @@ def distr1(df: pd.DataFrame) -> list:
     return distance_from_est_location
 
 
-def distr2(df) -> list:
+def backward_discrepancy(df) -> list:
     """Calculate what the distance is between the projected position (based on the reported speed and
     heading at the current and previous time steps) and the actual position. The calculation proceeds from the
     final, later observation to the first (in contrast to distr1 which runs in time order)
@@ -387,7 +387,7 @@ def distr2(df) -> list:
     return distance_from_est_location[::-1]
 
 
-def midpt(df: pd.DataFrame) -> list:
+def calculate_midpoint(df: pd.DataFrame) -> list:
     """Interpolate between alternate reports and compare the interpolated location to the actual location. e.g.
     take difference between reports 2 and 4 and interpolate to get an estimate for the position at the time
     of report 3. Then compare the estimated and actual positions at the time of report 3.
@@ -424,7 +424,7 @@ def midpt(df: pd.DataFrame) -> list:
         if fraction_of_time_diff > 1.0:
             print(fraction_of_time_diff, t0, t1)
 
-        estimated_lat_at_midpt, estimated_lon_at_midpt = sg.intermediate_point(
+        estimated_lat_at_midpoint, estimated_lon_at_midpoint = sg.intermediate_point(
             df.iloc[i - 1].lat,
             df.iloc[i - 1].lon,
             df.iloc[i + 1].lat,
@@ -435,8 +435,8 @@ def midpt(df: pd.DataFrame) -> list:
         discrepancy = sg.sphere_distance(
             df.iloc[i].lat,
             df.iloc[i].lon,
-            estimated_lat_at_midpt,
-            estimated_lon_at_midpt,
+            estimated_lat_at_midpoint,
+            estimated_lon_at_midpoint,
         )
 
         midpoint_discrepancies.append(discrepancy)
@@ -498,9 +498,6 @@ def track_check(df: pd.DataFrame) -> pd.DataFrame:
             df["few"] = np.zeros(nobs) + 1
             return df
 
-    trk = np.zeros(nobs)
-    few = np.zeros(nobs)
-
     # work out speeds and distances between alternating points
     df = calc_alternate_speeds(df)
     df = calculate_speed_course_distance_time_difference(df)
@@ -510,21 +507,15 @@ def track_check(df: pd.DataFrame) -> pd.DataFrame:
 
     # set speed limits based on modal speed
     amax, amaxx, amin = tc.set_speed_limits(modal_speed)
-    del amaxx
-    del amin
+
     # compare reported speeds and positions if we have them
-    forward_diff_from_estimated = distr1(df)
-    reverse_diff_from_estimated = distr2(df)
+    forward_diff_from_estimated = forward_discrepancy(df)
+    reverse_diff_from_estimated = backward_discrepancy(df)
 
     df["fwd_diff"] = forward_diff_from_estimated
     df["bwd_diff"] = reverse_diff_from_estimated
 
-    try:
-        midpoint_diff_from_estimated = midpt(df)
-    except Exception:
-        print(df.iloc[0].id)
-        assert False
-
+    midpoint_diff_from_estimated = calculate_midpoint(df)
     df["midpt"] = midpoint_diff_from_estimated
 
     # do QC
