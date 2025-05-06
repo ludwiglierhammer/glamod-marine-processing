@@ -122,8 +122,8 @@ def test_calculate_speed_course_distance_time_difference(ship_frame):
             assert pytest.approx(row.speed, 0.00001) == 11.119508064776555
             assert pytest.approx(row.distance, 0.00001) == 11.119508064776555
             assert (
-                    pytest.approx(row.course, 0.00001) == 0
-                    or pytest.approx(row.course, 0.00001) == 360.0
+                pytest.approx(row.course, 0.00001) == 0
+                or pytest.approx(row.course, 0.00001) == 360.0
             )
             assert pytest.approx(row.time_diff, 0.0000001) == 1.0
         else:
@@ -167,7 +167,9 @@ def longer_frame_last_passes():
     dpt[49] = 10.0
     id = ["GOODTHING" for _ in range(50)]
     date = pd.date_range(start=f"1850-01-01", freq="1h", periods=len(lat))
-    df = pd.DataFrame({"date": date, "lat": lat, "lon": lon, "at": at, "dpt": dpt, "id": id})
+    df = pd.DataFrame(
+        {"date": date, "lat": lat, "lon": lon, "at": at, "dpt": dpt, "id": id}
+    )
     return df
 
 
@@ -180,7 +182,9 @@ def longer_frame_broken_run():
     dpt[25] = 10.0
     id = ["GOODTHING" for _ in range(50)]
     date = pd.date_range(start=f"1850-01-01", freq="1h", periods=len(lat))
-    df = pd.DataFrame({"date": date, "lat": lat, "lon": lon, "at": at, "dpt": dpt, "id": id})
+    df = pd.DataFrame(
+        {"date": date, "lat": lat, "lon": lon, "at": at, "dpt": dpt, "id": id}
+    )
     return df
 
 
@@ -193,13 +197,18 @@ def longer_frame_early_broken_run():
     dpt[3] = 10.0
     id = ["GOODTHING" for _ in range(50)]
     date = pd.date_range(start=f"1850-01-01", freq="1h", periods=len(lat))
-    df = pd.DataFrame({"date": date, "lat": lat, "lon": lon, "at": at, "dpt": dpt, "id": id})
+    df = pd.DataFrame(
+        {"date": date, "lat": lat, "lon": lon, "at": at, "dpt": dpt, "id": id}
+    )
     return df
 
 
 def test_find_saturated_runs(
-        long_frame, longer_frame, longer_frame_last_passes, longer_frame_broken_run,
-        longer_frame_early_broken_run
+    long_frame,
+    longer_frame,
+    longer_frame_last_passes,
+    longer_frame_broken_run,
+    longer_frame_early_broken_run,
 ):
     result = find_saturated_runs(long_frame)
     assert "repsat" in result
