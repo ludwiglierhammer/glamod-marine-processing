@@ -7,6 +7,13 @@ from cdm_reader_mapper import DataBundle, read_tables
 from cdm_reader_mapper.common.getting_files import load_file
 
 import glamod_marine_processing.qc_suite.modules.qc as qc
+from glamod_marine_processing.qc_suite.modules.icoads_identify import (
+    is_buoy,
+    is_deck,
+    is_drifter,
+    is_in_valid_list,
+    is_ship,
+)
 from glamod_marine_processing.qc_suite.modules.next_level_qc import (
     do_air_temperature_anomaly_check,
     do_air_temperature_climatology_plus_stdev_check,
@@ -32,11 +39,6 @@ from glamod_marine_processing.qc_suite.modules.next_level_qc import (
     do_wind_speed_hard_limit_check,
     do_wind_speed_missing_value_check,
     humidity_blacklist,
-    is_buoy,
-    is_deck,
-    is_drifter,
-    is_in_valid_list,
-    is_ship,
     mat_blacklist,
     wind_blacklist,
 )

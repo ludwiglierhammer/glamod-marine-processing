@@ -14,6 +14,13 @@ from glamod_marine_processing.qc_suite.modules.blacklisting import (
     do_mat_blacklist,
     do_wind_blacklist,
 )
+from glamod_marine_processing.qc_suite.modules.icoads_identify import (
+    is_buoy,
+    is_deck,
+    is_drifter,
+    is_in_valid_list,
+    is_ship,
+)
 from glamod_marine_processing.qc_suite.modules.next_level_qc import (
     _split_date,
     do_air_temperature_anomaly_check,
@@ -38,11 +45,6 @@ from glamod_marine_processing.qc_suite.modules.next_level_qc import (
     do_wind_direction_missing_value_check,
     do_wind_speed_hard_limit_check,
     do_wind_speed_missing_value_check,
-    is_buoy,
-    is_deck,
-    is_drifter,
-    is_in_valid_list,
-    is_ship,
 )
 
 
