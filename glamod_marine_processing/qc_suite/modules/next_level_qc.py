@@ -6,7 +6,7 @@ import math
 from datetime import datetime
 
 from . import qc
-from .qc import failed, passed, untestable, untested
+from .qc import failed, passed, untestable
 
 
 def _split_date(date):
@@ -509,7 +509,7 @@ def do_day_check(
     return failed
 
 
-def humidity_blacklist(platform_type: int) -> int:
+def do_humidity_blacklist(platform_type: int) -> int:
     """
     Flag certain sources as ineligible for humidity QC.
 
@@ -529,7 +529,7 @@ def humidity_blacklist(platform_type: int) -> int:
         return failed
 
 
-def mat_blacklist(
+def do_mat_blacklist(
     platform_type: int,
     deck: int,
     latitude: float,
@@ -589,7 +589,7 @@ def mat_blacklist(
     return passed
 
 
-def wind_blacklist(deck):
+def do_wind_blacklist(deck):
     """
     Flag certain sources as ineligible for wind QC. Based on Shawn Smith's list.
 

@@ -21,6 +21,8 @@ from glamod_marine_processing.qc_suite.modules.next_level_qc import (
     do_dpt_climatology_plus_stdev_check,
     do_dpt_missing_value_check,
     do_dpt_no_normal_check,
+    do_humidity_blacklist,
+    do_mat_blacklist,
     do_position_check,
     do_sst_anomaly_check,
     do_sst_freeze_check,
@@ -28,19 +30,17 @@ from glamod_marine_processing.qc_suite.modules.next_level_qc import (
     do_sst_no_normal_check,
     do_supersaturation_check,
     do_time_check,
+    do_wind_blacklist,
     do_wind_consistency_check,
     do_wind_direction_hard_limit_check,
     do_wind_direction_missing_value_check,
     do_wind_speed_hard_limit_check,
     do_wind_speed_missing_value_check,
-    humidity_blacklist,
     is_buoy,
     is_deck,
     is_drifter,
     is_in_valid_list,
     is_ship,
-    mat_blacklist,
-    wind_blacklist,
 )
 
 
@@ -494,9 +494,9 @@ def test_do_day_check_using_date(
     assert result == expected
 
 
-def test_humidity_blacklist():
+def test_do_humidity_blacklist():
     for platform_type in range(0, 47):
-        result = humidity_blacklist(platform_type)
+        result = do_humidity_blacklist(platform_type)
         if platform_type in [0, 1, 2, 3, 4, 5, 6, 8, 9, 10, 15]:
             assert result == qc.passed
         else:
@@ -522,14 +522,14 @@ def test_humidity_blacklist():
         (1, 193, 45.0, -40.0, 1999, qc.passed),  # Outside the exclusion zone (in time)
     ],
 )
-def test_mat_blacklist(platform_type, deck, latitude, longitude, year, expected):
-    result = mat_blacklist(platform_type, deck, latitude, longitude, year)
+def test_do_mat_blacklist(platform_type, deck, latitude, longitude, year, expected):
+    result = do_mat_blacklist(platform_type, deck, latitude, longitude, year)
     assert result == expected
 
 
-def test_wind_blacklist():
+def test_do_wind_blacklist():
     for deck in range(1, 1000):
-        result = wind_blacklist(deck)
+        result = do_wind_blacklist(deck)
         if deck in [708, 780]:
             assert result == qc.failed
         else:
@@ -873,25 +873,24 @@ def test_do_wind_direction_hard_limit_check_no_params(wd, expected):
 
 
 @pytest.mark.parametrize(
-    "wind_speed, wind_direction, variable_limit, expected",
+    "wind_speed, wind_direction, expected",
     [
-        (None, 4, None, qc.failed),  # missing wind speed; failed
-        (4, None, None, qc.failed),  # missing wind directory; failed
-        (0, 0, None, qc.passed),
-        (0, 120, None, qc.failed),
-        (5.0, 0, None, qc.failed),
-        (5, 361, None, qc.passed),  # do not test hard limits; passed
-        (12.0, 362, None, qc.passed),  # do not test hard limits; passed
-        (5, 165, None, qc.passed),
-        (12.0, 73, None, qc.passed),
+        (None, 4, qc.failed),  # missing wind speed; failed
+        (4, None, qc.failed),  # missing wind directory; failed
+        (0, 0, qc.passed),
+        (0, 120, qc.failed),
+        (5.0, 0, qc.failed),
+        (5, 361, qc.passed),  # do not test hard limits; passed
+        (12.0, 362, qc.passed),  # do not test hard limits; passed
+        (5, 165, qc.passed),
+        (12.0, 73, qc.passed),
     ],
 )
-def test_do_wind_consistency_check(
-    wind_speed, wind_direction, variable_limit, expected
-):
+def test_do_wind_consistency_check(wind_speed, wind_direction, expected):
     assert (
         do_wind_consistency_check(
-            wind_speed, wind_direction, variable_limit=variable_limit
+            wind_speed,
+            wind_direction,
         )
         == expected
     )
