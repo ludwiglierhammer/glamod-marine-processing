@@ -108,12 +108,14 @@ def do_date_check(
     return passed
 
 
-def do_time_check(hour: float):
+def do_time_check(date: datetime | None = None, hour: float | None = None) -> int:
     """
     Check that the time is valid i.e. in the range 0.0 to 23.99999...
 
     Parameters
     ----------
+    date: datetime-like, optional
+        Date of report
     hour : float
         hour of the time to be checked
 
@@ -122,6 +124,11 @@ def do_time_check(hour: float):
     int
         Return 1 if hour is invalid, 0 otherwise
     """
+    if isinstance(date, datetime):
+        date_ = _split_date(date)
+        if date_ is None:
+            return failed
+        hour = date_["hour"]
     if qc.isvalid(hour) == failed:
         return failed
 
@@ -352,6 +359,48 @@ def do_climatology_plus_stdev_check(
         stdev,
         minmax_standard_deviation,
         maximum_standardised_anomaly,
+    )
+
+
+def do_climatology_plus_stdev_plus_lowbar_check(
+    value: float,
+    climatology: float,
+    stdev: float,
+    limit: float,
+    lowbar: float,
+) -> int:
+    """Check that standardised value anomaly is within standard deviation-based limits but with a minimum width.
+
+    Value is converted into a standardised anomaly by subtracting the climatological normal and dividing by
+    the climatological standard deviation.
+
+
+    More Documentation.
+
+    Parameters
+    ----------
+    value : float
+        Value to be checked.
+    climatology : float
+        Climatological normal.
+    stdev : float
+        Climatological standard deviation.
+    limit : float
+        Maximum standardised anomaly.
+    lowbar: float
+        The anomaly must be greater than lowbar to fail regardless of standard deviation.
+
+    Returns
+    -------
+    int
+        Returns 1 if standardised value anomaly is outside specified range, 0 otherwise.
+    """
+    return qc.climatology_plus_stdev_with_lowbar_check(
+        value,
+        climatology,
+        stdev,
+        limit,
+        lowbar,
     )
 
 
