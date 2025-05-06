@@ -9,7 +9,6 @@ from cdm_reader_mapper.common.getting_files import load_file
 import glamod_marine_processing.qc_suite.modules.qc as qc
 from glamod_marine_processing.qc_suite.modules.icoads_identify import (
     is_buoy,
-    is_deck,
     is_drifter,
     is_in_valid_list,
     is_ship,
@@ -20,7 +19,6 @@ from glamod_marine_processing.qc_suite.modules.next_level_qc import (
     do_air_temperature_hard_limit_check,
     do_air_temperature_missing_value_check,
     do_air_temperature_no_normal_check,
-    do_blacklist,
     do_date_check,
     do_day_check,
     do_dpt_climatology_plus_stdev_check,
@@ -38,9 +36,6 @@ from glamod_marine_processing.qc_suite.modules.next_level_qc import (
     do_wind_direction_missing_value_check,
     do_wind_speed_hard_limit_check,
     do_wind_speed_missing_value_check,
-    humidity_blacklist,
-    mat_blacklist,
-    wind_blacklist,
 )
 
 
@@ -215,10 +210,6 @@ def test_do_time_check(testdata):
     pd.testing.assert_series_equal(results, expected)
 
 
-def _test_do_blacklist(testdata):
-    raise NotImplementedError
-
-
 def test_do_day_check(testdata):
     db_ = testdata["header"].copy()
     results = db_.apply(
@@ -231,18 +222,6 @@ def test_do_day_check(testdata):
     )
     expected = pd.Series([qc.failed] * 13)  # observations are at night
     pd.testing.assert_series_equal(results, expected)
-
-
-def _test_humidity_blacklist(testdata):
-    raise NotImplementedError
-
-
-def _test_mat_blacklist(testdata):
-    raise NotImplementedError
-
-
-def _test_wind_blcklist(testdata):
-    raise NotImplementedError
 
 
 def test_do_air_temperature_missing_value_check(testdata):
@@ -438,10 +417,10 @@ def test_do_dpt_climatology_plus_stdev_check(testdata):
         275,
     ]
     results = db_.apply(
-        lambda row: do_air_temperature_climatology_plus_stdev_check(
-            at=row["observation_value"],
-            at_climatology=row["climatology"],
-            at_stdev=1.0,
+        lambda row: do_dpt_climatology_plus_stdev_check(
+            dpt=row["observation_value"],
+            dpt_climatology=row["climatology"],
+            dpt_stdev=1.0,
             minmax_standard_deviation=[1.0, 4.0],
             maximum_standardised_anomaly=2.0,
         ),
@@ -610,8 +589,8 @@ def test_do_sst_freeze_check(testdata):
 def test_do_sst_anomaly_check(testdata):
     db_ = testdata["observations-sst"].copy()
     results = db_.apply(
-        lambda row: do_air_temperature_anomaly_check(
-            at=row["observation_value"], at_climatology=277, maximum_anomaly=1.0
+        lambda row: do_sst_anomaly_check(
+            sst=row["observation_value"], sst_climatology=277, maximum_anomaly=1.0
         ),
         axis=1,
     )
@@ -803,82 +782,3 @@ def test_do_wind_consistency_check(testdata):
         ]
     )
     pd.testing.assert_series_equal(results, expected)
-
-
-def _test_header_all():
-    db_header = read_tables(cache_dir, cdm_tables="header")
-    db_header["report_quality"] = db_header.apply(
-        lambda row: perform_base_qc(
-            pt=row["platform_type"],
-            latitude=row["latitude"],
-            longitude=row["longitude"],
-            timestamp=row["report_timestamp"],
-            parameters={},
-        ),
-        axis=1,
-    )
-
-    # Do some assertion
-
-
-def _test_at_all():
-    db_header = read_tables(cache_dir, cdm_tables="observations-at")
-    db_header["quality_flag"] = db_header.apply(
-        lambda row: perform_obs_qc(at=row["observation_value"], parameters={}), axis=1
-    )
-
-    # Do some assertion
-
-
-def _test_dpt_all():
-    db_header = read_tables(cache_dir, cdm_tables="observations-dpt")
-    db_header["quality_flag"] = db_header.apply(
-        lambda row: perform_obs_qc(dpt=row["observation_value"], parameters={}), axis=1
-    )
-
-    # Do some assertion
-
-
-def _test_slp_all():
-    db_header = read_tables(cache_dir, cdm_tables="observations-slp")
-    db_header["quality_flag"] = db_header.apply(
-        lambda row: perform_obs_qc(slp=row["observation_value"], parameters={}), axis=1
-    )
-
-    # Do some assertion
-
-
-def _test_sst_all():
-    db_header = read_tables(cache_dir, cdm_tables="observations-sst")
-    db_header["quality_flag"] = db_header.apply(
-        lambda row: perform_obs_qc(sst=row["observation_value"], parameters={}), axis=1
-    )
-
-    # Do some assertion
-
-
-def _test_wbt_all():
-    db_header = read_tables(cache_dir, cdm_tables="observations-wbt")
-    db_header["quality_flag"] = db_header.apply(
-        lambda row: perform_obs_qc(wbt=row["observation_value"], parameters={}), axis=1
-    )
-
-    # Do some assertion
-
-
-def _test_wd_all():
-    db_header = read_tables(cache_dir, cdm_tables="observations-wd")
-    db_header["quality_flag"] = db_header.apply(
-        lambda row: perform_obs_qc(wd=row["observation_value"], parameters={}), axis=1
-    )
-
-    # Do some assertion
-
-
-def _test_ws_all():
-    db_header = read_tables(cache_dir, cdm_tables="observations-ws")
-    db_header["quality_flag"] = db_header.apply(
-        lambda row: perform_obs_qc(ws=row["observation_value"], parameters={}), axis=1
-    )
-
-    # Do some assertion
