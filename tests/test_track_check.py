@@ -107,8 +107,8 @@ def test_one_of_each_speed_input_min_under8point5():
         (None, (15.00 / km_to_nm, 20.00 / km_to_nm, 0.00 / km_to_nm)),
         (5.5 / km_to_nm, (15.00 / km_to_nm, 20.00 / km_to_nm, 0.00 / km_to_nm)),
         (
-                9.5 / km_to_nm,
-                (9.5 * 1.25 / km_to_nm, 30.00 / km_to_nm, 9.5 * 0.75 / km_to_nm),
+            9.5 / km_to_nm,
+            (9.5 * 1.25 / km_to_nm, 30.00 / km_to_nm, 9.5 * 0.75 / km_to_nm),
         ),
     ],
 )
@@ -187,9 +187,9 @@ def test_ship_is_at_computed_location(trip1):
 def test_misplaced_ob_out_by_1degree_times_coslat(trip2):
     difference_from_estimated_location = tc.distr1(trip2)
     expected = (
-            (2 * np.pi * sg.earths_radius)
-            * np.cos(trip2.reps[1].lat() * np.pi / 180.0)
-            / 360
+        (2 * np.pi * sg.earths_radius)
+        * np.cos(trip2.reps[1].lat() * np.pi / 180.0)
+        / 360
     )
     assert pytest.approx(difference_from_estimated_location[1], 0.00001) == expected
 
@@ -209,9 +209,9 @@ def test_ship_is_at_computed_location_1(trip1):
 def test_misplaced_ob_out_by_1degree_times_coslat_1(trip2):
     difference_from_estimated_location = tc.distr2(trip2)
     expected = (
-            (2 * np.pi * sg.earths_radius)
-            * np.cos(trip2.reps[1].lat() * np.pi / 180.0)
-            / 360.0
+        (2 * np.pi * sg.earths_radius)
+        * np.cos(trip2.reps[1].lat() * np.pi / 180.0)
+        / 360.0
     )
     assert pytest.approx(difference_from_estimated_location[1], 0.00001) == expected
 
@@ -225,10 +225,10 @@ def test_first_and_last_are_missing_2(trip1):
 def test_midpt_1_deg_error_out_by_60coslat_2(trip2):
     midpoint_discrepancies = tc.midpt(trip2)
     assert (
-            pytest.approx(midpoint_discrepancies[1], 0.00001)
-            == (2 * np.pi * sg.earths_radius)
-            * math.cos(trip2.reps[1].lat() * np.pi / 180)
-            / 360.0
+        pytest.approx(midpoint_discrepancies[1], 0.00001)
+        == (2 * np.pi * sg.earths_radius)
+        * math.cos(trip2.reps[1].lat() * np.pi / 180)
+        / 360.0
     )
 
 
@@ -279,12 +279,12 @@ def test_speed_continuity(vsi, vsi_previous, max_speed_change, expected):
     ],
 )
 def test_check_distance_from_estimate(
-        vsi,
-        vsi_previous,
-        time_differences,
-        fwd_diff_from_estimated,
-        rev_diff_from_estimated,
-        expected,
+    vsi,
+    vsi_previous,
+    time_differences,
+    fwd_diff_from_estimated,
+    rev_diff_from_estimated,
+    expected,
 ):
     result = tc.check_distance_from_estimate(
         vsi,

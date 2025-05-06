@@ -50,7 +50,7 @@ def spike_check(df: pd.DataFrame) -> pd.DataFrame:
     gradient_violations = []
     count_gradient_violations = []
 
-    spike_qc = np.zeros(numobs)   # type: np.ndarray
+    spike_qc = np.zeros(numobs)  # type: np.ndarray
 
     for t1 in range(numobs):
 
@@ -108,7 +108,7 @@ def spike_check(df: pd.DataFrame) -> pd.DataFrame:
 
 
 def row_difference(
-        later_row: pd.DataFrame, earlier_row: pd.DataFrame
+    later_row: pd.DataFrame, earlier_row: pd.DataFrame
 ) -> (float, float, float, float):
     """Subtracting one row from another to return the speed, distance, course and the time difference between the
     two rows. Originally this was coded as a subtraction: later_row minus earlier_row.
@@ -189,7 +189,7 @@ def calc_alternate_speeds(df):
     """The speeds and courses can also be calculated using alternating reports."""
     numobs = len(df)
 
-    alt_speed = np.empty(numobs)   # type: np.ndarray
+    alt_speed = np.empty(numobs)  # type: np.ndarray
     alt_course = np.empty(numobs)  # type: np.ndarray
     alt_distance = np.empty(numobs)  # type: np.ndarray
     alt_time_diff = np.empty(numobs)  # type: np.ndarray
@@ -245,11 +245,11 @@ def distr1(df) -> list:
         time_diff = df.iloc[i].time_diff
 
         if (
-                vsi is not None
-                and vsi_minus_one is not None
-                and dsi is not None
-                and dsi_minus_one is not None
-                and time_diff is not None
+            vsi is not None
+            and vsi_minus_one is not None
+            and dsi is not None
+            and dsi_minus_one is not None
+            and time_diff is not None
         ):
             # get increment from initial position
             lat1, lon1 = tc.increment_position(
@@ -316,11 +316,11 @@ def distr2(df) -> list:
         time_diff = df.iloc[i].time_diff
 
         if (
-                vsi is not None
-                and vsi_minus_one is not None
-                and dsi is not None
-                and dsi_minus_one is not None
-                and time_diff is not None
+            vsi is not None
+            and vsi_minus_one is not None
+            and dsi is not None
+            and dsi_minus_one is not None
+            and time_diff is not None
         ):
             # get increment from initial position - backwards in time
             # means reversing the direction by 180 degrees
@@ -499,7 +499,7 @@ def track_check(df: pd.DataFrame):
     df["midpt"] = midpoint_diff_from_estimated
 
     # do QC
-    trk = np.zeros(nobs)   # type: np.ndarray
+    trk = np.zeros(nobs)  # type: np.ndarray
     few = np.zeros(nobs)  # type: np.ndarray
 
     for i in range(1, nobs - 1):
@@ -508,24 +508,24 @@ def track_check(df: pd.DataFrame):
 
         # together these cover the speeds calculate from point i
         if (
-                df.iloc[i].speed is not None
-                and df.iloc[i].speed > amax
-                and df.iloc[i - 1].alt_speed is not None
-                and df.iloc[i - 1].alt_speed > amax
+            df.iloc[i].speed is not None
+            and df.iloc[i].speed > amax
+            and df.iloc[i - 1].alt_speed is not None
+            and df.iloc[i - 1].alt_speed > amax
         ):
             thisqc_a += 1.00
         elif (
-                df.iloc[i + 1].speed is not None
-                and df.iloc[i + 1].speed > amax
-                and df.iloc[i + 1].alt_speed is not None
-                and df.iloc[i + 1].alt_speed > amax
+            df.iloc[i + 1].speed is not None
+            and df.iloc[i + 1].speed > amax
+            and df.iloc[i + 1].alt_speed is not None
+            and df.iloc[i + 1].alt_speed > amax
         ):
             thisqc_a += 2.00
         elif (
-                df.iloc[i].speed is not None
-                and df.iloc[i].speed > amax
-                and df.iloc[i + 1].speed is not None
-                and df.iloc[i + 1].speed > amax
+            df.iloc[i].speed is not None
+            and df.iloc[i].speed > amax
+            and df.iloc[i + 1].speed is not None
+            and df.iloc[i + 1].speed > amax
         ):
             thisqc_a += 3.00
 
@@ -559,9 +559,9 @@ def track_check(df: pd.DataFrame):
 
         # make the final decision
         if (
-                midpoint_diff_from_estimated[i] > max_midpoint_discrepancy / km_to_nm
-                and thisqc_a > 0
-                and thisqc_b > 0
+            midpoint_diff_from_estimated[i] > max_midpoint_discrepancy / km_to_nm
+            and thisqc_a > 0
+            and thisqc_b > 0
         ):
             trk[i] = 1
 
@@ -595,13 +595,13 @@ def find_saturated_runs(df: pd.DataFrame) -> pd.DataFrame:
 
     numobs = len(df)
 
-    repsat = np.zeros((numobs))  # type: np.ndarray
+    repsat = np.zeros(numobs)  # type: np.ndarray
 
     for i in range(numobs):
 
         row = df.iloc[i]
 
-        saturated = (row["dpt"] == row["at"])
+        saturated = row["dpt"] == row["at"]
 
         if saturated:
             satcount.append(i)
