@@ -346,3 +346,19 @@ def test_iquam_track_check(iquam_drifter, iquam_ship):
     result = iquam_track_check(iquam_ship)
     for i in range(len(result)):
         assert result.iloc[i].iquam_track == 0
+
+    lon = iquam_drifter.lon.array
+    lon[15] = 30.0
+    iquam_drifter["lon"] = lon
+    result = iquam_track_check(iquam_drifter)
+    for i in range(len(result)):
+        if i == 15:
+            assert result.iloc[i].iquam_track == 1
+        else:
+            assert result.iloc[i].iquam_track == 0
+
+    id = ["SHIP     " for _ in range(30)]
+    iquam_ship["id"] = id
+    result = iquam_track_check(iquam_ship)
+    for i in range(len(result)):
+        assert result.iloc[i].iquam_track == 0

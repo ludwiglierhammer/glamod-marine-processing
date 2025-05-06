@@ -152,8 +152,19 @@ def row_difference(
     return speed, distance, course, timediff
 
 
-def calculate_speed_course_distance_time_difference(df):
-    """The speeds and courses calculated using consecutive reports."""
+def calculate_speed_course_distance_time_difference(df: pd.DataFrame) -> pd.DataFrame:
+    """Calculates speeds, courses, distances and time differences using consecutive reports.
+
+    Parameters
+    ----------
+    df : pd.DataFrame
+        Input DataFrame for which the speeds, courses, distances and time differences are to be calculated.
+
+    Returns
+    -------
+    pd.DataFrame
+        Returns the DataFrame with additional columns "speed", "course", "distance", "time_diff"
+    """
     numobs = len(df)
 
     speed = np.empty(numobs)  # type: np.ndarray
@@ -186,7 +197,18 @@ def calculate_speed_course_distance_time_difference(df):
 
 
 def calc_alternate_speeds(df):
-    """The speeds and courses can also be calculated using alternating reports."""
+    """Calculates speeds, courses, distances and time differences using alternating reports.
+
+    Parameters
+    ----------
+    df : pd.DataFrame
+        Input DataFrame for which the speeds, courses, distances, and time differences are to be calculated.
+
+    Returns
+    -------
+    pd.DataFrame
+        Returns the DataFrame with additional columns "alt_speed", "alt_course", "alt_distance", "alt_time_diff"
+    """
     numobs = len(df)
 
     alt_speed = np.empty(numobs)  # type: np.ndarray
@@ -218,19 +240,25 @@ def calc_alternate_speeds(df):
     return df
 
 
-def distr1(df) -> list:
-    """
-    calculate what the distance is between the projected position (based on the reported
+def distr1(df: pd.DataFrame) -> list:
+    """Calculate what the distance is between the projected position (based on the reported
     speed and heading at the current and previous time steps) and the actual position. The
     observations are taken in time order.
-
-    :return: list of distances from estimated positions
-    :rtype: list of floats
 
     This takes the speed and direction reported by the ship and projects it forwards half a
     time step, it then projects it forwards another half time step using the speed and
     direction for the next report, to which the projected location
     is then compared. The distances between the projected and actual locations is returned
+
+    Parameters
+    ----------
+    df : pd.DataFrame
+        DataFrame for which the discrepancies are to be calculated.
+
+    Returns
+    -------
+    list
+        list of distances from estimated positions
     """
     nobs = len(df)
 
@@ -297,6 +325,7 @@ def distr2(df) -> list:
     Parameters
     ----------
     df : pd.DataFrame
+        DataFrame for which the discrepancies are to be calculated.
 
     Returns
     -------
@@ -381,8 +410,8 @@ def midpt(df: pd.DataFrame) -> list:
     midpoint_discrepancies = [None]
 
     for i in range(1, nobs - 1):
-        t0 = df.iloc[i].time_diff  # self.getvar(i, "time_diff")
-        t1 = df.iloc[i + 1].time_diff  # self.getvar(i + 1, "time_diff")
+        t0 = df.iloc[i].time_diff
+        t1 = df.iloc[i + 1].time_diff
 
         if t0 is not None and t1 is not None:
             if t0 + t1 != 0:
@@ -417,7 +446,7 @@ def midpt(df: pd.DataFrame) -> list:
     return midpoint_discrepancies
 
 
-def track_check(df: pd.DataFrame):
+def track_check(df: pd.DataFrame) -> pd.DataFrame:
     """Perform one pass of the track check.  This is an implementation of the MDS track check code
     which was originally written in the 1990s. I don't know why this piece of historic trivia so exercises
     my mind, but it does: the 1990s! I wish my code would last so long.
@@ -589,6 +618,10 @@ def find_saturated_runs(df: pd.DataFrame) -> pd.DataFrame:
     -------
     pd.DataFrame
     """
+    for key in ["dpt", "at", "date"]:
+        if key not in df:
+            raise KeyError(f"{key} not in dataframe")
+
     min_time_threshold = 48.0  # hours
     shortest_run = 4  # number of obs
 
@@ -654,8 +687,9 @@ def find_multiple_rounded_values(df: pd.DataFrame, intype: str) -> pd.DataFrame:
     pd.DataFrame
         Returns dataframe with additional column "rounded" containing QC outcomes
     """
-
-    assert intype in ["sst", "at", "dpt"]
+    allowed_variables = ["sst", "at", "dpt"]
+    if intype not in allowed_variables:
+        raise ValueError(f'{intype} not one of {allowed_variables}')
 
     min_count = 20
     threshold = 0.5
@@ -713,7 +747,9 @@ def find_repeated_values(df: pd.DataFrame, intype: str) -> pd.DataFrame:
     pd.DataFrame
         Returns dataframe with additional column "rep" containing QC outcomes
     """
-    assert intype in ["sst", "at", "dpt", "slp"]
+    allowed_variables = ["sst", "at", "dpt", "slp"]
+    if intype not in allowed_variables:
+        raise ValueError(f'{intype} not one of {allowed_variables}')
 
     threshold = 0.7
     assert 0.0 <= threshold <= 1.0
@@ -765,6 +801,10 @@ def iquam_track_check(df: pd.DataFrame) -> pd.DataFrame:
     pd.DataFrame
         Returns DataFrame with additional column "iquam_track" containing the outcomes of the QC
     """
+    for key in ["lat", "lon", "id", "date"]:
+        if key not in df:
+            raise KeyError(f"{key} not in dataframe")
+
     buoy_speed_limit = 15.0  # km/h
     ship_speed_limit = 60.0  # km/h
 
