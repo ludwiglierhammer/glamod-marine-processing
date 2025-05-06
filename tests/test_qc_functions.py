@@ -8,6 +8,12 @@ import numpy.ma as ma
 import pytest
 
 import glamod_marine_processing.qc_suite.modules.qc as qc
+from glamod_marine_processing.qc_suite.modules.blacklisting import (
+    do_blacklist,
+    do_humidity_blacklist,
+    do_mat_blacklist,
+    do_wind_blacklist,
+)
 from glamod_marine_processing.qc_suite.modules.next_level_qc import (
     _split_date,
     do_air_temperature_anomaly_check,
@@ -15,14 +21,11 @@ from glamod_marine_processing.qc_suite.modules.next_level_qc import (
     do_air_temperature_hard_limit_check,
     do_air_temperature_missing_value_check,
     do_air_temperature_no_normal_check,
-    do_blacklist,
     do_date_check,
     do_day_check,
     do_dpt_climatology_plus_stdev_check,
     do_dpt_missing_value_check,
     do_dpt_no_normal_check,
-    do_humidity_blacklist,
-    do_mat_blacklist,
     do_position_check,
     do_sst_anomaly_check,
     do_sst_freeze_check,
@@ -30,7 +33,6 @@ from glamod_marine_processing.qc_suite.modules.next_level_qc import (
     do_sst_no_normal_check,
     do_supersaturation_check,
     do_time_check,
-    do_wind_blacklist,
     do_wind_consistency_check,
     do_wind_direction_hard_limit_check,
     do_wind_direction_missing_value_check,
