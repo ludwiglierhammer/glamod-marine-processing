@@ -476,14 +476,14 @@ def track_check(df: pd.DataFrame) -> pd.DataFrame:
 
     # no obs in, no qc outcomes out
     if nobs == 0:
-        return
+        return df
 
     # Generic ids and buoys get a free pass on the track check
     if qc.id_is_generic(df.iloc[0].id, df.iloc[0].date.year) or df.iloc[0].pt in [6, 7]:
         for i in range(0, nobs):
             df["trk"] = np.zeros(nobs)
             df["few"] = np.zeros(nobs)
-        return
+        return df
 
     # fewer than three obs - set the fewsome flag
     # deck 720 gets a pass prior to 1891 see
@@ -492,11 +492,11 @@ def track_check(df: pd.DataFrame) -> pd.DataFrame:
         if df.iloc[0].dck == 720 and df.iloc[0].date.year < 1891:
             df["trk"] = np.zeros(nobs)
             df["few"] = np.zeros(nobs)
-            return
+            return df
         else:
             df["trk"] = np.zeros(nobs)
             df["few"] = np.zeros(nobs) + 1
-            return
+            return df
 
     trk = np.zeros(nobs)
     few = np.zeros(nobs)
