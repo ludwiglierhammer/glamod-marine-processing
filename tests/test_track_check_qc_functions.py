@@ -13,6 +13,7 @@ from glamod_marine_processing.qc_suite.modules.next_level_track_check_qc import 
     row_difference,
     spike_check,
     track_check,
+    find_saturated_runs,
 )
 
 
@@ -121,9 +122,42 @@ def test_calculate_speed_course_distance_time_difference(ship_frame):
             assert pytest.approx(row.speed, 0.00001) == 11.119508064776555
             assert pytest.approx(row.distance, 0.00001) == 11.119508064776555
             assert (
-                pytest.approx(row.course, 0.00001) == 0
-                or pytest.approx(row.course, 0.00001) == 360.0
+                    pytest.approx(row.course, 0.00001) == 0
+                    or pytest.approx(row.course, 0.00001) == 360.0
             )
             assert pytest.approx(row.time_diff, 0.0000001) == 1.0
         else:
             assert np.isnan(row.speed)
+
+@pytest.fixture
+def long_frame():
+    lat = [-5.0 + i * 0.1 for i in range(30)]
+    lon = [0 for _ in range(30)]
+    at = [15.0 for i in range(30)]
+    dpt = [15.0 for i in range(30)]
+    id = ["GOODTHING" for _ in range(30)]
+    date = pd.date_range(start=f"1850-01-01", freq="1h", periods=len(lat))
+    df = pd.DataFrame({"date": date, "lat": lat, "lon": lon, "at": at, "dpt": dpt, "id": id})
+    return df
+
+@pytest.fixture
+def longer_frame():
+    lat = [-5.0 + i * 0.1 for i in range(50)]
+    lon = [0 for _ in range(50)]
+    at = [15.0 for i in range(50)]
+    dpt = [15.0 for i in range(50)]
+    id = ["GOODTHING" for _ in range(50)]
+    date = pd.date_range(start=f"1850-01-01", freq="1h", periods=len(lat))
+    df = pd.DataFrame({"date": date, "lat": lat, "lon": lon, "at": at, "dpt": dpt, "id": id})
+    return df
+
+def test_find_saturated_runs(long_frame, longer_frame):
+    result = find_saturated_runs(long_frame)
+    assert "repsat" in result
+    for i in range(len(result)):
+        assert result.iloc[i].repsat == 0
+
+    result = find_saturated_runs(longer_frame)
+    assert "repsat" in result
+    for i in range(len(result)):
+        assert result.iloc[i].repsat == 1

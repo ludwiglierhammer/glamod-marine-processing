@@ -50,7 +50,7 @@ def spike_check(df: pd.DataFrame) -> pd.DataFrame:
     gradient_violations = []
     count_gradient_violations = []
 
-    spike_qc = np.zeros(numobs)
+    spike_qc = np.zeros(numobs)   # type: np.ndarray
 
     for t1 in range(numobs):
 
@@ -91,7 +91,7 @@ def spike_check(df: pd.DataFrame) -> pd.DataFrame:
 
     count = 0
     while np.sum(count_gradient_violations) > 0.0:
-        most_fails = np.argmax(count_gradient_violations)
+        most_fails = int(np.argmax(count_gradient_violations))
         spike_qc[most_fails] = 1
 
         for index in gradient_violations[most_fails]:
@@ -108,7 +108,7 @@ def spike_check(df: pd.DataFrame) -> pd.DataFrame:
 
 
 def row_difference(
-    later_row: pd.DataFrame, earlier_row: pd.DataFrame
+        later_row: pd.DataFrame, earlier_row: pd.DataFrame
 ) -> (float, float, float, float):
     """Subtracting one row from another to return the speed, distance, course and the time difference between the
     two rows. Originally this was coded as a subtraction: later_row minus earlier_row.
@@ -156,10 +156,10 @@ def calculate_speed_course_distance_time_difference(df):
     """The speeds and courses calculated using consecutive reports."""
     numobs = len(df)
 
-    speed = np.empty(numobs)
-    course = np.empty(numobs)
-    distance = np.empty(numobs)
-    time_diff = np.empty(numobs)
+    speed = np.empty(numobs)  # type: np.ndarray
+    course = np.empty(numobs)  # type: np.ndarray
+    distance = np.empty(numobs)  # type: np.ndarray
+    time_diff = np.empty(numobs)  # type: np.ndarray
 
     speed.fill(np.nan)
     course.fill(np.nan)
@@ -189,10 +189,10 @@ def calc_alternate_speeds(df):
     """The speeds and courses can also be calculated using alternating reports."""
     numobs = len(df)
 
-    alt_speed = np.empty(numobs)
-    alt_course = np.empty(numobs)
-    alt_distance = np.empty(numobs)
-    alt_time_diff = np.empty(numobs)
+    alt_speed = np.empty(numobs)   # type: np.ndarray
+    alt_course = np.empty(numobs)  # type: np.ndarray
+    alt_distance = np.empty(numobs)  # type: np.ndarray
+    alt_time_diff = np.empty(numobs)  # type: np.ndarray
 
     alt_speed.fill(np.nan)
     alt_course.fill(np.nan)
@@ -218,7 +218,7 @@ def calc_alternate_speeds(df):
     return df
 
 
-def distr1(df):
+def distr1(df) -> list:
     """
     calculate what the distance is between the projected position (based on the reported
     speed and heading at the current and previous time steps) and the actual position. The
@@ -245,11 +245,11 @@ def distr1(df):
         time_diff = df.iloc[i].time_diff
 
         if (
-            vsi is not None
-            and vsi_minus_one is not None
-            and dsi is not None
-            and dsi_minus_one is not None
-            and time_diff is not None
+                vsi is not None
+                and vsi_minus_one is not None
+                and dsi is not None
+                and dsi_minus_one is not None
+                and time_diff is not None
         ):
             # get increment from initial position
             lat1, lon1 = tc.increment_position(
@@ -285,7 +285,7 @@ def distr1(df):
     return distance_from_est_location
 
 
-def distr2(df):
+def distr2(df) -> list:
     """Calculate what the distance is between the projected position (based on the reported speed and
     heading at the current and previous time steps) and the actual position. The calculation proceeds from the
     final, later observation to the first (in contrast to distr1 which runs in time order)
@@ -316,11 +316,11 @@ def distr2(df):
         time_diff = df.iloc[i].time_diff
 
         if (
-            vsi is not None
-            and vsi_minus_one is not None
-            and dsi is not None
-            and dsi_minus_one is not None
-            and time_diff is not None
+                vsi is not None
+                and vsi_minus_one is not None
+                and dsi is not None
+                and dsi_minus_one is not None
+                and time_diff is not None
         ):
             # get increment from initial position - backwards in time
             # means reversing the direction by 180 degrees
@@ -499,8 +499,8 @@ def track_check(df: pd.DataFrame):
     df["midpt"] = midpoint_diff_from_estimated
 
     # do QC
-    trk = np.zeros(nobs)
-    few = np.zeros(nobs)
+    trk = np.zeros(nobs)   # type: np.ndarray
+    few = np.zeros(nobs)  # type: np.ndarray
 
     for i in range(1, nobs - 1):
         thisqc_a = 0
@@ -508,24 +508,24 @@ def track_check(df: pd.DataFrame):
 
         # together these cover the speeds calculate from point i
         if (
-            df.iloc[i].speed is not None
-            and df.iloc[i].speed > amax
-            and df.iloc[i - 1].alt_speed is not None
-            and df.iloc[i - 1].alt_speed > amax
+                df.iloc[i].speed is not None
+                and df.iloc[i].speed > amax
+                and df.iloc[i - 1].alt_speed is not None
+                and df.iloc[i - 1].alt_speed > amax
         ):
             thisqc_a += 1.00
         elif (
-            df.iloc[i + 1].speed is not None
-            and df.iloc[i + 1].speed > amax
-            and df.iloc[i + 1].alt_speed is not None
-            and df.iloc[i + 1].alt_speed > amax
+                df.iloc[i + 1].speed is not None
+                and df.iloc[i + 1].speed > amax
+                and df.iloc[i + 1].alt_speed is not None
+                and df.iloc[i + 1].alt_speed > amax
         ):
             thisqc_a += 2.00
         elif (
-            df.iloc[i].speed is not None
-            and df.iloc[i].speed > amax
-            and df.iloc[i + 1].speed is not None
-            and df.iloc[i + 1].speed > amax
+                df.iloc[i].speed is not None
+                and df.iloc[i].speed > amax
+                and df.iloc[i + 1].speed is not None
+                and df.iloc[i + 1].speed > amax
         ):
             thisqc_a += 3.00
 
@@ -559,9 +559,9 @@ def track_check(df: pd.DataFrame):
 
         # make the final decision
         if (
-            midpoint_diff_from_estimated[i] > max_midpoint_discrepancy / km_to_nm
-            and thisqc_a > 0
-            and thisqc_b > 0
+                midpoint_diff_from_estimated[i] > max_midpoint_discrepancy / km_to_nm
+                and thisqc_a > 0
+                and thisqc_b > 0
         ):
             trk[i] = 1
 
@@ -570,5 +570,70 @@ def track_check(df: pd.DataFrame):
 
     df["trk"] = trk
     df["few"] = few
+
+    return df
+
+
+def find_saturated_runs(df: pd.DataFrame) -> pd.DataFrame:
+    """Perform checks on persistence of 100% rh while going through the voyage.
+    While going through the voyage repeated strings of 100 %rh (AT == DPT) are noted.
+    If a string extends beyond 20 reports and two days/48 hrs in time then all values are set to
+    fail the repsat qc flag.
+
+    Parameters
+    ----------
+    df : pd.DataFrame
+        DataFrame to be checked
+    Returns
+    -------
+    pd.DataFrame
+    """
+    min_time_threshold = 48.0  # hours
+    shortest_run = 4  # number of obs
+
+    satcount = []
+
+    numobs = len(df)
+
+    repsat = np.zeros((numobs))  # type: np.ndarray
+
+    for i in range(numobs):
+
+        row = df.iloc[i]
+
+        saturated = (row["dpt"] == row["at"])
+
+        if saturated:
+            satcount.append(i)
+        elif not saturated and len(satcount) > shortest_run:
+
+            row2 = df.iloc[satcount[len(satcount) - 1]]
+            row1 = df.iloc[satcount[0]]
+            _, _, _, tdiff = row_difference(row2, row1)
+
+            print(tdiff)
+
+            if tdiff >= min_time_threshold:
+                for loc in satcount:
+                    repsat[loc] = 1
+                satcount = []
+            else:
+                satcount = []
+
+        else:
+            satcount = []
+
+    if len(satcount) > shortest_run:
+        row2 = df.iloc[satcount[len(satcount) - 1]]
+        row1 = df.iloc[satcount[0]]
+        _, _, _, tdiff = row_difference(row2, row1)
+
+        print(tdiff)
+
+        if tdiff >= min_time_threshold:
+            for loc in satcount:
+                repsat[loc] = 1
+
+    df["repsat"] = repsat
 
     return df
