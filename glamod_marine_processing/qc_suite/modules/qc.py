@@ -9,7 +9,6 @@ from __future__ import annotations
 import calendar
 import math
 from datetime import datetime, timedelta
-from typing import List, Tuple
 
 import numpy as np
 
