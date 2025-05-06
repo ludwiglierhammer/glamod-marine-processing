@@ -181,7 +181,9 @@ def calculate_speed_course_distance_time_difference(df: pd.DataFrame) -> pd.Data
         for i in range(1, number_of_obs):
             row2 = df.iloc[i]
             row1 = df.iloc[i - 1]
-            ship_speed, ship_distance, ship_direction, ship_time_difference = row_difference(row2, row1)
+            ship_speed, ship_distance, ship_direction, ship_time_difference = (
+                row_difference(row2, row1)
+            )
 
             speed[i] = ship_speed
             course[i] = ship_direction
@@ -225,7 +227,9 @@ def calc_alternate_speeds(df):
         for i in range(1, number_of_obs - 1):
             row2 = df.iloc[i + 1]
             row1 = df.iloc[i - 1]
-            ship_speed, ship_distance, ship_direction, ship_time_difference = row_difference(row1, row2)
+            ship_speed, ship_distance, ship_direction, ship_time_difference = (
+                row_difference(row1, row2)
+            )
 
             alt_speed[i] = ship_speed
             alt_course[i] = ship_direction
