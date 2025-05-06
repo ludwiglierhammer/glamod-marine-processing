@@ -4,10 +4,6 @@ from __future__ import annotations
 
 from .qc import failed, passed
 
-# This should be the raw structure.
-# In general, I think, we do not need to set qc flags, we just return them (no self.set_qc)
-# I hop I did not forget anything.
-
 
 def is_in_valid_list(
     value: str | int | float, valid_list: str | int | float | list
@@ -49,8 +45,6 @@ def is_buoy(platform_type: int, valid_list: list | int = [6, 7]) -> int:
     int
         Return 0 if observation is from a drifting or moored buoy and 1 otherwise
     """
-    # I think we should use the CDM platform table?
-    # https://glamod.github.io/cdm-obs-documentation/tables/code_tables/platform_type/platform_type.html
     return is_in_valid_list(platform_type, valid_list)
 
 
@@ -93,8 +87,6 @@ def is_ship(
     int
         Return 0 if observation is from a ship and 1 otherwise
     """
-    # I think we should use the CDM platform table?
-    # https://glamod.github.io/cdm-obs-documentation/tables/code_tables/platform_type/platform_type.html
     return is_in_valid_list(platform_type, valid_list)
 
 
@@ -115,8 +107,4 @@ def is_deck(dck: int, valid_list: list | int = 780) -> int:
     int
         return 0 if observation is in deck 780 and 1 otherwise
     """
-    # Do we need this function?
-    # Where/Why do we need "is780"?
-    # I think this function should return a boolean value, isn't it?
-    # We do not have this information explicitly in the CDM.
     return is_in_valid_list(dck, valid_list)
