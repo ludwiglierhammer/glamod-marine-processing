@@ -611,8 +611,6 @@ def find_saturated_runs(df: pd.DataFrame) -> pd.DataFrame:
             row1 = df.iloc[satcount[0]]
             _, _, _, tdiff = row_difference(row2, row1)
 
-            print(tdiff)
-
             if tdiff >= min_time_threshold:
                 for loc in satcount:
                     repsat[loc] = 1
@@ -627,8 +625,6 @@ def find_saturated_runs(df: pd.DataFrame) -> pd.DataFrame:
         row2 = df.iloc[satcount[len(satcount) - 1]]
         row1 = df.iloc[satcount[0]]
         _, _, _, tdiff = row_difference(row2, row1)
-
-        print(tdiff)
 
         if tdiff >= min_time_threshold:
             for loc in satcount:
