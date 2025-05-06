@@ -14,28 +14,18 @@ from glamod_marine_processing.qc_suite.modules.icoads_identify import (
     is_ship,
 )
 from glamod_marine_processing.qc_suite.modules.next_level_qc import (
-    do_air_temperature_anomaly_check,
-    do_air_temperature_climatology_plus_stdev_check,
-    do_air_temperature_hard_limit_check,
-    do_air_temperature_missing_value_check,
-    do_air_temperature_no_normal_check,
+    do_anomaly_check,
+    do_climatology_plus_stdev_check,
     do_date_check,
     do_day_check,
-    do_dpt_climatology_plus_stdev_check,
-    do_dpt_missing_value_check,
-    do_dpt_no_normal_check,
+    do_hard_limit_check,
+    do_missing_value_check,
+    do_no_normal_check,
     do_position_check,
-    do_sst_anomaly_check,
     do_sst_freeze_check,
-    do_sst_missing_value_check,
-    do_sst_no_normal_check,
     do_supersaturation_check,
     do_time_check,
     do_wind_consistency_check,
-    do_wind_direction_hard_limit_check,
-    do_wind_direction_missing_value_check,
-    do_wind_speed_hard_limit_check,
-    do_wind_speed_missing_value_check,
 )
 
 
@@ -145,11 +135,6 @@ def test_is_ship(testdata):
     pd.testing.assert_series_equal(results, expected)
 
 
-def _test_is_deck(testdata):
-    # Deck is ICOADS specific.
-    raise NotImplementedError
-
-
 def test_do_position_check(testdata):
     db_ = testdata["header"].copy()
     results = db_.apply(
@@ -227,7 +212,7 @@ def test_do_day_check(testdata):
 def test_do_air_temperature_missing_value_check(testdata):
     db_ = testdata["observations-at"].copy()
     results = db_.apply(
-        lambda row: do_air_temperature_missing_value_check(at=row["observation_value"]),
+        lambda row: do_missing_value_check(value=row["observation_value"]),
         axis=1,
     )
     expected = pd.Series(
@@ -268,9 +253,9 @@ def test_do_air_temperature_anomaly_check(testdata):
         280,
     ]
     results = db_.apply(
-        lambda row: do_air_temperature_anomaly_check(
-            at=row["observation_value"],
-            at_climatology=row["climatology"],
+        lambda row: do_anomaly_check(
+            value=row["observation_value"],
+            climatology=row["climatology"],
             maximum_anomaly=1.0,
         ),
         axis=1,
@@ -298,9 +283,7 @@ def test_do_air_temperature_anomaly_check(testdata):
 def test_do_air_temperature_no_normal_check(testdata):
     db_ = testdata["observations-at"].copy()
     results = db_.apply(
-        lambda row: do_air_temperature_no_normal_check(
-            at_climatology=row["observation_value"]
-        ),
+        lambda row: do_no_normal_check(climatology=row["observation_value"]),
         axis=1,
     )
     expected = pd.Series(
@@ -326,8 +309,8 @@ def test_do_air_temperature_no_normal_check(testdata):
 def test_do_air_temperature_hard_limit_check(testdata):
     db_ = testdata["observations-at"].copy()
     results = db_.apply(
-        lambda row: do_air_temperature_hard_limit_check(
-            at=row["observation_value"],
+        lambda row: do_hard_limit_check(
+            value=row["observation_value"],
             hard_limits=[278, 281],
         ),
         axis=1,
@@ -370,10 +353,10 @@ def test_do_air_temperature_climatology_plus_stdev_check(testdata):
         280,
     ]
     results = db_.apply(
-        lambda row: do_air_temperature_climatology_plus_stdev_check(
-            at=row["observation_value"],
-            at_climatology=row["climatology"],
-            at_stdev=1.0,
+        lambda row: do_climatology_plus_stdev_check(
+            value=row["observation_value"],
+            climatology=row["climatology"],
+            stdev=1.0,
             minmax_standard_deviation=[1.0, 4.0],
             maximum_standardised_anomaly=2.0,
         ),
@@ -417,10 +400,10 @@ def test_do_dpt_climatology_plus_stdev_check(testdata):
         275,
     ]
     results = db_.apply(
-        lambda row: do_dpt_climatology_plus_stdev_check(
-            dpt=row["observation_value"],
-            dpt_climatology=row["climatology"],
-            dpt_stdev=1.0,
+        lambda row: do_climatology_plus_stdev_check(
+            value=row["observation_value"],
+            climatology=row["climatology"],
+            stdev=1.0,
             minmax_standard_deviation=[1.0, 4.0],
             maximum_standardised_anomaly=2.0,
         ),
@@ -449,7 +432,7 @@ def test_do_dpt_climatology_plus_stdev_check(testdata):
 def test_do_dpt_missing_value_check(testdata):
     db_ = testdata["observations-dpt"].copy()
     results = db_.apply(
-        lambda row: do_dpt_missing_value_check(dpt=row["observation_value"]),
+        lambda row: do_missing_value_check(value=row["observation_value"]),
         axis=1,
     )
     expected = pd.Series(
@@ -475,7 +458,7 @@ def test_do_dpt_missing_value_check(testdata):
 def test_do_dpt_no_normal_check(testdata):
     db_ = testdata["observations-dpt"].copy()
     results = db_.apply(
-        lambda row: do_dpt_no_normal_check(dpt_climatology=row["observation_value"]),
+        lambda row: do_no_normal_check(climatology=row["observation_value"]),
         axis=1,
     )
     expected = pd.Series(
@@ -533,7 +516,7 @@ def test_do_supersaturation_check(testdata):
 def test_do_sst_missing_value_check(testdata):
     db_ = testdata["observations-sst"].copy()
     results = db_.apply(
-        lambda row: do_sst_missing_value_check(sst=row["observation_value"]),
+        lambda row: do_missing_value_check(value=row["observation_value"]),
         axis=1,
     )
     expected = pd.Series(
@@ -589,8 +572,8 @@ def test_do_sst_freeze_check(testdata):
 def test_do_sst_anomaly_check(testdata):
     db_ = testdata["observations-sst"].copy()
     results = db_.apply(
-        lambda row: do_sst_anomaly_check(
-            sst=row["observation_value"], sst_climatology=277, maximum_anomaly=1.0
+        lambda row: do_anomaly_check(
+            value=row["observation_value"], climatology=277, maximum_anomaly=1.0
         ),
         axis=1,
     )
@@ -617,7 +600,7 @@ def test_do_sst_anomaly_check(testdata):
 def test_do_sst_no_normal_check(testdata):
     db_ = testdata["observations-sst"].copy()
     results = db_.apply(
-        lambda row: do_sst_no_normal_check(sst_climatology=row["observation_value"]),
+        lambda row: do_no_normal_check(climatology=row["observation_value"]),
         axis=1,
     )
     expected = pd.Series(
@@ -643,9 +626,7 @@ def test_do_sst_no_normal_check(testdata):
 def test_do_wind_speed_missing_value_check(testdata):
     db_ = testdata["observations-ws"].copy()
     results = db_.apply(
-        lambda row: do_wind_speed_missing_value_check(
-            wind_speed=row["observation_value"]
-        ),
+        lambda row: do_missing_value_check(value=row["observation_value"]),
         axis=1,
     )
     expected = pd.Series(
@@ -671,8 +652,8 @@ def test_do_wind_speed_missing_value_check(testdata):
 def test_do_wind_speed_hard_limit_check(testdata):
     db_ = testdata["observations-ws"].copy()
     results = db_.apply(
-        lambda row: do_wind_speed_hard_limit_check(
-            wind_speed=row["observation_value"],
+        lambda row: do_hard_limit_check(
+            value=row["observation_value"],
             hard_limits=[0, 13],
         ),
         axis=1,
@@ -700,9 +681,7 @@ def test_do_wind_speed_hard_limit_check(testdata):
 def test_do_wind_direction_missing_value_check(testdata):
     db_ = testdata["observations-wd"].copy()
     results = db_.apply(
-        lambda row: do_wind_direction_missing_value_check(
-            wind_direction=row["observation_value"]
-        ),
+        lambda row: do_missing_value_check(value=row["observation_value"]),
         axis=1,
     )
     expected = pd.Series(
@@ -728,8 +707,8 @@ def test_do_wind_direction_missing_value_check(testdata):
 def test_do_wind_direction_hard_limit_check(testdata):
     db_ = testdata["observations-wd"].copy()
     results = db_.apply(
-        lambda row: do_wind_direction_hard_limit_check(
-            wind_direction=row["observation_value"],
+        lambda row: do_hard_limit_check(
+            value=row["observation_value"], hard_limits=[0, 360]
         ),
         axis=1,
     )
