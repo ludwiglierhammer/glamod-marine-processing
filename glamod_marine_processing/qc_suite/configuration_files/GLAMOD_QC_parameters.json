@@ -55,7 +55,9 @@
           "value": "observation_value"
         },
         "arguments": {
-          "climatology": "?",
+          "climatology": {
+            "ext_file": "ERAClimatologies/t2m_pentad_1by1marine_ERA-Interim_data_19792015.nc"
+          },
           "maximum_anomaly": 10.0
         }
       },
@@ -64,8 +66,12 @@
           "value": "observation_value"
         },
         "arguments": {
-          "climatology": "?",
-          "stdev": "?",
+          "climatology": {
+            "ext_file": "ERAClimatologies/t2m_pentad_1by1marine_ERA-Interim_data_19792015.nc"
+          },
+          "stdev": {
+            "ext_file": "ERAClimatologies/t2m_pentad_1by1marine_ERA-Interim_data_19792015.nc"
+          },
           "minmax_standard_deviation": [
             1.0,
             4.0
@@ -90,8 +96,12 @@
           "value": "observation_value"
         },
         "arguments": {
-          "climatology": "?",
-          "stdev": "?",
+          "climatology": {
+            "ext_file": "ERAClimatologies/td2m_pentad_1by1marine_ERA-Interim_data_19792015.nc"
+          },
+          "stdev": {
+            "ext_file": "ERAClimatologies/td2m_pentad_1by1marine_ERA-Interim_data_19792015.nc"
+          },
           "minmax_standard_deviation": [
             1.0,
             4.0
@@ -146,8 +156,10 @@
           "value": "observation_value"
         },
         "arguments": {
-          "climatology": "?",
-          "maximum_anomaly": "?"
+          "climatology": {
+            "ext_file": "SST/HadSST2_daily_1x1_climatology.nc"
+          },
+          "maximum_anomaly": 8.0
         }
       },
       "do_hard_limit_check": {
