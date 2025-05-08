@@ -5,7 +5,7 @@ from __future__ import annotations
 import cf_xarray  # noqa
 import xarray as xr
 
-from .qc import day_in_year, which_pentad
+from .time_control import day_in_year, which_pentad
 
 
 def open_xrdataset(
