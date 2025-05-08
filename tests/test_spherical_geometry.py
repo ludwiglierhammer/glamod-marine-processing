@@ -7,7 +7,7 @@ import glamod_marine_processing.qc_suite.modules.spherical_geometry as sg
 
 
 def test_same_start_and_end_have_zero_distance():
-    """for a range of lats and longs test that identical start and end points map to zero distance"""
+    """For a range of lats and longs test that identical start and end points map to zero distance"""
     for lat1 in range(-90, 90, 5):
         for lon1 in range(-180, 180, 5):
             a = sg.sphere_distance(lat1, lon1, lat1, lon1)
@@ -15,31 +15,31 @@ def test_same_start_and_end_have_zero_distance():
 
 
 def test_pole_to_pole_a():
-    """make sure pole to pole distance is pi*r"""
+    """Make sure pole to pole distance is pi*r"""
     a = sg.sphere_distance(-90.0, 0.0, 90.0, 0.0)
     assert sg.earths_radius * np.pi == a
 
 
 def test_round_equator_a():
-    """make sure half the equator is pi*r"""
+    """Make sure half the equator is pi*r"""
     a = sg.sphere_distance(0.0, 0.0, 0.0, 180.0)
     assert sg.earths_radius * np.pi == a
 
 
 def test_small_steps_latitude():
-    """test that 5degree lat increment is one 36th of pi*r to better than 1cm"""
+    """Test that 5degree lat increment is one 36th of pi*r to better than 1cm"""
     a = sg.sphere_distance(-90.0, 0.0, -85.0, 0.0)
     assert pytest.approx(a, 0.00000001) == sg.earths_radius * np.pi / 36
 
 
 def test_small_steps_longitude():
-    """test that 5degree long increment is one 36th of pi*r to better than 1cm"""
+    """Test that 5degree long increment is one 36th of pi*r to better than 1cm"""
     a = sg.sphere_distance(0.0, 22.0, 0.0, 27.0)
     assert pytest.approx(a, 0.00000001) == sg.earths_radius * np.pi / 36
 
 
 def test_same_start_and_end_have_zero_angular_distance():
-    """for a range of lats and longs test that identical start and end points map to zero distance"""
+    """For a range of lats and longs test that identical start and end points map to zero distance"""
     for lat1 in range(-90, 90, 5):
         for lon1 in range(-180, 180, 5):
             a = sg.angular_distance(lat1, lon1, lat1, lon1)
@@ -47,19 +47,19 @@ def test_same_start_and_end_have_zero_angular_distance():
 
 
 def test_pole_to_pole():
-    """make sure pole to pole distance is pi"""
+    """Make sure pole to pole distance is pi"""
     a = sg.angular_distance(-90.0, 0.0, 90.0, 0.0)
     assert a == np.pi
 
 
 def test_round_equator():
-    """make sure half the equator is pi"""
+    """Make sure half the equator is pi"""
     a = sg.angular_distance(0.0, 0.0, 0.0, 180.0)
     assert a == np.pi
 
 
 def test_round_the_world_is_zero():
-    """test all the way round the equator 0 - 360 gives zero angular distance"""
+    """Test all the way round the equator 0 - 360 gives zero angular distance"""
     a = sg.angular_distance(0.0, 0.0, 0.0, 360.0)
     assert pytest.approx(a, 0.00000001) == 0.0
 
@@ -86,7 +86,7 @@ def test_going_nowhere():
 
 
 def test_heading_north_from_pole_to_pole():
-    """headin north from the southpole for an angular distance of pi takes you to the north pole"""
+    """Heading north from the southpole for an angular distance of pi takes you to the north pole"""
     lat, lon = sg.lat_lon_from_course_and_distance(
         -90.0, 0.0, 0.0, np.pi * sg.earths_radius
     )
@@ -95,7 +95,7 @@ def test_heading_north_from_pole_to_pole():
 
 
 def test_heading_north_from_pole_to_pole_on_different_headings():
-    """headin north from the southpole for an angular distance of pi takes you to the north pole"""
+    """Heading north from the southpole for an angular distance of pi takes you to the north pole"""
     for i in range(0, 100):
         lat, lon = sg.lat_lon_from_course_and_distance(
             -90.0, 0.0, i * 360.0 / 100.0, np.pi * sg.earths_radius
@@ -120,13 +120,13 @@ def test_heading_eastish_round_equator():
 
 
 def test_heading_just_east_of_north():
-    """just east of north heading should be zero"""
+    """Just east of north heading should be zero"""
     heading = sg.course_between_points(0.0, 0.0, 1.3, 0.0000001)
     assert pytest.approx(heading, 1) == 0.0
 
 
 def test_heading_cos_lat_near_zero():
-    """just east of north heading should be zero"""
+    """Just east of north heading should be zero"""
     heading = sg.course_between_points(90.0, 0.0, 1.3, 0.0000001)
     assert pytest.approx(heading, 1) == 0.0
 
@@ -135,38 +135,37 @@ def test_heading_cos_lat_near_zero():
 
 
 def test_heading_just_west_of_north():
-    """just west of north heading should be 360.0"""
+    """Just west of north heading should be 360.0"""
     heading = sg.course_between_points(0.0, 0.0, 1.3, -0.0000001)
     assert pytest.approx(heading, 0.00001) == 360.0
 
 
 def test_heading_east():
-    """heading due east should be course of 90degrees"""
+    """Heading due east should be course of 90degrees"""
     heading = sg.course_between_points(0.0, 0.0, 0.0, 23.2)
     assert pytest.approx(heading, 0.0000001) == 90.0
 
 
 def test_heading_west():
-    """heading due west should be course of 90degrees"""
+    """Heading due west should be course of 90degrees"""
     heading = sg.course_between_points(0.0, 0.0, 0.0, -23.2)
     assert pytest.approx(heading, 0.0000001) == 270.0
 
 
 def test_heading_south():
-    """heading due south should be course of 90degrees"""
+    """Heading due south should be course of 90degrees"""
     heading = sg.course_between_points(0.0, 0.0, -11.1111, 0.0)
     assert pytest.approx(heading, 0.0000001) == 180.0
 
 
 def test_heading_south2():
-    """test added in response to bug where heading due south or due north occasionally
-    returned nan"""
+    """Test added in response to bug where heading due south or due north occasionally returned nan"""
     heading = sg.course_between_points(4.0, 92.0, 3.0, 92.0)
     assert pytest.approx(heading, 0.000001) == 180.0
 
 
 def test_equator_is_halfway_from_pole_to_pole():
-    """make sure equator is halfway between (almost) the poles"""
+    """Make sure equator is halfway between (almost) the poles"""
     # don't do 90S to 90N as the great circle is not uniquely defined
     lat, lon = sg.intermediate_point(-89, 0, 89, 0, 0.5)
     assert lat == 0.0
@@ -174,7 +173,7 @@ def test_equator_is_halfway_from_pole_to_pole():
 
 
 def test_that_5deg_is_one_72th_of_equator():
-    """test that 5degrees is one eighteenth of 90degrees around the equator"""
+    """Test that 5degrees is one eighteenth of 90degrees around the equator"""
     lat, lon = sg.intermediate_point(0.0, 0.0, 0.0, 90.0, 1.0 / 18.0)
     assert pytest.approx(lon, 0.0000001) == 5.0
 

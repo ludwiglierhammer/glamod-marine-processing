@@ -44,7 +44,7 @@ def sphere_distance(lat1: float, lon1: float, lat2: float, lon2: float) -> float
 
 
 def angular_distance(lat1: float, lon1: float, lat2: float, lon2: float) -> float:
-    """calculate distance between two points on a sphere  input latitudes and longitudes should be in degrees
+    """Calculate distance between two points on a sphere  input latitudes and longitudes should be in degrees
     output is in radians
 
     Parameters
