@@ -10,8 +10,9 @@ import math
 import numpy as np
 
 from . import Extended_IMMA as ex
-from .qc import dayinyear, sunangle
+from .astronomical_geometry import sunangle
 from .spherical_geometry import sphere_distance
+from .time_control import dayinyear
 
 """
 The trackqc module contains a set of functions for performing the tracking QC
