@@ -110,7 +110,7 @@ def spike_check(df: pd.DataFrame) -> pd.DataFrame:
 
 
 def row_difference(
-    later_row: pd.DataFrame, earlier_row: pd.DataFrame
+        later_row: pd.DataFrame, earlier_row: pd.DataFrame
 ) -> (float, float, float, float):
     """Subtracting one row from another to return the speed, distance, course and the time difference between the
     two rows. Originally this was coded as a subtraction: later_row minus earlier_row.
@@ -155,7 +155,8 @@ def row_difference(
 
 
 def calculate_speed_course_distance_time_difference(df: pd.DataFrame) -> pd.DataFrame:
-    """Calculates speeds, courses, distances and time differences using consecutive reports.
+    """
+    Calculates speeds, courses, distances and time differences using consecutive reports.
 
     Parameters
     ----------
@@ -279,11 +280,11 @@ def forward_discrepancy(df: pd.DataFrame) -> list:
         time_diff = df.iloc[i].time_diff
 
         if (
-            vsi is not None
-            and vsi_minus_one is not None
-            and dsi is not None
-            and dsi_minus_one is not None
-            and time_diff is not None
+                vsi is not None
+                and vsi_minus_one is not None
+                and dsi is not None
+                and dsi_minus_one is not None
+                and time_diff is not None
         ):
             # get increment from initial position
             lat1, lon1 = tc.increment_position(
@@ -351,11 +352,11 @@ def backward_discrepancy(df) -> list:
         time_diff = df.iloc[i].time_diff
 
         if (
-            vsi is not None
-            and vsi_minus_one is not None
-            and dsi is not None
-            and dsi_minus_one is not None
-            and time_diff is not None
+                vsi is not None
+                and vsi_minus_one is not None
+                and dsi is not None
+                and dsi_minus_one is not None
+                and time_diff is not None
         ):
             # get increment from initial position - backwards in time
             # means reversing the direction by 180 degrees
@@ -534,24 +535,24 @@ def track_check(df: pd.DataFrame) -> pd.DataFrame:
 
         # together these cover the speeds calculate from point i
         if (
-            df.iloc[i].speed is not None
-            and df.iloc[i].speed > amax
-            and df.iloc[i - 1].alt_speed is not None
-            and df.iloc[i - 1].alt_speed > amax
+                df.iloc[i].speed is not None
+                and df.iloc[i].speed > amax
+                and df.iloc[i - 1].alt_speed is not None
+                and df.iloc[i - 1].alt_speed > amax
         ):
             thisqc_a += 1.00
         elif (
-            df.iloc[i + 1].speed is not None
-            and df.iloc[i + 1].speed > amax
-            and df.iloc[i + 1].alt_speed is not None
-            and df.iloc[i + 1].alt_speed > amax
+                df.iloc[i + 1].speed is not None
+                and df.iloc[i + 1].speed > amax
+                and df.iloc[i + 1].alt_speed is not None
+                and df.iloc[i + 1].alt_speed > amax
         ):
             thisqc_a += 2.00
         elif (
-            df.iloc[i].speed is not None
-            and df.iloc[i].speed > amax
-            and df.iloc[i + 1].speed is not None
-            and df.iloc[i + 1].speed > amax
+                df.iloc[i].speed is not None
+                and df.iloc[i].speed > amax
+                and df.iloc[i + 1].speed is not None
+                and df.iloc[i + 1].speed > amax
         ):
             thisqc_a += 3.00
 
@@ -585,9 +586,9 @@ def track_check(df: pd.DataFrame) -> pd.DataFrame:
 
         # make the final decision
         if (
-            midpoint_diff_from_estimated[i] > max_midpoint_discrepancy / km_to_nm
-            and thisqc_a > 0
-            and thisqc_b > 0
+                midpoint_diff_from_estimated[i] > max_midpoint_discrepancy / km_to_nm
+                and thisqc_a > 0
+                and thisqc_b > 0
         ):
             trk[i] = 1
 
@@ -844,7 +845,7 @@ def iquam_track_check(df: pd.DataFrame) -> pd.DataFrame:
             _, distance, _, time_diff = row_difference(row2, row1)
 
             iquam_condition = max([abs(distance) - delta_d, 0.0]) / (
-                abs(time_diff) + delta_t
+                    abs(time_diff) + delta_t
             )
 
             if iquam_condition > speed_limit:

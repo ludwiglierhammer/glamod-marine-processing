@@ -154,7 +154,7 @@ def trim_std(inarr: list, trim: float) -> float:
         array of numbers
     trim : float
         trimming criteria. A value of 10 trims one tenth of the values off each end of the sorted array before
-      calculating the standard deviation.
+        calculating the standard deviation.
 
     Returns
     -------
