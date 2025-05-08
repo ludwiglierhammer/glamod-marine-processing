@@ -21,7 +21,7 @@ from .next_level_qc import (  # noqa
 from .qc import failed
 
 
-def do_multiple_row_qc(data: dict | pd.Series, qc_dict: dict) -> int:
+def do_multiple_row_qc(data: dict | pd.Series, qc_dict: dict = {}) -> int:
     """Basic roy-by-row QC.
 
     Parameters
