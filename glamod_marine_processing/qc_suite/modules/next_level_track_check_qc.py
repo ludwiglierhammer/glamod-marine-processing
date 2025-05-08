@@ -3,10 +3,10 @@ from __future__ import annotations
 import numpy as np
 import pandas as pd
 
-import glamod_marine_processing.qc_suite.modules.qc as qc
 import glamod_marine_processing.qc_suite.modules.icoads_identify as icoads_identify
-import glamod_marine_processing.qc_suite.modules.time_control as time_control
+import glamod_marine_processing.qc_suite.modules.qc as qc
 import glamod_marine_processing.qc_suite.modules.spherical_geometry as sg
+import glamod_marine_processing.qc_suite.modules.time_control as time_control
 import glamod_marine_processing.qc_suite.modules.track_check as tc
 
 km_to_nm = 0.539957
@@ -486,7 +486,9 @@ def track_check(df: pd.DataFrame) -> pd.DataFrame:
         return df
 
     # Generic ids and buoys get a free pass on the track check
-    if icoads_identify.id_is_generic(df.iloc[0].id, df.iloc[0].date.year) or df.iloc[0].pt in [6, 7]:
+    if icoads_identify.id_is_generic(df.iloc[0].id, df.iloc[0].date.year) or df.iloc[
+        0
+    ].pt in [6, 7]:
         for i in range(0, nobs):
             df["trk"] = np.zeros(nobs)
             df["few"] = np.zeros(nobs)
