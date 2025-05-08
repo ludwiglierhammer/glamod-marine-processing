@@ -5,7 +5,7 @@ from __future__ import annotations
 import math
 from datetime import datetime
 
-from . import qc
+from . import qc, time_control
 from .qc import failed, passed, untestable
 
 
@@ -100,7 +100,7 @@ def do_date_check(
     if month < 1 or month > 12:
         return failed
 
-    month_lengths = qc.get_month_lengths(year)
+    month_lengths = time_control.get_month_lengths(year)
 
     if day < 1 or day > month_lengths[month - 1]:
         return failed
