@@ -174,7 +174,7 @@ def trip2():
 
 def test_first_entry_missing(trip1):
     difference_from_estimated_location = tc.distr1(trip1)
-    assert difference_from_estimated_location[0] == None
+    assert difference_from_estimated_location[0] is None
 
 
 def test_ship_is_at_computed_location(trip1):
