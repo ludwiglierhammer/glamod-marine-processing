@@ -108,3 +108,67 @@ def is_deck(dck: int, valid_list: list | int = 780) -> int:
         return 0 if observation is in deck 780 and 1 otherwise
     """
     return is_in_valid_list(dck, valid_list)
+
+
+def id_is_generic(inid: str, inyear: int) -> bool:
+    """Test to see if an ID is one of the generic IDs.
+
+    Certain callsigns are shared by large numbers of ships. e.g. SHIP, PLAT, 0120,
+    MASK, MASKSTID. This simple routine has a list of known generic call signs.
+    Some call signs are only generic between certain years.
+
+    Parameters
+    ----------
+    inid : str
+        ID from marine report
+    inyear : int
+        Year we are checking for
+
+    Returns
+    -------
+    bool
+        True if the ID is generic and False otherwise
+    """
+    generic_ids = [
+        None,
+        "",
+        " ",
+        "1        ",
+        "58       ",
+        "RIGG     ",
+        "     RIGG",
+        "SHIP     ",
+        "ship     ",
+        "     SHIP",
+        "PLAT     ",
+        "     PLAT",
+        "         ",
+        "0120     ",
+        "0204     ",
+        "0205     ",
+        "0206     ",
+        "0207     ",
+        "0208     ",
+        "0209     ",
+        "MASKST   ",
+        "MASKSTID ",
+        "MASK     ",
+        "XXXX     ",
+        "/////    ",
+    ]
+
+    if 1921 <= inyear <= 1941:
+        generic_ids.append("2        ")
+        generic_ids.append("00002    ")
+
+    if 1930 <= inyear <= 1937:
+        generic_ids.append("3        ")
+
+    if 1934 <= inyear <= 1954:
+        generic_ids.append("7        ")
+        generic_ids.append("00007    ")
+
+    result = False
+    if inid in generic_ids:
+        result = True
+    return result
