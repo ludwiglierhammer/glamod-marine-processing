@@ -8,6 +8,14 @@ import numpy.ma as ma
 import pytest
 
 import glamod_marine_processing.qc_suite.modules.qc as qc
+from glamod_marine_processing.qc_suite.modules.time_control import (
+season,
+month_match,
+yesterday,
+pentad_to_month_day,
+which_pentad,
+day_in_year
+)
 from glamod_marine_processing.qc_suite.modules.blacklisting import (
     do_blacklist,
     do_humidity_blacklist,
@@ -939,7 +947,7 @@ def test_do_wind_consistency_check(wind_speed, wind_direction, expected):
     ],
 )
 def test_month_match(y1, m1, y2, m2, expected):
-    assert qc.month_match(y1, m1, y2, m2) == expected
+    assert month_match(y1, m1, y2, m2) == expected
 
 
 @pytest.mark.parametrize(
@@ -954,7 +962,7 @@ def test_month_match(y1, m1, y2, m2, expected):
     ],
 )
 def test_yesterday(year, month, day, expected_year, expected_month, expected_day):
-    assert qc.yesterday(year, month, day) == (
+    assert yesterday(year, month, day) == (
         expected_year,
         expected_month,
         expected_day,
@@ -982,13 +990,13 @@ def test_yesterday(year, month, day, expected_year, expected_month, expected_day
     ],
 )
 def test_seasons(month, expected):
-    assert qc.season(month) == expected
+    assert season(month) == expected
 
 
 def test_pentad_to_mont():
     for p in range(1, 74):
-        m, d = qc.pentad_to_month_day(p)
-        assert p == qc.which_pentad(m, d)
+        m, d = pentad_to_month_day(p)
+        assert p == which_pentad(m, d)
 
 
 @pytest.mark.parametrize(
@@ -1015,26 +1023,26 @@ def test_which_pentad_raises_value_error():
 
 
 def test_day_in_year_leap_year():
-    assert qc.day_in_year(2, 29) == qc.day_in_year(3, 1)
+    assert day_in_year(2, 29) == day_in_year(3, 1)
 
     # Just test all days
     month_lengths = [31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31]
     count = 1
     for month in range(1, 13):
         for day in range(1, month_lengths[month - 1] + 1):
-            assert qc.day_in_year(month, day) == count
+            assert day_in_year(month, day) == count
             count += 1
 
 
 def test_day_in_year_leap_year_test():
     with pytest.raises(ValueError):
-        qc.day_in_year(13, 1)
+        day_in_year(13, 1)
     with pytest.raises(ValueError):
-        qc.day_in_year(0, 1)
+        day_in_year(0, 1)
     with pytest.raises(ValueError):
-        qc.day_in_year(2, 30)
+        day_in_year(2, 30)
     with pytest.raises(ValueError):
-        qc.day_in_year(2, 0)
+        day_in_year(2, 0)
 
 
 @pytest.fixture
