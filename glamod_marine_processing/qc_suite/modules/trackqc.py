@@ -296,11 +296,12 @@ def create_smoothed_lon_lat_hrs(
     half_win=0,
 ):
     """Create smoothed lon/lat timeseries."""
-    lon_smooth = np.array(nrep * [np.nan])
-    lat_smooth = np.array(nrep * [np.nan])
-    hrs_smooth = np.array(nrep * [np.nan])
+    nrep_smooth = nrep - smooth_win + 1  # length of series after smoothing
 
-    nrep_smooth = nrep - smooth_win + 1
+    lon_smooth = np.array(nrep_smooth * [np.nan])
+    lat_smooth = np.array(nrep_smooth * [np.nan])
+    hrs_smooth = np.array(nrep_smooth * [np.nan])
+
     for i in range(0, nrep_smooth):
         lon_smooth[i] = np.median(lon[i : i + smooth_win])
         lat_smooth[i] = np.median(lat[i : i + smooth_win])
@@ -331,13 +332,12 @@ def check_drifter_aground(
 
     time_to_end = hrs_smooth[-1] - hrs_smooth[i]
     while time_to_end >= min_win_period_hours:
-        if max_win_period_hours is not None:
-            f_win = hrs_smooth <= hrs_smooth[i] + max_win_period_hours
-            win_len = hrs_smooth[f_win][-1] - hrs_smooth[i]
-            if win_len < min_win_period_hours:
-                i += 1
-                time_to_end = hrs_smooth[-1] - hrs_smooth[i]
-                continue
+        f_win = hrs_smooth <= hrs_smooth[i] + max_win_period_hours
+        win_len = hrs_smooth[f_win][-1] - hrs_smooth[i]
+        if win_len < min_win_period_hours:
+            i += 1
+            time_to_end = hrs_smooth[-1] - hrs_smooth[i]
+            continue
 
         displace = sphere_distance(
             lat_smooth[i], lon_smooth[i], lat_smooth[f_win][-1], lon_smooth[f_win][-1]
