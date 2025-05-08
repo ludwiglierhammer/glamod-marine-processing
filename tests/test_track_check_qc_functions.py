@@ -4,14 +4,11 @@ import numpy as np
 import pandas as pd
 import pytest
 
-from glamod_marine_processing.qc_suite.modules.next_level_track_check_qc import (
-    backward_discrepancy,
-    calc_alternate_speeds,
+from glamod_marine_processing.qc_suite.modules.next_level_track_check_qc import (  # backward_discrepancy,; calc_alternate_speeds,; forward_discrepancy,
     calculate_speed_course_distance_time_difference,
     find_multiple_rounded_values,
     find_repeated_values,
     find_saturated_runs,
-    forward_discrepancy,
     iquam_track_check,
     km_to_nm,
     row_difference,
@@ -31,7 +28,7 @@ def generic_frame(in_pt):
     dsi = [0 for _ in range(30)]
     dck = [193 for _ in range(30)]
 
-    date = pd.date_range(start=f"1850-01-01", freq="1h", periods=len(pt))
+    date = pd.date_range(start="1850-01-01", freq="1h", periods=len(pt))
 
     df = pd.DataFrame(
         {
@@ -140,7 +137,7 @@ def long_frame():
     at = [15.0 for i in range(30)]
     dpt = [15.0 for i in range(30)]
     id = ["GOODTHING" for _ in range(30)]
-    date = pd.date_range(start=f"1850-01-01", freq="1h", periods=len(lat))
+    date = pd.date_range(start="1850-01-01", freq="1h", periods=len(lat))
     df = pd.DataFrame(
         {"date": date, "lat": lat, "lon": lon, "at": at, "dpt": dpt, "id": id}
     )
@@ -154,7 +151,7 @@ def longer_frame():
     at = [15.0 for i in range(50)]
     dpt = [15.0 for i in range(50)]
     id = ["GOODTHING" for _ in range(50)]
-    date = pd.date_range(start=f"1850-01-01", freq="1h", periods=len(lat))
+    date = pd.date_range(start="1850-01-01", freq="1h", periods=len(lat))
     df = pd.DataFrame(
         {"date": date, "lat": lat, "lon": lon, "at": at, "dpt": dpt, "id": id}
     )
@@ -169,7 +166,7 @@ def longer_frame_last_passes():
     dpt = [15.0 for i in range(50)]
     dpt[49] = 10.0
     id = ["GOODTHING" for _ in range(50)]
-    date = pd.date_range(start=f"1850-01-01", freq="1h", periods=len(lat))
+    date = pd.date_range(start="1850-01-01", freq="1h", periods=len(lat))
     df = pd.DataFrame(
         {"date": date, "lat": lat, "lon": lon, "at": at, "dpt": dpt, "id": id}
     )
@@ -184,7 +181,7 @@ def longer_frame_broken_run():
     dpt = [15.0 for i in range(50)]
     dpt[25] = 10.0
     id = ["GOODTHING" for _ in range(50)]
-    date = pd.date_range(start=f"1850-01-01", freq="1h", periods=len(lat))
+    date = pd.date_range(start="1850-01-01", freq="1h", periods=len(lat))
     df = pd.DataFrame(
         {"date": date, "lat": lat, "lon": lon, "at": at, "dpt": dpt, "id": id}
     )
@@ -199,7 +196,7 @@ def longer_frame_early_broken_run():
     dpt = [15.0 for i in range(50)]
     dpt[3] = 10.0
     id = ["GOODTHING" for _ in range(50)]
-    date = pd.date_range(start=f"1850-01-01", freq="1h", periods=len(lat))
+    date = pd.date_range(start="1850-01-01", freq="1h", periods=len(lat))
     df = pd.DataFrame(
         {"date": date, "lat": lat, "lon": lon, "at": at, "dpt": dpt, "id": id}
     )
@@ -246,7 +243,7 @@ def unrounded_data():
     lon = [0 for _ in range(50)]
     at = [15.0 + (i * 0.2) for i in range(50)]
     id = ["GOODTHING" for _ in range(50)]
-    date = pd.date_range(start=f"1850-01-01", freq="1h", periods=len(lat))
+    date = pd.date_range(start="1850-01-01", freq="1h", periods=len(lat))
     df = pd.DataFrame({"date": date, "lat": lat, "lon": lon, "at": at, "id": id})
     return df
 
@@ -257,7 +254,7 @@ def rounded_data():
     lon = [0 for _ in range(50)]
     at = [round(15.0 + (i * 0.2)) for i in range(50)]
     id = ["GOODTHING" for _ in range(50)]
-    date = pd.date_range(start=f"1850-01-01", freq="1h", periods=len(lat))
+    date = pd.date_range(start="1850-01-01", freq="1h", periods=len(lat))
     df = pd.DataFrame({"date": date, "lat": lat, "lon": lon, "at": at, "id": id})
     return df
 
@@ -279,7 +276,7 @@ def repeated_data():
     at = [22.3 for i in range(50)]
     at[49] = 22.5
     id = ["GOODTHING" for _ in range(50)]
-    date = pd.date_range(start=f"1850-01-01", freq="1h", periods=len(lat))
+    date = pd.date_range(start="1850-01-01", freq="1h", periods=len(lat))
     df = pd.DataFrame({"date": date, "lat": lat, "lon": lon, "at": at, "id": id})
     return df
 
@@ -292,7 +289,7 @@ def almost_repeated_data():
     for i in range(20, 50):
         at.append(22.5 + (i - 20) * 0.3)
     id = ["GOODTHING" for _ in range(50)]
-    date = pd.date_range(start=f"1850-01-01", freq="1h", periods=len(lat))
+    date = pd.date_range(start="1850-01-01", freq="1h", periods=len(lat))
     df = pd.DataFrame({"date": date, "lat": lat, "lon": lon, "at": at, "id": id})
     return df
 
@@ -313,7 +310,7 @@ def iquam_frame(in_pt):
     lat = [-5.0 + i * 0.1 for i in range(30)]
     lon = [0 for _ in range(30)]
     id = ["GOODTHING" for _ in range(30)]
-    date = pd.date_range(start=f"1850-01-01", freq="1h", periods=len(pt))
+    date = pd.date_range(start="1850-01-01", freq="1h", periods=len(pt))
 
     df = pd.DataFrame(
         {
