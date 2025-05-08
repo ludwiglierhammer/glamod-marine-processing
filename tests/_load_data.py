@@ -1,7 +1,5 @@
 from __future__ import annotations
 
-import os
-
 from cdm_reader_mapper.common.getting_files import load_file
 
 

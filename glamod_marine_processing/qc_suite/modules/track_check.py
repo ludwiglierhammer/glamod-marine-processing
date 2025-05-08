@@ -12,7 +12,6 @@ from __future__ import annotations
 import math
 
 from . import Extended_IMMA as ex
-from . import qc
 from . import spherical_geometry as sph
 
 km_to_nm = 0.539957
