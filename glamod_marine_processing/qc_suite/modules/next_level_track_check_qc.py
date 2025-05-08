@@ -4,6 +4,8 @@ import numpy as np
 import pandas as pd
 
 import glamod_marine_processing.qc_suite.modules.qc as qc
+import glamod_marine_processing.qc_suite.modules.icoads_identify as icoads_identify
+import glamod_marine_processing.qc_suite.modules.time_control as time_control
 import glamod_marine_processing.qc_suite.modules.spherical_geometry as sg
 import glamod_marine_processing.qc_suite.modules.track_check as tc
 
@@ -129,7 +131,7 @@ def row_difference(
         later_row.lat, later_row.lon, earlier_row.lat, earlier_row.lon
     )
 
-    timediff = qc.time_difference(
+    timediff = time_control.time_difference(
         earlier_row.date.year,
         earlier_row.date.month,
         earlier_row.date.day,
@@ -483,7 +485,7 @@ def track_check(df: pd.DataFrame) -> pd.DataFrame:
         return df
 
     # Generic ids and buoys get a free pass on the track check
-    if qc.id_is_generic(df.iloc[0].id, df.iloc[0].date.year) or df.iloc[0].pt in [6, 7]:
+    if icoads_identify.id_is_generic(df.iloc[0].id, df.iloc[0].date.year) or df.iloc[0].pt in [6, 7]:
         for i in range(0, nobs):
             df["trk"] = np.zeros(nobs)
             df["few"] = np.zeros(nobs)
@@ -813,7 +815,7 @@ def iquam_track_check(df: pd.DataFrame) -> pd.DataFrame:
     if numobs == 0:
         return df
 
-    if qc.id_is_generic(df.iloc[0].id, df.iloc[0].date.year):
+    if icoads_identify.id_is_generic(df.iloc[0].id, df.iloc[0].date.year):
         df["iquam_track"] = np.zeros(numobs)
         return df
 
