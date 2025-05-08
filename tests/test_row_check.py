@@ -8,14 +8,6 @@ import numpy.ma as ma
 import pytest
 
 import glamod_marine_processing.qc_suite.modules.qc as qc
-from glamod_marine_processing.qc_suite.modules.time_control import (
-season,
-month_match,
-yesterday,
-pentad_to_month_day,
-which_pentad,
-day_in_year
-)
 from glamod_marine_processing.qc_suite.modules.blacklisting import (
     do_blacklist,
     do_humidity_blacklist,
@@ -44,6 +36,14 @@ from glamod_marine_processing.qc_suite.modules.next_level_qc import (
     do_supersaturation_check,
     do_time_check,
     do_wind_consistency_check,
+)
+from glamod_marine_processing.qc_suite.modules.time_control import (
+    day_in_year,
+    month_match,
+    pentad_to_month_day,
+    season,
+    which_pentad,
+    yesterday,
 )
 
 

@@ -15,16 +15,28 @@ Atkinson, C.P., N.A. Rayner, J. Roberts-Jones, R.O. Smith, 2013:
 Assessing the quality of sea surface temperature observations from
 drifting buoys and ships on a platform-by-platform basis (doi:10.1002/jgrc.20257).
 """
+
+from __future__ import annotations
+
 import math
+
 import numpy as np
 import pandas as pd
 
-from .qc import dayinyear, sunangle
 import glamod_marine_processing.qc_suite.modules.spherical_geometry as sg
 
+from .qc import dayinyear, sunangle
 
-def track_day_test(year: int, month: int, day: int, hour: float, lat: float, lon: float,
-                   elevdlim: float = -2.5) -> bool:
+
+def track_day_test(
+    year: int,
+    month: int,
+    day: int,
+    hour: float,
+    lat: float,
+    lon: float,
+    elevdlim: float = -2.5,
+) -> bool:
     """Given date, time, lat and lon calculate if the sun elevation is > elevdlim. If so return True
 
     This is the "day" test used by tracking QC to decide whether an SST measurement is night or day.
@@ -128,7 +140,7 @@ def trim_mean(inarr: list, trim: float) -> float:
 
     index1 = int(length / trim)
 
-    trim = np.mean(arr[index1: length - index1])
+    trim = np.mean(arr[index1 : length - index1])
 
     return trim
 
@@ -158,12 +170,14 @@ def trim_std(inarr: list, trim: float) -> float:
 
     index1 = int(length / trim)
 
-    trim = np.std(arr[index1: length - index1])
+    trim = np.std(arr[index1 : length - index1])
 
     return trim
 
 
-def assert_window_and_periods(smooth_win=1, min_win_period=1, max_win_period=None) -> (int, int, int):
+def assert_window_and_periods(
+    smooth_win=1, min_win_period=1, max_win_period=None
+) -> (int, int, int):
     """Assert smooth window and window periods
 
     Parameters
@@ -188,12 +202,16 @@ def assert_window_and_periods(smooth_win=1, min_win_period=1, max_win_period=Non
     if max_win_period is not None:
         max_win_period = int(max_win_period)
         assert max_win_period >= 1, "max_win_period must be >= 1"
-        assert max_win_period >= min_win_period, "max_win_period must be >= min_win_period"
+        assert (
+            max_win_period >= min_win_period
+        ), "max_win_period must be >= min_win_period"
     return smooth_win, min_win_period, max_win_period
 
 
 def assert_limit_periods(
-        speed_limit: float = 2.5, min_win_period: float = 1, max_win_period: float = None,
+    speed_limit: float = 2.5,
+    min_win_period: float = 1,
+    max_win_period: float = None,
 ) -> (float, float, float):
     """Assert speed limit and window periods.
 
@@ -220,19 +238,19 @@ def assert_limit_periods(
         max_win_period = float(max_win_period)
         assert max_win_period >= 0, "max_win_period must be >= 0"
         assert (
-                max_win_period >= min_win_period
+            max_win_period >= min_win_period
         ), "max_win_period must be >= min_win_period"
     return speed_limit, min_win_period, max_win_period
 
 
 def assert_drifters(
-        n_eval=1,
-        bias_lim=1.10,
-        drif_intra=1.0,
-        drif_inter=0.29,
-        err_std_n=3.0,
-        n_bad=2,
-        background_err_lim=0.3,
+    n_eval=1,
+    bias_lim=1.10,
+    drif_intra=1.0,
+    drif_inter=0.29,
+    err_std_n=3.0,
+    n_bad=2,
+    background_err_lim=0.3,
 ):
     """Assert drifter sea surface temperature record."""
     n_eval = int(n_eval)
@@ -261,14 +279,14 @@ def assert_drifters(
 
 
 def assert_window_drifters(
-        long_win_len=1,
-        long_err_std_n=3.0,
-        short_win_len=1,
-        short_err_std_n=3.0,
-        short_win_n_bad=1,
-        drif_inter=0.29,
-        drif_intra=1.00,
-        background_err_lim=0.3,
+    long_win_len=1,
+    long_err_std_n=3.0,
+    short_win_len=1,
+    short_err_std_n=3.0,
+    short_win_n_bad=1,
+    drif_inter=0.29,
+    drif_intra=1.00,
+    background_err_lim=0.3,
 ):
     """Assert drifter and window parameters."""
     long_win_len = int(long_win_len)
@@ -323,22 +341,22 @@ def retrieve_lon_lat_hrs(df):
 
 
 def create_smoothed_lon_lat_hrs(
-        lon: np.ndarray = np.array([np.nan]),
-        lat: np.ndarray = np.array([np.nan]),
-        hrs: np.ndarray = np.array([np.nan]),
-        nrep: int = 1,
-        smooth_win: int = 1,
-        half_win: int = 0,
+    lon: np.ndarray = np.array([np.nan]),
+    lat: np.ndarray = np.array([np.nan]),
+    hrs: np.ndarray = np.array([np.nan]),
+    nrep: int = 1,
+    smooth_win: int = 1,
+    half_win: int = 0,
 ):
     """Create smoothed lon/lat timeseries."""
-    lon_smooth = np.array(nrep * [np.nan]) # type: np.ndarray
-    lat_smooth = np.array(nrep * [np.nan]) # type: np.ndarray
-    hrs_smooth = np.array(nrep * [np.nan]) # type: np.ndarray
+    lon_smooth = np.array(nrep * [np.nan])  # type: np.ndarray
+    lat_smooth = np.array(nrep * [np.nan])  # type: np.ndarray
+    hrs_smooth = np.array(nrep * [np.nan])  # type: np.ndarray
 
     nrep_smooth = nrep - smooth_win + 1
     for i in range(0, nrep_smooth):
-        lon_smooth[i] = np.median(lon[i: i + smooth_win])
-        lat_smooth[i] = np.median(lat[i: i + smooth_win])
+        lon_smooth[i] = np.median(lon[i : i + smooth_win])
+        lat_smooth[i] = np.median(lat[i : i + smooth_win])
         hrs_smooth[i] = hrs[i + half_win]
     assert not any(np.isnan(lon_smooth)), "Nan(s) found in smoothed longitude"
     assert not any(np.isnan(lat_smooth)), "Nan(s) found in smoothed latitude"
@@ -347,11 +365,11 @@ def create_smoothed_lon_lat_hrs(
 
 
 def check_drifter_aground(
-        lon_smooth: np.ndarray = np.array([np.nan]),
-        lat_smooth: np.ndarray = np.array([np.nan]),
-        hrs_smooth: np.ndarray = np.array([np.nan]),
-        min_win_period: int = 1,
-        max_win_period: int | None = None,
+    lon_smooth: np.ndarray = np.array([np.nan]),
+    lat_smooth: np.ndarray = np.array([np.nan]),
+    hrs_smooth: np.ndarray = np.array([np.nan]),
+    min_win_period: int = 1,
+    max_win_period: int | None = None,
 ):
     """Check whether drifter has run aground."""
     i = 0
@@ -396,14 +414,14 @@ def check_drifter_aground(
 
 
 def check_drifter_speed(
-        df: pd.DataFrame,
-        lon: np.ndarray = np.array([np.nan]),
-        lat: np.ndarray = np.array([np.nan]),
-        hrs: np.ndarray = np.array([np.nan]),
-        speed_limit: float = 2.5,
-        min_win_period: int = 1,
-        max_win_period: float | int | None = None,
-        iquam_track_ship=None,
+    df: pd.DataFrame,
+    lon: np.ndarray = np.array([np.nan]),
+    lat: np.ndarray = np.array([np.nan]),
+    hrs: np.ndarray = np.array([np.nan]),
+    speed_limit: float = 2.5,
+    min_win_period: int = 1,
+    max_win_period: float | int | None = None,
+    iquam_track_ship=None,
 ):
     """Check whether drifter is moving too fast and flag any occurrences."""
     nrep = len(df)
@@ -458,8 +476,8 @@ def check_drifter_speed(
 
 
 def filter_unsuitable_backgrounds(
-        df,
-        background_err_lim=0.3,
+    df,
+    background_err_lim=0.3,
 ):
     """Test and filter out obs with unsuitable background matches."""
     reps_ind = []
@@ -481,19 +499,27 @@ def filter_unsuitable_backgrounds(
         if ice_val is None:
             ice_val = 0.0
         assert (
-                ice_val is not None and 0.0 <= ice_val <= 1.0
+            ice_val is not None and 0.0 <= ice_val <= 1.0
         ), "matched ice proportion is invalid"
 
         try:
             daytime = track_day_test(
-                row.date.year, row.date.month, row.date.day, row.date.hour, row.lat, row.lon, -2.5,
+                row.date.year,
+                row.date.month,
+                row.date.day,
+                row.date.hour,
+                row.lat,
+                row.lon,
+                -2.5,
             )
         except AssertionError as error:
             raise AssertionError("problem with report value: " + str(error))
 
         if ind > 0:
             try:
-                time_diff = row.time_diff  # raises assertion error if 'time_diff' not found
+                time_diff = (
+                    row.time_diff
+                )  # raises assertion error if 'time_diff' not found
                 assert time_diff >= 0, "times are not sorted"
             except AssertionError as error:
                 raise AssertionError("problem with report value: " + str(error))
@@ -509,10 +535,10 @@ def filter_unsuitable_backgrounds(
             pass
         else:
             assert (
-                    bg_val is not None and -5.0 <= bg_val <= 45.0
+                bg_val is not None and -5.0 <= bg_val <= 45.0
             ), "matched background sst is invalid"
             assert (
-                    bgvar_val is not None and 0.0 <= bgvar_val <= 10
+                bgvar_val is not None and 0.0 <= bgvar_val <= 10
             ), "matched background error variance is invalid"
             reps_ind.append(ind)
             sst_anom.append(row.sst - bg_val)
@@ -633,6 +659,7 @@ def short_tail_check(
 
     return start_tail_ind, end_tail_ind
 
+
 def aground_check(df, smooth_win=41, min_win_period=8, max_win_period=10):
     """
     Check to see whether a drifter has run aground based on 1/100th degree precision positions.
@@ -708,7 +735,7 @@ def aground_check(df, smooth_win=41, min_win_period=8, max_win_period=10):
         max_win_period=max_win_period,
     )
 
-    drf_agr = np.zeros(nrep) # type: np.ndarray
+    drf_agr = np.zeros(nrep)  # type: np.ndarray
 
     if is_aground:
         if i_aground > 0:
@@ -718,9 +745,9 @@ def aground_check(df, smooth_win=41, min_win_period=8, max_win_period=10):
     for ind in range(nrep):
         if is_aground:
             if ind < i_aground:
-                drf_agr[ind] = 0 #rep.set_qc("POS", "drf_agr", 0)
+                drf_agr[ind] = 0  # rep.set_qc("POS", "drf_agr", 0)
             else:
-                drf_agr[ind] = 1 #rep.set_qc("POS", "drf_agr", 1)
+                drf_agr[ind] = 1  # rep.set_qc("POS", "drf_agr", 1)
         else:
             drf_agr[ind] = 0  # rep.set_qc("POS", "drf_agr", 0)
 
