@@ -25,8 +25,9 @@ import pandas as pd
 
 import glamod_marine_processing.qc_suite.modules.spherical_geometry as sg
 
-from .time_control import dayinyear
 from .astronomical_geometry import sunangle
+from .time_control import dayinyear
+
 
 def track_day_test(
     year: int,
