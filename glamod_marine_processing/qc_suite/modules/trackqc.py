@@ -304,7 +304,7 @@ def create_smoothed_lon_lat_hrs(
     for i in range(0, nrep_smooth):
         lon_smooth[i] = np.median(lon[i : i + smooth_win])
         lat_smooth[i] = np.median(lat[i : i + smooth_win])
-        hrs_smooth[i] = hrs[i + half_win]
+        hrs_smooth[i] = hrs[i + int(half_win)]
     assert not any(np.isnan(lon_smooth)), "Nan(s) found in smoothed longitude"
     assert not any(np.isnan(lat_smooth)), "Nan(s) found in smoothed latitude"
     assert not any(np.isnan(hrs_smooth)), "Nan(s) found in smoothed time differences"
