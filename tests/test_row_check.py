@@ -1174,7 +1174,7 @@ def test_bilinear_interp(x1, x2, y1, y2, x, y, q11, q12, q21, q22, expected):
         (0.0, 1.0, 1.0, 0.0, 0.5, 0.5, 0.0, 1.0, 1.0, 2.0, 1.0,),  # y1 > y2
         (0.0, 1.0, 0.0, 1.0, 1.1, 0.0, 0.0, 1.0, 1.0, 2.0, 0.0),  # x>x2
         (0.0, 1.0, 0.0, 1.0, 1.0, -0.1, 0.0, 1.0, 1.0, 2.0, 2.0),  # y<y1
-        (0.0, 1.0, 0.0, 1.0, 0.0, 1.0, None, 1.0, 1.0, 2.0, 1.0), # missing data points
+        (0.0, 1.0, 0.0, 1.0, 0.0, 1.0, None, 1.0, 1.0, 2.0, 1.0),  # missing data points
         (0.0, 1.0, 0.0, 1.0, 1.0, 0.0, 0.0, None, 1.0, 2.0, 1.0),
         (0.0, 1.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, None, 1.0, 0.0,),
         (0.0, 1.0, 0.0, 1.0, 0.0, 1.0, 0.0, 1.0, 1.0, None, 1.0,),
@@ -1183,10 +1183,6 @@ def test_bilinear_interp(x1, x2, y1, y2, x, y, q11, q12, q21, q22, expected):
 def test_bilinear_interp_raises(x1, x2, y1, y2, x, y, q11, q12, q21, q22, expected):
     with pytest.raises(ValueError):
         bilinear_interp(x1, x2, y1, y2, x, y, q11, q12, q21, q22)
-
-
-
-
 
 
 @pytest.mark.parametrize(
