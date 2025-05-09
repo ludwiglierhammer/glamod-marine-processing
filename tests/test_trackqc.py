@@ -5,10 +5,8 @@ import sys
 
 import numpy as np
 import pandas as pd
-<<<<<<< HEAD
-=======
+
 import pytest
->>>>>>> 3375222aaed089911108f88fcb88a5d10197f9a5
 
 import glamod_marine_processing.qc_suite.modules.Extended_IMMA as ex
 
