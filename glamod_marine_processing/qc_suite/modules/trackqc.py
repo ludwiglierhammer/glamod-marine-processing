@@ -513,7 +513,7 @@ def long_tail_check(
     """Do long tail check."""
     start_tail_ind = -1  # keeps track of index where start tail stops
     end_tail_ind = nrep  # keeps track of index where end tail starts
-    mid_win_ind = (long_win_len - 1) / 2
+    mid_win_ind = int((long_win_len - 1) / 2)
 
     if nrep >= long_win_len:
         for forward in [True, False]:  # run forwards then backwards over timeseries
