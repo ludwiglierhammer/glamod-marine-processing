@@ -205,7 +205,7 @@ def winsorised_mean(inarr: list[float]) -> float:
     inarr.sort()
 
     if length >= 4:
-        lower = length / 4
+        lower = int(length / 4)
         upper = upper - lower
         total = total + (inarr[lower] + inarr[upper]) * lower
 
@@ -236,7 +236,7 @@ def trimmed_mean(inarr: list[float], trim: int) -> float:
     length = len(inarr)
     inarr.sort()
 
-    index1 = length / trim
+    index1 = int(length / trim)
 
     trim = np.mean(inarr[index1 : length - index1])
 
