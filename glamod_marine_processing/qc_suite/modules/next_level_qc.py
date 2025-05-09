@@ -317,7 +317,7 @@ def do_hard_limit_check(value: float, hard_limits: list) -> int:
     int
         1 if air temperature is outside hard limits, 0 otherwise
     """
-    return qc.hard_limit(value, hard_limits)
+    return qc.hard_limit_check(value, hard_limits)
 
 
 def do_climatology_plus_stdev_check(
