@@ -8,7 +8,7 @@ from datetime import datetime, timedelta
 
 import numpy as np
 
-from .qc import failed, passed, untestable
+from .qc import failed, passed
 
 
 def month_match(
@@ -636,11 +636,13 @@ def year_month_gen(year1: int, month1: int, year2: int, month2: int) -> (int, in
         Return an iterator that yields tuples of a year and month
     """
     if year2 < year1:
-        return untestable
+        raise ValueError(
+            f"year1 is greater than year2: year1 = {year1}, year2 = {year2}."
+        )
     if not (0 < month1 <= 12):
-        return untestable
+        raise ValueError(f"month1 is not in valid range (1 to 12): month1 = {month1}.")
     if not (0 < month2 <= 12):
-        return untestable
+        raise ValueError(f"month2 is not in valid range (1 to 12): month2 = {month2}.")
 
     year = year1
     month = month1

@@ -6,8 +6,6 @@ import math
 
 import numpy as np
 
-from .qc import untestable
-
 
 def p_data_given_good(
     x: float, q: float, r_hi: float, r_lo: float, mu: float, sigma: float
@@ -43,15 +41,17 @@ def p_data_given_good(
         When inputs are incorrectly specified: q<=0, sigma<=0, r_lo > r_hi, x < r_lo or x > r_hi
     """
     if q <= 0.0:
-        return untestable
+        raise ValueError(f"Value is not positive: q = {q}.")
     if sigma <= 0.0:
-        return untestable
+        raise ValueError(f"Value is not positive: sigma = {sigma}.")
     if r_lo >= r_hi:
-        return untestable
+        raise ValueError(
+            f"Lower limit is greater than upper limit: r_hi = {r_hi}, r_lo = {r_lo}."
+        )
     if x < r_lo:
-        return untestable
+        raise ValueError(f"Lower limit is greater than x: r_lo = {r_lo}, x = {x}.")
     if x > r_hi:
-        return untestable
+        raise ValueError(f"Upper limit is less than x: r_hi = {r_hi}, x = {x}.")
 
     upper_x = min([x + 0.5 * q, r_hi + 0.5 * q])
     lower_x = max([x - 0.5 * q, r_lo - 0.5 * q])
@@ -95,9 +95,11 @@ def p_data_given_gross(q: float, r_hi: float, r_lo: float) -> float:
         When limits are not ascending or q<=0
     """
     if r_hi < r_lo:
-        return untestable
+        raise ValueError(
+            f"Lower limit is greater than upper limit: r_hi = {r_hi}, r_lo = {r_lo}."
+        )
     if q <= 0.0:
-        return untestable
+        raise ValueError(f"Value is not positive: q = {q}.")
 
     r = r_hi - r_lo
     return 1.0 / (1.0 + (r / q))
@@ -140,20 +142,22 @@ def p_gross(
     ValueError
         When inputs are incorrectly specified: p0 < 0, p0 > 1, q <= 0, r_hi < r_lo, x < r_lo, x > r_hi, sigma <= 0
     """
-    if not (p0 >= 0):
-        return untestable
-    if not (p0 <= 1):
-        return untestable
-    if not (q > 0.0):
-        return untestable
-    if not (r_hi > r_lo):
-        return untestable
-    if not (x >= r_lo):
-        return untestable
-    if not (x <= r_hi):
-        return untestable
-    if not (sigma > 0.0):
-        return untestable
+    if p0 < 0.0:
+        raise ValueError(f"Value is not positive: p0 = {p0}.")
+    if p0 > 1.0:
+        raise ValueError(f"Value is greater than 1.0: p0 = {p0}.")
+    if q <= 0.0:
+        raise ValueError(f"Value is not positive: q = {q}.")
+    if r_hi < r_lo:
+        raise ValueError(
+            f"Lower limit is greater than upper limit: r_hi = {r_hi}, r_lo = {r_lo}."
+        )
+    if x < r_lo:
+        raise ValueError(f"Lower limit is greater than x: r_lo = {r_lo}, x = {x}.")
+    if x > r_hi:
+        raise ValueError(f"Upper limit is less than x: r_hi = {r_hi}, x = {x}.")
+    if sigma <= 0.0:
+        raise ValueError(f"Value is not positive: sigma = {sigma}.")
 
     pgross = (
         p0
