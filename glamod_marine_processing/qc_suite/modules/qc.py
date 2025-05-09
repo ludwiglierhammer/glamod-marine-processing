@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import math
+import numpy as np
 
 passed = 0
 failed = 1
@@ -47,6 +48,9 @@ def climatology_plus_stdev_with_lowbar_check(
         return untestable
 
     if value is None or climate_normal is None or standard_deviation is None:
+        return failed
+
+    if np.isnan(value) or np.isnan(climate_normal) or np.isnan(standard_deviation):
         return failed
 
     if (

@@ -48,14 +48,14 @@ def bilinear_interp(
     int or float
        Interpolated value
     """
-    if not (x1 <= x <= x2):
-        raise ValueError("X point not between x1 and x2")
-    if not (y1 <= y <= y2):
-        raise ValueError("Y point not between y1 and y2")
     if x2 < x1:
         raise ValueError("x2 not greater than x1")
     if y2 < y1:
         raise ValueError("y2 not greater than y1")
+    if not (x1 <= x <= x2):
+        raise ValueError("X point not between x1 and x2")
+    if not (y1 <= y <= y2):
+        raise ValueError("Y point not between y1 and y2")
     if q11 is None or q12 is None or q21 is None or q22 is None:
         raise ValueError("One or more data values not specified")
 
