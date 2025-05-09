@@ -702,6 +702,7 @@ def aground_check(reps, smooth_win=41, min_win_period=8, max_win_period=10):
 
     return reps
 
+
 def new_aground_check(reps, smooth_win=41, min_win_period=8):
     """
     Check to see whether a drifter has run aground based on 1/100th degree precision positions.
@@ -739,20 +740,20 @@ def new_aground_check(reps, smooth_win=41, min_win_period=8):
     try:
         smooth_win = int(smooth_win)
         min_win_period = int(min_win_period)
-        assert smooth_win >= 1, 'smooth_win must be >= 1'
-        assert smooth_win % 2 != 0, 'smooth_win must be an odd number'
-        assert min_win_period >= 1, 'min_win_period must be >= 1'
+        assert smooth_win >= 1, "smooth_win must be >= 1"
+        assert smooth_win % 2 != 0, "smooth_win must be an odd number"
+        assert min_win_period >= 1, "min_win_period must be >= 1"
     except AssertionError as error:
-        raise AssertionError('invalid input parameter: ' + str(error))
+        raise AssertionError("invalid input parameter: " + str(error))
 
     half_win = int((smooth_win - 1) / 2)
     min_win_period_hours = min_win_period * 24.0
 
     nrep = len(reps)
     if nrep <= smooth_win:  # records shorter than smoothing-window can't be evaluated
-        print('Voyage too short for QC, setting flags to pass')
+        print("Voyage too short for QC, setting flags to pass")
         for rep in reps:
-            rep.set_qc('POS', 'drf_agr', 0)
+            rep.set_qc("POS", "drf_agr", 0)
         return
 
     # retrieve lon/lat/time_diff variables from marine reports
@@ -764,18 +765,20 @@ def new_aground_check(reps, smooth_win=41, min_win_period=8):
     hrs[:] = np.nan
     try:
         for ind, rep in enumerate(reps):
-            lon[ind] = rep.getvar('LON')  # returns None if missing
-            lat[ind] = rep.getvar('LAT')  # returns None if missing
+            lon[ind] = rep.getvar("LON")  # returns None if missing
+            lat[ind] = rep.getvar("LAT")  # returns None if missing
             if ind == 0:
                 hrs[ind] = 0
             else:
-                hrs[ind] = rep.getext('time_diff')  # raises assertion error if 'time_diff' not found
-        assert not any(np.isnan(lon)), 'Nan(s) found in longitude'
-        assert not any(np.isnan(lat)), 'Nan(s) found in latitude'
-        assert not any(np.isnan(hrs)), 'Nan(s) found in time differences'
-        assert not any(hrs < 0), 'times are not sorted'
+                hrs[ind] = rep.getext(
+                    "time_diff"
+                )  # raises assertion error if 'time_diff' not found
+        assert not any(np.isnan(lon)), "Nan(s) found in longitude"
+        assert not any(np.isnan(lat)), "Nan(s) found in latitude"
+        assert not any(np.isnan(hrs)), "Nan(s) found in time differences"
+        assert not any(hrs < 0), "times are not sorted"
     except AssertionError as error:
-        raise AssertionError('problem with report values: ' + str(error))
+        raise AssertionError("problem with report values: " + str(error))
 
     hrs = np.cumsum(hrs)  # get time difference in hours relative to first report
 
@@ -789,14 +792,16 @@ def new_aground_check(reps, smooth_win=41, min_win_period=8):
     hrs_smooth[:] = np.nan
     try:
         for i in range(0, nrep_smooth):
-            lon_smooth[i] = np.median(lon[i:i + smooth_win])
-            lat_smooth[i] = np.median(lat[i:i + smooth_win])
+            lon_smooth[i] = np.median(lon[i : i + smooth_win])
+            lat_smooth[i] = np.median(lat[i : i + smooth_win])
             hrs_smooth[i] = hrs[i + half_win]
-        assert not any(np.isnan(lon_smooth)), 'Nan(s) found in smoothed longitude'
-        assert not any(np.isnan(lat_smooth)), 'Nan(s) found in smoothed latitude'
-        assert not any(np.isnan(hrs_smooth)), 'Nan(s) found in smoothed time differences'
+        assert not any(np.isnan(lon_smooth)), "Nan(s) found in smoothed longitude"
+        assert not any(np.isnan(lat_smooth)), "Nan(s) found in smoothed latitude"
+        assert not any(
+            np.isnan(hrs_smooth)
+        ), "Nan(s) found in smoothed time differences"
     except AssertionError as error:
-        raise AssertionError('problem with smoothed report values: ' + str(error))
+        raise AssertionError("problem with smoothed report values: " + str(error))
 
     # loop through smoothed timeseries to see if drifter has run aground
     i = 0
@@ -805,8 +810,9 @@ def new_aground_check(reps, smooth_win=41, min_win_period=8):
     time_to_end = hrs_smooth[-1] - hrs_smooth[i]
     while time_to_end >= min_win_period_hours:
 
-        displace = sphere_distance(lat_smooth[i], lon_smooth[i],
-                                   lat_smooth[-1], lon_smooth[-1])
+        displace = sphere_distance(
+            lat_smooth[i], lon_smooth[i], lat_smooth[-1], lon_smooth[-1]
+        )
         if displace <= tolerance:
             if is_aground:
                 i += 1
@@ -832,11 +838,11 @@ def new_aground_check(reps, smooth_win=41, min_win_period=8):
     for ind, rep in enumerate(reps):
         if is_aground:
             if ind < i_aground:
-                rep.set_qc('POS', 'drf_agr', 0)
+                rep.set_qc("POS", "drf_agr", 0)
             else:
-                rep.set_qc('POS', 'drf_agr', 1)
+                rep.set_qc("POS", "drf_agr", 1)
         else:
-            rep.set_qc('POS', 'drf_agr', 0)
+            rep.set_qc("POS", "drf_agr", 0)
 
 
 # def new_aground_check(reps, smooth_win=41, min_win_period=8):
