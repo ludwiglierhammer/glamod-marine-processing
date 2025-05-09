@@ -1,13 +1,11 @@
 from __future__ import annotations
 
-import pytest
-
 import os
 import sys
 
 import numpy as np
 import pandas as pd
-
+import pytest
 
 import glamod_marine_processing.qc_suite.modules.Extended_IMMA as ex
 
@@ -2842,8 +2840,6 @@ def reps15():
     return reps
 
 
-
-
 def test_too_short_for_qc(reps15):
     expected_flags = [0, 0]
     old_stdout = sys.stdout
@@ -2948,7 +2944,7 @@ def test_error_bad_input_parameter(reps16):
         otqc.aground_check(reps16.reps, 0, 1, 2)
     except AssertionError as error:
         error_return_text = "invalid input parameter: smooth_win must be >= 1"
-        assert str(error)[0: len(error_return_text)] == error_return_text
+        assert str(error)[0 : len(error_return_text)] == error_return_text
     for i in range(0, len(reps16)):
         assert reps16.get_qc(i, "POS", "drf_agr") == expected_flags[i]
 
@@ -3047,7 +3043,7 @@ def test_error_missing_observation(reps17):
         otqc.aground_check(reps17.reps, 3, 1, 2)
     except AssertionError as error:
         error_return_text = "problem with report values: Nan(s) found in longitude"
-        assert str(error)[0: len(error_return_text)] == error_return_text
+        assert str(error)[0 : len(error_return_text)] == error_return_text
     for i in range(0, len(reps17)):
         assert reps17.get_qc(i, "POS", "drf_agr") == expected_flags[i]
 
@@ -3146,7 +3142,7 @@ def test_error_not_time_sorted(reps18):
         otqc.aground_check(reps18.reps, 3, 1, 2)
     except AssertionError as error:
         error_return_text = "problem with report values: times are not sorted"
-        assert str(error)[0: len(error_return_text)] == error_return_text
+        assert str(error)[0 : len(error_return_text)] == error_return_text
     for i in range(0, len(reps18)):
         assert reps18.get_qc(i, "POS", "drf_agr") == expected_flags[i]
 
@@ -3266,7 +3262,7 @@ def test_new_error_bad_input_parameter(reps16):
         otqc.new_aground_check(reps16.reps, 2, 1)
     except AssertionError as error:
         error_return_text = "invalid input parameter: smooth_win must be an odd number"
-        assert str(error)[0: len(error_return_text)] == error_return_text
+        assert str(error)[0 : len(error_return_text)] == error_return_text
     for i in range(0, len(reps16)):
         assert reps16.get_qc(i, "POS", "drf_agr") == expected_flags[i]
 
@@ -3277,7 +3273,7 @@ def test_new_error_missing_observation(reps17):
         otqc.new_aground_check(reps17.reps, 3, 1)
     except AssertionError as error:
         error_return_text = "problem with report values: Nan(s) found in longitude"
-        assert str(error)[0: len(error_return_text)] == error_return_text
+        assert str(error)[0 : len(error_return_text)] == error_return_text
     for i in range(0, len(reps17)):
         assert reps17.get_qc(i, "POS", "drf_agr") == expected_flags[i]
 
@@ -3288,7 +3284,7 @@ def test_new_error_not_time_sorted(reps18):
         otqc.new_aground_check(reps18.reps, 3, 1)
     except AssertionError as error:
         error_return_text = "problem with report values: times are not sorted"
-        assert str(error)[0: len(error_return_text)] == error_return_text
+        assert str(error)[0 : len(error_return_text)] == error_return_text
     for i in range(0, len(reps18)):
         assert reps18.get_qc(i, "POS", "drf_agr") == expected_flags[i]
 
@@ -3300,7 +3296,9 @@ def test_assert_limit_periods():
     assert min_win_period == 1
     assert max_win_period == None
 
-    speed_limit, min_win_period, max_win_period = otqc.assert_limit_periods(max_win_period=5.7)
+    speed_limit, min_win_period, max_win_period = otqc.assert_limit_periods(
+        max_win_period=5.7
+    )
     assert speed_limit == 2.5
     assert min_win_period == 1
     assert max_win_period == 5.7
@@ -3308,7 +3306,9 @@ def test_assert_limit_periods():
 
 def test_assert_drifters():
     # default values
-    n_eval, bias_lim, drif_intra, drif_inter, err_std_n, n_bad, background_err_lim = otqc.assert_drifters()
+    n_eval, bias_lim, drif_intra, drif_inter, err_std_n, n_bad, background_err_lim = (
+        otqc.assert_drifters()
+    )
     assert n_eval == 1
     assert bias_lim == 1.10
     assert drif_intra == 1.0
@@ -3320,8 +3320,16 @@ def test_assert_drifters():
 
 def test_assert_window_drifters():
     # default values
-    (long_win_len, long_err_std_n, short_win_len, short_err_std_n, short_win_n_bad, drif_inter, drif_intra,
-     background_err_lim) = otqc.assert_window_drifters()
+    (
+        long_win_len,
+        long_err_std_n,
+        short_win_len,
+        short_err_std_n,
+        short_win_n_bad,
+        drif_inter,
+        drif_intra,
+        background_err_lim,
+    ) = otqc.assert_window_drifters()
 
     assert long_win_len == 1
     assert long_err_std_n == 3.0
@@ -3336,24 +3344,96 @@ def test_assert_window_drifters():
 @pytest.fixture
 def iquam_parameters():
     return {
-        'number_of_neighbours': 5,
-        'buoy_speed_limit': 15.0,
-        'ship_speed_limit': 60.0,
-        'delta_d': 1.11,
-        'delta_t': 0.01
+        "number_of_neighbours": 5,
+        "buoy_speed_limit": 15.0,
+        "ship_speed_limit": 60.0,
+        "delta_d": 1.11,
+        "delta_t": 0.01,
     }
 
 
 @pytest.fixture
 def reps1a():
     # stationary drifter
-    vals1 = [{'ID': 'AAAAAAAAA', 'YR': 2003, 'MO': 12, 'DY': 1, 'HR': 12, 'LAT': 0.0, 'LON': 0.0, 'SST': 5.0, 'PT': 7},
-             {'ID': 'AAAAAAAAA', 'YR': 2003, 'MO': 12, 'DY': 2, 'HR': 12, 'LAT': 0.0, 'LON': 0.0, 'SST': 5.0, 'PT': 7},
-             {'ID': 'AAAAAAAAA', 'YR': 2003, 'MO': 12, 'DY': 3, 'HR': 12, 'LAT': 0.0, 'LON': 0.0, 'SST': 5.0, 'PT': 7},
-             {'ID': 'AAAAAAAAA', 'YR': 2003, 'MO': 12, 'DY': 4, 'HR': 12, 'LAT': 0.0, 'LON': 0.0, 'SST': 5.0, 'PT': 7},
-             {'ID': 'AAAAAAAAA', 'YR': 2003, 'MO': 12, 'DY': 5, 'HR': 12, 'LAT': 0.0, 'LON': 0.0, 'SST': 5.0, 'PT': 7},
-             {'ID': 'AAAAAAAAA', 'YR': 2003, 'MO': 12, 'DY': 6, 'HR': 12, 'LAT': 0.0, 'LON': 0.0, 'SST': 5.0, 'PT': 7},
-             {'ID': 'AAAAAAAAA', 'YR': 2003, 'MO': 12, 'DY': 7, 'HR': 12, 'LAT': 0.0, 'LON': 0.0, 'SST': 5.0, 'PT': 7}]
+    vals1 = [
+        {
+            "ID": "AAAAAAAAA",
+            "YR": 2003,
+            "MO": 12,
+            "DY": 1,
+            "HR": 12,
+            "LAT": 0.0,
+            "LON": 0.0,
+            "SST": 5.0,
+            "PT": 7,
+        },
+        {
+            "ID": "AAAAAAAAA",
+            "YR": 2003,
+            "MO": 12,
+            "DY": 2,
+            "HR": 12,
+            "LAT": 0.0,
+            "LON": 0.0,
+            "SST": 5.0,
+            "PT": 7,
+        },
+        {
+            "ID": "AAAAAAAAA",
+            "YR": 2003,
+            "MO": 12,
+            "DY": 3,
+            "HR": 12,
+            "LAT": 0.0,
+            "LON": 0.0,
+            "SST": 5.0,
+            "PT": 7,
+        },
+        {
+            "ID": "AAAAAAAAA",
+            "YR": 2003,
+            "MO": 12,
+            "DY": 4,
+            "HR": 12,
+            "LAT": 0.0,
+            "LON": 0.0,
+            "SST": 5.0,
+            "PT": 7,
+        },
+        {
+            "ID": "AAAAAAAAA",
+            "YR": 2003,
+            "MO": 12,
+            "DY": 5,
+            "HR": 12,
+            "LAT": 0.0,
+            "LON": 0.0,
+            "SST": 5.0,
+            "PT": 7,
+        },
+        {
+            "ID": "AAAAAAAAA",
+            "YR": 2003,
+            "MO": 12,
+            "DY": 6,
+            "HR": 12,
+            "LAT": 0.0,
+            "LON": 0.0,
+            "SST": 5.0,
+            "PT": 7,
+        },
+        {
+            "ID": "AAAAAAAAA",
+            "YR": 2003,
+            "MO": 12,
+            "DY": 7,
+            "HR": 12,
+            "LAT": 0.0,
+            "LON": 0.0,
+            "SST": 5.0,
+            "PT": 7,
+        },
+    ]
 
     reps = ex.Voyage()
     for v in vals1:
@@ -3369,13 +3449,85 @@ def reps1a():
 @pytest.fixture
 def reps2a():
     # fast moving drifter
-    vals2 = [{'ID': 'AAAAAAAAA', 'YR': 2003, 'MO': 12, 'DY': 1, 'HR': 12, 'LAT': 0.0, 'LON': 0.0, 'SST': 5.0, 'PT': 7},
-             {'ID': 'AAAAAAAAA', 'YR': 2003, 'MO': 12, 'DY': 2, 'HR': 12, 'LAT': 3.0, 'LON': 0.0, 'SST': 5.0, 'PT': 7},
-             {'ID': 'AAAAAAAAA', 'YR': 2003, 'MO': 12, 'DY': 3, 'HR': 12, 'LAT': 6.0, 'LON': 0.0, 'SST': 5.0, 'PT': 7},
-             {'ID': 'AAAAAAAAA', 'YR': 2003, 'MO': 12, 'DY': 4, 'HR': 12, 'LAT': 9.0, 'LON': 0.0, 'SST': 5.0, 'PT': 7},
-             {'ID': 'AAAAAAAAA', 'YR': 2003, 'MO': 12, 'DY': 5, 'HR': 12, 'LAT': 12.0, 'LON': 0.0, 'SST': 5.0, 'PT': 7},
-             {'ID': 'AAAAAAAAA', 'YR': 2003, 'MO': 12, 'DY': 6, 'HR': 12, 'LAT': 15.0, 'LON': 0.0, 'SST': 5.0, 'PT': 7},
-             {'ID': 'AAAAAAAAA', 'YR': 2003, 'MO': 12, 'DY': 7, 'HR': 12, 'LAT': 18.0, 'LON': 0.0, 'SST': 5.0, 'PT': 7}]
+    vals2 = [
+        {
+            "ID": "AAAAAAAAA",
+            "YR": 2003,
+            "MO": 12,
+            "DY": 1,
+            "HR": 12,
+            "LAT": 0.0,
+            "LON": 0.0,
+            "SST": 5.0,
+            "PT": 7,
+        },
+        {
+            "ID": "AAAAAAAAA",
+            "YR": 2003,
+            "MO": 12,
+            "DY": 2,
+            "HR": 12,
+            "LAT": 3.0,
+            "LON": 0.0,
+            "SST": 5.0,
+            "PT": 7,
+        },
+        {
+            "ID": "AAAAAAAAA",
+            "YR": 2003,
+            "MO": 12,
+            "DY": 3,
+            "HR": 12,
+            "LAT": 6.0,
+            "LON": 0.0,
+            "SST": 5.0,
+            "PT": 7,
+        },
+        {
+            "ID": "AAAAAAAAA",
+            "YR": 2003,
+            "MO": 12,
+            "DY": 4,
+            "HR": 12,
+            "LAT": 9.0,
+            "LON": 0.0,
+            "SST": 5.0,
+            "PT": 7,
+        },
+        {
+            "ID": "AAAAAAAAA",
+            "YR": 2003,
+            "MO": 12,
+            "DY": 5,
+            "HR": 12,
+            "LAT": 12.0,
+            "LON": 0.0,
+            "SST": 5.0,
+            "PT": 7,
+        },
+        {
+            "ID": "AAAAAAAAA",
+            "YR": 2003,
+            "MO": 12,
+            "DY": 6,
+            "HR": 12,
+            "LAT": 15.0,
+            "LON": 0.0,
+            "SST": 5.0,
+            "PT": 7,
+        },
+        {
+            "ID": "AAAAAAAAA",
+            "YR": 2003,
+            "MO": 12,
+            "DY": 7,
+            "HR": 12,
+            "LAT": 18.0,
+            "LON": 0.0,
+            "SST": 5.0,
+            "PT": 7,
+        },
+    ]
 
     reps = ex.Voyage()
     for v in vals2:
@@ -3391,13 +3543,85 @@ def reps2a():
 @pytest.fixture
 def reps3a():
     # slow moving drifter
-    vals3 = [{'ID': 'AAAAAAAAA', 'YR': 2003, 'MO': 12, 'DY': 1, 'HR': 12, 'LAT': 0.0, 'LON': 0.0, 'SST': 5.0, 'PT': 7},
-             {'ID': 'AAAAAAAAA', 'YR': 2003, 'MO': 12, 'DY': 2, 'HR': 12, 'LAT': 0.0, 'LON': 1.0, 'SST': 5.0, 'PT': 7},
-             {'ID': 'AAAAAAAAA', 'YR': 2003, 'MO': 12, 'DY': 3, 'HR': 12, 'LAT': 0.0, 'LON': 2.0, 'SST': 5.0, 'PT': 7},
-             {'ID': 'AAAAAAAAA', 'YR': 2003, 'MO': 12, 'DY': 4, 'HR': 12, 'LAT': 0.0, 'LON': 3.0, 'SST': 5.0, 'PT': 7},
-             {'ID': 'AAAAAAAAA', 'YR': 2003, 'MO': 12, 'DY': 5, 'HR': 12, 'LAT': 0.0, 'LON': 4.0, 'SST': 5.0, 'PT': 7},
-             {'ID': 'AAAAAAAAA', 'YR': 2003, 'MO': 12, 'DY': 6, 'HR': 12, 'LAT': 0.0, 'LON': 5.0, 'SST': 5.0, 'PT': 7},
-             {'ID': 'AAAAAAAAA', 'YR': 2003, 'MO': 12, 'DY': 7, 'HR': 12, 'LAT': 0.0, 'LON': 6.0, 'SST': 5.0, 'PT': 7}]
+    vals3 = [
+        {
+            "ID": "AAAAAAAAA",
+            "YR": 2003,
+            "MO": 12,
+            "DY": 1,
+            "HR": 12,
+            "LAT": 0.0,
+            "LON": 0.0,
+            "SST": 5.0,
+            "PT": 7,
+        },
+        {
+            "ID": "AAAAAAAAA",
+            "YR": 2003,
+            "MO": 12,
+            "DY": 2,
+            "HR": 12,
+            "LAT": 0.0,
+            "LON": 1.0,
+            "SST": 5.0,
+            "PT": 7,
+        },
+        {
+            "ID": "AAAAAAAAA",
+            "YR": 2003,
+            "MO": 12,
+            "DY": 3,
+            "HR": 12,
+            "LAT": 0.0,
+            "LON": 2.0,
+            "SST": 5.0,
+            "PT": 7,
+        },
+        {
+            "ID": "AAAAAAAAA",
+            "YR": 2003,
+            "MO": 12,
+            "DY": 4,
+            "HR": 12,
+            "LAT": 0.0,
+            "LON": 3.0,
+            "SST": 5.0,
+            "PT": 7,
+        },
+        {
+            "ID": "AAAAAAAAA",
+            "YR": 2003,
+            "MO": 12,
+            "DY": 5,
+            "HR": 12,
+            "LAT": 0.0,
+            "LON": 4.0,
+            "SST": 5.0,
+            "PT": 7,
+        },
+        {
+            "ID": "AAAAAAAAA",
+            "YR": 2003,
+            "MO": 12,
+            "DY": 6,
+            "HR": 12,
+            "LAT": 0.0,
+            "LON": 5.0,
+            "SST": 5.0,
+            "PT": 7,
+        },
+        {
+            "ID": "AAAAAAAAA",
+            "YR": 2003,
+            "MO": 12,
+            "DY": 7,
+            "HR": 12,
+            "LAT": 0.0,
+            "LON": 6.0,
+            "SST": 5.0,
+            "PT": 7,
+        },
+    ]
     reps = ex.Voyage()
     for v in vals3:
         rec = IMMA()
@@ -3412,13 +3636,85 @@ def reps3a():
 @pytest.fixture
 def reps4a():
     # slow-fast-slow moving drifter
-    vals4 = [{'ID': 'AAAAAAAAA', 'YR': 2003, 'MO': 12, 'DY': 1, 'HR': 12, 'LAT': 0.0, 'LON': 0.0, 'SST': 5.0, 'PT': 7},
-             {'ID': 'AAAAAAAAA', 'YR': 2003, 'MO': 12, 'DY': 2, 'HR': 12, 'LAT': 1.0, 'LON': 0.0, 'SST': 5.0, 'PT': 7},
-             {'ID': 'AAAAAAAAA', 'YR': 2003, 'MO': 12, 'DY': 3, 'HR': 12, 'LAT': 2.0, 'LON': 0.0, 'SST': 5.0, 'PT': 7},
-             {'ID': 'AAAAAAAAA', 'YR': 2003, 'MO': 12, 'DY': 4, 'HR': 12, 'LAT': 5.0, 'LON': 0.0, 'SST': 5.0, 'PT': 7},
-             {'ID': 'AAAAAAAAA', 'YR': 2003, 'MO': 12, 'DY': 5, 'HR': 12, 'LAT': 8.0, 'LON': 0.0, 'SST': 5.0, 'PT': 7},
-             {'ID': 'AAAAAAAAA', 'YR': 2003, 'MO': 12, 'DY': 6, 'HR': 12, 'LAT': 9.0, 'LON': 0.0, 'SST': 5.0, 'PT': 7},
-             {'ID': 'AAAAAAAAA', 'YR': 2003, 'MO': 12, 'DY': 7, 'HR': 12, 'LAT': 10.0, 'LON': 0.0, 'SST': 5.0, 'PT': 7}]
+    vals4 = [
+        {
+            "ID": "AAAAAAAAA",
+            "YR": 2003,
+            "MO": 12,
+            "DY": 1,
+            "HR": 12,
+            "LAT": 0.0,
+            "LON": 0.0,
+            "SST": 5.0,
+            "PT": 7,
+        },
+        {
+            "ID": "AAAAAAAAA",
+            "YR": 2003,
+            "MO": 12,
+            "DY": 2,
+            "HR": 12,
+            "LAT": 1.0,
+            "LON": 0.0,
+            "SST": 5.0,
+            "PT": 7,
+        },
+        {
+            "ID": "AAAAAAAAA",
+            "YR": 2003,
+            "MO": 12,
+            "DY": 3,
+            "HR": 12,
+            "LAT": 2.0,
+            "LON": 0.0,
+            "SST": 5.0,
+            "PT": 7,
+        },
+        {
+            "ID": "AAAAAAAAA",
+            "YR": 2003,
+            "MO": 12,
+            "DY": 4,
+            "HR": 12,
+            "LAT": 5.0,
+            "LON": 0.0,
+            "SST": 5.0,
+            "PT": 7,
+        },
+        {
+            "ID": "AAAAAAAAA",
+            "YR": 2003,
+            "MO": 12,
+            "DY": 5,
+            "HR": 12,
+            "LAT": 8.0,
+            "LON": 0.0,
+            "SST": 5.0,
+            "PT": 7,
+        },
+        {
+            "ID": "AAAAAAAAA",
+            "YR": 2003,
+            "MO": 12,
+            "DY": 6,
+            "HR": 12,
+            "LAT": 9.0,
+            "LON": 0.0,
+            "SST": 5.0,
+            "PT": 7,
+        },
+        {
+            "ID": "AAAAAAAAA",
+            "YR": 2003,
+            "MO": 12,
+            "DY": 7,
+            "HR": 12,
+            "LAT": 10.0,
+            "LON": 0.0,
+            "SST": 5.0,
+            "PT": 7,
+        },
+    ]
     reps = ex.Voyage()
     for v in vals4:
         rec = IMMA()
@@ -3433,13 +3729,85 @@ def reps4a():
 @pytest.fixture
 def reps5a():
     # fast moving drifter (high frequency sampling)
-    vals5 = [{'ID': 'AAAAAAAAA', 'YR': 2003, 'MO': 12, 'DY': 1, 'HR': 0, 'LAT': 0.0, 'LON': 0.0, 'SST': 5.0, 'PT': 7},
-             {'ID': 'AAAAAAAAA', 'YR': 2003, 'MO': 12, 'DY': 1, 'HR': 1, 'LAT': 3.0, 'LON': 0.0, 'SST': 5.0, 'PT': 7},
-             {'ID': 'AAAAAAAAA', 'YR': 2003, 'MO': 12, 'DY': 1, 'HR': 2, 'LAT': 6.0, 'LON': 0.0, 'SST': 5.0, 'PT': 7},
-             {'ID': 'AAAAAAAAA', 'YR': 2003, 'MO': 12, 'DY': 1, 'HR': 3, 'LAT': 9.0, 'LON': 0.0, 'SST': 5.0, 'PT': 7},
-             {'ID': 'AAAAAAAAA', 'YR': 2003, 'MO': 12, 'DY': 1, 'HR': 4, 'LAT': 12.0, 'LON': 0.0, 'SST': 5.0, 'PT': 7},
-             {'ID': 'AAAAAAAAA', 'YR': 2003, 'MO': 12, 'DY': 1, 'HR': 5, 'LAT': 15.0, 'LON': 0.0, 'SST': 5.0, 'PT': 7},
-             {'ID': 'AAAAAAAAA', 'YR': 2003, 'MO': 12, 'DY': 1, 'HR': 6, 'LAT': 18.0, 'LON': 0.0, 'SST': 5.0, 'PT': 7}]
+    vals5 = [
+        {
+            "ID": "AAAAAAAAA",
+            "YR": 2003,
+            "MO": 12,
+            "DY": 1,
+            "HR": 0,
+            "LAT": 0.0,
+            "LON": 0.0,
+            "SST": 5.0,
+            "PT": 7,
+        },
+        {
+            "ID": "AAAAAAAAA",
+            "YR": 2003,
+            "MO": 12,
+            "DY": 1,
+            "HR": 1,
+            "LAT": 3.0,
+            "LON": 0.0,
+            "SST": 5.0,
+            "PT": 7,
+        },
+        {
+            "ID": "AAAAAAAAA",
+            "YR": 2003,
+            "MO": 12,
+            "DY": 1,
+            "HR": 2,
+            "LAT": 6.0,
+            "LON": 0.0,
+            "SST": 5.0,
+            "PT": 7,
+        },
+        {
+            "ID": "AAAAAAAAA",
+            "YR": 2003,
+            "MO": 12,
+            "DY": 1,
+            "HR": 3,
+            "LAT": 9.0,
+            "LON": 0.0,
+            "SST": 5.0,
+            "PT": 7,
+        },
+        {
+            "ID": "AAAAAAAAA",
+            "YR": 2003,
+            "MO": 12,
+            "DY": 1,
+            "HR": 4,
+            "LAT": 12.0,
+            "LON": 0.0,
+            "SST": 5.0,
+            "PT": 7,
+        },
+        {
+            "ID": "AAAAAAAAA",
+            "YR": 2003,
+            "MO": 12,
+            "DY": 1,
+            "HR": 5,
+            "LAT": 15.0,
+            "LON": 0.0,
+            "SST": 5.0,
+            "PT": 7,
+        },
+        {
+            "ID": "AAAAAAAAA",
+            "YR": 2003,
+            "MO": 12,
+            "DY": 1,
+            "HR": 6,
+            "LAT": 18.0,
+            "LON": 0.0,
+            "SST": 5.0,
+            "PT": 7,
+        },
+    ]
     reps = ex.Voyage()
     for v in vals5:
         rec = IMMA()
@@ -3454,13 +3822,85 @@ def reps5a():
 @pytest.fixture
 def reps6a():
     # fast moving drifter (low frequency sampling)
-    vals6 = [{'ID': 'AAAAAAAAA', 'YR': 2003, 'MO': 12, 'DY': 1, 'HR': 12, 'LAT': 0.0, 'LON': 0.0, 'SST': 5.0, 'PT': 7},
-             {'ID': 'AAAAAAAAA', 'YR': 2003, 'MO': 12, 'DY': 2, 'HR': 13, 'LAT': 5.0, 'LON': 0.0, 'SST': 5.0, 'PT': 7},
-             {'ID': 'AAAAAAAAA', 'YR': 2003, 'MO': 12, 'DY': 3, 'HR': 14, 'LAT': 10.0, 'LON': 0.0, 'SST': 5.0, 'PT': 7},
-             {'ID': 'AAAAAAAAA', 'YR': 2003, 'MO': 12, 'DY': 4, 'HR': 15, 'LAT': 15.0, 'LON': 0.0, 'SST': 5.0, 'PT': 7},
-             {'ID': 'AAAAAAAAA', 'YR': 2003, 'MO': 12, 'DY': 5, 'HR': 16, 'LAT': 20.0, 'LON': 0.0, 'SST': 5.0, 'PT': 7},
-             {'ID': 'AAAAAAAAA', 'YR': 2003, 'MO': 12, 'DY': 6, 'HR': 17, 'LAT': 25.0, 'LON': 0.0, 'SST': 5.0, 'PT': 7},
-             {'ID': 'AAAAAAAAA', 'YR': 2003, 'MO': 12, 'DY': 7, 'HR': 18, 'LAT': 30.0, 'LON': 0.0, 'SST': 5.0, 'PT': 7}]
+    vals6 = [
+        {
+            "ID": "AAAAAAAAA",
+            "YR": 2003,
+            "MO": 12,
+            "DY": 1,
+            "HR": 12,
+            "LAT": 0.0,
+            "LON": 0.0,
+            "SST": 5.0,
+            "PT": 7,
+        },
+        {
+            "ID": "AAAAAAAAA",
+            "YR": 2003,
+            "MO": 12,
+            "DY": 2,
+            "HR": 13,
+            "LAT": 5.0,
+            "LON": 0.0,
+            "SST": 5.0,
+            "PT": 7,
+        },
+        {
+            "ID": "AAAAAAAAA",
+            "YR": 2003,
+            "MO": 12,
+            "DY": 3,
+            "HR": 14,
+            "LAT": 10.0,
+            "LON": 0.0,
+            "SST": 5.0,
+            "PT": 7,
+        },
+        {
+            "ID": "AAAAAAAAA",
+            "YR": 2003,
+            "MO": 12,
+            "DY": 4,
+            "HR": 15,
+            "LAT": 15.0,
+            "LON": 0.0,
+            "SST": 5.0,
+            "PT": 7,
+        },
+        {
+            "ID": "AAAAAAAAA",
+            "YR": 2003,
+            "MO": 12,
+            "DY": 5,
+            "HR": 16,
+            "LAT": 20.0,
+            "LON": 0.0,
+            "SST": 5.0,
+            "PT": 7,
+        },
+        {
+            "ID": "AAAAAAAAA",
+            "YR": 2003,
+            "MO": 12,
+            "DY": 6,
+            "HR": 17,
+            "LAT": 25.0,
+            "LON": 0.0,
+            "SST": 5.0,
+            "PT": 7,
+        },
+        {
+            "ID": "AAAAAAAAA",
+            "YR": 2003,
+            "MO": 12,
+            "DY": 7,
+            "HR": 18,
+            "LAT": 30.0,
+            "LON": 0.0,
+            "SST": 5.0,
+            "PT": 7,
+        },
+    ]
     reps = ex.Voyage()
     for v in vals6:
         rec = IMMA()
@@ -3475,13 +3915,85 @@ def reps6a():
 @pytest.fixture
 def reps7a():
     # slow-fast-slow moving drifter (mid frequency sampling)
-    vals7 = [{'ID': 'AAAAAAAAA', 'YR': 2003, 'MO': 12, 'DY': 1, 'HR': 0, 'LAT': 0.0, 'LON': 0.0, 'SST': 5.0, 'PT': 7},
-             {'ID': 'AAAAAAAAA', 'YR': 2003, 'MO': 12, 'DY': 1, 'HR': 12, 'LAT': 0.5, 'LON': 0.0, 'SST': 5.0, 'PT': 7},
-             {'ID': 'AAAAAAAAA', 'YR': 2003, 'MO': 12, 'DY': 2, 'HR': 0, 'LAT': 1.0, 'LON': 0.0, 'SST': 5.0, 'PT': 7},
-             {'ID': 'AAAAAAAAA', 'YR': 2003, 'MO': 12, 'DY': 2, 'HR': 12, 'LAT': 2.5, 'LON': 0.0, 'SST': 5.0, 'PT': 7},
-             {'ID': 'AAAAAAAAA', 'YR': 2003, 'MO': 12, 'DY': 3, 'HR': 0, 'LAT': 4.0, 'LON': 0.0, 'SST': 5.0, 'PT': 7},
-             {'ID': 'AAAAAAAAA', 'YR': 2003, 'MO': 12, 'DY': 3, 'HR': 12, 'LAT': 4.5, 'LON': 0.0, 'SST': 5.0, 'PT': 7},
-             {'ID': 'AAAAAAAAA', 'YR': 2003, 'MO': 12, 'DY': 4, 'HR': 0, 'LAT': 5.0, 'LON': 0.0, 'SST': 5.0, 'PT': 7}]
+    vals7 = [
+        {
+            "ID": "AAAAAAAAA",
+            "YR": 2003,
+            "MO": 12,
+            "DY": 1,
+            "HR": 0,
+            "LAT": 0.0,
+            "LON": 0.0,
+            "SST": 5.0,
+            "PT": 7,
+        },
+        {
+            "ID": "AAAAAAAAA",
+            "YR": 2003,
+            "MO": 12,
+            "DY": 1,
+            "HR": 12,
+            "LAT": 0.5,
+            "LON": 0.0,
+            "SST": 5.0,
+            "PT": 7,
+        },
+        {
+            "ID": "AAAAAAAAA",
+            "YR": 2003,
+            "MO": 12,
+            "DY": 2,
+            "HR": 0,
+            "LAT": 1.0,
+            "LON": 0.0,
+            "SST": 5.0,
+            "PT": 7,
+        },
+        {
+            "ID": "AAAAAAAAA",
+            "YR": 2003,
+            "MO": 12,
+            "DY": 2,
+            "HR": 12,
+            "LAT": 2.5,
+            "LON": 0.0,
+            "SST": 5.0,
+            "PT": 7,
+        },
+        {
+            "ID": "AAAAAAAAA",
+            "YR": 2003,
+            "MO": 12,
+            "DY": 3,
+            "HR": 0,
+            "LAT": 4.0,
+            "LON": 0.0,
+            "SST": 5.0,
+            "PT": 7,
+        },
+        {
+            "ID": "AAAAAAAAA",
+            "YR": 2003,
+            "MO": 12,
+            "DY": 3,
+            "HR": 12,
+            "LAT": 4.5,
+            "LON": 0.0,
+            "SST": 5.0,
+            "PT": 7,
+        },
+        {
+            "ID": "AAAAAAAAA",
+            "YR": 2003,
+            "MO": 12,
+            "DY": 4,
+            "HR": 0,
+            "LAT": 5.0,
+            "LON": 0.0,
+            "SST": 5.0,
+            "PT": 7,
+        },
+    ]
     reps = ex.Voyage()
     for v in vals7:
         rec = IMMA()
@@ -3496,13 +4008,85 @@ def reps7a():
 @pytest.fixture
 def reps8a():
     # fast moving drifter (with irregular sampling)
-    vals8 = [{'ID': 'AAAAAAAAA', 'YR': 2003, 'MO': 12, 'DY': 1, 'HR': 12, 'LAT': 0.0, 'LON': 0.0, 'SST': 5.0, 'PT': 7},
-             {'ID': 'AAAAAAAAA', 'YR': 2003, 'MO': 12, 'DY': 2, 'HR': 12, 'LAT': 3.0, 'LON': 0.0, 'SST': 5.0, 'PT': 7},
-             {'ID': 'AAAAAAAAA', 'YR': 2003, 'MO': 12, 'DY': 4, 'HR': 12, 'LAT': 12.0, 'LON': 0.0, 'SST': 5.0, 'PT': 7},
-             {'ID': 'AAAAAAAAA', 'YR': 2003, 'MO': 12, 'DY': 5, 'HR': 12, 'LAT': 12.0, 'LON': 0.0, 'SST': 5.0, 'PT': 7},
-             {'ID': 'AAAAAAAAA', 'YR': 2003, 'MO': 12, 'DY': 5, 'HR': 23, 'LAT': 14.0, 'LON': 0.0, 'SST': 5.0, 'PT': 7},
-             {'ID': 'AAAAAAAAA', 'YR': 2003, 'MO': 12, 'DY': 6, 'HR': 23, 'LAT': 14.0, 'LON': 0.0, 'SST': 5.0, 'PT': 7},
-             {'ID': 'AAAAAAAAA', 'YR': 2003, 'MO': 12, 'DY': 7, 'HR': 23, 'LAT': 17.0, 'LON': 0.0, 'SST': 5.0, 'PT': 7}]
+    vals8 = [
+        {
+            "ID": "AAAAAAAAA",
+            "YR": 2003,
+            "MO": 12,
+            "DY": 1,
+            "HR": 12,
+            "LAT": 0.0,
+            "LON": 0.0,
+            "SST": 5.0,
+            "PT": 7,
+        },
+        {
+            "ID": "AAAAAAAAA",
+            "YR": 2003,
+            "MO": 12,
+            "DY": 2,
+            "HR": 12,
+            "LAT": 3.0,
+            "LON": 0.0,
+            "SST": 5.0,
+            "PT": 7,
+        },
+        {
+            "ID": "AAAAAAAAA",
+            "YR": 2003,
+            "MO": 12,
+            "DY": 4,
+            "HR": 12,
+            "LAT": 12.0,
+            "LON": 0.0,
+            "SST": 5.0,
+            "PT": 7,
+        },
+        {
+            "ID": "AAAAAAAAA",
+            "YR": 2003,
+            "MO": 12,
+            "DY": 5,
+            "HR": 12,
+            "LAT": 12.0,
+            "LON": 0.0,
+            "SST": 5.0,
+            "PT": 7,
+        },
+        {
+            "ID": "AAAAAAAAA",
+            "YR": 2003,
+            "MO": 12,
+            "DY": 5,
+            "HR": 23,
+            "LAT": 14.0,
+            "LON": 0.0,
+            "SST": 5.0,
+            "PT": 7,
+        },
+        {
+            "ID": "AAAAAAAAA",
+            "YR": 2003,
+            "MO": 12,
+            "DY": 6,
+            "HR": 23,
+            "LAT": 14.0,
+            "LON": 0.0,
+            "SST": 5.0,
+            "PT": 7,
+        },
+        {
+            "ID": "AAAAAAAAA",
+            "YR": 2003,
+            "MO": 12,
+            "DY": 7,
+            "HR": 23,
+            "LAT": 17.0,
+            "LON": 0.0,
+            "SST": 5.0,
+            "PT": 7,
+        },
+    ]
     reps = ex.Voyage()
     for v in vals8:
         rec = IMMA()
@@ -3517,19 +4101,85 @@ def reps8a():
 @pytest.fixture
 def reps9a():
     # fast moving Arctic drifter
-    vals9 = [{'ID': 'AAAAAAAAA', 'YR': 2003, 'MO': 12, 'DY': 1, 'HR': 12, 'LAT': 85.0, 'LON': 0.0, 'SST': 5.0, 'PT': 7},
-             {'ID': 'AAAAAAAAA', 'YR': 2003, 'MO': 12, 'DY': 2, 'HR': 12, 'LAT': 85.0, 'LON': 30.0, 'SST': 5.0,
-              'PT': 7},
-             {'ID': 'AAAAAAAAA', 'YR': 2003, 'MO': 12, 'DY': 3, 'HR': 12, 'LAT': 85.0, 'LON': 60.0, 'SST': 5.0,
-              'PT': 7},
-             {'ID': 'AAAAAAAAA', 'YR': 2003, 'MO': 12, 'DY': 4, 'HR': 12, 'LAT': 85.0, 'LON': 90.0, 'SST': 5.0,
-              'PT': 7},
-             {'ID': 'AAAAAAAAA', 'YR': 2003, 'MO': 12, 'DY': 5, 'HR': 12, 'LAT': 85.0, 'LON': 120.0, 'SST': 5.0,
-              'PT': 7},
-             {'ID': 'AAAAAAAAA', 'YR': 2003, 'MO': 12, 'DY': 6, 'HR': 12, 'LAT': 85.0, 'LON': 150.0, 'SST': 5.0,
-              'PT': 7},
-             {'ID': 'AAAAAAAAA', 'YR': 2003, 'MO': 12, 'DY': 7, 'HR': 12, 'LAT': 85.0, 'LON': 180.0, 'SST': 5.0,
-              'PT': 7}]
+    vals9 = [
+        {
+            "ID": "AAAAAAAAA",
+            "YR": 2003,
+            "MO": 12,
+            "DY": 1,
+            "HR": 12,
+            "LAT": 85.0,
+            "LON": 0.0,
+            "SST": 5.0,
+            "PT": 7,
+        },
+        {
+            "ID": "AAAAAAAAA",
+            "YR": 2003,
+            "MO": 12,
+            "DY": 2,
+            "HR": 12,
+            "LAT": 85.0,
+            "LON": 30.0,
+            "SST": 5.0,
+            "PT": 7,
+        },
+        {
+            "ID": "AAAAAAAAA",
+            "YR": 2003,
+            "MO": 12,
+            "DY": 3,
+            "HR": 12,
+            "LAT": 85.0,
+            "LON": 60.0,
+            "SST": 5.0,
+            "PT": 7,
+        },
+        {
+            "ID": "AAAAAAAAA",
+            "YR": 2003,
+            "MO": 12,
+            "DY": 4,
+            "HR": 12,
+            "LAT": 85.0,
+            "LON": 90.0,
+            "SST": 5.0,
+            "PT": 7,
+        },
+        {
+            "ID": "AAAAAAAAA",
+            "YR": 2003,
+            "MO": 12,
+            "DY": 5,
+            "HR": 12,
+            "LAT": 85.0,
+            "LON": 120.0,
+            "SST": 5.0,
+            "PT": 7,
+        },
+        {
+            "ID": "AAAAAAAAA",
+            "YR": 2003,
+            "MO": 12,
+            "DY": 6,
+            "HR": 12,
+            "LAT": 85.0,
+            "LON": 150.0,
+            "SST": 5.0,
+            "PT": 7,
+        },
+        {
+            "ID": "AAAAAAAAA",
+            "YR": 2003,
+            "MO": 12,
+            "DY": 7,
+            "HR": 12,
+            "LAT": 85.0,
+            "LON": 180.0,
+            "SST": 5.0,
+            "PT": 7,
+        },
+    ]
     reps = ex.Voyage()
     for v in vals9:
         rec = IMMA()
@@ -3544,15 +4194,85 @@ def reps9a():
 @pytest.fixture
 def reps10a():
     # stationary drifter (gross position errors)
-    vals10 = [{'ID': 'AAAAAAAAA', 'YR': 2003, 'MO': 12, 'DY': 1, 'HR': 12, 'LAT': 0.0, 'LON': 0.0, 'SST': 5.0, 'PT': 7},
-              {'ID': 'AAAAAAAAA', 'YR': 2003, 'MO': 12, 'DY': 2, 'HR': 12, 'LAT': 0.0, 'LON': 0.0, 'SST': 5.0, 'PT': 7},
-              {'ID': 'AAAAAAAAA', 'YR': 2003, 'MO': 12, 'DY': 3, 'HR': 12, 'LAT': 50.0, 'LON': 0.0, 'SST': 5.0,
-               'PT': 7},
-              {'ID': 'AAAAAAAAA', 'YR': 2003, 'MO': 12, 'DY': 4, 'HR': 12, 'LAT': 0.0, 'LON': 0.0, 'SST': 5.0, 'PT': 7},
-              {'ID': 'AAAAAAAAA', 'YR': 2003, 'MO': 12, 'DY': 5, 'HR': 12, 'LAT': 0.0, 'LON': 0.0, 'SST': 5.0, 'PT': 7},
-              {'ID': 'AAAAAAAAA', 'YR': 2003, 'MO': 12, 'DY': 6, 'HR': 12, 'LAT': 50.0, 'LON': 0.0, 'SST': 5.0,
-               'PT': 7},
-              {'ID': 'AAAAAAAAA', 'YR': 2003, 'MO': 12, 'DY': 7, 'HR': 12, 'LAT': 0.0, 'LON': 0.0, 'SST': 5.0, 'PT': 7}]
+    vals10 = [
+        {
+            "ID": "AAAAAAAAA",
+            "YR": 2003,
+            "MO": 12,
+            "DY": 1,
+            "HR": 12,
+            "LAT": 0.0,
+            "LON": 0.0,
+            "SST": 5.0,
+            "PT": 7,
+        },
+        {
+            "ID": "AAAAAAAAA",
+            "YR": 2003,
+            "MO": 12,
+            "DY": 2,
+            "HR": 12,
+            "LAT": 0.0,
+            "LON": 0.0,
+            "SST": 5.0,
+            "PT": 7,
+        },
+        {
+            "ID": "AAAAAAAAA",
+            "YR": 2003,
+            "MO": 12,
+            "DY": 3,
+            "HR": 12,
+            "LAT": 50.0,
+            "LON": 0.0,
+            "SST": 5.0,
+            "PT": 7,
+        },
+        {
+            "ID": "AAAAAAAAA",
+            "YR": 2003,
+            "MO": 12,
+            "DY": 4,
+            "HR": 12,
+            "LAT": 0.0,
+            "LON": 0.0,
+            "SST": 5.0,
+            "PT": 7,
+        },
+        {
+            "ID": "AAAAAAAAA",
+            "YR": 2003,
+            "MO": 12,
+            "DY": 5,
+            "HR": 12,
+            "LAT": 0.0,
+            "LON": 0.0,
+            "SST": 5.0,
+            "PT": 7,
+        },
+        {
+            "ID": "AAAAAAAAA",
+            "YR": 2003,
+            "MO": 12,
+            "DY": 6,
+            "HR": 12,
+            "LAT": 50.0,
+            "LON": 0.0,
+            "SST": 5.0,
+            "PT": 7,
+        },
+        {
+            "ID": "AAAAAAAAA",
+            "YR": 2003,
+            "MO": 12,
+            "DY": 7,
+            "HR": 12,
+            "LAT": 0.0,
+            "LON": 0.0,
+            "SST": 5.0,
+            "PT": 7,
+        },
+    ]
     reps = ex.Voyage()
     for v in vals10:
         rec = IMMA()
@@ -3567,8 +4287,30 @@ def reps10a():
 @pytest.fixture
 def reps11a():
     # too short for QC
-    vals11 = [{'ID': 'AAAAAAAAA', 'YR': 2003, 'MO': 12, 'DY': 1, 'HR': 12, 'LAT': 0.0, 'LON': 0.0, 'SST': 5.0, 'PT': 7},
-              {'ID': 'AAAAAAAAA', 'YR': 2003, 'MO': 12, 'DY': 2, 'HR': 12, 'LAT': 0.0, 'LON': 0.0, 'SST': 5.0, 'PT': 7}]
+    vals11 = [
+        {
+            "ID": "AAAAAAAAA",
+            "YR": 2003,
+            "MO": 12,
+            "DY": 1,
+            "HR": 12,
+            "LAT": 0.0,
+            "LON": 0.0,
+            "SST": 5.0,
+            "PT": 7,
+        },
+        {
+            "ID": "AAAAAAAAA",
+            "YR": 2003,
+            "MO": 12,
+            "DY": 2,
+            "HR": 12,
+            "LAT": 0.0,
+            "LON": 0.0,
+            "SST": 5.0,
+            "PT": 7,
+        },
+    ]
     reps = ex.Voyage()
     for v in vals11:
         rec = IMMA()
@@ -3583,13 +4325,85 @@ def reps11a():
 @pytest.fixture
 def reps12a():
     # assertion error - bad input parameter
-    vals12 = [{'ID': 'AAAAAAAAA', 'YR': 2003, 'MO': 12, 'DY': 1, 'HR': 12, 'LAT': 0.0, 'LON': 0.0, 'SST': 5.0, 'PT': 7},
-              {'ID': 'AAAAAAAAA', 'YR': 2003, 'MO': 12, 'DY': 2, 'HR': 12, 'LAT': 0.0, 'LON': 0.0, 'SST': 5.0, 'PT': 7},
-              {'ID': 'AAAAAAAAA', 'YR': 2003, 'MO': 12, 'DY': 3, 'HR': 12, 'LAT': 0.0, 'LON': 0.0, 'SST': 5.0, 'PT': 7},
-              {'ID': 'AAAAAAAAA', 'YR': 2003, 'MO': 12, 'DY': 4, 'HR': 12, 'LAT': 0.0, 'LON': 0.0, 'SST': 5.0, 'PT': 7},
-              {'ID': 'AAAAAAAAA', 'YR': 2003, 'MO': 12, 'DY': 5, 'HR': 12, 'LAT': 0.0, 'LON': 0.0, 'SST': 5.0, 'PT': 7},
-              {'ID': 'AAAAAAAAA', 'YR': 2003, 'MO': 12, 'DY': 6, 'HR': 12, 'LAT': 0.0, 'LON': 0.0, 'SST': 5.0, 'PT': 7},
-              {'ID': 'AAAAAAAAA', 'YR': 2003, 'MO': 12, 'DY': 7, 'HR': 12, 'LAT': 0.0, 'LON': 0.0, 'SST': 5.0, 'PT': 7}]
+    vals12 = [
+        {
+            "ID": "AAAAAAAAA",
+            "YR": 2003,
+            "MO": 12,
+            "DY": 1,
+            "HR": 12,
+            "LAT": 0.0,
+            "LON": 0.0,
+            "SST": 5.0,
+            "PT": 7,
+        },
+        {
+            "ID": "AAAAAAAAA",
+            "YR": 2003,
+            "MO": 12,
+            "DY": 2,
+            "HR": 12,
+            "LAT": 0.0,
+            "LON": 0.0,
+            "SST": 5.0,
+            "PT": 7,
+        },
+        {
+            "ID": "AAAAAAAAA",
+            "YR": 2003,
+            "MO": 12,
+            "DY": 3,
+            "HR": 12,
+            "LAT": 0.0,
+            "LON": 0.0,
+            "SST": 5.0,
+            "PT": 7,
+        },
+        {
+            "ID": "AAAAAAAAA",
+            "YR": 2003,
+            "MO": 12,
+            "DY": 4,
+            "HR": 12,
+            "LAT": 0.0,
+            "LON": 0.0,
+            "SST": 5.0,
+            "PT": 7,
+        },
+        {
+            "ID": "AAAAAAAAA",
+            "YR": 2003,
+            "MO": 12,
+            "DY": 5,
+            "HR": 12,
+            "LAT": 0.0,
+            "LON": 0.0,
+            "SST": 5.0,
+            "PT": 7,
+        },
+        {
+            "ID": "AAAAAAAAA",
+            "YR": 2003,
+            "MO": 12,
+            "DY": 6,
+            "HR": 12,
+            "LAT": 0.0,
+            "LON": 0.0,
+            "SST": 5.0,
+            "PT": 7,
+        },
+        {
+            "ID": "AAAAAAAAA",
+            "YR": 2003,
+            "MO": 12,
+            "DY": 7,
+            "HR": 12,
+            "LAT": 0.0,
+            "LON": 0.0,
+            "SST": 5.0,
+            "PT": 7,
+        },
+    ]
     reps = ex.Voyage()
     for v in vals12:
         rec = IMMA()
@@ -3604,13 +4418,85 @@ def reps12a():
 @pytest.fixture
 def reps13a():
     # assertion error - missing observation
-    vals13 = [{'ID': 'AAAAAAAAA', 'YR': 2003, 'MO': 12, 'DY': 1, 'HR': 12, 'LAT': 0.0, 'LON': 0.0, 'SST': 5.0, 'PT': 7},
-              {'ID': 'AAAAAAAAA', 'YR': 2003, 'MO': 12, 'DY': 2, 'HR': 12, 'LAT': 0.0, 'LON': 0.0, 'SST': 5.0, 'PT': 7},
-              {'ID': 'AAAAAAAAA', 'YR': 2003, 'MO': 12, 'DY': 3, 'HR': 12, 'LAT': 0.0, 'LON': 0.0, 'SST': 5.0, 'PT': 7},
-              {'ID': 'AAAAAAAAA', 'YR': 2003, 'MO': 12, 'DY': 4, 'HR': 12, 'LAT': 0.0, 'LON': 0.0, 'SST': 5.0, 'PT': 7},
-              {'ID': 'AAAAAAAAA', 'YR': 2003, 'MO': 12, 'DY': 5, 'HR': 12, 'LAT': 0.0, 'LON': 0.0, 'SST': 5.0, 'PT': 7},
-              {'ID': 'AAAAAAAAA', 'YR': 2003, 'MO': 12, 'DY': 6, 'HR': 12, 'LAT': 0.0, 'LON': 0.0, 'SST': 5.0, 'PT': 7},
-              {'ID': 'AAAAAAAAA', 'YR': 2003, 'MO': 12, 'DY': 7, 'HR': 12, 'LAT': 0.0, 'LON': 0.0, 'SST': 5.0, 'PT': 7}]
+    vals13 = [
+        {
+            "ID": "AAAAAAAAA",
+            "YR": 2003,
+            "MO": 12,
+            "DY": 1,
+            "HR": 12,
+            "LAT": 0.0,
+            "LON": 0.0,
+            "SST": 5.0,
+            "PT": 7,
+        },
+        {
+            "ID": "AAAAAAAAA",
+            "YR": 2003,
+            "MO": 12,
+            "DY": 2,
+            "HR": 12,
+            "LAT": 0.0,
+            "LON": 0.0,
+            "SST": 5.0,
+            "PT": 7,
+        },
+        {
+            "ID": "AAAAAAAAA",
+            "YR": 2003,
+            "MO": 12,
+            "DY": 3,
+            "HR": 12,
+            "LAT": 0.0,
+            "LON": 0.0,
+            "SST": 5.0,
+            "PT": 7,
+        },
+        {
+            "ID": "AAAAAAAAA",
+            "YR": 2003,
+            "MO": 12,
+            "DY": 4,
+            "HR": 12,
+            "LAT": 0.0,
+            "LON": 0.0,
+            "SST": 5.0,
+            "PT": 7,
+        },
+        {
+            "ID": "AAAAAAAAA",
+            "YR": 2003,
+            "MO": 12,
+            "DY": 5,
+            "HR": 12,
+            "LAT": 0.0,
+            "LON": 0.0,
+            "SST": 5.0,
+            "PT": 7,
+        },
+        {
+            "ID": "AAAAAAAAA",
+            "YR": 2003,
+            "MO": 12,
+            "DY": 6,
+            "HR": 12,
+            "LAT": 0.0,
+            "LON": 0.0,
+            "SST": 5.0,
+            "PT": 7,
+        },
+        {
+            "ID": "AAAAAAAAA",
+            "YR": 2003,
+            "MO": 12,
+            "DY": 7,
+            "HR": 12,
+            "LAT": 0.0,
+            "LON": 0.0,
+            "SST": 5.0,
+            "PT": 7,
+        },
+    ]
     reps = ex.Voyage()
     for v in vals13:
         rec = IMMA()
@@ -3618,7 +4504,7 @@ def reps13a():
             rec.data[key] = v[key]
         rep = ex.MarineReportQC(rec)
         reps.add_report(rep)
-    reps.setvar(1, 'LON', None)
+    reps.setvar(1, "LON", None)
 
     return reps
 
@@ -3626,13 +4512,85 @@ def reps13a():
 @pytest.fixture
 def reps14a():
     # assertion error - times not sorted
-    vals14 = [{'ID': 'AAAAAAAAA', 'YR': 2003, 'MO': 12, 'DY': 1, 'HR': 12, 'LAT': 0.0, 'LON': 0.0, 'SST': 5.0, 'PT': 7},
-              {'ID': 'AAAAAAAAA', 'YR': 2003, 'MO': 12, 'DY': 2, 'HR': 12, 'LAT': 0.0, 'LON': 0.0, 'SST': 5.0, 'PT': 7},
-              {'ID': 'AAAAAAAAA', 'YR': 2003, 'MO': 12, 'DY': 3, 'HR': 12, 'LAT': 0.0, 'LON': 0.0, 'SST': 5.0, 'PT': 7},
-              {'ID': 'AAAAAAAAA', 'YR': 2003, 'MO': 12, 'DY': 2, 'HR': 12, 'LAT': 0.0, 'LON': 0.0, 'SST': 5.0, 'PT': 7},
-              {'ID': 'AAAAAAAAA', 'YR': 2003, 'MO': 12, 'DY': 5, 'HR': 12, 'LAT': 0.0, 'LON': 0.0, 'SST': 5.0, 'PT': 7},
-              {'ID': 'AAAAAAAAA', 'YR': 2003, 'MO': 12, 'DY': 6, 'HR': 12, 'LAT': 0.0, 'LON': 0.0, 'SST': 5.0, 'PT': 7},
-              {'ID': 'AAAAAAAAA', 'YR': 2003, 'MO': 12, 'DY': 7, 'HR': 12, 'LAT': 0.0, 'LON': 0.0, 'SST': 5.0, 'PT': 7}]
+    vals14 = [
+        {
+            "ID": "AAAAAAAAA",
+            "YR": 2003,
+            "MO": 12,
+            "DY": 1,
+            "HR": 12,
+            "LAT": 0.0,
+            "LON": 0.0,
+            "SST": 5.0,
+            "PT": 7,
+        },
+        {
+            "ID": "AAAAAAAAA",
+            "YR": 2003,
+            "MO": 12,
+            "DY": 2,
+            "HR": 12,
+            "LAT": 0.0,
+            "LON": 0.0,
+            "SST": 5.0,
+            "PT": 7,
+        },
+        {
+            "ID": "AAAAAAAAA",
+            "YR": 2003,
+            "MO": 12,
+            "DY": 3,
+            "HR": 12,
+            "LAT": 0.0,
+            "LON": 0.0,
+            "SST": 5.0,
+            "PT": 7,
+        },
+        {
+            "ID": "AAAAAAAAA",
+            "YR": 2003,
+            "MO": 12,
+            "DY": 2,
+            "HR": 12,
+            "LAT": 0.0,
+            "LON": 0.0,
+            "SST": 5.0,
+            "PT": 7,
+        },
+        {
+            "ID": "AAAAAAAAA",
+            "YR": 2003,
+            "MO": 12,
+            "DY": 5,
+            "HR": 12,
+            "LAT": 0.0,
+            "LON": 0.0,
+            "SST": 5.0,
+            "PT": 7,
+        },
+        {
+            "ID": "AAAAAAAAA",
+            "YR": 2003,
+            "MO": 12,
+            "DY": 6,
+            "HR": 12,
+            "LAT": 0.0,
+            "LON": 0.0,
+            "SST": 5.0,
+            "PT": 7,
+        },
+        {
+            "ID": "AAAAAAAAA",
+            "YR": 2003,
+            "MO": 12,
+            "DY": 7,
+            "HR": 12,
+            "LAT": 0.0,
+            "LON": 0.0,
+            "SST": 5.0,
+            "PT": 7,
+        },
+    ]
 
     reps = ex.Voyage()
 
@@ -3650,81 +4608,81 @@ def test_stationary_a(reps1a):
     expected_flags = [0, 0, 0, 0, 0, 0, 0]
     otqc.speed_check(reps1a.reps, 2.5, 0.5, 1.0)
     for i in range(0, len(reps1a)):
-        assert reps1a.get_qc(i, 'POS', 'drf_spd') == expected_flags[i]
+        assert reps1a.get_qc(i, "POS", "drf_spd") == expected_flags[i]
 
 
 def test_fast_drifter(reps2a):
     expected_flags = [1, 1, 1, 1, 1, 1, 1]
     otqc.speed_check(reps2a.reps, 2.5, 0.5, 1.0)
     for i in range(0, len(reps2a)):
-        assert reps2a.get_qc(i, 'POS', 'drf_spd') == expected_flags[i]
+        assert reps2a.get_qc(i, "POS", "drf_spd") == expected_flags[i]
 
 
 def test_slow_drifter(reps3a):
     expected_flags = [0, 0, 0, 0, 0, 0, 0]
     otqc.speed_check(reps3a.reps, 2.5, 0.5, 1.0)
     for i in range(0, len(reps3a)):
-        assert reps3a.get_qc(i, 'POS', 'drf_spd') == expected_flags[i]
+        assert reps3a.get_qc(i, "POS", "drf_spd") == expected_flags[i]
 
 
 def test_slow_fast_slow_drifter(reps4a):
     expected_flags = [0, 0, 1, 1, 1, 0, 0]
     otqc.speed_check(reps4a.reps, 2.5, 0.5, 1.0)
     for i in range(0, len(reps4a)):
-        assert reps4a.get_qc(i, 'POS', 'drf_spd') == expected_flags[i]
+        assert reps4a.get_qc(i, "POS", "drf_spd") == expected_flags[i]
 
 
 def test_high_freqency_sampling(reps5a):
     expected_flags = [0, 0, 0, 0, 0, 0, 0]
     otqc.speed_check(reps5a.reps, 2.5, 0.5, 1.0)
     for i in range(0, len(reps5a)):
-        assert reps5a.get_qc(i, 'POS', 'drf_spd') == expected_flags[i]
+        assert reps5a.get_qc(i, "POS", "drf_spd") == expected_flags[i]
 
 
 def test_low_freqency_sampling(reps6a):
     expected_flags = [0, 0, 0, 0, 0, 0, 0]
     otqc.speed_check(reps6a.reps, 2.5, 0.5, 1.0)
     for i in range(0, len(reps6a)):
-        assert reps6a.get_qc(i, 'POS', 'drf_spd') == expected_flags[i]
+        assert reps6a.get_qc(i, "POS", "drf_spd") == expected_flags[i]
 
 
 def test_slow_fast_slow_mid_freqency_sampling(reps7a):
     expected_flags = [0, 1, 1, 1, 1, 1, 0]
     otqc.speed_check(reps7a.reps, 2.5, 0.5, 1.0)
     for i in range(0, len(reps7a)):
-        assert reps7a.get_qc(i, 'POS', 'drf_spd') == expected_flags[i]
+        assert reps7a.get_qc(i, "POS", "drf_spd") == expected_flags[i]
 
 
 def test_irregular_sampling(reps8a):
     expected_flags = [1, 1, 0, 0, 0, 1, 1]
     otqc.speed_check(reps8a.reps, 2.5, 0.5, 1.0)
     for i in range(0, len(reps8a)):
-        assert reps8a.get_qc(i, 'POS', 'drf_spd') == expected_flags[i]
+        assert reps8a.get_qc(i, "POS", "drf_spd") == expected_flags[i]
 
 
 def test_fast_arctic_drifter(reps9a):
     expected_flags = [1, 1, 1, 1, 1, 1, 1]
     otqc.speed_check(reps9a.reps, 2.5, 0.5, 1.0)
     for i in range(0, len(reps9a)):
-        assert reps9a.get_qc(i, 'POS', 'drf_spd') == expected_flags[i]
+        assert reps9a.get_qc(i, "POS", "drf_spd") == expected_flags[i]
 
 
 def test_stationary_gross_error(reps10a):
     expected_flags = [0, 1, 1, 1, 1, 1, 1]
     otqc.speed_check(reps10a.reps, 2.5, 0.5, 1.0)
     for i in range(0, len(reps10a)):
-        assert reps10a.get_qc(i, 'POS', 'drf_spd') == expected_flags[i]
+        assert reps10a.get_qc(i, "POS", "drf_spd") == expected_flags[i]
 
 
 def test_too_short_for_qc_a(reps11a):
     expected_flags = [0, 0]
     old_stdout = sys.stdout
-    f = open(os.devnull, 'w')
+    f = open(os.devnull, "w")
     sys.stdout = f
     otqc.speed_check(reps11a.reps, 2.5, 0.5, 1.0)
     sys.stdout = old_stdout
     for i in range(0, len(reps11a)):
-        assert reps11a.get_qc(i, 'POS', 'drf_spd') == expected_flags[i]
+        assert reps11a.get_qc(i, "POS", "drf_spd") == expected_flags[i]
 
 
 def test_error_bad_input_parameter_a(reps12a):
@@ -3732,10 +4690,10 @@ def test_error_bad_input_parameter_a(reps12a):
     try:
         otqc.speed_check(reps12a.reps, -2.5, 0.5, 1.0)
     except AssertionError as error:
-        error_return_text = 'invalid input parameter: speed_limit must be >= 0'
-        assert str(error)[0:len(error_return_text)] == error_return_text
+        error_return_text = "invalid input parameter: speed_limit must be >= 0"
+        assert str(error)[0 : len(error_return_text)] == error_return_text
     for i in range(0, len(reps12a)):
-        assert reps12a.get_qc(i, 'POS', 'drf_spd') == expected_flags[i]
+        assert reps12a.get_qc(i, "POS", "drf_spd") == expected_flags[i]
 
 
 def test_error_missing_observation_a(reps13a):
@@ -3743,10 +4701,10 @@ def test_error_missing_observation_a(reps13a):
     try:
         otqc.speed_check(reps13a.reps, 2.5, 0.5, 1.0)
     except AssertionError as error:
-        error_return_text = 'problem with report values: Nan(s) found in longitude'
-        assert str(error)[0:len(error_return_text)] == error_return_text
+        error_return_text = "problem with report values: Nan(s) found in longitude"
+        assert str(error)[0 : len(error_return_text)] == error_return_text
     for i in range(0, len(reps13a)):
-        assert reps13a.get_qc(i, 'POS', 'drf_spd') == expected_flags[i]
+        assert reps13a.get_qc(i, "POS", "drf_spd") == expected_flags[i]
 
 
 def test_error_not_time_sorted_a(reps14a):
@@ -3754,10 +4712,10 @@ def test_error_not_time_sorted_a(reps14a):
     try:
         otqc.speed_check(reps14a.reps, 2.5, 0.5, 1.0)
     except AssertionError as error:
-        error_return_text = 'problem with report values: times are not sorted'
-        assert str(error)[0:len(error_return_text)] == error_return_text
+        error_return_text = "problem with report values: times are not sorted"
+        assert str(error)[0 : len(error_return_text)] == error_return_text
     for i in range(0, len(reps14a)):
-        assert reps14a.get_qc(i, 'POS', 'drf_spd') == expected_flags[i]
+        assert reps14a.get_qc(i, "POS", "drf_spd") == expected_flags[i]
 
 
 # --- new speed check ---
@@ -3765,81 +4723,81 @@ def test_new_stationary_a(reps1a, iquam_parameters):
     expected_flags = [0, 0, 0, 0, 0, 0, 0]
     otqc.new_speed_check(reps1a.reps, iquam_parameters, 2.5, 0.5)
     for i in range(0, len(reps1a)):
-        assert reps1a.get_qc(i, 'POS', 'drf_spd') == expected_flags[i]
+        assert reps1a.get_qc(i, "POS", "drf_spd") == expected_flags[i]
 
 
 def test_new_fast_drifter(reps2a, iquam_parameters):
     expected_flags = [1, 1, 1, 1, 1, 1, 1]
     otqc.new_speed_check(reps2a.reps, iquam_parameters, 2.5, 0.5)
     for i in range(0, len(reps2a)):
-        assert reps2a.get_qc(i, 'POS', 'drf_spd') == expected_flags[i]
+        assert reps2a.get_qc(i, "POS", "drf_spd") == expected_flags[i]
 
 
 def test_new_slow_drifter(reps3a, iquam_parameters):
     expected_flags = [0, 0, 0, 0, 0, 0, 0]
     otqc.new_speed_check(reps3a.reps, iquam_parameters, 2.5, 0.5)
     for i in range(0, len(reps3a)):
-        assert reps3a.get_qc(i, 'POS', 'drf_spd') == expected_flags[i]
+        assert reps3a.get_qc(i, "POS", "drf_spd") == expected_flags[i]
 
 
 def test_new_slow_fast_slow_drifter(reps4a, iquam_parameters):
     expected_flags = [0, 0, 1, 1, 1, 0, 0]
     otqc.new_speed_check(reps4a.reps, iquam_parameters, 2.5, 0.5)
     for i in range(0, len(reps4a)):
-        assert reps4a.get_qc(i, 'POS', 'drf_spd') == expected_flags[i]
+        assert reps4a.get_qc(i, "POS", "drf_spd") == expected_flags[i]
 
 
 def test_new_high_freqency_sampling(reps5a, iquam_parameters):
     expected_flags = [0, 0, 0, 0, 0, 0, 0]
     otqc.new_speed_check(reps5a.reps, iquam_parameters, 2.5, 0.5)
     for i in range(0, len(reps5a)):
-        assert reps5a.get_qc(i, 'POS', 'drf_spd') == expected_flags[i]
+        assert reps5a.get_qc(i, "POS", "drf_spd") == expected_flags[i]
 
 
 def test_new_low_freqency_sampling(reps6a, iquam_parameters):
     expected_flags = [1, 1, 1, 1, 1, 1, 1]
     otqc.new_speed_check(reps6a.reps, iquam_parameters, 2.5, 0.5)
     for i in range(0, len(reps6a)):
-        assert reps6a.get_qc(i, 'POS', 'drf_spd') == expected_flags[i]
+        assert reps6a.get_qc(i, "POS", "drf_spd") == expected_flags[i]
 
 
 def test_new_slow_fast_slow_mid_freqency_sampling(reps7a, iquam_parameters):
     expected_flags = [0, 0, 1, 1, 1, 0, 0]
     otqc.new_speed_check(reps7a.reps, iquam_parameters, 2.5, 0.5)
     for i in range(0, len(reps7a)):
-        assert reps7a.get_qc(i, 'POS', 'drf_spd') == expected_flags[i]
+        assert reps7a.get_qc(i, "POS", "drf_spd") == expected_flags[i]
 
 
 def test_new_irregular_sampling(reps8a, iquam_parameters):
     expected_flags = [1, 1, 1, 0, 0, 1, 1]
     otqc.new_speed_check(reps8a.reps, iquam_parameters, 2.5, 0.5)
     for i in range(0, len(reps8a)):
-        assert reps8a.get_qc(i, 'POS', 'drf_spd') == expected_flags[i]
+        assert reps8a.get_qc(i, "POS", "drf_spd") == expected_flags[i]
 
 
 def test_new_fast_arctic_drifter(reps9a, iquam_parameters):
     expected_flags = [1, 1, 1, 1, 1, 1, 1]
     otqc.new_speed_check(reps9a.reps, iquam_parameters, 2.5, 0.5)
     for i in range(0, len(reps9a)):
-        assert reps9a.get_qc(i, 'POS', 'drf_spd') == expected_flags[i]
+        assert reps9a.get_qc(i, "POS", "drf_spd") == expected_flags[i]
 
 
 def test_new_stationary_gross_error(reps10a, iquam_parameters):
     expected_flags = [0, 0, 0, 0, 0, 0, 0]
     otqc.new_speed_check(reps10a.reps, iquam_parameters, 2.5, 0.5)
     for i in range(0, len(reps10a)):
-        assert reps10a.get_qc(i, 'POS', 'drf_spd') == expected_flags[i]
+        assert reps10a.get_qc(i, "POS", "drf_spd") == expected_flags[i]
 
 
 def test_new_too_short_for_qc_a(reps11a, iquam_parameters):
     expected_flags = [0, 0]
     old_stdout = sys.stdout
-    f = open(os.devnull, 'w')
+    f = open(os.devnull, "w")
     sys.stdout = f
     otqc.new_speed_check(reps11a.reps, iquam_parameters, 2.5, 0.5)
     sys.stdout = old_stdout
     for i in range(0, len(reps11a)):
-        assert reps11a.get_qc(i, 'POS', 'drf_spd') == expected_flags[i]
+        assert reps11a.get_qc(i, "POS", "drf_spd") == expected_flags[i]
 
 
 def test_new_error_bad_input_parameter_a(reps12a, iquam_parameters):
@@ -3847,10 +4805,10 @@ def test_new_error_bad_input_parameter_a(reps12a, iquam_parameters):
     try:
         otqc.new_speed_check(reps12a.reps, iquam_parameters, -2.5, 0.5)
     except AssertionError as error:
-        error_return_text = 'invalid input parameter: speed_limit must be >= 0'
-        assert str(error)[0:len(error_return_text)] == error_return_text
+        error_return_text = "invalid input parameter: speed_limit must be >= 0"
+        assert str(error)[0 : len(error_return_text)] == error_return_text
     for i in range(0, len(reps12a)):
-        assert reps12a.get_qc(i, 'POS', 'drf_spd') == expected_flags[i]
+        assert reps12a.get_qc(i, "POS", "drf_spd") == expected_flags[i]
 
 
 def test_new_error_missing_observation_a(reps13a, iquam_parameters):
@@ -3858,10 +4816,10 @@ def test_new_error_missing_observation_a(reps13a, iquam_parameters):
     try:
         otqc.new_speed_check(reps13a.reps, iquam_parameters, 2.5, 0.5)
     except AssertionError as error:
-        error_return_text = 'problem with report values: Nan(s) found in longitude'
-        assert str(error)[0:len(error_return_text)] == error_return_text
+        error_return_text = "problem with report values: Nan(s) found in longitude"
+        assert str(error)[0 : len(error_return_text)] == error_return_text
     for i in range(0, len(reps13a)):
-        assert reps13a.get_qc(i, 'POS', 'drf_spd') == expected_flags[i]
+        assert reps13a.get_qc(i, "POS", "drf_spd") == expected_flags[i]
 
 
 def test_new_error_not_time_sorted_a(reps14a, iquam_parameters):
@@ -3869,7 +4827,7 @@ def test_new_error_not_time_sorted_a(reps14a, iquam_parameters):
     try:
         otqc.new_speed_check(reps14a.reps, iquam_parameters, 2.5, 0.5)
     except AssertionError as error:
-        error_return_text = 'problem with report values: times are not sorted'
-        assert str(error)[0:len(error_return_text)] == error_return_text
+        error_return_text = "problem with report values: times are not sorted"
+        assert str(error)[0 : len(error_return_text)] == error_return_text
     for i in range(0, len(reps14a)):
-        assert reps14a.get_qc(i, 'POS', 'drf_spd') == expected_flags[i]
+        assert reps14a.get_qc(i, "POS", "drf_spd") == expected_flags[i]

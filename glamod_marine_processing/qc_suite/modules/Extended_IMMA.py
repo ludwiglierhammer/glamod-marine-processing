@@ -15,8 +15,9 @@ from datetime import datetime
 
 import numpy as np
 
+from . import CalcHums
 from . import icoads_identify as ii
-from . import CalcHums, qc
+from . import qc
 from . import spherical_geometry as sph
 from . import time_control
 from . import track_check as tc
