@@ -15,6 +15,7 @@ from datetime import datetime
 
 import numpy as np
 
+from . import icoads_identify as ii
 from . import CalcHums, qc
 from . import spherical_geometry as sph
 from . import time_control
@@ -2138,7 +2139,7 @@ class Voyage:
         if numobs == 0:
             return
 
-        if qc.id_is_generic(self.getvar(0, "ID"), self.getvar(0, "YR")):
+        if ii.id_is_generic(self.getvar(0, "ID"), self.getvar(0, "YR")):
             for i in range(0, numobs):
                 self.set_qc(i, "POS", "iquam_track", 0)
             return
@@ -2214,7 +2215,7 @@ class Voyage:
 
         # Generic ids and buoys get a free pass on the track check
         if (
-            qc.id_is_generic(self.getvar(0, "ID"), self.getvar(0, "YR"))
+            ii.id_is_generic(self.getvar(0, "ID"), self.getvar(0, "YR"))
             or self.getvar(0, "PT") == 6
             or self.getvar(0, "PT") == 7
         ):
