@@ -1,8 +1,8 @@
+from __future__ import annotations
+
 import pytest
 
-from glamod_marine_processing.qc_suite.modules.astronomical_geometry import (
-    day_test
-)
+from glamod_marine_processing.qc_suite.modules.astronomical_geometry import day_test
 
 
 # result = day_test(year,month,day,hour,lat,lon)

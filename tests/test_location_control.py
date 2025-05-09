@@ -1,5 +1,9 @@
-import pytest
+from __future__ import annotations
+
 import math
+
+import pytest
+
 from glamod_marine_processing.qc_suite.modules.location_control import *
 
 
@@ -184,27 +188,27 @@ def test_all_missing_in_square():
 
 
 def test_one_missing_corner():
-    q11, q12, q21, q22 = fill_missing_vals(1., 2., 3., None)
-    assert q11 == 1.
-    assert q12 == 2.
-    assert q21 == 3.
+    q11, q12, q21, q22 = fill_missing_vals(1.0, 2.0, 3.0, None)
+    assert q11 == 1.0
+    assert q12 == 2.0
+    assert q21 == 3.0
     assert q22 == 2.5
 
 
 def test_two_missing_corners():
-    q11, q12, q21, q22 = fill_missing_vals(None, 2., 3., None)
+    q11, q12, q21, q22 = fill_missing_vals(None, 2.0, 3.0, None)
     assert q11 == 2.5
-    assert q12 == 2.
-    assert q21 == 3.
+    assert q12 == 2.0
+    assert q21 == 3.0
     assert q22 == 2.5
 
 
 def test_three_missing_corners():
-    q11, q12, q21, q22 = fill_missing_vals(None, None, 3., None)
-    assert q11 == 3.
-    assert q12 == 3.
-    assert q21 == 3.
-    assert q22 == 3.
+    q11, q12, q21, q22 = fill_missing_vals(None, None, 3.0, None)
+    assert q11 == 3.0
+    assert q12 == 3.0
+    assert q21 == 3.0
+    assert q22 == 3.0
 
 
 def test_high_lon():
