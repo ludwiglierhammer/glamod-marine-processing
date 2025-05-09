@@ -5,8 +5,19 @@ from __future__ import annotations
 import math
 from datetime import datetime
 
-from . import qc, time_control
-from .qc import failed, passed, untestable
+from .astronomical_geometry import sunangle
+from .qc import (
+    climatology_check,
+    climatology_plus_stdev_check,
+    climatology_plus_stdev_with_lowbar_check,
+    failed,
+    hard_limit_check,
+    isvalid,
+    passed,
+    sst_freeze_check,
+    untestable,
+)
+from .time_control import dayinyear, get_month_lengths
 
 
 def _split_date(date):
@@ -38,9 +49,9 @@ def do_position_check(latitude: float, longitude: float) -> int:
     int
         1 if either latitude or longitude is invalid, 0 otherwise
     """
-    if qc.isvalid(latitude):
+    if isvalid(latitude):
         return untestable
-    if qc.isvalid(longitude):
+    if isvalid(longitude):
         return untestable
 
     if latitude < -90 or latitude > 90:
@@ -87,11 +98,11 @@ def do_date_check(
         year = date_["year"]
         month = date_["month"]
         day = date_["day"]
-    if qc.isvalid(year) == failed:
+    if isvalid(year) == failed:
         return untestable
-    if qc.isvalid(month) == failed:
+    if isvalid(month) == failed:
         return untestable
-    if qc.isvalid(day) == failed:
+    if isvalid(day) == failed:
         return untestable
 
     if year > 2025 or year < 1850:
@@ -100,7 +111,7 @@ def do_date_check(
     if month < 1 or month > 12:
         return failed
 
-    month_lengths = time_control.get_month_lengths(year)
+    month_lengths = get_month_lengths(year)
 
     if day < 1 or day > month_lengths[month - 1]:
         return failed
@@ -129,7 +140,7 @@ def do_time_check(date: datetime | None = None, hour: float | None = None) -> in
         if date_ is None:
             return failed
         hour = date_["hour"]
-    if qc.isvalid(hour) == failed:
+    if isvalid(hour) == failed:
         return failed
 
     if hour >= 24 or hour < 0:
@@ -192,7 +203,7 @@ def do_day_check(
     if (
         do_position_check(latitude, longitude) == 1
         or do_date_check(year=year, month=month, day=day) == 1
-        or do_time_check(hour) == 1
+        or do_time_check(hour=hour) == 1
     ):
         return failed
 
@@ -211,7 +222,7 @@ def do_day_check(
     #     return 0
 
     year2 = year
-    day2 = qc.dayinyear(year, month, day)
+    day2 = dayinyear(year, month, day)
     hour2 = math.floor(hour)
     minute2 = (hour - math.floor(hour)) * 60.0
 
@@ -222,7 +233,7 @@ def do_day_check(
         day2 = day2 - 1
         if day2 <= 0:
             year2 = year2 - 1
-            day2 = qc.dayinyear(year2, 12, 31)
+            day2 = dayinyear(year2, 12, 31)
 
     lat2 = latitude
     lon2 = longitude
@@ -231,7 +242,7 @@ def do_day_check(
     if longitude == 0:
         lon2 = 0.0001
 
-    azimuth, elevation, rta, hra, sid, dec = qc.sunangle(
+    azimuth, elevation, rta, hra, sid, dec = sunangle(
         year2, day2, hour2, minute2, 0, 0, 0, lat2, lon2
     )
     del azimuth
@@ -260,7 +271,7 @@ def do_missing_value_check(value: float) -> int:
     int
         1 if value is missing, 0 otherwise
     """
-    return qc.isvalid(value)
+    return isvalid(value)
 
 
 def do_anomaly_check(value: float, climatology: float, maximum_anomaly: float) -> int:
@@ -281,7 +292,7 @@ def do_anomaly_check(value: float, climatology: float, maximum_anomaly: float) -
     int
         1 if value anomaly is outside allowed bounds, 0 otherwise
     """
-    return qc.climatology_check(value, climatology, maximum_anomaly)
+    return climatology_check(value, climatology, maximum_anomaly)
 
 
 def do_no_normal_check(climatology: float | None) -> int:
@@ -298,7 +309,7 @@ def do_no_normal_check(climatology: float | None) -> int:
     int
         1 if climatology value is missing, 0 otherwise
     """
-    return qc.isvalid(climatology)
+    return isvalid(climatology)
 
 
 def do_hard_limit_check(value: float, hard_limits: list) -> int:
@@ -317,7 +328,7 @@ def do_hard_limit_check(value: float, hard_limits: list) -> int:
     int
         1 if air temperature is outside hard limits, 0 otherwise
     """
-    return qc.hard_limit_check(value, hard_limits)
+    return hard_limit_check(value, hard_limits)
 
 
 def do_climatology_plus_stdev_check(
@@ -353,7 +364,7 @@ def do_climatology_plus_stdev_check(
     int
         Returns 1 if standardised value anomaly is outside specified range, 0 otherwise.
     """
-    return qc.climatology_plus_stdev_check(
+    return climatology_plus_stdev_check(
         value,
         climatology,
         stdev,
@@ -395,7 +406,7 @@ def do_climatology_plus_stdev_plus_lowbar_check(
     int
         Returns 1 if standardised value anomaly is outside specified range, 0 otherwise.
     """
-    return qc.climatology_plus_stdev_with_lowbar_check(
+    return climatology_plus_stdev_with_lowbar_check(
         value,
         climatology,
         stdev,
@@ -420,7 +431,7 @@ def do_supersaturation_check(dpt: float, at2: float) -> int:
     int
         Set to 1 if supersaturation is detected, 0 otherwise
     """
-    if qc.isvalid(dpt) == failed or qc.isvalid(at2) == failed:
+    if isvalid(dpt) == failed or isvalid(at2) == failed:
         return failed
     elif dpt > at2:
         return failed
@@ -449,7 +460,7 @@ def do_sst_freeze_check(
     int
         Return 1 if SST below freezing, 0 otherwise
     """
-    return qc.sst_freeze_check(sst, 0.0, freezing_point, freeze_check_n_sigma)
+    return sst_freeze_check(sst, 0.0, freezing_point, freeze_check_n_sigma)
 
 
 def do_wind_consistency_check(
@@ -471,7 +482,7 @@ def do_wind_consistency_check(
     int
         1 if windspeed and direction are inconsistent, 0 otherwise
     """
-    if qc.isvalid(wind_speed) == failed or qc.isvalid(wind_direction) == failed:
+    if isvalid(wind_speed) == failed or isvalid(wind_direction) == failed:
         return failed
     if wind_speed == 0.0 and wind_direction != 0:
         return failed
