@@ -72,7 +72,28 @@ def testdata():
             )
 
         data_dict[table] = db_table
+
     return data_dict
+
+
+@pytest.fixture(scope="session")
+def climdata():
+    clim_dict = {}
+    clim_dict["SLP"] = {
+        "mean": load_file(
+            "metoffice_qc/external_files/SLP_pentad_climatology.nc",
+            cache_dir=".pytest_cache/metoffice_qc",
+            within_drs=False,
+            branch="qc_ext_files",
+        ),
+        "stdev": load_file(
+            "metoffice_qc/external_files/SLP_pentad_stdev_climatology.nc",
+            cache_dir=".pytest_cache/metoffice_qc",
+            within_drs=False,
+            branch="qc_ext_files",
+        ),
+    }
+    return clim_dict
 
 
 @pytest.mark.parametrize(
@@ -383,7 +404,7 @@ def test_do_air_temperature_climatology_plus_stdev_check(testdata):
     pd.testing.assert_series_equal(results, expected)
 
 
-def test_do_slp_climatology_plus_stdev_plus_lowbar_check(testdata):
+def test_do_slp_climatology_plus_stdev_plus_lowbar_check(testdata, climdata):
     db_ = testdata["observations-slp"].copy()
     db_.data["climatology"] = [
         1013.25,
