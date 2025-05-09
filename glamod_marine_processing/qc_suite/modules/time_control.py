@@ -8,8 +8,6 @@ from datetime import datetime, timedelta
 
 import numpy as np
 
-from .qc import failed, passed
-
 
 def month_match(
     y1: int,
@@ -33,12 +31,11 @@ def month_match(
     Returns
     -------
     int
-        Returns 1 if both `y1` and `y2` and `m1` and `m2` match, else 0.
+        Returns True if both `y1` and `y2` and `m1` and `m2` match, else False.
     """
     if y1 == y2 and m1 == m2:
-        return failed
-    else:
-        return passed
+        return True
+    return False
 
 
 def yesterday(

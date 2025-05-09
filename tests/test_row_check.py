@@ -940,10 +940,10 @@ def test_do_wind_consistency_check(wind_speed, wind_direction, expected):
 @pytest.mark.parametrize(
     "y1, m1, y2, m2, expected",
     [
-        (2024, 1, 2024, 1, qc.failed),
-        (2023, 1, 2024, 1, qc.passed),
-        (2024, 1, 2024, 2, qc.passed),
-        (2021, 12, 2025, 3, qc.passed),
+        (2024, 1, 2024, 1, True),
+        (2023, 1, 2024, 1, False),
+        (2024, 1, 2024, 2, False),
+        (2021, 12, 2025, 3, False),
     ],
 )
 def test_month_match(y1, m1, y2, m2, expected):
