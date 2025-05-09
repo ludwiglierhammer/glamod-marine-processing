@@ -97,7 +97,7 @@ def test_heading_north_from_pole_to_pole():
 def test_heading_north_from_pole_to_pole_on_different_headings():
     """Heading north from the southpole for an angular distance of pi takes you to the north pole"""
     for i in range(0, 100):
-        lat, lon = sg.lat_lon_from_course_and_distance(
+        lat, _lon = sg.lat_lon_from_course_and_distance(
             -90.0, 0.0, i * 360.0 / 100.0, np.pi * sg.earths_radius
         )
         assert lat == 90.0
@@ -175,6 +175,7 @@ def test_equator_is_halfway_from_pole_to_pole():
 def test_that_5deg_is_one_72th_of_equator():
     """Test that 5degrees is one eighteenth of 90degrees around the equator"""
     lat, lon = sg.intermediate_point(0.0, 0.0, 0.0, 90.0, 1.0 / 18.0)
+    assert lat == 0.0
     assert pytest.approx(lon, 0.0000001) == 5.0
 
 

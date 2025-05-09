@@ -1,10 +1,11 @@
+"""Module containing QC functions for track checking which could be applied on a DataBundle."""
+
 from __future__ import annotations
 
 import numpy as np
 import pandas as pd
 
 import glamod_marine_processing.qc_suite.modules.icoads_identify as icoads_identify
-import glamod_marine_processing.qc_suite.modules.qc as qc
 import glamod_marine_processing.qc_suite.modules.spherical_geometry as sg
 import glamod_marine_processing.qc_suite.modules.time_control as time_control
 import glamod_marine_processing.qc_suite.modules.track_check as tc
@@ -515,7 +516,7 @@ def track_check(df: pd.DataFrame) -> pd.DataFrame:
     modal_speed = tc.modesp(df.speed)
 
     # set speed limits based on modal speed
-    amax, amaxx, amin = tc.set_speed_limits(modal_speed)
+    amax, _amaxx, _amin = tc.set_speed_limits(modal_speed)
 
     # compare reported speeds and positions if we have them
     forward_diff_from_estimated = forward_discrepancy(df)
