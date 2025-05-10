@@ -1490,78 +1490,17 @@ def test_sd_with_trim():
 @pytest.fixture
 def reps1():
     # stationary drifter
+    # fmt: off
     vals1 = [
-        {
-            "ID": "AAAAAAAAA",
-            "YR": 2003,
-            "MO": 12,
-            "DY": 1,
-            "HR": 12,
-            "LAT": 0.0,
-            "LON": 0.0,
-            "SST": 5.0,
-        },
-        {
-            "ID": "AAAAAAAAA",
-            "YR": 2003,
-            "MO": 12,
-            "DY": 2,
-            "HR": 12,
-            "LAT": 0.0,
-            "LON": 0.0,
-            "SST": 5.0,
-        },
-        {
-            "ID": "AAAAAAAAA",
-            "YR": 2003,
-            "MO": 12,
-            "DY": 3,
-            "HR": 12,
-            "LAT": 0.0,
-            "LON": 0.0,
-            "SST": 5.0,
-        },
-        {
-            "ID": "AAAAAAAAA",
-            "YR": 2003,
-            "MO": 12,
-            "DY": 4,
-            "HR": 12,
-            "LAT": 0.0,
-            "LON": 0.0,
-            "SST": 5.0,
-        },
-        {
-            "ID": "AAAAAAAAA",
-            "YR": 2003,
-            "MO": 12,
-            "DY": 5,
-            "HR": 12,
-            "LAT": 0.0,
-            "LON": 0.0,
-            "SST": 5.0,
-        },
-        {
-            "ID": "AAAAAAAAA",
-            "YR": 2003,
-            "MO": 12,
-            "DY": 6,
-            "HR": 12,
-            "LAT": 0.0,
-            "LON": 0.0,
-            "SST": 5.0,
-        },
-        {
-            "ID": "AAAAAAAAA",
-            "YR": 2003,
-            "MO": 12,
-            "DY": 7,
-            "HR": 12,
-            "LAT": 0.0,
-            "LON": 0.0,
-            "SST": 5.0,
-        },
+        {"ID": "AAAAAAAAA", "YR": 2003, "MO": 12, "DY": 1, "HR": 12, "LAT": 0.0, "LON": 0.0, "SST": 5.0, },
+        {"ID": "AAAAAAAAA", "YR": 2003, "MO": 12, "DY": 2, "HR": 12, "LAT": 0.0, "LON": 0.0, "SST": 5.0, },
+        {"ID": "AAAAAAAAA", "YR": 2003, "MO": 12, "DY": 3, "HR": 12, "LAT": 0.0, "LON": 0.0, "SST": 5.0, },
+        {"ID": "AAAAAAAAA", "YR": 2003, "MO": 12, "DY": 4, "HR": 12, "LAT": 0.0, "LON": 0.0, "SST": 5.0, },
+        {"ID": "AAAAAAAAA", "YR": 2003, "MO": 12, "DY": 5, "HR": 12, "LAT": 0.0, "LON": 0.0, "SST": 5.0, },
+        {"ID": "AAAAAAAAA", "YR": 2003, "MO": 12, "DY": 6, "HR": 12, "LAT": 0.0, "LON": 0.0, "SST": 5.0, },
+        {"ID": "AAAAAAAAA", "YR": 2003, "MO": 12, "DY": 7, "HR": 12, "LAT": 0.0, "LON": 0.0, "SST": 5.0, },
     ]
+    # fmt: on
 
     reps = ex.Voyage()
 
@@ -1585,78 +1524,17 @@ def test_stationary_b(reps1):
 @pytest.fixture
 def reps2():
     # stationary drifter (artificial 'jitter' spikes)
+    # fmt: off
     vals2 = [
-        {
-            "ID": "AAAAAAAAA",
-            "YR": 2003,
-            "MO": 12,
-            "DY": 1,
-            "HR": 12,
-            "LAT": 0.0,
-            "LON": 0.0,
-            "SST": 5.0,
-        },
-        {
-            "ID": "AAAAAAAAA",
-            "YR": 2003,
-            "MO": 12,
-            "DY": 2,
-            "HR": 12,
-            "LAT": 0.0,
-            "LON": 0.0,
-            "SST": 5.0,
-        },
-        {
-            "ID": "AAAAAAAAA",
-            "YR": 2003,
-            "MO": 12,
-            "DY": 3,
-            "HR": 12,
-            "LAT": 1.0,
-            "LON": 0.0,
-            "SST": 5.0,
-        },
-        {
-            "ID": "AAAAAAAAA",
-            "YR": 2003,
-            "MO": 12,
-            "DY": 4,
-            "HR": 12,
-            "LAT": 0.0,
-            "LON": 0.0,
-            "SST": 5.0,
-        },
-        {
-            "ID": "AAAAAAAAA",
-            "YR": 2003,
-            "MO": 12,
-            "DY": 5,
-            "HR": 12,
-            "LAT": 0.0,
-            "LON": 1.0,
-            "SST": 5.0,
-        },
-        {
-            "ID": "AAAAAAAAA",
-            "YR": 2003,
-            "MO": 12,
-            "DY": 6,
-            "HR": 12,
-            "LAT": 0.0,
-            "LON": 0.0,
-            "SST": 5.0,
-        },
-        {
-            "ID": "AAAAAAAAA",
-            "YR": 2003,
-            "MO": 12,
-            "DY": 7,
-            "HR": 12,
-            "LAT": 0.0,
-            "LON": 0.0,
-            "SST": 5.0,
-        },
+        {"ID": "AAAAAAAAA", "YR": 2003, "MO": 12, "DY": 1, "HR": 12, "LAT": 0.0, "LON": 0.0, "SST": 5.0, },
+        {"ID": "AAAAAAAAA", "YR": 2003, "MO": 12, "DY": 2, "HR": 12, "LAT": 0.0, "LON": 0.0, "SST": 5.0, },
+        {"ID": "AAAAAAAAA", "YR": 2003, "MO": 12, "DY": 3, "HR": 12, "LAT": 1.0, "LON": 0.0, "SST": 5.0, },
+        {"ID": "AAAAAAAAA", "YR": 2003, "MO": 12, "DY": 4, "HR": 12, "LAT": 0.0, "LON": 0.0, "SST": 5.0, },
+        {"ID": "AAAAAAAAA", "YR": 2003, "MO": 12, "DY": 5, "HR": 12, "LAT": 0.0, "LON": 1.0, "SST": 5.0, },
+        {"ID": "AAAAAAAAA", "YR": 2003, "MO": 12, "DY": 6, "HR": 12, "LAT": 0.0, "LON": 0.0, "SST": 5.0, },
+        {"ID": "AAAAAAAAA", "YR": 2003, "MO": 12, "DY": 7, "HR": 12, "LAT": 0.0, "LON": 0.0, "SST": 5.0, },
     ]
+    # fmt: on
     reps = ex.Voyage()
     for v in vals2:
         rec = IMMA()
@@ -1678,78 +1556,17 @@ def test_stationary_jitter_spikes(reps2):
 @pytest.fixture
 def reps3():
     # stationary drifter (artificial 'jitter' which won't be fully smoothed and outside tolerance)
+    # fmt: off
     vals3 = [
-        {
-            "ID": "AAAAAAAAA",
-            "YR": 2003,
-            "MO": 12,
-            "DY": 1,
-            "HR": 12,
-            "LAT": 0.0,
-            "LON": 0.0,
-            "SST": 5.0,
-        },
-        {
-            "ID": "AAAAAAAAA",
-            "YR": 2003,
-            "MO": 12,
-            "DY": 2,
-            "HR": 12,
-            "LAT": 0.0,
-            "LON": 0.0,
-            "SST": 5.0,
-        },
-        {
-            "ID": "AAAAAAAAA",
-            "YR": 2003,
-            "MO": 12,
-            "DY": 3,
-            "HR": 12,
-            "LAT": 1.0,
-            "LON": 0.0,
-            "SST": 5.0,
-        },
-        {
-            "ID": "AAAAAAAAA",
-            "YR": 2003,
-            "MO": 12,
-            "DY": 4,
-            "HR": 12,
-            "LAT": 1.0,
-            "LON": 0.0,
-            "SST": 5.0,
-        },
-        {
-            "ID": "AAAAAAAAA",
-            "YR": 2003,
-            "MO": 12,
-            "DY": 5,
-            "HR": 12,
-            "LAT": 0.0,
-            "LON": 0.0,
-            "SST": 5.0,
-        },
-        {
-            "ID": "AAAAAAAAA",
-            "YR": 2003,
-            "MO": 12,
-            "DY": 6,
-            "HR": 12,
-            "LAT": 0.0,
-            "LON": 0.0,
-            "SST": 5.0,
-        },
-        {
-            "ID": "AAAAAAAAA",
-            "YR": 2003,
-            "MO": 12,
-            "DY": 7,
-            "HR": 12,
-            "LAT": 0.0,
-            "LON": 0.0,
-            "SST": 5.0,
-        },
+        {"ID": "AAAAAAAAA", "YR": 2003, "MO": 12, "DY": 1, "HR": 12, "LAT": 0.0, "LON": 0.0, "SST": 5.0, },
+        {"ID": "AAAAAAAAA", "YR": 2003, "MO": 12, "DY": 2, "HR": 12, "LAT": 0.0, "LON": 0.0, "SST": 5.0, },
+        {"ID": "AAAAAAAAA", "YR": 2003, "MO": 12, "DY": 3, "HR": 12, "LAT": 1.0, "LON": 0.0, "SST": 5.0, },
+        {"ID": "AAAAAAAAA", "YR": 2003, "MO": 12, "DY": 4, "HR": 12, "LAT": 1.0, "LON": 0.0, "SST": 5.0, },
+        {"ID": "AAAAAAAAA", "YR": 2003, "MO": 12, "DY": 5, "HR": 12, "LAT": 0.0, "LON": 0.0, "SST": 5.0, },
+        {"ID": "AAAAAAAAA", "YR": 2003, "MO": 12, "DY": 6, "HR": 12, "LAT": 0.0, "LON": 0.0, "SST": 5.0, },
+        {"ID": "AAAAAAAAA", "YR": 2003, "MO": 12, "DY": 7, "HR": 12, "LAT": 0.0, "LON": 0.0, "SST": 5.0, },
     ]
+    # fmt: on
     reps = ex.Voyage()
 
     for v in vals3:
@@ -1772,78 +1589,17 @@ def test_stationary_big_remaining_jitter(reps3):
 @pytest.fixture
 def reps4():
     # stationary drifter (artificial 'jitter' which won't be fully smoothed and within tolerance)
+    # fmt: off
     vals4 = [
-        {
-            "ID": "AAAAAAAAA",
-            "YR": 2003,
-            "MO": 12,
-            "DY": 1,
-            "HR": 12,
-            "LAT": 0.0,
-            "LON": 0.0,
-            "SST": 5.0,
-        },
-        {
-            "ID": "AAAAAAAAA",
-            "YR": 2003,
-            "MO": 12,
-            "DY": 2,
-            "HR": 12,
-            "LAT": 0.0,
-            "LON": 0.0,
-            "SST": 5.0,
-        },
-        {
-            "ID": "AAAAAAAAA",
-            "YR": 2003,
-            "MO": 12,
-            "DY": 3,
-            "HR": 12,
-            "LAT": 0.01,
-            "LON": 0.01,
-            "SST": 5.0,
-        },
-        {
-            "ID": "AAAAAAAAA",
-            "YR": 2003,
-            "MO": 12,
-            "DY": 4,
-            "HR": 12,
-            "LAT": 0.01,
-            "LON": 0.01,
-            "SST": 5.0,
-        },
-        {
-            "ID": "AAAAAAAAA",
-            "YR": 2003,
-            "MO": 12,
-            "DY": 5,
-            "HR": 12,
-            "LAT": 0.0,
-            "LON": 0.0,
-            "SST": 5.0,
-        },
-        {
-            "ID": "AAAAAAAAA",
-            "YR": 2003,
-            "MO": 12,
-            "DY": 6,
-            "HR": 12,
-            "LAT": 0.0,
-            "LON": 0.0,
-            "SST": 5.0,
-        },
-        {
-            "ID": "AAAAAAAAA",
-            "YR": 2003,
-            "MO": 12,
-            "DY": 7,
-            "HR": 12,
-            "LAT": 0.0,
-            "LON": 0.0,
-            "SST": 5.0,
-        },
+        {"ID": "AAAAAAAAA", "YR": 2003, "MO": 12, "DY": 1, "HR": 12, "LAT": 0.0, "LON": 0.0, "SST": 5.0, },
+        {"ID": "AAAAAAAAA", "YR": 2003, "MO": 12, "DY": 2, "HR": 12, "LAT": 0.0, "LON": 0.0, "SST": 5.0, },
+        {"ID": "AAAAAAAAA", "YR": 2003, "MO": 12, "DY": 3, "HR": 12, "LAT": 0.01, "LON": 0.01, "SST": 5.0, },
+        {"ID": "AAAAAAAAA", "YR": 2003, "MO": 12, "DY": 4, "HR": 12, "LAT": 0.01, "LON": 0.01, "SST": 5.0, },
+        {"ID": "AAAAAAAAA", "YR": 2003, "MO": 12, "DY": 5, "HR": 12, "LAT": 0.0, "LON": 0.0, "SST": 5.0, },
+        {"ID": "AAAAAAAAA", "YR": 2003, "MO": 12, "DY": 6, "HR": 12, "LAT": 0.0, "LON": 0.0, "SST": 5.0, },
+        {"ID": "AAAAAAAAA", "YR": 2003, "MO": 12, "DY": 7, "HR": 12, "LAT": 0.0, "LON": 0.0, "SST": 5.0, },
     ]
+    # fmt: on
     reps = ex.Voyage()
     for v in vals4:
         rec = IMMA()
@@ -1865,79 +1621,17 @@ def test_stationary_small_remaining_jitter(reps4):
 @pytest.fixture
 def reps5():
     # moving drifter (going west)
+    # fmt: off
     vals5 = [
-        {
-            "ID": "AAAAAAAAA",
-            "YR": 2003,
-            "MO": 12,
-            "DY": 1,
-            "HR": 12,
-            "LAT": 0.0,
-            "LON": 0.0,
-            "SST": 5.0,
-        },
-        {
-            "ID": "AAAAAAAAA",
-            "YR": 2003,
-            "MO": 12,
-            "DY": 2,
-            "HR": 12,
-            "LAT": 0.0,
-            "LON": -0.02,
-            "SST": 5.0,
-        },
-        {
-            "ID": "AAAAAAAAA",
-            "YR": 2003,
-            "MO": 12,
-            "DY": 3,
-            "HR": 12,
-            "LAT": 0.0,
-            "LON": -0.04,
-            "SST": 5.0,
-        },
-        {
-            "ID": "AAAAAAAAA",
-            "YR": 2003,
-            "MO": 12,
-            "DY": 4,
-            "HR": 12,
-            "LAT": 0.0,
-            "LON": -0.06,
-            "SST": 5.0,
-        },
-        {
-            "ID": "AAAAAAAAA",
-            "YR": 2003,
-            "MO": 12,
-            "DY": 5,
-            "HR": 12,
-            "LAT": 0.0,
-            "LON": -0.08,
-            "SST": 5.0,
-        },
-        {
-            "ID": "AAAAAAAAA",
-            "YR": 2003,
-            "MO": 12,
-            "DY": 6,
-            "HR": 12,
-            "LAT": 0.0,
-            "LON": -0.10,
-            "SST": 5.0,
-        },
-        {
-            "ID": "AAAAAAAAA",
-            "YR": 2003,
-            "MO": 12,
-            "DY": 7,
-            "HR": 12,
-            "LAT": 0.0,
-            "LON": -0.12,
-            "SST": 5.0,
-        },
+        {"ID": "AAAAAAAAA", "YR": 2003, "MO": 12, "DY": 1, "HR": 12, "LAT": 0.0, "LON": 0.0, "SST": 5.0, },
+        {"ID": "AAAAAAAAA", "YR": 2003, "MO": 12, "DY": 2, "HR": 12, "LAT": 0.0, "LON": -0.02, "SST": 5.0, },
+        {"ID": "AAAAAAAAA", "YR": 2003, "MO": 12, "DY": 3, "HR": 12, "LAT": 0.0, "LON": -0.04, "SST": 5.0, },
+        {"ID": "AAAAAAAAA", "YR": 2003, "MO": 12, "DY": 4, "HR": 12, "LAT": 0.0, "LON": -0.06, "SST": 5.0, },
+        {"ID": "AAAAAAAAA", "YR": 2003, "MO": 12, "DY": 5, "HR": 12, "LAT": 0.0, "LON": -0.08, "SST": 5.0, },
+        {"ID": "AAAAAAAAA", "YR": 2003, "MO": 12, "DY": 6, "HR": 12, "LAT": 0.0, "LON": -0.10, "SST": 5.0, },
+        {"ID": "AAAAAAAAA", "YR": 2003, "MO": 12, "DY": 7, "HR": 12, "LAT": 0.0, "LON": -0.12, "SST": 5.0, },
     ]
-
+    # fmt: on
     reps = ex.Voyage()
     for v in vals5:
         rec = IMMA()
@@ -1959,79 +1653,17 @@ def test_moving_west(reps5):
 @pytest.fixture
 def reps6():
     # moving drifter (going north)
+    # fmt: off
     vals6 = [
-        {
-            "ID": "AAAAAAAAA",
-            "YR": 2003,
-            "MO": 12,
-            "DY": 1,
-            "HR": 12,
-            "LAT": 0.0,
-            "LON": 0.0,
-            "SST": 5.0,
-        },
-        {
-            "ID": "AAAAAAAAA",
-            "YR": 2003,
-            "MO": 12,
-            "DY": 2,
-            "HR": 12,
-            "LAT": 0.02,
-            "LON": 0.0,
-            "SST": 5.0,
-        },
-        {
-            "ID": "AAAAAAAAA",
-            "YR": 2003,
-            "MO": 12,
-            "DY": 3,
-            "HR": 12,
-            "LAT": 0.04,
-            "LON": 0.0,
-            "SST": 5.0,
-        },
-        {
-            "ID": "AAAAAAAAA",
-            "YR": 2003,
-            "MO": 12,
-            "DY": 4,
-            "HR": 12,
-            "LAT": 0.06,
-            "LON": 0.0,
-            "SST": 5.0,
-        },
-        {
-            "ID": "AAAAAAAAA",
-            "YR": 2003,
-            "MO": 12,
-            "DY": 5,
-            "HR": 12,
-            "LAT": 0.08,
-            "LON": 0.0,
-            "SST": 5.0,
-        },
-        {
-            "ID": "AAAAAAAAA",
-            "YR": 2003,
-            "MO": 12,
-            "DY": 6,
-            "HR": 12,
-            "LAT": 0.10,
-            "LON": 0.0,
-            "SST": 5.0,
-        },
-        {
-            "ID": "AAAAAAAAA",
-            "YR": 2003,
-            "MO": 12,
-            "DY": 7,
-            "HR": 12,
-            "LAT": 0.12,
-            "LON": 0.0,
-            "SST": 5.0,
-        },
+        {"ID": "AAAAAAAAA", "YR": 2003, "MO": 12, "DY": 1, "HR": 12, "LAT": 0.0, "LON": 0.0, "SST": 5.0, },
+        {"ID": "AAAAAAAAA", "YR": 2003, "MO": 12, "DY": 2, "HR": 12, "LAT": 0.02, "LON": 0.0, "SST": 5.0, },
+        {"ID": "AAAAAAAAA", "YR": 2003, "MO": 12, "DY": 3, "HR": 12, "LAT": 0.04, "LON": 0.0, "SST": 5.0, },
+        {"ID": "AAAAAAAAA", "YR": 2003, "MO": 12, "DY": 4, "HR": 12, "LAT": 0.06, "LON": 0.0, "SST": 5.0, },
+        {"ID": "AAAAAAAAA", "YR": 2003, "MO": 12, "DY": 5, "HR": 12, "LAT": 0.08, "LON": 0.0, "SST": 5.0, },
+        {"ID": "AAAAAAAAA", "YR": 2003, "MO": 12, "DY": 6, "HR": 12, "LAT": 0.10, "LON": 0.0, "SST": 5.0, },
+        {"ID": "AAAAAAAAA", "YR": 2003, "MO": 12, "DY": 7, "HR": 12, "LAT": 0.12, "LON": 0.0, "SST": 5.0, },
     ]
-
+    # fmt: on
     reps = ex.Voyage()
     for v in vals6:
         rec = IMMA()
@@ -2053,78 +1685,17 @@ def test_moving_north(reps6):
 @pytest.fixture
 def reps7():
     # runs aground (drifter going north then stops)
+    # fmt: off
     vals7 = [
-        {
-            "ID": "AAAAAAAAA",
-            "YR": 2003,
-            "MO": 12,
-            "DY": 1,
-            "HR": 12,
-            "LAT": 0.0,
-            "LON": 0.0,
-            "SST": 5.0,
-        },
-        {
-            "ID": "AAAAAAAAA",
-            "YR": 2003,
-            "MO": 12,
-            "DY": 2,
-            "HR": 12,
-            "LAT": 0.02,
-            "LON": 0.0,
-            "SST": 5.0,
-        },
-        {
-            "ID": "AAAAAAAAA",
-            "YR": 2003,
-            "MO": 12,
-            "DY": 3,
-            "HR": 12,
-            "LAT": 0.04,
-            "LON": 0.0,
-            "SST": 5.0,
-        },
-        {
-            "ID": "AAAAAAAAA",
-            "YR": 2003,
-            "MO": 12,
-            "DY": 4,
-            "HR": 12,
-            "LAT": 0.06,
-            "LON": 0.0,
-            "SST": 5.0,
-        },
-        {
-            "ID": "AAAAAAAAA",
-            "YR": 2003,
-            "MO": 12,
-            "DY": 5,
-            "HR": 12,
-            "LAT": 0.08,
-            "LON": 0.0,
-            "SST": 5.0,
-        },
-        {
-            "ID": "AAAAAAAAA",
-            "YR": 2003,
-            "MO": 12,
-            "DY": 6,
-            "HR": 12,
-            "LAT": 0.08,
-            "LON": 0.0,
-            "SST": 5.0,
-        },
-        {
-            "ID": "AAAAAAAAA",
-            "YR": 2003,
-            "MO": 12,
-            "DY": 7,
-            "HR": 12,
-            "LAT": 0.08,
-            "LON": 0.0,
-            "SST": 5.0,
-        },
+        {"ID": "AAAAAAAAA", "YR": 2003, "MO": 12, "DY": 1, "HR": 12, "LAT": 0.0, "LON": 0.0, "SST": 5.0, },
+        {"ID": "AAAAAAAAA", "YR": 2003, "MO": 12, "DY": 2, "HR": 12, "LAT": 0.02, "LON": 0.0, "SST": 5.0, },
+        {"ID": "AAAAAAAAA", "YR": 2003, "MO": 12, "DY": 3, "HR": 12, "LAT": 0.04, "LON": 0.0, "SST": 5.0, },
+        {"ID": "AAAAAAAAA", "YR": 2003, "MO": 12, "DY": 4, "HR": 12, "LAT": 0.06, "LON": 0.0, "SST": 5.0, },
+        {"ID": "AAAAAAAAA", "YR": 2003, "MO": 12, "DY": 5, "HR": 12, "LAT": 0.08, "LON": 0.0, "SST": 5.0, },
+        {"ID": "AAAAAAAAA", "YR": 2003, "MO": 12, "DY": 6, "HR": 12, "LAT": 0.08, "LON": 0.0, "SST": 5.0, },
+        {"ID": "AAAAAAAAA", "YR": 2003, "MO": 12, "DY": 7, "HR": 12, "LAT": 0.08, "LON": 0.0, "SST": 5.0, },
     ]
+    # fmt: on
     reps = ex.Voyage()
     for v in vals7:
         rec = IMMA()
@@ -2145,79 +1716,17 @@ def test_moving_north_then_stop(reps7):
 @pytest.fixture
 def reps8():
     # stationary drifter (high frequency sampling prevents detection)
+    # fmt: off
     vals8 = [
-        {
-            "ID": "AAAAAAAAA",
-            "YR": 2003,
-            "MO": 12,
-            "DY": 1,
-            "HR": 1,
-            "LAT": 0.0,
-            "LON": 0.0,
-            "SST": 5.0,
-        },
-        {
-            "ID": "AAAAAAAAA",
-            "YR": 2003,
-            "MO": 12,
-            "DY": 1,
-            "HR": 2,
-            "LAT": 0.0,
-            "LON": 0.0,
-            "SST": 5.0,
-        },
-        {
-            "ID": "AAAAAAAAA",
-            "YR": 2003,
-            "MO": 12,
-            "DY": 1,
-            "HR": 3,
-            "LAT": 0.0,
-            "LON": 0.0,
-            "SST": 5.0,
-        },
-        {
-            "ID": "AAAAAAAAA",
-            "YR": 2003,
-            "MO": 12,
-            "DY": 1,
-            "HR": 4,
-            "LAT": 0.0,
-            "LON": 0.0,
-            "SST": 5.0,
-        },
-        {
-            "ID": "AAAAAAAAA",
-            "YR": 2003,
-            "MO": 12,
-            "DY": 1,
-            "HR": 5,
-            "LAT": 0.0,
-            "LON": 0.0,
-            "SST": 5.0,
-        },
-        {
-            "ID": "AAAAAAAAA",
-            "YR": 2003,
-            "MO": 12,
-            "DY": 1,
-            "HR": 6,
-            "LAT": 0.0,
-            "LON": 0.0,
-            "SST": 5.0,
-        },
-        {
-            "ID": "AAAAAAAAA",
-            "YR": 2003,
-            "MO": 12,
-            "DY": 1,
-            "HR": 7,
-            "LAT": 0.0,
-            "LON": 0.0,
-            "SST": 5.0,
-        },
+        {"ID": "AAAAAAAAA", "YR": 2003, "MO": 12, "DY": 1, "HR": 1, "LAT": 0.0, "LON": 0.0, "SST": 5.0, },
+        {"ID": "AAAAAAAAA", "YR": 2003, "MO": 12, "DY": 1, "HR": 2, "LAT": 0.0, "LON": 0.0, "SST": 5.0, },
+        {"ID": "AAAAAAAAA", "YR": 2003, "MO": 12, "DY": 1, "HR": 3, "LAT": 0.0, "LON": 0.0, "SST": 5.0, },
+        {"ID": "AAAAAAAAA", "YR": 2003, "MO": 12, "DY": 1, "HR": 4, "LAT": 0.0, "LON": 0.0, "SST": 5.0, },
+        {"ID": "AAAAAAAAA", "YR": 2003, "MO": 12, "DY": 1, "HR": 5, "LAT": 0.0, "LON": 0.0, "SST": 5.0, },
+        {"ID": "AAAAAAAAA", "YR": 2003, "MO": 12, "DY": 1, "HR": 6, "LAT": 0.0, "LON": 0.0, "SST": 5.0, },
+        {"ID": "AAAAAAAAA", "YR": 2003, "MO": 12, "DY": 1, "HR": 7, "LAT": 0.0, "LON": 0.0, "SST": 5.0, },
     ]
-
+    # fmt: on
     reps = ex.Voyage()
     for v in vals8:
         rec = IMMA()
@@ -2239,78 +1748,17 @@ def test_stationary_high_freq_sampling(reps8):
 @pytest.fixture
 def reps9():
     # stationary drifter (low frequency sampling prevents detection)
+    # fmt: off
     vals9 = [
-        {
-            "ID": "AAAAAAAAA",
-            "YR": 2003,
-            "MO": 12,
-            "DY": 1,
-            "HR": 12,
-            "LAT": 0.0,
-            "LON": 0.0,
-            "SST": 5.0,
-        },
-        {
-            "ID": "AAAAAAAAA",
-            "YR": 2003,
-            "MO": 12,
-            "DY": 4,
-            "HR": 12,
-            "LAT": 0.0,
-            "LON": 0.0,
-            "SST": 5.0,
-        },
-        {
-            "ID": "AAAAAAAAA",
-            "YR": 2003,
-            "MO": 12,
-            "DY": 7,
-            "HR": 12,
-            "LAT": 0.0,
-            "LON": 0.0,
-            "SST": 5.0,
-        },
-        {
-            "ID": "AAAAAAAAA",
-            "YR": 2003,
-            "MO": 12,
-            "DY": 10,
-            "HR": 12,
-            "LAT": 0.0,
-            "LON": 0.0,
-            "SST": 5.0,
-        },
-        {
-            "ID": "AAAAAAAAA",
-            "YR": 2003,
-            "MO": 12,
-            "DY": 13,
-            "HR": 12,
-            "LAT": 0.0,
-            "LON": 0.0,
-            "SST": 5.0,
-        },
-        {
-            "ID": "AAAAAAAAA",
-            "YR": 2003,
-            "MO": 12,
-            "DY": 16,
-            "HR": 12,
-            "LAT": 0.0,
-            "LON": 0.0,
-            "SST": 5.0,
-        },
-        {
-            "ID": "AAAAAAAAA",
-            "YR": 2003,
-            "MO": 12,
-            "DY": 19,
-            "HR": 12,
-            "LAT": 0.0,
-            "LON": 0.0,
-            "SST": 5.0,
-        },
+        {"ID": "AAAAAAAAA", "YR": 2003, "MO": 12, "DY": 1, "HR": 12, "LAT": 0.0, "LON": 0.0, "SST": 5.0, },
+        {"ID": "AAAAAAAAA", "YR": 2003, "MO": 12, "DY": 4, "HR": 12, "LAT": 0.0, "LON": 0.0, "SST": 5.0, },
+        {"ID": "AAAAAAAAA", "YR": 2003, "MO": 12, "DY": 7, "HR": 12, "LAT": 0.0, "LON": 0.0, "SST": 5.0, },
+        {"ID": "AAAAAAAAA", "YR": 2003, "MO": 12, "DY": 10, "HR": 12, "LAT": 0.0, "LON": 0.0, "SST": 5.0, },
+        {"ID": "AAAAAAAAA", "YR": 2003, "MO": 12, "DY": 13, "HR": 12, "LAT": 0.0, "LON": 0.0, "SST": 5.0, },
+        {"ID": "AAAAAAAAA", "YR": 2003, "MO": 12, "DY": 16, "HR": 12, "LAT": 0.0, "LON": 0.0, "SST": 5.0, },
+        {"ID": "AAAAAAAAA", "YR": 2003, "MO": 12, "DY": 19, "HR": 12, "LAT": 0.0, "LON": 0.0, "SST": 5.0, },
     ]
+    # fmt: on
     reps = ex.Voyage()
     for v in vals9:
         rec = IMMA()
@@ -2332,79 +1780,17 @@ def test_stationary_low_freq_sampling(reps9):
 @pytest.fixture
 def reps10():
     # stationary drifter (mid frequency sampling enables detection)
+    # fmt: off
     vals10 = [
-        {
-            "ID": "AAAAAAAAA",
-            "YR": 2003,
-            "MO": 12,
-            "DY": 1,
-            "HR": 12,
-            "LAT": 0.0,
-            "LON": 0.0,
-            "SST": 5.0,
-        },
-        {
-            "ID": "AAAAAAAAA",
-            "YR": 2003,
-            "MO": 12,
-            "DY": 3,
-            "HR": 0,
-            "LAT": 0.0,
-            "LON": 0.0,
-            "SST": 5.0,
-        },
-        {
-            "ID": "AAAAAAAAA",
-            "YR": 2003,
-            "MO": 12,
-            "DY": 4,
-            "HR": 12,
-            "LAT": 0.0,
-            "LON": 0.0,
-            "SST": 5.0,
-        },
-        {
-            "ID": "AAAAAAAAA",
-            "YR": 2003,
-            "MO": 12,
-            "DY": 6,
-            "HR": 0,
-            "LAT": 0.0,
-            "LON": 0.0,
-            "SST": 5.0,
-        },
-        {
-            "ID": "AAAAAAAAA",
-            "YR": 2003,
-            "MO": 12,
-            "DY": 7,
-            "HR": 12,
-            "LAT": 0.0,
-            "LON": 0.0,
-            "SST": 5.0,
-        },
-        {
-            "ID": "AAAAAAAAA",
-            "YR": 2003,
-            "MO": 12,
-            "DY": 9,
-            "HR": 0,
-            "LAT": 0.0,
-            "LON": 0.0,
-            "SST": 5.0,
-        },
-        {
-            "ID": "AAAAAAAAA",
-            "YR": 2003,
-            "MO": 12,
-            "DY": 10,
-            "HR": 12,
-            "LAT": 0.0,
-            "LON": 0.0,
-            "SST": 5.0,
-        },
+        {"ID": "AAAAAAAAA", "YR": 2003, "MO": 12, "DY": 1, "HR": 12, "LAT": 0.0, "LON": 0.0, "SST": 5.0, },
+        {"ID": "AAAAAAAAA", "YR": 2003, "MO": 12, "DY": 3, "HR": 0, "LAT": 0.0, "LON": 0.0, "SST": 5.0, },
+        {"ID": "AAAAAAAAA", "YR": 2003, "MO": 12, "DY": 4, "HR": 12, "LAT": 0.0, "LON": 0.0, "SST": 5.0, },
+        {"ID": "AAAAAAAAA", "YR": 2003, "MO": 12, "DY": 6, "HR": 0, "LAT": 0.0, "LON": 0.0, "SST": 5.0, },
+        {"ID": "AAAAAAAAA", "YR": 2003, "MO": 12, "DY": 7, "HR": 12, "LAT": 0.0, "LON": 0.0, "SST": 5.0, },
+        {"ID": "AAAAAAAAA", "YR": 2003, "MO": 12, "DY": 9, "HR": 0, "LAT": 0.0, "LON": 0.0, "SST": 5.0, },
+        {"ID": "AAAAAAAAA", "YR": 2003, "MO": 12, "DY": 10, "HR": 12, "LAT": 0.0, "LON": 0.0, "SST": 5.0, },
     ]
-
+    # fmt: on
     reps = ex.Voyage()
 
     for v in vals10:
@@ -2427,79 +1813,17 @@ def test_stationary_mid_freq_sampling(reps10):
 @pytest.fixture
 def reps11():
     # stationary drifter (changed sampling prevents early detection)
+    # fmt: off
     vals11 = [
-        {
-            "ID": "AAAAAAAAA",
-            "YR": 2003,
-            "MO": 12,
-            "DY": 1,
-            "HR": 12,
-            "LAT": 0.0,
-            "LON": 0.0,
-            "SST": 5.0,
-        },
-        {
-            "ID": "AAAAAAAAA",
-            "YR": 2003,
-            "MO": 12,
-            "DY": 4,
-            "HR": 12,
-            "LAT": 0.0,
-            "LON": 0.0,
-            "SST": 5.0,
-        },
-        {
-            "ID": "AAAAAAAAA",
-            "YR": 2003,
-            "MO": 12,
-            "DY": 7,
-            "HR": 12,
-            "LAT": 0.0,
-            "LON": 0.0,
-            "SST": 5.0,
-        },
-        {
-            "ID": "AAAAAAAAA",
-            "YR": 2003,
-            "MO": 12,
-            "DY": 8,
-            "HR": 12,
-            "LAT": 0.0,
-            "LON": 0.0,
-            "SST": 5.0,
-        },
-        {
-            "ID": "AAAAAAAAA",
-            "YR": 2003,
-            "MO": 12,
-            "DY": 9,
-            "HR": 12,
-            "LAT": 0.0,
-            "LON": 0.0,
-            "SST": 5.0,
-        },
-        {
-            "ID": "AAAAAAAAA",
-            "YR": 2003,
-            "MO": 12,
-            "DY": 10,
-            "HR": 12,
-            "LAT": 0.0,
-            "LON": 0.0,
-            "SST": 5.0,
-        },
-        {
-            "ID": "AAAAAAAAA",
-            "YR": 2003,
-            "MO": 12,
-            "DY": 11,
-            "HR": 12,
-            "LAT": 0.0,
-            "LON": 0.0,
-            "SST": 5.0,
-        },
+        {"ID": "AAAAAAAAA", "YR": 2003, "MO": 12, "DY": 1, "HR": 12, "LAT": 0.0, "LON": 0.0, "SST": 5.0, },
+        {"ID": "AAAAAAAAA", "YR": 2003, "MO": 12, "DY": 4, "HR": 12, "LAT": 0.0, "LON": 0.0, "SST": 5.0, },
+        {"ID": "AAAAAAAAA", "YR": 2003, "MO": 12, "DY": 7, "HR": 12, "LAT": 0.0, "LON": 0.0, "SST": 5.0, },
+        {"ID": "AAAAAAAAA", "YR": 2003, "MO": 12, "DY": 8, "HR": 12, "LAT": 0.0, "LON": 0.0, "SST": 5.0, },
+        {"ID": "AAAAAAAAA", "YR": 2003, "MO": 12, "DY": 9, "HR": 12, "LAT": 0.0, "LON": 0.0, "SST": 5.0, },
+        {"ID": "AAAAAAAAA", "YR": 2003, "MO": 12, "DY": 10, "HR": 12, "LAT": 0.0, "LON": 0.0, "SST": 5.0, },
+        {"ID": "AAAAAAAAA", "YR": 2003, "MO": 12, "DY": 11, "HR": 12, "LAT": 0.0, "LON": 0.0, "SST": 5.0, },
     ]
-
+    # fmt: on
     reps = ex.Voyage()
 
     for v in vals11:
@@ -2522,79 +1846,17 @@ def test_stationary_low_to_mid_freq_sampling(reps11):
 @pytest.fixture
 def reps12():
     # moving drifter (going northwest at equator but going slowly and within tolerance)
+    # fmt: off
     vals12 = [
-        {
-            "ID": "AAAAAAAAA",
-            "YR": 2003,
-            "MO": 12,
-            "DY": 1,
-            "HR": 12,
-            "LAT": 0.0,
-            "LON": 0.0,
-            "SST": 5.0,
-        },
-        {
-            "ID": "AAAAAAAAA",
-            "YR": 2003,
-            "MO": 12,
-            "DY": 2,
-            "HR": 12,
-            "LAT": 0.005,
-            "LON": -0.005,
-            "SST": 5.0,
-        },
-        {
-            "ID": "AAAAAAAAA",
-            "YR": 2003,
-            "MO": 12,
-            "DY": 3,
-            "HR": 12,
-            "LAT": 0.01,
-            "LON": -0.01,
-            "SST": 5.0,
-        },
-        {
-            "ID": "AAAAAAAAA",
-            "YR": 2003,
-            "MO": 12,
-            "DY": 4,
-            "HR": 12,
-            "LAT": 0.015,
-            "LON": -0.015,
-            "SST": 5.0,
-        },
-        {
-            "ID": "AAAAAAAAA",
-            "YR": 2003,
-            "MO": 12,
-            "DY": 5,
-            "HR": 12,
-            "LAT": 0.02,
-            "LON": -0.02,
-            "SST": 5.0,
-        },
-        {
-            "ID": "AAAAAAAAA",
-            "YR": 2003,
-            "MO": 12,
-            "DY": 6,
-            "HR": 12,
-            "LAT": 0.025,
-            "LON": -0.025,
-            "SST": 5.0,
-        },
-        {
-            "ID": "AAAAAAAAA",
-            "YR": 2003,
-            "MO": 12,
-            "DY": 7,
-            "HR": 12,
-            "LAT": 0.03,
-            "LON": -0.03,
-            "SST": 5.0,
-        },
+        {"ID": "AAAAAAAAA", "YR": 2003, "MO": 12, "DY": 1, "HR": 12, "LAT": 0.0, "LON": 0.0, "SST": 5.0, },
+        {"ID": "AAAAAAAAA", "YR": 2003, "MO": 12, "DY": 2, "HR": 12, "LAT": 0.005, "LON": -0.005, "SST": 5.0, },
+        {"ID": "AAAAAAAAA", "YR": 2003, "MO": 12, "DY": 3, "HR": 12, "LAT": 0.01, "LON": -0.01, "SST": 5.0, },
+        {"ID": "AAAAAAAAA", "YR": 2003, "MO": 12, "DY": 4, "HR": 12, "LAT": 0.015, "LON": -0.015, "SST": 5.0, },
+        {"ID": "AAAAAAAAA", "YR": 2003, "MO": 12, "DY": 5, "HR": 12, "LAT": 0.02, "LON": -0.02, "SST": 5.0, },
+        {"ID": "AAAAAAAAA", "YR": 2003, "MO": 12, "DY": 6, "HR": 12, "LAT": 0.025, "LON": -0.025, "SST": 5.0, },
+        {"ID": "AAAAAAAAA", "YR": 2003, "MO": 12, "DY": 7, "HR": 12, "LAT": 0.03, "LON": -0.03, "SST": 5.0, },
     ]
-
+    # fmt: on
     reps = ex.Voyage()  #
 
     for v in vals12:
@@ -2616,79 +1878,17 @@ def test_moving_slowly_northwest(reps12):
 @pytest.fixture
 def reps13():
     # moving drifter (going west in high Arctic but going slower than tolerance set at equator)
+    # fmt: off
     vals13 = [
-        {
-            "ID": "AAAAAAAAA",
-            "YR": 2003,
-            "MO": 12,
-            "DY": 1,
-            "HR": 12,
-            "LAT": 85.0,
-            "LON": 0.0,
-            "SST": 5.0,
-        },
-        {
-            "ID": "AAAAAAAAA",
-            "YR": 2003,
-            "MO": 12,
-            "DY": 2,
-            "HR": 12,
-            "LAT": 85.0,
-            "LON": -0.02,
-            "SST": 5.0,
-        },
-        {
-            "ID": "AAAAAAAAA",
-            "YR": 2003,
-            "MO": 12,
-            "DY": 3,
-            "HR": 12,
-            "LAT": 85.0,
-            "LON": -0.04,
-            "SST": 5.0,
-        },
-        {
-            "ID": "AAAAAAAAA",
-            "YR": 2003,
-            "MO": 12,
-            "DY": 4,
-            "HR": 12,
-            "LAT": 85.0,
-            "LON": -0.06,
-            "SST": 5.0,
-        },
-        {
-            "ID": "AAAAAAAAA",
-            "YR": 2003,
-            "MO": 12,
-            "DY": 5,
-            "HR": 12,
-            "LAT": 85.0,
-            "LON": -0.08,
-            "SST": 5.0,
-        },
-        {
-            "ID": "AAAAAAAAA",
-            "YR": 2003,
-            "MO": 12,
-            "DY": 6,
-            "HR": 12,
-            "LAT": 85.0,
-            "LON": -0.10,
-            "SST": 5.0,
-        },
-        {
-            "ID": "AAAAAAAAA",
-            "YR": 2003,
-            "MO": 12,
-            "DY": 7,
-            "HR": 12,
-            "LAT": 85.0,
-            "LON": -0.12,
-            "SST": 5.0,
-        },
+        {"ID": "AAAAAAAAA", "YR": 2003, "MO": 12, "DY": 1, "HR": 12, "LAT": 85.0, "LON": 0.0, "SST": 5.0, },
+        {"ID": "AAAAAAAAA", "YR": 2003, "MO": 12, "DY": 2, "HR": 12, "LAT": 85.0, "LON": -0.02, "SST": 5.0, },
+        {"ID": "AAAAAAAAA", "YR": 2003, "MO": 12, "DY": 3, "HR": 12, "LAT": 85.0, "LON": -0.04, "SST": 5.0, },
+        {"ID": "AAAAAAAAA", "YR": 2003, "MO": 12, "DY": 4, "HR": 12, "LAT": 85.0, "LON": -0.06, "SST": 5.0, },
+        {"ID": "AAAAAAAAA", "YR": 2003, "MO": 12, "DY": 5, "HR": 12, "LAT": 85.0, "LON": -0.08, "SST": 5.0, },
+        {"ID": "AAAAAAAAA", "YR": 2003, "MO": 12, "DY": 6, "HR": 12, "LAT": 85.0, "LON": -0.10, "SST": 5.0, },
+        {"ID": "AAAAAAAAA", "YR": 2003, "MO": 12, "DY": 7, "HR": 12, "LAT": 85.0, "LON": -0.12, "SST": 5.0, },
     ]
-
+    # fmt: on
     reps = ex.Voyage()
     for v in vals13:
         rec = IMMA()
@@ -2710,79 +1910,17 @@ def test_moving_slowly_west_in_arctic(reps13):
 @pytest.fixture
 def reps14():
     # stationary then moves
+    # fmt: off
     vals14 = [
-        {
-            "ID": "AAAAAAAAA",
-            "YR": 2003,
-            "MO": 12,
-            "DY": 1,
-            "HR": 12,
-            "LAT": 0.0,
-            "LON": 0.0,
-            "SST": 5.0,
-        },
-        {
-            "ID": "AAAAAAAAA",
-            "YR": 2003,
-            "MO": 12,
-            "DY": 2,
-            "HR": 12,
-            "LAT": 0.0,
-            "LON": 0.0,
-            "SST": 5.0,
-        },
-        {
-            "ID": "AAAAAAAAA",
-            "YR": 2003,
-            "MO": 12,
-            "DY": 3,
-            "HR": 12,
-            "LAT": 0.0,
-            "LON": 0.0,
-            "SST": 5.0,
-        },
-        {
-            "ID": "AAAAAAAAA",
-            "YR": 2003,
-            "MO": 12,
-            "DY": 4,
-            "HR": 12,
-            "LAT": 0.0,
-            "LON": 0.0,
-            "SST": 5.0,
-        },
-        {
-            "ID": "AAAAAAAAA",
-            "YR": 2003,
-            "MO": 12,
-            "DY": 5,
-            "HR": 12,
-            "LAT": 0.02,
-            "LON": 0.0,
-            "SST": 5.0,
-        },
-        {
-            "ID": "AAAAAAAAA",
-            "YR": 2003,
-            "MO": 12,
-            "DY": 6,
-            "HR": 12,
-            "LAT": 0.04,
-            "LON": 0.0,
-            "SST": 5.0,
-        },
-        {
-            "ID": "AAAAAAAAA",
-            "YR": 2003,
-            "MO": 12,
-            "DY": 7,
-            "HR": 12,
-            "LAT": 0.06,
-            "LON": 0.0,
-            "SST": 5.0,
-        },
+        {"ID": "AAAAAAAAA", "YR": 2003, "MO": 12, "DY": 1, "HR": 12, "LAT": 0.0, "LON": 0.0, "SST": 5.0, },
+        {"ID": "AAAAAAAAA", "YR": 2003, "MO": 12, "DY": 2, "HR": 12, "LAT": 0.0, "LON": 0.0, "SST": 5.0, },
+        {"ID": "AAAAAAAAA", "YR": 2003, "MO": 12, "DY": 3, "HR": 12, "LAT": 0.0, "LON": 0.0, "SST": 5.0, },
+        {"ID": "AAAAAAAAA", "YR": 2003, "MO": 12, "DY": 4, "HR": 12, "LAT": 0.0, "LON": 0.0, "SST": 5.0, },
+        {"ID": "AAAAAAAAA", "YR": 2003, "MO": 12, "DY": 5, "HR": 12, "LAT": 0.02, "LON": 0.0, "SST": 5.0, },
+        {"ID": "AAAAAAAAA", "YR": 2003, "MO": 12, "DY": 6, "HR": 12, "LAT": 0.04, "LON": 0.0, "SST": 5.0, },
+        {"ID": "AAAAAAAAA", "YR": 2003, "MO": 12, "DY": 7, "HR": 12, "LAT": 0.06, "LON": 0.0, "SST": 5.0, },
     ]
-
+    # fmt: on
     reps = ex.Voyage()
 
     for v in vals14:
@@ -2805,29 +1943,12 @@ def test_stop_then_moving_north(reps14):
 @pytest.fixture
 def reps15():
     # too short for QC
+    # fmt: off
     vals15 = [
-        {
-            "ID": "AAAAAAAAA",
-            "YR": 2003,
-            "MO": 12,
-            "DY": 1,
-            "HR": 12,
-            "LAT": 0.0,
-            "LON": 0.0,
-            "SST": 5.0,
-        },
-        {
-            "ID": "AAAAAAAAA",
-            "YR": 2003,
-            "MO": 12,
-            "DY": 2,
-            "HR": 12,
-            "LAT": 0.0,
-            "LON": -0.02,
-            "SST": 5.0,
-        },
+        {"ID": "AAAAAAAAA", "YR": 2003, "MO": 12, "DY": 1, "HR": 12, "LAT": 0.0, "LON": 0.0, "SST": 5.0, },
+        {"ID": "AAAAAAAAA", "YR": 2003, "MO": 12, "DY": 2, "HR": 12, "LAT": 0.0, "LON": -0.02, "SST": 5.0, },
     ]
-
+    # fmt: on
     reps = ex.Voyage()
 
     for v in vals15:
@@ -2854,79 +1975,17 @@ def test_too_short_for_qc(reps15):
 @pytest.fixture
 def reps16():
     # assertion error - bad input parameter
+    # fmt: off
     vals16 = [
-        {
-            "ID": "AAAAAAAAA",
-            "YR": 2003,
-            "MO": 12,
-            "DY": 1,
-            "HR": 12,
-            "LAT": 0.0,
-            "LON": 0.0,
-            "SST": 5.0,
-        },
-        {
-            "ID": "AAAAAAAAA",
-            "YR": 2003,
-            "MO": 12,
-            "DY": 2,
-            "HR": 12,
-            "LAT": 0.0,
-            "LON": -0.02,
-            "SST": 5.0,
-        },
-        {
-            "ID": "AAAAAAAAA",
-            "YR": 2003,
-            "MO": 12,
-            "DY": 3,
-            "HR": 12,
-            "LAT": 0.0,
-            "LON": -0.04,
-            "SST": 5.0,
-        },
-        {
-            "ID": "AAAAAAAAA",
-            "YR": 2003,
-            "MO": 12,
-            "DY": 4,
-            "HR": 12,
-            "LAT": 0.0,
-            "LON": -0.06,
-            "SST": 5.0,
-        },
-        {
-            "ID": "AAAAAAAAA",
-            "YR": 2003,
-            "MO": 12,
-            "DY": 5,
-            "HR": 12,
-            "LAT": 0.0,
-            "LON": -0.08,
-            "SST": 5.0,
-        },
-        {
-            "ID": "AAAAAAAAA",
-            "YR": 2003,
-            "MO": 12,
-            "DY": 6,
-            "HR": 12,
-            "LAT": 0.0,
-            "LON": -0.10,
-            "SST": 5.0,
-        },
-        {
-            "ID": "AAAAAAAAA",
-            "YR": 2003,
-            "MO": 12,
-            "DY": 7,
-            "HR": 12,
-            "LAT": 0.0,
-            "LON": -0.12,
-            "SST": 5.0,
-        },
+        {"ID": "AAAAAAAAA", "YR": 2003, "MO": 12, "DY": 1, "HR": 12, "LAT": 0.0, "LON": 0.0, "SST": 5.0, },
+        {"ID": "AAAAAAAAA", "YR": 2003, "MO": 12, "DY": 2, "HR": 12, "LAT": 0.0, "LON": -0.02, "SST": 5.0, },
+        {"ID": "AAAAAAAAA", "YR": 2003, "MO": 12, "DY": 3, "HR": 12, "LAT": 0.0, "LON": -0.04, "SST": 5.0, },
+        {"ID": "AAAAAAAAA", "YR": 2003, "MO": 12, "DY": 4, "HR": 12, "LAT": 0.0, "LON": -0.06, "SST": 5.0, },
+        {"ID": "AAAAAAAAA", "YR": 2003, "MO": 12, "DY": 5, "HR": 12, "LAT": 0.0, "LON": -0.08, "SST": 5.0, },
+        {"ID": "AAAAAAAAA", "YR": 2003, "MO": 12, "DY": 6, "HR": 12, "LAT": 0.0, "LON": -0.10, "SST": 5.0, },
+        {"ID": "AAAAAAAAA", "YR": 2003, "MO": 12, "DY": 7, "HR": 12, "LAT": 0.0, "LON": -0.12, "SST": 5.0, },
     ]
-
+    # fmt: on
     reps = ex.Voyage()
     for v in vals16:
         rec = IMMA()
@@ -2952,79 +2011,17 @@ def test_error_bad_input_parameter(reps16):
 @pytest.fixture
 def reps17():
     # assertion error - missing observation
+    # fmt: off
     vals17 = [
-        {
-            "ID": "AAAAAAAAA",
-            "YR": 2003,
-            "MO": 12,
-            "DY": 1,
-            "HR": 12,
-            "LAT": 0.0,
-            "LON": 0.0,
-            "SST": 5.0,
-        },
-        {
-            "ID": "AAAAAAAAA",
-            "YR": 2003,
-            "MO": 12,
-            "DY": 2,
-            "HR": 12,
-            "LAT": 0.0,
-            "LON": -0.02,
-            "SST": 5.0,
-        },
-        {
-            "ID": "AAAAAAAAA",
-            "YR": 2003,
-            "MO": 12,
-            "DY": 3,
-            "HR": 12,
-            "LAT": 0.0,
-            "LON": -0.04,
-            "SST": 5.0,
-        },
-        {
-            "ID": "AAAAAAAAA",
-            "YR": 2003,
-            "MO": 12,
-            "DY": 4,
-            "HR": 12,
-            "LAT": 0.0,
-            "LON": -0.06,
-            "SST": 5.0,
-        },
-        {
-            "ID": "AAAAAAAAA",
-            "YR": 2003,
-            "MO": 12,
-            "DY": 5,
-            "HR": 12,
-            "LAT": 0.0,
-            "LON": -0.08,
-            "SST": 5.0,
-        },
-        {
-            "ID": "AAAAAAAAA",
-            "YR": 2003,
-            "MO": 12,
-            "DY": 6,
-            "HR": 12,
-            "LAT": 0.0,
-            "LON": -0.10,
-            "SST": 5.0,
-        },
-        {
-            "ID": "AAAAAAAAA",
-            "YR": 2003,
-            "MO": 12,
-            "DY": 7,
-            "HR": 12,
-            "LAT": 0.0,
-            "LON": -0.12,
-            "SST": 5.0,
-        },
+        {"ID": "AAAAAAAAA", "YR": 2003, "MO": 12, "DY": 1, "HR": 12, "LAT": 0.0, "LON": 0.0, "SST": 5.0, },
+        {"ID": "AAAAAAAAA", "YR": 2003, "MO": 12, "DY": 2, "HR": 12, "LAT": 0.0, "LON": -0.02, "SST": 5.0, },
+        {"ID": "AAAAAAAAA", "YR": 2003, "MO": 12, "DY": 3, "HR": 12, "LAT": 0.0, "LON": -0.04, "SST": 5.0, },
+        {"ID": "AAAAAAAAA", "YR": 2003, "MO": 12, "DY": 4, "HR": 12, "LAT": 0.0, "LON": -0.06, "SST": 5.0, },
+        {"ID": "AAAAAAAAA", "YR": 2003, "MO": 12, "DY": 5, "HR": 12, "LAT": 0.0, "LON": -0.08, "SST": 5.0, },
+        {"ID": "AAAAAAAAA", "YR": 2003, "MO": 12, "DY": 6, "HR": 12, "LAT": 0.0, "LON": -0.10, "SST": 5.0, },
+        {"ID": "AAAAAAAAA", "YR": 2003, "MO": 12, "DY": 7, "HR": 12, "LAT": 0.0, "LON": -0.12, "SST": 5.0, },
     ]
-
+    # fmt: on
     reps = ex.Voyage()
     for v in vals17:
         rec = IMMA()
@@ -3051,79 +2048,17 @@ def test_error_missing_observation(reps17):
 @pytest.fixture
 def reps18():
     # assertion error - times not sorted
+    # fmt: off
     vals18 = [
-        {
-            "ID": "AAAAAAAAA",
-            "YR": 2003,
-            "MO": 12,
-            "DY": 1,
-            "HR": 12,
-            "LAT": 0.0,
-            "LON": 0.0,
-            "SST": 5.0,
-        },
-        {
-            "ID": "AAAAAAAAA",
-            "YR": 2003,
-            "MO": 12,
-            "DY": 2,
-            "HR": 12,
-            "LAT": 0.0,
-            "LON": -0.02,
-            "SST": 5.0,
-        },
-        {
-            "ID": "AAAAAAAAA",
-            "YR": 2003,
-            "MO": 12,
-            "DY": 3,
-            "HR": 12,
-            "LAT": 0.0,
-            "LON": -0.04,
-            "SST": 5.0,
-        },
-        {
-            "ID": "AAAAAAAAA",
-            "YR": 2003,
-            "MO": 12,
-            "DY": 2,
-            "HR": 12,
-            "LAT": 0.0,
-            "LON": -0.06,
-            "SST": 5.0,
-        },
-        {
-            "ID": "AAAAAAAAA",
-            "YR": 2003,
-            "MO": 12,
-            "DY": 5,
-            "HR": 12,
-            "LAT": 0.0,
-            "LON": -0.08,
-            "SST": 5.0,
-        },
-        {
-            "ID": "AAAAAAAAA",
-            "YR": 2003,
-            "MO": 12,
-            "DY": 6,
-            "HR": 12,
-            "LAT": 0.0,
-            "LON": -0.10,
-            "SST": 5.0,
-        },
-        {
-            "ID": "AAAAAAAAA",
-            "YR": 2003,
-            "MO": 12,
-            "DY": 7,
-            "HR": 12,
-            "LAT": 0.0,
-            "LON": -0.12,
-            "SST": 5.0,
-        },
+        {"ID": "AAAAAAAAA", "YR": 2003, "MO": 12, "DY": 1, "HR": 12, "LAT": 0.0, "LON": 0.0, "SST": 5.0, },
+        {"ID": "AAAAAAAAA", "YR": 2003, "MO": 12, "DY": 2, "HR": 12, "LAT": 0.0, "LON": -0.02, "SST": 5.0, },
+        {"ID": "AAAAAAAAA", "YR": 2003, "MO": 12, "DY": 3, "HR": 12, "LAT": 0.0, "LON": -0.04, "SST": 5.0, },
+        {"ID": "AAAAAAAAA", "YR": 2003, "MO": 12, "DY": 2, "HR": 12, "LAT": 0.0, "LON": -0.06, "SST": 5.0, },
+        {"ID": "AAAAAAAAA", "YR": 2003, "MO": 12, "DY": 5, "HR": 12, "LAT": 0.0, "LON": -0.08, "SST": 5.0, },
+        {"ID": "AAAAAAAAA", "YR": 2003, "MO": 12, "DY": 6, "HR": 12, "LAT": 0.0, "LON": -0.10, "SST": 5.0, },
+        {"ID": "AAAAAAAAA", "YR": 2003, "MO": 12, "DY": 7, "HR": 12, "LAT": 0.0, "LON": -0.12, "SST": 5.0, },
     ]
-
+    # fmt: on
     reps = ex.Voyage()
 
     for v in vals18:
@@ -3355,86 +2290,17 @@ def iquam_parameters():
 @pytest.fixture
 def reps1a():
     # stationary drifter
+    # fmt: off
     vals1 = [
-        {
-            "ID": "AAAAAAAAA",
-            "YR": 2003,
-            "MO": 12,
-            "DY": 1,
-            "HR": 12,
-            "LAT": 0.0,
-            "LON": 0.0,
-            "SST": 5.0,
-            "PT": 7,
-        },
-        {
-            "ID": "AAAAAAAAA",
-            "YR": 2003,
-            "MO": 12,
-            "DY": 2,
-            "HR": 12,
-            "LAT": 0.0,
-            "LON": 0.0,
-            "SST": 5.0,
-            "PT": 7,
-        },
-        {
-            "ID": "AAAAAAAAA",
-            "YR": 2003,
-            "MO": 12,
-            "DY": 3,
-            "HR": 12,
-            "LAT": 0.0,
-            "LON": 0.0,
-            "SST": 5.0,
-            "PT": 7,
-        },
-        {
-            "ID": "AAAAAAAAA",
-            "YR": 2003,
-            "MO": 12,
-            "DY": 4,
-            "HR": 12,
-            "LAT": 0.0,
-            "LON": 0.0,
-            "SST": 5.0,
-            "PT": 7,
-        },
-        {
-            "ID": "AAAAAAAAA",
-            "YR": 2003,
-            "MO": 12,
-            "DY": 5,
-            "HR": 12,
-            "LAT": 0.0,
-            "LON": 0.0,
-            "SST": 5.0,
-            "PT": 7,
-        },
-        {
-            "ID": "AAAAAAAAA",
-            "YR": 2003,
-            "MO": 12,
-            "DY": 6,
-            "HR": 12,
-            "LAT": 0.0,
-            "LON": 0.0,
-            "SST": 5.0,
-            "PT": 7,
-        },
-        {
-            "ID": "AAAAAAAAA",
-            "YR": 2003,
-            "MO": 12,
-            "DY": 7,
-            "HR": 12,
-            "LAT": 0.0,
-            "LON": 0.0,
-            "SST": 5.0,
-            "PT": 7,
-        },
+        {"ID": "AAAAAAAAA", "YR": 2003, "MO": 12, "DY": 1, "HR": 12, "LAT": 0.0, "LON": 0.0, "SST": 5.0, "PT": 7, },
+        {"ID": "AAAAAAAAA", "YR": 2003, "MO": 12, "DY": 2, "HR": 12, "LAT": 0.0, "LON": 0.0, "SST": 5.0, "PT": 7, },
+        {"ID": "AAAAAAAAA", "YR": 2003, "MO": 12, "DY": 3, "HR": 12, "LAT": 0.0, "LON": 0.0, "SST": 5.0, "PT": 7, },
+        {"ID": "AAAAAAAAA", "YR": 2003, "MO": 12, "DY": 4, "HR": 12, "LAT": 0.0, "LON": 0.0, "SST": 5.0, "PT": 7, },
+        {"ID": "AAAAAAAAA", "YR": 2003, "MO": 12, "DY": 5, "HR": 12, "LAT": 0.0, "LON": 0.0, "SST": 5.0, "PT": 7, },
+        {"ID": "AAAAAAAAA", "YR": 2003, "MO": 12, "DY": 6, "HR": 12, "LAT": 0.0, "LON": 0.0, "SST": 5.0, "PT": 7, },
+        {"ID": "AAAAAAAAA", "YR": 2003, "MO": 12, "DY": 7, "HR": 12, "LAT": 0.0, "LON": 0.0, "SST": 5.0, "PT": 7, },
     ]
-
+    # fmt: on
     reps = ex.Voyage()
     for v in vals1:
         rec = IMMA()
@@ -3449,86 +2315,17 @@ def reps1a():
 @pytest.fixture
 def reps2a():
     # fast moving drifter
+    # fmt: off
     vals2 = [
-        {
-            "ID": "AAAAAAAAA",
-            "YR": 2003,
-            "MO": 12,
-            "DY": 1,
-            "HR": 12,
-            "LAT": 0.0,
-            "LON": 0.0,
-            "SST": 5.0,
-            "PT": 7,
-        },
-        {
-            "ID": "AAAAAAAAA",
-            "YR": 2003,
-            "MO": 12,
-            "DY": 2,
-            "HR": 12,
-            "LAT": 3.0,
-            "LON": 0.0,
-            "SST": 5.0,
-            "PT": 7,
-        },
-        {
-            "ID": "AAAAAAAAA",
-            "YR": 2003,
-            "MO": 12,
-            "DY": 3,
-            "HR": 12,
-            "LAT": 6.0,
-            "LON": 0.0,
-            "SST": 5.0,
-            "PT": 7,
-        },
-        {
-            "ID": "AAAAAAAAA",
-            "YR": 2003,
-            "MO": 12,
-            "DY": 4,
-            "HR": 12,
-            "LAT": 9.0,
-            "LON": 0.0,
-            "SST": 5.0,
-            "PT": 7,
-        },
-        {
-            "ID": "AAAAAAAAA",
-            "YR": 2003,
-            "MO": 12,
-            "DY": 5,
-            "HR": 12,
-            "LAT": 12.0,
-            "LON": 0.0,
-            "SST": 5.0,
-            "PT": 7,
-        },
-        {
-            "ID": "AAAAAAAAA",
-            "YR": 2003,
-            "MO": 12,
-            "DY": 6,
-            "HR": 12,
-            "LAT": 15.0,
-            "LON": 0.0,
-            "SST": 5.0,
-            "PT": 7,
-        },
-        {
-            "ID": "AAAAAAAAA",
-            "YR": 2003,
-            "MO": 12,
-            "DY": 7,
-            "HR": 12,
-            "LAT": 18.0,
-            "LON": 0.0,
-            "SST": 5.0,
-            "PT": 7,
-        },
+        {"ID": "AAAAAAAAA", "YR": 2003, "MO": 12, "DY": 1, "HR": 12, "LAT": 0.0, "LON": 0.0, "SST": 5.0, "PT": 7, },
+        {"ID": "AAAAAAAAA", "YR": 2003, "MO": 12, "DY": 2, "HR": 12, "LAT": 3.0, "LON": 0.0, "SST": 5.0, "PT": 7, },
+        {"ID": "AAAAAAAAA", "YR": 2003, "MO": 12, "DY": 3, "HR": 12, "LAT": 6.0, "LON": 0.0, "SST": 5.0, "PT": 7, },
+        {"ID": "AAAAAAAAA", "YR": 2003, "MO": 12, "DY": 4, "HR": 12, "LAT": 9.0, "LON": 0.0, "SST": 5.0, "PT": 7, },
+        {"ID": "AAAAAAAAA", "YR": 2003, "MO": 12, "DY": 5, "HR": 12, "LAT": 12.0, "LON": 0.0, "SST": 5.0, "PT": 7, },
+        {"ID": "AAAAAAAAA", "YR": 2003, "MO": 12, "DY": 6, "HR": 12, "LAT": 15.0, "LON": 0.0, "SST": 5.0, "PT": 7, },
+        {"ID": "AAAAAAAAA", "YR": 2003, "MO": 12, "DY": 7, "HR": 12, "LAT": 18.0, "LON": 0.0, "SST": 5.0, "PT": 7, },
     ]
-
+    # fmt: on
     reps = ex.Voyage()
     for v in vals2:
         rec = IMMA()
@@ -3543,85 +2340,17 @@ def reps2a():
 @pytest.fixture
 def reps3a():
     # slow moving drifter
+    # fmt: off
     vals3 = [
-        {
-            "ID": "AAAAAAAAA",
-            "YR": 2003,
-            "MO": 12,
-            "DY": 1,
-            "HR": 12,
-            "LAT": 0.0,
-            "LON": 0.0,
-            "SST": 5.0,
-            "PT": 7,
-        },
-        {
-            "ID": "AAAAAAAAA",
-            "YR": 2003,
-            "MO": 12,
-            "DY": 2,
-            "HR": 12,
-            "LAT": 0.0,
-            "LON": 1.0,
-            "SST": 5.0,
-            "PT": 7,
-        },
-        {
-            "ID": "AAAAAAAAA",
-            "YR": 2003,
-            "MO": 12,
-            "DY": 3,
-            "HR": 12,
-            "LAT": 0.0,
-            "LON": 2.0,
-            "SST": 5.0,
-            "PT": 7,
-        },
-        {
-            "ID": "AAAAAAAAA",
-            "YR": 2003,
-            "MO": 12,
-            "DY": 4,
-            "HR": 12,
-            "LAT": 0.0,
-            "LON": 3.0,
-            "SST": 5.0,
-            "PT": 7,
-        },
-        {
-            "ID": "AAAAAAAAA",
-            "YR": 2003,
-            "MO": 12,
-            "DY": 5,
-            "HR": 12,
-            "LAT": 0.0,
-            "LON": 4.0,
-            "SST": 5.0,
-            "PT": 7,
-        },
-        {
-            "ID": "AAAAAAAAA",
-            "YR": 2003,
-            "MO": 12,
-            "DY": 6,
-            "HR": 12,
-            "LAT": 0.0,
-            "LON": 5.0,
-            "SST": 5.0,
-            "PT": 7,
-        },
-        {
-            "ID": "AAAAAAAAA",
-            "YR": 2003,
-            "MO": 12,
-            "DY": 7,
-            "HR": 12,
-            "LAT": 0.0,
-            "LON": 6.0,
-            "SST": 5.0,
-            "PT": 7,
-        },
+        {"ID": "AAAAAAAAA", "YR": 2003, "MO": 12, "DY": 1, "HR": 12, "LAT": 0.0, "LON": 0.0, "SST": 5.0, "PT": 7, },
+        {"ID": "AAAAAAAAA", "YR": 2003, "MO": 12, "DY": 2, "HR": 12, "LAT": 0.0, "LON": 1.0, "SST": 5.0, "PT": 7, },
+        {"ID": "AAAAAAAAA", "YR": 2003, "MO": 12, "DY": 3, "HR": 12, "LAT": 0.0, "LON": 2.0, "SST": 5.0, "PT": 7, },
+        {"ID": "AAAAAAAAA", "YR": 2003, "MO": 12, "DY": 4, "HR": 12, "LAT": 0.0, "LON": 3.0, "SST": 5.0, "PT": 7, },
+        {"ID": "AAAAAAAAA", "YR": 2003, "MO": 12, "DY": 5, "HR": 12, "LAT": 0.0, "LON": 4.0, "SST": 5.0, "PT": 7, },
+        {"ID": "AAAAAAAAA", "YR": 2003, "MO": 12, "DY": 6, "HR": 12, "LAT": 0.0, "LON": 5.0, "SST": 5.0, "PT": 7, },
+        {"ID": "AAAAAAAAA", "YR": 2003, "MO": 12, "DY": 7, "HR": 12, "LAT": 0.0, "LON": 6.0, "SST": 5.0, "PT": 7, },
     ]
+    # fmt: on
     reps = ex.Voyage()
     for v in vals3:
         rec = IMMA()
@@ -3636,85 +2365,17 @@ def reps3a():
 @pytest.fixture
 def reps4a():
     # slow-fast-slow moving drifter
+    # fmt: off
     vals4 = [
-        {
-            "ID": "AAAAAAAAA",
-            "YR": 2003,
-            "MO": 12,
-            "DY": 1,
-            "HR": 12,
-            "LAT": 0.0,
-            "LON": 0.0,
-            "SST": 5.0,
-            "PT": 7,
-        },
-        {
-            "ID": "AAAAAAAAA",
-            "YR": 2003,
-            "MO": 12,
-            "DY": 2,
-            "HR": 12,
-            "LAT": 1.0,
-            "LON": 0.0,
-            "SST": 5.0,
-            "PT": 7,
-        },
-        {
-            "ID": "AAAAAAAAA",
-            "YR": 2003,
-            "MO": 12,
-            "DY": 3,
-            "HR": 12,
-            "LAT": 2.0,
-            "LON": 0.0,
-            "SST": 5.0,
-            "PT": 7,
-        },
-        {
-            "ID": "AAAAAAAAA",
-            "YR": 2003,
-            "MO": 12,
-            "DY": 4,
-            "HR": 12,
-            "LAT": 5.0,
-            "LON": 0.0,
-            "SST": 5.0,
-            "PT": 7,
-        },
-        {
-            "ID": "AAAAAAAAA",
-            "YR": 2003,
-            "MO": 12,
-            "DY": 5,
-            "HR": 12,
-            "LAT": 8.0,
-            "LON": 0.0,
-            "SST": 5.0,
-            "PT": 7,
-        },
-        {
-            "ID": "AAAAAAAAA",
-            "YR": 2003,
-            "MO": 12,
-            "DY": 6,
-            "HR": 12,
-            "LAT": 9.0,
-            "LON": 0.0,
-            "SST": 5.0,
-            "PT": 7,
-        },
-        {
-            "ID": "AAAAAAAAA",
-            "YR": 2003,
-            "MO": 12,
-            "DY": 7,
-            "HR": 12,
-            "LAT": 10.0,
-            "LON": 0.0,
-            "SST": 5.0,
-            "PT": 7,
-        },
+        {"ID": "AAAAAAAAA", "YR": 2003, "MO": 12, "DY": 1, "HR": 12, "LAT": 0.0, "LON": 0.0, "SST": 5.0, "PT": 7, },
+        {"ID": "AAAAAAAAA", "YR": 2003, "MO": 12, "DY": 2, "HR": 12, "LAT": 1.0, "LON": 0.0, "SST": 5.0, "PT": 7, },
+        {"ID": "AAAAAAAAA", "YR": 2003, "MO": 12, "DY": 3, "HR": 12, "LAT": 2.0, "LON": 0.0, "SST": 5.0, "PT": 7, },
+        {"ID": "AAAAAAAAA", "YR": 2003, "MO": 12, "DY": 4, "HR": 12, "LAT": 5.0, "LON": 0.0, "SST": 5.0, "PT": 7, },
+        {"ID": "AAAAAAAAA", "YR": 2003, "MO": 12, "DY": 5, "HR": 12, "LAT": 8.0, "LON": 0.0, "SST": 5.0, "PT": 7, },
+        {"ID": "AAAAAAAAA", "YR": 2003, "MO": 12, "DY": 6, "HR": 12, "LAT": 9.0, "LON": 0.0, "SST": 5.0, "PT": 7, },
+        {"ID": "AAAAAAAAA", "YR": 2003, "MO": 12, "DY": 7, "HR": 12, "LAT": 10.0, "LON": 0.0, "SST": 5.0, "PT": 7, },
     ]
+    # fmt: on
     reps = ex.Voyage()
     for v in vals4:
         rec = IMMA()
@@ -3729,85 +2390,17 @@ def reps4a():
 @pytest.fixture
 def reps5a():
     # fast moving drifter (high frequency sampling)
+    # fmt: off
     vals5 = [
-        {
-            "ID": "AAAAAAAAA",
-            "YR": 2003,
-            "MO": 12,
-            "DY": 1,
-            "HR": 0,
-            "LAT": 0.0,
-            "LON": 0.0,
-            "SST": 5.0,
-            "PT": 7,
-        },
-        {
-            "ID": "AAAAAAAAA",
-            "YR": 2003,
-            "MO": 12,
-            "DY": 1,
-            "HR": 1,
-            "LAT": 3.0,
-            "LON": 0.0,
-            "SST": 5.0,
-            "PT": 7,
-        },
-        {
-            "ID": "AAAAAAAAA",
-            "YR": 2003,
-            "MO": 12,
-            "DY": 1,
-            "HR": 2,
-            "LAT": 6.0,
-            "LON": 0.0,
-            "SST": 5.0,
-            "PT": 7,
-        },
-        {
-            "ID": "AAAAAAAAA",
-            "YR": 2003,
-            "MO": 12,
-            "DY": 1,
-            "HR": 3,
-            "LAT": 9.0,
-            "LON": 0.0,
-            "SST": 5.0,
-            "PT": 7,
-        },
-        {
-            "ID": "AAAAAAAAA",
-            "YR": 2003,
-            "MO": 12,
-            "DY": 1,
-            "HR": 4,
-            "LAT": 12.0,
-            "LON": 0.0,
-            "SST": 5.0,
-            "PT": 7,
-        },
-        {
-            "ID": "AAAAAAAAA",
-            "YR": 2003,
-            "MO": 12,
-            "DY": 1,
-            "HR": 5,
-            "LAT": 15.0,
-            "LON": 0.0,
-            "SST": 5.0,
-            "PT": 7,
-        },
-        {
-            "ID": "AAAAAAAAA",
-            "YR": 2003,
-            "MO": 12,
-            "DY": 1,
-            "HR": 6,
-            "LAT": 18.0,
-            "LON": 0.0,
-            "SST": 5.0,
-            "PT": 7,
-        },
+        {"ID": "AAAAAAAAA", "YR": 2003, "MO": 12, "DY": 1, "HR": 0, "LAT": 0.0, "LON": 0.0, "SST": 5.0, "PT": 7, },
+        {"ID": "AAAAAAAAA", "YR": 2003, "MO": 12, "DY": 1, "HR": 1, "LAT": 3.0, "LON": 0.0, "SST": 5.0, "PT": 7, },
+        {"ID": "AAAAAAAAA", "YR": 2003, "MO": 12, "DY": 1, "HR": 2, "LAT": 6.0, "LON": 0.0, "SST": 5.0, "PT": 7, },
+        {"ID": "AAAAAAAAA", "YR": 2003, "MO": 12, "DY": 1, "HR": 3, "LAT": 9.0, "LON": 0.0, "SST": 5.0, "PT": 7, },
+        {"ID": "AAAAAAAAA", "YR": 2003, "MO": 12, "DY": 1, "HR": 4, "LAT": 12.0, "LON": 0.0, "SST": 5.0, "PT": 7, },
+        {"ID": "AAAAAAAAA", "YR": 2003, "MO": 12, "DY": 1, "HR": 5, "LAT": 15.0, "LON": 0.0, "SST": 5.0, "PT": 7, },
+        {"ID": "AAAAAAAAA", "YR": 2003, "MO": 12, "DY": 1, "HR": 6, "LAT": 18.0, "LON": 0.0, "SST": 5.0, "PT": 7, },
     ]
+    # fmt: on
     reps = ex.Voyage()
     for v in vals5:
         rec = IMMA()
@@ -3822,85 +2415,17 @@ def reps5a():
 @pytest.fixture
 def reps6a():
     # fast moving drifter (low frequency sampling)
+    # fmt: off
     vals6 = [
-        {
-            "ID": "AAAAAAAAA",
-            "YR": 2003,
-            "MO": 12,
-            "DY": 1,
-            "HR": 12,
-            "LAT": 0.0,
-            "LON": 0.0,
-            "SST": 5.0,
-            "PT": 7,
-        },
-        {
-            "ID": "AAAAAAAAA",
-            "YR": 2003,
-            "MO": 12,
-            "DY": 2,
-            "HR": 13,
-            "LAT": 5.0,
-            "LON": 0.0,
-            "SST": 5.0,
-            "PT": 7,
-        },
-        {
-            "ID": "AAAAAAAAA",
-            "YR": 2003,
-            "MO": 12,
-            "DY": 3,
-            "HR": 14,
-            "LAT": 10.0,
-            "LON": 0.0,
-            "SST": 5.0,
-            "PT": 7,
-        },
-        {
-            "ID": "AAAAAAAAA",
-            "YR": 2003,
-            "MO": 12,
-            "DY": 4,
-            "HR": 15,
-            "LAT": 15.0,
-            "LON": 0.0,
-            "SST": 5.0,
-            "PT": 7,
-        },
-        {
-            "ID": "AAAAAAAAA",
-            "YR": 2003,
-            "MO": 12,
-            "DY": 5,
-            "HR": 16,
-            "LAT": 20.0,
-            "LON": 0.0,
-            "SST": 5.0,
-            "PT": 7,
-        },
-        {
-            "ID": "AAAAAAAAA",
-            "YR": 2003,
-            "MO": 12,
-            "DY": 6,
-            "HR": 17,
-            "LAT": 25.0,
-            "LON": 0.0,
-            "SST": 5.0,
-            "PT": 7,
-        },
-        {
-            "ID": "AAAAAAAAA",
-            "YR": 2003,
-            "MO": 12,
-            "DY": 7,
-            "HR": 18,
-            "LAT": 30.0,
-            "LON": 0.0,
-            "SST": 5.0,
-            "PT": 7,
-        },
+        {"ID": "AAAAAAAAA", "YR": 2003, "MO": 12, "DY": 1, "HR": 12, "LAT": 0.0, "LON": 0.0, "SST": 5.0, "PT": 7, },
+        {"ID": "AAAAAAAAA", "YR": 2003, "MO": 12, "DY": 2, "HR": 13, "LAT": 5.0, "LON": 0.0, "SST": 5.0, "PT": 7, },
+        {"ID": "AAAAAAAAA", "YR": 2003, "MO": 12, "DY": 3, "HR": 14, "LAT": 10.0, "LON": 0.0, "SST": 5.0, "PT": 7, },
+        {"ID": "AAAAAAAAA", "YR": 2003, "MO": 12, "DY": 4, "HR": 15, "LAT": 15.0, "LON": 0.0, "SST": 5.0, "PT": 7, },
+        {"ID": "AAAAAAAAA", "YR": 2003, "MO": 12, "DY": 5, "HR": 16, "LAT": 20.0, "LON": 0.0, "SST": 5.0, "PT": 7, },
+        {"ID": "AAAAAAAAA", "YR": 2003, "MO": 12, "DY": 6, "HR": 17, "LAT": 25.0, "LON": 0.0, "SST": 5.0, "PT": 7, },
+        {"ID": "AAAAAAAAA", "YR": 2003, "MO": 12, "DY": 7, "HR": 18, "LAT": 30.0, "LON": 0.0, "SST": 5.0, "PT": 7, },
     ]
+    # fmt: on
     reps = ex.Voyage()
     for v in vals6:
         rec = IMMA()
@@ -3915,85 +2440,17 @@ def reps6a():
 @pytest.fixture
 def reps7a():
     # slow-fast-slow moving drifter (mid frequency sampling)
+    # fmt: off
     vals7 = [
-        {
-            "ID": "AAAAAAAAA",
-            "YR": 2003,
-            "MO": 12,
-            "DY": 1,
-            "HR": 0,
-            "LAT": 0.0,
-            "LON": 0.0,
-            "SST": 5.0,
-            "PT": 7,
-        },
-        {
-            "ID": "AAAAAAAAA",
-            "YR": 2003,
-            "MO": 12,
-            "DY": 1,
-            "HR": 12,
-            "LAT": 0.5,
-            "LON": 0.0,
-            "SST": 5.0,
-            "PT": 7,
-        },
-        {
-            "ID": "AAAAAAAAA",
-            "YR": 2003,
-            "MO": 12,
-            "DY": 2,
-            "HR": 0,
-            "LAT": 1.0,
-            "LON": 0.0,
-            "SST": 5.0,
-            "PT": 7,
-        },
-        {
-            "ID": "AAAAAAAAA",
-            "YR": 2003,
-            "MO": 12,
-            "DY": 2,
-            "HR": 12,
-            "LAT": 2.5,
-            "LON": 0.0,
-            "SST": 5.0,
-            "PT": 7,
-        },
-        {
-            "ID": "AAAAAAAAA",
-            "YR": 2003,
-            "MO": 12,
-            "DY": 3,
-            "HR": 0,
-            "LAT": 4.0,
-            "LON": 0.0,
-            "SST": 5.0,
-            "PT": 7,
-        },
-        {
-            "ID": "AAAAAAAAA",
-            "YR": 2003,
-            "MO": 12,
-            "DY": 3,
-            "HR": 12,
-            "LAT": 4.5,
-            "LON": 0.0,
-            "SST": 5.0,
-            "PT": 7,
-        },
-        {
-            "ID": "AAAAAAAAA",
-            "YR": 2003,
-            "MO": 12,
-            "DY": 4,
-            "HR": 0,
-            "LAT": 5.0,
-            "LON": 0.0,
-            "SST": 5.0,
-            "PT": 7,
-        },
+        {"ID": "AAAAAAAAA", "YR": 2003, "MO": 12, "DY": 1, "HR": 0, "LAT": 0.0, "LON": 0.0, "SST": 5.0, "PT": 7, },
+        {"ID": "AAAAAAAAA", "YR": 2003, "MO": 12, "DY": 1, "HR": 12, "LAT": 0.5, "LON": 0.0, "SST": 5.0, "PT": 7, },
+        {"ID": "AAAAAAAAA", "YR": 2003, "MO": 12, "DY": 2, "HR": 0, "LAT": 1.0, "LON": 0.0, "SST": 5.0, "PT": 7, },
+        {"ID": "AAAAAAAAA", "YR": 2003, "MO": 12, "DY": 2, "HR": 12, "LAT": 2.5, "LON": 0.0, "SST": 5.0, "PT": 7, },
+        {"ID": "AAAAAAAAA", "YR": 2003, "MO": 12, "DY": 3, "HR": 0, "LAT": 4.0, "LON": 0.0, "SST": 5.0, "PT": 7, },
+        {"ID": "AAAAAAAAA", "YR": 2003, "MO": 12, "DY": 3, "HR": 12, "LAT": 4.5, "LON": 0.0, "SST": 5.0, "PT": 7, },
+        {"ID": "AAAAAAAAA", "YR": 2003, "MO": 12, "DY": 4, "HR": 0, "LAT": 5.0, "LON": 0.0, "SST": 5.0, "PT": 7, },
     ]
+    # fmt: on
     reps = ex.Voyage()
     for v in vals7:
         rec = IMMA()
@@ -4008,85 +2465,17 @@ def reps7a():
 @pytest.fixture
 def reps8a():
     # fast moving drifter (with irregular sampling)
+    # fmt: off
     vals8 = [
-        {
-            "ID": "AAAAAAAAA",
-            "YR": 2003,
-            "MO": 12,
-            "DY": 1,
-            "HR": 12,
-            "LAT": 0.0,
-            "LON": 0.0,
-            "SST": 5.0,
-            "PT": 7,
-        },
-        {
-            "ID": "AAAAAAAAA",
-            "YR": 2003,
-            "MO": 12,
-            "DY": 2,
-            "HR": 12,
-            "LAT": 3.0,
-            "LON": 0.0,
-            "SST": 5.0,
-            "PT": 7,
-        },
-        {
-            "ID": "AAAAAAAAA",
-            "YR": 2003,
-            "MO": 12,
-            "DY": 4,
-            "HR": 12,
-            "LAT": 12.0,
-            "LON": 0.0,
-            "SST": 5.0,
-            "PT": 7,
-        },
-        {
-            "ID": "AAAAAAAAA",
-            "YR": 2003,
-            "MO": 12,
-            "DY": 5,
-            "HR": 12,
-            "LAT": 12.0,
-            "LON": 0.0,
-            "SST": 5.0,
-            "PT": 7,
-        },
-        {
-            "ID": "AAAAAAAAA",
-            "YR": 2003,
-            "MO": 12,
-            "DY": 5,
-            "HR": 23,
-            "LAT": 14.0,
-            "LON": 0.0,
-            "SST": 5.0,
-            "PT": 7,
-        },
-        {
-            "ID": "AAAAAAAAA",
-            "YR": 2003,
-            "MO": 12,
-            "DY": 6,
-            "HR": 23,
-            "LAT": 14.0,
-            "LON": 0.0,
-            "SST": 5.0,
-            "PT": 7,
-        },
-        {
-            "ID": "AAAAAAAAA",
-            "YR": 2003,
-            "MO": 12,
-            "DY": 7,
-            "HR": 23,
-            "LAT": 17.0,
-            "LON": 0.0,
-            "SST": 5.0,
-            "PT": 7,
-        },
+        {"ID": "AAAAAAAAA", "YR": 2003, "MO": 12, "DY": 1, "HR": 12, "LAT": 0.0, "LON": 0.0, "SST": 5.0, "PT": 7, },
+        {"ID": "AAAAAAAAA", "YR": 2003, "MO": 12, "DY": 2, "HR": 12, "LAT": 3.0, "LON": 0.0, "SST": 5.0, "PT": 7, },
+        {"ID": "AAAAAAAAA", "YR": 2003, "MO": 12, "DY": 4, "HR": 12, "LAT": 12.0, "LON": 0.0, "SST": 5.0, "PT": 7, },
+        {"ID": "AAAAAAAAA", "YR": 2003, "MO": 12, "DY": 5, "HR": 12, "LAT": 12.0, "LON": 0.0, "SST": 5.0, "PT": 7, },
+        {"ID": "AAAAAAAAA", "YR": 2003, "MO": 12, "DY": 5, "HR": 23, "LAT": 14.0, "LON": 0.0, "SST": 5.0, "PT": 7, },
+        {"ID": "AAAAAAAAA", "YR": 2003, "MO": 12, "DY": 6, "HR": 23, "LAT": 14.0, "LON": 0.0, "SST": 5.0, "PT": 7, },
+        {"ID": "AAAAAAAAA", "YR": 2003, "MO": 12, "DY": 7, "HR": 23, "LAT": 17.0, "LON": 0.0, "SST": 5.0, "PT": 7, },
     ]
+    # fmt: on
     reps = ex.Voyage()
     for v in vals8:
         rec = IMMA()
@@ -4101,85 +2490,17 @@ def reps8a():
 @pytest.fixture
 def reps9a():
     # fast moving Arctic drifter
+    # fmt: off
     vals9 = [
-        {
-            "ID": "AAAAAAAAA",
-            "YR": 2003,
-            "MO": 12,
-            "DY": 1,
-            "HR": 12,
-            "LAT": 85.0,
-            "LON": 0.0,
-            "SST": 5.0,
-            "PT": 7,
-        },
-        {
-            "ID": "AAAAAAAAA",
-            "YR": 2003,
-            "MO": 12,
-            "DY": 2,
-            "HR": 12,
-            "LAT": 85.0,
-            "LON": 30.0,
-            "SST": 5.0,
-            "PT": 7,
-        },
-        {
-            "ID": "AAAAAAAAA",
-            "YR": 2003,
-            "MO": 12,
-            "DY": 3,
-            "HR": 12,
-            "LAT": 85.0,
-            "LON": 60.0,
-            "SST": 5.0,
-            "PT": 7,
-        },
-        {
-            "ID": "AAAAAAAAA",
-            "YR": 2003,
-            "MO": 12,
-            "DY": 4,
-            "HR": 12,
-            "LAT": 85.0,
-            "LON": 90.0,
-            "SST": 5.0,
-            "PT": 7,
-        },
-        {
-            "ID": "AAAAAAAAA",
-            "YR": 2003,
-            "MO": 12,
-            "DY": 5,
-            "HR": 12,
-            "LAT": 85.0,
-            "LON": 120.0,
-            "SST": 5.0,
-            "PT": 7,
-        },
-        {
-            "ID": "AAAAAAAAA",
-            "YR": 2003,
-            "MO": 12,
-            "DY": 6,
-            "HR": 12,
-            "LAT": 85.0,
-            "LON": 150.0,
-            "SST": 5.0,
-            "PT": 7,
-        },
-        {
-            "ID": "AAAAAAAAA",
-            "YR": 2003,
-            "MO": 12,
-            "DY": 7,
-            "HR": 12,
-            "LAT": 85.0,
-            "LON": 180.0,
-            "SST": 5.0,
-            "PT": 7,
-        },
+        {"ID": "AAAAAAAAA", "YR": 2003, "MO": 12, "DY": 1, "HR": 12, "LAT": 85.0, "LON": 0.0, "SST": 5.0, "PT": 7, },
+        {"ID": "AAAAAAAAA", "YR": 2003, "MO": 12, "DY": 2, "HR": 12, "LAT": 85.0, "LON": 30.0, "SST": 5.0, "PT": 7, },
+        {"ID": "AAAAAAAAA", "YR": 2003, "MO": 12, "DY": 3, "HR": 12, "LAT": 85.0, "LON": 60.0, "SST": 5.0, "PT": 7, },
+        {"ID": "AAAAAAAAA", "YR": 2003, "MO": 12, "DY": 4, "HR": 12, "LAT": 85.0, "LON": 90.0, "SST": 5.0, "PT": 7, },
+        {"ID": "AAAAAAAAA", "YR": 2003, "MO": 12, "DY": 5, "HR": 12, "LAT": 85.0, "LON": 120.0, "SST": 5.0, "PT": 7, },
+        {"ID": "AAAAAAAAA", "YR": 2003, "MO": 12, "DY": 6, "HR": 12, "LAT": 85.0, "LON": 150.0, "SST": 5.0, "PT": 7, },
+        {"ID": "AAAAAAAAA", "YR": 2003, "MO": 12, "DY": 7, "HR": 12, "LAT": 85.0, "LON": 180.0, "SST": 5.0, "PT": 7, },
     ]
+    # fmt: on
     reps = ex.Voyage()
     for v in vals9:
         rec = IMMA()
@@ -4194,85 +2515,17 @@ def reps9a():
 @pytest.fixture
 def reps10a():
     # stationary drifter (gross position errors)
+    # fmt: off
     vals10 = [
-        {
-            "ID": "AAAAAAAAA",
-            "YR": 2003,
-            "MO": 12,
-            "DY": 1,
-            "HR": 12,
-            "LAT": 0.0,
-            "LON": 0.0,
-            "SST": 5.0,
-            "PT": 7,
-        },
-        {
-            "ID": "AAAAAAAAA",
-            "YR": 2003,
-            "MO": 12,
-            "DY": 2,
-            "HR": 12,
-            "LAT": 0.0,
-            "LON": 0.0,
-            "SST": 5.0,
-            "PT": 7,
-        },
-        {
-            "ID": "AAAAAAAAA",
-            "YR": 2003,
-            "MO": 12,
-            "DY": 3,
-            "HR": 12,
-            "LAT": 50.0,
-            "LON": 0.0,
-            "SST": 5.0,
-            "PT": 7,
-        },
-        {
-            "ID": "AAAAAAAAA",
-            "YR": 2003,
-            "MO": 12,
-            "DY": 4,
-            "HR": 12,
-            "LAT": 0.0,
-            "LON": 0.0,
-            "SST": 5.0,
-            "PT": 7,
-        },
-        {
-            "ID": "AAAAAAAAA",
-            "YR": 2003,
-            "MO": 12,
-            "DY": 5,
-            "HR": 12,
-            "LAT": 0.0,
-            "LON": 0.0,
-            "SST": 5.0,
-            "PT": 7,
-        },
-        {
-            "ID": "AAAAAAAAA",
-            "YR": 2003,
-            "MO": 12,
-            "DY": 6,
-            "HR": 12,
-            "LAT": 50.0,
-            "LON": 0.0,
-            "SST": 5.0,
-            "PT": 7,
-        },
-        {
-            "ID": "AAAAAAAAA",
-            "YR": 2003,
-            "MO": 12,
-            "DY": 7,
-            "HR": 12,
-            "LAT": 0.0,
-            "LON": 0.0,
-            "SST": 5.0,
-            "PT": 7,
-        },
+        {"ID": "AAAAAAAAA", "YR": 2003, "MO": 12, "DY": 1, "HR": 12, "LAT": 0.0, "LON": 0.0, "SST": 5.0, "PT": 7, },
+        {"ID": "AAAAAAAAA", "YR": 2003, "MO": 12, "DY": 2, "HR": 12, "LAT": 0.0, "LON": 0.0, "SST": 5.0, "PT": 7, },
+        {"ID": "AAAAAAAAA", "YR": 2003, "MO": 12, "DY": 3, "HR": 12, "LAT": 50.0, "LON": 0.0, "SST": 5.0, "PT": 7, },
+        {"ID": "AAAAAAAAA", "YR": 2003, "MO": 12, "DY": 4, "HR": 12, "LAT": 0.0, "LON": 0.0, "SST": 5.0, "PT": 7, },
+        {"ID": "AAAAAAAAA", "YR": 2003, "MO": 12, "DY": 5, "HR": 12, "LAT": 0.0, "LON": 0.0, "SST": 5.0, "PT": 7, },
+        {"ID": "AAAAAAAAA", "YR": 2003, "MO": 12, "DY": 6, "HR": 12, "LAT": 50.0, "LON": 0.0, "SST": 5.0, "PT": 7, },
+        {"ID": "AAAAAAAAA", "YR": 2003, "MO": 12, "DY": 7, "HR": 12, "LAT": 0.0, "LON": 0.0, "SST": 5.0, "PT": 7, },
     ]
+    # fmt: on
     reps = ex.Voyage()
     for v in vals10:
         rec = IMMA()
@@ -4287,30 +2540,12 @@ def reps10a():
 @pytest.fixture
 def reps11a():
     # too short for QC
+    # fmt: off
     vals11 = [
-        {
-            "ID": "AAAAAAAAA",
-            "YR": 2003,
-            "MO": 12,
-            "DY": 1,
-            "HR": 12,
-            "LAT": 0.0,
-            "LON": 0.0,
-            "SST": 5.0,
-            "PT": 7,
-        },
-        {
-            "ID": "AAAAAAAAA",
-            "YR": 2003,
-            "MO": 12,
-            "DY": 2,
-            "HR": 12,
-            "LAT": 0.0,
-            "LON": 0.0,
-            "SST": 5.0,
-            "PT": 7,
-        },
+        {"ID": "AAAAAAAAA", "YR": 2003, "MO": 12, "DY": 1, "HR": 12, "LAT": 0.0, "LON": 0.0, "SST": 5.0, "PT": 7, },
+        {"ID": "AAAAAAAAA", "YR": 2003, "MO": 12, "DY": 2, "HR": 12, "LAT": 0.0, "LON": 0.0, "SST": 5.0, "PT": 7, },
     ]
+    # fmt: on
     reps = ex.Voyage()
     for v in vals11:
         rec = IMMA()
@@ -4325,85 +2560,17 @@ def reps11a():
 @pytest.fixture
 def reps12a():
     # assertion error - bad input parameter
+    # fmt: off
     vals12 = [
-        {
-            "ID": "AAAAAAAAA",
-            "YR": 2003,
-            "MO": 12,
-            "DY": 1,
-            "HR": 12,
-            "LAT": 0.0,
-            "LON": 0.0,
-            "SST": 5.0,
-            "PT": 7,
-        },
-        {
-            "ID": "AAAAAAAAA",
-            "YR": 2003,
-            "MO": 12,
-            "DY": 2,
-            "HR": 12,
-            "LAT": 0.0,
-            "LON": 0.0,
-            "SST": 5.0,
-            "PT": 7,
-        },
-        {
-            "ID": "AAAAAAAAA",
-            "YR": 2003,
-            "MO": 12,
-            "DY": 3,
-            "HR": 12,
-            "LAT": 0.0,
-            "LON": 0.0,
-            "SST": 5.0,
-            "PT": 7,
-        },
-        {
-            "ID": "AAAAAAAAA",
-            "YR": 2003,
-            "MO": 12,
-            "DY": 4,
-            "HR": 12,
-            "LAT": 0.0,
-            "LON": 0.0,
-            "SST": 5.0,
-            "PT": 7,
-        },
-        {
-            "ID": "AAAAAAAAA",
-            "YR": 2003,
-            "MO": 12,
-            "DY": 5,
-            "HR": 12,
-            "LAT": 0.0,
-            "LON": 0.0,
-            "SST": 5.0,
-            "PT": 7,
-        },
-        {
-            "ID": "AAAAAAAAA",
-            "YR": 2003,
-            "MO": 12,
-            "DY": 6,
-            "HR": 12,
-            "LAT": 0.0,
-            "LON": 0.0,
-            "SST": 5.0,
-            "PT": 7,
-        },
-        {
-            "ID": "AAAAAAAAA",
-            "YR": 2003,
-            "MO": 12,
-            "DY": 7,
-            "HR": 12,
-            "LAT": 0.0,
-            "LON": 0.0,
-            "SST": 5.0,
-            "PT": 7,
-        },
+        {"ID": "AAAAAAAAA", "YR": 2003, "MO": 12, "DY": 1, "HR": 12, "LAT": 0.0, "LON": 0.0, "SST": 5.0, "PT": 7, },
+        {"ID": "AAAAAAAAA", "YR": 2003, "MO": 12, "DY": 2, "HR": 12, "LAT": 0.0, "LON": 0.0, "SST": 5.0, "PT": 7, },
+        {"ID": "AAAAAAAAA", "YR": 2003, "MO": 12, "DY": 3, "HR": 12, "LAT": 0.0, "LON": 0.0, "SST": 5.0, "PT": 7, },
+        {"ID": "AAAAAAAAA", "YR": 2003, "MO": 12, "DY": 4, "HR": 12, "LAT": 0.0, "LON": 0.0, "SST": 5.0, "PT": 7, },
+        {"ID": "AAAAAAAAA", "YR": 2003, "MO": 12, "DY": 5, "HR": 12, "LAT": 0.0, "LON": 0.0, "SST": 5.0, "PT": 7, },
+        {"ID": "AAAAAAAAA", "YR": 2003, "MO": 12, "DY": 6, "HR": 12, "LAT": 0.0, "LON": 0.0, "SST": 5.0, "PT": 7, },
+        {"ID": "AAAAAAAAA", "YR": 2003, "MO": 12, "DY": 7, "HR": 12, "LAT": 0.0, "LON": 0.0, "SST": 5.0, "PT": 7, },
     ]
+    # fmt: on
     reps = ex.Voyage()
     for v in vals12:
         rec = IMMA()
@@ -4418,85 +2585,17 @@ def reps12a():
 @pytest.fixture
 def reps13a():
     # assertion error - missing observation
+    # fmt: off
     vals13 = [
-        {
-            "ID": "AAAAAAAAA",
-            "YR": 2003,
-            "MO": 12,
-            "DY": 1,
-            "HR": 12,
-            "LAT": 0.0,
-            "LON": 0.0,
-            "SST": 5.0,
-            "PT": 7,
-        },
-        {
-            "ID": "AAAAAAAAA",
-            "YR": 2003,
-            "MO": 12,
-            "DY": 2,
-            "HR": 12,
-            "LAT": 0.0,
-            "LON": 0.0,
-            "SST": 5.0,
-            "PT": 7,
-        },
-        {
-            "ID": "AAAAAAAAA",
-            "YR": 2003,
-            "MO": 12,
-            "DY": 3,
-            "HR": 12,
-            "LAT": 0.0,
-            "LON": 0.0,
-            "SST": 5.0,
-            "PT": 7,
-        },
-        {
-            "ID": "AAAAAAAAA",
-            "YR": 2003,
-            "MO": 12,
-            "DY": 4,
-            "HR": 12,
-            "LAT": 0.0,
-            "LON": 0.0,
-            "SST": 5.0,
-            "PT": 7,
-        },
-        {
-            "ID": "AAAAAAAAA",
-            "YR": 2003,
-            "MO": 12,
-            "DY": 5,
-            "HR": 12,
-            "LAT": 0.0,
-            "LON": 0.0,
-            "SST": 5.0,
-            "PT": 7,
-        },
-        {
-            "ID": "AAAAAAAAA",
-            "YR": 2003,
-            "MO": 12,
-            "DY": 6,
-            "HR": 12,
-            "LAT": 0.0,
-            "LON": 0.0,
-            "SST": 5.0,
-            "PT": 7,
-        },
-        {
-            "ID": "AAAAAAAAA",
-            "YR": 2003,
-            "MO": 12,
-            "DY": 7,
-            "HR": 12,
-            "LAT": 0.0,
-            "LON": 0.0,
-            "SST": 5.0,
-            "PT": 7,
-        },
+        {"ID": "AAAAAAAAA", "YR": 2003, "MO": 12, "DY": 1, "HR": 12, "LAT": 0.0, "LON": 0.0, "SST": 5.0, "PT": 7, },
+        {"ID": "AAAAAAAAA", "YR": 2003, "MO": 12, "DY": 2, "HR": 12, "LAT": 0.0, "LON": 0.0, "SST": 5.0, "PT": 7, },
+        {"ID": "AAAAAAAAA", "YR": 2003, "MO": 12, "DY": 3, "HR": 12, "LAT": 0.0, "LON": 0.0, "SST": 5.0, "PT": 7, },
+        {"ID": "AAAAAAAAA", "YR": 2003, "MO": 12, "DY": 4, "HR": 12, "LAT": 0.0, "LON": 0.0, "SST": 5.0, "PT": 7, },
+        {"ID": "AAAAAAAAA", "YR": 2003, "MO": 12, "DY": 5, "HR": 12, "LAT": 0.0, "LON": 0.0, "SST": 5.0, "PT": 7, },
+        {"ID": "AAAAAAAAA", "YR": 2003, "MO": 12, "DY": 6, "HR": 12, "LAT": 0.0, "LON": 0.0, "SST": 5.0, "PT": 7, },
+        {"ID": "AAAAAAAAA", "YR": 2003, "MO": 12, "DY": 7, "HR": 12, "LAT": 0.0, "LON": 0.0, "SST": 5.0, "PT": 7, },
     ]
+    # fmt: on
     reps = ex.Voyage()
     for v in vals13:
         rec = IMMA()
@@ -4512,86 +2611,17 @@ def reps13a():
 @pytest.fixture
 def reps14a():
     # assertion error - times not sorted
+    # fmt: off
     vals14 = [
-        {
-            "ID": "AAAAAAAAA",
-            "YR": 2003,
-            "MO": 12,
-            "DY": 1,
-            "HR": 12,
-            "LAT": 0.0,
-            "LON": 0.0,
-            "SST": 5.0,
-            "PT": 7,
-        },
-        {
-            "ID": "AAAAAAAAA",
-            "YR": 2003,
-            "MO": 12,
-            "DY": 2,
-            "HR": 12,
-            "LAT": 0.0,
-            "LON": 0.0,
-            "SST": 5.0,
-            "PT": 7,
-        },
-        {
-            "ID": "AAAAAAAAA",
-            "YR": 2003,
-            "MO": 12,
-            "DY": 3,
-            "HR": 12,
-            "LAT": 0.0,
-            "LON": 0.0,
-            "SST": 5.0,
-            "PT": 7,
-        },
-        {
-            "ID": "AAAAAAAAA",
-            "YR": 2003,
-            "MO": 12,
-            "DY": 2,
-            "HR": 12,
-            "LAT": 0.0,
-            "LON": 0.0,
-            "SST": 5.0,
-            "PT": 7,
-        },
-        {
-            "ID": "AAAAAAAAA",
-            "YR": 2003,
-            "MO": 12,
-            "DY": 5,
-            "HR": 12,
-            "LAT": 0.0,
-            "LON": 0.0,
-            "SST": 5.0,
-            "PT": 7,
-        },
-        {
-            "ID": "AAAAAAAAA",
-            "YR": 2003,
-            "MO": 12,
-            "DY": 6,
-            "HR": 12,
-            "LAT": 0.0,
-            "LON": 0.0,
-            "SST": 5.0,
-            "PT": 7,
-        },
-        {
-            "ID": "AAAAAAAAA",
-            "YR": 2003,
-            "MO": 12,
-            "DY": 7,
-            "HR": 12,
-            "LAT": 0.0,
-            "LON": 0.0,
-            "SST": 5.0,
-            "PT": 7,
-        },
+        {"ID": "AAAAAAAAA", "YR": 2003, "MO": 12, "DY": 1, "HR": 12, "LAT": 0.0, "LON": 0.0, "SST": 5.0, "PT": 7, },
+        {"ID": "AAAAAAAAA", "YR": 2003, "MO": 12, "DY": 2, "HR": 12, "LAT": 0.0, "LON": 0.0, "SST": 5.0, "PT": 7, },
+        {"ID": "AAAAAAAAA", "YR": 2003, "MO": 12, "DY": 3, "HR": 12, "LAT": 0.0, "LON": 0.0, "SST": 5.0, "PT": 7, },
+        {"ID": "AAAAAAAAA", "YR": 2003, "MO": 12, "DY": 2, "HR": 12, "LAT": 0.0, "LON": 0.0, "SST": 5.0, "PT": 7, },
+        {"ID": "AAAAAAAAA", "YR": 2003, "MO": 12, "DY": 5, "HR": 12, "LAT": 0.0, "LON": 0.0, "SST": 5.0, "PT": 7, },
+        {"ID": "AAAAAAAAA", "YR": 2003, "MO": 12, "DY": 6, "HR": 12, "LAT": 0.0, "LON": 0.0, "SST": 5.0, "PT": 7, },
+        {"ID": "AAAAAAAAA", "YR": 2003, "MO": 12, "DY": 7, "HR": 12, "LAT": 0.0, "LON": 0.0, "SST": 5.0, "PT": 7, },
     ]
-
+    # fmt: on
     reps = ex.Voyage()
 
     for v in vals14:
@@ -4855,128 +2885,29 @@ def tailcheck_vals(selector):
          "BGVAR": 0.01, "ICE": 0.0, },
         {"ID": "AAAAAAAAA", "YR": 2003, "MO": 12, "DY": 1, "HR": 12.8, "LAT": 0.0, "LON": 0.0, "SST": 5.0, "OSTIA": 5.0,
          "BGVAR": 0.01, "ICE": 0.0, }, ]
-    # fmt: on
 
     # all land-masked
     vals2 = [
-        {
-            "ID": "AAAAAAAAA",
-            "YR": 2003,
-            "MO": 12,
-            "DY": 1,
-            "HR": 0.0,
-            "LAT": 0.0,
-            "LON": 0.0,
-            "SST": 5.0,
-            "OSTIA": None,
-            "BGVAR": 0.01,
-            "ICE": 0.0,
-        },
-        {
-            "ID": "AAAAAAAAA",
-            "YR": 2003,
-            "MO": 12,
-            "DY": 1,
-            "HR": 0.1,
-            "LAT": 0.0,
-            "LON": 0.0,
-            "SST": 5.0,
-            "OSTIA": None,
-            "BGVAR": 0.01,
-            "ICE": 0.0,
-        },
-        {
-            "ID": "AAAAAAAAA",
-            "YR": 2003,
-            "MO": 12,
-            "DY": 1,
-            "HR": 0.2,
-            "LAT": 0.0,
-            "LON": 0.0,
-            "SST": 5.0,
-            "OSTIA": None,
-            "BGVAR": 0.01,
-            "ICE": 0.0,
-        },
-        {
-            "ID": "AAAAAAAAA",
-            "YR": 2003,
-            "MO": 12,
-            "DY": 1,
-            "HR": 0.3,
-            "LAT": 0.0,
-            "LON": 0.0,
-            "SST": 5.0,
-            "OSTIA": None,
-            "BGVAR": 0.01,
-            "ICE": 0.0,
-        },
-        {
-            "ID": "AAAAAAAAA",
-            "YR": 2003,
-            "MO": 12,
-            "DY": 1,
-            "HR": 0.4,
-            "LAT": 0.0,
-            "LON": 0.0,
-            "SST": 5.0,
-            "OSTIA": None,
-            "BGVAR": 0.01,
-            "ICE": 0.0,
-        },
-        {
-            "ID": "AAAAAAAAA",
-            "YR": 2003,
-            "MO": 12,
-            "DY": 1,
-            "HR": 0.5,
-            "LAT": 0.0,
-            "LON": 0.0,
-            "SST": 5.0,
-            "OSTIA": None,
-            "BGVAR": 0.01,
-            "ICE": 0.0,
-        },
-        {
-            "ID": "AAAAAAAAA",
-            "YR": 2003,
-            "MO": 12,
-            "DY": 1,
-            "HR": 0.6,
-            "LAT": 0.0,
-            "LON": 0.0,
-            "SST": 5.0,
-            "OSTIA": None,
-            "BGVAR": 0.01,
-            "ICE": 0.0,
-        },
-        {
-            "ID": "AAAAAAAAA",
-            "YR": 2003,
-            "MO": 12,
-            "DY": 1,
-            "HR": 0.7,
-            "LAT": 0.0,
-            "LON": 0.0,
-            "SST": 5.0,
-            "OSTIA": None,
-            "BGVAR": 0.01,
-            "ICE": 0.0,
-        },
-        {
-            "ID": "AAAAAAAAA",
-            "YR": 2003,
-            "MO": 12,
-            "DY": 1,
-            "HR": 0.8,
-            "LAT": 0.0,
-            "LON": 0.0,
-            "SST": 5.0,
-            "OSTIA": None,
-            "BGVAR": 0.01,
-            "ICE": 0.0,
-        },
+        {"ID": "AAAAAAAAA", "YR": 2003, "MO": 12, "DY": 1, "HR": 0.0, "LAT": 0.0, "LON": 0.0, "SST": 5.0, "OSTIA": None,
+         "BGVAR": 0.01, "ICE": 0.0, },
+        {"ID": "AAAAAAAAA", "YR": 2003, "MO": 12, "DY": 1, "HR": 0.1, "LAT": 0.0, "LON": 0.0, "SST": 5.0, "OSTIA": None,
+         "BGVAR": 0.01, "ICE": 0.0, },
+        {"ID": "AAAAAAAAA", "YR": 2003, "MO": 12, "DY": 1, "HR": 0.2, "LAT": 0.0, "LON": 0.0, "SST": 5.0, "OSTIA": None,
+         "BGVAR": 0.01, "ICE": 0.0, },
+        {"ID": "AAAAAAAAA", "YR": 2003, "MO": 12, "DY": 1, "HR": 0.3, "LAT": 0.0, "LON": 0.0, "SST": 5.0, "OSTIA": None,
+         "BGVAR": 0.01, "ICE": 0.0, },
+        {"ID": "AAAAAAAAA", "YR": 2003, "MO": 12, "DY": 1, "HR": 0.4, "LAT": 0.0, "LON": 0.0, "SST": 5.0, "OSTIA": None,
+         "BGVAR": 0.01, "ICE": 0.0, },
+        {"ID": "AAAAAAAAA", "YR": 2003, "MO": 12, "DY": 1, "HR": 0.5, "LAT": 0.0, "LON": 0.0, "SST": 5.0, "OSTIA": None,
+         "BGVAR": 0.01, "ICE": 0.0, },
+        {"ID": "AAAAAAAAA", "YR": 2003, "MO": 12, "DY": 1, "HR": 0.6, "LAT": 0.0, "LON": 0.0, "SST": 5.0, "OSTIA": None,
+         "BGVAR": 0.01, "ICE": 0.0, },
+        {"ID": "AAAAAAAAA", "YR": 2003, "MO": 12, "DY": 1, "HR": 0.7, "LAT": 0.0, "LON": 0.0, "SST": 5.0, "OSTIA": None,
+         "BGVAR": 0.01, "ICE": 0.0, },
+        {"ID": "AAAAAAAAA", "YR": 2003, "MO": 12, "DY": 1, "HR": 0.8, "LAT": 0.0, "LON": 0.0, "SST": 5.0, "OSTIA": None,
+         "BGVAR": 0.01, "ICE": 0.0, },
     ]
+    # fmt: on
 
     # all ice
     vals3 = [
