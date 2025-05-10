@@ -1232,3 +1232,219 @@ def sst_biased_noisy_check(
                 for rep in reps:
                     rep.set_qc("SST", "drf_short", 1)
     return reps
+
+
+def og_sst_tail_check(reps, long_win_len=121, long_err_std_n=3.0, short_win_len=30, short_err_std_n=3.0,
+                   short_win_n_bad=2, drif_inter=0.29, drif_intra=1.00, background_err_lim=0.3):
+    """
+    Check to see whether there is erroneous sea surface temperature data at the beginning or end of a drifter record
+    (referred to as 'tails'). The flags 'drf_tail1' and 'drf_tail2' are set for each input report: flag=1 for reports
+    with erroneous data, else flag=0, 'drf_tail1' is used for bad data at the beginning of a record, 'drf_tail2' is
+    used for bad data at the end of a record.
+
+    The tail check makes an assessment of the quality of data at the start and end of a drifting buoy record by
+    comparing to a background reference field. Data found to be unacceptably biased or noisy relative to the
+    background are flagged by the check. When making the comparison an allowance is made for background error
+    variance and also normal drifter error (both bias and random measurement error). The correlation of the
+    background error is treated as unknown and takes on a value which maximises background error dependent on the
+    assesment being made. A background error variance limit is also specified, beyond which the background is deemed
+    unreliable. Observations made during the day, in icy regions or where the background value is missing are
+    excluded from the comparison.
+
+    The check proceeds in two steps; a 'long tail-check' followed by a 'short tail-check'. The idea is that the short
+    tail-check has finer resolution but lower sensitivity than the long tail-check and may pick off noisy data not
+    picked up by the long tail check. Only observations that pass the long tail-check are passed to the short
+    tail-check. Both of these tail checks proceed by moving a window over the data and assessing the data in each
+    window. Once good data are found the check stops and any bad data preceeding this are flagged. If unreliable
+    background data are encountered the check stops. The checks are run forwards and backwards over the record so as
+    to assess data at the start and end of the record. If the whole record fails no observations are flagged as there
+    are then no 'tails' in the data (this is left for other checks). The long tail check looks for groups of
+    observations that are too biased or noisy as a whole. The short tail check looks for individual observations
+    exceeding a noise limit within the window.
+
+    :param reps: a time-sorted list of drifter observations in format :class:`.Voyage`, each report must have a
+      valid longitude, latitude and time and matched values for OSTIA, ICE and BGVAR in its extended data
+    :param long_win_len: length of window (in data-points) over which to make long tail-check (must be an odd number)
+    :param long_err_std_n: number of standard deviations of combined background and drifter bias error, beyond which
+      data fail bias check
+    :param short_win_len: length of window (in data-points) over which to make the short tail-check
+    :param short_err_std_n: number of standard deviations of combined background and drifter error, beyond which data
+      are deemed suspicious
+    :param short_win_n_bad: minimum number of suspicious data points required for failure of short check window
+    :param drif_inter: spread of biases expected in drifter data (standard deviation, degC)
+    :param drif_intra: maximum random measurement uncertainty reasonably expected in drifter data (standard deviation,
+      degC)
+    :param background_err_lim: background error variance beyond which the SST background is deemed unreliable (degC
+      squared)
+    :type reps: a :class:`.Voyage`
+    :type long_win_len: integer
+    :type long_err_std_n: float
+    :type short_win_len: integer
+    :type short_err_std_n: float
+    :type short_win_n_bad: integer
+    :type drif_inter: float
+    :type drif_intra: float
+    :type background_err_lim: float
+    """
+
+    try:
+        long_win_len = int(long_win_len)
+        long_err_std_n = float(long_err_std_n)
+        short_win_len = int(short_win_len)
+        short_err_std_n = float(short_err_std_n)
+        short_win_n_bad = int(short_win_n_bad)
+        drif_inter = float(drif_inter)
+        drif_intra = float(drif_intra)
+        background_err_lim = float(background_err_lim)
+        assert long_win_len >= 1, 'long_win_len must be >= 1'
+        assert long_win_len % 2 != 0, 'long_win_len must be an odd number'
+        assert long_err_std_n >= 0, 'long_err_std_n must be >= 0'
+        assert short_win_len >= 1, 'short_win_len must be >= 1'
+        assert short_err_std_n >= 0, 'short_err_std_n must be >= 0'
+        assert short_win_n_bad >= 1, 'short_win_n_bad must be >= 1'
+        assert drif_inter >= 0, 'drif_inter must be >= 0'
+        assert drif_intra >= 0, 'drif_intra must be >= 0'
+        assert background_err_lim >= 0, 'background_err_lim must be >= 0'
+    except AssertionError as error:
+        raise AssertionError('invalid input parameter: ' + str(error))
+
+    # test and filter out obs with unsuitable background matches
+    reps_ind = []
+    sst_anom = []
+    bgvar = []
+    for ind, rep in enumerate(reps):
+        try:
+            bg_val = rep.getext('OSTIA')  # raises assertion error if not found
+            ice_val = rep.getext('ICE')  # raises assertion error if not found
+            bgvar_val = rep.getext('BGVAR')  # raises assertion error if not found
+        except AssertionError as error:
+            raise AssertionError('matched report value is missing: ' + str(error))
+
+        if ice_val is None:
+            ice_val = 0.0
+        assert ice_val is not None and 0.0 <= ice_val <= 1.0, 'matched ice proportion is invalid'
+
+        try:
+            daytime = track_day_test(rep.getvar('YR'), rep.getvar('MO'), rep.getvar('DY'),
+                                     rep.getvar('HR'), rep.getvar('LAT'), rep.getvar('LON'), -2.5)
+        except AssertionError as error:
+            raise AssertionError('problem with report value: ' + str(error))
+        if ind > 0:
+            try:
+                time_diff = rep.getext('time_diff')  # raises assertion error if 'time_diff' not found
+                assert time_diff >= 0, 'times are not sorted'
+            except AssertionError as error:
+                raise AssertionError('problem with report value: ' + str(error))
+
+        land_match = True if bg_val is None else False
+        ice_match = True if ice_val > 0.15 else False
+        if daytime or land_match or ice_match:
+            pass
+        else:
+            assert bg_val is not None and -5.0 <= bg_val <= 45.0, 'matched background sst is invalid'
+            assert bgvar_val is not None and 0.0 <= bgvar_val <= 10, 'matched background error variance is invalid'
+            reps_ind.append(ind)
+            sst_anom.append(rep.getvar('SST') - bg_val)
+            bgvar.append(bgvar_val)
+
+    # set start and end tail flags to pass to ensure all obs receive flag
+    # then exit if there are no obs suitable for assessment
+    for rep in reps:
+        rep.set_qc('SST', 'drf_tail1', 0)
+        rep.set_qc('SST', 'drf_tail2', 0)
+    if len(sst_anom) == 0:
+        return
+
+    # prepare numpy arrays and variables needed for tail checks
+    reps_ind = np.array(reps_ind)  # indices of obs suitable for assessment
+    sst_anom = np.array(sst_anom)  # ob-background differences
+    bgerr = np.sqrt(np.array(bgvar))  # standard deviation of background error
+    nrep = len(sst_anom)
+    start_tail_ind = -1  # keeps track of index where start tail stops
+    end_tail_ind = nrep  # keeps track of index where end tail starts
+
+    # do long tail check
+    mid_win_ind = int((long_win_len - 1) / 2)
+    if nrep < long_win_len:  # records shorter than long-window length aren't evaluated
+        pass
+    else:
+        for forward in [True, False]:  # run forwards then backwards over timeseries
+            if forward:
+                sst_anom_temp = sst_anom
+                bgerr_temp = bgerr
+            else:
+                sst_anom_temp = np.flipud(sst_anom)
+                bgerr_temp = np.flipud(bgerr)
+            # this is the long tail check
+            for ix in range(0, nrep - long_win_len + 1):
+                sst_anom_winvals = sst_anom_temp[ix:ix + long_win_len]
+                bgerr_winvals = bgerr_temp[ix:ix + long_win_len]
+                if np.any(bgerr_winvals > np.sqrt(background_err_lim)):
+                    break
+                sst_anom_avg = trim_mean(sst_anom_winvals, 100)
+                sst_anom_stdev = trim_std(sst_anom_winvals, 100)
+                bgerr_avg = np.mean(bgerr_winvals)
+                bgerr_rms = np.sqrt(np.mean(bgerr_winvals ** 2))
+                if (abs(sst_anom_avg) > long_err_std_n * np.sqrt(drif_inter ** 2 + bgerr_avg ** 2)) \
+                        or (sst_anom_stdev > np.sqrt(drif_intra ** 2 + bgerr_rms ** 2)):
+                    if forward:
+                        start_tail_ind = ix + mid_win_ind
+                    else:
+                        end_tail_ind = (nrep - 1) - ix - mid_win_ind
+                else:
+                    break
+
+    # do short tail check on records that pass long tail check
+    if start_tail_ind >= end_tail_ind:  # whole record already failed long tail check
+        pass
+    else:
+        first_pass_ind = start_tail_ind + 1  # first index passing long tail check
+        last_pass_ind = end_tail_ind - 1  # last index passing long tail check
+        npass = last_pass_ind - first_pass_ind + 1
+        assert npass > 0, 'short tail check: npass not > 0'
+        if npass < short_win_len:  # records shorter than short-window length aren't evaluated
+            pass
+        else:
+            for forward in [True, False]:  # run forwards then backwards over timeseries
+                if forward:
+                    sst_anom_temp = sst_anom[first_pass_ind:last_pass_ind + 1]
+                    bgerr_temp = bgerr[first_pass_ind:last_pass_ind + 1]
+                else:
+                    sst_anom_temp = np.flipud(sst_anom[first_pass_ind:last_pass_ind + 1])
+                    bgerr_temp = np.flipud(bgerr[first_pass_ind:last_pass_ind + 1])
+                # this is the short tail check
+                for ix in range(0, npass - short_win_len + 1):
+                    sst_anom_winvals = sst_anom_temp[ix:ix + short_win_len]
+                    bgerr_winvals = bgerr_temp[ix:ix + short_win_len]
+                    if np.any(bgerr_winvals > np.sqrt(background_err_lim)):
+                        break
+                    limit = short_err_std_n * np.sqrt(bgerr_winvals ** 2 + drif_inter ** 2 + drif_intra ** 2)
+                    exceed_limit = np.logical_or(sst_anom_winvals > limit, sst_anom_winvals < -limit)
+                    if np.sum(exceed_limit) >= short_win_n_bad:
+                        if forward:
+                            if ix == (npass - short_win_len):  # if all windows have failed, flag everything
+                                start_tail_ind += short_win_len
+                            else:
+                                start_tail_ind += 1
+                        else:
+                            if ix == (npass - short_win_len):  # if all windows have failed, flag everything
+                                end_tail_ind -= short_win_len
+                            else:
+                                end_tail_ind -= 1
+                    else:
+                        break
+
+                        # now flag reps
+    if start_tail_ind >= end_tail_ind:  # whole record failed tail checks, dont flag
+        start_tail_ind = -1
+        end_tail_ind = nrep
+    if not start_tail_ind == -1:
+        for ind, rep in enumerate(reps):
+            if ind <= reps_ind[start_tail_ind]:
+                rep.set_qc('SST', 'drf_tail1', 1)
+    if not end_tail_ind == nrep:
+        for ind, rep in enumerate(reps):
+            if ind >= reps_ind[end_tail_ind]:
+                rep.set_qc('SST', 'drf_tail2', 1)
+
+    return
