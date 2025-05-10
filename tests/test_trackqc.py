@@ -2944,7 +2944,7 @@ def test_error_bad_input_parameter(reps16):
         otqc.aground_check(reps16.reps, 0, 1, 2)
     except AssertionError as error:
         error_return_text = "invalid input parameter: smooth_win must be >= 1"
-        assert str(error)[0 : len(error_return_text)] == error_return_text
+        assert str(error)[0: len(error_return_text)] == error_return_text
     for i in range(0, len(reps16)):
         assert reps16.get_qc(i, "POS", "drf_agr") == expected_flags[i]
 
@@ -3043,7 +3043,7 @@ def test_error_missing_observation(reps17):
         otqc.aground_check(reps17.reps, 3, 1, 2)
     except AssertionError as error:
         error_return_text = "problem with report values: Nan(s) found in longitude"
-        assert str(error)[0 : len(error_return_text)] == error_return_text
+        assert str(error)[0: len(error_return_text)] == error_return_text
     for i in range(0, len(reps17)):
         assert reps17.get_qc(i, "POS", "drf_agr") == expected_flags[i]
 
@@ -3142,7 +3142,7 @@ def test_error_not_time_sorted(reps18):
         otqc.aground_check(reps18.reps, 3, 1, 2)
     except AssertionError as error:
         error_return_text = "problem with report values: times are not sorted"
-        assert str(error)[0 : len(error_return_text)] == error_return_text
+        assert str(error)[0: len(error_return_text)] == error_return_text
     for i in range(0, len(reps18)):
         assert reps18.get_qc(i, "POS", "drf_agr") == expected_flags[i]
 
@@ -3262,7 +3262,7 @@ def test_new_error_bad_input_parameter(reps16):
         otqc.new_aground_check(reps16.reps, 2, 1)
     except AssertionError as error:
         error_return_text = "invalid input parameter: smooth_win must be an odd number"
-        assert str(error)[0 : len(error_return_text)] == error_return_text
+        assert str(error)[0: len(error_return_text)] == error_return_text
     for i in range(0, len(reps16)):
         assert reps16.get_qc(i, "POS", "drf_agr") == expected_flags[i]
 
@@ -3273,7 +3273,7 @@ def test_new_error_missing_observation(reps17):
         otqc.new_aground_check(reps17.reps, 3, 1)
     except AssertionError as error:
         error_return_text = "problem with report values: Nan(s) found in longitude"
-        assert str(error)[0 : len(error_return_text)] == error_return_text
+        assert str(error)[0: len(error_return_text)] == error_return_text
     for i in range(0, len(reps17)):
         assert reps17.get_qc(i, "POS", "drf_agr") == expected_flags[i]
 
@@ -3284,7 +3284,7 @@ def test_new_error_not_time_sorted(reps18):
         otqc.new_aground_check(reps18.reps, 3, 1)
     except AssertionError as error:
         error_return_text = "problem with report values: times are not sorted"
-        assert str(error)[0 : len(error_return_text)] == error_return_text
+        assert str(error)[0: len(error_return_text)] == error_return_text
     for i in range(0, len(reps18)):
         assert reps18.get_qc(i, "POS", "drf_agr") == expected_flags[i]
 
@@ -4691,7 +4691,7 @@ def test_error_bad_input_parameter_a(reps12a):
         otqc.speed_check(reps12a.reps, -2.5, 0.5, 1.0)
     except AssertionError as error:
         error_return_text = "invalid input parameter: speed_limit must be >= 0"
-        assert str(error)[0 : len(error_return_text)] == error_return_text
+        assert str(error)[0: len(error_return_text)] == error_return_text
     for i in range(0, len(reps12a)):
         assert reps12a.get_qc(i, "POS", "drf_spd") == expected_flags[i]
 
@@ -4702,7 +4702,7 @@ def test_error_missing_observation_a(reps13a):
         otqc.speed_check(reps13a.reps, 2.5, 0.5, 1.0)
     except AssertionError as error:
         error_return_text = "problem with report values: Nan(s) found in longitude"
-        assert str(error)[0 : len(error_return_text)] == error_return_text
+        assert str(error)[0: len(error_return_text)] == error_return_text
     for i in range(0, len(reps13a)):
         assert reps13a.get_qc(i, "POS", "drf_spd") == expected_flags[i]
 
@@ -4713,7 +4713,7 @@ def test_error_not_time_sorted_a(reps14a):
         otqc.speed_check(reps14a.reps, 2.5, 0.5, 1.0)
     except AssertionError as error:
         error_return_text = "problem with report values: times are not sorted"
-        assert str(error)[0 : len(error_return_text)] == error_return_text
+        assert str(error)[0: len(error_return_text)] == error_return_text
     for i in range(0, len(reps14a)):
         assert reps14a.get_qc(i, "POS", "drf_spd") == expected_flags[i]
 
@@ -4806,7 +4806,7 @@ def test_new_error_bad_input_parameter_a(reps12a, iquam_parameters):
         otqc.new_speed_check(reps12a.reps, iquam_parameters, -2.5, 0.5)
     except AssertionError as error:
         error_return_text = "invalid input parameter: speed_limit must be >= 0"
-        assert str(error)[0 : len(error_return_text)] == error_return_text
+        assert str(error)[0: len(error_return_text)] == error_return_text
     for i in range(0, len(reps12a)):
         assert reps12a.get_qc(i, "POS", "drf_spd") == expected_flags[i]
 
@@ -4817,7 +4817,7 @@ def test_new_error_missing_observation_a(reps13a, iquam_parameters):
         otqc.new_speed_check(reps13a.reps, iquam_parameters, 2.5, 0.5)
     except AssertionError as error:
         error_return_text = "problem with report values: Nan(s) found in longitude"
-        assert str(error)[0 : len(error_return_text)] == error_return_text
+        assert str(error)[0: len(error_return_text)] == error_return_text
     for i in range(0, len(reps13a)):
         assert reps13a.get_qc(i, "POS", "drf_spd") == expected_flags[i]
 
@@ -4828,132 +4828,34 @@ def test_new_error_not_time_sorted_a(reps14a, iquam_parameters):
         otqc.new_speed_check(reps14a.reps, iquam_parameters, 2.5, 0.5)
     except AssertionError as error:
         error_return_text = "problem with report values: times are not sorted"
-        assert str(error)[0 : len(error_return_text)] == error_return_text
+        assert str(error)[0: len(error_return_text)] == error_return_text
     for i in range(0, len(reps14a)):
         assert reps14a.get_qc(i, "POS", "drf_spd") == expected_flags[i]
 
 
 def tailcheck_vals(selector):
     # all daytime
+    # fmt: off
     vals1 = [
-        {
-            "ID": "AAAAAAAAA",
-            "YR": 2003,
-            "MO": 12,
-            "DY": 1,
-            "HR": 12.0,
-            "LAT": 0.0,
-            "LON": 0.0,
-            "SST": 5.0,
-            "OSTIA": 5.0,
-            "BGVAR": 0.01,
-            "ICE": 0.0,
-        },
-        {
-            "ID": "AAAAAAAAA",
-            "YR": 2003,
-            "MO": 12,
-            "DY": 1,
-            "HR": 12.1,
-            "LAT": 0.0,
-            "LON": 0.0,
-            "SST": 5.0,
-            "OSTIA": 5.0,
-            "BGVAR": 0.01,
-            "ICE": 0.0,
-        },
-        {
-            "ID": "AAAAAAAAA",
-            "YR": 2003,
-            "MO": 12,
-            "DY": 1,
-            "HR": 12.2,
-            "LAT": 0.0,
-            "LON": 0.0,
-            "SST": 5.0,
-            "OSTIA": 5.0,
-            "BGVAR": 0.01,
-            "ICE": 0.0,
-        },
-        {
-            "ID": "AAAAAAAAA",
-            "YR": 2003,
-            "MO": 12,
-            "DY": 1,
-            "HR": 12.3,
-            "LAT": 0.0,
-            "LON": 0.0,
-            "SST": 5.0,
-            "OSTIA": 5.0,
-            "BGVAR": 0.01,
-            "ICE": 0.0,
-        },
-        {
-            "ID": "AAAAAAAAA",
-            "YR": 2003,
-            "MO": 12,
-            "DY": 1,
-            "HR": 12.4,
-            "LAT": 0.0,
-            "LON": 0.0,
-            "SST": 5.0,
-            "OSTIA": 5.0,
-            "BGVAR": 0.01,
-            "ICE": 0.0,
-        },
-        {
-            "ID": "AAAAAAAAA",
-            "YR": 2003,
-            "MO": 12,
-            "DY": 1,
-            "HR": 12.5,
-            "LAT": 0.0,
-            "LON": 0.0,
-            "SST": 5.0,
-            "OSTIA": 5.0,
-            "BGVAR": 0.01,
-            "ICE": 0.0,
-        },
-        {
-            "ID": "AAAAAAAAA",
-            "YR": 2003,
-            "MO": 12,
-            "DY": 1,
-            "HR": 12.6,
-            "LAT": 0.0,
-            "LON": 0.0,
-            "SST": 5.0,
-            "OSTIA": 5.0,
-            "BGVAR": 0.01,
-            "ICE": 0.0,
-        },
-        {
-            "ID": "AAAAAAAAA",
-            "YR": 2003,
-            "MO": 12,
-            "DY": 1,
-            "HR": 12.7,
-            "LAT": 0.0,
-            "LON": 0.0,
-            "SST": 5.0,
-            "OSTIA": 5.0,
-            "BGVAR": 0.01,
-            "ICE": 0.0,
-        },
-        {
-            "ID": "AAAAAAAAA",
-            "YR": 2003,
-            "MO": 12,
-            "DY": 1,
-            "HR": 12.8,
-            "LAT": 0.0,
-            "LON": 0.0,
-            "SST": 5.0,
-            "OSTIA": 5.0,
-            "BGVAR": 0.01,
-            "ICE": 0.0,
-        },
-    ]
+        {"ID": "AAAAAAAAA", "YR": 2003, "MO": 12, "DY": 1, "HR": 12.0, "LAT": 0.0, "LON": 0.0, "SST": 5.0, "OSTIA": 5.0,
+         "BGVAR": 0.01, "ICE": 0.0, },
+        {"ID": "AAAAAAAAA", "YR": 2003, "MO": 12, "DY": 1, "HR": 12.1, "LAT": 0.0, "LON": 0.0, "SST": 5.0, "OSTIA": 5.0,
+         "BGVAR": 0.01, "ICE": 0.0, },
+        {"ID": "AAAAAAAAA", "YR": 2003, "MO": 12, "DY": 1, "HR": 12.2, "LAT": 0.0, "LON": 0.0, "SST": 5.0, "OSTIA": 5.0,
+         "BGVAR": 0.01, "ICE": 0.0, },
+        {"ID": "AAAAAAAAA", "YR": 2003, "MO": 12, "DY": 1, "HR": 12.3, "LAT": 0.0, "LON": 0.0, "SST": 5.0, "OSTIA": 5.0,
+         "BGVAR": 0.01, "ICE": 0.0, },
+        {"ID": "AAAAAAAAA", "YR": 2003, "MO": 12, "DY": 1, "HR": 12.4, "LAT": 0.0, "LON": 0.0, "SST": 5.0, "OSTIA": 5.0,
+         "BGVAR": 0.01, "ICE": 0.0, },
+        {"ID": "AAAAAAAAA", "YR": 2003, "MO": 12, "DY": 1, "HR": 12.5, "LAT": 0.0, "LON": 0.0, "SST": 5.0, "OSTIA": 5.0,
+         "BGVAR": 0.01, "ICE": 0.0, },
+        {"ID": "AAAAAAAAA", "YR": 2003, "MO": 12, "DY": 1, "HR": 12.6, "LAT": 0.0, "LON": 0.0, "SST": 5.0, "OSTIA": 5.0,
+         "BGVAR": 0.01, "ICE": 0.0, },
+        {"ID": "AAAAAAAAA", "YR": 2003, "MO": 12, "DY": 1, "HR": 12.7, "LAT": 0.0, "LON": 0.0, "SST": 5.0, "OSTIA": 5.0,
+         "BGVAR": 0.01, "ICE": 0.0, },
+        {"ID": "AAAAAAAAA", "YR": 2003, "MO": 12, "DY": 1, "HR": 12.8, "LAT": 0.0, "LON": 0.0, "SST": 5.0, "OSTIA": 5.0,
+         "BGVAR": 0.01, "ICE": 0.0, }, ]
+    # fmt: on
 
     # all land-masked
     vals2 = [
@@ -9935,6 +9837,7 @@ def test_short_all_fail():
         assert reps.get_qc(i, "SST", "drf_tail1") == expected_flags["drf_tail1"][i]
         assert reps.get_qc(i, "SST", "drf_tail2") == expected_flags["drf_tail2"][i]
 
+
 # BROKEN TEST FIXED BY REVERTING TO ORIGINAL CODE
 def test_short_start_tail_with_bgvar():
     reps = tailcheck_vals(21)
@@ -9944,6 +9847,7 @@ def test_short_start_tail_with_bgvar():
     for i in range(0, len(reps)):
         assert reps.get_qc(i, 'SST', 'drf_tail1') == expected_flags['drf_tail1'][i]
         assert reps.get_qc(i, 'SST', 'drf_tail2') == expected_flags['drf_tail2'][i]
+
 
 # BROKEN TEST FIXED BY REVERTING TO ORIGINAL CODE
 def test_short_all_fail_with_bgvar():
@@ -10039,6 +9943,7 @@ def test_long_and_short_start_tail_with_bgvar():
         assert reps.get_qc(i, "SST", "drf_tail1") == expected_flags["drf_tail1"][i]
         assert reps.get_qc(i, "SST", "drf_tail2") == expected_flags["drf_tail2"][i]
 
+
 # BROKEN TEST FIXED BY REVERTING TO ORIGINAL CODE
 def test_long_and_short_all_fail_with_bgvar():
     reps = tailcheck_vals(30)
@@ -10096,7 +10001,7 @@ def test_error_bad_input_parameter_tail_check():
         otqc.sst_tail_check(reps.reps, 0, 3.0, 1, 3.0, 1, 0.29, 1.0, 0.3)
     except AssertionError as error:
         error_return_text = "invalid input parameter: long_win_len must be >= 1"
-        assert str(error)[0 : len(error_return_text)] == error_return_text
+        assert str(error)[0: len(error_return_text)] == error_return_text
     for i in range(0, len(reps)):
         assert reps.get_qc(i, "SST", "drf_tail1") == expected_flags["drf_tail1"][i]
         assert reps.get_qc(i, "SST", "drf_tail2") == expected_flags["drf_tail2"][i]
@@ -10126,7 +10031,7 @@ def test_error_invalid_ice_value():
         otqc.sst_tail_check(reps.reps, 3, 3.0, 1, 3.0, 1, 0.29, 1.0, 0.3)
     except AssertionError as error:
         error_return_text = "matched ice proportion is invalid"
-        assert str(error)[0 : len(error_return_text)] == error_return_text
+        assert str(error)[0: len(error_return_text)] == error_return_text
     for i in range(0, len(reps)):
         assert reps.get_qc(i, "SST", "drf_tail1") == expected_flags["drf_tail1"][i]
         assert reps.get_qc(i, "SST", "drf_tail2") == expected_flags["drf_tail2"][i]
@@ -10161,10 +10066,11 @@ def test_error_not_time_sorted_tail_check():
         otqc.sst_tail_check(reps.reps, 3, 3.0, 1, 3.0, 1, 0.29, 1.0, 0.3)
     except AssertionError as error:
         error_return_text = "problem with report value: times are not sorted"
-        assert str(error)[0 : len(error_return_text)] == error_return_text
+        assert str(error)[0: len(error_return_text)] == error_return_text
     for i in range(0, len(reps)):
         assert reps.get_qc(i, "SST", "drf_tail1") == expected_flags["drf_tail1"][i]
         assert reps.get_qc(i, "SST", "drf_tail2") == expected_flags["drf_tail2"][i]
+
 
 # BROKEN TEST FIXED BY REVERTING TO ORIGINAL CODE
 def test_error_invalid_background():
@@ -10191,7 +10097,7 @@ def test_error_invalid_background_error_variance():
         otqc.sst_tail_check(reps.reps, 3, 3.0, 1, 3.0, 1, 0.29, 1.0, 0.3)
     except AssertionError as error:
         error_return_text = "matched background error variance is invalid"
-        assert str(error)[0 : len(error_return_text)] == error_return_text
+        assert str(error)[0: len(error_return_text)] == error_return_text
     for i in range(0, len(reps)):
         assert reps.get_qc(i, "SST", "drf_tail1") == expected_flags["drf_tail1"][i]
         assert reps.get_qc(i, "SST", "drf_tail2") == expected_flags["drf_tail2"][i]
@@ -10245,7 +10151,6 @@ def test_error_invalid_background_error_variance():
     + assertion error - invalid background sst
     + assertion error - invalid background error
     """
-
 
 # class TestTrackQC_biased_noisy_check(unittest.TestCase):
 #
