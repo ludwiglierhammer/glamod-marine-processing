@@ -1486,3 +1486,158 @@ def og_sst_tail_check(
                 rep.set_qc("SST", "drf_tail2", 1)
 
     return
+
+
+def og_sst_biased_noisy_check(reps, n_eval=30, bias_lim=1.10, drif_intra=1.0, drif_inter=0.29, err_std_n=3.0, n_bad=2,
+                           background_err_lim=0.3):
+    """
+    Check to see whether a drifter sea surface temperature record is unacceptably biased or noisy as a whole.
+
+    The check makes an assessment of the quality of data in a drifting buoy record by comparing to a background
+    reference field. If the record is found to be unacceptably biased or noisy relative to the background all
+    observations are flagged by the check. For longer records the flags 'drf_bias' and 'drf_noise' are set for each
+    input report: flag=1 for records with erroneous data, else flag=0. For shorter records 'drf_short' is set for
+    each input report: flag=1 for reports with erroneous data, else flag=0.
+
+    When making the comparison an allowance is made for background error variance and also normal drifter error (both
+    bias and random measurement error). A background error variance limit is also specified, beyond which the
+    background is deemed unreliable and is excluded from comparison. Observations made during the day, in icy regions
+    or where the background value is missing are also excluded from the comparison.
+
+    The check has two separate streams; a 'long-record check' and a 'short-record check'. Records with at least
+    n_eval observations are passed to the long-record check, else they are passed to the short-record check. The
+    long-record check looks for records that are too biased or noisy as a whole. The short record check looks for
+    individual observations exceeding a noise limit within a record. The purpose of n_eval is to ensure records with
+    too few observations for their bias and noise to be reliably estimated are handled separately by the short-record
+    check.
+
+    The correlation of the background error is treated as unknown and handled differently for each assessment. For
+    the long-record noise-check and the short-record check the background error is treated as uncorrelated,
+    which maximises the possible impact of background error on these assessments. For the long-record bias-check a
+    limit (bias_lim) is specified beyond which the record is considered biased. The default value for this limit was
+    chosen based on histograms of drifter-background bias. An alternative approach would be to treat the background
+    error as entirely correlated across a long-record, which maximises its possible impact on the bias assessment. In
+    this case the histogram approach was used as the limit could be tuned to give better results.
+
+    :param reps: a time-sorted list of drifter observations in format from :class:`.Voyage`,
+      each report must have a valid longitude, latitude and time and matched values for OSTIA, ICE and BGVAR in its
+      extended data
+    :param n_eval: the minimum number of drifter observations required to be assessed by the long-record check
+    :param bias_lim: maximum allowable drifter-background bias, beyond which a record is considered biased (degC)
+    :param drif_intra: maximum random measurement uncertainty reasonably expected in drifter data (standard
+      deviation, degC)
+    :param drif_inter: spread of biases expected in drifter data (standard deviation, degC)
+    :param err_std_n: number of standard deviations of combined background and drifter error, beyond which
+      short-record data are deemed suspicious
+    :param n_bad: minimum number of suspicious data points required for failure of short-record check
+    :param background_err_lim: background error variance beyond which the SST background is deemed unreliable
+      (degC squared)
+    :type reps: a :class:`.Voyage`
+    :type n_eval: integer
+    :type bias_lim: float
+    :type drif_intra: float
+    :type drif_inter: float
+    :type err_std_n: float
+    :type n_bad: integer
+    :type background_err_lim: float
+    """
+
+    try:
+        n_eval = int(n_eval)
+        bias_lim = float(bias_lim)
+        drif_intra = float(drif_intra)
+        drif_inter = float(drif_inter)
+        err_std_n = float(err_std_n)
+        n_bad = int(n_bad)
+        background_err_lim = float(background_err_lim)
+        assert n_eval > 0, 'n_eval must be > 0'
+        assert bias_lim >= 0, 'bias_lim must be >= 0'
+        assert drif_intra >= 0, 'drif_intra must be >= 0'
+        assert drif_inter >= 0, 'drif_inter must be >= 0'
+        assert err_std_n >= 0, 'err_std_n must be >= 0'
+        assert n_bad >= 1, 'n_bad must be >= 1'
+        assert background_err_lim >= 0, 'background_err_lim must be >= 0'
+    except AssertionError as error:
+        raise AssertionError('invalid input parameter: ' + str(error))
+
+    # test and filter out obs with unsuitable background matches
+    sst_anom = []
+    bgvar = []
+    bgvar_is_masked = False
+    for ind, rep in enumerate(reps):
+        try:
+            bg_val = rep.getext('OSTIA')  # raises assertion error if not found
+            ice_val = rep.getext('ICE')  # raises assertion error if not found
+            bgvar_val = rep.getext('BGVAR')  # raises assertion error if not found
+        except AssertionError as error:
+            raise AssertionError('matched report value is missing: ' + str(error))
+
+        if ice_val is None:
+            ice_val = 0.0
+        assert ice_val is not None and 0.0 <= ice_val <= 1.0, 'matched ice proportion is invalid'
+
+        try:
+            daytime = track_day_test(rep.getvar('YR'), rep.getvar('MO'), rep.getvar('DY'),
+                                     rep.getvar('HR'), rep.getvar('LAT'), rep.getvar('LON'), -2.5)
+        except AssertionError as error:
+            raise AssertionError('problem with report value: ' + str(error))
+        if ind > 0:
+            try:
+                time_diff = rep.getext('time_diff')  # raises assertion error if 'time_diff' not found
+                assert time_diff >= 0, 'times are not sorted'
+            except AssertionError as error:
+                raise AssertionError('problem with report value: ' + str(error))
+
+        land_match = True if bg_val is None else False
+        ice_match = True if ice_val > 0.15 else False
+        bgvar_mask = True if bgvar_val is not None and bgvar_val > background_err_lim else False
+        if bgvar_mask:
+            bgvar_is_masked = True
+        if daytime or land_match or ice_match or bgvar_mask:
+            pass
+        else:
+            assert bg_val is not None and -5.0 <= bg_val <= 45.0, 'matched background sst is invalid'
+            assert bgvar_val is not None and 0.0 <= bgvar_val <= 10, 'matched background error variance is invalid'
+            sst_anom.append(rep.getvar('SST') - bg_val)
+            bgvar.append(bgvar_val)
+
+    # set bias and noise flags to pass to ensure all obs receive flag
+    # then exit if there are no obs suitable for assessment
+    for rep in reps:
+        rep.set_qc('SST', 'drf_bias', 0)
+        rep.set_qc('SST', 'drf_noise', 0)
+        rep.set_qc('SST', 'drf_short', 0)
+    if len(sst_anom) == 0:
+        return
+
+    # prepare numpy arrays and variables needed for checks
+    sst_anom = np.array(sst_anom)  # ob-background differences
+    bgerr = np.sqrt(np.array(bgvar))  # standard deviation of background error
+
+    nrep = len(sst_anom)
+    long_record = True
+    if nrep < n_eval:
+        long_record = False
+
+    # assess long records
+    if long_record:
+        sst_anom_avg = np.mean(sst_anom)
+        sst_anom_stdev = np.std(sst_anom)
+        bgerr_rms = np.sqrt(np.mean(bgerr ** 2))
+        if abs(sst_anom_avg) > bias_lim:
+            for rep in reps:
+                rep.set_qc('SST', 'drf_bias', 1)
+        if sst_anom_stdev > np.sqrt(drif_intra ** 2 + bgerr_rms ** 2):
+            for rep in reps:
+                rep.set_qc('SST', 'drf_noise', 1)
+    else:
+        if bgvar_is_masked:
+            pass  # short record may still have unreliable values
+        else:
+            limit = err_std_n * np.sqrt(bgerr ** 2 + drif_inter ** 2 + drif_intra ** 2)
+            exceed_limit = np.logical_or(sst_anom > limit, sst_anom < -limit)
+            if np.sum(exceed_limit) >= n_bad:
+                for rep in reps:
+                    rep.set_qc('SST', 'drf_short', 1)
+
+    return

@@ -3980,1135 +3980,699 @@ def test_error_invalid_background_error_variance():
     """
 
 
-# class TestTrackQC_biased_noisy_check(unittest.TestCase):
-#
-#     def setUp():
-#
-#         # all daytime
-#         vals1 = [{'ID': 'AAAAAAAAA', 'YR': 2003, 'MO': 12, 'DY': 1, 'HR': 12.0, 'LAT': 0.0, 'LON': 0.0, 'SST': 5.0,
-#                   'OSTIA': 5.0, 'BGVAR': 0.01, 'ICE': 0.0},
-#                  {'ID': 'AAAAAAAAA', 'YR': 2003, 'MO': 12, 'DY': 1, 'HR': 12.1, 'LAT': 0.0, 'LON': 0.0, 'SST': 5.0,
-#                   'OSTIA': 5.0, 'BGVAR': 0.01, 'ICE': 0.0},
-#                  {'ID': 'AAAAAAAAA', 'YR': 2003, 'MO': 12, 'DY': 1, 'HR': 12.2, 'LAT': 0.0, 'LON': 0.0, 'SST': 5.0,
-#                   'OSTIA': 5.0, 'BGVAR': 0.01, 'ICE': 0.0},
-#                  {'ID': 'AAAAAAAAA', 'YR': 2003, 'MO': 12, 'DY': 1, 'HR': 12.3, 'LAT': 0.0, 'LON': 0.0, 'SST': 5.0,
-#                   'OSTIA': 5.0, 'BGVAR': 0.01, 'ICE': 0.0},
-#                  {'ID': 'AAAAAAAAA', 'YR': 2003, 'MO': 12, 'DY': 1, 'HR': 12.4, 'LAT': 0.0, 'LON': 0.0, 'SST': 5.0,
-#                   'OSTIA': 5.0, 'BGVAR': 0.01, 'ICE': 0.0},
-#                  {'ID': 'AAAAAAAAA', 'YR': 2003, 'MO': 12, 'DY': 1, 'HR': 12.5, 'LAT': 0.0, 'LON': 0.0, 'SST': 5.0,
-#                   'OSTIA': 5.0, 'BGVAR': 0.01, 'ICE': 0.0},
-#                  {'ID': 'AAAAAAAAA', 'YR': 2003, 'MO': 12, 'DY': 1, 'HR': 12.6, 'LAT': 0.0, 'LON': 0.0, 'SST': 5.0,
-#                   'OSTIA': 5.0, 'BGVAR': 0.01, 'ICE': 0.0},
-#                  {'ID': 'AAAAAAAAA', 'YR': 2003, 'MO': 12, 'DY': 1, 'HR': 12.7, 'LAT': 0.0, 'LON': 0.0, 'SST': 5.0,
-#                   'OSTIA': 5.0, 'BGVAR': 0.01, 'ICE': 0.0},
-#                  {'ID': 'AAAAAAAAA', 'YR': 2003, 'MO': 12, 'DY': 1, 'HR': 12.8, 'LAT': 0.0, 'LON': 0.0, 'SST': 5.0,
-#                   'OSTIA': 5.0, 'BGVAR': 0.01, 'ICE': 0.0}]
-#
-#         # all land-masked
-#         vals2 = [{'ID': 'AAAAAAAAA', 'YR': 2003, 'MO': 12, 'DY': 1, 'HR': 0.0, 'LAT': 0.0, 'LON': 0.0, 'SST': 5.0,
-#                   'OSTIA': None, 'BGVAR': 0.01, 'ICE': 0.0},
-#                  {'ID': 'AAAAAAAAA', 'YR': 2003, 'MO': 12, 'DY': 1, 'HR': 0.1, 'LAT': 0.0, 'LON': 0.0, 'SST': 5.0,
-#                   'OSTIA': None, 'BGVAR': 0.01, 'ICE': 0.0},
-#                  {'ID': 'AAAAAAAAA', 'YR': 2003, 'MO': 12, 'DY': 1, 'HR': 0.2, 'LAT': 0.0, 'LON': 0.0, 'SST': 5.0,
-#                   'OSTIA': None, 'BGVAR': 0.01, 'ICE': 0.0},
-#                  {'ID': 'AAAAAAAAA', 'YR': 2003, 'MO': 12, 'DY': 1, 'HR': 0.3, 'LAT': 0.0, 'LON': 0.0, 'SST': 5.0,
-#                   'OSTIA': None, 'BGVAR': 0.01, 'ICE': 0.0},
-#                  {'ID': 'AAAAAAAAA', 'YR': 2003, 'MO': 12, 'DY': 1, 'HR': 0.4, 'LAT': 0.0, 'LON': 0.0, 'SST': 5.0,
-#                   'OSTIA': None, 'BGVAR': 0.01, 'ICE': 0.0},
-#                  {'ID': 'AAAAAAAAA', 'YR': 2003, 'MO': 12, 'DY': 1, 'HR': 0.5, 'LAT': 0.0, 'LON': 0.0, 'SST': 5.0,
-#                   'OSTIA': None, 'BGVAR': 0.01, 'ICE': 0.0},
-#                  {'ID': 'AAAAAAAAA', 'YR': 2003, 'MO': 12, 'DY': 1, 'HR': 0.6, 'LAT': 0.0, 'LON': 0.0, 'SST': 5.0,
-#                   'OSTIA': None, 'BGVAR': 0.01, 'ICE': 0.0},
-#                  {'ID': 'AAAAAAAAA', 'YR': 2003, 'MO': 12, 'DY': 1, 'HR': 0.7, 'LAT': 0.0, 'LON': 0.0, 'SST': 5.0,
-#                   'OSTIA': None, 'BGVAR': 0.01, 'ICE': 0.0},
-#                  {'ID': 'AAAAAAAAA', 'YR': 2003, 'MO': 12, 'DY': 1, 'HR': 0.8, 'LAT': 0.0, 'LON': 0.0, 'SST': 5.0,
-#                   'OSTIA': None, 'BGVAR': 0.01, 'ICE': 0.0}]
-#
-#         # all ice
-#         vals3 = [{'ID': 'AAAAAAAAA', 'YR': 2003, 'MO': 12, 'DY': 1, 'HR': 0.0, 'LAT': 0.0, 'LON': 0.0, 'SST': 5.0,
-#                   'OSTIA': 5.0, 'BGVAR': 0.01, 'ICE': 0.2},
-#                  {'ID': 'AAAAAAAAA', 'YR': 2003, 'MO': 12, 'DY': 1, 'HR': 0.1, 'LAT': 0.0, 'LON': 0.0, 'SST': 5.0,
-#                   'OSTIA': 5.0, 'BGVAR': 0.01, 'ICE': 0.2},
-#                  {'ID': 'AAAAAAAAA', 'YR': 2003, 'MO': 12, 'DY': 1, 'HR': 0.2, 'LAT': 0.0, 'LON': 0.0, 'SST': 5.0,
-#                   'OSTIA': 5.0, 'BGVAR': 0.01, 'ICE': 0.2},
-#                  {'ID': 'AAAAAAAAA', 'YR': 2003, 'MO': 12, 'DY': 1, 'HR': 0.3, 'LAT': 0.0, 'LON': 0.0, 'SST': 5.0,
-#                   'OSTIA': 5.0, 'BGVAR': 0.01, 'ICE': 0.2},
-#                  {'ID': 'AAAAAAAAA', 'YR': 2003, 'MO': 12, 'DY': 1, 'HR': 0.4, 'LAT': 0.0, 'LON': 0.0, 'SST': 5.0,
-#                   'OSTIA': 5.0, 'BGVAR': 0.01, 'ICE': 0.2},
-#                  {'ID': 'AAAAAAAAA', 'YR': 2003, 'MO': 12, 'DY': 1, 'HR': 0.5, 'LAT': 0.0, 'LON': 0.0, 'SST': 5.0,
-#                   'OSTIA': 5.0, 'BGVAR': 0.01, 'ICE': 0.2},
-#                  {'ID': 'AAAAAAAAA', 'YR': 2003, 'MO': 12, 'DY': 1, 'HR': 0.6, 'LAT': 0.0, 'LON': 0.0, 'SST': 5.0,
-#                   'OSTIA': 5.0, 'BGVAR': 0.01, 'ICE': 0.2},
-#                  {'ID': 'AAAAAAAAA', 'YR': 2003, 'MO': 12, 'DY': 1, 'HR': 0.7, 'LAT': 0.0, 'LON': 0.0, 'SST': 5.0,
-#                   'OSTIA': 5.0, 'BGVAR': 0.01, 'ICE': 0.2},
-#                  {'ID': 'AAAAAAAAA', 'YR': 2003, 'MO': 12, 'DY': 1, 'HR': 0.8, 'LAT': 0.0, 'LON': 0.0, 'SST': 5.0,
-#                   'OSTIA': 5.0, 'BGVAR': 0.01, 'ICE': 0.2}]
-#
-#         # all bgvar exceeds limit
-#         vals4 = [{'ID': 'AAAAAAAAA', 'YR': 2003, 'MO': 12, 'DY': 1, 'HR': 0.0, 'LAT': 0.0, 'LON': 0.0, 'SST': 5.0,
-#                   'OSTIA': 5.0, 'BGVAR': 0.4, 'ICE': 0.0},
-#                  {'ID': 'AAAAAAAAA', 'YR': 2003, 'MO': 12, 'DY': 1, 'HR': 0.1, 'LAT': 0.0, 'LON': 0.0, 'SST': 5.0,
-#                   'OSTIA': 5.0, 'BGVAR': 0.4, 'ICE': 0.0},
-#                  {'ID': 'AAAAAAAAA', 'YR': 2003, 'MO': 12, 'DY': 1, 'HR': 0.2, 'LAT': 0.0, 'LON': 0.0, 'SST': 5.0,
-#                   'OSTIA': 5.0, 'BGVAR': 0.4, 'ICE': 0.0},
-#                  {'ID': 'AAAAAAAAA', 'YR': 2003, 'MO': 12, 'DY': 1, 'HR': 0.3, 'LAT': 0.0, 'LON': 0.0, 'SST': 5.0,
-#                   'OSTIA': 5.0, 'BGVAR': 0.4, 'ICE': 0.0},
-#                  {'ID': 'AAAAAAAAA', 'YR': 2003, 'MO': 12, 'DY': 1, 'HR': 0.4, 'LAT': 0.0, 'LON': 0.0, 'SST': 5.0,
-#                   'OSTIA': 5.0, 'BGVAR': 0.4, 'ICE': 0.0},
-#                  {'ID': 'AAAAAAAAA', 'YR': 2003, 'MO': 12, 'DY': 1, 'HR': 0.5, 'LAT': 0.0, 'LON': 0.0, 'SST': 5.0,
-#                   'OSTIA': 5.0, 'BGVAR': 0.4, 'ICE': 0.0},
-#                  {'ID': 'AAAAAAAAA', 'YR': 2003, 'MO': 12, 'DY': 1, 'HR': 0.6, 'LAT': 0.0, 'LON': 0.0, 'SST': 5.0,
-#                   'OSTIA': 5.0, 'BGVAR': 0.4, 'ICE': 0.0},
-#                  {'ID': 'AAAAAAAAA', 'YR': 2003, 'MO': 12, 'DY': 1, 'HR': 0.7, 'LAT': 0.0, 'LON': 0.0, 'SST': 5.0,
-#                   'OSTIA': 5.0, 'BGVAR': 0.4, 'ICE': 0.0},
-#                  {'ID': 'AAAAAAAAA', 'YR': 2003, 'MO': 12, 'DY': 1, 'HR': 0.8, 'LAT': 0.0, 'LON': 0.0, 'SST': 5.0,
-#                   'OSTIA': 5.0, 'BGVAR': 0.4, 'ICE': 0.0}]
-#
-#         # biased warm
-#         vals5 = [{'ID': 'AAAAAAAAA', 'YR': 2003, 'MO': 12, 'DY': 1, 'HR': 0.0, 'LAT': 0.0, 'LON': 0.0, 'SST': 6.2,
-#                   'OSTIA': 5.0, 'BGVAR': 0.01, 'ICE': 0.0},
-#                  {'ID': 'AAAAAAAAA', 'YR': 2003, 'MO': 12, 'DY': 1, 'HR': 0.1, 'LAT': 0.0, 'LON': 0.0, 'SST': 6.2,
-#                   'OSTIA': 5.0, 'BGVAR': 0.01, 'ICE': 0.0},
-#                  {'ID': 'AAAAAAAAA', 'YR': 2003, 'MO': 12, 'DY': 1, 'HR': 0.2, 'LAT': 0.0, 'LON': 0.0, 'SST': 6.2,
-#                   'OSTIA': 5.0, 'BGVAR': 0.01, 'ICE': 0.0},
-#                  {'ID': 'AAAAAAAAA', 'YR': 2003, 'MO': 12, 'DY': 1, 'HR': 0.3, 'LAT': 0.0, 'LON': 0.0, 'SST': 6.2,
-#                   'OSTIA': 5.0, 'BGVAR': 0.01, 'ICE': 0.0},
-#                  {'ID': 'AAAAAAAAA', 'YR': 2003, 'MO': 12, 'DY': 1, 'HR': 0.4, 'LAT': 0.0, 'LON': 0.0, 'SST': 6.2,
-#                   'OSTIA': 5.0, 'BGVAR': 0.01, 'ICE': 0.0},
-#                  {'ID': 'AAAAAAAAA', 'YR': 2003, 'MO': 12, 'DY': 1, 'HR': 0.5, 'LAT': 0.0, 'LON': 0.0, 'SST': 6.2,
-#                   'OSTIA': 5.0, 'BGVAR': 0.01, 'ICE': 0.0},
-#                  {'ID': 'AAAAAAAAA', 'YR': 2003, 'MO': 12, 'DY': 1, 'HR': 0.6, 'LAT': 0.0, 'LON': 0.0, 'SST': 6.2,
-#                   'OSTIA': 5.0, 'BGVAR': 0.01, 'ICE': 0.0},
-#                  {'ID': 'AAAAAAAAA', 'YR': 2003, 'MO': 12, 'DY': 1, 'HR': 0.7, 'LAT': 0.0, 'LON': 0.0, 'SST': 6.2,
-#                   'OSTIA': 5.0, 'BGVAR': 0.01, 'ICE': 0.0},
-#                  {'ID': 'AAAAAAAAA', 'YR': 2003, 'MO': 12, 'DY': 1, 'HR': 0.8, 'LAT': 0.0, 'LON': 0.0, 'SST': 6.2,
-#                   'OSTIA': 5.0, 'BGVAR': 0.01, 'ICE': 0.0}]
-#
-#         # biased cool
-#         vals6 = [{'ID': 'AAAAAAAAA', 'YR': 2003, 'MO': 12, 'DY': 1, 'HR': 0.0, 'LAT': 0.0, 'LON': 0.0, 'SST': 3.8,
-#                   'OSTIA': 5.0, 'BGVAR': 0.01, 'ICE': 0.0},
-#                  {'ID': 'AAAAAAAAA', 'YR': 2003, 'MO': 12, 'DY': 1, 'HR': 0.1, 'LAT': 0.0, 'LON': 0.0, 'SST': 3.8,
-#                   'OSTIA': 5.0, 'BGVAR': 0.01, 'ICE': 0.0},
-#                  {'ID': 'AAAAAAAAA', 'YR': 2003, 'MO': 12, 'DY': 1, 'HR': 0.2, 'LAT': 0.0, 'LON': 0.0, 'SST': 3.8,
-#                   'OSTIA': 5.0, 'BGVAR': 0.01, 'ICE': 0.0},
-#                  {'ID': 'AAAAAAAAA', 'YR': 2003, 'MO': 12, 'DY': 1, 'HR': 0.3, 'LAT': 0.0, 'LON': 0.0, 'SST': 3.8,
-#                   'OSTIA': 5.0, 'BGVAR': 0.01, 'ICE': 0.0},
-#                  {'ID': 'AAAAAAAAA', 'YR': 2003, 'MO': 12, 'DY': 1, 'HR': 0.4, 'LAT': 0.0, 'LON': 0.0, 'SST': 3.8,
-#                   'OSTIA': 5.0, 'BGVAR': 0.01, 'ICE': 0.0},
-#                  {'ID': 'AAAAAAAAA', 'YR': 2003, 'MO': 12, 'DY': 1, 'HR': 0.5, 'LAT': 0.0, 'LON': 0.0, 'SST': 3.8,
-#                   'OSTIA': 5.0, 'BGVAR': 0.01, 'ICE': 0.0},
-#                  {'ID': 'AAAAAAAAA', 'YR': 2003, 'MO': 12, 'DY': 1, 'HR': 0.6, 'LAT': 0.0, 'LON': 0.0, 'SST': 3.8,
-#                   'OSTIA': 5.0, 'BGVAR': 0.01, 'ICE': 0.0},
-#                  {'ID': 'AAAAAAAAA', 'YR': 2003, 'MO': 12, 'DY': 1, 'HR': 0.7, 'LAT': 0.0, 'LON': 0.0, 'SST': 3.8,
-#                   'OSTIA': 5.0, 'BGVAR': 0.01, 'ICE': 0.0},
-#                  {'ID': 'AAAAAAAAA', 'YR': 2003, 'MO': 12, 'DY': 1, 'HR': 0.8, 'LAT': 0.0, 'LON': 0.0, 'SST': 3.8,
-#                   'OSTIA': 5.0, 'BGVAR': 0.01, 'ICE': 0.0}]
-#
-#         # noisy
-#         vals7 = [{'ID': 'AAAAAAAAA', 'YR': 2003, 'MO': 12, 'DY': 1, 'HR': 0.0, 'LAT': 0.0, 'LON': 0.0, 'SST': 7.0,
-#                   'OSTIA': 5.0, 'BGVAR': 0.01, 'ICE': 0.0},
-#                  {'ID': 'AAAAAAAAA', 'YR': 2003, 'MO': 12, 'DY': 1, 'HR': 0.1, 'LAT': 0.0, 'LON': 0.0, 'SST': 5.0,
-#                   'OSTIA': 5.0, 'BGVAR': 0.01, 'ICE': 0.0},
-#                  {'ID': 'AAAAAAAAA', 'YR': 2003, 'MO': 12, 'DY': 1, 'HR': 0.2, 'LAT': 0.0, 'LON': 0.0, 'SST': 3.0,
-#                   'OSTIA': 5.0, 'BGVAR': 0.01, 'ICE': 0.0},
-#                  {'ID': 'AAAAAAAAA', 'YR': 2003, 'MO': 12, 'DY': 1, 'HR': 0.3, 'LAT': 0.0, 'LON': 0.0, 'SST': 5.0,
-#                   'OSTIA': 5.0, 'BGVAR': 0.01, 'ICE': 0.0},
-#                  {'ID': 'AAAAAAAAA', 'YR': 2003, 'MO': 12, 'DY': 1, 'HR': 0.4, 'LAT': 0.0, 'LON': 0.0, 'SST': 7.0,
-#                   'OSTIA': 5.0, 'BGVAR': 0.01, 'ICE': 0.0},
-#                  {'ID': 'AAAAAAAAA', 'YR': 2003, 'MO': 12, 'DY': 1, 'HR': 0.5, 'LAT': 0.0, 'LON': 0.0, 'SST': 5.0,
-#                   'OSTIA': 5.0, 'BGVAR': 0.01, 'ICE': 0.0},
-#                  {'ID': 'AAAAAAAAA', 'YR': 2003, 'MO': 12, 'DY': 1, 'HR': 0.6, 'LAT': 0.0, 'LON': 0.0, 'SST': 3.0,
-#                   'OSTIA': 5.0, 'BGVAR': 0.01, 'ICE': 0.0},
-#                  {'ID': 'AAAAAAAAA', 'YR': 2003, 'MO': 12, 'DY': 1, 'HR': 0.7, 'LAT': 0.0, 'LON': 0.0, 'SST': 5.0,
-#                   'OSTIA': 5.0, 'BGVAR': 0.01, 'ICE': 0.0},
-#                  {'ID': 'AAAAAAAAA', 'YR': 2003, 'MO': 12, 'DY': 1, 'HR': 0.8, 'LAT': 0.0, 'LON': 0.0, 'SST': 7.0,
-#                   'OSTIA': 5.0, 'BGVAR': 0.01, 'ICE': 0.0}]
-#
-#         # biased and noisy
-#         vals8 = [{'ID': 'AAAAAAAAA', 'YR': 2003, 'MO': 12, 'DY': 1, 'HR': 0.0, 'LAT': 0.0, 'LON': 0.0, 'SST': 9.0,
-#                   'OSTIA': 5.0, 'BGVAR': 0.01, 'ICE': 0.0},
-#                  {'ID': 'AAAAAAAAA', 'YR': 2003, 'MO': 12, 'DY': 1, 'HR': 0.1, 'LAT': 0.0, 'LON': 0.0, 'SST': 7.0,
-#                   'OSTIA': 5.0, 'BGVAR': 0.01, 'ICE': 0.0},
-#                  {'ID': 'AAAAAAAAA', 'YR': 2003, 'MO': 12, 'DY': 1, 'HR': 0.2, 'LAT': 0.0, 'LON': 0.0, 'SST': 5.0,
-#                   'OSTIA': 5.0, 'BGVAR': 0.01, 'ICE': 0.0},
-#                  {'ID': 'AAAAAAAAA', 'YR': 2003, 'MO': 12, 'DY': 1, 'HR': 0.3, 'LAT': 0.0, 'LON': 0.0, 'SST': 7.0,
-#                   'OSTIA': 5.0, 'BGVAR': 0.01, 'ICE': 0.0},
-#                  {'ID': 'AAAAAAAAA', 'YR': 2003, 'MO': 12, 'DY': 1, 'HR': 0.4, 'LAT': 0.0, 'LON': 0.0, 'SST': 9.0,
-#                   'OSTIA': 5.0, 'BGVAR': 0.01, 'ICE': 0.0},
-#                  {'ID': 'AAAAAAAAA', 'YR': 2003, 'MO': 12, 'DY': 1, 'HR': 0.5, 'LAT': 0.0, 'LON': 0.0, 'SST': 7.0,
-#                   'OSTIA': 5.0, 'BGVAR': 0.01, 'ICE': 0.0},
-#                  {'ID': 'AAAAAAAAA', 'YR': 2003, 'MO': 12, 'DY': 1, 'HR': 0.6, 'LAT': 0.0, 'LON': 0.0, 'SST': 5.0,
-#                   'OSTIA': 5.0, 'BGVAR': 0.01, 'ICE': 0.0},
-#                  {'ID': 'AAAAAAAAA', 'YR': 2003, 'MO': 12, 'DY': 1, 'HR': 0.7, 'LAT': 0.0, 'LON': 0.0, 'SST': 7.0,
-#                   'OSTIA': 5.0, 'BGVAR': 0.01, 'ICE': 0.0},
-#                  {'ID': 'AAAAAAAAA', 'YR': 2003, 'MO': 12, 'DY': 1, 'HR': 0.8, 'LAT': 0.0, 'LON': 0.0, 'SST': 9.0,
-#                   'OSTIA': 5.0, 'BGVAR': 0.01, 'ICE': 0.0}]
-#
-#         # biased warm obs missing
-#         vals9 = [{'ID': 'AAAAAAAAA', 'YR': 2003, 'MO': 12, 'DY': 1, 'HR': 0.0, 'LAT': 0.0, 'LON': 0.0, 'SST': 6.2,
-#                   'OSTIA': None, 'BGVAR': 0.01, 'ICE': 0.0},
-#                  {'ID': 'AAAAAAAAA', 'YR': 2003, 'MO': 12, 'DY': 1, 'HR': 0.1, 'LAT': 0.0, 'LON': 0.0, 'SST': 6.2,
-#                   'OSTIA': None, 'BGVAR': 0.01, 'ICE': 0.0},
-#                  {'ID': 'AAAAAAAAA', 'YR': 2003, 'MO': 12, 'DY': 1, 'HR': 0.2, 'LAT': 0.0, 'LON': 0.0, 'SST': 6.2,
-#                   'OSTIA': 5.0, 'BGVAR': 0.01, 'ICE': 0.0},
-#                  {'ID': 'AAAAAAAAA', 'YR': 2003, 'MO': 12, 'DY': 1, 'HR': 0.3, 'LAT': 0.0, 'LON': 0.0, 'SST': 6.2,
-#                   'OSTIA': 5.0, 'BGVAR': 0.01, 'ICE': 0.0},
-#                  {'ID': 'AAAAAAAAA', 'YR': 2003, 'MO': 12, 'DY': 1, 'HR': 0.4, 'LAT': 0.0, 'LON': 0.0, 'SST': 6.2,
-#                   'OSTIA': 5.0, 'BGVAR': 0.01, 'ICE': 0.0},
-#                  {'ID': 'AAAAAAAAA', 'YR': 2003, 'MO': 12, 'DY': 1, 'HR': 0.5, 'LAT': 0.0, 'LON': 0.0, 'SST': 6.2,
-#                   'OSTIA': 5.0, 'BGVAR': 0.01, 'ICE': 0.0},
-#                  {'ID': 'AAAAAAAAA', 'YR': 2003, 'MO': 12, 'DY': 1, 'HR': 0.6, 'LAT': 0.0, 'LON': 0.0, 'SST': 6.2,
-#                   'OSTIA': 5.0, 'BGVAR': 0.01, 'ICE': 0.0},
-#                  {'ID': 'AAAAAAAAA', 'YR': 2003, 'MO': 12, 'DY': 1, 'HR': 0.7, 'LAT': 0.0, 'LON': 0.0, 'SST': 6.2,
-#                   'OSTIA': None, 'BGVAR': 0.01, 'ICE': 0.0},
-#                  {'ID': 'AAAAAAAAA', 'YR': 2003, 'MO': 12, 'DY': 1, 'HR': 0.8, 'LAT': 0.0, 'LON': 0.0, 'SST': 6.2,
-#                   'OSTIA': None, 'BGVAR': 0.01, 'ICE': 0.0}]
-#
-#         # short record one bad
-#         vals10 = [{'ID': 'AAAAAAAAA', 'YR': 2003, 'MO': 12, 'DY': 1, 'HR': 0.0, 'LAT': 0.0, 'LON': 0.0, 'SST': 5.0,
-#                    'OSTIA': 5.0, 'BGVAR': 0.01, 'ICE': 0.0},
-#                   {'ID': 'AAAAAAAAA', 'YR': 2003, 'MO': 12, 'DY': 1, 'HR': 0.1, 'LAT': 0.0, 'LON': 0.0, 'SST': 5.0,
-#                    'OSTIA': 5.0, 'BGVAR': 0.01, 'ICE': 0.0},
-#                   {'ID': 'AAAAAAAAA', 'YR': 2003, 'MO': 12, 'DY': 1, 'HR': 0.2, 'LAT': 0.0, 'LON': 0.0, 'SST': 9.0,
-#                    'OSTIA': 5.0, 'BGVAR': 0.01, 'ICE': 0.0},
-#                   {'ID': 'AAAAAAAAA', 'YR': 2003, 'MO': 12, 'DY': 1, 'HR': 0.3, 'LAT': 0.0, 'LON': 0.0, 'SST': 5.0,
-#                    'OSTIA': 5.0, 'BGVAR': 0.01, 'ICE': 0.0},
-#                   {'ID': 'AAAAAAAAA', 'YR': 2003, 'MO': 12, 'DY': 1, 'HR': 0.4, 'LAT': 0.0, 'LON': 0.0, 'SST': 5.0,
-#                    'OSTIA': 5.0, 'BGVAR': 0.01, 'ICE': 0.0}]
-#
-#         # short record two bad
-#         vals11 = [{'ID': 'AAAAAAAAA', 'YR': 2003, 'MO': 12, 'DY': 1, 'HR': 0.0, 'LAT': 0.0, 'LON': 0.0, 'SST': 9.0,
-#                    'OSTIA': 5.0, 'BGVAR': 0.01, 'ICE': 0.0},
-#                   {'ID': 'AAAAAAAAA', 'YR': 2003, 'MO': 12, 'DY': 1, 'HR': 0.1, 'LAT': 0.0, 'LON': 0.0, 'SST': 5.0,
-#                    'OSTIA': 5.0, 'BGVAR': 0.01, 'ICE': 0.0},
-#                   {'ID': 'AAAAAAAAA', 'YR': 2003, 'MO': 12, 'DY': 1, 'HR': 0.2, 'LAT': 0.0, 'LON': 0.0, 'SST': 9.0,
-#                    'OSTIA': 5.0, 'BGVAR': 0.01, 'ICE': 0.0},
-#                   {'ID': 'AAAAAAAAA', 'YR': 2003, 'MO': 12, 'DY': 1, 'HR': 0.3, 'LAT': 0.0, 'LON': 0.0, 'SST': 5.0,
-#                    'OSTIA': 5.0, 'BGVAR': 0.01, 'ICE': 0.0},
-#                   {'ID': 'AAAAAAAAA', 'YR': 2003, 'MO': 12, 'DY': 1, 'HR': 0.4, 'LAT': 0.0, 'LON': 0.0, 'SST': 5.0,
-#                    'OSTIA': 5.0, 'BGVAR': 0.01, 'ICE': 0.0}]
-#
-#         # short record two bad obs missing
-#         vals12 = [{'ID': 'AAAAAAAAA', 'YR': 2003, 'MO': 12, 'DY': 1, 'HR': 0.0, 'LAT': 0.0, 'LON': 0.0, 'SST': 5.0,
-#                    'OSTIA': None, 'BGVAR': 0.01, 'ICE': 0.0},
-#                   {'ID': 'AAAAAAAAA', 'YR': 2003, 'MO': 12, 'DY': 1, 'HR': 0.1, 'LAT': 0.0, 'LON': 0.0, 'SST': 5.0,
-#                    'OSTIA': None, 'BGVAR': 0.01, 'ICE': 0.0},
-#                   {'ID': 'AAAAAAAAA', 'YR': 2003, 'MO': 12, 'DY': 1, 'HR': 0.2, 'LAT': 0.0, 'LON': 0.0, 'SST': 9.0,
-#                    'OSTIA': 5.0, 'BGVAR': 0.01, 'ICE': 0.0},
-#                   {'ID': 'AAAAAAAAA', 'YR': 2003, 'MO': 12, 'DY': 1, 'HR': 0.3, 'LAT': 0.0, 'LON': 0.0, 'SST': 5.0,
-#                    'OSTIA': 5.0, 'BGVAR': 0.01, 'ICE': 0.0},
-#                   {'ID': 'AAAAAAAAA', 'YR': 2003, 'MO': 12, 'DY': 1, 'HR': 0.4, 'LAT': 0.0, 'LON': 0.0, 'SST': 9.0,
-#                    'OSTIA': 5.0, 'BGVAR': 0.01, 'ICE': 0.0},
-#                   {'ID': 'AAAAAAAAA', 'YR': 2003, 'MO': 12, 'DY': 1, 'HR': 0.5, 'LAT': 0.0, 'LON': 0.0, 'SST': 5.0,
-#                    'OSTIA': 5.0, 'BGVAR': 0.01, 'ICE': 0.0},
-#                   {'ID': 'AAAAAAAAA', 'YR': 2003, 'MO': 12, 'DY': 1, 'HR': 0.6, 'LAT': 0.0, 'LON': 0.0, 'SST': 5.0,
-#                    'OSTIA': 5.0, 'BGVAR': 0.01, 'ICE': 0.0},
-#                   {'ID': 'AAAAAAAAA', 'YR': 2003, 'MO': 12, 'DY': 1, 'HR': 0.7, 'LAT': 0.0, 'LON': 0.0, 'SST': 5.0,
-#                    'OSTIA': None, 'BGVAR': 0.01, 'ICE': 0.0},
-#                   {'ID': 'AAAAAAAAA', 'YR': 2003, 'MO': 12, 'DY': 1, 'HR': 0.8, 'LAT': 0.0, 'LON': 0.0, 'SST': 5.0,
-#                    'OSTIA': None, 'BGVAR': 0.01, 'ICE': 0.0}]
-#
-#         # short record two bad obs missing with bgvar masked
-#         vals13 = [{'ID': 'AAAAAAAAA', 'YR': 2003, 'MO': 12, 'DY': 1, 'HR': 0.0, 'LAT': 0.0, 'LON': 0.0, 'SST': 5.0,
-#                    'OSTIA': None, 'BGVAR': 0.01, 'ICE': 0.0},
-#                   {'ID': 'AAAAAAAAA', 'YR': 2003, 'MO': 12, 'DY': 1, 'HR': 0.1, 'LAT': 0.0, 'LON': 0.0, 'SST': 5.0,
-#                    'OSTIA': None, 'BGVAR': 0.4, 'ICE': 0.0},
-#                   {'ID': 'AAAAAAAAA', 'YR': 2003, 'MO': 12, 'DY': 1, 'HR': 0.2, 'LAT': 0.0, 'LON': 0.0, 'SST': 9.0,
-#                    'OSTIA': 5.0, 'BGVAR': 0.01, 'ICE': 0.0},
-#                   {'ID': 'AAAAAAAAA', 'YR': 2003, 'MO': 12, 'DY': 1, 'HR': 0.3, 'LAT': 0.0, 'LON': 0.0, 'SST': 5.0,
-#                    'OSTIA': 5.0, 'BGVAR': 0.01, 'ICE': 0.0},
-#                   {'ID': 'AAAAAAAAA', 'YR': 2003, 'MO': 12, 'DY': 1, 'HR': 0.4, 'LAT': 0.0, 'LON': 0.0, 'SST': 9.0,
-#                    'OSTIA': 5.0, 'BGVAR': 0.01, 'ICE': 0.0},
-#                   {'ID': 'AAAAAAAAA', 'YR': 2003, 'MO': 12, 'DY': 1, 'HR': 0.5, 'LAT': 0.0, 'LON': 0.0, 'SST': 5.0,
-#                    'OSTIA': 5.0, 'BGVAR': 0.01, 'ICE': 0.0},
-#                   {'ID': 'AAAAAAAAA', 'YR': 2003, 'MO': 12, 'DY': 1, 'HR': 0.6, 'LAT': 0.0, 'LON': 0.0, 'SST': 5.0,
-#                    'OSTIA': 5.0, 'BGVAR': 0.01, 'ICE': 0.0},
-#                   {'ID': 'AAAAAAAAA', 'YR': 2003, 'MO': 12, 'DY': 1, 'HR': 0.7, 'LAT': 0.0, 'LON': 0.0, 'SST': 5.0,
-#                    'OSTIA': None, 'BGVAR': 0.01, 'ICE': 0.0},
-#                   {'ID': 'AAAAAAAAA', 'YR': 2003, 'MO': 12, 'DY': 1, 'HR': 0.8, 'LAT': 0.0, 'LON': 0.0, 'SST': 5.0,
-#                    'OSTIA': None, 'BGVAR': 0.01, 'ICE': 0.0}]
-#
-#         # good data
-#         vals14 = [{'ID': 'AAAAAAAAA', 'YR': 2003, 'MO': 12, 'DY': 1, 'HR': 0.0, 'LAT': 0.0, 'LON': 0.0, 'SST': 5.0,
-#                    'OSTIA': 5.0, 'BGVAR': 0.01, 'ICE': 0.0},
-#                   {'ID': 'AAAAAAAAA', 'YR': 2003, 'MO': 12, 'DY': 1, 'HR': 0.1, 'LAT': 0.0, 'LON': 0.0, 'SST': 5.0,
-#                    'OSTIA': 5.0, 'BGVAR': 0.01, 'ICE': 0.0},
-#                   {'ID': 'AAAAAAAAA', 'YR': 2003, 'MO': 12, 'DY': 1, 'HR': 0.2, 'LAT': 0.0, 'LON': 0.0, 'SST': 5.0,
-#                    'OSTIA': 5.0, 'BGVAR': 0.01, 'ICE': 0.0},
-#                   {'ID': 'AAAAAAAAA', 'YR': 2003, 'MO': 12, 'DY': 1, 'HR': 0.3, 'LAT': 0.0, 'LON': 0.0, 'SST': 5.0,
-#                    'OSTIA': 5.0, 'BGVAR': 0.01, 'ICE': 0.0},
-#                   {'ID': 'AAAAAAAAA', 'YR': 2003, 'MO': 12, 'DY': 1, 'HR': 0.4, 'LAT': 0.0, 'LON': 0.0, 'SST': 5.0,
-#                    'OSTIA': 5.0, 'BGVAR': 0.01, 'ICE': 0.0},
-#                   {'ID': 'AAAAAAAAA', 'YR': 2003, 'MO': 12, 'DY': 1, 'HR': 0.5, 'LAT': 0.0, 'LON': 0.0, 'SST': 5.0,
-#                    'OSTIA': 5.0, 'BGVAR': 0.01, 'ICE': 0.0},
-#                   {'ID': 'AAAAAAAAA', 'YR': 2003, 'MO': 12, 'DY': 1, 'HR': 0.6, 'LAT': 0.0, 'LON': 0.0, 'SST': 5.0,
-#                    'OSTIA': 5.0, 'BGVAR': 0.01, 'ICE': 0.0},
-#                   {'ID': 'AAAAAAAAA', 'YR': 2003, 'MO': 12, 'DY': 1, 'HR': 0.7, 'LAT': 0.0, 'LON': 0.0, 'SST': 5.0,
-#                    'OSTIA': 5.0, 'BGVAR': 0.01, 'ICE': 0.0},
-#                   {'ID': 'AAAAAAAAA', 'YR': 2003, 'MO': 12, 'DY': 1, 'HR': 0.8, 'LAT': 0.0, 'LON': 0.0, 'SST': 5.0,
-#                    'OSTIA': 5.0, 'BGVAR': 0.01, 'ICE': 0.0}]
-#
-#         # short record good data
-#         vals15 = [{'ID': 'AAAAAAAAA', 'YR': 2003, 'MO': 12, 'DY': 1, 'HR': 0.0, 'LAT': 0.0, 'LON': 0.0, 'SST': 5.0,
-#                    'OSTIA': 5.0, 'BGVAR': 0.01, 'ICE': 0.0},
-#                   {'ID': 'AAAAAAAAA', 'YR': 2003, 'MO': 12, 'DY': 1, 'HR': 0.1, 'LAT': 0.0, 'LON': 0.0, 'SST': 5.0,
-#                    'OSTIA': 5.0, 'BGVAR': 0.01, 'ICE': 0.0},
-#                   {'ID': 'AAAAAAAAA', 'YR': 2003, 'MO': 12, 'DY': 1, 'HR': 0.2, 'LAT': 0.0, 'LON': 0.0, 'SST': 5.0,
-#                    'OSTIA': 5.0, 'BGVAR': 0.01, 'ICE': 0.0},
-#                   {'ID': 'AAAAAAAAA', 'YR': 2003, 'MO': 12, 'DY': 1, 'HR': 0.3, 'LAT': 0.0, 'LON': 0.0, 'SST': 5.0,
-#                    'OSTIA': 5.0, 'BGVAR': 0.01, 'ICE': 0.0},
-#                   {'ID': 'AAAAAAAAA', 'YR': 2003, 'MO': 12, 'DY': 1, 'HR': 0.4, 'LAT': 0.0, 'LON': 0.0, 'SST': 5.0,
-#                    'OSTIA': 5.0, 'BGVAR': 0.01, 'ICE': 0.0}]
-#
-#         # short record obs missing good data
-#         vals16 = [{'ID': 'AAAAAAAAA', 'YR': 2003, 'MO': 12, 'DY': 1, 'HR': 0.0, 'LAT': 0.0, 'LON': 0.0, 'SST': 5.0,
-#                    'OSTIA': None, 'BGVAR': 0.01, 'ICE': 0.0},
-#                   {'ID': 'AAAAAAAAA', 'YR': 2003, 'MO': 12, 'DY': 1, 'HR': 0.1, 'LAT': 0.0, 'LON': 0.0, 'SST': 5.0,
-#                    'OSTIA': None, 'BGVAR': 0.01, 'ICE': 0.0},
-#                   {'ID': 'AAAAAAAAA', 'YR': 2003, 'MO': 12, 'DY': 1, 'HR': 0.2, 'LAT': 0.0, 'LON': 0.0, 'SST': 5.0,
-#                    'OSTIA': 5.0, 'BGVAR': 0.01, 'ICE': 0.0},
-#                   {'ID': 'AAAAAAAAA', 'YR': 2003, 'MO': 12, 'DY': 1, 'HR': 0.3, 'LAT': 0.0, 'LON': 0.0, 'SST': 5.0,
-#                    'OSTIA': 5.0, 'BGVAR': 0.01, 'ICE': 0.0},
-#                   {'ID': 'AAAAAAAAA', 'YR': 2003, 'MO': 12, 'DY': 1, 'HR': 0.4, 'LAT': 0.0, 'LON': 0.0, 'SST': 5.0,
-#                    'OSTIA': 5.0, 'BGVAR': 0.01, 'ICE': 0.0},
-#                   {'ID': 'AAAAAAAAA', 'YR': 2003, 'MO': 12, 'DY': 1, 'HR': 0.5, 'LAT': 0.0, 'LON': 0.0, 'SST': 5.0,
-#                    'OSTIA': 5.0, 'BGVAR': 0.01, 'ICE': 0.0},
-#                   {'ID': 'AAAAAAAAA', 'YR': 2003, 'MO': 12, 'DY': 1, 'HR': 0.6, 'LAT': 0.0, 'LON': 0.0, 'SST': 5.0,
-#                    'OSTIA': 5.0, 'BGVAR': 0.01, 'ICE': 0.0},
-#                   {'ID': 'AAAAAAAAA', 'YR': 2003, 'MO': 12, 'DY': 1, 'HR': 0.7, 'LAT': 0.0, 'LON': 0.0, 'SST': 5.0,
-#                    'OSTIA': None, 'BGVAR': 0.01, 'ICE': 0.0},
-#                   {'ID': 'AAAAAAAAA', 'YR': 2003, 'MO': 12, 'DY': 1, 'HR': 0.8, 'LAT': 0.0, 'LON': 0.0, 'SST': 5.0,
-#                    'OSTIA': None, 'BGVAR': 0.01, 'ICE': 0.0}]
-#
-#         # noisy big bgvar
-#         vals17 = [{'ID': 'AAAAAAAAA', 'YR': 2003, 'MO': 12, 'DY': 1, 'HR': 0.0, 'LAT': 0.0, 'LON': 0.0, 'SST': 7.0,
-#                    'OSTIA': 5.0, 'BGVAR': 4.0, 'ICE': 0.0},
-#                   {'ID': 'AAAAAAAAA', 'YR': 2003, 'MO': 12, 'DY': 1, 'HR': 0.1, 'LAT': 0.0, 'LON': 0.0, 'SST': 5.0,
-#                    'OSTIA': 5.0, 'BGVAR': 4.0, 'ICE': 0.0},
-#                   {'ID': 'AAAAAAAAA', 'YR': 2003, 'MO': 12, 'DY': 1, 'HR': 0.2, 'LAT': 0.0, 'LON': 0.0, 'SST': 3.0,
-#                    'OSTIA': 5.0, 'BGVAR': 4.0, 'ICE': 0.0},
-#                   {'ID': 'AAAAAAAAA', 'YR': 2003, 'MO': 12, 'DY': 1, 'HR': 0.3, 'LAT': 0.0, 'LON': 0.0, 'SST': 5.0,
-#                    'OSTIA': 5.0, 'BGVAR': 4.0, 'ICE': 0.0},
-#                   {'ID': 'AAAAAAAAA', 'YR': 2003, 'MO': 12, 'DY': 1, 'HR': 0.4, 'LAT': 0.0, 'LON': 0.0, 'SST': 7.0,
-#                    'OSTIA': 5.0, 'BGVAR': 4.0, 'ICE': 0.0},
-#                   {'ID': 'AAAAAAAAA', 'YR': 2003, 'MO': 12, 'DY': 1, 'HR': 0.5, 'LAT': 0.0, 'LON': 0.0, 'SST': 5.0,
-#                    'OSTIA': 5.0, 'BGVAR': 4.0, 'ICE': 0.0},
-#                   {'ID': 'AAAAAAAAA', 'YR': 2003, 'MO': 12, 'DY': 1, 'HR': 0.6, 'LAT': 0.0, 'LON': 0.0, 'SST': 3.0,
-#                    'OSTIA': 5.0, 'BGVAR': 4.0, 'ICE': 0.0},
-#                   {'ID': 'AAAAAAAAA', 'YR': 2003, 'MO': 12, 'DY': 1, 'HR': 0.7, 'LAT': 0.0, 'LON': 0.0, 'SST': 5.0,
-#                    'OSTIA': 5.0, 'BGVAR': 4.0, 'ICE': 0.0},
-#                   {'ID': 'AAAAAAAAA', 'YR': 2003, 'MO': 12, 'DY': 1, 'HR': 0.8, 'LAT': 0.0, 'LON': 0.0, 'SST': 7.0,
-#                    'OSTIA': 5.0, 'BGVAR': 4.0, 'ICE': 0.0}]
-#
-#         # short record two bad obs missing big bgvar
-#         vals18 = [{'ID': 'AAAAAAAAA', 'YR': 2003, 'MO': 12, 'DY': 1, 'HR': 0.0, 'LAT': 0.0, 'LON': 0.0, 'SST': 5.0,
-#                    'OSTIA': None, 'BGVAR': 4.0, 'ICE': 0.0},
-#                   {'ID': 'AAAAAAAAA', 'YR': 2003, 'MO': 12, 'DY': 1, 'HR': 0.1, 'LAT': 0.0, 'LON': 0.0, 'SST': 5.0,
-#                    'OSTIA': None, 'BGVAR': 4.0, 'ICE': 0.0},
-#                   {'ID': 'AAAAAAAAA', 'YR': 2003, 'MO': 12, 'DY': 1, 'HR': 0.2, 'LAT': 0.0, 'LON': 0.0, 'SST': 9.0,
-#                    'OSTIA': 5.0, 'BGVAR': 4.0, 'ICE': 0.0},
-#                   {'ID': 'AAAAAAAAA', 'YR': 2003, 'MO': 12, 'DY': 1, 'HR': 0.3, 'LAT': 0.0, 'LON': 0.0, 'SST': 5.0,
-#                    'OSTIA': 5.0, 'BGVAR': 4.0, 'ICE': 0.0},
-#                   {'ID': 'AAAAAAAAA', 'YR': 2003, 'MO': 12, 'DY': 1, 'HR': 0.4, 'LAT': 0.0, 'LON': 0.0, 'SST': 9.0,
-#                    'OSTIA': 5.0, 'BGVAR': 4.0, 'ICE': 0.0},
-#                   {'ID': 'AAAAAAAAA', 'YR': 2003, 'MO': 12, 'DY': 1, 'HR': 0.5, 'LAT': 0.0, 'LON': 0.0, 'SST': 5.0,
-#                    'OSTIA': 5.0, 'BGVAR': 4.0, 'ICE': 0.0},
-#                   {'ID': 'AAAAAAAAA', 'YR': 2003, 'MO': 12, 'DY': 1, 'HR': 0.6, 'LAT': 0.0, 'LON': 0.0, 'SST': 5.0,
-#                    'OSTIA': 5.0, 'BGVAR': 4.0, 'ICE': 0.0},
-#                   {'ID': 'AAAAAAAAA', 'YR': 2003, 'MO': 12, 'DY': 1, 'HR': 0.7, 'LAT': 0.0, 'LON': 0.0, 'SST': 5.0,
-#                    'OSTIA': None, 'BGVAR': 4.0, 'ICE': 0.0},
-#                   {'ID': 'AAAAAAAAA', 'YR': 2003, 'MO': 12, 'DY': 1, 'HR': 0.8, 'LAT': 0.0, 'LON': 0.0, 'SST': 5.0,
-#                    'OSTIA': None, 'BGVAR': 4.0, 'ICE': 0.0}]
-#
-#         # good data
-#         vals19 = [{'ID': 'AAAAAAAAA', 'YR': 2003, 'MO': 12, 'DY': 1, 'HR': 0.0, 'LAT': 0.0, 'LON': 0.0, 'SST': 5.0,
-#                    'OSTIA': 5.0, 'BGVAR': 0.01, 'ICE': 0.0},
-#                   {'ID': 'AAAAAAAAA', 'YR': 2003, 'MO': 12, 'DY': 1, 'HR': 0.1, 'LAT': 0.0, 'LON': 0.0, 'SST': 5.0,
-#                    'OSTIA': 5.0, 'BGVAR': 0.01, 'ICE': 0.0},
-#                   {'ID': 'AAAAAAAAA', 'YR': 2003, 'MO': 12, 'DY': 1, 'HR': 0.2, 'LAT': 0.0, 'LON': 0.0, 'SST': 5.0,
-#                    'OSTIA': 5.0, 'BGVAR': 0.01, 'ICE': 0.0},
-#                   {'ID': 'AAAAAAAAA', 'YR': 2003, 'MO': 12, 'DY': 1, 'HR': 0.3, 'LAT': 0.0, 'LON': 0.0, 'SST': 5.0,
-#                    'OSTIA': 5.0, 'BGVAR': 0.01, 'ICE': 0.0},
-#                   {'ID': 'AAAAAAAAA', 'YR': 2003, 'MO': 12, 'DY': 1, 'HR': 0.4, 'LAT': 0.0, 'LON': 0.0, 'SST': 5.0,
-#                    'OSTIA': 5.0, 'BGVAR': 0.01, 'ICE': 0.0},
-#                   {'ID': 'AAAAAAAAA', 'YR': 2003, 'MO': 12, 'DY': 1, 'HR': 0.5, 'LAT': 0.0, 'LON': 0.0, 'SST': 5.0,
-#                    'OSTIA': 5.0, 'BGVAR': 0.01, 'ICE': 0.0},
-#                   {'ID': 'AAAAAAAAA', 'YR': 2003, 'MO': 12, 'DY': 1, 'HR': 0.6, 'LAT': 0.0, 'LON': 0.0, 'SST': 5.0,
-#                    'OSTIA': 5.0, 'BGVAR': 0.01, 'ICE': 0.0},
-#                   {'ID': 'AAAAAAAAA', 'YR': 2003, 'MO': 12, 'DY': 1, 'HR': 0.7, 'LAT': 0.0, 'LON': 0.0, 'SST': 5.0,
-#                    'OSTIA': 5.0, 'BGVAR': 0.01, 'ICE': 0.0},
-#                   {'ID': 'AAAAAAAAA', 'YR': 2003, 'MO': 12, 'DY': 1, 'HR': 0.8, 'LAT': 0.0, 'LON': 0.0, 'SST': 5.0,
-#                    'OSTIA': 5.0, 'BGVAR': 0.01, 'ICE': 0.0}]
-#
-#         # assertion error - bad input parameter
-#         vals20 = [{'ID': 'AAAAAAAAA', 'YR': 2003, 'MO': 12, 'DY': 1, 'HR': 0.0, 'LAT': 0.0, 'LON': 0.0, 'SST': 5.0,
-#                    'OSTIA': 5.0, 'BGVAR': 0.01, 'ICE': 0.0},
-#                   {'ID': 'AAAAAAAAA', 'YR': 2003, 'MO': 12, 'DY': 1, 'HR': 0.1, 'LAT': 0.0, 'LON': 0.0, 'SST': 5.0,
-#                    'OSTIA': 5.0, 'BGVAR': 0.01, 'ICE': 0.0},
-#                   {'ID': 'AAAAAAAAA', 'YR': 2003, 'MO': 12, 'DY': 1, 'HR': 0.2, 'LAT': 0.0, 'LON': 0.0, 'SST': 5.0,
-#                    'OSTIA': 5.0, 'BGVAR': 0.01, 'ICE': 0.0},
-#                   {'ID': 'AAAAAAAAA', 'YR': 2003, 'MO': 12, 'DY': 1, 'HR': 0.3, 'LAT': 0.0, 'LON': 0.0, 'SST': 5.0,
-#                    'OSTIA': 5.0, 'BGVAR': 0.01, 'ICE': 0.0},
-#                   {'ID': 'AAAAAAAAA', 'YR': 2003, 'MO': 12, 'DY': 1, 'HR': 0.4, 'LAT': 0.0, 'LON': 0.0, 'SST': 5.0,
-#                    'OSTIA': 5.0, 'BGVAR': 0.01, 'ICE': 0.0},
-#                   {'ID': 'AAAAAAAAA', 'YR': 2003, 'MO': 12, 'DY': 1, 'HR': 0.5, 'LAT': 0.0, 'LON': 0.0, 'SST': 5.0,
-#                    'OSTIA': 5.0, 'BGVAR': 0.01, 'ICE': 0.0},
-#                   {'ID': 'AAAAAAAAA', 'YR': 2003, 'MO': 12, 'DY': 1, 'HR': 0.6, 'LAT': 0.0, 'LON': 0.0, 'SST': 5.0,
-#                    'OSTIA': 5.0, 'BGVAR': 0.01, 'ICE': 0.0},
-#                   {'ID': 'AAAAAAAAA', 'YR': 2003, 'MO': 12, 'DY': 1, 'HR': 0.7, 'LAT': 0.0, 'LON': 0.0, 'SST': 5.0,
-#                    'OSTIA': 5.0, 'BGVAR': 0.01, 'ICE': 0.0},
-#                   {'ID': 'AAAAAAAAA', 'YR': 2003, 'MO': 12, 'DY': 1, 'HR': 0.8, 'LAT': 0.0, 'LON': 0.0, 'SST': 5.0,
-#                    'OSTIA': 5.0, 'BGVAR': 0.01, 'ICE': 0.0}]
-#
-#         # assertion error - missing matched value
-#         vals21 = [{'ID': 'AAAAAAAAA', 'YR': 2003, 'MO': 12, 'DY': 1, 'HR': 0.0, 'LAT': 0.0, 'LON': 0.0, 'SST': 5.0,
-#                    'OSTIA': 5.0, 'BGVAR': 0.01, 'ICE': 0.0},
-#                   {'ID': 'AAAAAAAAA', 'YR': 2003, 'MO': 12, 'DY': 1, 'HR': 0.1, 'LAT': 0.0, 'LON': 0.0, 'SST': 5.0,
-#                    'OSTIA': 5.0, 'BGVAR': 0.01, 'ICE': 0.0},
-#                   {'ID': 'AAAAAAAAA', 'YR': 2003, 'MO': 12, 'DY': 1, 'HR': 0.2, 'LAT': 0.0, 'LON': 0.0, 'SST': 5.0,
-#                    'OSTIA': 5.0, 'BGVAR': 0.01, 'ICE': 0.0},
-#                   {'ID': 'AAAAAAAAA', 'YR': 2003, 'MO': 12, 'DY': 1, 'HR': 0.3, 'LAT': 0.0, 'LON': 0.0, 'SST': 5.0,
-#                    'OSTIA': 5.0, 'BGVAR': 0.01, 'ICE': 0.0},
-#                   {'ID': 'AAAAAAAAA', 'YR': 2003, 'MO': 12, 'DY': 1, 'HR': 0.4, 'LAT': 0.0, 'LON': 0.0, 'SST': 5.0,
-#                    'OSTIA': 5.0, 'BGVAR': 0.01, 'ICE': 0.0},
-#                   {'ID': 'AAAAAAAAA', 'YR': 2003, 'MO': 12, 'DY': 1, 'HR': 0.5, 'LAT': 0.0, 'LON': 0.0, 'SST': 5.0,
-#                    'OSTIA': 5.0, 'BGVAR': 0.01, 'ICE': 0.0},
-#                   {'ID': 'AAAAAAAAA', 'YR': 2003, 'MO': 12, 'DY': 1, 'HR': 0.6, 'LAT': 0.0, 'LON': 0.0, 'SST': 5.0,
-#                    'OSTIA': 5.0, 'BGVAR': 0.01, 'ICE': 0.0},
-#                   {'ID': 'AAAAAAAAA', 'YR': 2003, 'MO': 12, 'DY': 1, 'HR': 0.7, 'LAT': 0.0, 'LON': 0.0, 'SST': 5.0,
-#                    'OSTIA': 5.0, 'BGVAR': 0.01, 'ICE': 0.0},
-#                   {'ID': 'AAAAAAAAA', 'YR': 2003, 'MO': 12, 'DY': 1, 'HR': 0.8, 'LAT': 0.0, 'LON': 0.0, 'SST': 5.0,
-#                    'OSTIA': 5.0, 'BGVAR': 0.01, 'ICE': 0.0}]
-#
-#         # assertion error - invalid ice value
-#         vals22 = [{'ID': 'AAAAAAAAA', 'YR': 2003, 'MO': 12, 'DY': 1, 'HR': 0.0, 'LAT': 0.0, 'LON': 0.0, 'SST': 5.0,
-#                    'OSTIA': 5.0, 'BGVAR': 0.01, 'ICE': 1.1},
-#                   {'ID': 'AAAAAAAAA', 'YR': 2003, 'MO': 12, 'DY': 1, 'HR': 0.1, 'LAT': 0.0, 'LON': 0.0, 'SST': 5.0,
-#                    'OSTIA': 5.0, 'BGVAR': 0.01, 'ICE': 0.0},
-#                   {'ID': 'AAAAAAAAA', 'YR': 2003, 'MO': 12, 'DY': 1, 'HR': 0.2, 'LAT': 0.0, 'LON': 0.0, 'SST': 5.0,
-#                    'OSTIA': 5.0, 'BGVAR': 0.01, 'ICE': 0.0},
-#                   {'ID': 'AAAAAAAAA', 'YR': 2003, 'MO': 12, 'DY': 1, 'HR': 0.3, 'LAT': 0.0, 'LON': 0.0, 'SST': 5.0,
-#                    'OSTIA': 5.0, 'BGVAR': 0.01, 'ICE': 0.0},
-#                   {'ID': 'AAAAAAAAA', 'YR': 2003, 'MO': 12, 'DY': 1, 'HR': 0.4, 'LAT': 0.0, 'LON': 0.0, 'SST': 5.0,
-#                    'OSTIA': 5.0, 'BGVAR': 0.01, 'ICE': 0.0},
-#                   {'ID': 'AAAAAAAAA', 'YR': 2003, 'MO': 12, 'DY': 1, 'HR': 0.5, 'LAT': 0.0, 'LON': 0.0, 'SST': 5.0,
-#                    'OSTIA': 5.0, 'BGVAR': 0.01, 'ICE': 0.0},
-#                   {'ID': 'AAAAAAAAA', 'YR': 2003, 'MO': 12, 'DY': 1, 'HR': 0.6, 'LAT': 0.0, 'LON': 0.0, 'SST': 5.0,
-#                    'OSTIA': 5.0, 'BGVAR': 0.01, 'ICE': 0.0},
-#                   {'ID': 'AAAAAAAAA', 'YR': 2003, 'MO': 12, 'DY': 1, 'HR': 0.7, 'LAT': 0.0, 'LON': 0.0, 'SST': 5.0,
-#                    'OSTIA': 5.0, 'BGVAR': 0.01, 'ICE': 0.0},
-#                   {'ID': 'AAAAAAAAA', 'YR': 2003, 'MO': 12, 'DY': 1, 'HR': 0.8, 'LAT': 0.0, 'LON': 0.0, 'SST': 5.0,
-#                    'OSTIA': 5.0, 'BGVAR': 0.01, 'ICE': 0.0}]
-#
-#         # assertion error - missing observation value
-#         vals23 = [{'ID': 'AAAAAAAAA', 'YR': 2003, 'MO': 12, 'DY': 1, 'HR': 0.0, 'LAT': 0.0, 'LON': 0.0, 'SST': 5.0,
-#                    'OSTIA': 5.0, 'BGVAR': 0.01, 'ICE': 0.0},
-#                   {'ID': 'AAAAAAAAA', 'YR': 2003, 'MO': 12, 'DY': 1, 'HR': 0.1, 'LAT': 0.0, 'LON': 0.0, 'SST': 5.0,
-#                    'OSTIA': 5.0, 'BGVAR': 0.01, 'ICE': 0.0},
-#                   {'ID': 'AAAAAAAAA', 'YR': 2003, 'MO': 12, 'DY': 1, 'HR': 0.2, 'LAT': 0.0, 'LON': 0.0, 'SST': 5.0,
-#                    'OSTIA': 5.0, 'BGVAR': 0.01, 'ICE': 0.0},
-#                   {'ID': 'AAAAAAAAA', 'YR': 2003, 'MO': 12, 'DY': 1, 'HR': 0.3, 'LAT': 0.0, 'LON': 0.0, 'SST': 5.0,
-#                    'OSTIA': 5.0, 'BGVAR': 0.01, 'ICE': 0.0},
-#                   {'ID': 'AAAAAAAAA', 'YR': 2003, 'MO': 12, 'DY': 1, 'HR': 0.4, 'LAT': 0.0, 'LON': 0.0, 'SST': 5.0,
-#                    'OSTIA': 5.0, 'BGVAR': 0.01, 'ICE': 0.0},
-#                   {'ID': 'AAAAAAAAA', 'YR': 2003, 'MO': 12, 'DY': 1, 'HR': 0.5, 'LAT': 0.0, 'LON': 0.0, 'SST': 5.0,
-#                    'OSTIA': 5.0, 'BGVAR': 0.01, 'ICE': 0.0},
-#                   {'ID': 'AAAAAAAAA', 'YR': 2003, 'MO': 12, 'DY': 1, 'HR': 0.6, 'LAT': 0.0, 'LON': 0.0, 'SST': 5.0,
-#                    'OSTIA': 5.0, 'BGVAR': 0.01, 'ICE': 0.0},
-#                   {'ID': 'AAAAAAAAA', 'YR': 2003, 'MO': 12, 'DY': 1, 'HR': 0.7, 'LAT': 0.0, 'LON': 0.0, 'SST': 5.0,
-#                    'OSTIA': 5.0, 'BGVAR': 0.01, 'ICE': 0.0},
-#                   {'ID': 'AAAAAAAAA', 'YR': 2003, 'MO': 12, 'DY': 1, 'HR': 0.8, 'LAT': 0.0, 'LON': 0.0, 'SST': 5.0,
-#                    'OSTIA': 5.0, 'BGVAR': 0.01, 'ICE': 0.0}]
-#
-#         # assertion error - times not sorted
-#         vals24 = [{'ID': 'AAAAAAAAA', 'YR': 2003, 'MO': 12, 'DY': 1, 'HR': 0.0, 'LAT': 0.0, 'LON': 0.0, 'SST': 5.0,
-#                    'OSTIA': 5.0, 'BGVAR': 0.01, 'ICE': 0.0},
-#                   {'ID': 'AAAAAAAAA', 'YR': 2003, 'MO': 12, 'DY': 1, 'HR': 0.1, 'LAT': 0.0, 'LON': 0.0, 'SST': 5.0,
-#                    'OSTIA': 5.0, 'BGVAR': 0.01, 'ICE': 0.0},
-#                   {'ID': 'AAAAAAAAA', 'YR': 2003, 'MO': 12, 'DY': 1, 'HR': 0.2, 'LAT': 0.0, 'LON': 0.0, 'SST': 5.0,
-#                    'OSTIA': 5.0, 'BGVAR': 0.01, 'ICE': 0.0},
-#                   {'ID': 'AAAAAAAAA', 'YR': 2003, 'MO': 12, 'DY': 1, 'HR': 0.1, 'LAT': 0.0, 'LON': 0.0, 'SST': 5.0,
-#                    'OSTIA': 5.0, 'BGVAR': 0.01, 'ICE': 0.0},
-#                   {'ID': 'AAAAAAAAA', 'YR': 2003, 'MO': 12, 'DY': 1, 'HR': 0.4, 'LAT': 0.0, 'LON': 0.0, 'SST': 5.0,
-#                    'OSTIA': 5.0, 'BGVAR': 0.01, 'ICE': 0.0},
-#                   {'ID': 'AAAAAAAAA', 'YR': 2003, 'MO': 12, 'DY': 1, 'HR': 0.5, 'LAT': 0.0, 'LON': 0.0, 'SST': 5.0,
-#                    'OSTIA': 5.0, 'BGVAR': 0.01, 'ICE': 0.0},
-#                   {'ID': 'AAAAAAAAA', 'YR': 2003, 'MO': 12, 'DY': 1, 'HR': 0.6, 'LAT': 0.0, 'LON': 0.0, 'SST': 5.0,
-#                    'OSTIA': 5.0, 'BGVAR': 0.01, 'ICE': 0.0},
-#                   {'ID': 'AAAAAAAAA', 'YR': 2003, 'MO': 12, 'DY': 1, 'HR': 0.7, 'LAT': 0.0, 'LON': 0.0, 'SST': 5.0,
-#                    'OSTIA': 5.0, 'BGVAR': 0.01, 'ICE': 0.0},
-#                   {'ID': 'AAAAAAAAA', 'YR': 2003, 'MO': 12, 'DY': 1, 'HR': 0.8, 'LAT': 0.0, 'LON': 0.0, 'SST': 5.0,
-#                    'OSTIA': 5.0, 'BGVAR': 0.01, 'ICE': 0.0}]
-#
-#         # assertion error - invalid background sst
-#         vals25 = [{'ID': 'AAAAAAAAA', 'YR': 2003, 'MO': 12, 'DY': 1, 'HR': 0.0, 'LAT': 0.0, 'LON': 0.0, 'SST': 5.0,
-#                    'OSTIA': 5.0, 'BGVAR': 0.01, 'ICE': 0.0},
-#                   {'ID': 'AAAAAAAAA', 'YR': 2003, 'MO': 12, 'DY': 1, 'HR': 0.1, 'LAT': 0.0, 'LON': 0.0, 'SST': 5.0,
-#                    'OSTIA': 5.0, 'BGVAR': 0.01, 'ICE': 0.0},
-#                   {'ID': 'AAAAAAAAA', 'YR': 2003, 'MO': 12, 'DY': 1, 'HR': 0.2, 'LAT': 0.0, 'LON': 0.0, 'SST': 5.0,
-#                    'OSTIA': 5.0, 'BGVAR': 0.01, 'ICE': 0.0},
-#                   {'ID': 'AAAAAAAAA', 'YR': 2003, 'MO': 12, 'DY': 1, 'HR': 0.3, 'LAT': 0.0, 'LON': 0.0, 'SST': 5.0,
-#                    'OSTIA': 5.0, 'BGVAR': 0.01, 'ICE': 0.0},
-#                   {'ID': 'AAAAAAAAA', 'YR': 2003, 'MO': 12, 'DY': 1, 'HR': 0.4, 'LAT': 0.0, 'LON': 0.0, 'SST': 5.0,
-#                    'OSTIA': 5.0, 'BGVAR': 0.01, 'ICE': 0.0},
-#                   {'ID': 'AAAAAAAAA', 'YR': 2003, 'MO': 12, 'DY': 1, 'HR': 0.5, 'LAT': 0.0, 'LON': 0.0, 'SST': 5.0,
-#                    'OSTIA': 5.0, 'BGVAR': 0.01, 'ICE': 0.0},
-#                   {'ID': 'AAAAAAAAA', 'YR': 2003, 'MO': 12, 'DY': 1, 'HR': 0.6, 'LAT': 0.0, 'LON': 0.0, 'SST': 5.0,
-#                    'OSTIA': 5.0, 'BGVAR': 0.01, 'ICE': 0.0},
-#                   {'ID': 'AAAAAAAAA', 'YR': 2003, 'MO': 12, 'DY': 1, 'HR': 0.7, 'LAT': 0.0, 'LON': 0.0, 'SST': 5.0,
-#                    'OSTIA': 5.0, 'BGVAR': 0.01, 'ICE': 0.0},
-#                   {'ID': 'AAAAAAAAA', 'YR': 2003, 'MO': 12, 'DY': 1, 'HR': 0.8, 'LAT': 0.0, 'LON': 0.0, 'SST': 5.0,
-#                    'OSTIA': 46.0, 'BGVAR': 0.01, 'ICE': 0.0}]
-#
-#         # assertion error - invalid background error variance
-#         vals26 = [{'ID': 'AAAAAAAAA', 'YR': 2003, 'MO': 12, 'DY': 1, 'HR': 0.0, 'LAT': 0.0, 'LON': 0.0, 'SST': 5.0,
-#                    'OSTIA': 5.0, 'BGVAR': 0.01, 'ICE': 0.0},
-#                   {'ID': 'AAAAAAAAA', 'YR': 2003, 'MO': 12, 'DY': 1, 'HR': 0.1, 'LAT': 0.0, 'LON': 0.0, 'SST': 5.0,
-#                    'OSTIA': 5.0, 'BGVAR': 0.01, 'ICE': 0.0},
-#                   {'ID': 'AAAAAAAAA', 'YR': 2003, 'MO': 12, 'DY': 1, 'HR': 0.2, 'LAT': 0.0, 'LON': 0.0, 'SST': 5.0,
-#                    'OSTIA': 5.0, 'BGVAR': 0.01, 'ICE': 0.0},
-#                   {'ID': 'AAAAAAAAA', 'YR': 2003, 'MO': 12, 'DY': 1, 'HR': 0.3, 'LAT': 0.0, 'LON': 0.0, 'SST': 5.0,
-#                    'OSTIA': 5.0, 'BGVAR': -0.01, 'ICE': 0.0},
-#                   {'ID': 'AAAAAAAAA', 'YR': 2003, 'MO': 12, 'DY': 1, 'HR': 0.4, 'LAT': 0.0, 'LON': 0.0, 'SST': 5.0,
-#                    'OSTIA': 5.0, 'BGVAR': 0.01, 'ICE': 0.0},
-#                   {'ID': 'AAAAAAAAA', 'YR': 2003, 'MO': 12, 'DY': 1, 'HR': 0.5, 'LAT': 0.0, 'LON': 0.0, 'SST': 5.0,
-#                    'OSTIA': 5.0, 'BGVAR': 0.01, 'ICE': 0.0},
-#                   {'ID': 'AAAAAAAAA', 'YR': 2003, 'MO': 12, 'DY': 1, 'HR': 0.6, 'LAT': 0.0, 'LON': 0.0, 'SST': 5.0,
-#                    'OSTIA': 5.0, 'BGVAR': 0.01, 'ICE': 0.0},
-#                   {'ID': 'AAAAAAAAA', 'YR': 2003, 'MO': 12, 'DY': 1, 'HR': 0.7, 'LAT': 0.0, 'LON': 0.0, 'SST': 5.0,
-#                    'OSTIA': 5.0, 'BGVAR': 0.01, 'ICE': 0.0},
-#                   {'ID': 'AAAAAAAAA', 'YR': 2003, 'MO': 12, 'DY': 1, 'HR': 0.8, 'LAT': 0.0, 'LON': 0.0, 'SST': 5.0,
-#                    'OSTIA': 5.0, 'BGVAR': 0.01, 'ICE': 0.0}]
-#
-#         reps = ex.Voyage()
-#         reps = ex.Voyage()
-#         reps = ex.Voyage()
-#         reps = ex.Voyage()
-#         reps = ex.Voyage()
-#         reps = ex.Voyage()
-#         reps = ex.Voyage()
-#         reps = ex.Voyage()
-#         reps = ex.Voyage()
-#         reps = ex.Voyage()
-#         reps = ex.Voyage()
-#         reps = ex.Voyage()
-#         reps = ex.Voyage()
-#         reps = ex.Voyage()
-#         reps = ex.Voyage()
-#         reps = ex.Voyage()
-#         reps = ex.Voyage()
-#         reps = ex.Voyage()
-#         reps = ex.Voyage()
-#         reps = ex.Voyage()
-#         reps = ex.Voyage()
-#         reps = ex.Voyage()
-#         reps = ex.Voyage()
-#         reps = ex.Voyage()
-#         reps = ex.Voyage()
-#         reps = ex.Voyage()
-#
-#         for v in vals1:
-#             rec = IMMA()
-#             for key in v:
-#                 if not key in ['OSTIA', 'BGVAR', 'ICE']:
-#                     rec.data[key] = v[key]
-#             rep = ex.MarineReportQC(rec)
-#             rep.setext('OSTIA', v['OSTIA'])
-#             rep.setext('BGVAR', v['BGVAR'])
-#             rep.setext('ICE', v['ICE'])
-#             reps.add_report(rep)
-#
-#         for v in vals2:
-#             rec = IMMA()
-#             for key in v:
-#                 if not key in ['OSTIA', 'BGVAR', 'ICE']:
-#                     rec.data[key] = v[key]
-#             rep = ex.MarineReportQC(rec)
-#             rep.setext('OSTIA', v['OSTIA'])
-#             rep.setext('BGVAR', v['BGVAR'])
-#             rep.setext('ICE', v['ICE'])
-#             reps.add_report(rep)
-#
-#         for v in vals3:
-#             rec = IMMA()
-#             for key in v:
-#                 if not key in ['OSTIA', 'BGVAR', 'ICE']:
-#                     rec.data[key] = v[key]
-#             rep = ex.MarineReportQC(rec)
-#             rep.setext('OSTIA', v['OSTIA'])
-#             rep.setext('BGVAR', v['BGVAR'])
-#             rep.setext('ICE', v['ICE'])
-#             reps.add_report(rep)
-#
-#         for v in vals4:
-#             rec = IMMA()
-#             for key in v:
-#                 if not key in ['OSTIA', 'BGVAR', 'ICE']:
-#                     rec.data[key] = v[key]
-#             rep = ex.MarineReportQC(rec)
-#             rep.setext('OSTIA', v['OSTIA'])
-#             rep.setext('BGVAR', v['BGVAR'])
-#             rep.setext('ICE', v['ICE'])
-#             reps.add_report(rep)
-#
-#         for v in vals5:
-#             rec = IMMA()
-#             for key in v:
-#                 if not key in ['OSTIA', 'BGVAR', 'ICE']:
-#                     rec.data[key] = v[key]
-#             rep = ex.MarineReportQC(rec)
-#             rep.setext('OSTIA', v['OSTIA'])
-#             rep.setext('BGVAR', v['BGVAR'])
-#             rep.setext('ICE', v['ICE'])
-#             reps.add_report(rep)
-#
-#         for v in vals6:
-#             rec = IMMA()
-#             for key in v:
-#                 if not key in ['OSTIA', 'BGVAR', 'ICE']:
-#                     rec.data[key] = v[key]
-#             rep = ex.MarineReportQC(rec)
-#             rep.setext('OSTIA', v['OSTIA'])
-#             rep.setext('BGVAR', v['BGVAR'])
-#             rep.setext('ICE', v['ICE'])
-#             reps.add_report(rep)
-#
-#         for v in vals7:
-#             rec = IMMA()
-#             for key in v:
-#                 if not key in ['OSTIA', 'BGVAR', 'ICE']:
-#                     rec.data[key] = v[key]
-#             rep = ex.MarineReportQC(rec)
-#             rep.setext('OSTIA', v['OSTIA'])
-#             rep.setext('BGVAR', v['BGVAR'])
-#             rep.setext('ICE', v['ICE'])
-#             reps.add_report(rep)
-#
-#         for v in vals8:
-#             rec = IMMA()
-#             for key in v:
-#                 if not key in ['OSTIA', 'BGVAR', 'ICE']:
-#                     rec.data[key] = v[key]
-#             rep = ex.MarineReportQC(rec)
-#             rep.setext('OSTIA', v['OSTIA'])
-#             rep.setext('BGVAR', v['BGVAR'])
-#             rep.setext('ICE', v['ICE'])
-#             reps.add_report(rep)
-#
-#         for v in vals9:
-#             rec = IMMA()
-#             for key in v:
-#                 if not key in ['OSTIA', 'BGVAR', 'ICE']:
-#                     rec.data[key] = v[key]
-#             rep = ex.MarineReportQC(rec)
-#             rep.setext('OSTIA', v['OSTIA'])
-#             rep.setext('BGVAR', v['BGVAR'])
-#             rep.setext('ICE', v['ICE'])
-#             reps.add_report(rep)
-#
-#         for v in vals10:
-#             rec = IMMA()
-#             for key in v:
-#                 if not key in ['OSTIA', 'BGVAR', 'ICE']:
-#                     rec.data[key] = v[key]
-#             rep = ex.MarineReportQC(rec)
-#             rep.setext('OSTIA', v['OSTIA'])
-#             rep.setext('BGVAR', v['BGVAR'])
-#             rep.setext('ICE', v['ICE'])
-#             reps.add_report(rep)
-#
-#         for v in vals11:
-#             rec = IMMA()
-#             for key in v:
-#                 if not key in ['OSTIA', 'BGVAR', 'ICE']:
-#                     rec.data[key] = v[key]
-#             rep = ex.MarineReportQC(rec)
-#             rep.setext('OSTIA', v['OSTIA'])
-#             rep.setext('BGVAR', v['BGVAR'])
-#             rep.setext('ICE', v['ICE'])
-#             reps.add_report(rep)
-#
-#         for v in vals12:
-#             rec = IMMA()
-#             for key in v:
-#                 if not key in ['OSTIA', 'BGVAR', 'ICE']:
-#                     rec.data[key] = v[key]
-#             rep = ex.MarineReportQC(rec)
-#             rep.setext('OSTIA', v['OSTIA'])
-#             rep.setext('BGVAR', v['BGVAR'])
-#             rep.setext('ICE', v['ICE'])
-#             reps.add_report(rep)
-#
-#         for v in vals13:
-#             rec = IMMA()
-#             for key in v:
-#                 if not key in ['OSTIA', 'BGVAR', 'ICE']:
-#                     rec.data[key] = v[key]
-#             rep = ex.MarineReportQC(rec)
-#             rep.setext('OSTIA', v['OSTIA'])
-#             rep.setext('BGVAR', v['BGVAR'])
-#             rep.setext('ICE', v['ICE'])
-#             reps.add_report(rep)
-#
-#         for v in vals14:
-#             rec = IMMA()
-#             for key in v:
-#                 if not key in ['OSTIA', 'BGVAR', 'ICE']:
-#                     rec.data[key] = v[key]
-#             rep = ex.MarineReportQC(rec)
-#             rep.setext('OSTIA', v['OSTIA'])
-#             rep.setext('BGVAR', v['BGVAR'])
-#             rep.setext('ICE', v['ICE'])
-#             reps.add_report(rep)
-#
-#         for v in vals15:
-#             rec = IMMA()
-#             for key in v:
-#                 if not key in ['OSTIA', 'BGVAR', 'ICE']:
-#                     rec.data[key] = v[key]
-#             rep = ex.MarineReportQC(rec)
-#             rep.setext('OSTIA', v['OSTIA'])
-#             rep.setext('BGVAR', v['BGVAR'])
-#             rep.setext('ICE', v['ICE'])
-#             reps.add_report(rep)
-#
-#         for v in vals16:
-#             rec = IMMA()
-#             for key in v:
-#                 if not key in ['OSTIA', 'BGVAR', 'ICE']:
-#                     rec.data[key] = v[key]
-#             rep = ex.MarineReportQC(rec)
-#             rep.setext('OSTIA', v['OSTIA'])
-#             rep.setext('BGVAR', v['BGVAR'])
-#             rep.setext('ICE', v['ICE'])
-#             reps.add_report(rep)
-#
-#         for v in vals17:
-#             rec = IMMA()
-#             for key in v:
-#                 if not key in ['OSTIA', 'BGVAR', 'ICE']:
-#                     rec.data[key] = v[key]
-#             rep = ex.MarineReportQC(rec)
-#             rep.setext('OSTIA', v['OSTIA'])
-#             rep.setext('BGVAR', v['BGVAR'])
-#             rep.setext('ICE', v['ICE'])
-#             reps.add_report(rep)
-#
-#         for v in vals18:
-#             rec = IMMA()
-#             for key in v:
-#                 if not key in ['OSTIA', 'BGVAR', 'ICE']:
-#                     rec.data[key] = v[key]
-#             rep = ex.MarineReportQC(rec)
-#             rep.setext('OSTIA', v['OSTIA'])
-#             rep.setext('BGVAR', v['BGVAR'])
-#             rep.setext('ICE', v['ICE'])
-#             reps.add_report(rep)
-#
-#         for v in vals19:
-#             rec = IMMA()
-#             for key in v:
-#                 if not key in ['OSTIA', 'BGVAR', 'ICE']:
-#                     rec.data[key] = v[key]
-#             rep = ex.MarineReportQC(rec)
-#             rep.setext('OSTIA', v['OSTIA'])
-#             rep.setext('BGVAR', v['BGVAR'])
-#             rep.setext('ICE', v['ICE'])
-#             reps.add_report(rep)
-#
-#         for v in vals20:
-#             rec = IMMA()
-#             for key in v:
-#                 if not key in ['OSTIA', 'BGVAR', 'ICE']:
-#                     rec.data[key] = v[key]
-#             rep = ex.MarineReportQC(rec)
-#             rep.setext('OSTIA', v['OSTIA'])
-#             rep.setext('BGVAR', v['BGVAR'])
-#             rep.setext('ICE', v['ICE'])
-#             reps.add_report(rep)
-#
-#         for v in vals21:
-#             rec = IMMA()
-#             for key in v:
-#                 if not key in ['OSTIA', 'BGVAR', 'ICE']:
-#                     rec.data[key] = v[key]
-#             rep = ex.MarineReportQC(rec)
-#             # rep.setext('OSTIA', v['OSTIA'])
-#             rep.setext('BGVAR', v['BGVAR'])
-#             rep.setext('ICE', v['ICE'])
-#             reps.add_report(rep)
-#
-#         for v in vals22:
-#             rec = IMMA()
-#             for key in v:
-#                 if not key in ['OSTIA', 'BGVAR', 'ICE']:
-#                     rec.data[key] = v[key]
-#             rep = ex.MarineReportQC(rec)
-#             rep.setext('OSTIA', v['OSTIA'])
-#             rep.setext('BGVAR', v['BGVAR'])
-#             rep.setext('ICE', v['ICE'])
-#             reps.add_report(rep)
-#
-#         for v in vals23:
-#             rec = IMMA()
-#             for key in v:
-#                 if not key in ['OSTIA', 'BGVAR', 'ICE']:
-#                     rec.data[key] = v[key]
-#             rep = ex.MarineReportQC(rec)
-#             rep.setext('OSTIA', v['OSTIA'])
-#             rep.setext('BGVAR', v['BGVAR'])
-#             rep.setext('ICE', v['ICE'])
-#             reps.add_report(rep)
-#         reps.setvar(1, 'LAT', None)
-#
-#         for v in vals24:
-#             rec = IMMA()
-#             for key in v:
-#                 if not key in ['OSTIA', 'BGVAR', 'ICE']:
-#                     rec.data[key] = v[key]
-#             rep = ex.MarineReportQC(rec)
-#             rep.setext('OSTIA', v['OSTIA'])
-#             rep.setext('BGVAR', v['BGVAR'])
-#             rep.setext('ICE', v['ICE'])
-#             reps.add_report(rep)
-#
-#         for v in vals25:
-#             rec = IMMA()
-#             for key in v:
-#                 if not key in ['OSTIA', 'BGVAR', 'ICE']:
-#                     rec.data[key] = v[key]
-#             rep = ex.MarineReportQC(rec)
-#             rep.setext('OSTIA', v['OSTIA'])
-#             rep.setext('BGVAR', v['BGVAR'])
-#             rep.setext('ICE', v['ICE'])
-#             reps.add_report(rep)
-#
-#         for v in vals26:
-#             rec = IMMA()
-#             for key in v:
-#                 if not key in ['OSTIA', 'BGVAR', 'ICE']:
-#                     rec.data[key] = v[key]
-#             rep = ex.MarineReportQC(rec)
-#             rep.setext('OSTIA', v['OSTIA'])
-#             rep.setext('BGVAR', v['BGVAR'])
-#             rep.setext('ICE', v['ICE'])
-#             reps.add_report(rep)
-#
-#     def tearDown():
-#
-#         del reps
-#         del reps
-#         del reps
-#         del reps
-#         del reps
-#         del reps
-#         del reps
-#         del reps
-#         del reps
-#         del reps
-#         del reps
-#         del reps
-#         del reps
-#         del reps
-#         del reps
-#         del reps
-#         del reps
-#         del reps
-#         del reps
-#         del reps
-#         del reps
-#         del reps
-#         del reps
-#         del reps
-#         del reps
-#         del reps
-#
-#     def test_all_daytime():
-#         expected_flags = {'drf_bias': [0, 0, 0, 0, 0, 0, 0, 0, 0],
-#                           'drf_noise': [0, 0, 0, 0, 0, 0, 0, 0, 0],
-#                           'drf_short': [0, 0, 0, 0, 0, 0, 0, 0, 0]}
-#         otqc.sst_biased_noisy_check(reps.reps, 9, 1.10, 1.0, 0.29, 3.0, 2, 0.3)
-#         for i in range(0, len(reps)):
-#             assert reps.get_qc(i, 'SST', 'drf_bias'), expected_flags['drf_bias'][i])
-#             assert reps.get_qc(i, 'SST', 'drf_noise'), expected_flags['drf_noise'][i])
-#             assert reps.get_qc(i, 'SST', 'drf_short'), expected_flags['drf_short'][i])
-#
-#     def test_all_land_masked():
-#         expected_flags = {'drf_bias': [0, 0, 0, 0, 0, 0, 0, 0, 0],
-#                           'drf_noise': [0, 0, 0, 0, 0, 0, 0, 0, 0],
-#                           'drf_short': [0, 0, 0, 0, 0, 0, 0, 0, 0]}
-#         otqc.sst_biased_noisy_check(reps.reps, 9, 1.10, 1.0, 0.29, 3.0, 2, 0.3)
-#         for i in range(0, len(reps)):
-#             assert reps.get_qc(i, 'SST', 'drf_bias'), expected_flags['drf_bias'][i])
-#             assert reps.get_qc(i, 'SST', 'drf_noise'), expected_flags['drf_noise'][i])
-#             assert reps.get_qc(i, 'SST', 'drf_short'), expected_flags['drf_short'][i])
-#
-#     def test_all_ice():
-#         expected_flags = {'drf_bias': [0, 0, 0, 0, 0, 0, 0, 0, 0],
-#                           'drf_noise': [0, 0, 0, 0, 0, 0, 0, 0, 0],
-#                           'drf_short': [0, 0, 0, 0, 0, 0, 0, 0, 0]}
-#         otqc.sst_biased_noisy_check(reps.reps, 9, 1.10, 1.0, 0.29, 3.0, 2, 0.3)
-#         for i in range(0, len(reps)):
-#             assert reps.get_qc(i, 'SST', 'drf_bias'), expected_flags['drf_bias'][i])
-#             assert reps.get_qc(i, 'SST', 'drf_noise'), expected_flags['drf_noise'][i])
-#             assert reps.get_qc(i, 'SST', 'drf_short'), expected_flags['drf_short'][i])
-#
-#     def test_all_bgvar_exceeds_limit():
-#         expected_flags = {'drf_bias': [0, 0, 0, 0, 0, 0, 0, 0, 0],
-#                           'drf_noise': [0, 0, 0, 0, 0, 0, 0, 0, 0],
-#                           'drf_short': [0, 0, 0, 0, 0, 0, 0, 0, 0]}
-#         otqc.sst_biased_noisy_check(reps.reps, 9, 1.10, 1.0, 0.29, 3.0, 2, 0.3)
-#         for i in range(0, len(reps)):
-#             assert reps.get_qc(i, 'SST', 'drf_bias'), expected_flags['drf_bias'][i])
-#             assert reps.get_qc(i, 'SST', 'drf_noise'), expected_flags['drf_noise'][i])
-#             assert reps.get_qc(i, 'SST', 'drf_short'), expected_flags['drf_short'][i])
-#
-#     def test_biased_warm():
-#         expected_flags = {'drf_bias': [1, 1, 1, 1, 1, 1, 1, 1, 1],
-#                           'drf_noise': [0, 0, 0, 0, 0, 0, 0, 0, 0],
-#                           'drf_short': [0, 0, 0, 0, 0, 0, 0, 0, 0]}
-#         otqc.sst_biased_noisy_check(reps.reps, 9, 1.10, 1.0, 0.29, 3.0, 2, 0.3)
-#         for i in range(0, len(reps)):
-#             assert reps.get_qc(i, 'SST', 'drf_bias'), expected_flags['drf_bias'][i])
-#             assert reps.get_qc(i, 'SST', 'drf_noise'), expected_flags['drf_noise'][i])
-#             assert reps.get_qc(i, 'SST', 'drf_short'), expected_flags['drf_short'][i])
-#
-#     def test_biased_cool():
-#         expected_flags = {'drf_bias': [1, 1, 1, 1, 1, 1, 1, 1, 1],
-#                           'drf_noise': [0, 0, 0, 0, 0, 0, 0, 0, 0],
-#                           'drf_short': [0, 0, 0, 0, 0, 0, 0, 0, 0]}
-#         otqc.sst_biased_noisy_check(reps.reps, 9, 1.10, 1.0, 0.29, 3.0, 2, 0.3)
-#         for i in range(0, len(reps)):
-#             assert reps.get_qc(i, 'SST', 'drf_bias'), expected_flags['drf_bias'][i])
-#             assert reps.get_qc(i, 'SST', 'drf_noise'), expected_flags['drf_noise'][i])
-#             assert reps.get_qc(i, 'SST', 'drf_short'), expected_flags['drf_short'][i])
-#
-#     def test_noisy():
-#         expected_flags = {'drf_bias': [0, 0, 0, 0, 0, 0, 0, 0, 0],
-#                           'drf_noise': [1, 1, 1, 1, 1, 1, 1, 1, 1],
-#                           'drf_short': [0, 0, 0, 0, 0, 0, 0, 0, 0]}
-#         otqc.sst_biased_noisy_check(reps.reps, 9, 1.10, 1.0, 0.29, 3.0, 2, 0.3)
-#         for i in range(0, len(reps)):
-#             assert reps.get_qc(i, 'SST', 'drf_bias'), expected_flags['drf_bias'][i])
-#             assert reps.get_qc(i, 'SST', 'drf_noise'), expected_flags['drf_noise'][i])
-#             assert reps.get_qc(i, 'SST', 'drf_short'), expected_flags['drf_short'][i])
-#
-#     def test_biased_and_noisy():
-#         expected_flags = {'drf_bias': [1, 1, 1, 1, 1, 1, 1, 1, 1],
-#                           'drf_noise': [1, 1, 1, 1, 1, 1, 1, 1, 1],
-#                           'drf_short': [0, 0, 0, 0, 0, 0, 0, 0, 0]}
-#         otqc.sst_biased_noisy_check(reps.reps, 9, 1.10, 1.0, 0.29, 3.0, 2, 0.3)
-#         for i in range(0, len(reps)):
-#             assert reps.get_qc(i, 'SST', 'drf_bias'), expected_flags['drf_bias'][i])
-#             assert reps.get_qc(i, 'SST', 'drf_noise'), expected_flags['drf_noise'][i])
-#             assert reps.get_qc(i, 'SST', 'drf_short'), expected_flags['drf_short'][i])
-#
-#     def test_biased_warm_obs_missing():
-#         expected_flags = {'drf_bias': [1, 1, 1, 1, 1, 1, 1, 1, 1],
-#                           'drf_noise': [0, 0, 0, 0, 0, 0, 0, 0, 0],
-#                           'drf_short': [0, 0, 0, 0, 0, 0, 0, 0, 0]}
-#         otqc.sst_biased_noisy_check(reps.reps, 5, 1.10, 1.0, 0.29, 3.0, 2, 0.3)
-#         for i in range(0, len(reps)):
-#             assert reps.get_qc(i, 'SST', 'drf_bias'), expected_flags['drf_bias'][i])
-#             assert reps.get_qc(i, 'SST', 'drf_noise'), expected_flags['drf_noise'][i])
-#             assert reps.get_qc(i, 'SST', 'drf_short'), expected_flags['drf_short'][i])
-#
-#     def test_short_record_one_bad():
-#         expected_flags = {'drf_bias': [0, 0, 0, 0, 0],
-#                           'drf_noise': [0, 0, 0, 0, 0],
-#                           'drf_short': [0, 0, 0, 0, 0]}
-#         otqc.sst_biased_noisy_check(reps.reps, 9, 1.10, 1.0, 0.29, 3.0, 2, 0.3)
-#         for i in range(0, len(reps)):
-#             assert reps.get_qc(i, 'SST', 'drf_bias'), expected_flags['drf_bias'][i])
-#             assert reps.get_qc(i, 'SST', 'drf_noise'), expected_flags['drf_noise'][i])
-#             assert reps.get_qc(i, 'SST', 'drf_short'), expected_flags['drf_short'][i])
-#
-#     def test_short_record_two_bad():
-#         expected_flags = {'drf_bias': [0, 0, 0, 0, 0],
-#                           'drf_noise': [0, 0, 0, 0, 0],
-#                           'drf_short': [1, 1, 1, 1, 1]}
-#         otqc.sst_biased_noisy_check(reps.reps, 9, 1.10, 1.0, 0.29, 3.0, 2, 0.3)
-#         for i in range(0, len(reps)):
-#             assert reps.get_qc(i, 'SST', 'drf_bias'), expected_flags['drf_bias'][i])
-#             assert reps.get_qc(i, 'SST', 'drf_noise'), expected_flags['drf_noise'][i])
-#             assert reps.get_qc(i, 'SST', 'drf_short'), expected_flags['drf_short'][i])
-#
-#     def test_short_record_two_bad_obs_missing():
-#         expected_flags = {'drf_bias': [0, 0, 0, 0, 0, 0, 0, 0, 0],
-#                           'drf_noise': [0, 0, 0, 0, 0, 0, 0, 0, 0],
-#                           'drf_short': [1, 1, 1, 1, 1, 1, 1, 1, 1]}
-#         otqc.sst_biased_noisy_check(reps.reps, 9, 1.10, 1.0, 0.29, 3.0, 2, 0.3)
-#         for i in range(0, len(reps)):
-#             assert reps.get_qc(i, 'SST', 'drf_bias'), expected_flags['drf_bias'][i])
-#             assert reps.get_qc(i, 'SST', 'drf_noise'), expected_flags['drf_noise'][i])
-#             assert reps.get_qc(i, 'SST', 'drf_short'), expected_flags['drf_short'][i])
-#
-#     def test_short_record_two_bad_obs_missing_with_bgvar():
-#         expected_flags = {'drf_bias': [0, 0, 0, 0, 0, 0, 0, 0, 0],
-#                           'drf_noise': [0, 0, 0, 0, 0, 0, 0, 0, 0],
-#                           'drf_short': [0, 0, 0, 0, 0, 0, 0, 0, 0]}
-#         otqc.sst_biased_noisy_check(reps.reps, 9, 1.10, 1.0, 0.29, 3.0, 2, 0.3)
-#         for i in range(0, len(reps)):
-#             assert reps.get_qc(i, 'SST', 'drf_bias'), expected_flags['drf_bias'][i])
-#             assert reps.get_qc(i, 'SST', 'drf_noise'), expected_flags['drf_noise'][i])
-#             assert reps.get_qc(i, 'SST', 'drf_short'), expected_flags['drf_short'][i])
-#
-#     def test_good_data():
-#         expected_flags = {'drf_bias': [0, 0, 0, 0, 0, 0, 0, 0, 0],
-#                           'drf_noise': [0, 0, 0, 0, 0, 0, 0, 0, 0],
-#                           'drf_short': [0, 0, 0, 0, 0, 0, 0, 0, 0]}
-#         otqc.sst_biased_noisy_check(reps.reps, 9, 1.10, 1.0, 0.29, 3.0, 2, 0.3)
-#         for i in range(0, len(reps)):
-#             assert reps.get_qc(i, 'SST', 'drf_bias'), expected_flags['drf_bias'][i])
-#             assert reps.get_qc(i, 'SST', 'drf_noise'), expected_flags['drf_noise'][i])
-#             assert reps.get_qc(i, 'SST', 'drf_short'), expected_flags['drf_short'][i])
-#
-#     def test_short_record_good_data():
-#         expected_flags = {'drf_bias': [0, 0, 0, 0, 0],
-#                           'drf_noise': [0, 0, 0, 0, 0],
-#                           'drf_short': [0, 0, 0, 0, 0]}
-#         otqc.sst_biased_noisy_check(reps.reps, 9, 1.10, 1.0, 0.29, 3.0, 2, 0.3)
-#         for i in range(0, len(reps)):
-#             assert reps.get_qc(i, 'SST', 'drf_bias'), expected_flags['drf_bias'][i])
-#             assert reps.get_qc(i, 'SST', 'drf_noise'), expected_flags['drf_noise'][i])
-#             assert reps.get_qc(i, 'SST', 'drf_short'), expected_flags['drf_short'][i])
-#
-#     def test_short_record_obs_missing_good_data():
-#         expected_flags = {'drf_bias': [0, 0, 0, 0, 0, 0, 0, 0, 0],
-#                           'drf_noise': [0, 0, 0, 0, 0, 0, 0, 0, 0],
-#                           'drf_short': [0, 0, 0, 0, 0, 0, 0, 0, 0]}
-#         otqc.sst_biased_noisy_check(reps.reps, 9, 1.10, 1.0, 0.29, 3.0, 2, 0.3)
-#         for i in range(0, len(reps)):
-#             assert reps.get_qc(i, 'SST', 'drf_bias'), expected_flags['drf_bias'][i])
-#             assert reps.get_qc(i, 'SST', 'drf_noise'), expected_flags['drf_noise'][i])
-#             assert reps.get_qc(i, 'SST', 'drf_short'), expected_flags['drf_short'][i])
-#
-#     def test_noisy_big_bgvar():
-#         expected_flags = {'drf_bias': [0, 0, 0, 0, 0, 0, 0, 0, 0],
-#                           'drf_noise': [0, 0, 0, 0, 0, 0, 0, 0, 0],
-#                           'drf_short': [0, 0, 0, 0, 0, 0, 0, 0, 0]}
-#         otqc.sst_biased_noisy_check(reps.reps, 9, 1.10, 1.0, 0.29, 3.0, 2, 4.0)
-#         for i in range(0, len(reps)):
-#             assert reps.get_qc(i, 'SST', 'drf_bias'), expected_flags['drf_bias'][i])
-#             assert reps.get_qc(i, 'SST', 'drf_noise'), expected_flags['drf_noise'][i])
-#             assert reps.get_qc(i, 'SST', 'drf_short'), expected_flags['drf_short'][i])
-#
-#     def test_short_record_two_bad_obs_missing_big_bgvar():
-#         expected_flags = {'drf_bias': [0, 0, 0, 0, 0, 0, 0, 0, 0],
-#                           'drf_noise': [0, 0, 0, 0, 0, 0, 0, 0, 0],
-#                           'drf_short': [0, 0, 0, 0, 0, 0, 0, 0, 0]}
-#         otqc.sst_biased_noisy_check(reps.reps, 9, 1.10, 1.0, 0.29, 3.0, 2, 4.0)
-#         for i in range(0, len(reps)):
-#             assert reps.get_qc(i, 'SST', 'drf_bias'), expected_flags['drf_bias'][i])
-#             assert reps.get_qc(i, 'SST', 'drf_noise'), expected_flags['drf_noise'][i])
-#             assert reps.get_qc(i, 'SST', 'drf_short'), expected_flags['drf_short'][i])
-#
-#     def test_good_data():
-#         expected_flags = {'drf_bias': [0, 0, 0, 0, 0, 0, 0, 0, 0],
-#                           'drf_noise': [0, 0, 0, 0, 0, 0, 0, 0, 0],
-#                           'drf_short': [0, 0, 0, 0, 0, 0, 0, 0, 0]}
-#         otqc.sst_biased_noisy_check(reps.reps, 9, 1.10, 1.0, 0.29, 3.0, 2, 0.3)
-#         for i in range(0, len(reps)):
-#             assert reps.get_qc(i, 'SST', 'drf_bias'), expected_flags['drf_bias'][i])
-#             assert reps.get_qc(i, 'SST', 'drf_noise'), expected_flags['drf_noise'][i])
-#             assert reps.get_qc(i, 'SST', 'drf_short'), expected_flags['drf_short'][i])
-#
-#     def test_error_bad_input_parameter():
-#         expected_flags = {'drf_bias': [9, 9, 9, 9, 9, 9, 9, 9, 9],
-#                           'drf_noise': [9, 9, 9, 9, 9, 9, 9, 9, 9],
-#                           'drf_short': [9, 9, 9, 9, 9, 9, 9, 9, 9]}
-#         try:
-#             otqc.sst_biased_noisy_check(reps.reps, 0, 1.10, 1.0, 0.29, 3.0, 2, 0.3)
-#         except AssertionError as error:
-#             error_return_text = 'invalid input parameter: n_eval must be > 0'
-#             assert str(error)[0:len(error_return_text)], error_return_text)
-#         for i in range(0, len(reps)):
-#             assert reps.get_qc(i, 'SST', 'drf_bias'), expected_flags['drf_bias'][i])
-#             assert reps.get_qc(i, 'SST', 'drf_noise'), expected_flags['drf_noise'][i])
-#             assert reps.get_qc(i, 'SST', 'drf_short'), expected_flags['drf_short'][i])
-#
-#     def test_error_missing_matched_value():
-#         expected_flags = {'drf_bias': [9, 9, 9, 9, 9, 9, 9, 9, 9],
-#                           'drf_noise': [9, 9, 9, 9, 9, 9, 9, 9, 9],
-#                           'drf_short': [9, 9, 9, 9, 9, 9, 9, 9, 9]}
-#         try:
-#             otqc.sst_biased_noisy_check(reps.reps, 9, 1.10, 1.0, 0.29, 3.0, 2, 0.3)
-#         except AssertionError as error:
-#             error_return_text = 'matched report value is missing: unknown extended variable name OSTIA'
-#             assert str(error)[0:len(error_return_text)], error_return_text)
-#         for i in range(0, len(reps)):
-#             assert reps.get_qc(i, 'SST', 'drf_bias'), expected_flags['drf_bias'][i])
-#             assert reps.get_qc(i, 'SST', 'drf_noise'), expected_flags['drf_noise'][i])
-#             assert reps.get_qc(i, 'SST', 'drf_short'), expected_flags['drf_short'][i])
-#
-#     def test_error_invalid_ice_value():
-#         expected_flags = {'drf_bias': [9, 9, 9, 9, 9, 9, 9, 9, 9],
-#                           'drf_noise': [9, 9, 9, 9, 9, 9, 9, 9, 9],
-#                           'drf_short': [9, 9, 9, 9, 9, 9, 9, 9, 9]}
-#         try:
-#             otqc.sst_biased_noisy_check(reps.reps, 9, 1.10, 1.0, 0.29, 3.0, 2, 0.3)
-#         except AssertionError as error:
-#             error_return_text = 'matched ice proportion is invalid'
-#             assert str(error)[0:len(error_return_text)], error_return_text)
-#         for i in range(0, len(reps)):
-#             assert reps.get_qc(i, 'SST', 'drf_bias'), expected_flags['drf_bias'][i])
-#             assert reps.get_qc(i, 'SST', 'drf_noise'), expected_flags['drf_noise'][i])
-#             assert reps.get_qc(i, 'SST', 'drf_short'), expected_flags['drf_short'][i])
-#
-#     def test_error_missing_ob_value():
-#         expected_flags = {'drf_bias': [9, 9, 9, 9, 9, 9, 9, 9, 9],
-#                           'drf_noise': [9, 9, 9, 9, 9, 9, 9, 9, 9],
-#                           'drf_short': [9, 9, 9, 9, 9, 9, 9, 9, 9]}
-#         try:
-#             otqc.sst_biased_noisy_check(reps.reps, 9, 1.10, 1.0, 0.29, 3.0, 2, 0.3)
-#         except AssertionError as error:
-#             error_return_text = 'problem with report value: latitude is missing'
-#             assert str(error)[0:len(error_return_text)], error_return_text)
-#         for i in range(0, len(reps)):
-#             assert reps.get_qc(i, 'SST', 'drf_bias'), expected_flags['drf_bias'][i])
-#             assert reps.get_qc(i, 'SST', 'drf_noise'), expected_flags['drf_noise'][i])
-#             assert reps.get_qc(i, 'SST', 'drf_short'), expected_flags['drf_short'][i])
-#
-#     def test_error_not_time_sorted():
-#         expected_flags = {'drf_bias': [9, 9, 9, 9, 9, 9, 9, 9, 9],
-#                           'drf_noise': [9, 9, 9, 9, 9, 9, 9, 9, 9],
-#                           'drf_short': [9, 9, 9, 9, 9, 9, 9, 9, 9]}
-#         try:
-#             otqc.sst_biased_noisy_check(reps.reps, 9, 1.10, 1.0, 0.29, 3.0, 2, 0.3)
-#         except AssertionError as error:
-#             error_return_text = 'problem with report value: times are not sorted'
-#             assert str(error)[0:len(error_return_text)], error_return_text)
-#         for i in range(0, len(reps)):
-#             assert reps.get_qc(i, 'SST', 'drf_bias'), expected_flags['drf_bias'][i])
-#             assert reps.get_qc(i, 'SST', 'drf_noise'), expected_flags['drf_noise'][i])
-#             assert reps.get_qc(i, 'SST', 'drf_short'), expected_flags['drf_short'][i])
-#
-#     def test_error_invalid_background():
-#         expected_flags = {'drf_bias': [9, 9, 9, 9, 9, 9, 9, 9, 9],
-#                           'drf_noise': [9, 9, 9, 9, 9, 9, 9, 9, 9],
-#                           'drf_short': [9, 9, 9, 9, 9, 9, 9, 9, 9]}
-#         try:
-#             otqc.sst_biased_noisy_check(reps.reps, 9, 1.10, 1.0, 0.29, 3.0, 2, 0.3)
-#         except AssertionError as error:
-#             error_return_text = 'matched background sst is invalid'
-#             assert str(error)[0:len(error_return_text)], error_return_text)
-#         for i in range(0, len(reps)):
-#             assert reps.get_qc(i, 'SST', 'drf_bias'), expected_flags['drf_bias'][i])
-#             assert reps.get_qc(i, 'SST', 'drf_noise'), expected_flags['drf_noise'][i])
-#             assert reps.get_qc(i, 'SST', 'drf_short'), expected_flags['drf_short'][i])
-#
-#     def test_error_invalid_background_error_variance():
-#         expected_flags = {'drf_bias': [9, 9, 9, 9, 9, 9, 9, 9, 9],
-#                           'drf_noise': [9, 9, 9, 9, 9, 9, 9, 9, 9],
-#                           'drf_short': [9, 9, 9, 9, 9, 9, 9, 9, 9]}
-#         try:
-#             otqc.sst_biased_noisy_check(reps.reps, 9, 1.10, 1.0, 0.29, 3.0, 2, 0.3)
-#         except AssertionError as error:
-#             error_return_text = 'matched background error variance is invalid'
-#             assert str(error)[0:len(error_return_text)], error_return_text)
-#         for i in range(0, len(reps)):
-#             assert reps.get_qc(i, 'SST', 'drf_bias'), expected_flags['drf_bias'][i])
-#             assert reps.get_qc(i, 'SST', 'drf_noise'), expected_flags['drf_noise'][i])
-#             assert reps.get_qc(i, 'SST', 'drf_short'), expected_flags['drf_short'][i])
-#
-#
+def sst_biased_noisy_check_vals(selector):
+    # fmt: off
+    # @formatter:off
+    # all daytime
+    vals1 = [{'ID': 'AAAAAAAAA', 'YR': 2003, 'MO': 12, 'DY': 1, 'HR': 12.0, 'LAT': 0.0, 'LON': 0.0, 'SST': 5.0, 'OSTIA': 5.0, 'BGVAR': 0.01, 'ICE': 0.0},
+             {'ID': 'AAAAAAAAA', 'YR': 2003, 'MO': 12, 'DY': 1, 'HR': 12.1, 'LAT': 0.0, 'LON': 0.0, 'SST': 5.0, 'OSTIA': 5.0, 'BGVAR': 0.01, 'ICE': 0.0},
+             {'ID': 'AAAAAAAAA', 'YR': 2003, 'MO': 12, 'DY': 1, 'HR': 12.2, 'LAT': 0.0, 'LON': 0.0, 'SST': 5.0, 'OSTIA': 5.0, 'BGVAR': 0.01, 'ICE': 0.0},
+             {'ID': 'AAAAAAAAA', 'YR': 2003, 'MO': 12, 'DY': 1, 'HR': 12.3, 'LAT': 0.0, 'LON': 0.0, 'SST': 5.0, 'OSTIA': 5.0, 'BGVAR': 0.01, 'ICE': 0.0},
+             {'ID': 'AAAAAAAAA', 'YR': 2003, 'MO': 12, 'DY': 1, 'HR': 12.4, 'LAT': 0.0, 'LON': 0.0, 'SST': 5.0, 'OSTIA': 5.0, 'BGVAR': 0.01, 'ICE': 0.0},
+             {'ID': 'AAAAAAAAA', 'YR': 2003, 'MO': 12, 'DY': 1, 'HR': 12.5, 'LAT': 0.0, 'LON': 0.0, 'SST': 5.0, 'OSTIA': 5.0, 'BGVAR': 0.01, 'ICE': 0.0},
+             {'ID': 'AAAAAAAAA', 'YR': 2003, 'MO': 12, 'DY': 1, 'HR': 12.6, 'LAT': 0.0, 'LON': 0.0, 'SST': 5.0, 'OSTIA': 5.0, 'BGVAR': 0.01, 'ICE': 0.0},
+             {'ID': 'AAAAAAAAA', 'YR': 2003, 'MO': 12, 'DY': 1, 'HR': 12.7, 'LAT': 0.0, 'LON': 0.0, 'SST': 5.0, 'OSTIA': 5.0, 'BGVAR': 0.01, 'ICE': 0.0},
+             {'ID': 'AAAAAAAAA', 'YR': 2003, 'MO': 12, 'DY': 1, 'HR': 12.8, 'LAT': 0.0, 'LON': 0.0, 'SST': 5.0, 'OSTIA': 5.0, 'BGVAR': 0.01, 'ICE': 0.0}]
+
+    # all land-masked
+    vals2 = [{'ID': 'AAAAAAAAA', 'YR': 2003, 'MO': 12, 'DY': 1, 'HR': 0.0, 'LAT': 0.0, 'LON': 0.0, 'SST': 5.0, 'OSTIA': None, 'BGVAR': 0.01, 'ICE': 0.0},
+             {'ID': 'AAAAAAAAA', 'YR': 2003, 'MO': 12, 'DY': 1, 'HR': 0.1, 'LAT': 0.0, 'LON': 0.0, 'SST': 5.0, 'OSTIA': None, 'BGVAR': 0.01, 'ICE': 0.0},
+             {'ID': 'AAAAAAAAA', 'YR': 2003, 'MO': 12, 'DY': 1, 'HR': 0.2, 'LAT': 0.0, 'LON': 0.0, 'SST': 5.0, 'OSTIA': None, 'BGVAR': 0.01, 'ICE': 0.0},
+             {'ID': 'AAAAAAAAA', 'YR': 2003, 'MO': 12, 'DY': 1, 'HR': 0.3, 'LAT': 0.0, 'LON': 0.0, 'SST': 5.0, 'OSTIA': None, 'BGVAR': 0.01, 'ICE': 0.0},
+             {'ID': 'AAAAAAAAA', 'YR': 2003, 'MO': 12, 'DY': 1, 'HR': 0.4, 'LAT': 0.0, 'LON': 0.0, 'SST': 5.0, 'OSTIA': None, 'BGVAR': 0.01, 'ICE': 0.0},
+             {'ID': 'AAAAAAAAA', 'YR': 2003, 'MO': 12, 'DY': 1, 'HR': 0.5, 'LAT': 0.0, 'LON': 0.0, 'SST': 5.0, 'OSTIA': None, 'BGVAR': 0.01, 'ICE': 0.0},
+             {'ID': 'AAAAAAAAA', 'YR': 2003, 'MO': 12, 'DY': 1, 'HR': 0.6, 'LAT': 0.0, 'LON': 0.0, 'SST': 5.0, 'OSTIA': None, 'BGVAR': 0.01, 'ICE': 0.0},
+             {'ID': 'AAAAAAAAA', 'YR': 2003, 'MO': 12, 'DY': 1, 'HR': 0.7, 'LAT': 0.0, 'LON': 0.0, 'SST': 5.0, 'OSTIA': None, 'BGVAR': 0.01, 'ICE': 0.0},
+             {'ID': 'AAAAAAAAA', 'YR': 2003, 'MO': 12, 'DY': 1, 'HR': 0.8, 'LAT': 0.0, 'LON': 0.0, 'SST': 5.0, 'OSTIA': None, 'BGVAR': 0.01, 'ICE': 0.0}]
+
+    # all ice
+    vals3 = [{'ID': 'AAAAAAAAA', 'YR': 2003, 'MO': 12, 'DY': 1, 'HR': 0.0, 'LAT': 0.0, 'LON': 0.0, 'SST': 5.0, 'OSTIA': 5.0, 'BGVAR': 0.01, 'ICE': 0.2},
+             {'ID': 'AAAAAAAAA', 'YR': 2003, 'MO': 12, 'DY': 1, 'HR': 0.1, 'LAT': 0.0, 'LON': 0.0, 'SST': 5.0, 'OSTIA': 5.0, 'BGVAR': 0.01, 'ICE': 0.2},
+             {'ID': 'AAAAAAAAA', 'YR': 2003, 'MO': 12, 'DY': 1, 'HR': 0.2, 'LAT': 0.0, 'LON': 0.0, 'SST': 5.0, 'OSTIA': 5.0, 'BGVAR': 0.01, 'ICE': 0.2},
+             {'ID': 'AAAAAAAAA', 'YR': 2003, 'MO': 12, 'DY': 1, 'HR': 0.3, 'LAT': 0.0, 'LON': 0.0, 'SST': 5.0, 'OSTIA': 5.0, 'BGVAR': 0.01, 'ICE': 0.2},
+             {'ID': 'AAAAAAAAA', 'YR': 2003, 'MO': 12, 'DY': 1, 'HR': 0.4, 'LAT': 0.0, 'LON': 0.0, 'SST': 5.0, 'OSTIA': 5.0, 'BGVAR': 0.01, 'ICE': 0.2},
+             {'ID': 'AAAAAAAAA', 'YR': 2003, 'MO': 12, 'DY': 1, 'HR': 0.5, 'LAT': 0.0, 'LON': 0.0, 'SST': 5.0, 'OSTIA': 5.0, 'BGVAR': 0.01, 'ICE': 0.2},
+             {'ID': 'AAAAAAAAA', 'YR': 2003, 'MO': 12, 'DY': 1, 'HR': 0.6, 'LAT': 0.0, 'LON': 0.0, 'SST': 5.0, 'OSTIA': 5.0, 'BGVAR': 0.01, 'ICE': 0.2},
+             {'ID': 'AAAAAAAAA', 'YR': 2003, 'MO': 12, 'DY': 1, 'HR': 0.7, 'LAT': 0.0, 'LON': 0.0, 'SST': 5.0, 'OSTIA': 5.0, 'BGVAR': 0.01, 'ICE': 0.2},
+             {'ID': 'AAAAAAAAA', 'YR': 2003, 'MO': 12, 'DY': 1, 'HR': 0.8, 'LAT': 0.0, 'LON': 0.0, 'SST': 5.0, 'OSTIA': 5.0, 'BGVAR': 0.01, 'ICE': 0.2}]
+
+    # all bgvar exceeds limit
+    vals4 = [{'ID': 'AAAAAAAAA', 'YR': 2003, 'MO': 12, 'DY': 1, 'HR': 0.0, 'LAT': 0.0, 'LON': 0.0, 'SST': 5.0, 'OSTIA': 5.0, 'BGVAR': 0.4, 'ICE': 0.0},
+             {'ID': 'AAAAAAAAA', 'YR': 2003, 'MO': 12, 'DY': 1, 'HR': 0.1, 'LAT': 0.0, 'LON': 0.0, 'SST': 5.0, 'OSTIA': 5.0, 'BGVAR': 0.4, 'ICE': 0.0},
+             {'ID': 'AAAAAAAAA', 'YR': 2003, 'MO': 12, 'DY': 1, 'HR': 0.2, 'LAT': 0.0, 'LON': 0.0, 'SST': 5.0, 'OSTIA': 5.0, 'BGVAR': 0.4, 'ICE': 0.0},
+             {'ID': 'AAAAAAAAA', 'YR': 2003, 'MO': 12, 'DY': 1, 'HR': 0.3, 'LAT': 0.0, 'LON': 0.0, 'SST': 5.0, 'OSTIA': 5.0, 'BGVAR': 0.4, 'ICE': 0.0},
+             {'ID': 'AAAAAAAAA', 'YR': 2003, 'MO': 12, 'DY': 1, 'HR': 0.4, 'LAT': 0.0, 'LON': 0.0, 'SST': 5.0, 'OSTIA': 5.0, 'BGVAR': 0.4, 'ICE': 0.0},
+             {'ID': 'AAAAAAAAA', 'YR': 2003, 'MO': 12, 'DY': 1, 'HR': 0.5, 'LAT': 0.0, 'LON': 0.0, 'SST': 5.0, 'OSTIA': 5.0, 'BGVAR': 0.4, 'ICE': 0.0},
+             {'ID': 'AAAAAAAAA', 'YR': 2003, 'MO': 12, 'DY': 1, 'HR': 0.6, 'LAT': 0.0, 'LON': 0.0, 'SST': 5.0, 'OSTIA': 5.0, 'BGVAR': 0.4, 'ICE': 0.0},
+             {'ID': 'AAAAAAAAA', 'YR': 2003, 'MO': 12, 'DY': 1, 'HR': 0.7, 'LAT': 0.0, 'LON': 0.0, 'SST': 5.0, 'OSTIA': 5.0, 'BGVAR': 0.4, 'ICE': 0.0},
+             {'ID': 'AAAAAAAAA', 'YR': 2003, 'MO': 12, 'DY': 1, 'HR': 0.8, 'LAT': 0.0, 'LON': 0.0, 'SST': 5.0, 'OSTIA': 5.0, 'BGVAR': 0.4, 'ICE': 0.0}]
+
+    # biased warm
+    vals5 = [{'ID': 'AAAAAAAAA', 'YR': 2003, 'MO': 12, 'DY': 1, 'HR': 0.0, 'LAT': 0.0, 'LON': 0.0, 'SST': 6.2, 'OSTIA': 5.0, 'BGVAR': 0.01, 'ICE': 0.0},
+             {'ID': 'AAAAAAAAA', 'YR': 2003, 'MO': 12, 'DY': 1, 'HR': 0.1, 'LAT': 0.0, 'LON': 0.0, 'SST': 6.2, 'OSTIA': 5.0, 'BGVAR': 0.01, 'ICE': 0.0},
+             {'ID': 'AAAAAAAAA', 'YR': 2003, 'MO': 12, 'DY': 1, 'HR': 0.2, 'LAT': 0.0, 'LON': 0.0, 'SST': 6.2, 'OSTIA': 5.0, 'BGVAR': 0.01, 'ICE': 0.0},
+             {'ID': 'AAAAAAAAA', 'YR': 2003, 'MO': 12, 'DY': 1, 'HR': 0.3, 'LAT': 0.0, 'LON': 0.0, 'SST': 6.2, 'OSTIA': 5.0, 'BGVAR': 0.01, 'ICE': 0.0},
+             {'ID': 'AAAAAAAAA', 'YR': 2003, 'MO': 12, 'DY': 1, 'HR': 0.4, 'LAT': 0.0, 'LON': 0.0, 'SST': 6.2, 'OSTIA': 5.0, 'BGVAR': 0.01, 'ICE': 0.0},
+             {'ID': 'AAAAAAAAA', 'YR': 2003, 'MO': 12, 'DY': 1, 'HR': 0.5, 'LAT': 0.0, 'LON': 0.0, 'SST': 6.2, 'OSTIA': 5.0, 'BGVAR': 0.01, 'ICE': 0.0},
+             {'ID': 'AAAAAAAAA', 'YR': 2003, 'MO': 12, 'DY': 1, 'HR': 0.6, 'LAT': 0.0, 'LON': 0.0, 'SST': 6.2, 'OSTIA': 5.0, 'BGVAR': 0.01, 'ICE': 0.0},
+             {'ID': 'AAAAAAAAA', 'YR': 2003, 'MO': 12, 'DY': 1, 'HR': 0.7, 'LAT': 0.0, 'LON': 0.0, 'SST': 6.2, 'OSTIA': 5.0, 'BGVAR': 0.01, 'ICE': 0.0},
+             {'ID': 'AAAAAAAAA', 'YR': 2003, 'MO': 12, 'DY': 1, 'HR': 0.8, 'LAT': 0.0, 'LON': 0.0, 'SST': 6.2, 'OSTIA': 5.0, 'BGVAR': 0.01, 'ICE': 0.0}]
+
+    # biased cool
+    vals6 = [{'ID': 'AAAAAAAAA', 'YR': 2003, 'MO': 12, 'DY': 1, 'HR': 0.0, 'LAT': 0.0, 'LON': 0.0, 'SST': 3.8, 'OSTIA': 5.0, 'BGVAR': 0.01, 'ICE': 0.0},
+             {'ID': 'AAAAAAAAA', 'YR': 2003, 'MO': 12, 'DY': 1, 'HR': 0.1, 'LAT': 0.0, 'LON': 0.0, 'SST': 3.8, 'OSTIA': 5.0, 'BGVAR': 0.01, 'ICE': 0.0},
+             {'ID': 'AAAAAAAAA', 'YR': 2003, 'MO': 12, 'DY': 1, 'HR': 0.2, 'LAT': 0.0, 'LON': 0.0, 'SST': 3.8, 'OSTIA': 5.0, 'BGVAR': 0.01, 'ICE': 0.0},
+             {'ID': 'AAAAAAAAA', 'YR': 2003, 'MO': 12, 'DY': 1, 'HR': 0.3, 'LAT': 0.0, 'LON': 0.0, 'SST': 3.8, 'OSTIA': 5.0, 'BGVAR': 0.01, 'ICE': 0.0},
+             {'ID': 'AAAAAAAAA', 'YR': 2003, 'MO': 12, 'DY': 1, 'HR': 0.4, 'LAT': 0.0, 'LON': 0.0, 'SST': 3.8, 'OSTIA': 5.0, 'BGVAR': 0.01, 'ICE': 0.0},
+             {'ID': 'AAAAAAAAA', 'YR': 2003, 'MO': 12, 'DY': 1, 'HR': 0.5, 'LAT': 0.0, 'LON': 0.0, 'SST': 3.8, 'OSTIA': 5.0, 'BGVAR': 0.01, 'ICE': 0.0},
+             {'ID': 'AAAAAAAAA', 'YR': 2003, 'MO': 12, 'DY': 1, 'HR': 0.6, 'LAT': 0.0, 'LON': 0.0, 'SST': 3.8, 'OSTIA': 5.0, 'BGVAR': 0.01, 'ICE': 0.0},
+             {'ID': 'AAAAAAAAA', 'YR': 2003, 'MO': 12, 'DY': 1, 'HR': 0.7, 'LAT': 0.0, 'LON': 0.0, 'SST': 3.8, 'OSTIA': 5.0, 'BGVAR': 0.01, 'ICE': 0.0},
+             {'ID': 'AAAAAAAAA', 'YR': 2003, 'MO': 12, 'DY': 1, 'HR': 0.8, 'LAT': 0.0, 'LON': 0.0, 'SST': 3.8, 'OSTIA': 5.0, 'BGVAR': 0.01, 'ICE': 0.0}]
+
+    # noisy
+    vals7 = [{'ID': 'AAAAAAAAA', 'YR': 2003, 'MO': 12, 'DY': 1, 'HR': 0.0, 'LAT': 0.0, 'LON': 0.0, 'SST': 7.0, 'OSTIA': 5.0, 'BGVAR': 0.01, 'ICE': 0.0},
+             {'ID': 'AAAAAAAAA', 'YR': 2003, 'MO': 12, 'DY': 1, 'HR': 0.1, 'LAT': 0.0, 'LON': 0.0, 'SST': 5.0, 'OSTIA': 5.0, 'BGVAR': 0.01, 'ICE': 0.0},
+             {'ID': 'AAAAAAAAA', 'YR': 2003, 'MO': 12, 'DY': 1, 'HR': 0.2, 'LAT': 0.0, 'LON': 0.0, 'SST': 3.0, 'OSTIA': 5.0, 'BGVAR': 0.01, 'ICE': 0.0},
+             {'ID': 'AAAAAAAAA', 'YR': 2003, 'MO': 12, 'DY': 1, 'HR': 0.3, 'LAT': 0.0, 'LON': 0.0, 'SST': 5.0, 'OSTIA': 5.0, 'BGVAR': 0.01, 'ICE': 0.0},
+             {'ID': 'AAAAAAAAA', 'YR': 2003, 'MO': 12, 'DY': 1, 'HR': 0.4, 'LAT': 0.0, 'LON': 0.0, 'SST': 7.0, 'OSTIA': 5.0, 'BGVAR': 0.01, 'ICE': 0.0},
+             {'ID': 'AAAAAAAAA', 'YR': 2003, 'MO': 12, 'DY': 1, 'HR': 0.5, 'LAT': 0.0, 'LON': 0.0, 'SST': 5.0, 'OSTIA': 5.0, 'BGVAR': 0.01, 'ICE': 0.0},
+             {'ID': 'AAAAAAAAA', 'YR': 2003, 'MO': 12, 'DY': 1, 'HR': 0.6, 'LAT': 0.0, 'LON': 0.0, 'SST': 3.0, 'OSTIA': 5.0, 'BGVAR': 0.01, 'ICE': 0.0},
+             {'ID': 'AAAAAAAAA', 'YR': 2003, 'MO': 12, 'DY': 1, 'HR': 0.7, 'LAT': 0.0, 'LON': 0.0, 'SST': 5.0, 'OSTIA': 5.0, 'BGVAR': 0.01, 'ICE': 0.0},
+             {'ID': 'AAAAAAAAA', 'YR': 2003, 'MO': 12, 'DY': 1, 'HR': 0.8, 'LAT': 0.0, 'LON': 0.0, 'SST': 7.0, 'OSTIA': 5.0, 'BGVAR': 0.01, 'ICE': 0.0}]
+
+    # biased and noisy
+    vals8 = [{'ID': 'AAAAAAAAA', 'YR': 2003, 'MO': 12, 'DY': 1, 'HR': 0.0, 'LAT': 0.0, 'LON': 0.0, 'SST': 9.0, 'OSTIA': 5.0, 'BGVAR': 0.01, 'ICE': 0.0},
+             {'ID': 'AAAAAAAAA', 'YR': 2003, 'MO': 12, 'DY': 1, 'HR': 0.1, 'LAT': 0.0, 'LON': 0.0, 'SST': 7.0, 'OSTIA': 5.0, 'BGVAR': 0.01, 'ICE': 0.0},
+             {'ID': 'AAAAAAAAA', 'YR': 2003, 'MO': 12, 'DY': 1, 'HR': 0.2, 'LAT': 0.0, 'LON': 0.0, 'SST': 5.0, 'OSTIA': 5.0, 'BGVAR': 0.01, 'ICE': 0.0},
+             {'ID': 'AAAAAAAAA', 'YR': 2003, 'MO': 12, 'DY': 1, 'HR': 0.3, 'LAT': 0.0, 'LON': 0.0, 'SST': 7.0, 'OSTIA': 5.0, 'BGVAR': 0.01, 'ICE': 0.0},
+             {'ID': 'AAAAAAAAA', 'YR': 2003, 'MO': 12, 'DY': 1, 'HR': 0.4, 'LAT': 0.0, 'LON': 0.0, 'SST': 9.0, 'OSTIA': 5.0, 'BGVAR': 0.01, 'ICE': 0.0},
+             {'ID': 'AAAAAAAAA', 'YR': 2003, 'MO': 12, 'DY': 1, 'HR': 0.5, 'LAT': 0.0, 'LON': 0.0, 'SST': 7.0, 'OSTIA': 5.0, 'BGVAR': 0.01, 'ICE': 0.0},
+             {'ID': 'AAAAAAAAA', 'YR': 2003, 'MO': 12, 'DY': 1, 'HR': 0.6, 'LAT': 0.0, 'LON': 0.0, 'SST': 5.0, 'OSTIA': 5.0, 'BGVAR': 0.01, 'ICE': 0.0},
+             {'ID': 'AAAAAAAAA', 'YR': 2003, 'MO': 12, 'DY': 1, 'HR': 0.7, 'LAT': 0.0, 'LON': 0.0, 'SST': 7.0, 'OSTIA': 5.0, 'BGVAR': 0.01, 'ICE': 0.0},
+             {'ID': 'AAAAAAAAA', 'YR': 2003, 'MO': 12, 'DY': 1, 'HR': 0.8, 'LAT': 0.0, 'LON': 0.0, 'SST': 9.0, 'OSTIA': 5.0, 'BGVAR': 0.01, 'ICE': 0.0}]
+
+    # biased warm obs missing
+    vals9 = [{'ID': 'AAAAAAAAA', 'YR': 2003, 'MO': 12, 'DY': 1, 'HR': 0.0, 'LAT': 0.0, 'LON': 0.0, 'SST': 6.2, 'OSTIA': None, 'BGVAR': 0.01, 'ICE': 0.0},
+             {'ID': 'AAAAAAAAA', 'YR': 2003, 'MO': 12, 'DY': 1, 'HR': 0.1, 'LAT': 0.0, 'LON': 0.0, 'SST': 6.2, 'OSTIA': None, 'BGVAR': 0.01, 'ICE': 0.0},
+             {'ID': 'AAAAAAAAA', 'YR': 2003, 'MO': 12, 'DY': 1, 'HR': 0.2, 'LAT': 0.0, 'LON': 0.0, 'SST': 6.2, 'OSTIA': 5.0, 'BGVAR': 0.01, 'ICE': 0.0},
+             {'ID': 'AAAAAAAAA', 'YR': 2003, 'MO': 12, 'DY': 1, 'HR': 0.3, 'LAT': 0.0, 'LON': 0.0, 'SST': 6.2, 'OSTIA': 5.0, 'BGVAR': 0.01, 'ICE': 0.0},
+             {'ID': 'AAAAAAAAA', 'YR': 2003, 'MO': 12, 'DY': 1, 'HR': 0.4, 'LAT': 0.0, 'LON': 0.0, 'SST': 6.2, 'OSTIA': 5.0, 'BGVAR': 0.01, 'ICE': 0.0},
+             {'ID': 'AAAAAAAAA', 'YR': 2003, 'MO': 12, 'DY': 1, 'HR': 0.5, 'LAT': 0.0, 'LON': 0.0, 'SST': 6.2, 'OSTIA': 5.0, 'BGVAR': 0.01, 'ICE': 0.0},
+             {'ID': 'AAAAAAAAA', 'YR': 2003, 'MO': 12, 'DY': 1, 'HR': 0.6, 'LAT': 0.0, 'LON': 0.0, 'SST': 6.2, 'OSTIA': 5.0, 'BGVAR': 0.01, 'ICE': 0.0},
+             {'ID': 'AAAAAAAAA', 'YR': 2003, 'MO': 12, 'DY': 1, 'HR': 0.7, 'LAT': 0.0, 'LON': 0.0, 'SST': 6.2, 'OSTIA': None, 'BGVAR': 0.01, 'ICE': 0.0},
+             {'ID': 'AAAAAAAAA', 'YR': 2003, 'MO': 12, 'DY': 1, 'HR': 0.8, 'LAT': 0.0, 'LON': 0.0, 'SST': 6.2, 'OSTIA': None, 'BGVAR': 0.01, 'ICE': 0.0}]
+
+    # short record one bad
+    vals10 = [{'ID': 'AAAAAAAAA', 'YR': 2003, 'MO': 12, 'DY': 1, 'HR': 0.0, 'LAT': 0.0, 'LON': 0.0, 'SST': 5.0, 'OSTIA': 5.0, 'BGVAR': 0.01, 'ICE': 0.0},
+              {'ID': 'AAAAAAAAA', 'YR': 2003, 'MO': 12, 'DY': 1, 'HR': 0.1, 'LAT': 0.0, 'LON': 0.0, 'SST': 5.0, 'OSTIA': 5.0, 'BGVAR': 0.01, 'ICE': 0.0},
+              {'ID': 'AAAAAAAAA', 'YR': 2003, 'MO': 12, 'DY': 1, 'HR': 0.2, 'LAT': 0.0, 'LON': 0.0, 'SST': 9.0, 'OSTIA': 5.0, 'BGVAR': 0.01, 'ICE': 0.0},
+              {'ID': 'AAAAAAAAA', 'YR': 2003, 'MO': 12, 'DY': 1, 'HR': 0.3, 'LAT': 0.0, 'LON': 0.0, 'SST': 5.0, 'OSTIA': 5.0, 'BGVAR': 0.01, 'ICE': 0.0},
+              {'ID': 'AAAAAAAAA', 'YR': 2003, 'MO': 12, 'DY': 1, 'HR': 0.4, 'LAT': 0.0, 'LON': 0.0, 'SST': 5.0, 'OSTIA': 5.0, 'BGVAR': 0.01, 'ICE': 0.0}]
+
+    # short record two bad
+    vals11 = [{'ID': 'AAAAAAAAA', 'YR': 2003, 'MO': 12, 'DY': 1, 'HR': 0.0, 'LAT': 0.0, 'LON': 0.0, 'SST': 9.0, 'OSTIA': 5.0, 'BGVAR': 0.01, 'ICE': 0.0},
+              {'ID': 'AAAAAAAAA', 'YR': 2003, 'MO': 12, 'DY': 1, 'HR': 0.1, 'LAT': 0.0, 'LON': 0.0, 'SST': 5.0, 'OSTIA': 5.0, 'BGVAR': 0.01, 'ICE': 0.0},
+              {'ID': 'AAAAAAAAA', 'YR': 2003, 'MO': 12, 'DY': 1, 'HR': 0.2, 'LAT': 0.0, 'LON': 0.0, 'SST': 9.0, 'OSTIA': 5.0, 'BGVAR': 0.01, 'ICE': 0.0},
+              {'ID': 'AAAAAAAAA', 'YR': 2003, 'MO': 12, 'DY': 1, 'HR': 0.3, 'LAT': 0.0, 'LON': 0.0, 'SST': 5.0, 'OSTIA': 5.0, 'BGVAR': 0.01, 'ICE': 0.0},
+              {'ID': 'AAAAAAAAA', 'YR': 2003, 'MO': 12, 'DY': 1, 'HR': 0.4, 'LAT': 0.0, 'LON': 0.0, 'SST': 5.0, 'OSTIA': 5.0, 'BGVAR': 0.01, 'ICE': 0.0}]
+
+    # short record two bad obs missing
+    vals12 = [{'ID': 'AAAAAAAAA', 'YR': 2003, 'MO': 12, 'DY': 1, 'HR': 0.0, 'LAT': 0.0, 'LON': 0.0, 'SST': 5.0, 'OSTIA': None, 'BGVAR': 0.01, 'ICE': 0.0},
+              {'ID': 'AAAAAAAAA', 'YR': 2003, 'MO': 12, 'DY': 1, 'HR': 0.1, 'LAT': 0.0, 'LON': 0.0, 'SST': 5.0, 'OSTIA': None, 'BGVAR': 0.01, 'ICE': 0.0},
+              {'ID': 'AAAAAAAAA', 'YR': 2003, 'MO': 12, 'DY': 1, 'HR': 0.2, 'LAT': 0.0, 'LON': 0.0, 'SST': 9.0, 'OSTIA': 5.0, 'BGVAR': 0.01, 'ICE': 0.0},
+              {'ID': 'AAAAAAAAA', 'YR': 2003, 'MO': 12, 'DY': 1, 'HR': 0.3, 'LAT': 0.0, 'LON': 0.0, 'SST': 5.0, 'OSTIA': 5.0, 'BGVAR': 0.01, 'ICE': 0.0},
+              {'ID': 'AAAAAAAAA', 'YR': 2003, 'MO': 12, 'DY': 1, 'HR': 0.4, 'LAT': 0.0, 'LON': 0.0, 'SST': 9.0, 'OSTIA': 5.0, 'BGVAR': 0.01, 'ICE': 0.0},
+              {'ID': 'AAAAAAAAA', 'YR': 2003, 'MO': 12, 'DY': 1, 'HR': 0.5, 'LAT': 0.0, 'LON': 0.0, 'SST': 5.0, 'OSTIA': 5.0, 'BGVAR': 0.01, 'ICE': 0.0},
+              {'ID': 'AAAAAAAAA', 'YR': 2003, 'MO': 12, 'DY': 1, 'HR': 0.6, 'LAT': 0.0, 'LON': 0.0, 'SST': 5.0, 'OSTIA': 5.0, 'BGVAR': 0.01, 'ICE': 0.0},
+              {'ID': 'AAAAAAAAA', 'YR': 2003, 'MO': 12, 'DY': 1, 'HR': 0.7, 'LAT': 0.0, 'LON': 0.0, 'SST': 5.0, 'OSTIA': None, 'BGVAR': 0.01, 'ICE': 0.0},
+              {'ID': 'AAAAAAAAA', 'YR': 2003, 'MO': 12, 'DY': 1, 'HR': 0.8, 'LAT': 0.0, 'LON': 0.0, 'SST': 5.0, 'OSTIA': None, 'BGVAR': 0.01, 'ICE': 0.0}]
+
+    # short record two bad obs missing with bgvar masked
+    vals13 = [{'ID': 'AAAAAAAAA', 'YR': 2003, 'MO': 12, 'DY': 1, 'HR': 0.0, 'LAT': 0.0, 'LON': 0.0, 'SST': 5.0, 'OSTIA': None, 'BGVAR': 0.01, 'ICE': 0.0},
+              {'ID': 'AAAAAAAAA', 'YR': 2003, 'MO': 12, 'DY': 1, 'HR': 0.1, 'LAT': 0.0, 'LON': 0.0, 'SST': 5.0, 'OSTIA': None, 'BGVAR': 0.4, 'ICE': 0.0},
+              {'ID': 'AAAAAAAAA', 'YR': 2003, 'MO': 12, 'DY': 1, 'HR': 0.2, 'LAT': 0.0, 'LON': 0.0, 'SST': 9.0, 'OSTIA': 5.0, 'BGVAR': 0.01, 'ICE': 0.0},
+              {'ID': 'AAAAAAAAA', 'YR': 2003, 'MO': 12, 'DY': 1, 'HR': 0.3, 'LAT': 0.0, 'LON': 0.0, 'SST': 5.0, 'OSTIA': 5.0, 'BGVAR': 0.01, 'ICE': 0.0},
+              {'ID': 'AAAAAAAAA', 'YR': 2003, 'MO': 12, 'DY': 1, 'HR': 0.4, 'LAT': 0.0, 'LON': 0.0, 'SST': 9.0, 'OSTIA': 5.0, 'BGVAR': 0.01, 'ICE': 0.0},
+              {'ID': 'AAAAAAAAA', 'YR': 2003, 'MO': 12, 'DY': 1, 'HR': 0.5, 'LAT': 0.0, 'LON': 0.0, 'SST': 5.0, 'OSTIA': 5.0, 'BGVAR': 0.01, 'ICE': 0.0},
+              {'ID': 'AAAAAAAAA', 'YR': 2003, 'MO': 12, 'DY': 1, 'HR': 0.6, 'LAT': 0.0, 'LON': 0.0, 'SST': 5.0, 'OSTIA': 5.0, 'BGVAR': 0.01, 'ICE': 0.0},
+              {'ID': 'AAAAAAAAA', 'YR': 2003, 'MO': 12, 'DY': 1, 'HR': 0.7, 'LAT': 0.0, 'LON': 0.0, 'SST': 5.0, 'OSTIA': None, 'BGVAR': 0.01, 'ICE': 0.0},
+              {'ID': 'AAAAAAAAA', 'YR': 2003, 'MO': 12, 'DY': 1, 'HR': 0.8, 'LAT': 0.0, 'LON': 0.0, 'SST': 5.0, 'OSTIA': None, 'BGVAR': 0.01, 'ICE': 0.0}]
+
+    # good data
+    vals14 = [{'ID': 'AAAAAAAAA', 'YR': 2003, 'MO': 12, 'DY': 1, 'HR': 0.0, 'LAT': 0.0, 'LON': 0.0, 'SST': 5.0, 'OSTIA': 5.0, 'BGVAR': 0.01, 'ICE': 0.0},
+              {'ID': 'AAAAAAAAA', 'YR': 2003, 'MO': 12, 'DY': 1, 'HR': 0.1, 'LAT': 0.0, 'LON': 0.0, 'SST': 5.0, 'OSTIA': 5.0, 'BGVAR': 0.01, 'ICE': 0.0},
+              {'ID': 'AAAAAAAAA', 'YR': 2003, 'MO': 12, 'DY': 1, 'HR': 0.2, 'LAT': 0.0, 'LON': 0.0, 'SST': 5.0, 'OSTIA': 5.0, 'BGVAR': 0.01, 'ICE': 0.0},
+              {'ID': 'AAAAAAAAA', 'YR': 2003, 'MO': 12, 'DY': 1, 'HR': 0.3, 'LAT': 0.0, 'LON': 0.0, 'SST': 5.0, 'OSTIA': 5.0, 'BGVAR': 0.01, 'ICE': 0.0},
+              {'ID': 'AAAAAAAAA', 'YR': 2003, 'MO': 12, 'DY': 1, 'HR': 0.4, 'LAT': 0.0, 'LON': 0.0, 'SST': 5.0, 'OSTIA': 5.0, 'BGVAR': 0.01, 'ICE': 0.0},
+              {'ID': 'AAAAAAAAA', 'YR': 2003, 'MO': 12, 'DY': 1, 'HR': 0.5, 'LAT': 0.0, 'LON': 0.0, 'SST': 5.0, 'OSTIA': 5.0, 'BGVAR': 0.01, 'ICE': 0.0},
+              {'ID': 'AAAAAAAAA', 'YR': 2003, 'MO': 12, 'DY': 1, 'HR': 0.6, 'LAT': 0.0, 'LON': 0.0, 'SST': 5.0, 'OSTIA': 5.0, 'BGVAR': 0.01, 'ICE': 0.0},
+              {'ID': 'AAAAAAAAA', 'YR': 2003, 'MO': 12, 'DY': 1, 'HR': 0.7, 'LAT': 0.0, 'LON': 0.0, 'SST': 5.0, 'OSTIA': 5.0, 'BGVAR': 0.01, 'ICE': 0.0},
+              {'ID': 'AAAAAAAAA', 'YR': 2003, 'MO': 12, 'DY': 1, 'HR': 0.8, 'LAT': 0.0, 'LON': 0.0, 'SST': 5.0, 'OSTIA': 5.0, 'BGVAR': 0.01, 'ICE': 0.0}]
+
+    # short record good data
+    vals15 = [{'ID': 'AAAAAAAAA', 'YR': 2003, 'MO': 12, 'DY': 1, 'HR': 0.0, 'LAT': 0.0, 'LON': 0.0, 'SST': 5.0, 'OSTIA': 5.0, 'BGVAR': 0.01, 'ICE': 0.0},
+              {'ID': 'AAAAAAAAA', 'YR': 2003, 'MO': 12, 'DY': 1, 'HR': 0.1, 'LAT': 0.0, 'LON': 0.0, 'SST': 5.0, 'OSTIA': 5.0, 'BGVAR': 0.01, 'ICE': 0.0},
+              {'ID': 'AAAAAAAAA', 'YR': 2003, 'MO': 12, 'DY': 1, 'HR': 0.2, 'LAT': 0.0, 'LON': 0.0, 'SST': 5.0, 'OSTIA': 5.0, 'BGVAR': 0.01, 'ICE': 0.0},
+              {'ID': 'AAAAAAAAA', 'YR': 2003, 'MO': 12, 'DY': 1, 'HR': 0.3, 'LAT': 0.0, 'LON': 0.0, 'SST': 5.0, 'OSTIA': 5.0, 'BGVAR': 0.01, 'ICE': 0.0},
+              {'ID': 'AAAAAAAAA', 'YR': 2003, 'MO': 12, 'DY': 1, 'HR': 0.4, 'LAT': 0.0, 'LON': 0.0, 'SST': 5.0, 'OSTIA': 5.0, 'BGVAR': 0.01, 'ICE': 0.0}]
+
+    # short record obs missing good data
+    vals16 = [{'ID': 'AAAAAAAAA', 'YR': 2003, 'MO': 12, 'DY': 1, 'HR': 0.0, 'LAT': 0.0, 'LON': 0.0, 'SST': 5.0, 'OSTIA': None, 'BGVAR': 0.01, 'ICE': 0.0},
+              {'ID': 'AAAAAAAAA', 'YR': 2003, 'MO': 12, 'DY': 1, 'HR': 0.1, 'LAT': 0.0, 'LON': 0.0, 'SST': 5.0, 'OSTIA': None, 'BGVAR': 0.01, 'ICE': 0.0},
+              {'ID': 'AAAAAAAAA', 'YR': 2003, 'MO': 12, 'DY': 1, 'HR': 0.2, 'LAT': 0.0, 'LON': 0.0, 'SST': 5.0, 'OSTIA': 5.0, 'BGVAR': 0.01, 'ICE': 0.0},
+              {'ID': 'AAAAAAAAA', 'YR': 2003, 'MO': 12, 'DY': 1, 'HR': 0.3, 'LAT': 0.0, 'LON': 0.0, 'SST': 5.0, 'OSTIA': 5.0, 'BGVAR': 0.01, 'ICE': 0.0},
+              {'ID': 'AAAAAAAAA', 'YR': 2003, 'MO': 12, 'DY': 1, 'HR': 0.4, 'LAT': 0.0, 'LON': 0.0, 'SST': 5.0, 'OSTIA': 5.0, 'BGVAR': 0.01, 'ICE': 0.0},
+              {'ID': 'AAAAAAAAA', 'YR': 2003, 'MO': 12, 'DY': 1, 'HR': 0.5, 'LAT': 0.0, 'LON': 0.0, 'SST': 5.0, 'OSTIA': 5.0, 'BGVAR': 0.01, 'ICE': 0.0},
+              {'ID': 'AAAAAAAAA', 'YR': 2003, 'MO': 12, 'DY': 1, 'HR': 0.6, 'LAT': 0.0, 'LON': 0.0, 'SST': 5.0, 'OSTIA': 5.0, 'BGVAR': 0.01, 'ICE': 0.0},
+              {'ID': 'AAAAAAAAA', 'YR': 2003, 'MO': 12, 'DY': 1, 'HR': 0.7, 'LAT': 0.0, 'LON': 0.0, 'SST': 5.0, 'OSTIA': None, 'BGVAR': 0.01, 'ICE': 0.0},
+              {'ID': 'AAAAAAAAA', 'YR': 2003, 'MO': 12, 'DY': 1, 'HR': 0.8, 'LAT': 0.0, 'LON': 0.0, 'SST': 5.0, 'OSTIA': None, 'BGVAR': 0.01, 'ICE': 0.0}]
+
+    # noisy big bgvar
+    vals17 = [{'ID': 'AAAAAAAAA', 'YR': 2003, 'MO': 12, 'DY': 1, 'HR': 0.0, 'LAT': 0.0, 'LON': 0.0, 'SST': 7.0, 'OSTIA': 5.0, 'BGVAR': 4.0, 'ICE': 0.0},
+              {'ID': 'AAAAAAAAA', 'YR': 2003, 'MO': 12, 'DY': 1, 'HR': 0.1, 'LAT': 0.0, 'LON': 0.0, 'SST': 5.0, 'OSTIA': 5.0, 'BGVAR': 4.0, 'ICE': 0.0},
+              {'ID': 'AAAAAAAAA', 'YR': 2003, 'MO': 12, 'DY': 1, 'HR': 0.2, 'LAT': 0.0, 'LON': 0.0, 'SST': 3.0, 'OSTIA': 5.0, 'BGVAR': 4.0, 'ICE': 0.0},
+              {'ID': 'AAAAAAAAA', 'YR': 2003, 'MO': 12, 'DY': 1, 'HR': 0.3, 'LAT': 0.0, 'LON': 0.0, 'SST': 5.0, 'OSTIA': 5.0, 'BGVAR': 4.0, 'ICE': 0.0},
+              {'ID': 'AAAAAAAAA', 'YR': 2003, 'MO': 12, 'DY': 1, 'HR': 0.4, 'LAT': 0.0, 'LON': 0.0, 'SST': 7.0, 'OSTIA': 5.0, 'BGVAR': 4.0, 'ICE': 0.0},
+              {'ID': 'AAAAAAAAA', 'YR': 2003, 'MO': 12, 'DY': 1, 'HR': 0.5, 'LAT': 0.0, 'LON': 0.0, 'SST': 5.0, 'OSTIA': 5.0, 'BGVAR': 4.0, 'ICE': 0.0},
+              {'ID': 'AAAAAAAAA', 'YR': 2003, 'MO': 12, 'DY': 1, 'HR': 0.6, 'LAT': 0.0, 'LON': 0.0, 'SST': 3.0, 'OSTIA': 5.0, 'BGVAR': 4.0, 'ICE': 0.0},
+              {'ID': 'AAAAAAAAA', 'YR': 2003, 'MO': 12, 'DY': 1, 'HR': 0.7, 'LAT': 0.0, 'LON': 0.0, 'SST': 5.0, 'OSTIA': 5.0, 'BGVAR': 4.0, 'ICE': 0.0},
+              {'ID': 'AAAAAAAAA', 'YR': 2003, 'MO': 12, 'DY': 1, 'HR': 0.8, 'LAT': 0.0, 'LON': 0.0, 'SST': 7.0, 'OSTIA': 5.0, 'BGVAR': 4.0, 'ICE': 0.0}]
+
+    # short record two bad obs missing big bgvar
+    vals18 = [{'ID': 'AAAAAAAAA', 'YR': 2003, 'MO': 12, 'DY': 1, 'HR': 0.0, 'LAT': 0.0, 'LON': 0.0, 'SST': 5.0, 'OSTIA': None, 'BGVAR': 4.0, 'ICE': 0.0},
+              {'ID': 'AAAAAAAAA', 'YR': 2003, 'MO': 12, 'DY': 1, 'HR': 0.1, 'LAT': 0.0, 'LON': 0.0, 'SST': 5.0, 'OSTIA': None, 'BGVAR': 4.0, 'ICE': 0.0},
+              {'ID': 'AAAAAAAAA', 'YR': 2003, 'MO': 12, 'DY': 1, 'HR': 0.2, 'LAT': 0.0, 'LON': 0.0, 'SST': 9.0, 'OSTIA': 5.0, 'BGVAR': 4.0, 'ICE': 0.0},
+              {'ID': 'AAAAAAAAA', 'YR': 2003, 'MO': 12, 'DY': 1, 'HR': 0.3, 'LAT': 0.0, 'LON': 0.0, 'SST': 5.0, 'OSTIA': 5.0, 'BGVAR': 4.0, 'ICE': 0.0},
+              {'ID': 'AAAAAAAAA', 'YR': 2003, 'MO': 12, 'DY': 1, 'HR': 0.4, 'LAT': 0.0, 'LON': 0.0, 'SST': 9.0, 'OSTIA': 5.0, 'BGVAR': 4.0, 'ICE': 0.0},
+              {'ID': 'AAAAAAAAA', 'YR': 2003, 'MO': 12, 'DY': 1, 'HR': 0.5, 'LAT': 0.0, 'LON': 0.0, 'SST': 5.0, 'OSTIA': 5.0, 'BGVAR': 4.0, 'ICE': 0.0},
+              {'ID': 'AAAAAAAAA', 'YR': 2003, 'MO': 12, 'DY': 1, 'HR': 0.6, 'LAT': 0.0, 'LON': 0.0, 'SST': 5.0, 'OSTIA': 5.0, 'BGVAR': 4.0, 'ICE': 0.0},
+              {'ID': 'AAAAAAAAA', 'YR': 2003, 'MO': 12, 'DY': 1, 'HR': 0.7, 'LAT': 0.0, 'LON': 0.0, 'SST': 5.0, 'OSTIA': None, 'BGVAR': 4.0, 'ICE': 0.0},
+              {'ID': 'AAAAAAAAA', 'YR': 2003, 'MO': 12, 'DY': 1, 'HR': 0.8, 'LAT': 0.0, 'LON': 0.0, 'SST': 5.0, 'OSTIA': None, 'BGVAR': 4.0, 'ICE': 0.0}]
+
+    # good data
+    vals19 = [{'ID': 'AAAAAAAAA', 'YR': 2003, 'MO': 12, 'DY': 1, 'HR': 0.0, 'LAT': 0.0, 'LON': 0.0, 'SST': 5.0, 'OSTIA': 5.0, 'BGVAR': 0.01, 'ICE': 0.0},
+              {'ID': 'AAAAAAAAA', 'YR': 2003, 'MO': 12, 'DY': 1, 'HR': 0.1, 'LAT': 0.0, 'LON': 0.0, 'SST': 5.0, 'OSTIA': 5.0, 'BGVAR': 0.01, 'ICE': 0.0},
+              {'ID': 'AAAAAAAAA', 'YR': 2003, 'MO': 12, 'DY': 1, 'HR': 0.2, 'LAT': 0.0, 'LON': 0.0, 'SST': 5.0, 'OSTIA': 5.0, 'BGVAR': 0.01, 'ICE': 0.0},
+              {'ID': 'AAAAAAAAA', 'YR': 2003, 'MO': 12, 'DY': 1, 'HR': 0.3, 'LAT': 0.0, 'LON': 0.0, 'SST': 5.0, 'OSTIA': 5.0, 'BGVAR': 0.01, 'ICE': 0.0},
+              {'ID': 'AAAAAAAAA', 'YR': 2003, 'MO': 12, 'DY': 1, 'HR': 0.4, 'LAT': 0.0, 'LON': 0.0, 'SST': 5.0, 'OSTIA': 5.0, 'BGVAR': 0.01, 'ICE': 0.0},
+              {'ID': 'AAAAAAAAA', 'YR': 2003, 'MO': 12, 'DY': 1, 'HR': 0.5, 'LAT': 0.0, 'LON': 0.0, 'SST': 5.0, 'OSTIA': 5.0, 'BGVAR': 0.01, 'ICE': 0.0},
+              {'ID': 'AAAAAAAAA', 'YR': 2003, 'MO': 12, 'DY': 1, 'HR': 0.6, 'LAT': 0.0, 'LON': 0.0, 'SST': 5.0, 'OSTIA': 5.0, 'BGVAR': 0.01, 'ICE': 0.0},
+              {'ID': 'AAAAAAAAA', 'YR': 2003, 'MO': 12, 'DY': 1, 'HR': 0.7, 'LAT': 0.0, 'LON': 0.0, 'SST': 5.0, 'OSTIA': 5.0, 'BGVAR': 0.01, 'ICE': 0.0},
+              {'ID': 'AAAAAAAAA', 'YR': 2003, 'MO': 12, 'DY': 1, 'HR': 0.8, 'LAT': 0.0, 'LON': 0.0, 'SST': 5.0, 'OSTIA': 5.0, 'BGVAR': 0.01, 'ICE': 0.0}]
+
+    # assertion error - bad input parameter
+    vals20 = [{'ID': 'AAAAAAAAA', 'YR': 2003, 'MO': 12, 'DY': 1, 'HR': 0.0, 'LAT': 0.0, 'LON': 0.0, 'SST': 5.0, 'OSTIA': 5.0, 'BGVAR': 0.01, 'ICE': 0.0},
+              {'ID': 'AAAAAAAAA', 'YR': 2003, 'MO': 12, 'DY': 1, 'HR': 0.1, 'LAT': 0.0, 'LON': 0.0, 'SST': 5.0, 'OSTIA': 5.0, 'BGVAR': 0.01, 'ICE': 0.0},
+              {'ID': 'AAAAAAAAA', 'YR': 2003, 'MO': 12, 'DY': 1, 'HR': 0.2, 'LAT': 0.0, 'LON': 0.0, 'SST': 5.0, 'OSTIA': 5.0, 'BGVAR': 0.01, 'ICE': 0.0},
+              {'ID': 'AAAAAAAAA', 'YR': 2003, 'MO': 12, 'DY': 1, 'HR': 0.3, 'LAT': 0.0, 'LON': 0.0, 'SST': 5.0, 'OSTIA': 5.0, 'BGVAR': 0.01, 'ICE': 0.0},
+              {'ID': 'AAAAAAAAA', 'YR': 2003, 'MO': 12, 'DY': 1, 'HR': 0.4, 'LAT': 0.0, 'LON': 0.0, 'SST': 5.0, 'OSTIA': 5.0, 'BGVAR': 0.01, 'ICE': 0.0},
+              {'ID': 'AAAAAAAAA', 'YR': 2003, 'MO': 12, 'DY': 1, 'HR': 0.5, 'LAT': 0.0, 'LON': 0.0, 'SST': 5.0, 'OSTIA': 5.0, 'BGVAR': 0.01, 'ICE': 0.0},
+              {'ID': 'AAAAAAAAA', 'YR': 2003, 'MO': 12, 'DY': 1, 'HR': 0.6, 'LAT': 0.0, 'LON': 0.0, 'SST': 5.0, 'OSTIA': 5.0, 'BGVAR': 0.01, 'ICE': 0.0},
+              {'ID': 'AAAAAAAAA', 'YR': 2003, 'MO': 12, 'DY': 1, 'HR': 0.7, 'LAT': 0.0, 'LON': 0.0, 'SST': 5.0, 'OSTIA': 5.0, 'BGVAR': 0.01, 'ICE': 0.0},
+              {'ID': 'AAAAAAAAA', 'YR': 2003, 'MO': 12, 'DY': 1, 'HR': 0.8, 'LAT': 0.0, 'LON': 0.0, 'SST': 5.0, 'OSTIA': 5.0, 'BGVAR': 0.01, 'ICE': 0.0}]
+
+    # assertion error - missing matched value
+    vals21 = [{'ID': 'AAAAAAAAA', 'YR': 2003, 'MO': 12, 'DY': 1, 'HR': 0.0, 'LAT': 0.0, 'LON': 0.0, 'SST': 5.0, 'OSTIA': 5.0, 'BGVAR': 0.01, 'ICE': 0.0},
+              {'ID': 'AAAAAAAAA', 'YR': 2003, 'MO': 12, 'DY': 1, 'HR': 0.1, 'LAT': 0.0, 'LON': 0.0, 'SST': 5.0, 'OSTIA': 5.0, 'BGVAR': 0.01, 'ICE': 0.0},
+              {'ID': 'AAAAAAAAA', 'YR': 2003, 'MO': 12, 'DY': 1, 'HR': 0.2, 'LAT': 0.0, 'LON': 0.0, 'SST': 5.0, 'OSTIA': 5.0, 'BGVAR': 0.01, 'ICE': 0.0},
+              {'ID': 'AAAAAAAAA', 'YR': 2003, 'MO': 12, 'DY': 1, 'HR': 0.3, 'LAT': 0.0, 'LON': 0.0, 'SST': 5.0, 'OSTIA': 5.0, 'BGVAR': 0.01, 'ICE': 0.0},
+              {'ID': 'AAAAAAAAA', 'YR': 2003, 'MO': 12, 'DY': 1, 'HR': 0.4, 'LAT': 0.0, 'LON': 0.0, 'SST': 5.0, 'OSTIA': 5.0, 'BGVAR': 0.01, 'ICE': 0.0},
+              {'ID': 'AAAAAAAAA', 'YR': 2003, 'MO': 12, 'DY': 1, 'HR': 0.5, 'LAT': 0.0, 'LON': 0.0, 'SST': 5.0, 'OSTIA': 5.0, 'BGVAR': 0.01, 'ICE': 0.0},
+              {'ID': 'AAAAAAAAA', 'YR': 2003, 'MO': 12, 'DY': 1, 'HR': 0.6, 'LAT': 0.0, 'LON': 0.0, 'SST': 5.0, 'OSTIA': 5.0, 'BGVAR': 0.01, 'ICE': 0.0},
+              {'ID': 'AAAAAAAAA', 'YR': 2003, 'MO': 12, 'DY': 1, 'HR': 0.7, 'LAT': 0.0, 'LON': 0.0, 'SST': 5.0, 'OSTIA': 5.0, 'BGVAR': 0.01, 'ICE': 0.0},
+              {'ID': 'AAAAAAAAA', 'YR': 2003, 'MO': 12, 'DY': 1, 'HR': 0.8, 'LAT': 0.0, 'LON': 0.0, 'SST': 5.0, 'OSTIA': 5.0, 'BGVAR': 0.01, 'ICE': 0.0}]
+
+    # assertion error - invalid ice value
+    vals22 = [{'ID': 'AAAAAAAAA', 'YR': 2003, 'MO': 12, 'DY': 1, 'HR': 0.0, 'LAT': 0.0, 'LON': 0.0, 'SST': 5.0, 'OSTIA': 5.0, 'BGVAR': 0.01, 'ICE': 1.1},
+              {'ID': 'AAAAAAAAA', 'YR': 2003, 'MO': 12, 'DY': 1, 'HR': 0.1, 'LAT': 0.0, 'LON': 0.0, 'SST': 5.0, 'OSTIA': 5.0, 'BGVAR': 0.01, 'ICE': 0.0},
+              {'ID': 'AAAAAAAAA', 'YR': 2003, 'MO': 12, 'DY': 1, 'HR': 0.2, 'LAT': 0.0, 'LON': 0.0, 'SST': 5.0, 'OSTIA': 5.0, 'BGVAR': 0.01, 'ICE': 0.0},
+              {'ID': 'AAAAAAAAA', 'YR': 2003, 'MO': 12, 'DY': 1, 'HR': 0.3, 'LAT': 0.0, 'LON': 0.0, 'SST': 5.0, 'OSTIA': 5.0, 'BGVAR': 0.01, 'ICE': 0.0},
+              {'ID': 'AAAAAAAAA', 'YR': 2003, 'MO': 12, 'DY': 1, 'HR': 0.4, 'LAT': 0.0, 'LON': 0.0, 'SST': 5.0, 'OSTIA': 5.0, 'BGVAR': 0.01, 'ICE': 0.0},
+              {'ID': 'AAAAAAAAA', 'YR': 2003, 'MO': 12, 'DY': 1, 'HR': 0.5, 'LAT': 0.0, 'LON': 0.0, 'SST': 5.0, 'OSTIA': 5.0, 'BGVAR': 0.01, 'ICE': 0.0},
+              {'ID': 'AAAAAAAAA', 'YR': 2003, 'MO': 12, 'DY': 1, 'HR': 0.6, 'LAT': 0.0, 'LON': 0.0, 'SST': 5.0, 'OSTIA': 5.0, 'BGVAR': 0.01, 'ICE': 0.0},
+              {'ID': 'AAAAAAAAA', 'YR': 2003, 'MO': 12, 'DY': 1, 'HR': 0.7, 'LAT': 0.0, 'LON': 0.0, 'SST': 5.0, 'OSTIA': 5.0, 'BGVAR': 0.01, 'ICE': 0.0},
+              {'ID': 'AAAAAAAAA', 'YR': 2003, 'MO': 12, 'DY': 1, 'HR': 0.8, 'LAT': 0.0, 'LON': 0.0, 'SST': 5.0, 'OSTIA': 5.0, 'BGVAR': 0.01, 'ICE': 0.0}]
+
+    # assertion error - missing observation value
+    vals23 = [{'ID': 'AAAAAAAAA', 'YR': 2003, 'MO': 12, 'DY': 1, 'HR': 0.0, 'LAT': 0.0, 'LON': 0.0, 'SST': 5.0, 'OSTIA': 5.0, 'BGVAR': 0.01, 'ICE': 0.0},
+              {'ID': 'AAAAAAAAA', 'YR': 2003, 'MO': 12, 'DY': 1, 'HR': 0.1, 'LAT': 0.0, 'LON': 0.0, 'SST': 5.0, 'OSTIA': 5.0, 'BGVAR': 0.01, 'ICE': 0.0},
+              {'ID': 'AAAAAAAAA', 'YR': 2003, 'MO': 12, 'DY': 1, 'HR': 0.2, 'LAT': 0.0, 'LON': 0.0, 'SST': 5.0, 'OSTIA': 5.0, 'BGVAR': 0.01, 'ICE': 0.0},
+              {'ID': 'AAAAAAAAA', 'YR': 2003, 'MO': 12, 'DY': 1, 'HR': 0.3, 'LAT': 0.0, 'LON': 0.0, 'SST': 5.0, 'OSTIA': 5.0, 'BGVAR': 0.01, 'ICE': 0.0},
+              {'ID': 'AAAAAAAAA', 'YR': 2003, 'MO': 12, 'DY': 1, 'HR': 0.4, 'LAT': 0.0, 'LON': 0.0, 'SST': 5.0, 'OSTIA': 5.0, 'BGVAR': 0.01, 'ICE': 0.0},
+              {'ID': 'AAAAAAAAA', 'YR': 2003, 'MO': 12, 'DY': 1, 'HR': 0.5, 'LAT': 0.0, 'LON': 0.0, 'SST': 5.0, 'OSTIA': 5.0, 'BGVAR': 0.01, 'ICE': 0.0},
+              {'ID': 'AAAAAAAAA', 'YR': 2003, 'MO': 12, 'DY': 1, 'HR': 0.6, 'LAT': 0.0, 'LON': 0.0, 'SST': 5.0, 'OSTIA': 5.0, 'BGVAR': 0.01, 'ICE': 0.0},
+              {'ID': 'AAAAAAAAA', 'YR': 2003, 'MO': 12, 'DY': 1, 'HR': 0.7, 'LAT': 0.0, 'LON': 0.0, 'SST': 5.0, 'OSTIA': 5.0, 'BGVAR': 0.01, 'ICE': 0.0},
+              {'ID': 'AAAAAAAAA', 'YR': 2003, 'MO': 12, 'DY': 1, 'HR': 0.8, 'LAT': 0.0, 'LON': 0.0, 'SST': 5.0, 'OSTIA': 5.0, 'BGVAR': 0.01, 'ICE': 0.0}]
+
+    # assertion error - times not sorted
+    vals24 = [{'ID': 'AAAAAAAAA', 'YR': 2003, 'MO': 12, 'DY': 1, 'HR': 0.0, 'LAT': 0.0, 'LON': 0.0, 'SST': 5.0, 'OSTIA': 5.0, 'BGVAR': 0.01, 'ICE': 0.0},
+              {'ID': 'AAAAAAAAA', 'YR': 2003, 'MO': 12, 'DY': 1, 'HR': 0.1, 'LAT': 0.0, 'LON': 0.0, 'SST': 5.0, 'OSTIA': 5.0, 'BGVAR': 0.01, 'ICE': 0.0},
+              {'ID': 'AAAAAAAAA', 'YR': 2003, 'MO': 12, 'DY': 1, 'HR': 0.2, 'LAT': 0.0, 'LON': 0.0, 'SST': 5.0, 'OSTIA': 5.0, 'BGVAR': 0.01, 'ICE': 0.0},
+              {'ID': 'AAAAAAAAA', 'YR': 2003, 'MO': 12, 'DY': 1, 'HR': 0.1, 'LAT': 0.0, 'LON': 0.0, 'SST': 5.0, 'OSTIA': 5.0, 'BGVAR': 0.01, 'ICE': 0.0},
+              {'ID': 'AAAAAAAAA', 'YR': 2003, 'MO': 12, 'DY': 1, 'HR': 0.4, 'LAT': 0.0, 'LON': 0.0, 'SST': 5.0, 'OSTIA': 5.0, 'BGVAR': 0.01, 'ICE': 0.0},
+              {'ID': 'AAAAAAAAA', 'YR': 2003, 'MO': 12, 'DY': 1, 'HR': 0.5, 'LAT': 0.0, 'LON': 0.0, 'SST': 5.0, 'OSTIA': 5.0, 'BGVAR': 0.01, 'ICE': 0.0},
+              {'ID': 'AAAAAAAAA', 'YR': 2003, 'MO': 12, 'DY': 1, 'HR': 0.6, 'LAT': 0.0, 'LON': 0.0, 'SST': 5.0, 'OSTIA': 5.0, 'BGVAR': 0.01, 'ICE': 0.0},
+              {'ID': 'AAAAAAAAA', 'YR': 2003, 'MO': 12, 'DY': 1, 'HR': 0.7, 'LAT': 0.0, 'LON': 0.0, 'SST': 5.0, 'OSTIA': 5.0, 'BGVAR': 0.01, 'ICE': 0.0},
+              {'ID': 'AAAAAAAAA', 'YR': 2003, 'MO': 12, 'DY': 1, 'HR': 0.8, 'LAT': 0.0, 'LON': 0.0, 'SST': 5.0, 'OSTIA': 5.0, 'BGVAR': 0.01, 'ICE': 0.0}]
+
+    # assertion error - invalid background sst
+    vals25 = [{'ID': 'AAAAAAAAA', 'YR': 2003, 'MO': 12, 'DY': 1, 'HR': 0.0, 'LAT': 0.0, 'LON': 0.0, 'SST': 5.0, 'OSTIA': 5.0, 'BGVAR': 0.01, 'ICE': 0.0},
+              {'ID': 'AAAAAAAAA', 'YR': 2003, 'MO': 12, 'DY': 1, 'HR': 0.1, 'LAT': 0.0, 'LON': 0.0, 'SST': 5.0, 'OSTIA': 5.0, 'BGVAR': 0.01, 'ICE': 0.0},
+              {'ID': 'AAAAAAAAA', 'YR': 2003, 'MO': 12, 'DY': 1, 'HR': 0.2, 'LAT': 0.0, 'LON': 0.0, 'SST': 5.0, 'OSTIA': 5.0, 'BGVAR': 0.01, 'ICE': 0.0},
+              {'ID': 'AAAAAAAAA', 'YR': 2003, 'MO': 12, 'DY': 1, 'HR': 0.3, 'LAT': 0.0, 'LON': 0.0, 'SST': 5.0, 'OSTIA': 5.0, 'BGVAR': 0.01, 'ICE': 0.0},
+              {'ID': 'AAAAAAAAA', 'YR': 2003, 'MO': 12, 'DY': 1, 'HR': 0.4, 'LAT': 0.0, 'LON': 0.0, 'SST': 5.0, 'OSTIA': 5.0, 'BGVAR': 0.01, 'ICE': 0.0},
+              {'ID': 'AAAAAAAAA', 'YR': 2003, 'MO': 12, 'DY': 1, 'HR': 0.5, 'LAT': 0.0, 'LON': 0.0, 'SST': 5.0, 'OSTIA': 5.0, 'BGVAR': 0.01, 'ICE': 0.0},
+              {'ID': 'AAAAAAAAA', 'YR': 2003, 'MO': 12, 'DY': 1, 'HR': 0.6, 'LAT': 0.0, 'LON': 0.0, 'SST': 5.0, 'OSTIA': 5.0, 'BGVAR': 0.01, 'ICE': 0.0},
+              {'ID': 'AAAAAAAAA', 'YR': 2003, 'MO': 12, 'DY': 1, 'HR': 0.7, 'LAT': 0.0, 'LON': 0.0, 'SST': 5.0, 'OSTIA': 5.0, 'BGVAR': 0.01, 'ICE': 0.0},
+              {'ID': 'AAAAAAAAA', 'YR': 2003, 'MO': 12, 'DY': 1, 'HR': 0.8, 'LAT': 0.0, 'LON': 0.0, 'SST': 5.0, 'OSTIA': 46.0, 'BGVAR': 0.01, 'ICE': 0.0}]
+
+    # assertion error - invalid background error variance
+    vals26 = [{'ID': 'AAAAAAAAA', 'YR': 2003, 'MO': 12, 'DY': 1, 'HR': 0.0, 'LAT': 0.0, 'LON': 0.0, 'SST': 5.0, 'OSTIA': 5.0, 'BGVAR': 0.01, 'ICE': 0.0},
+              {'ID': 'AAAAAAAAA', 'YR': 2003, 'MO': 12, 'DY': 1, 'HR': 0.1, 'LAT': 0.0, 'LON': 0.0, 'SST': 5.0, 'OSTIA': 5.0, 'BGVAR': 0.01, 'ICE': 0.0},
+              {'ID': 'AAAAAAAAA', 'YR': 2003, 'MO': 12, 'DY': 1, 'HR': 0.2, 'LAT': 0.0, 'LON': 0.0, 'SST': 5.0, 'OSTIA': 5.0, 'BGVAR': 0.01, 'ICE': 0.0},
+              {'ID': 'AAAAAAAAA', 'YR': 2003, 'MO': 12, 'DY': 1, 'HR': 0.3, 'LAT': 0.0, 'LON': 0.0, 'SST': 5.0, 'OSTIA': 5.0, 'BGVAR': -0.01, 'ICE': 0.0},
+              {'ID': 'AAAAAAAAA', 'YR': 2003, 'MO': 12, 'DY': 1, 'HR': 0.4, 'LAT': 0.0, 'LON': 0.0, 'SST': 5.0, 'OSTIA': 5.0, 'BGVAR': 0.01, 'ICE': 0.0},
+              {'ID': 'AAAAAAAAA', 'YR': 2003, 'MO': 12, 'DY': 1, 'HR': 0.5, 'LAT': 0.0, 'LON': 0.0, 'SST': 5.0, 'OSTIA': 5.0, 'BGVAR': 0.01, 'ICE': 0.0},
+              {'ID': 'AAAAAAAAA', 'YR': 2003, 'MO': 12, 'DY': 1, 'HR': 0.6, 'LAT': 0.0, 'LON': 0.0, 'SST': 5.0, 'OSTIA': 5.0, 'BGVAR': 0.01, 'ICE': 0.0},
+              {'ID': 'AAAAAAAAA', 'YR': 2003, 'MO': 12, 'DY': 1, 'HR': 0.7, 'LAT': 0.0, 'LON': 0.0, 'SST': 5.0, 'OSTIA': 5.0, 'BGVAR': 0.01, 'ICE': 0.0},
+              {'ID': 'AAAAAAAAA', 'YR': 2003, 'MO': 12, 'DY': 1, 'HR': 0.8, 'LAT': 0.0, 'LON': 0.0, 'SST': 5.0, 'OSTIA': 5.0, 'BGVAR': 0.01, 'ICE': 0.0}]
+    # fmt: on
+    # @formatter:on
+
+    reps = ex.Voyage()
+    obs = locals()[f"vals{selector}"]
+
+    for v in obs:
+        rec = IMMA()
+        for key in v:
+            if not key in ["OSTIA", "BGVAR", "ICE"]:
+                rec.data[key] = v[key]
+        rep = ex.MarineReportQC(rec)
+        if selector != 21:
+            rep.setext("OSTIA", v["OSTIA"])
+        rep.setext("BGVAR", v["BGVAR"])
+        rep.setext("ICE", v["ICE"])
+        reps.add_report(rep)
+
+    if selector == 23:
+        reps.setvar(1, "LAT", None)
+
+    return reps
+
+
+def test_all_daytime_bnc():
+    reps = sst_biased_noisy_check_vals(1)
+    expected_flags = {
+        "drf_bias": [0, 0, 0, 0, 0, 0, 0, 0, 0],
+        "drf_noise": [0, 0, 0, 0, 0, 0, 0, 0, 0],
+        "drf_short": [0, 0, 0, 0, 0, 0, 0, 0, 0],
+    }
+    otqc.sst_biased_noisy_check(reps.reps, 9, 1.10, 1.0, 0.29, 3.0, 2, 0.3)
+    for i in range(0, len(reps)):
+        assert reps.get_qc(i, "SST", "drf_bias") == expected_flags["drf_bias"][i]
+        assert reps.get_qc(i, "SST", "drf_noise") == expected_flags["drf_noise"][i]
+        assert reps.get_qc(i, "SST", "drf_short") == expected_flags["drf_short"][i]
+
+
+def test_all_land_masked_bnc():
+    reps = sst_biased_noisy_check_vals(2)
+    expected_flags = {
+        "drf_bias": [0, 0, 0, 0, 0, 0, 0, 0, 0],
+        "drf_noise": [0, 0, 0, 0, 0, 0, 0, 0, 0],
+        "drf_short": [0, 0, 0, 0, 0, 0, 0, 0, 0],
+    }
+    otqc.sst_biased_noisy_check(reps.reps, 9, 1.10, 1.0, 0.29, 3.0, 2, 0.3)
+    for i in range(0, len(reps)):
+        assert reps.get_qc(i, "SST", "drf_bias") == expected_flags["drf_bias"][i]
+        assert reps.get_qc(i, "SST", "drf_noise") == expected_flags["drf_noise"][i]
+        assert reps.get_qc(i, "SST", "drf_short") == expected_flags["drf_short"][i]
+
+
+def test_all_ice_bnc():
+    reps = sst_biased_noisy_check_vals(3)
+    expected_flags = {
+        "drf_bias": [0, 0, 0, 0, 0, 0, 0, 0, 0],
+        "drf_noise": [0, 0, 0, 0, 0, 0, 0, 0, 0],
+        "drf_short": [0, 0, 0, 0, 0, 0, 0, 0, 0],
+    }
+    otqc.sst_biased_noisy_check(reps.reps, 9, 1.10, 1.0, 0.29, 3.0, 2, 0.3)
+    for i in range(0, len(reps)):
+        assert reps.get_qc(i, "SST", "drf_bias") == expected_flags["drf_bias"][i]
+        assert reps.get_qc(i, "SST", "drf_noise") == expected_flags["drf_noise"][i]
+        assert reps.get_qc(i, "SST", "drf_short") == expected_flags["drf_short"][i]
+
+
+def test_all_bgvar_exceeds_limit_bnc():
+    reps = sst_biased_noisy_check_vals(4)
+    expected_flags = {
+        "drf_bias": [0, 0, 0, 0, 0, 0, 0, 0, 0],
+        "drf_noise": [0, 0, 0, 0, 0, 0, 0, 0, 0],
+        "drf_short": [0, 0, 0, 0, 0, 0, 0, 0, 0],
+    }
+    otqc.sst_biased_noisy_check(reps.reps, 9, 1.10, 1.0, 0.29, 3.0, 2, 0.3)
+    for i in range(0, len(reps)):
+        assert reps.get_qc(i, "SST", "drf_bias") == expected_flags["drf_bias"][i]
+        assert reps.get_qc(i, "SST", "drf_noise") == expected_flags["drf_noise"][i]
+        assert reps.get_qc(i, "SST", "drf_short") == expected_flags["drf_short"][i]
+
+
+def test_biased_warm_bnc():
+    reps = sst_biased_noisy_check_vals(5)
+    expected_flags = {
+        "drf_bias": [1, 1, 1, 1, 1, 1, 1, 1, 1],
+        "drf_noise": [0, 0, 0, 0, 0, 0, 0, 0, 0],
+        "drf_short": [0, 0, 0, 0, 0, 0, 0, 0, 0],
+    }
+    otqc.sst_biased_noisy_check(reps.reps, 9, 1.10, 1.0, 0.29, 3.0, 2, 0.3)
+    for i in range(0, len(reps)):
+        assert reps.get_qc(i, "SST", "drf_bias") == expected_flags["drf_bias"][i]
+        assert reps.get_qc(i, "SST", "drf_noise") == expected_flags["drf_noise"][i]
+        assert reps.get_qc(i, "SST", "drf_short") == expected_flags["drf_short"][i]
+
+
+def test_biased_cool_bnc():
+    reps = sst_biased_noisy_check_vals(6)
+    expected_flags = {
+        "drf_bias": [1, 1, 1, 1, 1, 1, 1, 1, 1],
+        "drf_noise": [0, 0, 0, 0, 0, 0, 0, 0, 0],
+        "drf_short": [0, 0, 0, 0, 0, 0, 0, 0, 0],
+    }
+    otqc.sst_biased_noisy_check(reps.reps, 9, 1.10, 1.0, 0.29, 3.0, 2, 0.3)
+    for i in range(0, len(reps)):
+        assert reps.get_qc(i, "SST", "drf_bias") == expected_flags["drf_bias"][i]
+        assert reps.get_qc(i, "SST", "drf_noise") == expected_flags["drf_noise"][i]
+        assert reps.get_qc(i, "SST", "drf_short") == expected_flags["drf_short"][i]
+
+
+def test_noisy_bnc():
+    reps = sst_biased_noisy_check_vals(7)
+    expected_flags = {
+        "drf_bias": [0, 0, 0, 0, 0, 0, 0, 0, 0],
+        "drf_noise": [1, 1, 1, 1, 1, 1, 1, 1, 1],
+        "drf_short": [0, 0, 0, 0, 0, 0, 0, 0, 0],
+    }
+    otqc.sst_biased_noisy_check(reps.reps, 9, 1.10, 1.0, 0.29, 3.0, 2, 0.3)
+    for i in range(0, len(reps)):
+        assert reps.get_qc(i, "SST", "drf_bias") == expected_flags["drf_bias"][i]
+        assert reps.get_qc(i, "SST", "drf_noise") == expected_flags["drf_noise"][i]
+        assert reps.get_qc(i, "SST", "drf_short") == expected_flags["drf_short"][i]
+
+
+def test_biased_and_noisy_bnc():
+    reps = sst_biased_noisy_check_vals(8)
+    expected_flags = {
+        "drf_bias": [1, 1, 1, 1, 1, 1, 1, 1, 1],
+        "drf_noise": [1, 1, 1, 1, 1, 1, 1, 1, 1],
+        "drf_short": [0, 0, 0, 0, 0, 0, 0, 0, 0],
+    }
+    otqc.sst_biased_noisy_check(reps.reps, 9, 1.10, 1.0, 0.29, 3.0, 2, 0.3)
+    for i in range(0, len(reps)):
+        assert reps.get_qc(i, "SST", "drf_bias") == expected_flags["drf_bias"][i]
+        assert reps.get_qc(i, "SST", "drf_noise") == expected_flags["drf_noise"][i]
+        assert reps.get_qc(i, "SST", "drf_short") == expected_flags["drf_short"][i]
+
+
+def test_biased_warm_obs_missing_bnc():
+    reps = sst_biased_noisy_check_vals(9)
+    expected_flags = {
+        "drf_bias": [1, 1, 1, 1, 1, 1, 1, 1, 1],
+        "drf_noise": [0, 0, 0, 0, 0, 0, 0, 0, 0],
+        "drf_short": [0, 0, 0, 0, 0, 0, 0, 0, 0],
+    }
+    otqc.sst_biased_noisy_check(reps.reps, 5, 1.10, 1.0, 0.29, 3.0, 2, 0.3)
+    for i in range(0, len(reps)):
+        assert reps.get_qc(i, "SST", "drf_bias") == expected_flags["drf_bias"][i]
+        assert reps.get_qc(i, "SST", "drf_noise") == expected_flags["drf_noise"][i]
+        assert reps.get_qc(i, "SST", "drf_short") == expected_flags["drf_short"][i]
+
+
+def test_short_record_one_bad_bnc():
+    reps = sst_biased_noisy_check_vals(10)
+    expected_flags = {
+        "drf_bias": [0, 0, 0, 0, 0],
+        "drf_noise": [0, 0, 0, 0, 0],
+        "drf_short": [0, 0, 0, 0, 0],
+    }
+    otqc.og_sst_biased_noisy_check(reps.reps, 9, 1.10, 1.0, 0.29, 3.0, 2, 0.3)
+    for i in range(0, len(reps)):
+        assert reps.get_qc(i, "SST", "drf_bias") == expected_flags["drf_bias"][i]
+        assert reps.get_qc(i, "SST", "drf_noise") == expected_flags["drf_noise"][i]
+        assert reps.get_qc(i, "SST", "drf_short") == expected_flags["drf_short"][i]
+
+
+def test_short_record_two_bad_bnc():
+    reps = sst_biased_noisy_check_vals(11)
+    expected_flags = {
+        "drf_bias": [0, 0, 0, 0, 0],
+        "drf_noise": [0, 0, 0, 0, 0],
+        "drf_short": [1, 1, 1, 1, 1],
+    }
+    otqc.og_sst_biased_noisy_check(reps.reps, 9, 1.10, 1.0, 0.29, 3.0, 2, 0.3)
+    for i in range(0, len(reps)):
+        assert reps.get_qc(i, "SST", "drf_bias") == expected_flags["drf_bias"][i]
+        assert reps.get_qc(i, "SST", "drf_noise") == expected_flags["drf_noise"][i]
+        assert reps.get_qc(i, "SST", "drf_short") == expected_flags["drf_short"][i]
+
+
+def test_short_record_two_bad_obs_missing_bnc():
+    reps = sst_biased_noisy_check_vals(12)
+    expected_flags = {
+        "drf_bias": [0, 0, 0, 0, 0, 0, 0, 0, 0],
+        "drf_noise": [0, 0, 0, 0, 0, 0, 0, 0, 0],
+        "drf_short": [1, 1, 1, 1, 1, 1, 1, 1, 1],
+    }
+    otqc.og_sst_biased_noisy_check(reps.reps, 9, 1.10, 1.0, 0.29, 3.0, 2, 0.3)
+    for i in range(0, len(reps)):
+        assert reps.get_qc(i, "SST", "drf_bias") == expected_flags["drf_bias"][i]
+        assert reps.get_qc(i, "SST", "drf_noise") == expected_flags["drf_noise"][i]
+        assert reps.get_qc(i, "SST", "drf_short") == expected_flags["drf_short"][i]
+
+
+def test_short_record_two_bad_obs_missing_with_bgvar_bnc():
+    reps = sst_biased_noisy_check_vals(13)
+    expected_flags = {
+        "drf_bias": [0, 0, 0, 0, 0, 0, 0, 0, 0],
+        "drf_noise": [0, 0, 0, 0, 0, 0, 0, 0, 0],
+        "drf_short": [0, 0, 0, 0, 0, 0, 0, 0, 0],
+    }
+    otqc.og_sst_biased_noisy_check(reps.reps, 9, 1.10, 1.0, 0.29, 3.0, 2, 0.3)
+    for i in range(0, len(reps)):
+        assert reps.get_qc(i, "SST", "drf_bias") == expected_flags["drf_bias"][i]
+        assert reps.get_qc(i, "SST", "drf_noise") == expected_flags["drf_noise"][i]
+        assert reps.get_qc(i, "SST", "drf_short") == expected_flags["drf_short"][i]
+
+
+def test_good_data_bnc():
+    reps = sst_biased_noisy_check_vals(14)
+    expected_flags = {
+        "drf_bias": [0, 0, 0, 0, 0, 0, 0, 0, 0],
+        "drf_noise": [0, 0, 0, 0, 0, 0, 0, 0, 0],
+        "drf_short": [0, 0, 0, 0, 0, 0, 0, 0, 0],
+    }
+    otqc.sst_biased_noisy_check(reps.reps, 9, 1.10, 1.0, 0.29, 3.0, 2, 0.3)
+    for i in range(0, len(reps)):
+        assert reps.get_qc(i, "SST", "drf_bias") == expected_flags["drf_bias"][i]
+        assert reps.get_qc(i, "SST", "drf_noise") == expected_flags["drf_noise"][i]
+        assert reps.get_qc(i, "SST", "drf_short") == expected_flags["drf_short"][i]
+
+
+def test_short_record_good_data_bnc():
+    reps = sst_biased_noisy_check_vals(15)
+    expected_flags = {
+        "drf_bias": [0, 0, 0, 0, 0],
+        "drf_noise": [0, 0, 0, 0, 0],
+        "drf_short": [0, 0, 0, 0, 0],
+    }
+    otqc.sst_biased_noisy_check(reps.reps, 9, 1.10, 1.0, 0.29, 3.0, 2, 0.3)
+    for i in range(0, len(reps)):
+        assert reps.get_qc(i, "SST", "drf_bias") == expected_flags["drf_bias"][i]
+        assert reps.get_qc(i, "SST", "drf_noise") == expected_flags["drf_noise"][i]
+        assert reps.get_qc(i, "SST", "drf_short") == expected_flags["drf_short"][i]
+
+
+def test_short_record_obs_missing_good_data_bnc():
+    reps = sst_biased_noisy_check_vals(16)
+    expected_flags = {
+        "drf_bias": [0, 0, 0, 0, 0, 0, 0, 0, 0],
+        "drf_noise": [0, 0, 0, 0, 0, 0, 0, 0, 0],
+        "drf_short": [0, 0, 0, 0, 0, 0, 0, 0, 0],
+    }
+    otqc.sst_biased_noisy_check(reps.reps, 9, 1.10, 1.0, 0.29, 3.0, 2, 0.3)
+    for i in range(0, len(reps)):
+        assert reps.get_qc(i, "SST", "drf_bias") == expected_flags["drf_bias"][i]
+        assert reps.get_qc(i, "SST", "drf_noise") == expected_flags["drf_noise"][i]
+        assert reps.get_qc(i, "SST", "drf_short") == expected_flags["drf_short"][i]
+
+
+def test_noisy_big_bgvar_bnc():
+    reps = sst_biased_noisy_check_vals(17)
+    expected_flags = {
+        "drf_bias": [0, 0, 0, 0, 0, 0, 0, 0, 0],
+        "drf_noise": [0, 0, 0, 0, 0, 0, 0, 0, 0],
+        "drf_short": [0, 0, 0, 0, 0, 0, 0, 0, 0],
+    }
+    otqc.sst_biased_noisy_check(reps.reps, 9, 1.10, 1.0, 0.29, 3.0, 2, 4.0)
+    for i in range(0, len(reps)):
+        assert reps.get_qc(i, "SST", "drf_bias") == expected_flags["drf_bias"][i]
+        assert reps.get_qc(i, "SST", "drf_noise") == expected_flags["drf_noise"][i]
+        assert reps.get_qc(i, "SST", "drf_short") == expected_flags["drf_short"][i]
+
+
+def test_short_record_two_bad_obs_missing_big_bgvar_bnc():
+    reps = sst_biased_noisy_check_vals(18)
+    expected_flags = {
+        "drf_bias": [0, 0, 0, 0, 0, 0, 0, 0, 0],
+        "drf_noise": [0, 0, 0, 0, 0, 0, 0, 0, 0],
+        "drf_short": [0, 0, 0, 0, 0, 0, 0, 0, 0],
+    }
+    otqc.sst_biased_noisy_check(reps.reps, 9, 1.10, 1.0, 0.29, 3.0, 2, 4.0)
+    for i in range(0, len(reps)):
+        assert reps.get_qc(i, "SST", "drf_bias") == expected_flags["drf_bias"][i]
+        assert reps.get_qc(i, "SST", "drf_noise") == expected_flags["drf_noise"][i]
+        assert reps.get_qc(i, "SST", "drf_short") == expected_flags["drf_short"][i]
+
+
+def test_good_data_bnc():
+    reps = sst_biased_noisy_check_vals(19)
+    expected_flags = {
+        "drf_bias": [0, 0, 0, 0, 0, 0, 0, 0, 0],
+        "drf_noise": [0, 0, 0, 0, 0, 0, 0, 0, 0],
+        "drf_short": [0, 0, 0, 0, 0, 0, 0, 0, 0],
+    }
+    otqc.sst_biased_noisy_check(reps.reps, 9, 1.10, 1.0, 0.29, 3.0, 2, 0.3)
+    for i in range(0, len(reps)):
+        assert reps.get_qc(i, "SST", "drf_bias") == expected_flags["drf_bias"][i]
+        assert reps.get_qc(i, "SST", "drf_noise") == expected_flags["drf_noise"][i]
+        assert reps.get_qc(i, "SST", "drf_short") == expected_flags["drf_short"][i]
+
+
+def test_error_bad_input_parameter_bnc():
+    reps = sst_biased_noisy_check_vals(20)
+    expected_flags = {
+        "drf_bias": [9, 9, 9, 9, 9, 9, 9, 9, 9],
+        "drf_noise": [9, 9, 9, 9, 9, 9, 9, 9, 9],
+        "drf_short": [9, 9, 9, 9, 9, 9, 9, 9, 9],
+    }
+    try:
+        otqc.og_sst_biased_noisy_check(reps.reps, 0, 1.10, 1.0, 0.29, 3.0, 2, 0.3)
+    except AssertionError as error:
+        error_return_text = "invalid input parameter: n_eval must be > 0"
+        assert str(error)[0 : len(error_return_text)] == error_return_text
+    for i in range(0, len(reps)):
+        assert reps.get_qc(i, "SST", "drf_bias") == expected_flags["drf_bias"][i]
+        assert reps.get_qc(i, "SST", "drf_noise") == expected_flags["drf_noise"][i]
+        assert reps.get_qc(i, "SST", "drf_short") == expected_flags["drf_short"][i]
+
+
+def test_error_missing_matched_value_bnc():
+    reps = sst_biased_noisy_check_vals(21)
+    expected_flags = {
+        "drf_bias": [9, 9, 9, 9, 9, 9, 9, 9, 9],
+        "drf_noise": [9, 9, 9, 9, 9, 9, 9, 9, 9],
+        "drf_short": [9, 9, 9, 9, 9, 9, 9, 9, 9],
+    }
+    try:
+        otqc.sst_biased_noisy_check(reps.reps, 9, 1.10, 1.0, 0.29, 3.0, 2, 0.3)
+    except AssertionError as error:
+        error_return_text = (
+            "matched report value is missing: unknown extended variable name OSTIA"
+        )
+        assert str(error)[0 : len(error_return_text)] == error_return_text
+    for i in range(0, len(reps)):
+        assert reps.get_qc(i, "SST", "drf_bias") == expected_flags["drf_bias"][i]
+        assert reps.get_qc(i, "SST", "drf_noise") == expected_flags["drf_noise"][i]
+        assert reps.get_qc(i, "SST", "drf_short") == expected_flags["drf_short"][i]
+
+
+def test_error_invalid_ice_value_bnc():
+    reps = sst_biased_noisy_check_vals(22)
+    expected_flags = {
+        "drf_bias": [9, 9, 9, 9, 9, 9, 9, 9, 9],
+        "drf_noise": [9, 9, 9, 9, 9, 9, 9, 9, 9],
+        "drf_short": [9, 9, 9, 9, 9, 9, 9, 9, 9],
+    }
+    try:
+        otqc.sst_biased_noisy_check(reps.reps, 9, 1.10, 1.0, 0.29, 3.0, 2, 0.3)
+    except AssertionError as error:
+        error_return_text = "matched ice proportion is invalid"
+        assert str(error)[0 : len(error_return_text)] == error_return_text
+    for i in range(0, len(reps)):
+        assert reps.get_qc(i, "SST", "drf_bias") == expected_flags["drf_bias"][i]
+        assert reps.get_qc(i, "SST", "drf_noise") == expected_flags["drf_noise"][i]
+        assert reps.get_qc(i, "SST", "drf_short") == expected_flags["drf_short"][i]
+
+
+def test_error_missing_ob_value_bnc():
+    reps = sst_biased_noisy_check_vals(23)
+    expected_flags = {
+        "drf_bias": [9, 9, 9, 9, 9, 9, 9, 9, 9],
+        "drf_noise": [9, 9, 9, 9, 9, 9, 9, 9, 9],
+        "drf_short": [9, 9, 9, 9, 9, 9, 9, 9, 9],
+    }
+    with pytest.raises(ValueError):
+        otqc.og_sst_biased_noisy_check(reps.reps, 9, 1.10, 1.0, 0.29, 3.0, 2, 0.3)
+    try:
+        otqc.og_sst_biased_noisy_check(reps.reps, 9, 1.10, 1.0, 0.29, 3.0, 2, 0.3)
+    except AssertionError as error:
+        error_return_text = "problem with report value: latitude is missing"
+        assert str(error)[0 : len(error_return_text)] == error_return_text
+    except ValueError as error:
+        pass
+    for i in range(0, len(reps)):
+        assert reps.get_qc(i, "SST", "drf_bias") == expected_flags["drf_bias"][i]
+        assert reps.get_qc(i, "SST", "drf_noise") == expected_flags["drf_noise"][i]
+        assert reps.get_qc(i, "SST", "drf_short") == expected_flags["drf_short"][i]
+
+
+def test_error_not_time_sorted_bnc():
+    reps = sst_biased_noisy_check_vals(24)
+    expected_flags = {
+        "drf_bias": [9, 9, 9, 9, 9, 9, 9, 9, 9],
+        "drf_noise": [9, 9, 9, 9, 9, 9, 9, 9, 9],
+        "drf_short": [9, 9, 9, 9, 9, 9, 9, 9, 9],
+    }
+    try:
+        otqc.sst_biased_noisy_check(reps.reps, 9, 1.10, 1.0, 0.29, 3.0, 2, 0.3)
+    except AssertionError as error:
+        error_return_text = "problem with report value: times are not sorted"
+        assert str(error)[0 : len(error_return_text)] == error_return_text
+    for i in range(0, len(reps)):
+        assert reps.get_qc(i, "SST", "drf_bias") == expected_flags["drf_bias"][i]
+        assert reps.get_qc(i, "SST", "drf_noise") == expected_flags["drf_noise"][i]
+        assert reps.get_qc(i, "SST", "drf_short") == expected_flags["drf_short"][i]
+
+
+def test_error_invalid_background_bnc():
+    reps = sst_biased_noisy_check_vals(25)
+    expected_flags = {
+        "drf_bias": [9, 9, 9, 9, 9, 9, 9, 9, 9],
+        "drf_noise": [9, 9, 9, 9, 9, 9, 9, 9, 9],
+        "drf_short": [9, 9, 9, 9, 9, 9, 9, 9, 9],
+    }
+    try:
+        otqc.sst_biased_noisy_check(reps.reps, 9, 1.10, 1.0, 0.29, 3.0, 2, 0.3)
+    except AssertionError as error:
+        error_return_text = "matched background sst is invalid"
+        assert str(error)[0 : len(error_return_text)] == error_return_text
+    for i in range(0, len(reps)):
+        assert reps.get_qc(i, "SST", "drf_bias") == expected_flags["drf_bias"][i]
+        assert reps.get_qc(i, "SST", "drf_noise") == expected_flags["drf_noise"][i]
+        assert reps.get_qc(i, "SST", "drf_short") == expected_flags["drf_short"][i]
+
+
+def test_error_invalid_background_error_variance_bnc():
+    reps = sst_biased_noisy_check_vals(26)
+    expected_flags = {
+        "drf_bias": [9, 9, 9, 9, 9, 9, 9, 9, 9],
+        "drf_noise": [9, 9, 9, 9, 9, 9, 9, 9, 9],
+        "drf_short": [9, 9, 9, 9, 9, 9, 9, 9, 9],
+    }
+    try:
+        otqc.sst_biased_noisy_check(reps.reps, 9, 1.10, 1.0, 0.29, 3.0, 2, 0.3)
+    except AssertionError as error:
+        error_return_text = "matched background error variance is invalid"
+        assert str(error)[0 : len(error_return_text)] == error_return_text
+    for i in range(0, len(reps)):
+        assert reps.get_qc(i, "SST", "drf_bias") == expected_flags["drf_bias"][i]
+        assert reps.get_qc(i, "SST", "drf_noise") == expected_flags["drf_noise"][i]
+        assert reps.get_qc(i, "SST", "drf_short") == expected_flags["drf_short"][i]
