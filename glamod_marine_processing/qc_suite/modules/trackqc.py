@@ -1488,8 +1488,16 @@ def og_sst_tail_check(
     return
 
 
-def og_sst_biased_noisy_check(reps, n_eval=30, bias_lim=1.10, drif_intra=1.0, drif_inter=0.29, err_std_n=3.0, n_bad=2,
-                           background_err_lim=0.3):
+def og_sst_biased_noisy_check(
+    reps,
+    n_eval=30,
+    bias_lim=1.10,
+    drif_intra=1.0,
+    drif_inter=0.29,
+    err_std_n=3.0,
+    n_bad=2,
+    background_err_lim=0.3,
+):
     """
     Check to see whether a drifter sea surface temperature record is unacceptably biased or noisy as a whole.
 
@@ -1550,15 +1558,15 @@ def og_sst_biased_noisy_check(reps, n_eval=30, bias_lim=1.10, drif_intra=1.0, dr
         err_std_n = float(err_std_n)
         n_bad = int(n_bad)
         background_err_lim = float(background_err_lim)
-        assert n_eval > 0, 'n_eval must be > 0'
-        assert bias_lim >= 0, 'bias_lim must be >= 0'
-        assert drif_intra >= 0, 'drif_intra must be >= 0'
-        assert drif_inter >= 0, 'drif_inter must be >= 0'
-        assert err_std_n >= 0, 'err_std_n must be >= 0'
-        assert n_bad >= 1, 'n_bad must be >= 1'
-        assert background_err_lim >= 0, 'background_err_lim must be >= 0'
+        assert n_eval > 0, "n_eval must be > 0"
+        assert bias_lim >= 0, "bias_lim must be >= 0"
+        assert drif_intra >= 0, "drif_intra must be >= 0"
+        assert drif_inter >= 0, "drif_inter must be >= 0"
+        assert err_std_n >= 0, "err_std_n must be >= 0"
+        assert n_bad >= 1, "n_bad must be >= 1"
+        assert background_err_lim >= 0, "background_err_lim must be >= 0"
     except AssertionError as error:
-        raise AssertionError('invalid input parameter: ' + str(error))
+        raise AssertionError("invalid input parameter: " + str(error))
 
     # test and filter out obs with unsuitable background matches
     sst_anom = []
@@ -1566,47 +1574,64 @@ def og_sst_biased_noisy_check(reps, n_eval=30, bias_lim=1.10, drif_intra=1.0, dr
     bgvar_is_masked = False
     for ind, rep in enumerate(reps):
         try:
-            bg_val = rep.getext('OSTIA')  # raises assertion error if not found
-            ice_val = rep.getext('ICE')  # raises assertion error if not found
-            bgvar_val = rep.getext('BGVAR')  # raises assertion error if not found
+            bg_val = rep.getext("OSTIA")  # raises assertion error if not found
+            ice_val = rep.getext("ICE")  # raises assertion error if not found
+            bgvar_val = rep.getext("BGVAR")  # raises assertion error if not found
         except AssertionError as error:
-            raise AssertionError('matched report value is missing: ' + str(error))
+            raise AssertionError("matched report value is missing: " + str(error))
 
         if ice_val is None:
             ice_val = 0.0
-        assert ice_val is not None and 0.0 <= ice_val <= 1.0, 'matched ice proportion is invalid'
+        assert (
+            ice_val is not None and 0.0 <= ice_val <= 1.0
+        ), "matched ice proportion is invalid"
 
         try:
-            daytime = track_day_test(rep.getvar('YR'), rep.getvar('MO'), rep.getvar('DY'),
-                                     rep.getvar('HR'), rep.getvar('LAT'), rep.getvar('LON'), -2.5)
+            daytime = track_day_test(
+                rep.getvar("YR"),
+                rep.getvar("MO"),
+                rep.getvar("DY"),
+                rep.getvar("HR"),
+                rep.getvar("LAT"),
+                rep.getvar("LON"),
+                -2.5,
+            )
         except AssertionError as error:
-            raise AssertionError('problem with report value: ' + str(error))
+            raise AssertionError("problem with report value: " + str(error))
         if ind > 0:
             try:
-                time_diff = rep.getext('time_diff')  # raises assertion error if 'time_diff' not found
-                assert time_diff >= 0, 'times are not sorted'
+                time_diff = rep.getext(
+                    "time_diff"
+                )  # raises assertion error if 'time_diff' not found
+                assert time_diff >= 0, "times are not sorted"
             except AssertionError as error:
-                raise AssertionError('problem with report value: ' + str(error))
+                raise AssertionError("problem with report value: " + str(error))
 
         land_match = True if bg_val is None else False
         ice_match = True if ice_val > 0.15 else False
-        bgvar_mask = True if bgvar_val is not None and bgvar_val > background_err_lim else False
+        bgvar_mask = (
+            True if bgvar_val is not None and bgvar_val > background_err_lim else False
+        )
         if bgvar_mask:
             bgvar_is_masked = True
         if daytime or land_match or ice_match or bgvar_mask:
             pass
         else:
-            assert bg_val is not None and -5.0 <= bg_val <= 45.0, 'matched background sst is invalid'
-            assert bgvar_val is not None and 0.0 <= bgvar_val <= 10, 'matched background error variance is invalid'
-            sst_anom.append(rep.getvar('SST') - bg_val)
+            assert (
+                bg_val is not None and -5.0 <= bg_val <= 45.0
+            ), "matched background sst is invalid"
+            assert (
+                bgvar_val is not None and 0.0 <= bgvar_val <= 10
+            ), "matched background error variance is invalid"
+            sst_anom.append(rep.getvar("SST") - bg_val)
             bgvar.append(bgvar_val)
 
     # set bias and noise flags to pass to ensure all obs receive flag
     # then exit if there are no obs suitable for assessment
     for rep in reps:
-        rep.set_qc('SST', 'drf_bias', 0)
-        rep.set_qc('SST', 'drf_noise', 0)
-        rep.set_qc('SST', 'drf_short', 0)
+        rep.set_qc("SST", "drf_bias", 0)
+        rep.set_qc("SST", "drf_noise", 0)
+        rep.set_qc("SST", "drf_short", 0)
     if len(sst_anom) == 0:
         return
 
@@ -1623,21 +1648,21 @@ def og_sst_biased_noisy_check(reps, n_eval=30, bias_lim=1.10, drif_intra=1.0, dr
     if long_record:
         sst_anom_avg = np.mean(sst_anom)
         sst_anom_stdev = np.std(sst_anom)
-        bgerr_rms = np.sqrt(np.mean(bgerr ** 2))
+        bgerr_rms = np.sqrt(np.mean(bgerr**2))
         if abs(sst_anom_avg) > bias_lim:
             for rep in reps:
-                rep.set_qc('SST', 'drf_bias', 1)
-        if sst_anom_stdev > np.sqrt(drif_intra ** 2 + bgerr_rms ** 2):
+                rep.set_qc("SST", "drf_bias", 1)
+        if sst_anom_stdev > np.sqrt(drif_intra**2 + bgerr_rms**2):
             for rep in reps:
-                rep.set_qc('SST', 'drf_noise', 1)
+                rep.set_qc("SST", "drf_noise", 1)
     else:
         if bgvar_is_masked:
             pass  # short record may still have unreliable values
         else:
-            limit = err_std_n * np.sqrt(bgerr ** 2 + drif_inter ** 2 + drif_intra ** 2)
+            limit = err_std_n * np.sqrt(bgerr**2 + drif_inter**2 + drif_intra**2)
             exceed_limit = np.logical_or(sst_anom > limit, sst_anom < -limit)
             if np.sum(exceed_limit) >= n_bad:
                 for rep in reps:
-                    rep.set_qc('SST', 'drf_short', 1)
+                    rep.set_qc("SST", "drf_short", 1)
 
     return
