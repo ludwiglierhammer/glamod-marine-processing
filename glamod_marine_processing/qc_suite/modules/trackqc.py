@@ -1234,8 +1234,17 @@ def sst_biased_noisy_check(
     return reps
 
 
-def og_sst_tail_check(reps, long_win_len=121, long_err_std_n=3.0, short_win_len=30, short_err_std_n=3.0,
-                   short_win_n_bad=2, drif_inter=0.29, drif_intra=1.00, background_err_lim=0.3):
+def og_sst_tail_check(
+    reps,
+    long_win_len=121,
+    long_err_std_n=3.0,
+    short_win_len=30,
+    short_err_std_n=3.0,
+    short_win_n_bad=2,
+    drif_inter=0.29,
+    drif_intra=1.00,
+    background_err_lim=0.3,
+):
     """
     Check to see whether there is erroneous sea surface temperature data at the beginning or end of a drifter record
     (referred to as 'tails'). The flags 'drf_tail1' and 'drf_tail2' are set for each input report: flag=1 for reports
@@ -1296,17 +1305,17 @@ def og_sst_tail_check(reps, long_win_len=121, long_err_std_n=3.0, short_win_len=
         drif_inter = float(drif_inter)
         drif_intra = float(drif_intra)
         background_err_lim = float(background_err_lim)
-        assert long_win_len >= 1, 'long_win_len must be >= 1'
-        assert long_win_len % 2 != 0, 'long_win_len must be an odd number'
-        assert long_err_std_n >= 0, 'long_err_std_n must be >= 0'
-        assert short_win_len >= 1, 'short_win_len must be >= 1'
-        assert short_err_std_n >= 0, 'short_err_std_n must be >= 0'
-        assert short_win_n_bad >= 1, 'short_win_n_bad must be >= 1'
-        assert drif_inter >= 0, 'drif_inter must be >= 0'
-        assert drif_intra >= 0, 'drif_intra must be >= 0'
-        assert background_err_lim >= 0, 'background_err_lim must be >= 0'
+        assert long_win_len >= 1, "long_win_len must be >= 1"
+        assert long_win_len % 2 != 0, "long_win_len must be an odd number"
+        assert long_err_std_n >= 0, "long_err_std_n must be >= 0"
+        assert short_win_len >= 1, "short_win_len must be >= 1"
+        assert short_err_std_n >= 0, "short_err_std_n must be >= 0"
+        assert short_win_n_bad >= 1, "short_win_n_bad must be >= 1"
+        assert drif_inter >= 0, "drif_inter must be >= 0"
+        assert drif_intra >= 0, "drif_intra must be >= 0"
+        assert background_err_lim >= 0, "background_err_lim must be >= 0"
     except AssertionError as error:
-        raise AssertionError('invalid input parameter: ' + str(error))
+        raise AssertionError("invalid input parameter: " + str(error))
 
     # test and filter out obs with unsuitable background matches
     reps_ind = []
@@ -1314,44 +1323,59 @@ def og_sst_tail_check(reps, long_win_len=121, long_err_std_n=3.0, short_win_len=
     bgvar = []
     for ind, rep in enumerate(reps):
         try:
-            bg_val = rep.getext('OSTIA')  # raises assertion error if not found
-            ice_val = rep.getext('ICE')  # raises assertion error if not found
-            bgvar_val = rep.getext('BGVAR')  # raises assertion error if not found
+            bg_val = rep.getext("OSTIA")  # raises assertion error if not found
+            ice_val = rep.getext("ICE")  # raises assertion error if not found
+            bgvar_val = rep.getext("BGVAR")  # raises assertion error if not found
         except AssertionError as error:
-            raise AssertionError('matched report value is missing: ' + str(error))
+            raise AssertionError("matched report value is missing: " + str(error))
 
         if ice_val is None:
             ice_val = 0.0
-        assert ice_val is not None and 0.0 <= ice_val <= 1.0, 'matched ice proportion is invalid'
+        assert (
+            ice_val is not None and 0.0 <= ice_val <= 1.0
+        ), "matched ice proportion is invalid"
 
         try:
-            daytime = track_day_test(rep.getvar('YR'), rep.getvar('MO'), rep.getvar('DY'),
-                                     rep.getvar('HR'), rep.getvar('LAT'), rep.getvar('LON'), -2.5)
+            daytime = track_day_test(
+                rep.getvar("YR"),
+                rep.getvar("MO"),
+                rep.getvar("DY"),
+                rep.getvar("HR"),
+                rep.getvar("LAT"),
+                rep.getvar("LON"),
+                -2.5,
+            )
         except AssertionError as error:
-            raise AssertionError('problem with report value: ' + str(error))
+            raise AssertionError("problem with report value: " + str(error))
         if ind > 0:
             try:
-                time_diff = rep.getext('time_diff')  # raises assertion error if 'time_diff' not found
-                assert time_diff >= 0, 'times are not sorted'
+                time_diff = rep.getext(
+                    "time_diff"
+                )  # raises assertion error if 'time_diff' not found
+                assert time_diff >= 0, "times are not sorted"
             except AssertionError as error:
-                raise AssertionError('problem with report value: ' + str(error))
+                raise AssertionError("problem with report value: " + str(error))
 
         land_match = True if bg_val is None else False
         ice_match = True if ice_val > 0.15 else False
         if daytime or land_match or ice_match:
             pass
         else:
-            assert bg_val is not None and -5.0 <= bg_val <= 45.0, 'matched background sst is invalid'
-            assert bgvar_val is not None and 0.0 <= bgvar_val <= 10, 'matched background error variance is invalid'
+            assert (
+                bg_val is not None and -5.0 <= bg_val <= 45.0
+            ), "matched background sst is invalid"
+            assert (
+                bgvar_val is not None and 0.0 <= bgvar_val <= 10
+            ), "matched background error variance is invalid"
             reps_ind.append(ind)
-            sst_anom.append(rep.getvar('SST') - bg_val)
+            sst_anom.append(rep.getvar("SST") - bg_val)
             bgvar.append(bgvar_val)
 
     # set start and end tail flags to pass to ensure all obs receive flag
     # then exit if there are no obs suitable for assessment
     for rep in reps:
-        rep.set_qc('SST', 'drf_tail1', 0)
-        rep.set_qc('SST', 'drf_tail2', 0)
+        rep.set_qc("SST", "drf_tail1", 0)
+        rep.set_qc("SST", "drf_tail2", 0)
     if len(sst_anom) == 0:
         return
 
@@ -1377,16 +1401,18 @@ def og_sst_tail_check(reps, long_win_len=121, long_err_std_n=3.0, short_win_len=
                 bgerr_temp = np.flipud(bgerr)
             # this is the long tail check
             for ix in range(0, nrep - long_win_len + 1):
-                sst_anom_winvals = sst_anom_temp[ix:ix + long_win_len]
-                bgerr_winvals = bgerr_temp[ix:ix + long_win_len]
+                sst_anom_winvals = sst_anom_temp[ix : ix + long_win_len]
+                bgerr_winvals = bgerr_temp[ix : ix + long_win_len]
                 if np.any(bgerr_winvals > np.sqrt(background_err_lim)):
                     break
                 sst_anom_avg = trim_mean(sst_anom_winvals, 100)
                 sst_anom_stdev = trim_std(sst_anom_winvals, 100)
                 bgerr_avg = np.mean(bgerr_winvals)
-                bgerr_rms = np.sqrt(np.mean(bgerr_winvals ** 2))
-                if (abs(sst_anom_avg) > long_err_std_n * np.sqrt(drif_inter ** 2 + bgerr_avg ** 2)) \
-                        or (sst_anom_stdev > np.sqrt(drif_intra ** 2 + bgerr_rms ** 2)):
+                bgerr_rms = np.sqrt(np.mean(bgerr_winvals**2))
+                if (
+                    abs(sst_anom_avg)
+                    > long_err_std_n * np.sqrt(drif_inter**2 + bgerr_avg**2)
+                ) or (sst_anom_stdev > np.sqrt(drif_intra**2 + bgerr_rms**2)):
                     if forward:
                         start_tail_ind = ix + mid_win_ind
                     else:
@@ -1401,33 +1427,45 @@ def og_sst_tail_check(reps, long_win_len=121, long_err_std_n=3.0, short_win_len=
         first_pass_ind = start_tail_ind + 1  # first index passing long tail check
         last_pass_ind = end_tail_ind - 1  # last index passing long tail check
         npass = last_pass_ind - first_pass_ind + 1
-        assert npass > 0, 'short tail check: npass not > 0'
-        if npass < short_win_len:  # records shorter than short-window length aren't evaluated
+        assert npass > 0, "short tail check: npass not > 0"
+        if (
+            npass < short_win_len
+        ):  # records shorter than short-window length aren't evaluated
             pass
         else:
             for forward in [True, False]:  # run forwards then backwards over timeseries
                 if forward:
-                    sst_anom_temp = sst_anom[first_pass_ind:last_pass_ind + 1]
-                    bgerr_temp = bgerr[first_pass_ind:last_pass_ind + 1]
+                    sst_anom_temp = sst_anom[first_pass_ind : last_pass_ind + 1]
+                    bgerr_temp = bgerr[first_pass_ind : last_pass_ind + 1]
                 else:
-                    sst_anom_temp = np.flipud(sst_anom[first_pass_ind:last_pass_ind + 1])
-                    bgerr_temp = np.flipud(bgerr[first_pass_ind:last_pass_ind + 1])
+                    sst_anom_temp = np.flipud(
+                        sst_anom[first_pass_ind : last_pass_ind + 1]
+                    )
+                    bgerr_temp = np.flipud(bgerr[first_pass_ind : last_pass_ind + 1])
                 # this is the short tail check
                 for ix in range(0, npass - short_win_len + 1):
-                    sst_anom_winvals = sst_anom_temp[ix:ix + short_win_len]
-                    bgerr_winvals = bgerr_temp[ix:ix + short_win_len]
+                    sst_anom_winvals = sst_anom_temp[ix : ix + short_win_len]
+                    bgerr_winvals = bgerr_temp[ix : ix + short_win_len]
                     if np.any(bgerr_winvals > np.sqrt(background_err_lim)):
                         break
-                    limit = short_err_std_n * np.sqrt(bgerr_winvals ** 2 + drif_inter ** 2 + drif_intra ** 2)
-                    exceed_limit = np.logical_or(sst_anom_winvals > limit, sst_anom_winvals < -limit)
+                    limit = short_err_std_n * np.sqrt(
+                        bgerr_winvals**2 + drif_inter**2 + drif_intra**2
+                    )
+                    exceed_limit = np.logical_or(
+                        sst_anom_winvals > limit, sst_anom_winvals < -limit
+                    )
                     if np.sum(exceed_limit) >= short_win_n_bad:
                         if forward:
-                            if ix == (npass - short_win_len):  # if all windows have failed, flag everything
+                            if ix == (
+                                npass - short_win_len
+                            ):  # if all windows have failed, flag everything
                                 start_tail_ind += short_win_len
                             else:
                                 start_tail_ind += 1
                         else:
-                            if ix == (npass - short_win_len):  # if all windows have failed, flag everything
+                            if ix == (
+                                npass - short_win_len
+                            ):  # if all windows have failed, flag everything
                                 end_tail_ind -= short_win_len
                             else:
                                 end_tail_ind -= 1
@@ -1441,10 +1479,10 @@ def og_sst_tail_check(reps, long_win_len=121, long_err_std_n=3.0, short_win_len=
     if not start_tail_ind == -1:
         for ind, rep in enumerate(reps):
             if ind <= reps_ind[start_tail_ind]:
-                rep.set_qc('SST', 'drf_tail1', 1)
+                rep.set_qc("SST", "drf_tail1", 1)
     if not end_tail_ind == nrep:
         for ind, rep in enumerate(reps):
             if ind >= reps_ind[end_tail_ind]:
-                rep.set_qc('SST', 'drf_tail2', 1)
+                rep.set_qc("SST", "drf_tail2", 1)
 
     return
