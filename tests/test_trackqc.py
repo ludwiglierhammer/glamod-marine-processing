@@ -9585,9 +9585,9 @@ def tailcheck_vals(selector):
                 rec.data[key] = v[key]
         rep = ex.MarineReportQC(rec)
         if selector != 35:
-            rep.setext('OSTIA', v['OSTIA'])
-        rep.setext('BGVAR', v['BGVAR'])
-        rep.setext('ICE', v['ICE'])
+            rep.setext("OSTIA", v["OSTIA"])
+        rep.setext("BGVAR", v["BGVAR"])
+        rep.setext("ICE", v["ICE"])
         reps.add_report(rep)
 
     if selector == 37:
@@ -9782,12 +9782,14 @@ def test_start_tail_bias_with_bgvar():
 # BROKEN TEST FIXED BY REVERTING TO ORIGINAL CODE
 def test_all_biased_with_bgvar():
     reps = tailcheck_vals(16)
-    expected_flags = {'drf_tail1': [1, 1, 1, 0, 0, 0, 0, 0, 0],
-                      'drf_tail2': [0, 0, 0, 0, 0, 0, 1, 1, 1]}
+    expected_flags = {
+        "drf_tail1": [1, 1, 1, 0, 0, 0, 0, 0, 0],
+        "drf_tail2": [0, 0, 0, 0, 0, 0, 1, 1, 1],
+    }
     otqc.og_sst_tail_check(reps.reps, 3, 3.0, 1, 3.0, 1, 0.29, 1.0, 0.3)
     for i in range(0, len(reps)):
-        assert reps.get_qc(i, 'SST', 'drf_tail1') == expected_flags['drf_tail1'][i]
-        assert reps.get_qc(i, 'SST', 'drf_tail2') == expected_flags['drf_tail2'][i]
+        assert reps.get_qc(i, "SST", "drf_tail1") == expected_flags["drf_tail1"][i]
+        assert reps.get_qc(i, "SST", "drf_tail2") == expected_flags["drf_tail2"][i]
 
 
 def test_short_start_tail():
@@ -9841,23 +9843,28 @@ def test_short_all_fail():
 # BROKEN TEST FIXED BY REVERTING TO ORIGINAL CODE
 def test_short_start_tail_with_bgvar():
     reps = tailcheck_vals(21)
-    expected_flags = {'drf_tail1': [0, 0, 0, 0, 0, 0, 0, 0, 0],
-                      'drf_tail2': [0, 0, 0, 0, 0, 0, 0, 0, 0]}
+    expected_flags = {
+        "drf_tail1": [0, 0, 0, 0, 0, 0, 0, 0, 0],
+        "drf_tail2": [0, 0, 0, 0, 0, 0, 0, 0, 0],
+    }
     otqc.og_sst_tail_check(reps.reps, 7, 3.0, 3, 2.0, 2, 0.29, 1.0, 0.3)
     for i in range(0, len(reps)):
-        assert reps.get_qc(i, 'SST', 'drf_tail1') == expected_flags['drf_tail1'][i]
-        assert reps.get_qc(i, 'SST', 'drf_tail2') == expected_flags['drf_tail2'][i]
+        assert reps.get_qc(i, "SST", "drf_tail1") == expected_flags["drf_tail1"][i]
+        assert reps.get_qc(i, "SST", "drf_tail2") == expected_flags["drf_tail2"][i]
+
 
 
 # BROKEN TEST FIXED BY REVERTING TO ORIGINAL CODE
 def test_short_all_fail_with_bgvar():
     reps = tailcheck_vals(22)
-    expected_flags = {'drf_tail1': [1, 1, 0, 0, 0, 0, 0, 0, 0],
-                      'drf_tail2': [0, 0, 0, 0, 0, 0, 0, 1, 1]}
+    expected_flags = {
+        "drf_tail1": [1, 1, 0, 0, 0, 0, 0, 0, 0],
+        "drf_tail2": [0, 0, 0, 0, 0, 0, 0, 1, 1],
+    }
     otqc.og_sst_tail_check(reps.reps, 7, 9.0, 3, 2.0, 2, 0.29, 1.0, 0.3)
     for i in range(0, len(reps)):
-        assert reps.get_qc(i, 'SST', 'drf_tail1') == expected_flags['drf_tail1'][i]
-        assert reps.get_qc(i, 'SST', 'drf_tail2') == expected_flags['drf_tail2'][i]
+        assert reps.get_qc(i, "SST", "drf_tail1") == expected_flags["drf_tail1"][i]
+        assert reps.get_qc(i, "SST", "drf_tail2") == expected_flags["drf_tail2"][i]
 
 
 def test_long_and_short_start_tail():
@@ -9947,12 +9954,14 @@ def test_long_and_short_start_tail_with_bgvar():
 # BROKEN TEST FIXED BY REVERTING TO ORIGINAL CODE
 def test_long_and_short_all_fail_with_bgvar():
     reps = tailcheck_vals(30)
-    expected_flags = {'drf_tail1': [1, 1, 1, 1, 1, 1, 1, 1, 0],
-                      'drf_tail2': [0, 0, 0, 0, 0, 0, 0, 0, 0]}
+    expected_flags = {
+        "drf_tail1": [1, 1, 1, 1, 1, 1, 1, 1, 0],
+        "drf_tail2": [0, 0, 0, 0, 0, 0, 0, 0, 0],
+    }
     otqc.og_sst_tail_check(reps.reps, 3, 3.0, 1, 0.25, 1, 0.29, 1.0, 0.3)
     for i in range(0, len(reps)):
-        assert reps.get_qc(i, 'SST', 'drf_tail1') == expected_flags['drf_tail1'][i]
-        assert reps.get_qc(i, 'SST', 'drf_tail2') == expected_flags['drf_tail2'][i]
+        assert reps.get_qc(i, "SST", "drf_tail1") == expected_flags["drf_tail1"][i]
+        assert reps.get_qc(i, "SST", "drf_tail2") == expected_flags["drf_tail2"][i]
 
 
 def test_good_data():
@@ -10009,16 +10018,20 @@ def test_error_bad_input_parameter_tail_check():
 
 def test_error_missing_matched_value():
     reps = tailcheck_vals(35)
-    expected_flags = {'drf_tail1': [9, 9, 9, 9, 9, 9, 9, 9, 9],
-                      'drf_tail2': [9, 9, 9, 9, 9, 9, 9, 9, 9]}
+    expected_flags = {
+        "drf_tail1": [9, 9, 9, 9, 9, 9, 9, 9, 9],
+        "drf_tail2": [9, 9, 9, 9, 9, 9, 9, 9, 9],
+    }
     try:
         otqc.sst_tail_check(reps.reps, 3, 3.0, 1, 3.0, 1, 0.29, 1.0, 0.3)
     except AssertionError as error:
-        error_return_text = 'matched report value is missing: unknown extended variable name OSTIA'
-        assert str(error)[0:len(error_return_text)] == error_return_text
+        error_return_text = (
+            "matched report value is missing: unknown extended variable name OSTIA"
+        )
+        assert str(error)[0 : len(error_return_text)] == error_return_text
     for i in range(0, len(reps)):
-        assert reps.get_qc(i, 'SST', 'drf_tail1') == expected_flags['drf_tail1'][i]
-        assert reps.get_qc(i, 'SST', 'drf_tail2') == expected_flags['drf_tail2'][i]
+        assert reps.get_qc(i, "SST", "drf_tail1") == expected_flags["drf_tail1"][i]
+        assert reps.get_qc(i, "SST", "drf_tail2") == expected_flags["drf_tail2"][i]
 
 
 def test_error_invalid_ice_value():
@@ -10039,8 +10052,10 @@ def test_error_invalid_ice_value():
 
 def test_error_missing_ob_value():
     reps = tailcheck_vals(37)
-    expected_flags = {'drf_tail1': [9, 9, 9, 9, 9, 9, 9, 9, 9],
-                      'drf_tail2': [9, 9, 9, 9, 9, 9, 9, 9, 9]}
+    expected_flags = {
+        "drf_tail1": [9, 9, 9, 9, 9, 9, 9, 9, 9],
+        "drf_tail2": [9, 9, 9, 9, 9, 9, 9, 9, 9],
+    }
 
     with pytest.raises(ValueError):
         otqc.og_sst_tail_check(reps.reps, 3, 3.0, 1, 3.0, 1, 0.29, 1.0, 0.3)
@@ -10052,8 +10067,8 @@ def test_error_missing_ob_value():
     #     error_return_text = 'problem with report value: latitude is missing'
     #     assert str(error)[0:len(error_return_text)] == error_return_text
     for i in range(0, len(reps)):
-        assert reps.get_qc(i, 'SST', 'drf_tail1') == expected_flags['drf_tail1'][i]
-        assert reps.get_qc(i, 'SST', 'drf_tail2') == expected_flags['drf_tail2'][i]
+        assert reps.get_qc(i, "SST", "drf_tail1") == expected_flags["drf_tail1"][i]
+        assert reps.get_qc(i, "SST", "drf_tail2") == expected_flags["drf_tail2"][i]
 
 
 def test_error_not_time_sorted_tail_check():
@@ -10075,16 +10090,18 @@ def test_error_not_time_sorted_tail_check():
 # BROKEN TEST FIXED BY REVERTING TO ORIGINAL CODE
 def test_error_invalid_background():
     reps = tailcheck_vals(39)
-    expected_flags = {'drf_tail1': [9, 9, 9, 9, 9, 9, 9, 9, 9],
-                      'drf_tail2': [9, 9, 9, 9, 9, 9, 9, 9, 9]}
+    expected_flags = {
+        "drf_tail1": [9, 9, 9, 9, 9, 9, 9, 9, 9],
+        "drf_tail2": [9, 9, 9, 9, 9, 9, 9, 9, 9],
+    }
     try:
         otqc.og_sst_tail_check(reps.reps, 3, 3.0, 1, 3.0, 1, 0.29, 1.0, 0.3)
     except AssertionError as error:
-        error_return_text = 'matched background sst is invalid'
-        assert str(error)[0:len(error_return_text)] == error_return_text
+        error_return_text = "matched background sst is invalid"
+        assert str(error)[0 : len(error_return_text)] == error_return_text
     for i in range(0, len(reps)):
-        assert reps.get_qc(i, 'SST', 'drf_tail1') == expected_flags['drf_tail1'][i]
-        assert reps.get_qc(i, 'SST', 'drf_tail2') == expected_flags['drf_tail2'][i]
+        assert reps.get_qc(i, "SST", "drf_tail1") == expected_flags["drf_tail1"][i]
+        assert reps.get_qc(i, "SST", "drf_tail2") == expected_flags["drf_tail2"][i]
 
 
 def test_error_invalid_background_error_variance():
