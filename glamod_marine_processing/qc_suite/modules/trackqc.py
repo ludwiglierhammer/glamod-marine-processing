@@ -6,6 +6,7 @@ from __future__ import annotations
 
 import copy
 import math
+from typing import Optional
 
 import numpy as np
 
@@ -37,9 +38,16 @@ http://fcm9/projects/ClimateMonitoringAttribution/browser/Track_QC?order=name
 """
 
 
-def track_day_test(year, month, day, hour, lat, lon, elevdlim=-2.5):
-    """
-    Given date, time, lat and lon calculate if the sun elevation is > elevdlim.
+def track_day_test(
+    year: int,
+    month: int,
+    day: int,
+    hour: float,
+    lat: float,
+    lon: float,
+    elevdlim: float = -2.5,
+) -> bool:
+    """Given date, time, lat and lon calculate if the sun elevation is > elevdlim.
     If so return daytime is True
 
     This is the "day" test used by tracking QC to decide whether an SST measurement is night or day.
@@ -47,22 +55,27 @@ def track_day_test(year, month, day, hour, lat, lon, elevdlim=-2.5):
     It uses the function sunangle to calculate the elevation of the sun. A default solar_zenith angle
     of 92.5 degrees (elevation of -2.5 degrees) delimits night from day.
 
-    :param year: Year
-    :param month: Month
-    :param day: Day
-    :param hour: Hour expressed as decimal fraction (e.g. 20.75 = 20:45 pm)
-    :param lat: Latitude in degrees
-    :param lon: Longitude in degrees
-    :param elevdlim: Elevation day/night delimiter in degrees above horizon
-    :type year: integer
-    :type month: integer
-    :type day: integer
-    :type hour: float
-    :type lat: float
-    :type lon: float
-    :type elevdlim: float
-    :return: True if daytime, else False.
-    :rtype: boolean
+    Parameters
+    ----------
+    year: int
+        Year
+    month: int
+        Month
+    day: int
+        Day
+    hour: float
+        Hour expressed as decimal fraction (e.g. 20.75 = 20:45 pm)
+    lat: float
+        Latitude in degrees
+    lon: float
+        Longitude in degrees
+    elevdlim: float
+        Elevation day/night delimiter in degrees above horizon
+
+    Returns
+    -------
+    bool
+        True if daytime, else False.
     """
     if year is None:
         raise ValueError("year is missing")
@@ -113,17 +126,23 @@ def track_day_test(year, month, day, hour, lat, lon, elevdlim=-2.5):
     return daytime
 
 
-def trim_mean(inarr, trim):
-    """
-    Calculate a resistant (aka robust) mean of an input array given a trimming criteria.
+def trim_mean(inarr: list, trim: int) -> float:
+    """Calculate a resistant (aka robust) mean of an input array given a trimming criteria.
 
-    :param inarr: array of numbers
-    :param trim: trimming criteria. A value of 10 trims one tenth of the values off each end of the sorted array before calculating the mean.
-    :type inarr: array of floats
-    :type trim: integer
-    :return: trimmed mean
-    :rtype: float
+    Parameters
+    ----------
+    inarr: list
+        Array of numbers
+    trim: int
+        trimming criteria. A value of 10 trims one tenth of the values off each end of the sorted array
+        before calculating the mean.
+
+    Returns
+    -------
+    float
+        Trimmed mean
     """
+
     arr = np.array(inarr)
     if trim == 0:
         return np.mean(arr)
@@ -138,17 +157,21 @@ def trim_mean(inarr, trim):
     return trim
 
 
-def trim_std(inarr, trim):
-    """
-    Calculate a resistant (aka robust) standard deviation of an input array given a trimming criteria.
+def trim_std(inarr: list, trim: int) -> float:
+    """Calculate a resistant (aka robust) standard deviation of an input array given a trimming criteria.
 
-    :param inarr: array of numbers
-    :param trim: trimming criteria. A value of 10 trims one tenth of the values off each end of the sorted array before
-      calculating the standard deviation.
-    :type inarr: array of floats
-    :type trim: integer
-    :return: trimmed standard deviation
-    :rtype: float
+    Parameters
+    ----------
+    inarr : list
+        Array of numbers
+    trim: int
+        trimming criteria. A value of 10 trims one tenth of the values off each end of the sorted array before
+        calculating the standard deviation.
+
+    Returns
+    -------
+    float
+        Returns trimmed standard deviation
     """
     arr = np.array(inarr)
     if trim == 0:
@@ -164,8 +187,26 @@ def trim_std(inarr, trim):
     return trim
 
 
-def assert_window_and_periods(smooth_win=1, min_win_period=1, max_win_period=None):
-    """Assert smooth window and window periods."""
+def assert_window_and_periods(
+    smooth_win: int = 1, min_win_period: int = 1, max_win_period: Optional[int] = None
+) -> (int, int, int | None):
+    """Assert smooth window and window periods. Ensures that the three variables are of the correct
+    type and are valid for processing.
+
+    Parameters
+    ----------
+    smooth_win: int
+        Smoothing window
+    min_win_period: int
+        Minimum window period
+    max_win_period: int or None
+        Maximum window period
+
+    Returns
+    -------
+    (int, int, int or None)
+        Returns conforming smoothing window, minimum window period, maximum window period.
+    """
     smooth_win = int(smooth_win)
     assert smooth_win >= 1, "smooth_win must be >= 1"
     assert smooth_win % 2 != 0, "smooth_win must be an odd number"
@@ -181,11 +222,26 @@ def assert_window_and_periods(smooth_win=1, min_win_period=1, max_win_period=Non
 
 
 def assert_limit_periods(
-    speed_limit=2.5,
-    min_win_period=1,
-    max_win_period=None,
-):
-    """Assert speed limit and window periods."""
+    speed_limit: float = 2.5,
+    min_win_period: float = 1,
+    max_win_period: Optional[float] = None,
+) -> (float, float, Optional[float]):
+    """Assert speed limit and window periods. Ensure variables are correct type and valid choices.
+
+    Parameters
+    ----------
+    speed_limit: float
+        Speed limit
+    min_win_period: float
+        Minimum window period
+    max_win_period: float or None
+        Maximum window period
+
+    Returns
+    -------
+    (float, float, float or None)
+        Returns conforming speed limit, minimum window period and maximum window period.
+    """
     speed_limit = float(speed_limit)
     assert speed_limit >= 0, "speed_limit must be >= 0"
     min_win_period = float(min_win_period)
@@ -200,15 +256,39 @@ def assert_limit_periods(
 
 
 def assert_drifters(
-    n_eval=1,
-    bias_lim=1.10,
-    drif_intra=1.0,
-    drif_inter=0.29,
-    err_std_n=3.0,
-    n_bad=2,
-    background_err_lim=0.3,
-):
-    """Assert drifter sea surface temperature record."""
+    n_eval: int = 1,
+    bias_lim: float = 1.10,
+    drif_intra: float = 1.0,
+    drif_inter: float = 0.29,
+    err_std_n: float = 3.0,
+    n_bad: int = 2,
+    background_err_lim: float = 0.3,
+) -> (int, float, float, float, float, int, float):
+    """Assert drifter sea surface temperature record. Ensure variables are correct type and valid choices.
+
+    I am just guessing what these variables are for the time being.
+
+    Parameters
+    ----------
+    n_eval: int
+    bias_lim: float
+        Bias limit
+    drif_intra: float
+        Intra drifter
+    drif_inter: float
+        Inter drifter
+    err_std_n: float
+        Error standard deviations
+    n_bad: int
+        Number of bad
+    background_err_lim: float
+        Background error limit
+
+    Returns
+    -------
+    (int, float, float, float, float, int, float)
+        Returns conforming variables.
+    """
     n_eval = int(n_eval)
     bias_lim = float(bias_lim)
     drif_intra = float(drif_intra)
@@ -235,16 +315,33 @@ def assert_drifters(
 
 
 def assert_window_drifters(
-    long_win_len=1,
-    long_err_std_n=3.0,
-    short_win_len=1,
-    short_err_std_n=3.0,
-    short_win_n_bad=1,
-    drif_inter=0.29,
-    drif_intra=1.00,
-    background_err_lim=0.3,
-):
-    """Assert drifter and window parameters."""
+    long_win_len: int = 1,
+    long_err_std_n: float = 3.0,
+    short_win_len: int = 1,
+    short_err_std_n: float = 3.0,
+    short_win_n_bad: int = 1,
+    drif_inter: float = 0.29,
+    drif_intra: float = 1.00,
+    background_err_lim: float = 0.3,
+) -> (int, float, int, float, int, float, float, float):
+    """Assert drifter and window parameters.
+
+    Parameters
+    ----------
+    long_win_len: int
+    long_err_std_n: float
+    short_win_len: int
+    short_err_std_n: float
+    short_win_n_bad: int
+    drif_inter: float
+    drif_intra: float
+    background_err_lim: float
+
+    Returns
+    -------
+    (int, float, int, float, int, float, float, float)
+        Returns conforming variables.
+    """
     long_win_len = int(long_win_len)
     long_err_std_n = float(long_err_std_n)
     short_win_len = int(short_win_len)
@@ -275,11 +372,23 @@ def assert_window_drifters(
 
 
 def retrieve_lon_lat_hrs(reps):
-    """Retrieve lon/lat/time_diff variables from marine reports."""
+    """Given a set of MarineReports, extract the longitudes, latitudes and time. Time is expressed as hours since the
+    first observation in the set.
+
+    Parameters
+    ----------
+    reps: MarineReport
+        List of MarineReports
+
+    Returns
+    -------
+    (np.ndarray, np.ndarray, np.ndarray)
+        Returns arrays of longitude, latitude and hours since first observation.
+    """
     nrep = len(reps)
-    lon = np.array(nrep * [np.nan])
-    lat = np.array(nrep * [np.nan])
-    hrs = np.array(nrep * [np.nan])
+    lon = np.array(nrep * [np.nan])  # type: np.ndarray
+    lat = np.array(nrep * [np.nan])  # type: np.ndarray
+    hrs = np.array(nrep * [np.nan])  # type: np.ndarray
     for ind, rep in enumerate(reps):
         lon[ind] = rep.getvar("LON")  # returns None if missing
         lat[ind] = rep.getvar("LAT")  # returns None if missing
@@ -298,19 +407,40 @@ def retrieve_lon_lat_hrs(reps):
 
 
 def create_smoothed_lon_lat_hrs(
-    lon=np.array([np.nan]),
-    lat=np.array([np.nan]),
-    hrs=np.array([np.nan]),
-    nrep=1,
-    smooth_win=1,
-    half_win=0,
-):
-    """Create smoothed lon/lat timeseries."""
+    lon: np.ndarray = np.array([np.nan]),
+    lat: np.ndarray = np.array([np.nan]),
+    hrs: np.ndarray = np.array([np.nan]),
+    nrep: int = 1,
+    smooth_win: int = 1,
+    half_win: int = 0,
+) -> (np.ndarray, np.ndarray, np.ndarray):
+    """Create smoothed lon/lat timeseries.
+
+    Parameters
+    ----------
+    lon : np.ndarray
+        Array of longitudes
+    lat : np.ndarray
+        Array of latitudes
+    hrs : np.ndarray
+        Array of hours
+    nrep : int
+        Number of reports
+    smooth_win : int
+        Smoothing window
+    half_win : int
+        Half window length
+
+    Returns
+    -------
+    (np.ndarray,. np.ndarray, np.ndarray)
+        Returns arrays containing the smoothed longitudes, latitudes and hours
+    """
     nrep_smooth = nrep - smooth_win + 1  # length of series after smoothing
 
-    lon_smooth = np.array(nrep_smooth * [np.nan])
-    lat_smooth = np.array(nrep_smooth * [np.nan])
-    hrs_smooth = np.array(nrep_smooth * [np.nan])
+    lon_smooth = np.array(nrep_smooth * [np.nan])  # type: np.ndarray
+    lat_smooth = np.array(nrep_smooth * [np.nan])  # type: np.ndarray
+    hrs_smooth = np.array(nrep_smooth * [np.nan])  # type: np.ndarray
 
     for i in range(0, nrep_smooth):
         lon_smooth[i] = np.median(lon[i : i + smooth_win])
@@ -323,13 +453,32 @@ def create_smoothed_lon_lat_hrs(
 
 
 def check_drifter_aground(
-    lon_smooth=np.array([np.nan]),
-    lat_smooth=np.array([np.nan]),
-    hrs_smooth=np.array([np.nan]),
-    min_win_period=1,
-    max_win_period=None,
-):
-    """Check whether drifter has run aground."""
+    lon_smooth: np.ndarray = np.array([np.nan]),
+    lat_smooth: np.ndarray = np.array([np.nan]),
+    hrs_smooth: np.ndarray = np.array([np.nan]),
+    min_win_period: int = 1,
+    max_win_period: Optional[None] = None,
+) -> (bool, int):
+    """Check whether drifter has run aground.
+
+    Parameters
+    ----------
+    lon_smooth: np.ndarray
+        Array of smoothed longitudes
+    lat_smooth: np.ndarray
+        Array of smoothed latitudes
+    hrs_smooth: np.ndarray
+        Array of smoothed hours
+    min_win_period: int
+        Minimum window period
+    max_win_period: int or None
+        Maximum window period
+
+    Returns
+    -------
+    (bool, int)
+        Returns bool indicating whether drifter has run aground and index when drifter ran aground.
+    """
     i = 0
     is_aground = False  # keeps track of whether drifter is deemed aground
     i_aground = np.nan  # keeps track of index when drifter first ran aground
@@ -371,16 +520,41 @@ def check_drifter_aground(
 
 
 def check_drifter_speed(
-    reps,
-    lon=np.array([np.nan]),
-    lat=np.array([np.nan]),
-    hrs=np.array([np.nan]),
-    speed_limit=2.5,
-    min_win_period=1,
-    max_win_period=None,
-    iquam_track_ship=None,
-):
-    """Check whether drifter is moving too fast and flag any occurrences."""
+    reps: list,
+    lon: np.ndarray = np.array([np.nan]),
+    lat: np.ndarray = np.array([np.nan]),
+    hrs: np.ndarray = np.array([np.nan]),
+    speed_limit: float = 2.5,
+    min_win_period: int = 1,
+    max_win_period: Optional[int] = None,
+    iquam_track_ship: Optional[list] = None,
+) -> list:
+    """Check whether drifter is moving too fast and flag any occurrences.
+
+    Parameters
+    ----------
+    reps: list
+        List of MarineReports
+    lon: np.ndarray
+        Array containing longitudes
+    lat: np.ndarray
+        Array containing latitudes
+    hrs: np.ndarray
+        Array containing hours
+    speed_limit: float
+        Speed limit for QC check
+    min_win_period: int
+        Minimum window period
+    max_win_period: int or None
+        Maximum window period
+    iquam_track_ship: list or None
+        Indicator
+
+    Returns
+    -------
+    list
+        Returns list of quality controlled reports
+    """
     nrep = len(reps)
     index_arr = np.array(range(0, nrep))
     i = 0
@@ -430,10 +604,22 @@ def check_drifter_speed(
 
 
 def filter_unsuitable_backgrounds(
-    reps,
-    background_err_lim=0.3,
-):
-    """Test and filter out obs with unsuitable background matches."""
+    reps: list,
+    background_err_lim: float = 0.3,
+) -> (np.ndarray, np.ndarray, bool, np.ndarray):
+    """Test and filter out obs with unsuitable background matches.
+
+    Parameters
+    ----------
+    reps : list
+        Marine reports in a list
+    background_err_lim: float
+        Background error limit
+
+    Returns
+    -------
+    (np.ndarray, np.ndarray, bool, np.ndarray)
+    """
     reps_ind = []
     sst_anom = []
     bgvar = []
@@ -494,9 +680,9 @@ def filter_unsuitable_backgrounds(
             sst_anom.append(rep.getvar("SST") - bg_val)
             bgvar.append(bgvar_val)
 
-    reps_ind = np.array(reps_ind)
-    sst_anom = np.array(sst_anom)
-    bgerr = np.sqrt(np.array(bgvar))
+    reps_ind = np.array(reps_ind)  # type: np.ndarray
+    sst_anom = np.array(sst_anom)  # type: np.ndarray
+    bgerr = np.sqrt(np.array(bgvar))  # type: np.ndarray
     return sst_anom, bgerr, bgvar_is_masked, reps_ind
 
 
@@ -510,7 +696,33 @@ def long_tail_check(
     long_err_std_n=1,
     background_err_lim=0.3,
 ):
-    """Do long tail check."""
+    """
+    Do long tail check.
+
+    Parameters
+    ----------
+    nrep: int
+        Number of reports
+    sst_anom: np.ndarray
+        Array containing the SST anomalies
+    bgerr: np.ndarray
+        Array containing background errors
+    drif_inter: float
+        Drifter inter-drifter
+    drif_intra: float
+        Drifter intra-drifter
+    long_win_len: int
+        Long window length
+    long_err_std_n: int
+        Long error standard number
+    background_err_lim: float
+        Background error limit
+
+    Returns
+    -------
+    (int, int)
+        Returns the index of where the start-tail stops and the end-tail starts
+    """
     start_tail_ind = -1  # keeps track of index where start tail stops
     end_tail_ind = nrep  # keeps track of index where end tail starts
     mid_win_ind = int((long_win_len - 1) / 2)
@@ -559,7 +771,36 @@ def short_tail_check(
     short_win_n_bad=1,
     background_err_lim=0.3,
 ):
-    """Do short tail check."""
+    """
+    Do short tail check.
+
+    Parameters
+    ----------
+    start_tail_ind: int
+        index of the last point in the start tail
+    end_tail_ind: int
+        index of the first point in the end tail
+    sst_anom: np.ndarray
+        Array of SST anomalies
+    bgerr: np.ndarray
+        Array of background errors
+    drif_inter: float
+        Drifter inter
+    drif_intra: float
+        Drifter intra
+    short_win_len: int
+        Length of short window
+    short_err_std_n: float
+        Short error standard number
+    short_win_n_bad: int
+        Short window number bad
+    background_err_lim: float
+        background error limit
+
+    Returns
+    -------
+
+    """
     # do short tail check on records that pass long tail check
     if start_tail_ind < end_tail_ind:  # whole record already failed long tail check
         first_pass_ind = start_tail_ind + 1  # first index passing long tail check
@@ -610,9 +851,13 @@ def short_tail_check(
     return start_tail_ind, end_tail_ind
 
 
-def aground_check(reps, smooth_win=41, min_win_period=8, max_win_period=10):
-    """
-    Check to see whether a drifter has run aground based on 1/100th degree precision positions.
+def aground_check(
+    reps: list,
+    smooth_win: int = 41,
+    min_win_period: int = 8,
+    max_win_period: Optional[int] = 10,
+):
+    """Check to see whether a drifter has run aground based on 1/100th degree precision positions.
     A flag 'drf_agr' is set for each input report: flag=1 for reports deemed aground, else flag=0.
 
     Positional errors introduced by lon/lat 'jitter' and data precision can be of order several km's.
@@ -632,16 +877,23 @@ def aground_check(reps, smooth_win=41, min_win_period=8, max_win_period=10):
     available within this range. If a drifter is deemed aground and subsequently starts moving (e.g. if a drifter
     has moved very slowly for a prolonged period) incorrectly flagged reports will be reinstated.
 
-    :param reps: a time-sorted list of drifter observations in format class`.Voyage`,
-      each report must have a valid longitude, latitude and time-difference
-    :param smooth_win: length of window (odd number) in datapoints used for smoothing lon/lat
-    :param min_win_period: minimum period of time in days over which position is assessed for no movement (see description)
-    :param max_win_period: maximum period of time in days over which position is assessed for no movement (this should be
+    Parameters
+    ----------
+    reps: Voyage
+        a time-sorted list of drifter observations in format class`.Voyage`, each report must have a valid
+        longitude, latitude and time-difference
+    smooth_win: int
+        length of window (odd number) in datapoints used for smoothing lon/lat
+    min_win_period: int
+        minimum period of time in days over which position is assessed for no movement (see description)
+    max_win_period: int or None
+         maximum period of time in days over which position is assessed for no movement (this should be
       greater than min_win_period and allow for erratic temporal sampling e.g. min_win_period+2 to allow for gaps of up to 2-days in sampling).
-    :type reps: a class`.Voyage`
-    :type smooth_win: integer
-    :type min_win_period: integer
-    :type max_win_period: integer, optional
+
+    Returns
+    -------
+    list
+        Returns list of quality controlled reports
     """
     try:
         smooth_win, min_win_period, max_win_period = assert_window_and_periods(
@@ -703,9 +955,10 @@ def aground_check(reps, smooth_win=41, min_win_period=8, max_win_period=10):
     return reps
 
 
-def new_aground_check(reps, smooth_win=41, min_win_period=8):
-    """
-    Check to see whether a drifter has run aground based on 1/100th degree precision positions.
+def new_aground_check(
+    reps: list, smooth_win: int = 41, min_win_period: int = 8
+) -> None:
+    """Check to see whether a drifter has run aground based on 1/100th degree precision positions.
     A flag 'drf_agr' is set for each input report: flag=1 for reports deemed aground, else flag=0.
 
     Positional errors introduced by lon/lat 'jitter' and data precision can be of order several km's.
@@ -725,14 +978,19 @@ def new_aground_check(reps, smooth_win=41, min_win_period=8):
     is less than 'min_win_period'. If a drifter is deemed aground and subsequently starts moving (e.g. if a drifter
     has followed a circular path) incorrectly flagged reports will be reinstated.
 
-    :param reps: a time-sorted list of drifter observations in format :class:`.Voyage`,
-      each report must have a valid longitude, latitude and time-difference
-    :param smooth_win: length of window (odd number) in datapoints used for smoothing lon/lat
-    :param min_win_period: minimum period of time in days over which position is assessed for no movement (see
-      description)
-    :type reps: a :class:`.Voyage`
-    :type smooth_win: integer
-    :type min_win_period: integer
+    Parameters
+    ----------
+    reps: list
+        a time-sorted list of drifter observations in format :class:`.Voyage`, each report must have a valid
+        longitude, latitude and time-difference
+    smooth_win: int
+        length of window (odd number) in datapoints used for smoothing lon/lat
+    min_win_period: int
+        minimum period of time in days over which position is assessed for no movement (see description)
+
+    Returns
+    -------
+    None
     """
     tolerance = sphere_distance(0, 0, 0.01, 0.01)
     # displacement resulting from 1/100th deg 'position-jitter' at equator (km)
@@ -858,10 +1116,13 @@ def new_aground_check(reps, smooth_win=41, min_win_period=8):
 
 
 def speed_check(
-    reps, speed_limit=2.5, min_win_period=0.8, max_win_period=1.0, iquam_parameters=None
-):
-    """
-    Check to see whether a drifter has been picked up by a ship (out of water) based on 1/100th degree
+    reps: list,
+    speed_limit: float = 2.5,
+    min_win_period: float = 0.8,
+    max_win_period: Optional[float] = 1.0,
+    iquam_parameters: Optional[dict]=None,
+) -> None:
+    """Check to see whether a drifter has been picked up by a ship (out of water) based on 1/100th degree
     precision positions. A flag 'drf_spd' is set for each input report: flag=1 for reports deemed picked up,
     else flag=0.
 
@@ -873,8 +1134,8 @@ def speed_check(
     can be of order several km's. Reports must be separated by a suitably long period of time (the 'min_win_period')
     to minimise the effect of these errors when calculating speed e.g. for reports separated by 24 hours
     errors of several cm/s would result which are two orders of magnitude less than a fast ocean current
-    which seems reasonable. Conversley, the period of time chosen should not be too long so as to resolve
-    short-lived burst of speed on manouvering ships. Larger positional errors may also trigger the check.
+    which seems reasonable. Conversely, the period of time chosen should not be too long so as to resolve
+    short-lived burst of speed on manoeuvring ships. Larger positional errors may also trigger the check.
     Because temporal sampling can be erratic the time period over which this assessment is made is specified
     as a range (bound by 'min_win_period' and 'max_win_period') - assessment uses the longest time separation
     available within this range.
@@ -885,20 +1146,26 @@ def speed_check(
     movement is detected it is likely a human operator can then better pick out the actual bad data. False
     fails caused by positional errors (particularly in fast ocean currents) will also need reinstating.
 
-    :param reps: a time-sorted list of drifter observations in format class`.Voyage`,
-      each report must have a valid longitude, latitude and time-difference
-    :param speed_limit: maximum allowable speed for an in situ drifting buoy (metres per second)
-    :param min_win_period: minimum period of time in days over which position is assessed for speed estimates (see
-      description)
-    :param max_win_period: maximum period of time in days over which position is assessed for speed estimates
-      (this should be greater than min_win_period and allow for some erratic temporal sampling e.g. min_win_period+0.2
-      to allow for gaps of up to 0.2-days in sampling).
-    :param iquam_parameters: Parameter dictionary for Voyage.iquam_track_check() function.
-    :type reps: a class`.Voyage`
-    :type speed_limit: float
-    :type min_win_period: float
-    :type max_win_period: float, optional
-    :type iquam_parameters: dictionary, optional
+    Parameters
+    ----------
+    reps: list
+        a time-sorted list of drifter observations in format class`.Voyage`, each report must have a valid
+        longitude, latitude and time-difference
+    speed_limit: float
+        maximum allowable speed for an in situ drifting buoy (metres per second)
+    min_win_period: float
+        minimum period of time in days over which position is assessed for speed estimates (see description)
+    max_win_period: float or None
+        maximum period of time in days over which position is assessed for speed estimates
+        (this should be greater than min_win_period and allow for some erratic temporal sampling e.g. min_win_period+0.2
+        to allow for gaps of up to 0.2-days in sampling).
+    iquam_parameters: dict or None
+        Parameter dictionary for Voyage.iquam_track_check() function.
+
+    Returns
+    -------
+    list
+        Returns list of quality controlled reports
     """
     try:
         speed_limit, min_win_period, max_win_period = assert_limit_periods(
@@ -981,8 +1248,7 @@ def sst_tail_check(
     drif_intra=1.00,
     background_err_lim=0.3,
 ):
-    """
-    Check to see whether there is erroneous sea surface temperature data at the beginning or end of a drifter record
+    """Check to see whether there is erroneous sea surface temperature data at the beginning or end of a drifter record
     (referred to as 'tails'). The flags 'drf_tail1' and 'drf_tail2' are set for each input report: flag=1 for reports
     with erroneous data, else flag=0, 'drf_tail1' is used for bad data at the beginning of a record, 'drf_tail2' is
     used for bad data at the end of a record.
@@ -1007,29 +1273,32 @@ def sst_tail_check(
     observations that are too biased or noisy as a whole. The short tail check looks for individual observations
     exceeding a noise limit within the window.
 
-    :param reps: a time-sorted list of drifter observations in format class`.Voyage`, each report must have a
+    Parameters
+    ----------
+    reps: list
+        a time-sorted list of drifter observations in format class`.Voyage`, each report must have a
       valid longitude, latitude and time and matched values for OSTIA, ICE and BGVAR in its extended data
-    :param long_win_len: length of window (in data-points) over which to make long tail-check (must be an odd number)
-    :param long_err_std_n: number of standard deviations of combined background and drifter bias error, beyond which
-      data fail bias check
-    :param short_win_len: length of window (in data-points) over which to make the short tail-check
-    :param short_err_std_n: number of standard deviations of combined background and drifter error, beyond which data
-      are deemed suspicious
-    :param short_win_n_bad: minimum number of suspicious data points required for failure of short check window
-    :param drif_inter: spread of biases expected in drifter data (standard deviation, degC)
-    :param drif_intra: maximum random measurement uncertainty reasonably expected in drifter data (standard deviation,
-      degC)
-    :param background_err_lim: background error variance beyond which the SST background is deemed unreliable (degC
-      squared)
-    :type reps: a class`.Voyage`
-    :type long_win_len: integer
-    :type long_err_std_n: float
-    :type short_win_len: integer
-    :type short_err_std_n: float
-    :type short_win_n_bad: integer
-    :type drif_inter: float
-    :type drif_intra: float
-    :type background_err_lim: float
+    long_win_len: int
+        length of window (in data-points) over which to make long tail-check (must be an odd number)
+    long_err_std_n: float
+        number of standard deviations of combined background and drifter bias error, beyond which data fail bias check
+    short_win_len: int
+        length of window (in data-points) over which to make the short tail-check
+    short_err_std_n: float
+        number of standard deviations of combined background and drifter error, beyond which data are deemed suspicious
+    short_win_n_bad: int
+        minimum number of suspicious data points required for failure of short check window
+    drif_inter: float
+        spread of biases expected in drifter data (standard deviation, degC)
+    drif_intra: float
+        maximum random measurement uncertainty reasonably expected in drifter data (standard deviation, degC)
+    background_err_limL float
+        background error variance beyond which the SST background is deemed unreliable (degC squared)
+
+    Returns
+    -------
+    list
+        List of quality controlled reports
     """
     try:
         (
@@ -1095,7 +1364,7 @@ def sst_tail_check(
         background_err_lim=background_err_lim,
     )
 
-    if start_tail_ind >= end_tail_ind:  # whole record failed tail checks, dont flag
+    if start_tail_ind >= end_tail_ind:  # whole record failed tail checks, don't flag
         start_tail_ind = -1
         end_tail_ind = nrep
     if not start_tail_ind == -1:
@@ -1119,8 +1388,7 @@ def sst_biased_noisy_check(
     n_bad=2,
     background_err_lim=0.3,
 ):
-    """
-    Check to see whether a drifter sea surface temperature record is unacceptably biased or noisy as a whole.
+    """Check to see whether a drifter sea surface temperature record is unacceptably biased or noisy as a whole.
 
     The check makes an assessment of the quality of data in a drifting buoy record by comparing to a background
     reference field. If the record is found to be unacceptably biased or noisy relative to the background all
@@ -1148,27 +1416,33 @@ def sst_biased_noisy_check(
     error as entirely correlated across a long-record, which maximises its possible impact on the bias assessment. In
     this case the histogram approach was used as the limit could be tuned to give better results.
 
-    :param reps: a time-sorted list of drifter observations in format from class`.Voyage`,
-      each report must have a valid longitude, latitude and time and matched values for OSTIA, ICE and BGVAR in its
-      extended data
-    :param n_eval: the minimum number of drifter observations required to be assessed by the long-record check
-    :param bias_lim: maximum allowable drifter-background bias, beyond which a record is considered biased (degC)
-    :param drif_intra: maximum random measurement uncertainty reasonably expected in drifter data (standard
-      deviation, degC)
-    :param drif_inter: spread of biases expected in drifter data (standard deviation, degC)
-    :param err_std_n: number of standard deviations of combined background and drifter error, beyond which
-      short-record data are deemed suspicious
-    :param n_bad: minimum number of suspicious data points required for failure of short-record check
-    :param background_err_lim: background error variance beyond which the SST background is deemed unreliable
-      (degC squared)
-    :type reps: a class`.Voyage`
-    :type n_eval: integer
-    :type bias_lim: float
-    :type drif_intra: float
-    :type drif_inter: float
-    :type err_std_n: float
-    :type n_bad: integer
-    :type background_err_lim: float
+    Parameters
+    ----------
+    reps: list
+        a time-sorted list of drifter observations in format from class`.Voyage`,
+        each report must have a valid longitude, latitude and time and matched values for OSTIA, ICE and BGVAR in its
+        extended data
+    n_eval : int
+        the minimum number of drifter observations required to be assessed by the long-record check
+    bias_lim: float
+        maximum allowable drifter-background bias, beyond which a record is considered biased (degC)
+    drif_intra: float
+        maximum random measurement uncertainty reasonably expected in drifter data (standard
+        deviation, degC)
+    drif_inter: float
+        spread of biases expected in drifter data (standard deviation, degC)
+    err_std_n: float
+        number of standard deviations of combined background and drifter error, beyond which short-record data are
+        deemed suspicious
+    n_bad:int
+        minimum number of suspicious data points required for failure of short-record check
+    background_err_lim:float
+        background error variance beyond which the SST background is deemed unreliable (degC squared)
+
+    Returns
+    -------
+    list
+
     """
     try:
         (
@@ -1245,8 +1519,7 @@ def og_sst_tail_check(
     drif_intra=1.00,
     background_err_lim=0.3,
 ):
-    """
-    Check to see whether there is erroneous sea surface temperature data at the beginning or end of a drifter record
+    """Check to see whether there is erroneous sea surface temperature data at the beginning or end of a drifter record
     (referred to as 'tails'). The flags 'drf_tail1' and 'drf_tail2' are set for each input report: flag=1 for reports
     with erroneous data, else flag=0, 'drf_tail1' is used for bad data at the beginning of a record, 'drf_tail2' is
     used for bad data at the end of a record.
@@ -1271,31 +1544,36 @@ def og_sst_tail_check(
     observations that are too biased or noisy as a whole. The short tail check looks for individual observations
     exceeding a noise limit within the window.
 
-    :param reps: a time-sorted list of drifter observations in format :class:`.Voyage`, each report must have a
-      valid longitude, latitude and time and matched values for OSTIA, ICE and BGVAR in its extended data
-    :param long_win_len: length of window (in data-points) over which to make long tail-check (must be an odd number)
-    :param long_err_std_n: number of standard deviations of combined background and drifter bias error, beyond which
-      data fail bias check
-    :param short_win_len: length of window (in data-points) over which to make the short tail-check
-    :param short_err_std_n: number of standard deviations of combined background and drifter error, beyond which data
+    Parameters
+    ----------
+    reps: list
+        a time-sorted list of drifter observations in format :class:`.Voyage`, each report must have a
+        valid longitude, latitude and time and matched values for OSTIA, ICE and BGVAR in its extended data
+    long_win_len: int
+        length of window (in data-points) over which to make long tail-check (must be an odd number)
+    long_err_std_n: float
+        number of standard deviations of combined background and drifter bias error, beyond which
+        data fail bias check
+    short_win_len: int
+        length of window (in data-points) over which to make the short tail-check
+    short_err_std_n: float
+        number of standard deviations of combined background and drifter error, beyond which data
       are deemed suspicious
-    :param short_win_n_bad: minimum number of suspicious data points required for failure of short check window
-    :param drif_inter: spread of biases expected in drifter data (standard deviation, degC)
-    :param drif_intra: maximum random measurement uncertainty reasonably expected in drifter data (standard deviation,
-      degC)
-    :param background_err_lim: background error variance beyond which the SST background is deemed unreliable (degC
-      squared)
-    :type reps: a :class:`.Voyage`
-    :type long_win_len: integer
-    :type long_err_std_n: float
-    :type short_win_len: integer
-    :type short_err_std_n: float
-    :type short_win_n_bad: integer
-    :type drif_inter: float
-    :type drif_intra: float
-    :type background_err_lim: float
-    """
+    short_win_n_bad: int
+        minimum number of suspicious data points required for failure of short check window
+    drif_inter: float
+        spread of biases expected in drifter data (standard deviation, degC)
+    drif_intra: float
+        maximum random measurement uncertainty reasonably expected in drifter data (standard deviation,
+        degC)
+    background_err_lim: float
+        background error variance beyond which the SST background is deemed unreliable (degC
+        squared)
 
+    Returns
+    -------
+    list
+    """
     try:
         long_win_len = int(long_win_len)
         long_err_std_n = float(long_err_std_n)
@@ -1498,8 +1776,7 @@ def og_sst_biased_noisy_check(
     n_bad=2,
     background_err_lim=0.3,
 ):
-    """
-    Check to see whether a drifter sea surface temperature record is unacceptably biased or noisy as a whole.
+    """Check to see whether a drifter sea surface temperature record is unacceptably biased or noisy as a whole.
 
     The check makes an assessment of the quality of data in a drifting buoy record by comparing to a background
     reference field. If the record is found to be unacceptably biased or noisy relative to the background all
@@ -1527,29 +1804,33 @@ def og_sst_biased_noisy_check(
     error as entirely correlated across a long-record, which maximises its possible impact on the bias assessment. In
     this case the histogram approach was used as the limit could be tuned to give better results.
 
-    :param reps: a time-sorted list of drifter observations in format from :class:`.Voyage`,
+    Parameters
+    ----------
+    reps: list
+        a time-sorted list of drifter observations in format from :class:`.Voyage`,
       each report must have a valid longitude, latitude and time and matched values for OSTIA, ICE and BGVAR in its
       extended data
-    :param n_eval: the minimum number of drifter observations required to be assessed by the long-record check
-    :param bias_lim: maximum allowable drifter-background bias, beyond which a record is considered biased (degC)
-    :param drif_intra: maximum random measurement uncertainty reasonably expected in drifter data (standard
-      deviation, degC)
-    :param drif_inter: spread of biases expected in drifter data (standard deviation, degC)
-    :param err_std_n: number of standard deviations of combined background and drifter error, beyond which
-      short-record data are deemed suspicious
-    :param n_bad: minimum number of suspicious data points required for failure of short-record check
-    :param background_err_lim: background error variance beyond which the SST background is deemed unreliable
-      (degC squared)
-    :type reps: a :class:`.Voyage`
-    :type n_eval: integer
-    :type bias_lim: float
-    :type drif_intra: float
-    :type drif_inter: float
-    :type err_std_n: float
-    :type n_bad: integer
-    :type background_err_lim: float
-    """
+    n_eval: int
+        the minimum number of drifter observations required to be assessed by the long-record check
+    bias_lim: float
+        maximum allowable drifter-background bias, beyond which a record is considered biased (degC)
+    drif_intra: float
+        maximum random measurement uncertainty reasonably expected in drifter data (standard
+        deviation, degC)
+    drif_inter: float
+        spread of biases expected in drifter data (standard deviation, degC)
+    err_std_n: float
+        number of standard deviations of combined background and drifter error, beyond which
+        short-record data are deemed suspicious
+    n_bad: int
+        minimum number of suspicious data points required for failure of short-record check
+    background_err_lim: float
+        background error variance beyond which the SST background is deemed unreliable (degC squared)
 
+    Returns
+    -------
+    list
+    """
     try:
         n_eval = int(n_eval)
         bias_lim = float(bias_lim)
