@@ -7,6 +7,7 @@ from cdm_reader_mapper import DataBundle, read_tables
 from cdm_reader_mapper.common.getting_files import load_file
 
 import glamod_marine_processing.qc_suite.modules.qc as qc
+from glamod_marine_processing.qc_suite.modules.external_clim import Climatology
 from glamod_marine_processing.qc_suite.modules.icoads_identify import (
     is_buoy,
     is_drifter,
@@ -69,6 +70,17 @@ def testdata():
         else:
             db_table.data["observation_value"] = db_table["observation_value"].astype(
                 float
+            )
+            db_table.data["latitude"] = db_table["latitude"].astype(float)
+            db_table.data["longitude"] = db_table["longitude"].astype(float)
+            db_table.data["date_time"] = pd.to_datetime(
+                db_table["date_time"],
+                format="%Y-%m-%d %H:%M:%S",
+                errors="coerce",
+            )
+        if table == "observations-slp":
+            db_table.data["observation_value"] = (
+                db_table.data["observation_value"] / 100
             )
 
         data_dict[table] = db_table
@@ -406,46 +418,40 @@ def test_do_air_temperature_climatology_plus_stdev_check(testdata):
 
 def test_do_slp_climatology_plus_stdev_plus_lowbar_check(testdata, climdata):
     db_ = testdata["observations-slp"].copy()
-    db_.data["climatology"] = [
-        1013.25,
-        1013.75,
-        1014.00,
-        1013.25,
-        1013.75,
-        1014.00,
-        1013.25,
-        1013.75,
-        1014.00,
-        1013.25,
-        1013.75,
-        1014.00,
-        1013.25,
-    ]
+    climatology = Climatology.open_netcdf_file(
+        climdata["SLP"]["mean"], "slp", obs_name="SLP", statistics="mean"
+    )
+    stdev = Climatology.open_netcdf_file(
+        climdata["SLP"]["stdev"], "slp", obs_name="SLP", statistics="stdev"
+    )
     results = db_.apply(
         lambda row: do_climatology_plus_stdev_plus_lowbar_check(
             value=row["observation_value"],
-            climatology=row["climatology"],
-            stdev=1.0,
+            climatology=climatology,
+            stdev=stdev,
             limit=3.0,
             lowbar=10.0,
+            lat=row["latitude"],
+            lon=row["longitude"],
+            date=row["date_time"],
         ),
         axis=1,
     )
     expected = pd.Series(
         [
             qc.failed,
-            qc.failed,
             qc.passed,
             qc.failed,
             qc.passed,
             qc.failed,
-            qc.failed,
-            qc.failed,
-            qc.failed,
-            qc.failed,
-            qc.failed,
-            qc.failed,
-            qc.failed,
+            qc.passed,
+            qc.passed,
+            qc.passed,
+            qc.passed,
+            qc.passed,
+            qc.passed,
+            qc.passed,
+            qc.passed,
         ]
     )
     pd.testing.assert_series_equal(results, expected)
