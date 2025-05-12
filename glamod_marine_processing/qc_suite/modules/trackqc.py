@@ -188,7 +188,7 @@ def trim_std(inarr: list, trim: int) -> float:
 
 
 def assert_window_and_periods(
-    smooth_win: int = 1, min_win_period: int = 1, max_win_period: Optional[int] = None
+    smooth_win: int = 1, min_win_period: int = 1, max_win_period: int | None = None
 ) -> (int, int, int | None):
     """Assert smooth window and window periods. Ensures that the three variables are of the correct
     type and are valid for processing.
@@ -224,8 +224,8 @@ def assert_window_and_periods(
 def assert_limit_periods(
     speed_limit: float = 2.5,
     min_win_period: float = 1,
-    max_win_period: Optional[float] = None,
-) -> (float, float, Optional[float]):
+    max_win_period: float | None = None,
+) -> (float, float, float | None):
     """Assert speed limit and window periods. Ensure variables are correct type and valid choices.
 
     Parameters
@@ -457,7 +457,7 @@ def check_drifter_aground(
     lat_smooth: np.ndarray = np.array([np.nan]),
     hrs_smooth: np.ndarray = np.array([np.nan]),
     min_win_period: int = 1,
-    max_win_period: Optional[None] = None,
+    max_win_period: None | None = None,
 ) -> (bool, int):
     """Check whether drifter has run aground.
 
@@ -526,8 +526,8 @@ def check_drifter_speed(
     hrs: np.ndarray = np.array([np.nan]),
     speed_limit: float = 2.5,
     min_win_period: int = 1,
-    max_win_period: Optional[int] = None,
-    iquam_track_ship: Optional[list] = None,
+    max_win_period: int | None = None,
+    iquam_track_ship: list | None = None,
 ) -> list:
     """Check whether drifter is moving too fast and flag any occurrences.
 
@@ -855,7 +855,7 @@ def aground_check(
     reps: list,
     smooth_win: int = 41,
     min_win_period: int = 8,
-    max_win_period: Optional[int] = 10,
+    max_win_period: int | None = 10,
 ):
     """Check to see whether a drifter has run aground based on 1/100th degree precision positions.
     A flag 'drf_agr' is set for each input report: flag=1 for reports deemed aground, else flag=0.
