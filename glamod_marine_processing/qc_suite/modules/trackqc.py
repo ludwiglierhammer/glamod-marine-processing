@@ -467,7 +467,7 @@ def check_drifter_aground(
     lat_smooth: np.ndarray = np.array([np.nan]),
     hrs_smooth: np.ndarray = np.array([np.nan]),
     min_win_period: int = 1,
-    max_win_period: Optional[float] = None,
+    max_win_period: float | None = None,
 ) -> (bool, int):
     """Check whether drifter has run aground.
 
@@ -1135,8 +1135,8 @@ def speed_check(
     reps: list,
     speed_limit: float = 2.5,
     min_win_period: float = 0.8,
-    max_win_period: Optional[float] = 1.0,
-    iquam_parameters: Optional[dict] = None,
+    max_win_period: float | None = 1.0,
+    iquam_parameters: dict | None = None,
 ) -> None:
     """Check to see whether a drifter has been picked up by a ship (out of water) based on 1/100th degree
     precision positions. A flag 'drf_spd' is set for each input report: flag=1 for reports deemed picked up,

@@ -59,11 +59,11 @@ from glamod_marine_processing.qc_suite.modules.qc import (
 )
 from glamod_marine_processing.qc_suite.modules.statistics import missing_mean
 from glamod_marine_processing.qc_suite.modules.time_control import (
-    split_date,
     day_in_year,
     month_match,
     pentad_to_month_day,
     season,
+    split_date,
     which_pentad,
     yesterday,
 )
