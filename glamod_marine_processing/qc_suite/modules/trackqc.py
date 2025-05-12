@@ -143,16 +143,16 @@ def trim_mean(inarr: list, trim: int) -> float:
         Trimmed mean
     """
 
-    arr = np.array(inarr)
+    arr = np.array(inarr)  # type: np.ndarray
     if trim == 0:
-        return np.mean(arr)
+        return float(np.mean(arr))
 
     length = len(arr)
     arr.sort()
 
     index1 = int(length / trim)
 
-    trim = np.mean(arr[index1 : length - index1])
+    trim = float(np.mean(arr[index1 : length - index1]))
 
     return trim
 
@@ -173,16 +173,16 @@ def trim_std(inarr: list, trim: int) -> float:
     float
         Returns trimmed standard deviation
     """
-    arr = np.array(inarr)
+    arr = np.array(inarr) # type: np.ndarray
     if trim == 0:
-        return np.std(arr)
+        return float(np.std(arr))
 
     length = len(arr)
     arr.sort()
 
     index1 = int(length / trim)
 
-    trim = np.std(arr[index1 : length - index1])
+    trim = float(np.std(arr[index1 : length - index1]))
 
     return trim
 
@@ -471,7 +471,7 @@ def check_drifter_aground(
         Array of smoothed hours
     min_win_period: int
         Minimum window period
-    max_win_period: int or None
+    max_win_period: float or None
         Maximum window period
 
     Returns
@@ -556,7 +556,7 @@ def check_drifter_speed(
         Returns list of quality controlled reports
     """
     nrep = len(reps)
-    index_arr = np.array(range(0, nrep))
+    index_arr = np.array(range(0, nrep))  # type: np.ndarray
     i = 0
     time_to_end = hrs[-1] - hrs[i]
     min_win_period_hours = min_win_period * 24.0
@@ -620,9 +620,9 @@ def filter_unsuitable_backgrounds(
     -------
     (np.ndarray, np.ndarray, bool, np.ndarray)
     """
-    reps_ind = []
-    sst_anom = []
-    bgvar = []
+    reps_ind = [] # type: list
+    sst_anom = [] # type: list
+    bgvar = [] # type: list
     bgvar_is_masked = False
     for ind, rep in enumerate(reps):
         try:
@@ -1015,11 +1015,11 @@ def new_aground_check(
         return
 
     # retrieve lon/lat/time_diff variables from marine reports
-    lon = np.empty(nrep)
+    lon = np.empty(nrep)  # type: np.ndarray
     lon[:] = np.nan
-    lat = np.empty(nrep)
+    lat = np.empty(nrep)  # type: np.ndarray
     lat[:] = np.nan
-    hrs = np.empty(nrep)
+    hrs = np.empty(nrep)  # type: np.ndarray
     hrs[:] = np.nan
     try:
         for ind, rep in enumerate(reps):
@@ -1042,11 +1042,11 @@ def new_aground_check(
 
     # create smoothed lon/lat timeseries
     nrep_smooth = nrep - smooth_win + 1  # length of series after smoothing
-    lon_smooth = np.empty(nrep_smooth)
+    lon_smooth = np.empty(nrep_smooth)  # type: np.ndarray
     lon_smooth[:] = np.nan
-    lat_smooth = np.empty(nrep_smooth)
+    lat_smooth = np.empty(nrep_smooth)  # type: np.ndarray
     lat_smooth[:] = np.nan
-    hrs_smooth = np.empty(nrep_smooth)
+    hrs_smooth = np.empty(nrep_smooth)  # type: np.ndarray
     hrs_smooth[:] = np.nan
     try:
         for i in range(0, nrep_smooth):
@@ -1120,7 +1120,7 @@ def speed_check(
     speed_limit: float = 2.5,
     min_win_period: float = 0.8,
     max_win_period: Optional[float] = 1.0,
-    iquam_parameters: Optional[dict]=None,
+    iquam_parameters: Optional[dict] = None,
 ) -> None:
     """Check to see whether a drifter has been picked up by a ship (out of water) based on 1/100th degree
     precision positions. A flag 'drf_spd' is set for each input report: flag=1 for reports deemed picked up,
@@ -1596,9 +1596,9 @@ def og_sst_tail_check(
         raise AssertionError("invalid input parameter: " + str(error))
 
     # test and filter out obs with unsuitable background matches
-    reps_ind = []
-    sst_anom = []
-    bgvar = []
+    reps_ind = [] # type: list
+    sst_anom = [] # type: list
+    bgvar = [] # type: list
     for ind, rep in enumerate(reps):
         try:
             bg_val = rep.getext("OSTIA")  # raises assertion error if not found
@@ -1658,9 +1658,12 @@ def og_sst_tail_check(
         return
 
     # prepare numpy arrays and variables needed for tail checks
-    reps_ind = np.array(reps_ind)  # indices of obs suitable for assessment
-    sst_anom = np.array(sst_anom)  # ob-background differences
-    bgerr = np.sqrt(np.array(bgvar))  # standard deviation of background error
+    # indices of obs suitable for assessment
+    reps_ind = np.array(reps_ind)  # type: np.ndarray
+    # ob-background differences
+    sst_anom = np.array(sst_anom)  # type: np.ndarray
+    # standard deviation of background error
+    bgerr = np.sqrt(np.array(bgvar))  # type: np.ndarray
     nrep = len(sst_anom)
     start_tail_ind = -1  # keeps track of index where start tail stops
     end_tail_ind = nrep  # keeps track of index where end tail starts
