@@ -2,10 +2,12 @@
 
 from __future__ import annotations
 
+from datetime import datetime
+
 import cf_xarray  # noqa
 import xarray as xr
 
-from .time_control import day_in_year, which_pentad
+from .time_control import day_in_year, split_date, which_pentad
 
 
 def open_xrdataset(
@@ -84,9 +86,9 @@ class Climatology:
 
     def __init__(self, data, obs_name, statistics):
         self.data = data
-        self.time_axis = data.cf.axes["T"][0]
-        self.lat_axis = data.cf.axes["Y"][0]
-        self.lon_axis = data.cf.axes["X"][0]
+        self.time_axis = data.cf.coordinates["time"][0]
+        self.lat_axis = data.cf.coordinates["latitude"][0]
+        self.lon_axis = data.cf.coordinates["longitude"][0]
         self.ntime = len(data[self.time_axis])
         assert self.ntime in [1, 73, 365], "weird shaped field"
         self.nlat = len(data[self.lat_axis])
@@ -106,6 +108,7 @@ class Climatology:
         self,
         lat: float | None = None,
         lon: float | None = None,
+        date: datetime | None = None,
         month: int | None = None,
         day: int | None = None,
     ) -> float:
@@ -117,6 +120,8 @@ class Climatology:
             Latitude of location to extract value from in degrees.
         lon: float or None
             Longitude of location to extract value from in degrees.
+        date: datetime-like, optional
+            Date for which the value is required.
         month: int or None
             Month for which the value is required.
         day: int or None
@@ -132,6 +137,12 @@ class Climatology:
         Use only exact matches for selecting time and nearest valid index value for selecting location.
         """
         data = self.data.copy()
+        if isinstance(date, datetime):
+            date_ = split_date(date)
+            if date_ is None:
+                return
+            month = date_["month"]
+            day = date_["day"]
         if month is not None or day is not None:
             tindex = self.get_tindex(month, day)
             data = data.isel(**{self.time_axis: tindex})
@@ -139,7 +150,7 @@ class Climatology:
             data = data.sel(**{self.lat_axis: lat}, method="nearest")
         if lon is not None:
             data = data.sel(**{self.lon_axis: lon}, method="nearest")
-        return data.values[0]
+        return data.values
 
     def get_tindex(self, month: int, day: int) -> int:
         """Get the time index of the input month and day.
