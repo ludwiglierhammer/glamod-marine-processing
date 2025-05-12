@@ -173,7 +173,7 @@ def trim_std(inarr: list, trim: int) -> float:
     float
         Returns trimmed standard deviation
     """
-    arr = np.array(inarr) # type: np.ndarray
+    arr = np.array(inarr)  # type: np.ndarray
     if trim == 0:
         return float(np.std(arr))
 
@@ -620,9 +620,9 @@ def filter_unsuitable_backgrounds(
     -------
     (np.ndarray, np.ndarray, bool, np.ndarray)
     """
-    reps_ind = [] # type: list
-    sst_anom = [] # type: list
-    bgvar = [] # type: list
+    reps_ind = []  # type: list
+    sst_anom = []  # type: list
+    bgvar = []  # type: list
     bgvar_is_masked = False
     for ind, rep in enumerate(reps):
         try:
@@ -1119,8 +1119,8 @@ def speed_check(
     reps: list,
     speed_limit: float = 2.5,
     min_win_period: float = 0.8,
-    max_win_period: Optional[float] = 1.0,
-    iquam_parameters: Optional[dict] = None,
+    max_win_period: float | None = 1.0,
+    iquam_parameters: dict | None = None,
 ) -> None:
     """Check to see whether a drifter has been picked up by a ship (out of water) based on 1/100th degree
     precision positions. A flag 'drf_spd' is set for each input report: flag=1 for reports deemed picked up,
@@ -1596,9 +1596,9 @@ def og_sst_tail_check(
         raise AssertionError("invalid input parameter: " + str(error))
 
     # test and filter out obs with unsuitable background matches
-    reps_ind = [] # type: list
-    sst_anom = [] # type: list
-    bgvar = [] # type: list
+    reps_ind = []  # type: list
+    sst_anom = []  # type: list
+    bgvar = []  # type: list
     for ind, rep in enumerate(reps):
         try:
             bg_val = rep.getext("OSTIA")  # raises assertion error if not found
