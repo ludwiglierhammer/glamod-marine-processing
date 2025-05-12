@@ -111,14 +111,9 @@ def track_day_test(
     if lon == 0:
         lon2 = 0.0001
 
-    azimuth, elevation, rta, hra, sid, dec = sunangle(
+    _, elevation, _, _, _, _ = sunangle(
         year2, day2, hour2, minute2, 0, 0, 0, lat2, lon2
     )
-    del azimuth
-    del rta
-    del hra
-    del sid
-    del dec
 
     if elevation > elevdlim:
         daytime = True
@@ -196,11 +191,11 @@ def assert_window_and_periods(
     Parameters
     ----------
     smooth_win: int
-        Smoothing window
+        length of window (odd number) in datapoints used for smoothing lon/lat
     min_win_period: int
-        Minimum window period
+        minimum period of time in days over which position is assessed
     max_win_period: int or None
-        Maximum window period
+        maximum period of time in days over which position is assessed
 
     Returns
     -------
@@ -231,11 +226,11 @@ def assert_limit_periods(
     Parameters
     ----------
     speed_limit: float
-        Speed limit
+        Maximum allowable speed for an in situ drifting buoy (metres per second)
     min_win_period: float
-        Minimum window period
+        Minimum period of time in days over which position is assessed
     max_win_period: float or None
-        Maximum window period
+        maximum period of time in days over which position is assessed
 
     Returns
     -------
@@ -271,18 +266,21 @@ def assert_drifters(
     Parameters
     ----------
     n_eval: int
+        The minimum number of drifter observations required to be assessed
     bias_lim: float
-        Bias limit
+        Maximum allowable drifter-background bias, beyond which a record is considered biased (degC)
     drif_intra: float
-        Intra drifter
+        Maximum random measurement uncertainty reasonably expected in drifter data (standard
+        deviation, degC)
     drif_inter: float
-        Inter drifter
+        Spread of biases expected in drifter data (standard deviation, degC)
     err_std_n: float
-        Error standard deviations
+        Number of standard deviations of combined background and drifter error, beyond which short-record data are
+        deemed suspicious
     n_bad: int
-        Number of bad
+        Minimum number of suspicious data points required for failure of short-record check
     background_err_lim: float
-        Background error limit
+        Background error variance beyond which the SST background is deemed unreliable (degC squared)
 
     Returns
     -------
@@ -329,13 +327,25 @@ def assert_window_drifters(
     Parameters
     ----------
     long_win_len: int
+        Length of window (in data-points) over which to make long tail-check (must be an odd number)
     long_err_std_n: float
+        Number of standard deviations of combined background and drifter bias error, beyond which
+        data fail bias check
     short_win_len: int
+        Length of window (in data-points) over which to make the short tail-check
     short_err_std_n: float
+        Number of standard deviations of combined background and drifter error, beyond which data
+        are deemed suspicious
     short_win_n_bad: int
+        Minimum number of suspicious data points required for failure of short check window
     drif_inter: float
+        Spread of biases expected in drifter data (standard deviation, degC)
     drif_intra: float
+        Maximum random measurement uncertainty reasonably expected in drifter data (standard deviation,
+        degC)
     background_err_lim: float
+        Background error variance beyond which the SST background is deemed unreliable (degC
+        squared)
 
     Returns
     -------
@@ -371,7 +381,7 @@ def assert_window_drifters(
     )
 
 
-def retrieve_lon_lat_hrs(reps):
+def retrieve_lon_lat_hrs(reps: list):
     """Given a set of MarineReports, extract the longitudes, latitudes and time. Time is expressed as hours since the
     first observation in the set.
 
@@ -457,7 +467,7 @@ def check_drifter_aground(
     lat_smooth: np.ndarray = np.array([np.nan]),
     hrs_smooth: np.ndarray = np.array([np.nan]),
     min_win_period: int = 1,
-    max_win_period: None | None = None,
+    max_win_period: Optional[float] = None,
 ) -> (bool, int):
     """Check whether drifter has run aground.
 
@@ -542,11 +552,11 @@ def check_drifter_speed(
     hrs: np.ndarray
         Array containing hours
     speed_limit: float
-        Speed limit for QC check
+        Maximum allowable speed for an in situ drifting buoy (metres per second)
     min_win_period: int
-        Minimum window period
+        Minimum period of time in days over which position is assessed
     max_win_period: int or None
-        Maximum window period
+        maximum period of time in days over which position is assessed
     iquam_track_ship: list or None
         Indicator
 
@@ -614,7 +624,7 @@ def filter_unsuitable_backgrounds(
     reps : list
         Marine reports in a list
     background_err_lim: float
-        Background error limit
+        Background error variance beyond which the SST background is deemed unreliable (degC squared)
 
     Returns
     -------
@@ -687,15 +697,15 @@ def filter_unsuitable_backgrounds(
 
 
 def long_tail_check(
-    nrep,
-    sst_anom=np.array([np.nan]),
-    bgerr=np.array([np.nan]),
-    drif_inter=0.29,
-    drif_intra=1.00,
-    long_win_len=1,
-    long_err_std_n=1,
-    background_err_lim=0.3,
-):
+    nrep: int,
+    sst_anom: np.ndarray = np.array([np.nan]),
+    bgerr: np.ndarray = np.array([np.nan]),
+    drif_inter: float = 0.29,
+    drif_intra: float = 1.00,
+    long_win_len: int = 1,
+    long_err_std_n: int = 1,
+    background_err_lim: float = 0.3,
+) -> (int, int):
     """
     Do long tail check.
 
@@ -708,15 +718,18 @@ def long_tail_check(
     bgerr: np.ndarray
         Array containing background errors
     drif_inter: float
-        Drifter inter-drifter
+        Spread of biases expected in drifter data (standard deviation, degC)
     drif_intra: float
-        Drifter intra-drifter
+        Maximum random measurement uncertainty reasonably expected in drifter data (standard deviation,
+        degC)
     long_win_len: int
-        Long window length
+        Length of window (in data-points) over which to make long tail-check (must be an odd number)
     long_err_std_n: int
-        Long error standard number
+        Number of standard deviations of combined background and drifter bias error, beyond which
+        data fail bias check
     background_err_lim: float
-        Background error limit
+        Background error variance beyond which the SST background is deemed unreliable (degC
+        squared)
 
     Returns
     -------
@@ -760,17 +773,17 @@ def long_tail_check(
 
 
 def short_tail_check(
-    start_tail_ind,
-    end_tail_ind,
-    sst_anom=np.array([np.nan]),
-    bgerr=np.array([np.nan]),
-    drif_inter=0.29,
-    drif_intra=1.00,
-    short_win_len=1,
-    short_err_std_n=3.0,
-    short_win_n_bad=1,
-    background_err_lim=0.3,
-):
+    start_tail_ind: int,
+    end_tail_ind: int,
+    sst_anom: np.ndarray = np.array([np.nan]),
+    bgerr: np.ndarray = np.array([np.nan]),
+    drif_inter: float = 0.29,
+    drif_intra: float = 1.00,
+    short_win_len: int = 1,
+    short_err_std_n: float = 3.0,
+    short_win_n_bad: int = 1,
+    background_err_lim: float = 0.3,
+) -> (int, int):
     """
     Do short tail check.
 
@@ -785,21 +798,24 @@ def short_tail_check(
     bgerr: np.ndarray
         Array of background errors
     drif_inter: float
-        Drifter inter
+        spread of biases expected in drifter data (standard deviation, degC)
     drif_intra: float
-        Drifter intra
+        Maximum random measurement uncertainty reasonably expected in drifter data (standard deviation,
+        degC)
     short_win_len: int
-        Length of short window
+        Length of window (in data-points) over which to make the short tail-check
     short_err_std_n: float
-        Short error standard number
+        Number of standard deviations of combined background and drifter error, beyond which data
+        are deemed suspicious
     short_win_n_bad: int
-        Short window number bad
+        Minimum number of suspicious data points required for failure of short check window
     background_err_lim: float
-        background error limit
+        Background error variance beyond which the SST background is deemed unreliable (degC
+        squared)
 
     Returns
     -------
-
+    (int, int)
     """
     # do short tail check on records that pass long tail check
     if start_tail_ind < end_tail_ind:  # whole record already failed long tail check
@@ -1119,8 +1135,8 @@ def speed_check(
     reps: list,
     speed_limit: float = 2.5,
     min_win_period: float = 0.8,
-    max_win_period: float | None = 1.0,
-    iquam_parameters: dict | None = None,
+    max_win_period: Optional[float] = 1.0,
+    iquam_parameters: Optional[dict] = None,
 ) -> None:
     """Check to see whether a drifter has been picked up by a ship (out of water) based on 1/100th degree
     precision positions. A flag 'drf_spd' is set for each input report: flag=1 for reports deemed picked up,
@@ -1547,27 +1563,27 @@ def og_sst_tail_check(
     Parameters
     ----------
     reps: list
-        a time-sorted list of drifter observations in format :class:`.Voyage`, each report must have a
+        A time-sorted list of drifter observations in format :class:`.Voyage`, each report must have a
         valid longitude, latitude and time and matched values for OSTIA, ICE and BGVAR in its extended data
     long_win_len: int
-        length of window (in data-points) over which to make long tail-check (must be an odd number)
+        Length of window (in data-points) over which to make long tail-check (must be an odd number)
     long_err_std_n: float
-        number of standard deviations of combined background and drifter bias error, beyond which
+        Number of standard deviations of combined background and drifter bias error, beyond which
         data fail bias check
     short_win_len: int
-        length of window (in data-points) over which to make the short tail-check
+        Length of window (in data-points) over which to make the short tail-check
     short_err_std_n: float
-        number of standard deviations of combined background and drifter error, beyond which data
-      are deemed suspicious
+        Number of standard deviations of combined background and drifter error, beyond which data
+        are deemed suspicious
     short_win_n_bad: int
-        minimum number of suspicious data points required for failure of short check window
+        Minimum number of suspicious data points required for failure of short check window
     drif_inter: float
         spread of biases expected in drifter data (standard deviation, degC)
     drif_intra: float
-        maximum random measurement uncertainty reasonably expected in drifter data (standard deviation,
+        Maximum random measurement uncertainty reasonably expected in drifter data (standard deviation,
         degC)
     background_err_lim: float
-        background error variance beyond which the SST background is deemed unreliable (degC
+        Background error variance beyond which the SST background is deemed unreliable (degC
         squared)
 
     Returns

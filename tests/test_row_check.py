@@ -31,7 +31,6 @@ from glamod_marine_processing.qc_suite.modules.icoads_identify import (
 )
 from glamod_marine_processing.qc_suite.modules.interpolation import bilinear_interp
 from glamod_marine_processing.qc_suite.modules.next_level_qc import (
-    _split_date,
     do_anomaly_check,
     do_climatology_plus_stdev_check,
     do_climatology_plus_stdev_plus_lowbar_check,
@@ -60,6 +59,7 @@ from glamod_marine_processing.qc_suite.modules.qc import (
 )
 from glamod_marine_processing.qc_suite.modules.statistics import missing_mean
 from glamod_marine_processing.qc_suite.modules.time_control import (
+    split_date,
     day_in_year,
     month_match,
     pentad_to_month_day,
@@ -76,7 +76,7 @@ from glamod_marine_processing.qc_suite.modules.time_control import (
     ],
 )
 def test_split_date(date, expected_year, expected_month, expected_day, expected_hour):
-    result = _split_date(date)
+    result = split_date(date)
     expected = {
         "year": expected_year,
         "month": expected_month,
