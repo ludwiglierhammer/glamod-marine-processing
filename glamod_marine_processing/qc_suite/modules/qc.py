@@ -44,7 +44,7 @@ def climatology_plus_stdev_with_lowbar_check(
     ------
     ValueError
         When limit is zero or negative
-    """
+    """   
     if limit <= 0:
         return untestable
 

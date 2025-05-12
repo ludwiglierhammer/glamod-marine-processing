@@ -6,6 +6,7 @@ import math
 from datetime import datetime
 
 from .astronomical_geometry import sunangle
+from .external_clim import Climatology
 from .qc import (
     climatology_check,
     climatology_plus_stdev_check,
@@ -17,18 +18,7 @@ from .qc import (
     sst_freeze_check,
     untestable,
 )
-from .time_control import dayinyear, get_month_lengths
-
-
-def _split_date(date):
-    try:
-        year = int(date.year)
-        month = int(date.month)
-        day = int(date.day)
-        hour = date.hour + date.minute / 60.0 + date.second / 3600.0
-    except ValueError:
-        return None
-    return {"year": year, "month": month, "day": day, "hour": hour}
+from .time_control import dayinyear, get_month_lengths, split_date
 
 
 def do_position_check(latitude: float, longitude: float) -> int:
@@ -92,7 +82,7 @@ def do_date_check(
     # maybe return qc.date_check(latitude, longitude)
     # This should already be done while mapping to the CDM.
     if isinstance(date, datetime):
-        date_ = _split_date(date)
+        date_ = split_date(date)
         if date_ is None:
             return untestable
         year = date_["year"]
@@ -136,7 +126,7 @@ def do_time_check(date: datetime | None = None, hour: float | None = None) -> in
         Return 1 if hour is invalid, 0 otherwise
     """
     if isinstance(date, datetime):
-        date_ = _split_date(date)
+        date_ = split_date(date)
         if date_ is None:
             return failed
         hour = date_["hour"]
@@ -191,7 +181,7 @@ def do_day_check(
         Set to 0 if it is day, 1 otherwise.
     """
     if isinstance(date, datetime):
-        date_ = _split_date(date)
+        date_ = split_date(date)
         if date_ is None:
             return failed
         year = date_["year"]
@@ -282,8 +272,8 @@ def do_anomaly_check(value: float, climatology: float, maximum_anomaly: float) -
     ----------
     value : float
         Value to be checked
-    climatology: float
-        Reference climatological value
+    climatology: float or str
+        Reference climatological value.
     maximum_anomaly : float
         Maximum_anomaly allowed anomaly
 
@@ -375,10 +365,11 @@ def do_climatology_plus_stdev_check(
 
 def do_climatology_plus_stdev_plus_lowbar_check(
     value: float,
-    climatology: float,
-    stdev: float,
+    climatology: float | Climatology,
+    stdev: float | Climatology,
     limit: float,
     lowbar: float,
+    **kwargs,
 ) -> int:
     """Check that standardised value anomaly is within standard deviation-based limits but with a minimum width.
 
@@ -390,10 +381,10 @@ def do_climatology_plus_stdev_plus_lowbar_check(
 
     Parameters
     ----------
-    value : float
-        Value to be checked.
-    climatology : float
-        Climatological normal.
+    value : float or Climatology
+        Value or climatology to be checked.
+    climatology : float or str
+        Climatological normal. This could be a float value or a data file to be opened.
     stdev : float
         Climatological standard deviation.
     limit : float
@@ -406,6 +397,11 @@ def do_climatology_plus_stdev_plus_lowbar_check(
     int
         Returns 1 if standardised value anomaly is outside specified range, 0 otherwise.
     """
+    if isinstance(climatology, Climatology):
+        climatology = climatology.get_value(**kwargs)
+    if isinstance(stdev, Climatology):
+        stdev = stdev.get_value(**kwargs)
+
     return climatology_plus_stdev_with_lowbar_check(
         value,
         climatology,
