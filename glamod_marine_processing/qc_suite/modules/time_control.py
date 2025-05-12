@@ -9,6 +9,29 @@ from datetime import datetime, timedelta
 import numpy as np
 
 
+def split_date(date):
+    """Split datetime date into year, month, day and hour.
+
+    Parameters
+    ----------
+    date: datetime
+        Date to split
+
+    Returns
+    -------
+    dict
+        Dictionary containing year, month, day and hour.
+    """
+    try:
+        year = int(date.year)
+        month = int(date.month)
+        day = int(date.day)
+        hour = date.hour + date.minute / 60.0 + date.second / 3600.0
+    except ValueError:
+        return None
+    return {"year": year, "month": month, "day": day, "hour": hour}
+
+
 def month_match(
     y1: int,
     m1: int,
