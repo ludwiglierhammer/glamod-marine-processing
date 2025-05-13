@@ -117,7 +117,7 @@ def do_time_check(date: datetime | None = None, hour: float | None = None) -> in
     ----------
     date: datetime-like, optional
         Date of report
-    hour : float
+    hour : float, optional
         hour of the time to be checked
 
     Returns
@@ -167,11 +167,11 @@ def do_day_check(
         Day of report
     hour : float, optional
         Hour of report with minutes as decimal part of hour
-    latitude : float
+    latitude : float, optional
         Latitude of report in degrees
-    longitude : float
+    longitude : float, optional
         Longitude of report in degrees
-    time_since_sun_above_horizon : float
+    time_since_sun_above_horizon : float, default: 1.0
         Maximum time sun can have been above horizon (or below) to still count as night. Original QC test had this set
         to 1.0 i.e. it was night between one hour after sundown and one hour after sunrise.
 
@@ -291,7 +291,7 @@ def do_no_normal_check(climatology: float | None) -> int:
 
     Parameters
     ----------
-    climatology : float or None
+    climatology : float, optional
         Climatology value
 
     Returns
@@ -468,9 +468,9 @@ def do_wind_consistency_check(
 
     Parameters
     ----------
-    wind_speed : float
+    wind_speed : float, optional
         Wind speed
-    wind_direction : int
+    wind_direction : int, optional
         Wind direction
 
     Returns

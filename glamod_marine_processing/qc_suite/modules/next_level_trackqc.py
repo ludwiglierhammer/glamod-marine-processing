@@ -9,8 +9,8 @@ and speed checks have also been added.
 
 These functions perform tracking QC checks on a class`.Voyage`
 
-References:
-
+References
+----------
 Atkinson, C.P., N.A. Rayner, J. Roberts-Jones, R.O. Smith, 2013:
 Assessing the quality of sea surface temperature observations from
 drifting buoys and ships on a platform-by-platform basis (doi:10.1002/jgrc.20257).
@@ -59,7 +59,7 @@ def track_day_test(
         Latitude in degrees
     lon : float
         Longitude in degrees
-    elevdlim : float
+    elevdlim : float, default: -2.5
         Elevation day/night delimiter in degrees above horizon
 
     Returns
@@ -178,22 +178,22 @@ def trim_std(inarr: list, trim: float) -> float:
 
 def assert_window_and_periods(
     smooth_win=1, min_win_period=1, max_win_period=None
-) -> (int, int, int):
+) -> tuple[int, int, int]:
     """Assert smooth window and window periods
 
     Parameters
     ----------
-    smooth_win: int
+    smooth_win: int, default: 1
         Smoothing window, must be >= 1 and odd, defaults to 1
-    min_win_period : int
+    min_win_period : int, default: 1
         maximum window period must be >=1 and less than max_win_period, defaults to 1
-    max_win_period
+    max_win_period, default: optional
         minimum window period must be >=1 and greater than min_win_period, defaults to None
 
     Returns
     -------
-    int, int, int
-        Return the smoothing window, minimum window period and maximum window period
+    tuple of int
+        A tuple of three ints representing the smoothing window, minimum window period and maximum window period
     """
     smooth_win = int(smooth_win)
     assert smooth_win >= 1, "smooth_win must be >= 1"
@@ -213,22 +213,22 @@ def assert_limit_periods(
     speed_limit: float = 2.5,
     min_win_period: float = 1,
     max_win_period: float = None,
-) -> (float, float, float):
+) -> tuple[float, float, float]:
     """Assert speed limit and window periods.
 
     Parameters
     ----------
-    speed_limit : float
+    speed_limit : float, default: 2.5
         Speed limit
-    min_win_period : float
+    min_win_period : float, default: 1
         Minimum window period
-    max_win_period : float
+    max_win_period : float, optional
         Maximum window period
 
     Returns
     -------
-    float, float, float
-        Returns speed_limit, min_win_period, max_win_period
+    tuple of float
+        A tuple of three floats representing speed_limit, min_win_period, max_win_period
     """
     """"""
     speed_limit = float(speed_limit)

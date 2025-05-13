@@ -112,7 +112,7 @@ def spike_check(df: pd.DataFrame) -> pd.DataFrame:
 
 def row_difference(
     later_row: pd.DataFrame, earlier_row: pd.DataFrame
-) -> (float, float, float, float):
+) -> tuple[float, float, float, float]:
     """Subtracting one row from another to return the speed, distance, course and the time difference between the
     two rows. Originally this was coded as a subtraction: later_row minus earlier_row.
 
@@ -125,8 +125,8 @@ def row_difference(
 
     Returns
     -------
-    (float, float, float, float)
-        Returns the speed, distance, course and time difference between the two rows
+    tuple of float
+        A tuple of four floats representing the speed, distance, course and time difference between the two rows
     """
     distance = sg.sphere_distance(
         later_row.lat, later_row.lon, earlier_row.lat, earlier_row.lon
@@ -202,7 +202,7 @@ def calculate_speed_course_distance_time_difference(df: pd.DataFrame) -> pd.Data
     return df
 
 
-def calc_alternate_speeds(df):
+def calc_alternate_speeds(df: pd.DataFrame) -> pd.DataFrame:
     """Calculates speeds, courses, distances and time differences using alternating reports.
 
     Parameters
@@ -321,7 +321,7 @@ def forward_discrepancy(df: pd.DataFrame) -> list:
     return distance_from_est_location
 
 
-def backward_discrepancy(df) -> list:
+def backward_discrepancy(df: pd.DataFrame) -> list:
     """Calculate what the distance is between the projected position (based on the reported speed and
     heading at the current and previous time steps) and the actual position. The calculation proceeds from the
     final, later observation to the first (in contrast to distr1 which runs in time order)

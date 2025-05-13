@@ -2,10 +2,6 @@
 
 from __future__ import annotations
 
-import math
-
-import numpy as np
-
 passed = 0
 failed = 1
 untestable = 2
@@ -48,10 +44,11 @@ def climatology_plus_stdev_with_lowbar_check(
     if limit <= 0:
         return untestable
 
-    if value is None or climate_normal is None or standard_deviation is None:
-        return failed
-
-    if np.isnan(value) or np.isnan(climate_normal) or np.isnan(standard_deviation):
+    if (
+        isvalid(value) == failed
+        or isvalid(climate_normal)
+        or isvalid(standard_deviation)
+    ):
         return failed
 
     if (
@@ -64,10 +61,10 @@ def climatology_plus_stdev_with_lowbar_check(
 
 
 def climatology_plus_stdev_check(
-    value: float | None,
-    climate_normal: float | None,
-    standard_deviation: float | None,
-    stdev_limits: list[float, float],
+    value: float,
+    climate_normal: float,
+    standard_deviation: float,
+    stdev_limits: tuple[float, float],
     limit: float,
 ) -> int:
     """
@@ -78,14 +75,14 @@ def climatology_plus_stdev_check(
 
     Parameters
     ----------
-    value : float or None
+    value : float
         Value to be compared to climatology
-    climate_normal : float or None
+    climate_normal : float
         The climatological average to which the value will be compared
-    standard_deviation : float or None
+    standard_deviation : float
         The climatological standard deviation which will be used to standardise the anomaly
-    stdev_limits : list[float, float]
-        Upper and lower limits for standard deviation used in check
+    stdev_limits : tuple of float
+        A tuple of two floats representing the upper and lower limits for standard deviation used in check
     limit : float
         The maximum allowed normalised anomaly
 
@@ -105,9 +102,9 @@ def climatology_plus_stdev_check(
         return untestable
 
     if (
-        isvalid(value) == 1
-        or isvalid(climate_normal) == 1
-        or isvalid(standard_deviation) == 1
+        isvalid(value) == failed
+        or isvalid(climate_normal) == failed
+        or isvalid(standard_deviation) == failed
     ):
         return failed
 
@@ -123,19 +120,17 @@ def climatology_plus_stdev_check(
     return passed
 
 
-def climatology_check(
-    value: float | None, climate_normal: float | None, limit: float = 8.0
-) -> int:
+def climatology_check(value: float, climate_normal: float, limit: float = 8.0) -> int:
     """Simple function to compare a value with a climatological average with some arbitrary limit on the difference.
     This may be the second simplest function I have ever written (see blacklist)
 
     Parameters
     ----------
-    value : float or None
+    value : float
         Value to be compared to climatology
-    climate_normal : float or None
+    climate_normal : float
         The climatological average to which the value will be compared
-    limit : float
+    limit : float, default: 8.0
         The maximum allowed difference between the two
 
     Returns
@@ -144,7 +139,11 @@ def climatology_check(
         Return 1 if the difference is outside the specified limit, 0 otherwise
     """
     # if value is None or climate_normal is None or limit is None:
-    if isvalid(value) == 1 or isvalid(climate_normal) == 1 or isvalid(limit) == 1:
+    if (
+        isvalid(value) == failed
+        or isvalid(climate_normal) == failed
+        or isvalid(limit) == failed
+    ):
         return failed
 
     if abs(value - climate_normal) > limit:
@@ -153,12 +152,12 @@ def climatology_check(
     return passed
 
 
-def isvalid(inval: float | None) -> int:
+def isvalid(inval: float) -> int:
     """Check if a value is numerically valid.
 
     Parameters
     ----------
-    inval : float or None
+    inval : float
         The input value to be tested
 
     Returns
@@ -166,17 +165,17 @@ def isvalid(inval: float | None) -> int:
     int
         Returns 1 if the input value is numerically invalid, 0 otherwise
     """
-    if inval is None or math.isnan(inval):
+    if isvalid(inval) == failed:
         return failed
     return passed
 
 
-def value_check(inval: float | None) -> int:
+def value_check(inval: float) -> int:
     """Check if a value is equal to None
 
     Parameters
     ----------
-    inval : float or None
+    inval : float
         The input value to be tested
 
     Returns
@@ -184,17 +183,17 @@ def value_check(inval: float | None) -> int:
     int
         Returns 1 if the input value is None, 0 otherwise.
     """
-    if inval is None:
+    if isvalid(inval) == failed:
         return failed
     return passed
 
 
-def no_normal_check(inclimav: float | None) -> int:
+def no_normal_check(inclimav: float) -> int:
     """Check if a climatological average is equal to None.
 
     Parameters
     ----------
-    inclimav: float or None
+    inclimav: float
         The input value
 
     Returns
@@ -202,20 +201,20 @@ def no_normal_check(inclimav: float | None) -> int:
     int
         Returns 1 if the input value is None, 0 otherwise.
     """
-    if inclimav is None:
+    if isvalid(inclimav) == failed:
         return failed
     return passed
 
 
-def hard_limit_check(val: float | None, limits: list) -> int:
+def hard_limit_check(val: float, limits: tuple[float, float]) -> int:
     """Check if a value is outside specified limits.
 
     Parameters
     ----------
-    val: float or None
+    val: float
         Value to be tested.
-    limits: list
-        Two membered list of lower and upper limit.
+    limits: tuple of float
+        A tuple of two floats representing the lower and upper limit.
 
     Returns
     -------
@@ -240,7 +239,7 @@ def hard_limit_check(val: float | None, limits: list) -> int:
 
 
 def sst_freeze_check(
-    insst: float | None,
+    insst: float,
     sst_uncertainty: float = 0.0,
     freezing_point: float = -1.80,
     n_sigma: float = 2.0,
@@ -258,13 +257,13 @@ def sst_freeze_check(
 
     Parameters
     ----------
-    insst : float or None
+    insst : float
         input SST to be checked
-    sst_uncertainty : float
+    sst_uncertainty : float, default: 0.0
         the uncertainty in the SST value, defaults to zero, defaults to 0.0
-    freezing_point : float
+    freezing_point : float, default: -1.80
         the freezing point of the water, defaults to -1.8C
-    n_sigma : float
+    n_sigma : float, default: 2.0
         number of sigma to use in the check, defaults to 2.0
 
     Returns

@@ -16,7 +16,9 @@ from .location_control import (
 from .time_control import day_in_year, get_month_lengths, which_pentad
 
 
-def get_hires_sst(lat: float, lon: float, month: int, day: int, hires_field) -> float:
+def get_hires_sst(
+    lat: float, lon: float, month: int, day: int, hires_field
+) -> float | None:
     """Get a value from a high resolution ie 0.25 degree daily SST field
 
     Parameters
@@ -68,7 +70,7 @@ def get_hires_sst(lat: float, lon: float, month: int, day: int, hires_field) -> 
 
 def get_sst_daily(
     lat: float, lon: float, month: int, day: int, sst: np.ndarray
-) -> int | float | None:
+) -> float | None:
     """Get SST from pentad climatology interpolated to day.
 
     Parameters
@@ -125,7 +127,7 @@ def get_sst_daily(
 
 def get_sst(
     lat: float, lon: float, month: int, day: int, sst: np.ndarray
-) -> int | float | None:
+) -> float | None:
     """
     when given an array (sst) of appropriate type, extracts the value associated with that pentad,
     latitude and longitude.
@@ -251,7 +253,7 @@ def get_clim(
         return
 
 
-def get_sst_single_field(lat: float, lon: float, sst: np.ndarray) -> int | float | None:
+def get_sst_single_field(lat: float, lon: float, sst: np.ndarray) -> float | None:
     """When given an array (sst) of appropriate type, extracts the value associated with that pentad, latitude and longitude.
 
     The structure of the SST array has to be quite specific it assumes a grid that is 360 x 180 x 73
@@ -302,7 +304,7 @@ def get_sst_single_field(lat: float, lon: float, sst: np.ndarray) -> int | float
 
 def get_clim_interpolated(
     lat: float, lon: float, month: int, day: int, clim: np.ndarray
-) -> int | float:
+) -> float | None:
     """Get climatological interpolation.
 
     Parameters

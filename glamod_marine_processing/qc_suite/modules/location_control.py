@@ -11,7 +11,7 @@ def yindex_to_lat(yindex: int, res: float = 1.0) -> float:
     Parameters
     ----------
     yindex: int
-    res: float
+    res: float, default: 1.0
 
     Returns
     -------
@@ -31,7 +31,7 @@ def mds_lat_to_yindex(lat: float, res: float = 1.0) -> int:
     ----------
     lat: float
         Latitude of the point.
-    res: float
+    res: float, default: 1.0
         Resolution of grid in degrees.
 
     Returns
@@ -69,7 +69,7 @@ def lat_to_yindex(lat: float, res: float = 1.0) -> int:
     ----------
     lat: float
         Latitude of the point.
-    res: float
+    res: float, default: 1.0
         Resolution of the grid.
 
     Returns
@@ -105,7 +105,7 @@ def xindex_to_lon(xindex: int, res: float = 1.0) -> float:
     Parameters
     ----------
     xindex: int
-    res: float
+    res: float, default: 1.0
 
     Returns
     -------
@@ -125,7 +125,7 @@ def mds_lon_to_xindex(lon: float, res: float = 1.0) -> int:
     ----------
     lon: float
         Longitude of the point.
-    res: float
+    res: float, default: 1.0
         Resolution of the field.
 
     Returns
@@ -158,7 +158,7 @@ def lon_to_xindex(lon: float, res: float = 1.0) -> int:
     ----------
     lon: float
         Longitude of the point.
-    res: float
+    res: float, default: 1.0
         Resolution of the grid.
 
 
@@ -197,7 +197,7 @@ def lon_to_xindex(lon: float, res: float = 1.0) -> int:
 
 def fill_missing_vals(
     q11: float, q12: float, q21: float, q22: float
-) -> (float, float, float, float):
+) -> tuple[float, float, float, float]:
     """
     For a group of four neighbouring grid boxes which form a square, with values q11, q12, q21, q22,
     fill gaps using means of neighbours.
@@ -215,8 +215,8 @@ def fill_missing_vals(
 
     Returns
     -------
-    (float, float, float, float)
-        Neighbour mean
+    tuple of float
+        A tuple of four floats representing neighbour means.
     """
     outq11 = q11
     outq12 = q12
@@ -248,7 +248,7 @@ def fill_missing_vals(
 
 def get_four_surrounding_points(
     lat: float, lon: float, max90: int = 1
-) -> (float, float, float, float):
+) -> tuple[float, float, float, float]:
     """
     Get the four surrounding points of a specified latitude and longitude point.
 
@@ -258,14 +258,14 @@ def get_four_surrounding_points(
         Latitude of point
     lon : float
         Longitude of point
-    max90 : int
+    max90 : int, default: 1
         If set to 1 then cap latitude at 90.0, if set to 0 then don't cap latitude.
 
     Returns
     -------
-    (float, float, float, float)
-        The longitudes of the leftmost and rightmost pairs of points, and the latitudes of the topmost and
-        bottommost pairs of points.
+    tuple of floats
+        A tuple of floats representing the longitudes of the leftmost and rightmost pairs of points,
+        and the latitudes of the topmost and bottommost pairs of points.
     """
     assert -90.0 <= lat <= 90.0
     assert -180.0 <= lon <= 180.0

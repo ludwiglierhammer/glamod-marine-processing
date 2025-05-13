@@ -12,9 +12,9 @@ def is_in_valid_list(
 
     Parameters
     ----------
-    value : str or int or float
+    value : str, int or float
         Value to test
-    valid_list : list
+    valid_list : str, int, float or list
          List of valid values
 
     Returns
@@ -37,7 +37,7 @@ def is_buoy(platform_type: int, valid_list: list | int = [6, 7]) -> int:
     ----------
     platform_type : int
         Platform type
-    valid_list: list or int
+    valid_list: list or int, default: [6, 7]
         List of valid platform types
 
     Returns
@@ -57,7 +57,7 @@ def is_drifter(platform_type: int, valid_list: list | int = 7) -> int:
     ----------
     platform_type : int
         Platform type
-    valid_list: list or int
+    valid_list: list or int, default: 7
         List of valid platform types
 
     Returns
@@ -79,7 +79,7 @@ def is_ship(
     ----------
     platform_type : int
         Platform type
-    valid_list: list or str
+    valid_list: list or str, default: [0, 1, 2, 3, 4, 5, 10, 11, 12, 17]
         List of valid platform types
 
     Returns
@@ -99,7 +99,7 @@ def is_deck(dck: int, valid_list: list | int = 780) -> int:
     ----------
     dck : int
         Deck of observation
-    valid_list: list or int
+    valid_list: list or int, default: 780
         List of valid deck numbers
 
     Returns

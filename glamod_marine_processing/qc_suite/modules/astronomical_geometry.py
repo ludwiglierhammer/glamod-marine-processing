@@ -42,7 +42,7 @@ def day_test(
         Latitude in degrees.
     lon: float
         Longitude in degrees.
-    time_since_sun_above_horizon: float
+    time_since_sun_above_horizon: float, default:1.0
         Time since sun was above horizon for test.
 
     Returns
@@ -240,7 +240,7 @@ def sun_declination(sin_long_of_sun: float, angle_of_elliptic: float) -> float:
     return math.asin(sin_long_of_sun * math.sin(angle_of_elliptic))
 
 
-def calculate_sun_parameters(time: float) -> (float, float):
+def calculate_sun_parameters(time: float) -> tuple[float, float]:
     """Calculate both right ascension and declination of sun.
 
     Parameters
@@ -249,8 +249,8 @@ def calculate_sun_parameters(time: float) -> (float, float):
 
     Returns
     -------
-    (float, float)
-        Right ascension and declination of sun.
+    tuple of float
+        A tuple of two floats representing right ascension and declination of sun.
     """
     long_of_sun = sun_longitude(time)
     angle_of_elliptic = elliptic_angle(time)
@@ -413,7 +413,7 @@ def calculate_azimuth(
 
 def azimuth_elevation(
     lat: float, declination: float, hour_angle: float
-) -> (float, float):
+) -> tuple[float, float]:
     """Get both azimuth and geometric elevation of sun.
 
     Parameters
@@ -424,8 +424,8 @@ def azimuth_elevation(
 
     Returns
     -------
-    (float, float)
-        Azimuth and geometric elevation of sun.
+    tuple of float
+        A tuple of two floats representing azimuth and geometric elevation of sun.
     """
     phi = lat * degrad
     sin_elevation = sin_of_elevation(phi, declination, hour_angle)
@@ -448,7 +448,7 @@ def sunangle(
     dasvtm: int,
     lat: float,
     lon: float,
-) -> (float, float, float, float, float, float):
+) -> tuple[float, float, float, float, float, float]:
     """
     Calculate the local azimuth and elevation of the sun at a specified location and time.
 
@@ -475,10 +475,10 @@ def sunangle(
 
     Returns
     -------
-    (float, float, float, float, float, float)
-        Azimuth angle of the sun (degrees east of north), Elevation of sun (degrees),
+    tuple of float
+        A tuple of six floats representing Azimuth angle of the sun (degrees east of north), Elevation of sun (degrees),
         Right ascension of sun (degrees), Hour angle of sun (degrees), Hour angle of
-        local siderial time (degrees), Declination of sun (degrees)
+        local siderial time (degrees) and Declination of sun (degrees)
 
     Note
     ----

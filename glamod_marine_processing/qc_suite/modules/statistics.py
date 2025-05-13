@@ -179,7 +179,7 @@ def winsorised_mean(inarr: list[float]) -> float:
 
     Parameters
     ----------
-    inarr: list[float]
+    inarr: list of float
         input array to be averaged
 
     Returns
@@ -220,7 +220,7 @@ def trimmed_mean(inarr: list[float], trim: int) -> float:
 
     Parameters
     ----------
-    inarr: list[float]
+    inarr: list of float
         List of numbers.
     trim: int
         Trimming criteria. A value of 10 trims one tenth of the values off each end of the sorted array before calculating the mean.
@@ -243,12 +243,12 @@ def trimmed_mean(inarr: list[float], trim: int) -> float:
     return trim
 
 
-def missing_mean(inarr: list) -> float | None:
+def missing_mean(inarr: list[float]) -> float | None:
     """Return mean of input array
 
     Parameters
     ----------
-    inarr : list
+    inarr : list of float
         List of values for which mean is required. Missing values represented by None in list
 
     Returns

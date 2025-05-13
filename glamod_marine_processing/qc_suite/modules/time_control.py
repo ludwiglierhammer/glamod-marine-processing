@@ -9,7 +9,7 @@ from datetime import datetime, timedelta
 import numpy as np
 
 
-def split_date(date):
+def split_date(date: datetime) -> dict:
     """Split datetime date into year, month, day and hour.
 
     Parameters
@@ -65,7 +65,7 @@ def yesterday(
     year: int,
     month: int,
     day: int,
-) -> (int, int, int) | (None, None, None):
+) -> tuple[int | None, int | None, int | None]:
     """For specified year, month and day return the year, month and day of the day before.
 
     Parameters
@@ -79,8 +79,9 @@ def yesterday(
 
     Returns
     -------
-    (int, int, int, int) or (None, None, None, None)
-        year, month and day of the day before, returns a tuple of ``None`` values if the input day does not exist (e.g. Feb 30th).
+    tuple of int
+        A tuple of four ints representing year, month and day of the day before,
+        returns a tuple of four ``None`` values if the input day does not exist (e.g. Feb 30th).
     """
     try:
         dt = datetime(year, month, day)
@@ -123,7 +124,7 @@ def season(month: int) -> str | None:
     return ssnlist[month - 1]
 
 
-def pentad_to_month_day(p: int) -> (int, int):
+def pentad_to_month_day(p: int) -> tuple[int, int]:
     """Given a pentad number, return the month and day of the first day in the pentad.
 
     Parameters
@@ -133,8 +134,8 @@ def pentad_to_month_day(p: int) -> (int, int):
 
     Returns
     -------
-    (int, int)
-        Month and day of the first day of the pentad.
+    tuple of int
+        A tuple of two ints representing month and day of the first day of the pentad.
     """
     assert 0 < p < 74, "p outside allowed range 1-73 " + str(p)
     m = [
@@ -372,8 +373,8 @@ def relative_year_number(year: int, reference: int = 1979) -> int:
     ----------
     year : int
         Year
-    reference : int
-        Reference year, defaults to 1979
+    reference : int, default: 1979
+        Reference year
 
     Returns
     -------
@@ -587,7 +588,7 @@ def time_difference(
     return timdif
 
 
-def last_month_was(year: int, month: int) -> (int, int):
+def last_month_was(year: int, month: int) -> tuple[int, int]:
     """Short function to get the previous month given a particular month of interest
 
     Parameters
@@ -599,8 +600,8 @@ def last_month_was(year: int, month: int) -> (int, int):
 
     Returns
     -------
-    (int, int)
-        Year and month of previous month
+    tuple of int
+        A tuple of two ints representing year and month of previous month
 
     """
     last_year = year
@@ -612,7 +613,7 @@ def last_month_was(year: int, month: int) -> (int, int):
     return last_year, last_month
 
 
-def next_month_is(year: int, month: int) -> (int, int):
+def next_month_is(year: int, month: int) -> tuple[int, int]:
     """Short function to get the next month given a particular month of interest
 
     Parameters
@@ -624,8 +625,8 @@ def next_month_is(year: int, month: int) -> (int, int):
 
     Returns
     -------
-    (int, int)
-        Year and month of next month
+    tuple of int
+        A tuple of two ints representing year and month of next month
     """
     next_year = year
     next_month = month + 1
@@ -636,7 +637,7 @@ def next_month_is(year: int, month: int) -> (int, int):
     return next_year, next_month
 
 
-def year_month_gen(year1: int, month1: int, year2: int, month2: int) -> (int, int):
+def year_month_gen(year1: int, month1: int, year2: int, month2: int) -> tuple[int, int]:
     """A generator to loop one month at a time between year1 month1 and year2 month2
 
     Parameters
@@ -652,8 +653,8 @@ def year_month_gen(year1: int, month1: int, year2: int, month2: int) -> (int, in
 
     Returns
     -------
-    (int, int)
-        Return an iterator that yields tuples of a year and month
+    tuple of int
+        An iterator that yields tuples of a year and month
     """
     if year2 < year1:
         raise ValueError(
@@ -687,8 +688,8 @@ def get_month_lengths(year: int) -> list[int]:
 
     Returns
     -------
-    list[int]
-        list of month lengths
+    list of int
+        List of month lengths
     """
     if calendar.isleap(year):
         month_lengths = [31, 29, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31]

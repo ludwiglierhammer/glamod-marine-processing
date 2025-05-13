@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from datetime import datetime
+from typing import Literal
 
 import cf_xarray  # noqa
 import xarray as xr
@@ -11,18 +12,20 @@ from .time_control import day_in_year, split_date, which_pentad
 
 
 def open_xrdataset(
-    files,
-    use_cftime=True,
-    decode_cf=False,
-    decode_times=False,
-    parallel=False,
-    data_vars="minimal",
-    chunks={"time": 1},
-    coords="minimal",
-    compat="override",
-    combine="by_coords",
+    files: str | list,
+    use_cftime: bool = True,
+    decode_cf: bool = False,
+    decode_times: bool = False,
+    parallel: bool = False,
+    data_vars: Literal["all", "minimal", "different"] = "minimal",
+    chunks: int | dict | Literal["auto", "default"] | None = "default",
+    coords: Literal["all", "minimal", "different"] | None = "minimal",
+    compat: Literal[
+        "identical", "equals", "broadcast_equals", "no_conflicts", "override", "minimal"
+    ] = "override",
+    combine: Literal["by_coords", "nested"] | None = "by_coords",
     **kwargs,
-):
+) -> xr.Dataset:
     """Optimized function for opening large cf datasets.
 
     based on [open_xrdataset]_.
@@ -35,18 +38,25 @@ def open_xrdataset(
     ----------
     files: str or list
         See [open_mfdataset]_
-    use_cftime: bool, optional
+    use_cftime: bool, default: True
         See [decode_cf]_
-    parallel: bool, optional
+    decode_cf: bool, default: True
+        See [decode_cf]_
+    decode_times: bool, default: False
+        See [decode_cf]_
+    parallel: bool, default: False
         See [open_mfdataset]_
-    data_vars: {"minimal", "different", "all"} or list of str, optional
+    data_vars: {"minimal", "different", "all"} or list of str, default: "minimal"
         See [open_mfdataset]
-    chunks: int or dict, optional
+    chunks: int, dict, "auto" or None, optional, default: "default"
+        If chunks is "default", set chunks to {"time": 1}
         See [open_mfdataset]
-    coords: {"minimal", "different", "all"} or list of str, optional
+    coords: {"minimal", "different", "all"} or list of str, optional, default: "minimal"
         See [open_mfdataset]
-    compat: str (see `coords`), optional
+    compat: {"identical", "equals", "broadcast_equals", "no_conflicts", "override", "minimal"}, default: "override"
         See [open_mfdataset]
+    combine: {"by_coords", "nested"}, optional, default: "by_coords"
+        See [open_mfdataset]_
 
     Returns
     -------
@@ -62,6 +72,9 @@ def open_xrdataset(
 
     def drop_all_coords(ds):
         return ds.reset_coords(drop=True)
+
+    if chunks == "default":
+        chunks = {"time": 1}
 
     ds = xr.open_mfdataset(
         files,
@@ -116,15 +129,15 @@ class Climatology:
 
         Parameters
         ----------
-        lat: float or None
+        lat: float, optional
             Latitude of location to extract value from in degrees.
-        lon: float or None
+        lon: float, optional
             Longitude of location to extract value from in degrees.
         date: datetime-like, optional
             Date for which the value is required.
-        month: int or None
+        month: int, optional
             Month for which the value is required.
-        day: int or None
+        day: int, optional
             Day for which the value is required.
 
         Returns
