@@ -65,7 +65,7 @@ jobs:
 
       - name: Import marine_processing toolbox
         run: |
-          uv venv exec python -c "import glamod_marine_processing"
+          python -c "import glamod_marine_processing"
 
       - name: Run tests
         timeout-minutes: 10
