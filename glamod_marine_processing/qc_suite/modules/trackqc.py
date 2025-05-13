@@ -136,7 +136,6 @@ def trim_mean(inarr: list, trim: int) -> float:
     float
         Trimmed mean
     """
-
     arr = np.array(inarr)  # type: np.ndarray
     if trim == 0:
         return float(np.mean(arr))
