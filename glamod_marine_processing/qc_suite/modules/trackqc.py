@@ -2034,7 +2034,7 @@ class SSTBiasedNoisyChecker:
         bgvar = []
         bgvar_is_masked = False
 
-        for ind, rep in enumerate(reps):
+        for rep in reps:
             bg_val, ice_val, bgvar_val, good_match, bgvar_mask = self.parse_rep(rep)
 
             if bgvar_mask:
