@@ -10,7 +10,7 @@ import math
 import numpy as np
 
 from .astronomical_geometry import sunangle
-from .Extended_IMMA.ex import Voyage
+from .Extended_IMMA import Voyage
 from .spherical_geometry import sphere_distance
 from .time_control import dayinyear
 
