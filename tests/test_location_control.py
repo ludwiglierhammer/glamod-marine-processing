@@ -81,7 +81,7 @@ def test_lons():
     assert mds_lon_to_xindex(1.0) == 181
 
 
-def test_borderline():
+def test_borderline180():
     assert 0 == lon_to_xindex(-180)
     assert 0 == lon_to_xindex(180)
 
@@ -95,7 +95,7 @@ def test_non180_borderline():
     assert 106 == lon_to_xindex(-74.0)
 
 
-def test_gridcentres():
+def test_gridcentres180():
     assert 0 == lon_to_xindex(-179.5)
     assert 0 == lon_to_xindex(180.5)
 
