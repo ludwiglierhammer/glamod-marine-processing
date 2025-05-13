@@ -1,10 +1,11 @@
+# flake8: noqa: E501
+
 from __future__ import annotations
 
 import os
 import sys
 
 import numpy as np
-import pandas as pd
 import pytest
 
 import glamod_marine_processing.qc_suite.modules.Extended_IMMA as ex
@@ -2229,7 +2230,7 @@ def test_assert_limit_periods():
     speed_limit, min_win_period, max_win_period = otqc.assert_limit_periods()
     assert speed_limit == 2.5
     assert min_win_period == 1
-    assert max_win_period == None
+    assert max_win_period is None
 
     speed_limit, min_win_period, max_win_period = otqc.assert_limit_periods(
         max_win_period=5.7
@@ -3392,7 +3393,7 @@ def tailcheck_vals(selector):
     for v in obs:
         rec = IMMA()
         for key in v:
-            if not key in ["OSTIA", "BGVAR", "ICE"]:
+            if key not in ["OSTIA", "BGVAR", "ICE"]:
                 rec.data[key] = v[key]
         rep = ex.MarineReportQC(rec)
         if selector != 35:
@@ -4265,7 +4266,7 @@ def sst_biased_noisy_check_vals(selector):
     for v in obs:
         rec = IMMA()
         for key in v:
-            if not key in ["OSTIA", "BGVAR", "ICE"]:
+            if key not in ["OSTIA", "BGVAR", "ICE"]:
                 rec.data[key] = v[key]
         rep = ex.MarineReportQC(rec)
         if selector != 21:
@@ -4462,7 +4463,7 @@ def test_short_record_two_bad_obs_missing_with_bgvar_bnc():
         assert reps.get_qc(i, "SST", "drf_short") == expected_flags["drf_short"][i]
 
 
-def test_good_data_bnc():
+def test_good_data_bnc_14():
     reps = sst_biased_noisy_check_vals(14)
     expected_flags = {
         "drf_bias": [0, 0, 0, 0, 0, 0, 0, 0, 0],
@@ -4532,7 +4533,7 @@ def test_short_record_two_bad_obs_missing_big_bgvar_bnc():
         assert reps.get_qc(i, "SST", "drf_short") == expected_flags["drf_short"][i]
 
 
-def test_good_data_bnc():
+def test_good_data_bnc_19():
     reps = sst_biased_noisy_check_vals(19)
     expected_flags = {
         "drf_bias": [0, 0, 0, 0, 0, 0, 0, 0, 0],
