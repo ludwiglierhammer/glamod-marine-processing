@@ -89,7 +89,8 @@ def open_xrdataset(
         compat=compat,
         **kwargs,
     )
-    return xr.decode_cf(ds, use_cftime=use_cftime, decode_timedelta=False)
+    time_coder = xr.coders.CFDatetimeCoder(use_cftime=use_cftime)
+    return xr.decode_cf(ds, decode_times=time_coder, decode_timedelta=False)
 
 
 class Climatology:
