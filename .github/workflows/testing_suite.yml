@@ -63,9 +63,9 @@ jobs:
           uv version
           uv pip list
 
-      #- name: Import marine_processing toolbox
-      #  run: |
-      #    python -c "import glamod_marine_processing"
+      - name: Import marine_processing toolbox
+        run: |
+          python -c "import glamod_marine_processing"
 
       - name: Run tests
         timeout-minutes: 10
