@@ -4612,13 +4612,13 @@ def test_error_missing_ob_value_bnc():
     }
     with pytest.raises(ValueError):
         otqc.og_sst_biased_noisy_check(reps.reps, 9, 1.10, 1.0, 0.29, 3.0, 2, 0.3)
+
     try:
         otqc.og_sst_biased_noisy_check(reps.reps, 9, 1.10, 1.0, 0.29, 3.0, 2, 0.3)
-    except AssertionError as error:
-        error_return_text = "problem with report value: latitude is missing"
-        assert str(error)[0 : len(error_return_text)] == error_return_text
     except ValueError as error:
-        pass
+        error_return_text = "lat is missing"
+        assert str(error)[0 : len(error_return_text)] == error_return_text
+
     for i in range(0, len(reps)):
         assert reps.get_qc(i, "SST", "drf_bias") == expected_flags["drf_bias"][i]
         assert reps.get_qc(i, "SST", "drf_noise") == expected_flags["drf_noise"][i]
