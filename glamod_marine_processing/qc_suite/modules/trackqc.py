@@ -1544,7 +1544,7 @@ def og_sst_tail_check(
     background are flagged by the check. When making the comparison an allowance is made for background error
     variance and also normal drifter error (both bias and random measurement error). The correlation of the
     background error is treated as unknown and takes on a value which maximises background error dependent on the
-    assesment being made. A background error variance limit is also specified, beyond which the background is deemed
+    assessment being made. A background error variance limit is also specified, beyond which the background is deemed
     unreliable. Observations made during the day, in icy regions or where the background value is missing are
     excluded from the comparison.
 
@@ -1552,7 +1552,7 @@ def og_sst_tail_check(
     tail-check has finer resolution but lower sensitivity than the long tail-check and may pick off noisy data not
     picked up by the long tail check. Only observations that pass the long tail-check are passed to the short
     tail-check. Both of these tail checks proceed by moving a window over the data and assessing the data in each
-    window. Once good data are found the check stops and any bad data preceeding this are flagged. If unreliable
+    window. Once good data are found the check stops and any bad data preceding this are flagged. If unreliable
     background data are encountered the check stops. The checks are run forwards and backwards over the record so as
     to assess data at the start and end of the record. If the whole record fails no observations are flagged as there
     are then no 'tails' in the data (this is left for other checks). The long tail check looks for groups of
