@@ -1,8 +1,15 @@
 from __future__ import annotations
 
-import pytest
+import pytest  # noqa
 
-from glamod_marine_processing.qc_suite.modules.statistics import *
+from glamod_marine_processing.qc_suite.modules.statistics import (
+    missing_mean,
+    p_data_given_good,
+    p_data_given_gross,
+    p_gross,
+    trimmed_mean,
+    winsorised_mean,
+)
 
 
 @pytest.mark.parametrize(

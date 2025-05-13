@@ -2,9 +2,18 @@ from __future__ import annotations
 
 import math
 
-import pytest
+import pytest  # noqa
 
-from glamod_marine_processing.qc_suite.modules.location_control import *
+from glamod_marine_processing.qc_suite.modules.location_control import (
+    fill_missing_vals,
+    get_four_surrounding_points,
+    lat_to_yindex,
+    lon_to_xindex,
+    mds_lat_to_yindex,
+    mds_lon_to_xindex,
+    xindex_to_lon,
+    yindex_to_lat,
+)
 
 
 def test_0_is_89point5():
@@ -114,7 +123,7 @@ def test_oneshift_along_at_hires():
 
 
 def test_lons_ge_180():
-    """test to make sure wrapping works"""
+    """Test to make sure wrapping works"""
     assert 180 == lon_to_xindex(360.0)
     assert 5 == lon_to_xindex(185.1)
     for i in range(0, 520):
