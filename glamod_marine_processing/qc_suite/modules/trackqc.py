@@ -9,8 +9,8 @@ import math
 
 import numpy as np
 
+from . import Extended_IMMA as ex
 from .astronomical_geometry import sunangle
-from .Extended_IMMA import Voyage
 from .spherical_geometry import sphere_distance
 from .time_control import dayinyear
 
@@ -23,7 +23,7 @@ in the CMA FCM code repository. The code in this module represents a port of the
 revised IDL code into the python marine QC suite. New versions of the aground
 and speed checks have also been added.
 
-These functions perform tracking QC checks on a :py:class:`~Voyage`.
+These functions perform tracking QC checks on a :py:class:`ex.Voyage`.
 
 References:
 
@@ -894,7 +894,7 @@ def aground_check(
     Parameters
     ----------
     reps: Voyage
-        a time-sorted list of drifter observations in format :py:class:`~Voyage`, each report must have a valid
+        a time-sorted list of drifter observations in format :py:class:`ex.Voyage`, each report must have a valid
         longitude, latitude and time-difference
     smooth_win: int
         length of window (odd number) in datapoints used for smoothing lon/lat
@@ -996,7 +996,7 @@ def new_aground_check(
     Parameters
     ----------
     reps: list
-        a time-sorted list of drifter observations in format :py:class:`~Voyage`, each report must have a valid
+        a time-sorted list of drifter observations in format :py:class:`ex.Voyage`, each report must have a valid
         longitude, latitude and time-difference
     smooth_win: int
         length of window (odd number) in datapoints used for smoothing lon/lat
@@ -1164,7 +1164,7 @@ def speed_check(
     Parameters
     ----------
     reps: list
-        a time-sorted list of drifter observations in format :py:class:`~Voyage`, each report must have a valid
+        a time-sorted list of drifter observations in format :py:class:`ex.Voyage`, each report must have a valid
         longitude, latitude and time-difference
     speed_limit: float
         maximum allowable speed for an in situ drifting buoy (metres per second)
@@ -1205,7 +1205,7 @@ def speed_check(
 
     if isinstance(iquam_parameters, dict):
         reps_copy = copy.deepcopy(reps)
-        v = Voyage()
+        v = ex.Voyage()
         qc_list = []
         for rep in reps_copy:
             rep.setvar("PT", 5)  # ship
@@ -1291,7 +1291,7 @@ def sst_tail_check(
     Parameters
     ----------
     reps: list
-        a time-sorted list of drifter observations in format :py:class:`~Voyage`, each report must have a
+        a time-sorted list of drifter observations in format :py:class:`ex.Voyage`, each report must have a
         valid longitude, latitude and time and matched values for OSTIA, ICE and BGVAR in its extended data
     long_win_len: int
         length of window (in data-points) over which to make long tail-check (must be an odd number)
@@ -1434,7 +1434,7 @@ def sst_biased_noisy_check(
     Parameters
     ----------
     reps: list
-        a time-sorted list of drifter observations in format from :py:class:`~Voyage`,
+        a time-sorted list of drifter observations in format from :py:class:`ex.Voyage`,
         each report must have a valid longitude, latitude and time and matched values for OSTIA, ICE and BGVAR in its
         extended data
     n_eval : int
@@ -1562,7 +1562,7 @@ def og_sst_tail_check(
     Parameters
     ----------
     reps: list
-        A time-sorted list of drifter observations in format :py:class:`~Voyage`, each report must have a
+        A time-sorted list of drifter observations in format :py:class:`ex.Voyage`, each report must have a
         valid longitude, latitude and time and matched values for OSTIA, ICE and BGVAR in its extended data
     long_win_len: int
         Length of window (in data-points) over which to make long tail-check (must be an odd number)
@@ -1825,7 +1825,7 @@ def og_sst_biased_noisy_check(
     Parameters
     ----------
     reps: list
-        a time-sorted list of drifter observations in format from :py:class:`~Voyage`,
+        a time-sorted list of drifter observations in format from :py:class:`ex.Voyage`,
         each report must have a valid longitude, latitude and time and matched values for OSTIA, ICE and BGVAR in its
         extended data
     n_eval: int
