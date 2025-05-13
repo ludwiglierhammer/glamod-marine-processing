@@ -23,6 +23,7 @@ CI changes
 ^^^^^^^^^^
 * rename GitHub workflow ``ci`` to ``testing_suite`` (:pull:`76`)
 * GitHub workflow for ``testing_suite`` now uses ``uv`` for environment management, replacing ``micromamba`` (:pull:`76`)
+* Update GitHub workflow for ``testing_suite`` for ``astral-sh/uv-setup`` >= ``6.0.0`` (:pull:`124`)
 
 Internal changes
 ^^^^^^^^^^^^^^^^
