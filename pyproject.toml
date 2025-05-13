@@ -33,7 +33,7 @@ classifiers = [
   "Programming Language :: Python :: 3.12",
   "Programming Language :: Python :: 3.13"
 ]
-dynamic = ["version"]
+version = "7.1.0"
 dependencies = [
   "cdm_reader_mapper",
   "simplejson",
