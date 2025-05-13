@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+import math
+
 passed = 0
 failed = 1
 untestable = 2
@@ -152,12 +154,12 @@ def climatology_check(value: float, climate_normal: float, limit: float = 8.0) -
     return passed
 
 
-def isvalid(inval: float) -> int:
+def isvalid(inval: float | None) -> int:
     """Check if a value is numerically valid.
 
     Parameters
     ----------
-    inval : float
+    inval : float or None
         The input value to be tested
 
     Returns
@@ -165,17 +167,17 @@ def isvalid(inval: float) -> int:
     int
         Returns 1 if the input value is numerically invalid, 0 otherwise
     """
-    if isvalid(inval) == failed:
+    if inval is None or math.isnan(inval):
         return failed
     return passed
 
 
-def value_check(inval: float) -> int:
+def value_check(inval: float | None) -> int:
     """Check if a value is equal to None
 
     Parameters
     ----------
-    inval : float
+    inval : float or None
         The input value to be tested
 
     Returns
@@ -183,7 +185,7 @@ def value_check(inval: float) -> int:
     int
         Returns 1 if the input value is None, 0 otherwise.
     """
-    if isvalid(inval) == failed:
+    if inval is None:
         return failed
     return passed
 
