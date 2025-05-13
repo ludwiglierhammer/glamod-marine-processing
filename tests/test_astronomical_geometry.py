@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-import pytest
+import pytest  # noqa
 
 from glamod_marine_processing.qc_suite.modules.astronomical_geometry import day_test
 
