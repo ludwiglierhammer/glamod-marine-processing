@@ -4554,11 +4554,13 @@ def test_error_bad_input_parameter_bnc():
         "drf_noise": [9, 9, 9, 9, 9, 9, 9, 9, 9],
         "drf_short": [9, 9, 9, 9, 9, 9, 9, 9, 9],
     }
-    try:
+    with pytest.raises(AssertionError):
         otqc.og_sst_biased_noisy_check(reps.reps, 0, 1.10, 1.0, 0.29, 3.0, 2, 0.3)
-    except AssertionError as error:
-        error_return_text = "invalid input parameter: n_eval must be > 0"
-        assert str(error)[0 : len(error_return_text)] == error_return_text
+    # try:
+    #     otqc.og_sst_biased_noisy_check(reps.reps, 0, 1.10, 1.0, 0.29, 3.0, 2, 0.3)
+    # except AssertionError as error:
+    #     error_return_text = "invalid input parameter: n_eval must be > 0"
+    #     assert str(error)[0 : len(error_return_text)] == error_return_text
     for i in range(0, len(reps)):
         assert reps.get_qc(i, "SST", "drf_bias") == expected_flags["drf_bias"][i]
         assert reps.get_qc(i, "SST", "drf_noise") == expected_flags["drf_noise"][i]

@@ -1784,7 +1784,15 @@ def og_sst_tail_check(
     return
 
 
-def og_sst_biased_noisy_check(
+def og_sst_biased_noisy_check(reps, *args):
+    checker = SSTBiasedNoisyChecker(*args)
+    checker.validate()
+    sst_anom, bgerr, bgvar_is_masked = checker.preprocess_reps(reps)
+    checker.prep_reps(reps)
+    checker.do_qc(reps, sst_anom, bgerr, bgvar_is_masked)
+
+
+def BLEEK_og_sst_biased_noisy_check(
     reps,
     n_eval=30,
     bias_lim=1.10,
@@ -1965,3 +1973,120 @@ def og_sst_biased_noisy_check(
                     rep.set_qc("SST", "drf_short", 1)
 
     return
+
+
+from dataclasses import dataclass
+
+
+@dataclass
+class SSTBiasedNoisyChecker:
+
+    n_eval: int = 30
+    bias_lim: float = 1.10
+    drif_intra: float = 1.0
+    drif_inter: float = 0.29
+    err_std_n: float = 3.0
+    n_bad: int = 2
+    background_err_lim: float = 0.3
+
+    def validate(self):
+        assert self.n_eval > 0, "n_eval must be > 0"
+        assert self.bias_lim >= 0, "bias_lim must be >= 0"
+        assert self.drif_intra >= 0, "drif_intra must be >= 0"
+        assert self.drif_inter >= 0, "drif_inter must be >= 0"
+        assert self.err_std_n >= 0, "err_std_n must be >= 0"
+        assert self.n_bad >= 1, "n_bad must be >= 1"
+        assert self.background_err_lim >= 0, "background_err_lim must be >= 0"
+
+    def parse_rep(self, rep):
+        bg_val = rep.getext("OSTIA")
+        ice_val = rep.getext("ICE")
+        bgvar_val = rep.getext("BGVAR")
+
+        if ice_val is None:
+            ice_val = 0.0
+
+        daytime = track_day_test(
+            rep.getvar("YR"),
+            rep.getvar("MO"),
+            rep.getvar("DY"),
+            rep.getvar("HR"),
+            rep.getvar("LAT"),
+            rep.getvar("LON"),
+            -2.5,
+        )
+
+        land_match = True if bg_val is None else False
+        ice_match = True if ice_val > 0.15 else False
+        bgvar_mask = (
+            True
+            if bgvar_val is not None and bgvar_val > self.background_err_lim
+            else False
+        )
+
+        good_match = not (daytime or land_match or ice_match or bgvar_mask)
+
+        return bg_val, ice_val, bgvar_val, good_match, bgvar_mask
+
+    def preprocess_reps(self, reps):
+        # test and filter out obs with unsuitable background matches
+        sst_anom = []
+        bgvar = []
+        bgvar_is_masked = False
+
+        for ind, rep in enumerate(reps):
+            bg_val, ice_val, bgvar_val, good_match, bgvar_mask = self.parse_rep(rep)
+
+            if bgvar_mask:
+                bgvar_is_masked = True
+
+            if good_match:
+                assert (
+                    bg_val is not None and -5.0 <= bg_val <= 45.0
+                ), "matched background sst is invalid"
+                assert (
+                    bgvar_val is not None and 0.0 <= bgvar_val <= 10
+                ), "matched background error variance is invalid"
+                sst_anom.append(rep.getvar("SST") - bg_val)
+                bgvar.append(bgvar_val)
+
+        # prepare numpy arrays and variables needed for checks
+        sst_anom = np.array(sst_anom)  # ob-background differences
+        bgerr = np.sqrt(np.array(bgvar))  # standard deviation of background error
+
+        return sst_anom, bgerr, bgvar_is_masked
+
+    def prep_reps(self, reps):
+        for rep in reps:
+            rep.set_qc("SST", "drf_bias", 0)
+            rep.set_qc("SST", "drf_noise", 0)
+            rep.set_qc("SST", "drf_short", 0)
+
+    def do_qc(self, reps, sst_anom, bgerr, bgvar_is_masked):
+
+        long_record = not(len(sst_anom) < self.n_eval)
+
+        # assess long records
+        if long_record:
+            sst_anom_avg = np.mean(sst_anom)
+            sst_anom_stdev = np.std(sst_anom)
+            bgerr_rms = np.sqrt(np.mean(bgerr**2))
+
+            if abs(sst_anom_avg) > self.bias_lim:
+                for rep in reps:
+                    rep.set_qc("SST", "drf_bias", 1)
+
+            if sst_anom_stdev > np.sqrt(self.drif_intra**2 + bgerr_rms**2):
+                for rep in reps:
+                    rep.set_qc("SST", "drf_noise", 1)
+
+        # assess short records
+        else:
+            if not bgvar_is_masked:
+                limit = self.err_std_n * np.sqrt(
+                    bgerr**2 + self.drif_inter**2 + self.drif_intra**2
+                )
+                exceed_limit = np.logical_or(sst_anom > limit, sst_anom < -limit)
+                if np.sum(exceed_limit) >= self.n_bad:
+                    for rep in reps:
+                        rep.set_qc("SST", "drf_short", 1)
