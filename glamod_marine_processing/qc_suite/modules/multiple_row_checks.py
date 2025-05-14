@@ -21,7 +21,7 @@ from .next_level_qc import (  # noqa
 from .qc import failed
 
 
-def do_multiple_row_qc(data: dict | pd.Series, qc_dict: dict = {}) -> int:
+def do_multiple_row_check(data: dict | pd.Series, qc_dict: dict = {}) -> int:
     """Basic roy-by-row QC.
 
     Parameters
@@ -67,21 +67,23 @@ def do_multiple_row_qc(data: dict | pd.Series, qc_dict: dict = {}) -> int:
         if not callable(func):
             raise NameError(f"Function '{qc_function}' is not defined.")
 
-        requests = []
-        for name in qc_params["names"]:
-            if name not in data:
+        requests = {}
+        for param, cname in qc_params["names"].items():
+            if cname not in data:
                 raise NameError(
-                    f"Variable '{name}' is not available in input data: {data}."
+                    f"Variable '{cname}' is not available in input data: {data}."
                 )
-            requests.append(data[name])
+            requests[param] = data[cname]
 
         qc_inputs[qc_function] = {}
         qc_inputs[qc_function]["function"] = func
         qc_inputs[qc_function]["requests"] = requests
-        qc_inputs[qc_function]["kwargs"] = qc_params["arguments"]
+        qc_inputs[qc_function]["kwargs"] = {}
+        if "arguments" in qc_params:
+            qc_inputs[qc_function]["kwargs"] = qc_params["arguments"]
 
     for qc_function, qc_params in qc_inputs.items():
-        qc_flag = qc_function(*qc_params["requests"], **qc_params["kwargs"])
+        qc_flag = qc_params["function"](**qc_params["requests"], **qc_params["kwargs"])
         if qc_flag == failed:
             return qc_flag
 

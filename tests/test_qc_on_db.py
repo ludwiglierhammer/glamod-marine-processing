@@ -14,6 +14,9 @@ from glamod_marine_processing.qc_suite.modules.icoads_identify import (
     is_in_valid_list,
     is_ship,
 )
+from glamod_marine_processing.qc_suite.modules.multiple_row_checks import (
+    do_multiple_row_check,
+)
 from glamod_marine_processing.qc_suite.modules.next_level_qc import (
     do_anomaly_check,
     do_climatology_plus_stdev_check,
@@ -1039,6 +1042,83 @@ def test_do_wind_consistency_check(testdata):
             qc.failed,
             qc.failed,
             qc.failed,
+        ]
+    )
+    pd.testing.assert_series_equal(results, expected)
+
+
+def test_multiple_row_check(testdata, climdata):
+    db_ = testdata["observations-at"].copy()
+    climatology = Climatology.open_netcdf_file(
+        climdata["AT"]["mean"],
+        "at",
+        obs_name="AT",
+        statistics="mean",
+        time_axis="pentad_time",
+        target_units="K",
+        source_units="degC",
+    )
+    stdev = Climatology.open_netcdf_file(
+        climdata["AT"]["stdev"],
+        "at",
+        obs_name="AT",
+        statistics="stdev",
+        time_axis="pentad_time",
+    )
+    qc_dict = {
+        "do_missing_value_check": {"names": {"value": "observation_value"}},
+        # "do_no_normal_check": {
+        #  "names": {
+        #    "value": "observation_value",
+        #  }
+        # },
+        "do_hard_limit_check": {
+            "names": {"value": "observation_value"},
+            "arguments": {"hard_limits": [193.15, 338.15]},
+        },
+        # "do_anomaly_check": {
+        #  "names": {
+        #    "value": "observation_value"
+        #  },
+        #  "arguments": {
+        #    "climatology": climatology,
+        #    "maximum_anomaly": 10.0,
+        #  }
+        # },
+        # "do_climatology_plus_stdev_check": {
+        #  "names": {
+        #    "value": "observation_value"
+        #  },
+        #  "arguments": {
+        #    "climatology": climatology,
+        #    "stdev": stdev,
+        #    "minmax_standard_deviation": [
+        #      1.0,
+        #      4.0
+        #    ],
+        #    "maximum_standardised_anomaly": 5.5
+        #  }
+        # }
+    }
+    results = db_.apply(
+        lambda row: do_multiple_row_check(data=row, qc_dict=qc_dict),
+        axis=1,
+    )
+    expected = pd.Series(
+        [
+            qc.passed,
+            qc.passed,
+            qc.failed,
+            qc.passed,
+            qc.failed,
+            qc.passed,
+            qc.passed,
+            qc.passed,
+            qc.passed,
+            qc.passed,
+            qc.passed,
+            qc.passed,
+            qc.passed,
         ]
     )
     pd.testing.assert_series_equal(results, expected)

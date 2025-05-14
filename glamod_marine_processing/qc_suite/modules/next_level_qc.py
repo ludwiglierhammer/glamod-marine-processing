@@ -265,7 +265,10 @@ def do_missing_value_check(value: float) -> int:
 
 
 def do_anomaly_check(
-    value: float, climatology: float | Climatology, maximum_anomaly: float, **kwargs
+    value: float,
+    climatology: float | Climatology,
+    maximum_anomaly: float,
+    **kwargs,
 ) -> int:
     """
     Check that the value is within the prescribed distance from climatology.
