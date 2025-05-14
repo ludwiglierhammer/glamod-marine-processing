@@ -1786,9 +1786,9 @@ def og_sst_tail_check(
 
 def og_sst_biased_noisy_check(reps, *args):
     checker = SSTBiasedNoisyChecker(*args)
-    checker.validate()
+    checker.validate_parameters()
     sst_anom, bgerr, bgvar_is_masked = checker.preprocess_reps(reps)
-    checker.prep_reps(reps)
+    checker.initialise_flags(reps)
     checker.do_qc(reps, sst_anom, bgerr, bgvar_is_masked)
 
 
@@ -1989,7 +1989,19 @@ class SSTBiasedNoisyChecker:
     n_bad: int = 2
     background_err_lim: float = 0.3
 
-    def validate(self):
+    def validate_parameters(self) -> None:
+        """
+        Ensure that the parameters of the check are valid
+
+        Returns
+        -------
+        None
+
+        Raises
+        ------
+        AssertionError
+            Raises an assertion error if one of the class attributes is invalid.
+        """
         assert self.n_eval > 0, "n_eval must be > 0"
         assert self.bias_lim >= 0, "bias_lim must be >= 0"
         assert self.drif_intra >= 0, "drif_intra must be >= 0"
@@ -1998,7 +2010,24 @@ class SSTBiasedNoisyChecker:
         assert self.n_bad >= 1, "n_bad must be >= 1"
         assert self.background_err_lim >= 0, "background_err_lim must be >= 0"
 
-    def parse_rep(self, rep):
+    @staticmethod
+    def parse_rep(rep, background_err_lim) -> (float, float, float, bool, bool):
+        """
+        Extract QC-relevant variables from a marine report and
+
+        Parameters
+        ----------
+        rep: MarineRepor
+            Marine report. Must have variables OSTIA, ICE and BGVAR
+        background_err_lim: float
+            background error variance beyond which the SST background is deemed unreliable (degC squared)
+
+        Returns
+        -------
+        float, float, float, bool, bool
+            Returns the background SST value, ice value, background SST variance, a flag that indicates a good match,
+            and a flag that indicates if the background variance is valid.
+        """
         bg_val = rep.getext("OSTIA")
         ice_val = rep.getext("ICE")
         bgvar_val = rep.getext("BGVAR")
@@ -2016,26 +2045,39 @@ class SSTBiasedNoisyChecker:
             -2.5,
         )
 
-        land_match = True if bg_val is None else False
-        ice_match = True if ice_val > 0.15 else False
-        bgvar_mask = (
-            True
-            if bgvar_val is not None and bgvar_val > self.background_err_lim
-            else False
-        )
+        land_match = bg_val is None
+        ice_match = ice_val > 0.15
+        bgvar_mask = bgvar_val is not None and bgvar_val > background_err_lim
 
         good_match = not (daytime or land_match or ice_match or bgvar_mask)
 
         return bg_val, ice_val, bgvar_val, good_match, bgvar_mask
 
     def preprocess_reps(self, reps):
+        """
+        Extract the arrays of SST anomalies and background errors used in the QC checks, as well as a flag
+        indicating missing or invalid background values.
+
+        Parameters
+        ----------
+        reps : Voyage
+            The Voyage containing the reports to be quality controlled.
+
+        Returns
+        -------
+        np.ndarray, np.ndarray, bool
+            Returns the SST anomalies relative to the background SST, background errors, and a flag to indicate the
+            presence of invalid background values
+        """
         # test and filter out obs with unsuitable background matches
         sst_anom = []
         bgvar = []
         bgvar_is_masked = False
 
         for rep in reps:
-            bg_val, ice_val, bgvar_val, good_match, bgvar_mask = self.parse_rep(rep)
+            bg_val, ice_val, bgvar_val, good_match, bgvar_mask = (
+                SSTBiasedNoisyChecker.parse_rep(rep, self.background_err_lim)
+            )
 
             if bgvar_mask:
                 bgvar_is_masked = True
@@ -2056,37 +2098,63 @@ class SSTBiasedNoisyChecker:
 
         return sst_anom, bgerr, bgvar_is_masked
 
-    def prep_reps(self, reps):
+    def initialise_flags(self, reps):
         for rep in reps:
             rep.set_qc("SST", "drf_bias", 0)
             rep.set_qc("SST", "drf_noise", 0)
             rep.set_qc("SST", "drf_short", 0)
 
+    @staticmethod
+    def long_record_qc(reps, sst_anom, bgerr, drif_intra, bias_lim):
+        sst_anom_avg = np.mean(sst_anom)
+        sst_anom_stdev = np.std(sst_anom)
+        bgerr_rms = np.sqrt(np.mean(bgerr**2))
+
+        if abs(sst_anom_avg) > bias_lim:
+            for rep in reps:
+                rep.set_qc("SST", "drf_bias", 1)
+
+        if sst_anom_stdev > np.sqrt(drif_intra**2 + bgerr_rms**2):
+            for rep in reps:
+                rep.set_qc("SST", "drf_noise", 1)
+
+    @staticmethod
+    def short_record_qc(
+        reps, sst_anom, bgerr, err_std_n, drif_inter, drif_intra, n_bad
+    ):
+        # Calculate the limit based on the combined uncertainties (background error, drifter inter and drifter intra
+        # error) and then multiply by the err_std_n
+        limit = err_std_n * np.sqrt(bgerr**2 + drif_inter**2 + drif_intra**2)
+
+        # If the number of obs outside the limit exceed n_bad then flag them all as bad
+        exceed_limit = np.logical_or(sst_anom > limit, sst_anom < -limit)
+        if np.sum(exceed_limit) >= n_bad:
+            for rep in reps:
+                rep.set_qc("SST", "drf_short", 1)
+
     def do_qc(self, reps, sst_anom, bgerr, bgvar_is_masked):
 
-        long_record = not(len(sst_anom) < self.n_eval)
+        long_record = not (len(sst_anom) < self.n_eval)
 
         # assess long records
         if long_record:
-            sst_anom_avg = np.mean(sst_anom)
-            sst_anom_stdev = np.std(sst_anom)
-            bgerr_rms = np.sqrt(np.mean(bgerr**2))
-
-            if abs(sst_anom_avg) > self.bias_lim:
-                for rep in reps:
-                    rep.set_qc("SST", "drf_bias", 1)
-
-            if sst_anom_stdev > np.sqrt(self.drif_intra**2 + bgerr_rms**2):
-                for rep in reps:
-                    rep.set_qc("SST", "drf_noise", 1)
+            SSTBiasedNoisyChecker.long_record_qc(
+                reps,
+                sst_anom,
+                bgerr,
+                self.drif_intra,
+                self.bias_lim
+            )
 
         # assess short records
         else:
             if not bgvar_is_masked:
-                limit = self.err_std_n * np.sqrt(
-                    bgerr**2 + self.drif_inter**2 + self.drif_intra**2
+                SSTBiasedNoisyChecker.short_record_qc(
+                    reps,
+                    sst_anom,
+                    bgerr,
+                    self.err_std_n,
+                    self.drif_inter,
+                    self.drif_intra,
+                    self.n_bad,
                 )
-                exceed_limit = np.logical_or(sst_anom > limit, sst_anom < -limit)
-                if np.sum(exceed_limit) >= self.n_bad:
-                    for rep in reps:
-                        rep.set_qc("SST", "drf_short", 1)
