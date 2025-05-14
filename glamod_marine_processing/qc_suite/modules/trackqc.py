@@ -464,7 +464,7 @@ def check_drifter_speed(
     return reps
 
 
-def speed_check(
+def db_speed_check(
     reps: list,
     speed_limit: float = 2.5,
     min_win_period: float = 0.8,
@@ -577,7 +577,7 @@ def new_speed_check(reps, iquam_parameters, speed_limit=3.0, min_win_period=0.37
 
     This is function `speed_check` with `max_win_period` is None and iquam_parameters.
     """
-    return speed_check(
+    return db_speed_check(
         reps,
         speed_limit=speed_limit,
         min_win_period=min_win_period,
@@ -585,6 +585,120 @@ def new_speed_check(reps, iquam_parameters, speed_limit=3.0, min_win_period=0.37
         iquam_parameters=iquam_parameters,
     )
 
+
+def speed_check(reps, *args):
+    checker = SpeedChecker(reps)
+    if args:
+        checker.set_parameters(*args)
+    checker.do_qc()
+
+class SpeedChecker:
+
+    speed_limit=2.5
+    min_win_period=0.8
+    max_win_period=1.0
+
+    def __init__(self, reps):
+
+        self.reps = reps
+
+    def set_parameters(self, speed_limit, min_win_period, max_win_period):
+        try:
+            speed_limit = float(speed_limit)
+            min_win_period = float(min_win_period)
+            max_win_period = float(max_win_period)
+            assert speed_limit >= 0, "speed_limit must be >= 0"
+            assert min_win_period >= 0, "min_win_period must be >= 0"
+            assert max_win_period >= 0, "max_win_period must be >= 0"
+            assert max_win_period >= min_win_period, "max_win_period must be >= min_win_period"
+        except AssertionError as error:
+            raise AssertionError("invalid input parameter: " + str(error))
+
+        SpeedChecker.speed_limit = speed_limit
+        SpeedChecker.min_win_period = min_win_period
+        SpeedChecker.max_win_period = max_win_period
+
+    def do_qc(self):
+        nrep = len(self.reps)
+        # pairs of records are needed to evaluate speed
+        if nrep <= 1:
+            for rep in self.reps:
+                rep.set_qc("POS", "drf_spd", 0)
+            return
+
+        self.preprocess_reps()
+        self.initialise_reps()
+        self.do_speed_check()
+
+    def initialise_reps(self):
+        # begin by setting all reports to pass
+        for rep in self.reps:
+            rep.set_qc("POS", "drf_spd", 0)
+
+    def preprocess_reps(self):
+        nrep = len(self.reps)
+        # retrieve lon/lat/time_diff variables from marine reports
+        lon = np.empty(nrep) # type: np.ndarray
+        lon[:] = np.nan
+        lat = np.empty(nrep) # type: np.ndarray
+        lat[:] = np.nan
+        hrs = np.empty(nrep) # type: np.ndarray
+        hrs[:] = np.nan
+        try:
+            for ind, rep in enumerate(self.reps):
+                lon[ind] = rep.getvar("LON")  # returns None if missing
+                lat[ind] = rep.getvar("LAT")  # returns None if missing
+                if ind == 0:
+                    hrs[ind] = 0
+                else:
+                    hrs[ind] = rep.getext(
+                        "time_diff"
+                    )  # raises assertion error if 'time_diff' not found
+            assert not any(np.isnan(lon)), "Nan(s) found in longitude"
+            assert not any(np.isnan(lat)), "Nan(s) found in latitude"
+            assert not any(np.isnan(hrs)), "Nan(s) found in time differences"
+            assert not any(hrs < 0), "times are not sorted"
+        except AssertionError as error:
+            raise AssertionError("problem with report values: " + str(error))
+        
+        hrs = np.cumsum(hrs)  # get time difference in hours relative to first report
+
+        self.lon = lon
+        self.lat = lat
+        self.hrs = hrs
+
+
+    def do_speed_check(self):
+        nrep = len(self.reps)
+        min_win_period_hours = SpeedChecker.min_win_period * 24.0
+        max_win_period_hours = SpeedChecker.max_win_period * 24.0
+
+        # loop through timeseries to see if drifter is moving too fast
+        # and flag any occurences
+        index_arr = np.array(range(0, nrep))
+        i = 0
+        time_to_end = self.hrs[-1] - self.hrs[i]
+        while time_to_end >= min_win_period_hours:
+            f_win = self.hrs <= self.hrs[i] + max_win_period_hours
+            win_len = self.hrs[f_win][-1] - self.hrs[i]
+            if win_len < min_win_period_hours:
+                i += 1
+                time_to_end = self.hrs[-1] - self.hrs[i]
+                continue
+        
+            displace = sphere_distance(self.lat[i], self.lon[i], self.lat[f_win][-1], self.lon[f_win][-1])
+            speed = displace / win_len  # km per hr
+            speed = speed * 1000.0 / (60.0 * 60)  # metres per sec
+        
+            if speed > SpeedChecker.speed_limit:
+                for ix in range(i, index_arr[f_win][-1] + 1):
+                    if self.reps[ix].get_qc("POS", "drf_spd") == 0:
+                        self.reps[ix].set_qc("POS", "drf_spd", 1)
+                i += 1
+                time_to_end = self.hrs[-1] - self.hrs[i]
+            else:
+                i += 1
+                time_to_end = self.hrs[-1] - self.hrs[i]
 
 def aground_check(reps, *args):
     checker = AgroundChecker(reps)
