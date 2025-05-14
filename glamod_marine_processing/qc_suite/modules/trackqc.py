@@ -1507,16 +1507,14 @@ class SSTTailChecker:
             )
             if np.sum(exceed_limit) >= SSTTailChecker.short_win_n_bad:
                 if forward:
-                    if ix == (
-                        npass - SSTTailChecker.short_win_len
-                    ):  # if all windows have failed, flag everything
+                    # if all windows have failed, flag everything
+                    if ix == npass - SSTTailChecker.short_win_len:
                         self.start_tail_ind += SSTTailChecker.short_win_len
                     else:
                         self.start_tail_ind += 1
                 else:
-                    if ix == (
-                        npass - SSTTailChecker.short_win_len
-                    ):  # if all windows have failed, flag everything
+                    # if all windows have failed, flag everything
+                    if ix ==  npass - SSTTailChecker.short_win_len:
                         self.end_tail_ind -= SSTTailChecker.short_win_len
                     else:
                         self.end_tail_ind -= 1
@@ -1646,7 +1644,7 @@ class SSTBiasedNoisyChecker:
 
         Parameters
         ----------
-         n_eval: int
+        n_eval: int
             the minimum number of drifter observations required to be assessed by the long-record check
         bias_lim: float
             maximum allowable drifter-background bias, beyond which a record is considered biased (degC)
