@@ -2225,57 +2225,6 @@ def test_new_error_not_time_sorted(reps18):
         assert reps18.get_qc(i, "POS", "drf_agr") == expected_flags[i]
 
 
-def test_assert_limit_periods():
-    # default values
-    speed_limit, min_win_period, max_win_period = otqc.assert_limit_periods()
-    assert speed_limit == 2.5
-    assert min_win_period == 1
-    assert max_win_period is None
-
-    speed_limit, min_win_period, max_win_period = otqc.assert_limit_periods(
-        max_win_period=5.7
-    )
-    assert speed_limit == 2.5
-    assert min_win_period == 1
-    assert max_win_period == 5.7
-
-
-def test_assert_drifters():
-    # default values
-    n_eval, bias_lim, drif_intra, drif_inter, err_std_n, n_bad, background_err_lim = (
-        otqc.assert_drifters()
-    )
-    assert n_eval == 1
-    assert bias_lim == 1.10
-    assert drif_intra == 1.0
-    assert drif_inter == 0.29
-    assert err_std_n == 3.0
-    assert n_bad == 2
-    assert background_err_lim == 0.3
-
-
-def test_assert_window_drifters():
-    # default values
-    (
-        long_win_len,
-        long_err_std_n,
-        short_win_len,
-        short_err_std_n,
-        short_win_n_bad,
-        drif_inter,
-        drif_intra,
-        background_err_lim,
-    ) = otqc.assert_window_drifters()
-
-    assert long_win_len == 1
-    assert long_err_std_n == 3.0
-    assert short_win_len == 1
-    assert short_err_std_n == 3.0
-    assert short_win_n_bad == 1
-    assert drif_inter == 0.29
-    assert drif_intra == 1.00
-    assert background_err_lim == 0.3
-
 
 @pytest.fixture
 def iquam_parameters():

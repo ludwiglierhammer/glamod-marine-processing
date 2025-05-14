@@ -180,410 +180,144 @@ def trim_std(inarr: list, trim: int) -> float:
     return trim
 
 
-def assert_limit_periods(
-    speed_limit: float = 2.5,
-    min_win_period: float = 1,
-    max_win_period: float | None = None,
-) -> (float, float, float | None):
-    """Assert speed limit and window periods. Ensure variables are correct type and valid choices.
-
-    Parameters
-    ----------
-    speed_limit: float
-        Maximum allowable speed for an in situ drifting buoy (metres per second)
-    min_win_period: float
-        Minimum period of time in days over which position is assessed
-    max_win_period: float or None
-        maximum period of time in days over which position is assessed
-
-    Returns
-    -------
-    (float, float, float or None)
-        Returns conforming speed limit, minimum window period and maximum window period.
-    """
-    speed_limit = float(speed_limit)
-    assert speed_limit >= 0, "speed_limit must be >= 0"
-    min_win_period = float(min_win_period)
-    assert min_win_period >= 0, "min_win_period must be >= 0"
-    if max_win_period is not None:
-        max_win_period = float(max_win_period)
-        assert max_win_period >= 0, "max_win_period must be >= 0"
-        assert (
-            max_win_period >= min_win_period
-        ), "max_win_period must be >= min_win_period"
-    return speed_limit, min_win_period, max_win_period
+def new_speed_check(reps, *args):
+    checker = NewSpeedChecker(reps)
+    if args:
+        checker.set_parameters(*args)
+    checker.do_qc()
 
 
-def assert_drifters(
-    n_eval: int = 1,
-    bias_lim: float = 1.10,
-    drif_intra: float = 1.0,
-    drif_inter: float = 0.29,
-    err_std_n: float = 3.0,
-    n_bad: int = 2,
-    background_err_lim: float = 0.3,
-) -> (int, float, float, float, float, int, float):
-    """Assert drifter sea surface temperature record. Ensure variables are correct type and valid choices.
+class NewSpeedChecker:
 
-    I am just guessing what these variables are for the time being.
+    iquam_parameters = {}
+    speed_limit = 3.0
+    min_win_period = 0.375
 
-    Parameters
-    ----------
-    n_eval: int
-        The minimum number of drifter observations required to be assessed
-    bias_lim: float
-        Maximum allowable drifter-background bias, beyond which a record is considered biased (degC)
-    drif_intra: float
-        Maximum random measurement uncertainty reasonably expected in drifter data (standard
-        deviation, degC)
-    drif_inter: float
-        Spread of biases expected in drifter data (standard deviation, degC)
-    err_std_n: float
-        Number of standard deviations of combined background and drifter error, beyond which short-record data are
-        deemed suspicious
-    n_bad: int
-        Minimum number of suspicious data points required for failure of short-record check
-    background_err_lim: float
-        Background error variance beyond which the SST background is deemed unreliable (degC squared)
+    def __init__(self, reps):
+        self.reps = reps
 
-    Returns
-    -------
-    (int, float, float, float, float, int, float)
-        Returns conforming variables.
-    """
-    n_eval = int(n_eval)
-    bias_lim = float(bias_lim)
-    drif_intra = float(drif_intra)
-    drif_inter = float(drif_inter)
-    err_std_n = float(err_std_n)
-    n_bad = int(n_bad)
-    background_err_lim = float(background_err_lim)
-    assert n_eval > 0, "n_eval must be > 0"
-    assert bias_lim >= 0, "bias_lim must be >= 0"
-    assert drif_intra >= 0, "drif_intra must be >= 0"
-    assert drif_inter >= 0, "drif_inter must be >= 0"
-    assert err_std_n >= 0, "err_std_n must be >= 0"
-    assert n_bad >= 1, "n_bad must be >= 1"
-    assert background_err_lim >= 0, "background_err_lim must be >= 0"
-    return (
-        n_eval,
-        bias_lim,
-        drif_intra,
-        drif_inter,
-        err_std_n,
-        n_bad,
-        background_err_lim,
-    )
+        self.lon = None
+        self.lat = None
+        self.hrs = None
+        self.iquam_track_ship = None
 
+    def set_parameters(self, iquam_parameters, speed_limit, min_win_period):
+        try:
+            speed_limit = float(speed_limit)
+            min_win_period = float(min_win_period)
+            assert speed_limit >= 0, "speed_limit must be >= 0"
+            assert min_win_period >= 0, "min_win_period must be >= 0"
+        except AssertionError as error:
+            raise AssertionError("invalid input parameter: " + str(error))
 
-def assert_window_drifters(
-    long_win_len: int = 1,
-    long_err_std_n: float = 3.0,
-    short_win_len: int = 1,
-    short_err_std_n: float = 3.0,
-    short_win_n_bad: int = 1,
-    drif_inter: float = 0.29,
-    drif_intra: float = 1.00,
-    background_err_lim: float = 0.3,
-) -> (int, float, int, float, int, float, float, float):
-    """Assert drifter and window parameters.
+        NewSpeedChecker.iquam_parameters = iquam_parameters
+        NewSpeedChecker.speed_limit = speed_limit
+        NewSpeedChecker.min_win_period = min_win_period
 
-    Parameters
-    ----------
-    long_win_len: int
-        Length of window (in data-points) over which to make long tail-check (must be an odd number)
-    long_err_std_n: float
-        Number of standard deviations of combined background and drifter bias error, beyond which
-        data fail bias check
-    short_win_len: int
-        Length of window (in data-points) over which to make the short tail-check
-    short_err_std_n: float
-        Number of standard deviations of combined background and drifter error, beyond which data
-        are deemed suspicious
-    short_win_n_bad: int
-        Minimum number of suspicious data points required for failure of short check window
-    drif_inter: float
-        Spread of biases expected in drifter data (standard deviation, degC)
-    drif_intra: float
-        Maximum random measurement uncertainty reasonably expected in drifter data (standard deviation,
-        degC)
-    background_err_lim: float
-        Background error variance beyond which the SST background is deemed unreliable (degC
-        squared)
+    def do_qc(self):
 
-    Returns
-    -------
-    (int, float, int, float, int, float, float, float)
-        Returns conforming variables.
-    """
-    long_win_len = int(long_win_len)
-    long_err_std_n = float(long_err_std_n)
-    short_win_len = int(short_win_len)
-    short_err_std_n = float(short_err_std_n)
-    short_win_n_bad = int(short_win_n_bad)
-    drif_inter = float(drif_inter)
-    drif_intra = float(drif_intra)
-    background_err_lim = float(background_err_lim)
-    assert long_win_len >= 1, "long_win_len must be >= 1"
-    assert long_win_len % 2 != 0, "long_win_len must be an odd number"
-    assert long_err_std_n >= 0, "long_err_std_n must be >= 0"
-    assert short_win_len >= 1, "short_win_len must be >= 1"
-    assert short_err_std_n >= 0, "short_err_std_n must be >= 0"
-    assert short_win_n_bad >= 1, "short_win_n_bad must be >= 1"
-    assert drif_inter >= 0, "drif_inter must be >= 0"
-    assert drif_intra >= 0, "drif_intra must be >= 0"
-    assert background_err_lim >= 0, "background_err_lim must be >= 0"
-    return (
-        long_win_len,
-        long_err_std_n,
-        short_win_len,
-        short_err_std_n,
-        short_win_n_bad,
-        drif_inter,
-        drif_intra,
-        background_err_lim,
-    )
+        nrep = len(self.reps)
+        # pairs of records are needed to evaluate speed
+        if nrep <= 1:
+            for rep in self.reps:
+                rep.set_qc("POS", "drf_spd", 0)
+            return
 
+        self.preprocess_reps()
+        self.initialise_reps()
+        self.do_speed_check()
 
-def retrieve_lon_lat_hrs(reps: list):
-    """Given a set of MarineReports, extract the longitudes, latitudes and time. Time is expressed as hours since the
-    first observation in the set.
+    def preprocess_reps(self):
+        nrep = len(self.reps)
+        # retrieve lon/lat/time_diff variables from marine reports
+        lon = np.empty(nrep)  # type: np.ndarray
+        lon[:] = np.nan
+        lat = np.empty(nrep)  # type: np.ndarray
+        lat[:] = np.nan
+        hrs = np.empty(nrep)  # type: np.ndarray
+        hrs[:] = np.nan
+        try:
+            for ind, rep in enumerate(self.reps):
+                lon[ind] = rep.getvar("LON")  # returns None if missing
+                lat[ind] = rep.getvar("LAT")  # returns None if missing
+                if ind == 0:
+                    hrs[ind] = 0
+                else:
+                    hrs[ind] = rep.getext(
+                        "time_diff"
+                    )  # raises assertion error if 'time_diff' not found
+            assert not any(np.isnan(lon)), "Nan(s) found in longitude"
+            assert not any(np.isnan(lat)), "Nan(s) found in latitude"
+            assert not any(np.isnan(hrs)), "Nan(s) found in time differences"
+            assert not any(hrs < 0), "times are not sorted"
+        except AssertionError as error:
+            raise AssertionError("problem with report values: " + str(error))
 
-    Parameters
-    ----------
-    reps: MarineReport
-        List of MarineReports
+        hrs = np.cumsum(hrs)  # get time difference in hours relative to first report
 
-    Returns
-    -------
-    (np.ndarray, np.ndarray, np.ndarray)
-        Returns arrays of longitude, latitude and hours since first observation.
-    """
-    nrep = len(reps)
-    lon = np.array(nrep * [np.nan])  # type: np.ndarray
-    lat = np.array(nrep * [np.nan])  # type: np.ndarray
-    hrs = np.array(nrep * [np.nan])  # type: np.ndarray
-    for ind, rep in enumerate(reps):
-        lon[ind] = rep.getvar("LON")  # returns None if missing
-        lat[ind] = rep.getvar("LAT")  # returns None if missing
-        if ind == 0:
-            hrs[ind] = 0
-        else:
-            hrs[ind] = rep.getext(
-                "time_diff"
-            )  # raises assertion error if 'time_diff' not found
-    assert not any(np.isnan(lon)), "Nan(s) found in longitude"
-    assert not any(np.isnan(lat)), "Nan(s) found in latitude"
-    assert not any(np.isnan(hrs)), "Nan(s) found in time differences"
-    assert not any(hrs < 0), "times are not sorted"
-    hrs = np.cumsum(hrs)
-    return lon, lat, hrs
-
-
-def check_drifter_speed(
-    reps: list,
-    lon: np.ndarray = np.array([np.nan]),
-    lat: np.ndarray = np.array([np.nan]),
-    hrs: np.ndarray = np.array([np.nan]),
-    speed_limit: float = 2.5,
-    min_win_period: int = 1,
-    max_win_period: int | None = None,
-    iquam_track_ship: list | None = None,
-) -> list:
-    """Check whether drifter is moving too fast and flag any occurrences.
-
-    Parameters
-    ----------
-    reps: list
-        List of MarineReports
-    lon: np.ndarray
-        Array containing longitudes
-    lat: np.ndarray
-        Array containing latitudes
-    hrs: np.ndarray
-        Array containing hours
-    speed_limit: float
-        Maximum allowable speed for an in situ drifting buoy (metres per second)
-    min_win_period: int
-        Minimum period of time in days over which position is assessed
-    max_win_period: int or None
-        maximum period of time in days over which position is assessed
-    iquam_track_ship: list or None
-        Indicator
-
-    Returns
-    -------
-    list
-        Returns list of quality controlled reports
-    """
-    nrep = len(reps)
-    index_arr = np.array(range(0, nrep))  # type: np.ndarray
-    i = 0
-    time_to_end = hrs[-1] - hrs[i]
-    min_win_period_hours = min_win_period * 24.0
-    if max_win_period is None:
-        max_win_period_hours = None
-    else:
-        max_win_period_hours = max_win_period * 24.0
-    while time_to_end >= min_win_period_hours:
-        if iquam_track_ship is not None:
-            if iquam_track_ship[i] == 1:
-                i += 1
-                time_to_end = hrs[-1] - hrs[i]
-                continue
-            f_win = (hrs >= hrs[i] + min_win_period_hours) & (iquam_track_ship == 0)
-            if not any(f_win):
-                i += 1
-                time_to_end = hrs[-1] - hrs[i]
-                continue
-            win_len = hrs[f_win][0] - hrs[i]
-            ind = 0
-        else:
-            f_win = hrs <= hrs[i] + max_win_period_hours
-            win_len = hrs[f_win][-1] - hrs[i]
-            ind = -1
-            if win_len < min_win_period_hours:
-                i += 1
-                time_to_end = hrs[-1] - hrs[i]
-                continue
-
-        displace = sphere_distance(lat[i], lon[i], lat[f_win][ind], lon[f_win][ind])
-        speed = displace / win_len  # km per hr
-        speed = speed * 1000.0 / (60.0 * 60)  # metres per sec
-
-        if speed > speed_limit:
-            for ix in range(i, index_arr[f_win][ind] + 1):
-                if reps[ix].get_qc("POS", "drf_spd") == 0:
-                    reps[ix].set_qc("POS", "drf_spd", 1)
-            i += 1
-            time_to_end = hrs[-1] - hrs[i]
-        else:
-            i += 1
-            time_to_end = hrs[-1] - hrs[i]
-
-    return reps
-
-
-def db_speed_check(
-    reps: list,
-    speed_limit: float = 2.5,
-    min_win_period: float = 0.8,
-    max_win_period: float | None = 1.0,
-    iquam_parameters: dict | None = None,
-) -> None:
-    """Check to see whether a drifter has been picked up by a ship (out of water) based on 1/100th degree
-    precision positions. A flag 'drf_spd' is set for each input report: flag=1 for reports deemed picked up,
-    else flag=0.
-
-    A drifter is deemed picked up if it is moving faster than might be expected for a fast ocean current
-    (a few m/s). Unreasonably fast movement is detected when speed of travel between report-pairs exceeds
-    the chosen 'speed_limit' (speed is estimated as distance between reports divided by time separation -
-    this 'straight line' speed between the two points is a minimum speed estimate given a less-direct
-    path may have been followed). Positional errors introduced by lon/lat 'jitter' and data precision
-    can be of order several km's. Reports must be separated by a suitably long period of time (the 'min_win_period')
-    to minimise the effect of these errors when calculating speed e.g. for reports separated by 24 hours
-    errors of several cm/s would result which are two orders of magnitude less than a fast ocean current
-    which seems reasonable. Conversely, the period of time chosen should not be too long so as to resolve
-    short-lived burst of speed on manoeuvring ships. Larger positional errors may also trigger the check.
-    Because temporal sampling can be erratic the time period over which this assessment is made is specified
-    as a range (bound by 'min_win_period' and 'max_win_period') - assessment uses the longest time separation
-    available within this range.
-
-    IMPORTANT - for optimal performance, drifter records with observations failing this check should be
-    subsequently manually reviewed. Ships move around in all sorts of complicated ways that can readily
-    confuse such a simple check (e.g. pausing at sea, crisscrossing its own path) and once some erroneous
-    movement is detected it is likely a human operator can then better pick out the actual bad data. False
-    fails caused by positional errors (particularly in fast ocean currents) will also need reinstating.
-
-    Parameters
-    ----------
-    reps: list
-        a time-sorted list of drifter observations in format :py:class:`ex.Voyage`, each report must have a valid
-        longitude, latitude and time-difference
-    speed_limit: float
-        maximum allowable speed for an in situ drifting buoy (metres per second)
-    min_win_period: float
-        minimum period of time in days over which position is assessed for speed estimates (see description)
-    max_win_period: float or None
-        maximum period of time in days over which position is assessed for speed estimates
-        (this should be greater than min_win_period and allow for some erratic temporal sampling e.g. min_win_period+0.2
-        to allow for gaps of up to 0.2-days in sampling).
-    iquam_parameters: dict or None
-        Parameter dictionary for Voyage.iquam_track_check() function.
-
-    Returns
-    -------
-    list
-        Returns list of quality controlled reports
-    """
-    try:
-        speed_limit, min_win_period, max_win_period = assert_limit_periods(
-            speed_limit=speed_limit,
-            min_win_period=min_win_period,
-            max_win_period=max_win_period,
-        )
-    except AssertionError as error:
-        raise AssertionError("invalid input parameter: " + str(error))
-
-    nrep = len(reps)
-    if nrep <= 1:  # pairs of records are needed to evaluate speed
-        print("Voyage too short for QC, setting flags to pass")
-        for rep in reps:
-            rep.set_qc("POS", "drf_spd", 0)
-        return
-
-    try:
-        lon, lat, hrs = retrieve_lon_lat_hrs(reps)
-    except AssertionError as error:
-        raise AssertionError("problem with report values: " + str(error))
-
-    if isinstance(iquam_parameters, dict):
-        reps_copy = copy.deepcopy(reps)
+        # perform iQuam track check as if a ship
+        # a deep copy of reps is made so metadata can be safely modified ahead of iQuam check
+        # an array of qc flags (iquam_track_ship) is the result
+        reps_copy = copy.deepcopy(self.reps)
         v = ex.Voyage()
         qc_list = []
         for rep in reps_copy:
             rep.setvar("PT", 5)  # ship
             rep.set_qc("POS", "iquam_track", 0)  # reset iquam parameters
             v.add_report(rep)
-        v.iquam_track_check(iquam_parameters)
+        v.iquam_track_check(NewSpeedChecker.iquam_parameters)
         for rep in v.rep_feed():
             qc_list.append(rep.get_qc("POS", "iquam_track"))
-        iquam_track_ship = np.array(qc_list)
+        iquam_track_ship = np.array(qc_list)  # type: np.ndarray
         del reps_copy, v, qc_list
-    else:
-        iquam_track_ship = None
 
-    # begin by setting all reports to pass
-    for rep in reps:
-        rep.set_qc("POS", "drf_spd", 0)
+        self.iquam_track_ship = iquam_track_ship
+        self.lat = lat
+        self.lon = lon
+        self.hrs = hrs
 
-    return check_drifter_speed(
-        reps,
-        lon=lon,
-        lat=lat,
-        hrs=hrs,
-        speed_limit=speed_limit,
-        min_win_period=min_win_period,
-        max_win_period=max_win_period,
-        iquam_track_ship=iquam_track_ship,
-    )
+    def initialise_reps(self):
+        # begin by setting all reports to pass
+        for rep in self.reps:
+            rep.set_qc("POS", "drf_spd", 0)
 
+    def do_speed_check(self):
+        nrep = len(self.reps)
+        min_win_period_hours = NewSpeedChecker.min_win_period * 24.0
+        # loop through timeseries to see if drifter is moving too fast
+        # and flag any occurences
+        index_arr = np.array(range(0, nrep))
+        i = 0
+        time_to_end = self.hrs[-1] - self.hrs[i]
+        while time_to_end >= min_win_period_hours:
+            if self.iquam_track_ship[i] == 1:
+                i += 1
+                time_to_end = self.hrs[-1] - self.hrs[i]
+                continue
+            f_win = (self.hrs >= self.hrs[i] + min_win_period_hours) & (
+                self.iquam_track_ship == 0
+            )
+            if not any(f_win):
+                i += 1
+                time_to_end = self.hrs[-1] - self.hrs[i]
+                continue
 
-def new_speed_check(reps, iquam_parameters, speed_limit=3.0, min_win_period=0.375):
-    """
-    Check to see whether a drifter has been picked up by a ship (out of water) based on 1/100th degree
-    precision positions. A flag 'drf_spd' is set for each input report: flag=1 for reports deemed picked up,
-    else flag=0.
+            win_len = self.hrs[f_win][0] - self.hrs[i]
+            displace = sphere_distance(
+                self.lat[i], self.lon[i], self.lat[f_win][0], self.lon[f_win][0]
+            )
+            speed = displace / win_len  # km per hr
+            speed = speed * 1000.0 / (60.0 * 60)  # metres per sec
 
-    This is function `speed_check` with `max_win_period` is None and iquam_parameters.
-    """
-    return db_speed_check(
-        reps,
-        speed_limit=speed_limit,
-        min_win_period=min_win_period,
-        max_win_period=None,
-        iquam_parameters=iquam_parameters,
-    )
+            if speed > NewSpeedChecker.speed_limit:
+                for ix in range(i, index_arr[f_win][0] + 1):
+                    if self.reps[ix].get_qc("POS", "drf_spd") == 0:
+                        self.reps[ix].set_qc("POS", "drf_spd", 1)
+                i += 1
+                time_to_end = self.hrs[-1] - self.hrs[i]
+            else:
+                i += 1
+                time_to_end = self.hrs[-1] - self.hrs[i]
 
 
 def speed_check(reps, *args):
@@ -592,15 +326,20 @@ def speed_check(reps, *args):
         checker.set_parameters(*args)
     checker.do_qc()
 
+
 class SpeedChecker:
 
-    speed_limit=2.5
-    min_win_period=0.8
-    max_win_period=1.0
+    speed_limit = 2.5
+    min_win_period = 0.8
+    max_win_period = 1.0
 
     def __init__(self, reps):
 
         self.reps = reps
+
+        self.lon = None
+        self.lat = None
+        self.hrs = None
 
     def set_parameters(self, speed_limit, min_win_period, max_win_period):
         try:
@@ -610,7 +349,9 @@ class SpeedChecker:
             assert speed_limit >= 0, "speed_limit must be >= 0"
             assert min_win_period >= 0, "min_win_period must be >= 0"
             assert max_win_period >= 0, "max_win_period must be >= 0"
-            assert max_win_period >= min_win_period, "max_win_period must be >= min_win_period"
+            assert (
+                max_win_period >= min_win_period
+            ), "max_win_period must be >= min_win_period"
         except AssertionError as error:
             raise AssertionError("invalid input parameter: " + str(error))
 
@@ -638,11 +379,11 @@ class SpeedChecker:
     def preprocess_reps(self):
         nrep = len(self.reps)
         # retrieve lon/lat/time_diff variables from marine reports
-        lon = np.empty(nrep) # type: np.ndarray
+        lon = np.empty(nrep)  # type: np.ndarray
         lon[:] = np.nan
-        lat = np.empty(nrep) # type: np.ndarray
+        lat = np.empty(nrep)  # type: np.ndarray
         lat[:] = np.nan
-        hrs = np.empty(nrep) # type: np.ndarray
+        hrs = np.empty(nrep)  # type: np.ndarray
         hrs[:] = np.nan
         try:
             for ind, rep in enumerate(self.reps):
@@ -660,13 +401,12 @@ class SpeedChecker:
             assert not any(hrs < 0), "times are not sorted"
         except AssertionError as error:
             raise AssertionError("problem with report values: " + str(error))
-        
+
         hrs = np.cumsum(hrs)  # get time difference in hours relative to first report
 
         self.lon = lon
         self.lat = lat
         self.hrs = hrs
-
 
     def do_speed_check(self):
         nrep = len(self.reps)
@@ -685,11 +425,13 @@ class SpeedChecker:
                 i += 1
                 time_to_end = self.hrs[-1] - self.hrs[i]
                 continue
-        
-            displace = sphere_distance(self.lat[i], self.lon[i], self.lat[f_win][-1], self.lon[f_win][-1])
+
+            displace = sphere_distance(
+                self.lat[i], self.lon[i], self.lat[f_win][-1], self.lon[f_win][-1]
+            )
             speed = displace / win_len  # km per hr
             speed = speed * 1000.0 / (60.0 * 60)  # metres per sec
-        
+
             if speed > SpeedChecker.speed_limit:
                 for ix in range(i, index_arr[f_win][-1] + 1):
                     if self.reps[ix].get_qc("POS", "drf_spd") == 0:
@@ -699,6 +441,7 @@ class SpeedChecker:
             else:
                 i += 1
                 time_to_end = self.hrs[-1] - self.hrs[i]
+
 
 def aground_check(reps, *args):
     checker = AgroundChecker(reps)
