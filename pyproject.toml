@@ -37,7 +37,8 @@ version = "7.1.0"
 dependencies = [
   "cdm_reader_mapper",
   "simplejson",
-  "cf_xarray"
+  "cf_xarray",
+  "xclim"
 ]
 
 [project.optional-dependencies]
