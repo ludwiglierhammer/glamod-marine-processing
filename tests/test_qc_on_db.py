@@ -369,8 +369,9 @@ def test_do_at_anomaly_check(testdata, climdata):
         obs_name="AT",
         statistics="mean",
         time_axis="pentad_time",
+        target_units="K",
+        source_units="degC",
     )
-    climatology.convert_units_to("K", source_units="degC")
     results = db_.apply(
         lambda row: do_anomaly_check(
             value=row["observation_value"],
@@ -410,8 +411,9 @@ def test_do_at_climatology_plus_stdev_check(testdata, climdata):
         obs_name="AT",
         statistics="mean",
         time_axis="pentad_time",
+        target_units="K",
+        source_units="degC",
     )
-    climatology.convert_units_to("K", source_units="degC")
     stdev = Climatology.open_netcdf_file(
         climdata["AT"]["stdev"],
         "at",
@@ -515,13 +517,20 @@ def test_do_slp_no_normal_check(testdata, climdata):
 def test_do_slp_climatology_plus_stdev_plus_lowbar_check(testdata, climdata):
     db_ = testdata["observations-slp"].copy()
     climatology = Climatology.open_netcdf_file(
-        climdata["SLP"]["mean"], "slp", obs_name="SLP", statistics="mean"
+        climdata["SLP"]["mean"],
+        "slp",
+        obs_name="SLP",
+        statistics="mean",
+        target_units="Pa",
     )
-    climatology.convert_units_to("Pa")
     stdev = Climatology.open_netcdf_file(
-        climdata["SLP"]["stdev"], "slp", obs_name="SLP", statistics="stdev"
+        climdata["SLP"]["stdev"],
+        "slp",
+        obs_name="SLP",
+        statistics="stdev",
+        target_units="Pa",
+        source_units="hPa",
     )
-    stdev.convert_units_to("Pa", source_units="hPa")
     results = db_.apply(
         lambda row: do_climatology_plus_stdev_plus_lowbar_check(
             value=row["observation_value"],
@@ -656,8 +665,9 @@ def test_do_dpt_climatology_plus_stdev_check(testdata, climdata):
         obs_name="DPT",
         statistics="mean",
         time_axis="pentad_time",
+        target_units="K",
+        source_units="degC",
     )
-    climatology.convert_units_to("K", source_units="degC")
     stdev = Climatology.open_netcdf_file(
         climdata["DPT"]["stdev"],
         "dpt",

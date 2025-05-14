@@ -108,8 +108,11 @@ class Climatology:
         lat_axis=None,
         lon_axis=None,
         valid_ntime=[1, 73, 365],
+        target_units=None,
+        source_units=None,
     ):
         self.data = data
+        self.convert_units_to(target_units, source_units=source_units)
         if time_axis is None:
             self.time_axis = data.cf.coordinates["time"][0]
         else:
