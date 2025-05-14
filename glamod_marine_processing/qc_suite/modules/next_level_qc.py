@@ -264,41 +264,57 @@ def do_missing_value_check(value: float) -> int:
     return isvalid(value)
 
 
-def do_anomaly_check(value: float, climatology: float, maximum_anomaly: float) -> int:
+def do_anomaly_check(
+    value: float, climatology: float | Climatology, maximum_anomaly: float, **kwargs
+) -> int:
     """
-    Check that the value is within the prescribed distance from climatology/
+    Check that the value is within the prescribed distance from climatology.
 
     Parameters
     ----------
     value : float
         Value to be checked
-    climatology: float or str
+    climatology: float or Climatology
         Reference climatological value.
+        This could be a float value or Climatology object.
     maximum_anomaly : float
-        Maximum_anomaly allowed anomaly
+        Maximum_anomaly allowed anomaly.
 
     Returns
     -------
     int
         1 if value anomaly is outside allowed bounds, 0 otherwise
+
+    Note
+    ----
+    If ``climatology`` is a Climatology object, pass ``lon`` and ``lat`` and ``date`` or ``month`` and ``day`` as keyword-arguments!
     """
+    if isinstance(climatology, Climatology):
+        climatology = climatology.get_value(**kwargs)
     return climatology_check(value, climatology, maximum_anomaly)
 
 
-def do_no_normal_check(climatology: float | None) -> int:
+def do_no_normal_check(climatology: float | Climatology, **kwargs) -> int:
     """
     Check that climatological value is present
 
     Parameters
     ----------
-    climatology : float, optional
+    climatology : float or Climatology
         Climatology value
+        This could be a float value or Climatology object.
 
     Returns
     -------
     int
         1 if climatology value is missing, 0 otherwise
+
+    Note
+    ----
+    If ``climatology`` is a Climatology object, pass ``lon`` and ``lat`` and ``date`` or ``month`` and ``day`` as keyword-arguments!
     """
+    if isinstance(climatology, Climatology):
+        climatology = climatology.get_value(**kwargs)
     return isvalid(climatology)
 
 
@@ -323,10 +339,11 @@ def do_hard_limit_check(value: float, hard_limits: list) -> int:
 
 def do_climatology_plus_stdev_check(
     value: float,
-    climatology: float,
-    stdev: float,
+    climatology: float | Climatology,
+    stdev: float | Climatology,
     minmax_standard_deviation: list,
     maximum_standardised_anomaly: float,
+    **kwargs,
 ) -> int:
     """Check that standardised value anomaly is within specified range.
 
@@ -339,10 +356,12 @@ def do_climatology_plus_stdev_check(
     ----------
     value : float
         Value to be checked.
-    climatology : float
+    climatology : float or Climatology
         Climatological normal.
-    stdev : float
+        This could be a float value or Climatology object.
+    stdev : float or Climatology
         Climatological standard deviation.
+        This could be a float value or Climatology object.
     minmax_standard_deviation : list
         2-element list containing lower and upper limits for standard deviation. If the stdev is outside these
         limits, at_stdev will be set to the nearest limit.
@@ -353,7 +372,16 @@ def do_climatology_plus_stdev_check(
     -------
     int
         Returns 1 if standardised value anomaly is outside specified range, 0 otherwise.
+
+    Note
+    ----
+    If ``climatology`` and/or ``stdev`` is a Climatology object, pass ``lon`` and ``lat`` and ``date`` or ``month`` and ``day`` as keyword-arguments!
     """
+    if isinstance(climatology, Climatology):
+        climatology = climatology.get_value(**kwargs)
+    if isinstance(stdev, Climatology):
+        stdev = stdev.get_value(**kwargs)
+
     return climatology_plus_stdev_check(
         value,
         climatology,
@@ -367,8 +395,8 @@ def do_climatology_plus_stdev_plus_lowbar_check(
     value: float,
     climatology: float | Climatology,
     stdev: float | Climatology,
-    limit: float,
-    lowbar: float,
+    limit: float | str,
+    lowbar: float | str,
     **kwargs,
 ) -> int:
     """Check that standardised value anomaly is within standard deviation-based limits but with a minimum width.
@@ -383,10 +411,12 @@ def do_climatology_plus_stdev_plus_lowbar_check(
     ----------
     value : float or Climatology
         Value or climatology to be checked.
-    climatology : float or str
-        Climatological normal. This could be a float value or a data file to be opened.
-    stdev : float
+    climatology : float or Climatology
+        Climatological normal.
+        This could be a float value or Climatology object.
+    stdev : float or Climatology
         Climatological standard deviation.
+        This could be a float value or Climatology object.
     limit : float
         Maximum standardised anomaly.
     lowbar: float
@@ -396,6 +426,10 @@ def do_climatology_plus_stdev_plus_lowbar_check(
     -------
     int
         Returns 1 if standardised value anomaly is outside specified range, 0 otherwise.
+
+    Note
+    ----
+    If ``climatology`` and/or ``stdev`` is a Climatology object, pass ``lon`` and ``lat`` and ``date`` or ``month`` and ``day`` as keyword-arguments!
     """
     if isinstance(climatology, Climatology):
         climatology = climatology.get_value(**kwargs)
