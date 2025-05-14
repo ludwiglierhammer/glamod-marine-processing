@@ -7,6 +7,7 @@ from typing import Literal
 
 import cf_xarray  # noqa
 import xarray as xr
+from xclim.core.units import convert_units_to
 
 from .time_control import day_in_year, split_date, which_pentad
 
@@ -98,13 +99,33 @@ class Climatology:
     Automatically detects if this is a single field, pentad or daily climatology
     """
 
-    def __init__(self, data, obs_name, statistics):
+    def __init__(
+        self,
+        data,
+        obs_name,
+        statistics,
+        time_axis=None,
+        lat_axis=None,
+        lon_axis=None,
+        valid_ntime=[1, 73, 365],
+    ):
         self.data = data
-        self.time_axis = data.cf.coordinates["time"][0]
-        self.lat_axis = data.cf.coordinates["latitude"][0]
-        self.lon_axis = data.cf.coordinates["longitude"][0]
+        if time_axis is None:
+            self.time_axis = data.cf.coordinates["time"][0]
+        else:
+            self.time_axis = time_axis
+        if lat_axis is None:
+            self.lat_axis = data.cf.coordinates["latitude"][0]
+        else:
+            self.lat_axis = lat_axis
+        if lon_axis is None:
+            self.lon_axis = data.cf.coordinates["longitude"][0]
+        else:
+            self.lon_axis = lon_axis
+        if not isinstance(valid_ntime, list):
+            valid_ntime = [valid_ntime]
         self.ntime = len(data[self.time_axis])
-        assert self.ntime in [1, 73, 365], "weird shaped field"
+        assert self.ntime in valid_ntime, "weird shaped field"
         self.nlat = len(data[self.lat_axis])
         self.nlon = len(data[self.lon_axis])
         self.res = 180.0 / self.nlat
@@ -117,6 +138,14 @@ class Climatology:
         ds = open_xrdataset(file_name)
         da = ds[clim_name]
         return cls(da, **kwargs)
+
+    def convert_units_to(self, target_units, source_units=None):
+        """Documentation."""
+        if target_units is None:
+            return
+        if source_units is not None:
+            self.data.attrs["units"] = source_units
+        self.data = convert_units_to(self.data, target_units)
 
     def get_value(
         self,
@@ -185,5 +214,4 @@ class Climatology:
             return 0
         elif self.ntime == 73:
             return which_pentad(month, day) - 1
-        elif self.ntime == 365:
-            return day_in_year(month, day) - 1
+        return day_in_year(month, day) - 1
