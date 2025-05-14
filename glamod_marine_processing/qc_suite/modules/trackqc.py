@@ -1523,7 +1523,266 @@ def sst_biased_noisy_check(
     return reps
 
 
-def og_sst_tail_check(
+def og_sst_tail_check(reps, *args):
+    checker = SSTTailChecker(reps)
+    if args:
+        checker.set_parameters(*args)
+    checker.do_qc()
+
+
+class SSTTailChecker:
+
+    long_win_len = 121
+    long_err_std_n = 3.0
+    short_win_len = 30
+    short_err_std_n = 3.0
+    short_win_n_bad = 2
+    drif_inter = 0.29
+    drif_intra = 1.00
+    background_err_lim = 0.3
+
+    def __init__(self, reps):
+        self.reps = reps
+        self.reps_ind = None
+        self.sst_anom = None
+        self.bgerr = None
+
+        self.start_tail_ind = None
+        self.end_tail_ind = None
+
+    def set_parameters(
+        self,
+        long_win_len,
+        long_err_std_n,
+        short_win_len,
+        short_err_std_n,
+        short_win_n_bad,
+        drif_inter,
+        drif_intra,
+        background_err_lim,
+    ):
+
+        try:
+            long_win_len = int(long_win_len)
+            long_err_std_n = float(long_err_std_n)
+            short_win_len = int(short_win_len)
+            short_err_std_n = float(short_err_std_n)
+            short_win_n_bad = int(short_win_n_bad)
+            drif_inter = float(drif_inter)
+            drif_intra = float(drif_intra)
+            background_err_lim = float(background_err_lim)
+            assert long_win_len >= 1, "long_win_len must be >= 1"
+            assert long_win_len % 2 != 0, "long_win_len must be an odd number"
+            assert long_err_std_n >= 0, "long_err_std_n must be >= 0"
+            assert short_win_len >= 1, "short_win_len must be >= 1"
+            assert short_err_std_n >= 0, "short_err_std_n must be >= 0"
+            assert short_win_n_bad >= 1, "short_win_n_bad must be >= 1"
+            assert drif_inter >= 0, "drif_inter must be >= 0"
+            assert drif_intra >= 0, "drif_intra must be >= 0"
+            assert background_err_lim >= 0, "background_err_lim must be >= 0"
+        except AssertionError as error:
+            raise AssertionError("invalid input parameter: " + str(error))
+
+        SSTTailChecker.long_win_len = long_win_len
+        SSTTailChecker.long_err_std_n = long_err_std_n
+        SSTTailChecker.short_win_len = short_win_len
+        SSTTailChecker.short_err_std_n = short_err_std_n
+        SSTTailChecker.short_win_n_bad = short_win_n_bad
+        SSTTailChecker.drif_inter = drif_inter
+        SSTTailChecker.drif_intra = drif_intra
+        SSTTailChecker.background_err_lim = background_err_lim
+
+    def initialise_reps(self):
+        # set start and end tail flags to pass to ensure all obs receive flag
+        # then exit if there are no obs suitable for assessment
+        for rep in self.reps:
+            rep.set_qc("SST", "drf_tail1", 0)
+            rep.set_qc("SST", "drf_tail2", 0)
+        if len(self.sst_anom) == 0:
+            return
+
+    @staticmethod
+    def parse_rep(rep):
+        bg_val = rep.getext("OSTIA")  # raises assertion error if not found
+        ice_val = rep.getext("ICE")  # raises assertion error if not found
+        bgvar_val = rep.getext("BGVAR")  # raises assertion error if not found
+
+        if ice_val is None:
+            ice_val = 0.0
+
+        daytime = track_day_test(
+            rep.getvar("YR"),
+            rep.getvar("MO"),
+            rep.getvar("DY"),
+            rep.getvar("HR"),
+            rep.getvar("LAT"),
+            rep.getvar("LON"),
+            -2.5,
+        )
+
+        land_match = bg_val is None
+        ice_match = ice_val > 0.15
+
+        good_match = not (daytime or land_match or ice_match)
+
+        return bg_val, ice_val, bgvar_val, good_match
+
+    def preprocess_reps(self):
+        # test and filter out obs with unsuitable background matches
+        reps_ind = []  # type: list
+        sst_anom = []  # type: list
+        bgvar = []  # type: list
+        for ind, rep in enumerate(self.reps):
+            bg_val, ice_val, bgvar_val, good_match = SSTTailChecker.parse_rep(rep)
+
+            if good_match:
+                assert (
+                    bg_val is not None and -5.0 <= bg_val <= 45.0
+                ), "matched background sst is invalid"
+                assert (
+                    bgvar_val is not None and 0.0 <= bgvar_val <= 10
+                ), "matched background error variance is invalid"
+                reps_ind.append(ind)
+                sst_anom.append(rep.getvar("SST") - bg_val)
+                bgvar.append(bgvar_val)
+
+        # prepare numpy arrays and variables needed for tail checks
+        # indices of obs suitable for assessment
+        self.reps_ind = np.array(reps_ind)  # type: np.ndarray
+        # ob-background differences
+        self.sst_anom = np.array(sst_anom)  # type: np.ndarray
+        # standard deviation of background error
+        self.bgerr = np.sqrt(np.array(bgvar))  # type: np.ndarray
+
+    def do_long_tail_check(self, forward=True):
+
+        nrep = len(self.sst_anom)
+        mid_win_ind = int((SSTTailChecker.long_win_len - 1) / 2)
+
+        if forward:
+            sst_anom_temp = self.sst_anom
+            bgerr_temp = self.bgerr
+        else:
+            sst_anom_temp = np.flipud(self.sst_anom)
+            bgerr_temp = np.flipud(self.bgerr)
+
+        # this is the long tail check
+        for ix in range(0, nrep - SSTTailChecker.long_win_len + 1):
+            sst_anom_winvals = sst_anom_temp[ix : ix + SSTTailChecker.long_win_len]
+            bgerr_winvals = bgerr_temp[ix : ix + SSTTailChecker.long_win_len]
+            if np.any(bgerr_winvals > np.sqrt(SSTTailChecker.background_err_lim)):
+                break
+            sst_anom_avg = trim_mean(sst_anom_winvals, 100)
+            sst_anom_stdev = trim_std(sst_anom_winvals, 100)
+            bgerr_avg = np.mean(bgerr_winvals)
+            bgerr_rms = np.sqrt(np.mean(bgerr_winvals**2))
+            if (
+                abs(sst_anom_avg)
+                > SSTTailChecker.long_err_std_n
+                * np.sqrt(SSTTailChecker.drif_inter**2 + bgerr_avg**2)
+            ) or (
+                sst_anom_stdev > np.sqrt(SSTTailChecker.drif_intra**2 + bgerr_rms**2)
+            ):
+                if forward:
+                    self.start_tail_ind = ix + mid_win_ind
+                else:
+                    self.end_tail_ind = (nrep - 1) - ix - mid_win_ind
+            else:
+                break
+
+    def do_short_tail_check(self, forward=True):
+        first_pass_ind = self.start_tail_ind + 1  # first index passing long tail check
+        last_pass_ind = self.end_tail_ind - 1  # last index passing long tail check
+        npass = last_pass_ind - first_pass_ind + 1
+        assert npass > 0, "short tail check: npass not > 0"
+
+        if (
+            npass < SSTTailChecker.short_win_len
+        ):  # records shorter than short-window length aren't evaluated
+            return
+
+        if forward:
+            sst_anom_temp = self.sst_anom[first_pass_ind : last_pass_ind + 1]
+            bgerr_temp = self.bgerr[first_pass_ind : last_pass_ind + 1]
+        else:
+            sst_anom_temp = np.flipud(self.sst_anom[first_pass_ind : last_pass_ind + 1])
+            bgerr_temp = np.flipud(self.bgerr[first_pass_ind : last_pass_ind + 1])
+
+        # this is the short tail check
+        for ix in range(0, npass - SSTTailChecker.short_win_len + 1):
+            sst_anom_winvals = sst_anom_temp[ix : ix + SSTTailChecker.short_win_len]
+            bgerr_winvals = bgerr_temp[ix : ix + SSTTailChecker.short_win_len]
+            if np.any(bgerr_winvals > np.sqrt(SSTTailChecker.background_err_lim)):
+                break
+            limit = SSTTailChecker.short_err_std_n * np.sqrt(
+                bgerr_winvals**2
+                + SSTTailChecker.drif_inter**2
+                + SSTTailChecker.drif_intra**2
+            )
+            exceed_limit = np.logical_or(
+                sst_anom_winvals > limit, sst_anom_winvals < -limit
+            )
+            if np.sum(exceed_limit) >= SSTTailChecker.short_win_n_bad:
+                if forward:
+                    if ix == (
+                        npass - SSTTailChecker.short_win_len
+                    ):  # if all windows have failed, flag everything
+                        self.start_tail_ind += SSTTailChecker.short_win_len
+                    else:
+                        self.start_tail_ind += 1
+                else:
+                    if ix == (
+                        npass - SSTTailChecker.short_win_len
+                    ):  # if all windows have failed, flag everything
+                        self.end_tail_ind -= SSTTailChecker.short_win_len
+                    else:
+                        self.end_tail_ind -= 1
+            else:
+                break
+
+    def do_qc(self):
+        self.preprocess_reps()
+        self.initialise_reps()
+
+        if len(self.sst_anom) == 0:
+            return
+
+        nrep = len(self.sst_anom)
+        self.start_tail_ind = -1  # keeps track of index where start tail stops
+        self.end_tail_ind = nrep  # keeps track of index where end tail starts
+
+        # do long tail check
+        if not (
+            nrep < SSTTailChecker.long_win_len
+        ):  # records shorter than long-window length aren't evaluated
+            # run forwards then backwards over timeseries
+            self.do_long_tail_check(forward=True)
+            self.do_long_tail_check(forward=False)
+
+        # do short tail check on records that pass long tail check
+        if not (
+            self.start_tail_ind >= self.end_tail_ind
+        ):  # whole record already failed long tail check
+            self.do_short_tail_check(forward=True)
+            self.do_short_tail_check(forward=False)
+
+        # now flag reps
+        if (
+            self.start_tail_ind >= self.end_tail_ind
+        ):  # whole record failed tail checks, dont flag
+            self.start_tail_ind = -1
+            self.end_tail_ind = nrep
+        if not self.start_tail_ind == -1:
+            for ind, rep in enumerate(self.reps):
+                if ind <= self.reps_ind[self.start_tail_ind]:
+                    rep.set_qc("SST", "drf_tail1", 1)
+        if not self.end_tail_ind == nrep:
+            for ind, rep in enumerate(self.reps):
+                if ind >= self.reps_ind[self.end_tail_ind]:
+                    rep.set_qc("SST", "drf_tail2", 1)
+
+
+def BLEEK_og_sst_tail_check(
     reps,
     long_win_len=121,
     long_err_std_n=3.0,
@@ -1679,6 +1938,8 @@ def og_sst_tail_check(
     sst_anom = np.array(sst_anom)  # type: np.ndarray
     # standard deviation of background error
     bgerr = np.sqrt(np.array(bgvar))  # type: np.ndarray
+
+    ##
     nrep = len(sst_anom)
     start_tail_ind = -1  # keeps track of index where start tail stops
     end_tail_ind = nrep  # keeps track of index where end tail starts
