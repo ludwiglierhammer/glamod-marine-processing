@@ -79,9 +79,7 @@ def testdata():
                 errors="coerce",
             )
         if table == "observations-slp":
-            db_table.data["observation_value"] = (
-                db_table.data["observation_value"] / 100
-            )
+            db_table.data["observation_value"] = db_table.data["observation_value"]
 
         data_dict[table] = db_table
 
@@ -90,19 +88,46 @@ def testdata():
 
 @pytest.fixture(scope="session")
 def climdata():
+    kwargs = {
+        "cache_dir": ".pytest_cache/metoffice_qc",
+        "within_drs": False,
+        "branch": "qc_ext_files",
+    }
     clim_dict = {}
+    clim_dict["AT"] = {
+        "mean": load_file(
+            "metoffice_qc/external_files/AT_pentad_climatology.nc",
+            **kwargs,
+        ),
+        "stdev": load_file(
+            "metoffice_qc/external_files/AT_pentad_stdev_climatology.nc",
+            **kwargs,
+        ),
+    }
+    clim_dict["DPT"] = {
+        "mean": load_file(
+            "metoffice_qc/external_files/DPT_pentad_climatology.nc",
+            **kwargs,
+        ),
+        "stdev": load_file(
+            "metoffice_qc/external_files/DPT_pentad_stdev_climatology.nc",
+            **kwargs,
+        ),
+    }
     clim_dict["SLP"] = {
         "mean": load_file(
             "metoffice_qc/external_files/SLP_pentad_climatology.nc",
-            cache_dir=".pytest_cache/metoffice_qc",
-            within_drs=False,
-            branch="qc_ext_files",
+            **kwargs,
         ),
         "stdev": load_file(
             "metoffice_qc/external_files/SLP_pentad_stdev_climatology.nc",
-            cache_dir=".pytest_cache/metoffice_qc",
-            within_drs=False,
-            branch="qc_ext_files",
+            **kwargs,
+        ),
+    }
+    clim_dict["SST"] = {
+        "mean": load_file(
+            "metoffice_qc/external_files/SST_daily_climatology_january.nc",
+            **kwargs,
         ),
     }
     return clim_dict
@@ -243,7 +268,7 @@ def test_do_day_check(testdata):
     pd.testing.assert_series_equal(results, expected)
 
 
-def test_do_air_temperature_missing_value_check(testdata):
+def test_do_at_missing_value_check(testdata):
     db_ = testdata["observations-at"].copy()
     results = db_.apply(
         lambda row: do_missing_value_check(value=row["observation_value"]),
@@ -269,89 +294,18 @@ def test_do_air_temperature_missing_value_check(testdata):
     pd.testing.assert_series_equal(results, expected)
 
 
-def test_do_air_temperature_anomaly_check(testdata):
-    db_ = testdata["observations-at"].copy()
-    db_.data["climatology"] = [
-        277,
-        278,
-        279,
-        280,
-        280,
-        280,
-        280,
-        280,
-        280,
-        280,
-        280,
-        280,
-        280,
-    ]
-    results = db_.apply(
-        lambda row: do_anomaly_check(
-            value=row["observation_value"],
-            climatology=row["climatology"],
-            maximum_anomaly=1.0,
-        ),
-        axis=1,
-    )
-    expected = pd.Series(
-        [
-            qc.passed,
-            qc.failed,
-            qc.failed,
-            qc.passed,
-            qc.failed,
-            qc.passed,
-            qc.passed,
-            qc.passed,
-            qc.passed,
-            qc.passed,
-            qc.passed,
-            qc.passed,
-            qc.passed,
-        ]
-    )
-    pd.testing.assert_series_equal(results, expected)
-
-
-def test_do_air_temperature_no_normal_check(testdata):
-    db_ = testdata["observations-at"].copy()
-    results = db_.apply(
-        lambda row: do_no_normal_check(climatology=row["observation_value"]),
-        axis=1,
-    )
-    expected = pd.Series(
-        [
-            qc.passed,
-            qc.passed,
-            qc.failed,
-            qc.passed,
-            qc.failed,
-            qc.passed,
-            qc.passed,
-            qc.passed,
-            qc.passed,
-            qc.passed,
-            qc.passed,
-            qc.passed,
-            qc.passed,
-        ]
-    )
-    pd.testing.assert_series_equal(results, expected)
-
-
-def test_do_air_temperature_hard_limit_check(testdata):
+def test_do_at_hard_limit_check(testdata):
     db_ = testdata["observations-at"].copy()
     results = db_.apply(
         lambda row: do_hard_limit_check(
             value=row["observation_value"],
-            hard_limits=[278, 281],
+            hard_limits=[193.15, 338.15],  # K
         ),
         axis=1,
     )
     expected = pd.Series(
         [
-            qc.failed,
+            qc.passed,
             qc.passed,
             qc.failed,
             qc.passed,
@@ -369,68 +323,18 @@ def test_do_air_temperature_hard_limit_check(testdata):
     pd.testing.assert_series_equal(results, expected)
 
 
-def test_do_air_temperature_climatology_plus_stdev_check(testdata):
+def test_do_at_no_normal_check(testdata, climdata):
     db_ = testdata["observations-at"].copy()
-    db_.data["climatology"] = [
-        277,
-        278,
-        279,
-        280,
-        280,
-        280,
-        280,
-        280,
-        280,
-        280,
-        280,
-        280,
-        280,
-    ]
-    results = db_.apply(
-        lambda row: do_climatology_plus_stdev_check(
-            value=row["observation_value"],
-            climatology=row["climatology"],
-            stdev=1.0,
-            minmax_standard_deviation=[1.0, 4.0],
-            maximum_standardised_anomaly=2.0,
-        ),
-        axis=1,
-    )
-    expected = pd.Series(
-        [
-            qc.passed,
-            qc.passed,
-            qc.failed,
-            qc.passed,
-            qc.failed,
-            qc.passed,
-            qc.passed,
-            qc.passed,
-            qc.passed,
-            qc.passed,
-            qc.passed,
-            qc.passed,
-            qc.passed,
-        ]
-    )
-    pd.testing.assert_series_equal(results, expected)
-
-
-def test_do_slp_climatology_plus_stdev_plus_lowbar_check(testdata, climdata):
-    db_ = testdata["observations-slp"].copy()
     climatology = Climatology.open_netcdf_file(
-        climdata["SLP"]["mean"], "slp", obs_name="SLP", statistics="mean"
-    )
-    stdev = Climatology.open_netcdf_file(
-        climdata["SLP"]["stdev"], "slp", obs_name="SLP", statistics="stdev"
+        climdata["AT"]["mean"],
+        "at",
+        obs_name="AT",
+        statistics="mean",
+        time_axis="pentad_time",
     )
     results = db_.apply(
-        lambda row: do_climatology_plus_stdev_plus_lowbar_check(
-            value=row["observation_value"],
+        lambda row: do_no_normal_check(
             climatology=climatology,
-            stdev=stdev,
-            limit=3.0,
-            lowbar=10.0,
             lat=row["latitude"],
             lon=row["longitude"],
             date=row["date_time"],
@@ -457,30 +361,74 @@ def test_do_slp_climatology_plus_stdev_plus_lowbar_check(testdata, climdata):
     pd.testing.assert_series_equal(results, expected)
 
 
-def test_do_dpt_climatology_plus_stdev_check(testdata):
-    db_ = testdata["observations-dpt"].copy()
-    db_.data["climatology"] = [
-        268,
-        269,
-        270,
-        273,
-        275,
-        275,
-        275,
-        275,
-        275,
-        275,
-        275,
-        275,
-        275,
-    ]
+def test_do_at_anomaly_check(testdata, climdata):
+    db_ = testdata["observations-at"].copy()
+    climatology = Climatology.open_netcdf_file(
+        climdata["AT"]["mean"],
+        "at",
+        obs_name="AT",
+        statistics="mean",
+        time_axis="pentad_time",
+    )
+    climatology.convert_units_to("K", source_units="degC")
+    results = db_.apply(
+        lambda row: do_anomaly_check(
+            value=row["observation_value"],
+            climatology=climatology,
+            maximum_anomaly=10.0,  # K
+            lat=row["latitude"],
+            lon=row["longitude"],
+            date=row["date_time"],
+        ),
+        axis=1,
+    )
+    expected = pd.Series(
+        [
+            qc.failed,
+            qc.failed,
+            qc.failed,
+            qc.passed,
+            qc.failed,
+            qc.passed,
+            qc.passed,
+            qc.passed,
+            qc.passed,
+            qc.passed,
+            qc.passed,
+            qc.passed,
+            qc.passed,
+        ]
+    )
+    pd.testing.assert_series_equal(results, expected)
+
+
+def test_do_at_climatology_plus_stdev_check(testdata, climdata):
+    db_ = testdata["observations-at"].copy()
+    climatology = Climatology.open_netcdf_file(
+        climdata["AT"]["mean"],
+        "at",
+        obs_name="AT",
+        statistics="mean",
+        time_axis="pentad_time",
+    )
+    climatology.convert_units_to("K", source_units="degC")
+    stdev = Climatology.open_netcdf_file(
+        climdata["AT"]["stdev"],
+        "at",
+        obs_name="AT",
+        statistics="stdev",
+        time_axis="pentad_time",
+    )
     results = db_.apply(
         lambda row: do_climatology_plus_stdev_check(
             value=row["observation_value"],
-            climatology=row["climatology"],
-            stdev=1.0,
-            minmax_standard_deviation=[1.0, 4.0],
-            maximum_standardised_anomaly=2.0,
+            climatology=climatology,
+            stdev=stdev,
+            minmax_standard_deviation=[1.0, 4.0],  # K
+            maximum_standardised_anomaly=5.5,  # K
+            lat=row["latitude"],
+            lon=row["longitude"],
+            date=row["date_time"],
         ),
         axis=1,
     )
@@ -489,7 +437,110 @@ def test_do_dpt_climatology_plus_stdev_check(testdata):
             qc.failed,
             qc.passed,
             qc.failed,
+            qc.passed,
             qc.failed,
+            qc.passed,
+            qc.passed,
+            qc.passed,
+            qc.passed,
+            qc.passed,
+            qc.passed,
+            qc.passed,
+            qc.passed,
+        ]
+    )
+    pd.testing.assert_series_equal(results, expected)
+
+
+def test_do_slp_missing_value_check(testdata):
+    db_ = testdata["observations-slp"].copy()
+    results = db_.apply(
+        lambda row: do_missing_value_check(value=row["observation_value"]),
+        axis=1,
+    )
+    expected = pd.Series(
+        [
+            qc.passed,
+            qc.passed,
+            qc.failed,
+            qc.passed,
+            qc.failed,
+            qc.passed,
+            qc.passed,
+            qc.passed,
+            qc.passed,
+            qc.passed,
+            qc.passed,
+            qc.passed,
+            qc.passed,
+        ]
+    )
+    pd.testing.assert_series_equal(results, expected)
+
+
+def test_do_slp_no_normal_check(testdata, climdata):
+    db_ = testdata["observations-slp"].copy()
+    climatology = Climatology.open_netcdf_file(
+        climdata["SLP"]["mean"], "slp", obs_name="SLP", statistics="mean"
+    )
+    results = db_.apply(
+        lambda row: do_no_normal_check(
+            climatology=climatology,
+            lat=row["latitude"],
+            lon=row["longitude"],
+            date=row["date_time"],
+        ),
+        axis=1,
+    )
+    expected = pd.Series(
+        [
+            qc.failed,
+            qc.passed,
+            qc.failed,
+            qc.passed,
+            qc.failed,
+            qc.passed,
+            qc.passed,
+            qc.passed,
+            qc.passed,
+            qc.passed,
+            qc.passed,
+            qc.passed,
+            qc.passed,
+        ]
+    )
+    pd.testing.assert_series_equal(results, expected)
+
+
+def test_do_slp_climatology_plus_stdev_plus_lowbar_check(testdata, climdata):
+    db_ = testdata["observations-slp"].copy()
+    climatology = Climatology.open_netcdf_file(
+        climdata["SLP"]["mean"], "slp", obs_name="SLP", statistics="mean"
+    )
+    climatology.convert_units_to("Pa")
+    stdev = Climatology.open_netcdf_file(
+        climdata["SLP"]["stdev"], "slp", obs_name="SLP", statistics="stdev"
+    )
+    stdev.convert_units_to("Pa", source_units="hPa")
+    results = db_.apply(
+        lambda row: do_climatology_plus_stdev_plus_lowbar_check(
+            value=row["observation_value"],
+            climatology=climatology,
+            stdev=stdev,
+            limit=300,  # Pa
+            lowbar=1000,  # Pa
+            lat=row["latitude"],
+            lon=row["longitude"],
+            date=row["date_time"],
+        ),
+        axis=1,
+    )
+    expected = pd.Series(
+        [
+            qc.failed,
+            qc.passed,
+            qc.failed,
+            qc.passed,
             qc.failed,
             qc.passed,
             qc.passed,
@@ -530,10 +581,102 @@ def test_do_dpt_missing_value_check(testdata):
     pd.testing.assert_series_equal(results, expected)
 
 
-def test_do_dpt_no_normal_check(testdata):
+def test_do_dpt_hard_limit_check(testdata):
     db_ = testdata["observations-dpt"].copy()
     results = db_.apply(
-        lambda row: do_no_normal_check(climatology=row["observation_value"]),
+        lambda row: do_hard_limit_check(
+            value=row["observation_value"],
+            hard_limits=[193.15, 338.15],  # K
+        ),
+        axis=1,
+    )
+    expected = pd.Series(
+        [
+            qc.failed,
+            qc.passed,
+            qc.failed,
+            qc.passed,
+            qc.failed,
+            qc.passed,
+            qc.passed,
+            qc.passed,
+            qc.passed,
+            qc.passed,
+            qc.passed,
+            qc.passed,
+            qc.passed,
+        ]
+    )
+    pd.testing.assert_series_equal(results, expected)
+
+
+def test_do_dpt_no_normal_check(testdata, climdata):
+    db_ = testdata["observations-dpt"].copy()
+    climatology = Climatology.open_netcdf_file(
+        climdata["DPT"]["mean"],
+        "dpt",
+        obs_name="DPT",
+        statistics="mean",
+        time_axis="pentad_time",
+    )
+    results = db_.apply(
+        lambda row: do_no_normal_check(
+            climatology=climatology,
+            lat=row["latitude"],
+            lon=row["longitude"],
+            date=row["date_time"],
+        ),
+        axis=1,
+    )
+    expected = pd.Series(
+        [
+            qc.failed,
+            qc.passed,
+            qc.failed,
+            qc.passed,
+            qc.failed,
+            qc.passed,
+            qc.passed,
+            qc.passed,
+            qc.passed,
+            qc.passed,
+            qc.passed,
+            qc.passed,
+            qc.passed,
+        ]
+    )
+    pd.testing.assert_series_equal(results, expected)
+
+
+def test_do_dpt_climatology_plus_stdev_check(testdata, climdata):
+    db_ = testdata["observations-dpt"].copy()
+    climatology = Climatology.open_netcdf_file(
+        climdata["DPT"]["mean"],
+        "dpt",
+        obs_name="DPT",
+        statistics="mean",
+        time_axis="pentad_time",
+    )
+    climatology.convert_units_to("K", source_units="degC")
+    stdev = Climatology.open_netcdf_file(
+        climdata["DPT"]["stdev"],
+        "dpt",
+        obs_name="DPT",
+        statistics="stdev",
+        time_axis="pentad_time",
+    )
+
+    results = db_.apply(
+        lambda row: do_climatology_plus_stdev_check(
+            value=row["observation_value"],
+            climatology=climatology,
+            stdev=stdev,
+            minmax_standard_deviation=[1.0, 4.0],  # K
+            maximum_standardised_anomaly=5.5,  # K
+            lat=row["latitude"],
+            lon=row["longitude"],
+            date=row["date_time"],
+        ),
         axis=1,
     )
     expected = pd.Series(
@@ -644,18 +787,19 @@ def test_do_sst_freeze_check(testdata):
     pd.testing.assert_series_equal(results, expected)
 
 
-def test_do_sst_anomaly_check(testdata):
+def test_do_sst_hard_limit_check(testdata):
     db_ = testdata["observations-sst"].copy()
     results = db_.apply(
-        lambda row: do_anomaly_check(
-            value=row["observation_value"], climatology=277, maximum_anomaly=1.0
+        lambda row: do_hard_limit_check(
+            value=row["observation_value"],
+            hard_limits=[268.15, 318.15],
         ),
         axis=1,
     )
     expected = pd.Series(
         [
             qc.passed,
-            qc.failed,
+            qc.passed,
             qc.failed,
             qc.failed,
             qc.failed,
@@ -672,15 +816,67 @@ def test_do_sst_anomaly_check(testdata):
     pd.testing.assert_series_equal(results, expected)
 
 
-def test_do_sst_no_normal_check(testdata):
+def test_do_sst_no_normal_check(testdata, climdata):
     db_ = testdata["observations-sst"].copy()
+    climatology = Climatology.open_netcdf_file(
+        climdata["SST"]["mean"],
+        "sst",
+        obs_name="SST",
+        statistics="mean",
+        valid_ntime=31,
+    )
     results = db_.apply(
-        lambda row: do_no_normal_check(climatology=row["observation_value"]),
+        lambda row: do_no_normal_check(
+            climatology=climatology,
+            lat=row["latitude"],
+            lon=row["longitude"],
+            date=row["date_time"],
+        ),
         axis=1,
     )
     expected = pd.Series(
         [
+            qc.failed,
             qc.passed,
+            qc.failed,
+            qc.failed,
+            qc.failed,
+            qc.failed,
+            qc.failed,
+            qc.failed,
+            qc.failed,
+            qc.failed,
+            qc.failed,
+            qc.failed,
+            qc.failed,
+        ]
+    )
+    pd.testing.assert_series_equal(results, expected)
+
+
+def test_do_sst_anomaly_check(testdata, climdata):
+    db_ = testdata["observations-sst"].copy()
+    climatology = Climatology.open_netcdf_file(
+        climdata["SST"]["mean"],
+        "sst",
+        obs_name="SST",
+        statistics="mean",
+        valid_ntime=31,
+    )
+    results = db_.apply(
+        lambda row: do_anomaly_check(
+            value=row["observation_value"],
+            climatology=climatology,
+            maximum_anomaly=1.0,
+            lat=row["latitude"],
+            lon=row["longitude"],
+            date=row["date_time"],
+        ),
+        axis=1,
+    )
+    expected = pd.Series(
+        [
+            qc.failed,
             qc.passed,
             qc.failed,
             qc.failed,
