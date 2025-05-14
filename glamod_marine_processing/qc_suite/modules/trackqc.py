@@ -1785,11 +1785,10 @@ def og_sst_tail_check(
 
 
 def og_sst_biased_noisy_check(reps, *args):
-    checker = SSTBiasedNoisyChecker(*args)
-    checker.validate_parameters()
-    sst_anom, bgerr, bgvar_is_masked = checker.preprocess_reps(reps)
-    checker.initialise_flags(reps)
-    checker.do_qc(reps, sst_anom, bgerr, bgvar_is_masked)
+    checker = SSTBiasedNoisyChecker(reps)
+    if args:
+        checker.set_parameters(*args)
+    checker.do_qc()
 
 
 def BLEEK_og_sst_biased_noisy_check(
@@ -1975,23 +1974,100 @@ def BLEEK_og_sst_biased_noisy_check(
     return
 
 
-from dataclasses import dataclass
-
-
-@dataclass
 class SSTBiasedNoisyChecker:
+    """Check to see whether a drifter sea surface temperature record is unacceptably biased or noisy as a whole.
 
-    n_eval: int = 30
-    bias_lim: float = 1.10
-    drif_intra: float = 1.0
-    drif_inter: float = 0.29
-    err_std_n: float = 3.0
-    n_bad: int = 2
-    background_err_lim: float = 0.3
+    The check makes an assessment of the quality of data in a drifting buoy record by comparing to a background
+    reference field. If the record is found to be unacceptably biased or noisy relative to the background all
+    observations are flagged by the check. For longer records the flags 'drf_bias' and 'drf_noise' are set for each
+    input report: flag=1 for records with erroneous data, else flag=0. For shorter records 'drf_short' is set for
+    each input report: flag=1 for reports with erroneous data, else flag=0.
 
-    def validate_parameters(self) -> None:
+    When making the comparison an allowance is made for background error variance and also normal drifter error (both
+    bias and random measurement error). A background error variance limit is also specified, beyond which the
+    background is deemed unreliable and is excluded from comparison. Observations made during the day, in icy regions
+    or where the background value is missing are also excluded from the comparison.
+
+    The check has two separate streams; a 'long-record check' and a 'short-record check'. Records with at least
+    n_eval observations are passed to the long-record check, else they are passed to the short-record check. The
+    long-record check looks for records that are too biased or noisy as a whole. The short record check looks for
+    individual observations exceeding a noise limit within a record. The purpose of n_eval is to ensure records with
+    too few observations for their bias and noise to be reliably estimated are handled separately by the short-record
+    check.
+
+    The correlation of the background error is treated as unknown and handled differently for each assessment. For
+    the long-record noise-check and the short-record check the background error is treated as uncorrelated,
+    which maximises the possible impact of background error on these assessments. For the long-record bias-check a
+    limit (bias_lim) is specified beyond which the record is considered biased. The default value for this limit was
+    chosen based on histograms of drifter-background bias. An alternative approach would be to treat the background
+    error as entirely correlated across a long-record, which maximises its possible impact on the bias assessment. In
+    this case the histogram approach was used as the limit could be tuned to give better results.
+
+    The following class attributes are set and can be modified using the set_parameter method
+
+    n_eval: int
+        the minimum number of drifter observations required to be assessed by the long-record check
+    bias_lim: float
+        maximum allowable drifter-background bias, beyond which a record is considered biased (degC)
+    drif_intra: float
+        maximum random measurement uncertainty reasonably expected in drifter data (standard
+        deviation, degC)
+    drif_inter: float
+        spread of biases expected in drifter data (standard deviation, degC)
+    err_std_n: float
+        number of standard deviations of combined background and drifter error, beyond which
+        short-record data are deemed suspicious
+    n_bad: int
+        minimum number of suspicious data points required for failure of short-record check
+    background_err_lim: float
+        background error variance beyond which the SST background is deemed unreliable (degC squared)
+    """
+
+    n_eval = 30
+    bias_lim = 1.10
+    drif_intra = 1.0
+    drif_inter = 0.29
+    err_std_n = 3.0
+    n_bad = 2
+    background_err_lim = 0.3
+
+    def __init__(self, reps):
+        self.reps = reps
+        self.sst_anom = None
+        self.bgerr = None
+        self.bgvar_is_masked = None
+
+    def set_parameters(
+        self,
+        n_eval,
+        bias_lim,
+        drif_intra,
+        drif_inter,
+        err_std_n,
+        n_bad,
+        background_err_lim,
+    ) -> None:
         """
-        Ensure that the parameters of the check are valid
+        Set the parameters of the QC check
+
+        Parameters
+        ----------
+         n_eval: int
+            the minimum number of drifter observations required to be assessed by the long-record check
+        bias_lim: float
+            maximum allowable drifter-background bias, beyond which a record is considered biased (degC)
+        drif_intra: float
+            maximum random measurement uncertainty reasonably expected in drifter data (standard
+            deviation, degC)
+        drif_inter: float
+            spread of biases expected in drifter data (standard deviation, degC)
+        err_std_n: float
+            number of standard deviations of combined background and drifter error, beyond which
+            short-record data are deemed suspicious
+        n_bad: int
+            minimum number of suspicious data points required for failure of short-record check
+        background_err_lim: float
+            background error variance beyond which the SST background is deemed unreliable (degC squared)
 
         Returns
         -------
@@ -2000,18 +2076,26 @@ class SSTBiasedNoisyChecker:
         Raises
         ------
         AssertionError
-            Raises an assertion error if one of the class attributes is invalid.
+            When any of the parameters is invalid
         """
-        assert self.n_eval > 0, "n_eval must be > 0"
-        assert self.bias_lim >= 0, "bias_lim must be >= 0"
-        assert self.drif_intra >= 0, "drif_intra must be >= 0"
-        assert self.drif_inter >= 0, "drif_inter must be >= 0"
-        assert self.err_std_n >= 0, "err_std_n must be >= 0"
-        assert self.n_bad >= 1, "n_bad must be >= 1"
-        assert self.background_err_lim >= 0, "background_err_lim must be >= 0"
+        assert n_eval > 0, "n_eval must be > 0"
+        assert bias_lim >= 0, "bias_lim must be >= 0"
+        assert drif_intra >= 0, "drif_intra must be >= 0"
+        assert drif_inter >= 0, "drif_inter must be >= 0"
+        assert err_std_n >= 0, "err_std_n must be >= 0"
+        assert n_bad >= 1, "n_bad must be >= 1"
+        assert background_err_lim >= 0, "background_err_lim must be >= 0"
+
+        SSTBiasedNoisyChecker.n_eval = n_eval
+        SSTBiasedNoisyChecker.bias_lim = bias_lim
+        SSTBiasedNoisyChecker.drif_intra = drif_intra
+        SSTBiasedNoisyChecker.drif_inter = drif_inter
+        SSTBiasedNoisyChecker.err_std_n = err_std_n
+        SSTBiasedNoisyChecker.n_bad = n_bad
+        SSTBiasedNoisyChecker.background_err_lim = background_err_lim
 
     @staticmethod
-    def parse_rep(rep, background_err_lim) -> (float, float, float, bool, bool):
+    def parse_rep(rep) -> (float, float, float, bool, bool):
         """
         Extract QC-relevant variables from a marine report and
 
@@ -2047,13 +2131,16 @@ class SSTBiasedNoisyChecker:
 
         land_match = bg_val is None
         ice_match = ice_val > 0.15
-        bgvar_mask = bgvar_val is not None and bgvar_val > background_err_lim
+        bgvar_mask = (
+            bgvar_val is not None
+            and bgvar_val > SSTBiasedNoisyChecker.background_err_lim
+        )
 
         good_match = not (daytime or land_match or ice_match or bgvar_mask)
 
         return bg_val, ice_val, bgvar_val, good_match, bgvar_mask
 
-    def preprocess_reps(self, reps):
+    def preprocess_reps(self):
         """
         Extract the arrays of SST anomalies and background errors used in the QC checks, as well as a flag
         indicating missing or invalid background values.
@@ -2074,9 +2161,9 @@ class SSTBiasedNoisyChecker:
         bgvar = []
         bgvar_is_masked = False
 
-        for rep in reps:
+        for rep in self.reps:
             bg_val, ice_val, bgvar_val, good_match, bgvar_mask = (
-                SSTBiasedNoisyChecker.parse_rep(rep, self.background_err_lim)
+                SSTBiasedNoisyChecker.parse_rep(rep)
             )
 
             if bgvar_mask:
@@ -2096,65 +2183,56 @@ class SSTBiasedNoisyChecker:
         sst_anom = np.array(sst_anom)  # ob-background differences
         bgerr = np.sqrt(np.array(bgvar))  # standard deviation of background error
 
-        return sst_anom, bgerr, bgvar_is_masked
+        self.sst_anom = sst_anom
+        self.bgerr = bgerr
+        self.bgvar_is_masked = bgvar_is_masked
 
-    def initialise_flags(self, reps):
-        for rep in reps:
+    def initialise_flags(self):
+        for rep in self.reps:
             rep.set_qc("SST", "drf_bias", 0)
             rep.set_qc("SST", "drf_noise", 0)
             rep.set_qc("SST", "drf_short", 0)
 
-    @staticmethod
-    def long_record_qc(reps, sst_anom, bgerr, drif_intra, bias_lim):
-        sst_anom_avg = np.mean(sst_anom)
-        sst_anom_stdev = np.std(sst_anom)
-        bgerr_rms = np.sqrt(np.mean(bgerr**2))
+    def long_record_qc(self):
+        sst_anom_avg = np.mean(self.sst_anom)
+        sst_anom_stdev = np.std(self.sst_anom)
+        bgerr_rms = np.sqrt(np.mean(self.bgerr**2))
 
-        if abs(sst_anom_avg) > bias_lim:
-            for rep in reps:
+        if abs(sst_anom_avg) > SSTBiasedNoisyChecker.bias_lim:
+            for rep in self.reps:
                 rep.set_qc("SST", "drf_bias", 1)
 
-        if sst_anom_stdev > np.sqrt(drif_intra**2 + bgerr_rms**2):
-            for rep in reps:
+        if sst_anom_stdev > np.sqrt(SSTBiasedNoisyChecker.drif_intra**2 + bgerr_rms**2):
+            for rep in self.reps:
                 rep.set_qc("SST", "drf_noise", 1)
 
-    @staticmethod
-    def short_record_qc(
-        reps, sst_anom, bgerr, err_std_n, drif_inter, drif_intra, n_bad
-    ):
+    def short_record_qc(self):
         # Calculate the limit based on the combined uncertainties (background error, drifter inter and drifter intra
         # error) and then multiply by the err_std_n
-        limit = err_std_n * np.sqrt(bgerr**2 + drif_inter**2 + drif_intra**2)
+        limit = SSTBiasedNoisyChecker.err_std_n * np.sqrt(
+            self.bgerr**2
+            + SSTBiasedNoisyChecker.drif_inter**2
+            + SSTBiasedNoisyChecker.drif_intra**2
+        )
 
         # If the number of obs outside the limit exceed n_bad then flag them all as bad
-        exceed_limit = np.logical_or(sst_anom > limit, sst_anom < -limit)
-        if np.sum(exceed_limit) >= n_bad:
-            for rep in reps:
+        exceed_limit = np.logical_or(self.sst_anom > limit, self.sst_anom < -limit)
+        if np.sum(exceed_limit) >= SSTBiasedNoisyChecker.n_bad:
+            for rep in self.reps:
                 rep.set_qc("SST", "drf_short", 1)
 
-    def do_qc(self, reps, sst_anom, bgerr, bgvar_is_masked):
+    def do_qc(self):
 
-        long_record = not (len(sst_anom) < self.n_eval)
+        self.preprocess_reps()
+        self.initialise_flags()
+
+        long_record = not (len(self.sst_anom) < SSTBiasedNoisyChecker.n_eval)
 
         # assess long records
         if long_record:
-            SSTBiasedNoisyChecker.long_record_qc(
-                reps,
-                sst_anom,
-                bgerr,
-                self.drif_intra,
-                self.bias_lim
-            )
+            self.long_record_qc()
 
         # assess short records
         else:
-            if not bgvar_is_masked:
-                SSTBiasedNoisyChecker.short_record_qc(
-                    reps,
-                    sst_anom,
-                    bgerr,
-                    self.err_std_n,
-                    self.drif_inter,
-                    self.drif_intra,
-                    self.n_bad,
-                )
+            if not self.bgvar_is_masked:
+                self.short_record_qc()
