@@ -158,7 +158,7 @@ class Climatology:
         month: int | None = None,
         day: int | None = None,
     ) -> float:
-        """Get the value from the climatology at the give position and time.
+        """Get the value from a climatology at the give position and time.
 
         Parameters
         ----------
@@ -218,3 +218,21 @@ class Climatology:
         elif self.ntime == 73:
             return which_pentad(month, day) - 1
         return day_in_year(month, day) - 1
+
+
+def get_climatological_value(climatology, **kwargs):
+    """Get the value from a climatology.
+
+    Parameters
+    ----------
+    climatology: Climatology
+        Climatology class
+    kwargs: dict
+        Pass keyword-arguments to :py:class:~Climatology.get_value`
+
+    Returns
+    -------
+    float
+            Climatology value at specified location and time.
+    """
+    return climatology.get_value(**kwargs)
