@@ -288,6 +288,7 @@ def do_hard_limit_check(value: float, hard_limits: list) -> int:
     """
     return hard_limit_check(value, hard_limits)
 
+
 def do_climatology_check(
     value: float,
     climatology: float | Climatology,
@@ -319,6 +320,7 @@ def do_climatology_check(
     if isinstance(climatology, Climatology):
         climatology = climatology.get_value(**kwargs)
     return climatology_check(value, climatology, maximum_anomaly)
+
 
 def do_climatology_plus_stdev_check(
     value: float,

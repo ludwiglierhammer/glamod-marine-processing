@@ -818,7 +818,7 @@ def test_do_sst_missing_value_clim_check(testdata, climdata):
         valid_ntime=31,
     )
     results = db_.apply(
-        lambda row: do_no_normal_check(
+        lambda row: do_missing_value_clim_check(
             climatology=climatology,
             lat=row["latitude"],
             lon=row["longitude"],

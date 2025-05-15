@@ -31,7 +31,7 @@ from glamod_marine_processing.qc_suite.modules.icoads_identify import (
 )
 from glamod_marine_processing.qc_suite.modules.interpolation import bilinear_interp
 from glamod_marine_processing.qc_suite.modules.next_level_qc import (
-    do_anomaly_check,
+    do_climatology_check,
     do_climatology_plus_stdev_check,
     do_climatology_plus_stdev_with_lowbar_check,
     do_date_check,
@@ -51,10 +51,10 @@ from glamod_marine_processing.qc_suite.modules.qc import (
     climatology_plus_stdev_with_lowbar_check,
     failed,
     hard_limit_check,
+    isvalid,
     passed,
     sst_freeze_check,
     untestable,
-    isvalid,
     value_check,
 )
 from glamod_marine_processing.qc_suite.modules.statistics import missing_mean
@@ -1452,6 +1452,7 @@ def _test_climatology_plus_stdev_check_raises():
 def test_climatology_check(value, climate_normal, limit, expected):
     assert climatology_check(value, climate_normal, limit) == expected
 
+
 @pytest.mark.parametrize(
     "value, expected",
     [
@@ -1462,6 +1463,7 @@ def test_climatology_check(value, climate_normal, limit, expected):
 )
 def test_isvalid_check(value, expected):
     assert isvalid(value) == expected
+
 
 @pytest.mark.parametrize(
     "value, expected",

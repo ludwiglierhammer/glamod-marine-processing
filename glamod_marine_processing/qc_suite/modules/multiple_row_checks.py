@@ -8,13 +8,13 @@ import pandas as pd
 
 from .external_clim import get_climatological_value  # noqa
 from .next_level_qc import (  # noqa
-    do_anomaly_check,
+    do_climatology_check,
     do_climatology_plus_stdev_check,
     do_date_check,
     do_day_check,
     do_hard_limit_check,
     do_missing_value_check,
-    do_no_normal_check,
+    do_missing_value_clim_check,
     do_position_check,
     do_sst_freeze_check,
     do_supersaturation_check,

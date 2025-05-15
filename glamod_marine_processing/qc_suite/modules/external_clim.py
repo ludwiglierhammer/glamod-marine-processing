@@ -138,14 +138,14 @@ class Climatology:
 
     def convert_units_to(self, target_units, source_units=None):
         """Convert units to user-specific units.
-        
+
         Parameters
         ----------
         target_units: str
             Target units to which units must conform.
         source_units, str, optional
             Source units if not specified in :py:class:`Climatology`.
-            
+
         Note
         ----
         For more information see: :py:func:`xclim.core.units.convert_units_to`
