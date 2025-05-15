@@ -7,6 +7,7 @@ from typing import Literal
 
 import cf_xarray  # noqa
 import xarray as xr
+from numpy import ndarray  # noqa
 from xclim.core.units import convert_units_to
 
 from .time_control import day_in_year, split_date, which_pentad
@@ -102,8 +103,6 @@ class Climatology:
     def __init__(
         self,
         data,
-        obs_name,
-        statistics,
         time_axis=None,
         lat_axis=None,
         lon_axis=None,
@@ -129,11 +128,6 @@ class Climatology:
             valid_ntime = [valid_ntime]
         self.ntime = len(data[self.time_axis])
         assert self.ntime in valid_ntime, "weird shaped field"
-        self.nlat = len(data[self.lat_axis])
-        self.nlon = len(data[self.lon_axis])
-        self.res = 180.0 / self.nlat
-        self.obs_name = obs_name
-        self.statistics = statistics
 
     @classmethod
     def open_netcdf_file(cls, file_name, clim_name, **kwargs):
@@ -175,7 +169,7 @@ class Climatology:
 
         Returns
         -------
-        float
+        ndarray
             Climatology value at specified location and time.
 
         Note

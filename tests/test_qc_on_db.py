@@ -331,8 +331,6 @@ def test_do_at_no_normal_check(testdata, climdata):
     climatology = Climatology.open_netcdf_file(
         climdata["AT"]["mean"],
         "at",
-        obs_name="AT",
-        statistics="mean",
         time_axis="pentad_time",
     )
     results = db_.apply(
@@ -369,8 +367,6 @@ def test_do_at_anomaly_check(testdata, climdata):
     climatology = Climatology.open_netcdf_file(
         climdata["AT"]["mean"],
         "at",
-        obs_name="AT",
-        statistics="mean",
         time_axis="pentad_time",
         target_units="K",
         source_units="degC",
@@ -411,8 +407,6 @@ def test_do_at_climatology_plus_stdev_check(testdata, climdata):
     climatology = Climatology.open_netcdf_file(
         climdata["AT"]["mean"],
         "at",
-        obs_name="AT",
-        statistics="mean",
         time_axis="pentad_time",
         target_units="K",
         source_units="degC",
@@ -420,8 +414,6 @@ def test_do_at_climatology_plus_stdev_check(testdata, climdata):
     stdev = Climatology.open_netcdf_file(
         climdata["AT"]["stdev"],
         "at",
-        obs_name="AT",
-        statistics="stdev",
         time_axis="pentad_time",
     )
     results = db_.apply(
@@ -485,9 +477,7 @@ def test_do_slp_missing_value_check(testdata):
 
 def test_do_slp_no_normal_check(testdata, climdata):
     db_ = testdata["observations-slp"].copy()
-    climatology = Climatology.open_netcdf_file(
-        climdata["SLP"]["mean"], "slp", obs_name="SLP", statistics="mean"
-    )
+    climatology = Climatology.open_netcdf_file(climdata["SLP"]["mean"], "slp")
     results = db_.apply(
         lambda row: do_no_normal_check(
             climatology=climatology,
@@ -522,15 +512,12 @@ def test_do_slp_climatology_plus_stdev_plus_lowbar_check(testdata, climdata):
     climatology = Climatology.open_netcdf_file(
         climdata["SLP"]["mean"],
         "slp",
-        obs_name="SLP",
-        statistics="mean",
         target_units="Pa",
+        source_units="hPa",
     )
     stdev = Climatology.open_netcdf_file(
         climdata["SLP"]["stdev"],
         "slp",
-        obs_name="SLP",
-        statistics="stdev",
         target_units="Pa",
         source_units="hPa",
     )
@@ -627,8 +614,6 @@ def test_do_dpt_no_normal_check(testdata, climdata):
     climatology = Climatology.open_netcdf_file(
         climdata["DPT"]["mean"],
         "dpt",
-        obs_name="DPT",
-        statistics="mean",
         time_axis="pentad_time",
     )
     results = db_.apply(
@@ -665,8 +650,6 @@ def test_do_dpt_climatology_plus_stdev_check(testdata, climdata):
     climatology = Climatology.open_netcdf_file(
         climdata["DPT"]["mean"],
         "dpt",
-        obs_name="DPT",
-        statistics="mean",
         time_axis="pentad_time",
         target_units="K",
         source_units="degC",
@@ -674,8 +657,6 @@ def test_do_dpt_climatology_plus_stdev_check(testdata, climdata):
     stdev = Climatology.open_netcdf_file(
         climdata["DPT"]["stdev"],
         "dpt",
-        obs_name="DPT",
-        statistics="stdev",
         time_axis="pentad_time",
     )
 
@@ -834,8 +815,6 @@ def test_do_sst_no_normal_check(testdata, climdata):
     climatology = Climatology.open_netcdf_file(
         climdata["SST"]["mean"],
         "sst",
-        obs_name="SST",
-        statistics="mean",
         valid_ntime=31,
     )
     results = db_.apply(
@@ -872,8 +851,6 @@ def test_do_sst_anomaly_check(testdata, climdata):
     climatology = Climatology.open_netcdf_file(
         climdata["SST"]["mean"],
         "sst",
-        obs_name="SST",
-        statistics="mean",
         valid_ntime=31,
     )
     results = db_.apply(
@@ -1052,8 +1029,6 @@ def test_multiple_row_check(testdata, climdata):
     climatology = Climatology.open_netcdf_file(
         climdata["AT"]["mean"],
         "at",
-        obs_name="AT",
-        statistics="mean",
         time_axis="pentad_time",
         target_units="K",
         source_units="degC",
@@ -1061,8 +1036,6 @@ def test_multiple_row_check(testdata, climdata):
     stdev = Climatology.open_netcdf_file(
         climdata["AT"]["stdev"],
         "at",
-        obs_name="AT",
-        statistics="stdev",
         time_axis="pentad_time",
     )
     preproc_dict = {
