@@ -8,6 +8,7 @@ from glamod_marine_processing.qc_suite.modules.icoads_identify import (
     is_drifter,
     is_in_valid_list,
     is_ship,
+    id_is_generic
 )
 from glamod_marine_processing.qc_suite.modules.qc import failed, passed
 
@@ -101,3 +102,19 @@ def test_is_deck_valid_list():
             assert result == passed
         else:
             assert result == failed
+
+@pytest.mark.parametrize(
+    "in_id, year, expected",
+    [
+        ("QUALMS", 1999, False),
+        ("", 1999, True),
+        ("SHIP     ", 1999, True),
+        ("PLAT     ", 1999, True),
+        ("MASK     ", 1999, True),
+        ("2        ", 1941, True),
+        ("3        ", 1935, True),
+        ("7        ", 1950, True),
+    ]
+)
+def test_id_is_generic(in_id, year, expected):
+    assert id_is_generic(in_id, year) == expected
