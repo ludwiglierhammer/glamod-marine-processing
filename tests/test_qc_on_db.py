@@ -1067,38 +1067,44 @@ def test_multiple_row_check(testdata, climdata):
     )
     qc_dict = {
         "do_missing_value_check": {"names": {"value": "observation_value"}},
-        # "do_no_normal_check": {
-        #  "names": {
-        #    "value": "observation_value",
-        #  }
-        # },
+        "do_no_normal_check": {
+            "names": {
+                "lat": "latitude",
+                "lon": "longitude",
+                "date": "date_time",
+            },
+            "arguments": {"climatology": climatology},
+        },
         "do_hard_limit_check": {
             "names": {"value": "observation_value"},
-            "arguments": {"hard_limits": [193.15, 338.15]},
+            "arguments": {"hard_limits": [193.15, 338.15]},  # K
         },
-        # "do_anomaly_check": {
-        #  "names": {
-        #    "value": "observation_value"
-        #  },
-        #  "arguments": {
-        #    "climatology": climatology,
-        #    "maximum_anomaly": 10.0,
-        #  }
-        # },
-        # "do_climatology_plus_stdev_check": {
-        #  "names": {
-        #    "value": "observation_value"
-        #  },
-        #  "arguments": {
-        #    "climatology": climatology,
-        #    "stdev": stdev,
-        #    "minmax_standard_deviation": [
-        #      1.0,
-        #      4.0
-        #    ],
-        #    "maximum_standardised_anomaly": 5.5
-        #  }
-        # }
+        "do_anomaly_check": {
+            "names": {
+                "value": "observation_value",
+                "lat": "latitude",
+                "lon": "longitude",
+                "date": "date_time",
+            },
+            "arguments": {
+                "climatology": climatology,
+                "maximum_anomaly": 10.0,  # K
+            },
+        },
+        "do_climatology_plus_stdev_check": {
+            "names": {
+                "value": "observation_value",
+                "lat": "latitude",
+                "lon": "longitude",
+                "date": "date_time",
+            },
+            "arguments": {
+                "climatology": climatology,
+                "stdev": stdev,
+                "minmax_standard_deviation": [1.0, 4.0],  # K
+                "maximum_standardised_anomaly": 5.5,  # K
+            },
+        },
     }
     results = db_.apply(
         lambda row: do_multiple_row_check(data=row, qc_dict=qc_dict),
@@ -1106,8 +1112,8 @@ def test_multiple_row_check(testdata, climdata):
     )
     expected = pd.Series(
         [
-            qc.passed,
-            qc.passed,
+            qc.failed,
+            qc.failed,
             qc.failed,
             qc.passed,
             qc.failed,
