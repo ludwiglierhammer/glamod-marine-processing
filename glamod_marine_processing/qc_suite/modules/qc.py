@@ -189,24 +189,6 @@ def value_check(inval: float | None) -> int:
     return passed
 
 
-def no_normal_check(inclimav: float) -> int:
-    """Check if a climatological average is equal to None.
-
-    Parameters
-    ----------
-    inclimav: float
-        The input value
-
-    Returns
-    -------
-    int
-        Returns 1 if the input value is None, 0 otherwise.
-    """
-    if isvalid(inclimav) == failed:
-        return failed
-    return passed
-
-
 def hard_limit_check(val: float, limits: tuple[float, float]) -> int:
     """Check if a value is outside specified limits.
 
