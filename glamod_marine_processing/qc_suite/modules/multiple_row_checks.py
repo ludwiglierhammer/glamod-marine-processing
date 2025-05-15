@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+import inspect
+
 import pandas as pd
 
 from .next_level_qc import (  # noqa
@@ -60,15 +62,25 @@ def do_multiple_row_check(data: dict | pd.Series, qc_dict: dict = {}) -> int:
     def get_function(name):
         return globals().get(name)
 
+    def is_func_param(func, param):
+        sig = inspect.signature(func)
+        if "kwargs" in sig.parameters:
+            return True
+        return param in sig.parameters
+
     # Firstly, check if all functions are callable and all requested input variables are available!
     qc_inputs = {}
     for qc_function, qc_params in qc_dict.items():
         func = get_function(qc_function)
         if not callable(func):
-            raise NameError(f"Function '{qc_function}' is not defined.")
+            raise NameError(f"Function '{func.__name__}' is not defined.")
 
         requests = {}
         for param, cname in qc_params["names"].items():
+            if not is_func_param(func, param):
+                raise ValueError(
+                    f"Parameter '{param}' is not a valid parameter of function '{func.__name__}'"
+                )
             if cname not in data:
                 raise NameError(
                     f"Variable '{cname}' is not available in input data: {data}."
