@@ -7,7 +7,7 @@ from typing import Literal
 
 import cf_xarray  # noqa
 import xarray as xr
-from numpy import ndarray  # noqa
+from numpy import ndarray
 from xclim.core.units import convert_units_to
 
 from .time_control import day_in_year, split_date, which_pentad
@@ -137,7 +137,19 @@ class Climatology:
         return cls(da, **kwargs)
 
     def convert_units_to(self, target_units, source_units=None):
-        """Documentation."""
+        """Convert units to user-specific units.
+        
+        Parameters
+        ----------
+        target_units: str
+            Target units to which units must conform.
+        source_units, str, optional
+            Source units if not specified in :py:class:`Climatology`.
+            
+        Note
+        ----
+        For more information see: :py:func:`xclim.core.units.convert_units_to`
+        """
         if target_units is None:
             return
         if source_units is not None:
@@ -151,7 +163,7 @@ class Climatology:
         date: datetime | None = None,
         month: int | None = None,
         day: int | None = None,
-    ) -> float:
+    ) -> ndarray:
         """Get the value from a climatology at the give position and time.
 
         Parameters
@@ -214,7 +226,7 @@ class Climatology:
         return day_in_year(month, day) - 1
 
 
-def get_climatological_value(climatology, **kwargs):
+def get_climatological_value(climatology: Climatology, **kwargs) -> ndarray:
     """Get the value from a climatology.
 
     Parameters
@@ -226,7 +238,7 @@ def get_climatological_value(climatology, **kwargs):
 
     Returns
     -------
-    float
+    ndarray
             Climatology value at specified location and time.
     """
     return climatology.get_value(**kwargs)

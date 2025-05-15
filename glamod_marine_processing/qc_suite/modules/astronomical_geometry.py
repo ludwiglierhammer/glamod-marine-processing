@@ -48,7 +48,7 @@ def day_test(
     Returns
     -------
     int
-        1 if the sun was above the horizon an hour ago, 0 otherwise.
+        0 if the sun was above the horizon an hour ago, 1 otherwise.
 
     Note
     ----
@@ -60,10 +60,6 @@ def day_test(
     assert 1 <= day <= 31
     assert 0 <= hour <= 24
     assert 90 >= lat >= -90
-    # hour expressed as decimal fractions of 24 hour day.
-    # lat and lon in degrees
-    # return 0 for night
-    # return 1 for day
 
     result = 0
 
@@ -361,8 +357,7 @@ def sun_azimuth(phi: float, declination: float) -> float:
     """
     if (phi - declination) > 0:
         return 0
-    else:
-        return 180
+    return 180
 
 
 def convert_degrees(deg: float) -> float:
