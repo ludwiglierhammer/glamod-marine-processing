@@ -1,4 +1,126 @@
 {
+  "preprocessing": {
+    "observations-at": {
+      "climatology": {
+        "func": "get_climatological_value",
+        "names": {
+          "lat": "latitude",
+          "lon": "longitude",
+          "date": "date_time"
+        },
+        "inputs": {
+          "file_name": "ERAClimatologies/t2m_pentad_1by1marine_ERA-Interim_data_19792015.nc",
+          "clim_name": "t2m_clims",
+          "obs_name": "AT",
+          "statistics": "mean",
+          "time_axis": "pentad_time",
+          "target_units": "K",
+          "source_units": "degC"
+        }
+      },
+      "stdev": {
+        "func": "get_climatological_value",
+        "names": {
+          "lat": "latitude",
+          "lon": "longitude",
+          "date": "date_time"
+        },
+        "inputs": {
+          "file_name": "ERAClimatologies/t2m_pentad_1by1marine_ERA-Interim_data_19792015.nc",
+          "clim_name": "t2m_stdevs",
+          "obs_name": "AT",
+          "statistics": "mean",
+          "time_axis": "pentad_time"
+        }
+      }
+    },
+    "observations-dpt": {
+      "climatology": {
+        "func": "get_climatological_value",
+        "names": {
+          "lat": "latitude",
+          "lon": "longitude",
+          "date": "date_time"
+        },
+        "inputs": {
+          "file_name": "ERAClimatologies/td2m_pentad_1by1marine_ERA-Interim_data_19792015.nc",
+          "clim_name": "td2m_clims",
+          "obs_name": "DPT",
+          "statistics": "mean",
+          "time_axis": "pentad_time",
+          "target_units": "K",
+          "source_units": "degC"
+        }
+      },
+      "stdev": {
+        "func": "get_climatological_value",
+        "names": {
+          "lat": "latitude",
+          "lon": "longitude",
+          "date": "date_time"
+        },
+        "inputs": {
+          "file_name": "ERAClimatologies/td2m_pentad_1by1marine_ERA-Interim_data_19792015.nc",
+          "clim_name": "td2m_stdevs",
+          "obs_name": "DPT",
+          "statistics": "mean",
+          "time_axis": "pentad_time"
+        }
+      }
+    },
+    "observations-sst": {
+      "climatology": {
+        "func": "get_climatological_value",
+        "names": {
+          "lat": "latitude",
+          "lon": "longitude",
+          "date": "date_time"
+        },
+        "inputs": {
+          "file_name": "SST/HadSST2_daily_1x1_climatology.nc",
+          "clim_name": "sst",
+          "obs_name": "DPT",
+          "statistics": "mean",
+          "target_units": "K",
+          "source_units": "degC"
+        }
+      }
+    },
+    "observations-slp": {
+      "climatology": {
+        "func": "get_climatological_value",
+        "names": {
+          "lat": "latitude",
+          "lon": "longitude",
+          "date": "date_time"
+        },
+        "inputs": {
+          "file_name": "SLP/SLP_pentad_climatology.nc",
+          "clim_name": "slp",
+          "obs_name": "DPT",
+          "statistics": "mean",
+          "target_units": "Pa",
+          "source_units": "hPa"
+        }
+      },
+      "stdev": {
+        "func": "get_climatological_value",
+        "names": {
+          "lat": "latitude",
+          "lon": "longitude",
+          "date": "date_time"
+        },
+        "inputs": {
+          "file_name": "SLP/SLP_pentad_stdev_climatology.nc",
+          "clim_name": "slp",
+          "obs_name": "DPT",
+          "statistics": "stdev",
+          "target_units": "Pa",
+          "source_units": "hPa"
+        }
+      }
+    }
+  },
   "row-by-row": {
     "header": {
       "do_position_check": {
@@ -35,8 +157,8 @@
         }
       },
       "do_no_normal_check": {
-        "names": {
-          "value": "observation_value"
+        "arguments": {
+          "climatology": "__preprocessed__"
         }
       },
       "do_hard_limit_check": {
@@ -55,9 +177,7 @@
           "value": "observation_value"
         },
         "arguments": {
-          "climatology": {
-            "ext_file": "ERAClimatologies/t2m_pentad_1by1marine_ERA-Interim_data_19792015.nc"
-          },
+          "climatology": "__preprocessed__",
           "maximum_anomaly": 10.0
         }
       },
@@ -66,12 +186,8 @@
           "value": "observation_value"
         },
         "arguments": {
-          "climatology": {
-            "ext_file": "ERAClimatologies/t2m_pentad_1by1marine_ERA-Interim_data_19792015.nc"
-          },
-          "stdev": {
-            "ext_file": "ERAClimatologies/t2m_pentad_1by1marine_ERA-Interim_data_19792015.nc"
-          },
+          "climatology": "__preprocessed__",
+          "stdev": "__preprocessed__",
           "minmax_standard_deviation": [
             1.0,
             4.0
@@ -87,8 +203,8 @@
         }
       },
       "do_no_normal_check": {
-        "names": {
-          "value": "observation_value"
+        "arguments": {
+          "climatology": "__preprocessed__"
         }
       },
       "do_climatology_plus_stdev_check": {
@@ -96,12 +212,8 @@
           "value": "observation_value"
         },
         "arguments": {
-          "climatology": {
-            "ext_file": "ERAClimatologies/td2m_pentad_1by1marine_ERA-Interim_data_19792015.nc"
-          },
-          "stdev": {
-            "ext_file": "ERAClimatologies/td2m_pentad_1by1marine_ERA-Interim_data_19792015.nc"
-          },
+          "climatology": "__preprocessed__",
+          "stdev": "__preprocessed__",
           "minmax_standard_deviation": [
             1.0,
             4.0
@@ -117,8 +229,8 @@
         }
       },
       "do_no_normal_check": {
-        "names": {
-          "value": "observation_value"
+        "arguments": {
+          "climatology": "__preprocessed__"
         }
       },
       "do_climatology_plus_stdev_plus_lowbar_check": {
@@ -126,6 +238,8 @@
           "value": "observation_value"
         },
         "arguments": {
+          "climatology": "__preprocessed__",
+          "stdev": "__preprocessed__",
           "limit": 3.0,
           "lowbar": 10.0
         }
@@ -138,8 +252,8 @@
         }
       },
       "do_no_normal_check": {
-        "names": {
-          "value": "observation_value"
+        "arguments": {
+          "climatology": "__preprocessed__"
         }
       },
       "do_sst_freeze_check": {
@@ -156,9 +270,7 @@
           "value": "observation_value"
         },
         "arguments": {
-          "climatology": {
-            "ext_file": "SST/HadSST2_daily_1x1_climatology.nc"
-          },
+          "climatology": "__preprocessed__",
           "maximum_anomaly": 8.0
         }
       },
