@@ -5,8 +5,8 @@ import pytest
 
 from glamod_marine_processing.qc_suite.modules.astronomical_geometry import (
     angle_diff,
+    convert_degrees,
     day_test,
-    convert_degrees
 )
 from glamod_marine_processing.qc_suite.modules.qc import failed, passed
 

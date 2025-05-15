@@ -3,12 +3,12 @@ from __future__ import annotations
 import pytest
 
 from glamod_marine_processing.qc_suite.modules.icoads_identify import (
+    id_is_generic,
     is_buoy,
     is_deck,
     is_drifter,
     is_in_valid_list,
     is_ship,
-    id_is_generic
 )
 from glamod_marine_processing.qc_suite.modules.qc import failed, passed
 
@@ -103,6 +103,7 @@ def test_is_deck_valid_list():
         else:
             assert result == failed
 
+
 @pytest.mark.parametrize(
     "in_id, year, expected",
     [
@@ -114,7 +115,7 @@ def test_is_deck_valid_list():
         ("2        ", 1941, True),
         ("3        ", 1935, True),
         ("7        ", 1950, True),
-    ]
+    ],
 )
 def test_id_is_generic(in_id, year, expected):
     assert id_is_generic(in_id, year) == expected

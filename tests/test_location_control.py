@@ -120,10 +120,10 @@ def test_lons(lon, expected):
         (179.5, 5, 71),
         (179.9, 0.25, 1439),
         (-179.9 + 0.25, 0.25, 1),
-        (720., None, 180),
-        (720., 5, 36),
-        (-360., None, 180),
-        (-360., 5, 36),
+        (720.0, None, 180),
+        (720.0, 5, 36),
+        (-360.0, None, 180),
+        (-360.0, 5, 36),
     ],
 )
 def test_lon_to_xindex(lon, res, expected):
@@ -141,7 +141,7 @@ def test_lons_ge_180():
         assert math.fmod(i, 360) == lon_to_xindex(-179.5 + float(i))
     # And at different resolutions
     for i in range(0, 520):
-        assert math.fmod(int(i/5), 72) == lon_to_xindex(-179.5 + float(i), 5.0)
+        assert math.fmod(int(i / 5), 72) == lon_to_xindex(-179.5 + float(i), 5.0)
 
 
 @pytest.mark.parametrize(
@@ -204,7 +204,7 @@ def test_xindex_to_lon(xindex, res, lon):
         (1.0, 2.0, 3.0, None, 1.0, 2.0, 3.0, 2.5),
         (None, 2.0, 3.0, None, 2.5, 2.0, 3.0, 2.5),
         (None, None, 3.0, None, 3.0, 3.0, 3.0, 3.0),
-    ]
+    ],
 )
 def test_fill_missing_vals(in11, in12, in21, in22, ex11, ex12, ex21, ex22):
     assert fill_missing_vals(in11, in12, in21, in22) == (ex11, ex12, ex21, ex22)
@@ -220,13 +220,11 @@ def test_fill_missing_vals(in11, in12, in21, in22, ex11, ex12, ex21, ex22):
         (0.0, 179.9, None, 179.5, 180.5, -0.5, 0.5),
         (0.0, -179.9, None, -180.5, -179.5, -0.5, 0.5),
         (-89.9, 0.1, 1, -0.5, 0.5, -89.5, -89.5),
-        (-89.9, 0.1, 0, -0.5, 0.5, -90.5, -89.5)
-    ]
+        (-89.9, 0.1, 0, -0.5, 0.5, -90.5, -89.5),
+    ],
 )
 def test_get_four_surrounding_points(lat, lon, max90, x1, x2, y1, y2):
     if max90 is None:
         assert get_four_surrounding_points(lat, lon) == (x1, x2, y1, y2)
     else:
         assert get_four_surrounding_points(lat, lon, max90) == (x1, x2, y1, y2)
-
-
