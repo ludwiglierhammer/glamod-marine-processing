@@ -6,11 +6,14 @@ import pytest
 
 from glamod_marine_processing.qc_suite.modules.time_control import (
     day_in_year,
+    last_month_was,
     month_match,
+    next_month_is,
     pentad_to_month_day,
     season,
     split_date,
     which_pentad,
+    year_month_gen,
     yesterday,
     leap_year_correction,
     last_month_was,
@@ -151,14 +154,6 @@ def test_leap_year_correction():
     assert leap_year_correction(24.0, 1, -3) == -1096
 
 
-def test_last_month_was():
-    assert last_month_was(2005, 5) == (2005, 4)
-    assert last_month_was(2005, 1) == (2004, 12)
-
-def test_next_month_is():
-    assert next_month_is(2005, 1) == (2005, 2)
-    assert next_month_is(2005, 12) == (2006, 1)
-
 def test_year_month_gen():
     years = [year for year, month in year_month_gen(2001,1,2001,12)]
     months = [month for year, month in year_month_gen(2001,1,2001,12)]
@@ -180,3 +175,26 @@ def test_year_month_gen_raises():
         list(year_month_gen(1999, -1, 2000, 2))
     with pytest.raises(ValueError):
         list(year_month_gen(1999, 1, 2000, 13))
+
+@pytest.mark.parametrize(
+    "year, month, expected",
+    [
+        (1989, 12, (1989, 11)),
+        (2010, 9, (2010, 8)),
+        (2025, 1, (2024, 12)),
+    ],
+)
+def test_last_month_was(year, month, expected):
+    assert last_month_was(year, month) == expected
+
+
+@pytest.mark.parametrize(
+    "year, month, expected",
+    [
+        (1989, 12, (1990, 1)),
+        (2010, 9, (2010, 10)),
+        (2025, 1, (2025, 2)),
+    ],
+)
+def test_next_month_is(year, month, expected):
+    assert next_month_is(year, month) == expected
