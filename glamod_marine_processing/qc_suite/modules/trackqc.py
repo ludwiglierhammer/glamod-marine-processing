@@ -311,7 +311,7 @@ class NewSpeedChecker:
             assert not any(np.isnan(lon)), "Nan(s) found in longitude"
             assert not any(np.isnan(lat)), "Nan(s) found in latitude"
             assert not any(np.isnan(hrs)), "Nan(s) found in time differences"
-            assert not any(hrs < 0), "times are not sorted"
+            assert not any(np.less(hrs, 0)), "times are not sorted"
         except AssertionError as error:
             raise AssertionError("problem with report values: " + str(error))
 
@@ -350,7 +350,7 @@ class NewSpeedChecker:
         min_win_period_hours = NewSpeedChecker.min_win_period * 24.0
 
         # loop through timeseries to see if drifter is moving too fast and flag any occurrences
-        index_arr = np.array(range(0, nrep))
+        index_arr = np.array(range(0, nrep)) # type: np.ndarray
         i = 0
         time_to_end = self.hrs[-1] - self.hrs[i]
         while time_to_end >= min_win_period_hours:
@@ -522,7 +522,7 @@ class SpeedChecker:
             assert not any(np.isnan(lon)), "Nan(s) found in longitude"
             assert not any(np.isnan(lat)), "Nan(s) found in latitude"
             assert not any(np.isnan(hrs)), "Nan(s) found in time differences"
-            assert not any(hrs < 0), "times are not sorted"
+            assert not any(np.less(hrs, 0)), "times are not sorted"
         except AssertionError as error:
             raise AssertionError("problem with report values: " + str(error))
 
@@ -540,7 +540,7 @@ class SpeedChecker:
 
         # loop through timeseries to see if drifter is moving too fast
         # and flag any occurences
-        index_arr = np.array(range(0, nrep))
+        index_arr = np.array(range(0, nrep)) # type: np.ndarray
         i = 0
         time_to_end = self.hrs[-1] - self.hrs[i]
         while time_to_end >= min_win_period_hours:
@@ -706,7 +706,7 @@ class AgroundChecker:
             assert not any(np.isnan(lon)), "Nan(s) found in longitude"
             assert not any(np.isnan(lat)), "Nan(s) found in latitude"
             assert not any(np.isnan(hrs)), "Nan(s) found in time differences"
-            assert not any(hrs < 0), "times are not sorted"
+            assert not any(np.less(hrs, 0)), "times are not sorted"
         except AssertionError as error:
             raise AssertionError("problem with report values: " + str(error))
 
@@ -904,7 +904,7 @@ class NewAgroundChecker:
             assert not any(np.isnan(lon)), "Nan(s) found in longitude"
             assert not any(np.isnan(lat)), "Nan(s) found in latitude"
             assert not any(np.isnan(hrs)), "Nan(s) found in time differences"
-            assert not any(hrs < 0), "times are not sorted"
+            assert not any(np.less(hrs, 0)), "times are not sorted"
         except AssertionError as error:
             raise AssertionError("problem with report values: " + str(error))
 
@@ -1514,8 +1514,6 @@ class SSTBiasedNoisyChecker:
         ----------
         rep: MarineRepor
             Marine report. Must have variables OSTIA, ICE and BGVAR
-        background_err_lim: float
-            background error variance beyond which the SST background is deemed unreliable (degC squared)
 
         Returns
         -------
@@ -1568,18 +1566,8 @@ class SSTBiasedNoisyChecker:
         return bg_val, ice_val, bgvar_val, good_match, bgvar_mask
 
     def _preprocess_reps(self) -> None:
-        """
-        Fill SST anomalies and background errors used in the QC checks, as well as a flag
-        indicating missing or invalid background values.
-
-        Parameters
-        ----------
-        None
-
-        Returns
-        -------
-        None
-        """
+        """Fill SST anomalies and background errors used in the QC checks, as well as a flag
+        indicating missing or invalid background values."""
         # test and filter out obs with unsuitable background matches
         sst_anom = []
         bgvar = []
