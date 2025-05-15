@@ -583,9 +583,7 @@ def time_difference(
     first_day = jul_day(year1, month1, day1) + hour1 / 24.0
     last_day = jul_day(year2, month2, day2) + hour2 / 24.0
 
-    timdif = 24.0 * (last_day - first_day)
-
-    return timdif
+    return 24.0 * (last_day - first_day)
 
 
 def last_month_was(year: int, month: int) -> tuple[int, int]:

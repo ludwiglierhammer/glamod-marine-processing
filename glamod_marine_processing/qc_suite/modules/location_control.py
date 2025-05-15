@@ -20,8 +20,7 @@ def yindex_to_lat(yindex: int, res: float = 1.0) -> float:
     """
     assert yindex >= 0
     assert yindex < 180 / res
-    lat = 90.0 - yindex * res - res / 2.0
-    return lat
+    return 90.0 - yindex * res - res / 2.0
 
 
 def mds_lat_to_yindex(lat: float, res: float = 1.0) -> int:
@@ -56,10 +55,7 @@ def mds_lat_to_yindex(lat: float, res: float = 1.0) -> int:
 
     if lat > 0.0:
         return int(90 / res - 1 - int(lat_local / res))
-    else:
-        return int(90 / res - int(lat_local / res))
-
-    pass
+    return int(90 / res - int(lat_local / res))
 
 
 def lat_to_yindex(lat: float, res: float = 1.0) -> int:
@@ -89,14 +85,13 @@ def lat_to_yindex(lat: float, res: float = 1.0) -> int:
             yindex = 179
         if yindex < 0:
             yindex = 0
-        return yindex
     else:
         yindex = int((90 - lat) / res)
         if yindex >= 180 / res:
             yindex = int(180 / res - 1)
         if yindex < 0:
             yindex = 0
-        return yindex
+    return yindex
 
 
 def xindex_to_lon(xindex: int, res: float = 1.0) -> float:
@@ -114,8 +109,7 @@ def xindex_to_lon(xindex: int, res: float = 1.0) -> float:
     """
     assert xindex >= 0
     assert xindex < 360 / res
-    lon = xindex * res - 180.0 + res / 2.0
-    return lon
+    return xindex * res - 180.0 + res / 2.0
 
 
 def mds_lon_to_xindex(lon: float, res: float = 1.0) -> int:
@@ -147,8 +141,7 @@ def mds_lon_to_xindex(lon: float, res: float = 1.0) -> int:
         long_local -= 0.001
     if long_local > 0.0:
         return int(int(long_local / res) + 180 / res)
-    else:
-        return int(int(long_local / res) + 180 / res - 1)
+    return int(int(long_local / res) + 180 / res - 1)
 
 
 def lon_to_xindex(lon: float, res: float = 1.0) -> int:
@@ -182,7 +175,6 @@ def lon_to_xindex(lon: float, res: float = 1.0) -> int:
         xindex = int(inlon + 180.0)
         while xindex >= 360:
             xindex -= 360
-        return int(xindex)
     else:
         inlon = lon
         if inlon >= 180.0:
@@ -192,7 +184,7 @@ def lon_to_xindex(lon: float, res: float = 1.0) -> int:
         xindex = int((inlon + 180.0) / res)
         while xindex >= 360 / res:
             xindex -= 360 / res
-        return int(xindex)
+    return int(xindex)
 
 
 def fill_missing_vals(
