@@ -77,10 +77,6 @@ def do_date_check(
     int
         1 if the date is invalid, 0 otherwise
     """
-    # Do we need this function?
-    # I think this function should return a boolean value, isn't it?
-    # maybe return qc.date_check(latitude, longitude)
-    # This should already be done while mapping to the CDM.
     if isinstance(date, datetime):
         date_ = split_date(date)
         if date_ is None:
@@ -197,20 +193,6 @@ def do_day_check(
     ):
         return failed
 
-    # I don't think these tests will ever be reached because we already do three checks beforehand
-    # that rule them out.
-    # if not (1 <= month <= 12):
-    #     raise ValueError("Month not in range 1-12")
-    # if not (1 <= day <= 31):
-    #     raise ValueError("Day not in range 1-31")
-    # if not (0 <= hour <= 24):
-    #     raise ValueError("Hour not in range 0-24")
-    # if not (90 >= latitude >= -90):
-    #     raise ValueError("Latitude not in range -90 to 90")
-    #
-    # if year is None or month is None or day is None or hour is None:
-    #     return 0
-
     year2 = year
     day2 = dayinyear(year, month, day)
     hour2 = math.floor(hour)
@@ -264,40 +246,7 @@ def do_missing_value_check(value: float) -> int:
     return isvalid(value)
 
 
-def do_anomaly_check(
-    value: float,
-    climatology: float | Climatology,
-    maximum_anomaly: float,
-    **kwargs,
-) -> int:
-    """
-    Check that the value is within the prescribed distance from climatology.
-
-    Parameters
-    ----------
-    value : float
-        Value to be checked
-    climatology: float or Climatology
-        Reference climatological value.
-        This could be a float value or Climatology object.
-    maximum_anomaly : float
-        Maximum_anomaly allowed anomaly.
-
-    Returns
-    -------
-    int
-        1 if value anomaly is outside allowed bounds, 0 otherwise
-
-    Note
-    ----
-    If ``climatology`` is a Climatology object, pass ``lon`` and ``lat`` and ``date`` or ``month`` and ``day`` as keyword-arguments!
-    """
-    if isinstance(climatology, Climatology):
-        climatology = climatology.get_value(**kwargs)
-    return climatology_check(value, climatology, maximum_anomaly)
-
-
-def do_no_normal_check(climatology: float | Climatology, **kwargs) -> int:
+def do_missing_value_clim_check(climatology: float | Climatology, **kwargs) -> int:
     """
     Check that climatological value is present
 
@@ -339,6 +288,37 @@ def do_hard_limit_check(value: float, hard_limits: list) -> int:
     """
     return hard_limit_check(value, hard_limits)
 
+def do_climatology_check(
+    value: float,
+    climatology: float | Climatology,
+    maximum_anomaly: float,
+    **kwargs,
+) -> int:
+    """
+    Check that the value is within the prescribed distance from climatology.
+
+    Parameters
+    ----------
+    value : float
+        Value to be checked
+    climatology: float or Climatology
+        Reference climatological value.
+        This could be a float value or Climatology object.
+    maximum_anomaly : float
+        Maximum_anomaly allowed anomaly.
+
+    Returns
+    -------
+    int
+        1 if value anomaly is outside allowed bounds, 0 otherwise
+
+    Note
+    ----
+    If ``climatology`` is a Climatology object, pass ``lon`` and ``lat`` and ``date`` or ``month`` and ``day`` as keyword-arguments!
+    """
+    if isinstance(climatology, Climatology):
+        climatology = climatology.get_value(**kwargs)
+    return climatology_check(value, climatology, maximum_anomaly)
 
 def do_climatology_plus_stdev_check(
     value: float,
@@ -394,7 +374,7 @@ def do_climatology_plus_stdev_check(
     )
 
 
-def do_climatology_plus_stdev_plus_lowbar_check(
+def do_climatology_plus_stdev_with_lowbar_check(
     value: float,
     climatology: float | Climatology,
     stdev: float | Climatology,

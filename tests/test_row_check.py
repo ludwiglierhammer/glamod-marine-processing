@@ -33,12 +33,12 @@ from glamod_marine_processing.qc_suite.modules.interpolation import bilinear_int
 from glamod_marine_processing.qc_suite.modules.next_level_qc import (
     do_anomaly_check,
     do_climatology_plus_stdev_check,
-    do_climatology_plus_stdev_plus_lowbar_check,
+    do_climatology_plus_stdev_with_lowbar_check,
     do_date_check,
     do_day_check,
     do_hard_limit_check,
     do_missing_value_check,
-    do_no_normal_check,
+    do_missing_value_clim_check,
     do_position_check,
     do_sst_freeze_check,
     do_supersaturation_check,
@@ -51,10 +51,10 @@ from glamod_marine_processing.qc_suite.modules.qc import (
     climatology_plus_stdev_with_lowbar_check,
     failed,
     hard_limit_check,
-    no_normal_check,
     passed,
     sst_freeze_check,
     untestable,
+    isvalid,
     value_check,
 )
 from glamod_marine_processing.qc_suite.modules.statistics import missing_mean
@@ -572,18 +572,18 @@ def test_do_air_temperature_missing_value_check(at, expected):
         (np.nan, 2.2, 10.0, failed),  # not sure if np.nan should trigger FAIL
     ],
 )
-def test_do_air_temperature_anomaly_check(
+def test_do_air_temperature_climatology_check(
     at, at_climatology, maximum_anomaly, expected
 ):
-    assert do_anomaly_check(at, at_climatology, maximum_anomaly) == expected
+    assert do_climatology_check(at, at_climatology, maximum_anomaly) == expected
 
 
 @pytest.mark.parametrize(
     "at_climatology, expected",
     [(5.5, passed), (None, failed), (np.nan, failed)],
 )  # not sure if np.nan should trigger FAIL
-def test_do_air_temperature_no_normal_check(at_climatology, expected):
-    assert do_no_normal_check(at_climatology) == expected
+def test_do_air_temperature_missing_value_clim_check(at_climatology, expected):
+    assert do_missing_value_clim_check(at_climatology) == expected
 
 
 @pytest.mark.parametrize(
@@ -718,7 +718,7 @@ def test_do_air_temperature_climatology_plus_stdev_check(
         (np.nan, 2.2, 3.3, 1.0, 2.0, failed),  # not sure if np.nan should trigger FAIL
     ],
 )
-def test_do_slp_climatology_plus_stdev_plus_lowbar_check(
+def test_do_slp_climatology_plus_stdev_with_lowbar_check(
     slp,
     slp_climatology,
     slp_stdev,
@@ -727,7 +727,7 @@ def test_do_slp_climatology_plus_stdev_plus_lowbar_check(
     expected,
 ):
     assert (
-        do_climatology_plus_stdev_plus_lowbar_check(
+        do_climatology_plus_stdev_with_lowbar_check(
             slp,
             slp_climatology,
             slp_stdev,
@@ -826,8 +826,8 @@ def test_do_dpt_climatology_plus_stdev_check(
         (np.nan, failed),
     ],  # not sure if np.nan should trigger FAIL
 )
-def test_do_dpt_temperature_no_normal_check(dpt_climatology, expected):
-    assert do_no_normal_check(dpt_climatology) == expected
+def test_do_dpt_temperature_missing_value_clim_check(dpt_climatology, expected):
+    assert do_missing_value_clim_check(dpt_climatology) == expected
 
 
 @pytest.mark.parametrize(
@@ -859,8 +859,8 @@ def test_do_sst_missing_value_check(sst, expected):
         (np.nan, 2.2, 10.0, failed),  # not sure if np.nan should trigger FAIL
     ],
 )
-def test_do_sst_anomaly_check(sst, sst_climatology, maximum_anomaly, expected):
-    assert do_anomaly_check(sst, sst_climatology, maximum_anomaly) == expected
+def test_do_sst_climatology_check(sst, sst_climatology, maximum_anomaly, expected):
+    assert do_climatology_check(sst, sst_climatology, maximum_anomaly) == expected
 
 
 @pytest.mark.parametrize(
@@ -871,8 +871,8 @@ def test_do_sst_anomaly_check(sst, sst_climatology, maximum_anomaly, expected):
         (np.nan, failed),
     ],  # not sure if np.nan should trigger FAIL
 )
-def test_do_sst_no_normal_check(sst_climatology, expected):
-    assert do_no_normal_check(sst_climatology) == expected
+def test_do_sst_missing_value_clim_check(sst_climatology, expected):
+    assert do_missing_value_clim_check(sst_climatology) == expected
 
 
 @pytest.mark.parametrize(
@@ -1452,27 +1452,27 @@ def _test_climatology_plus_stdev_check_raises():
 def test_climatology_check(value, climate_normal, limit, expected):
     assert climatology_check(value, climate_normal, limit) == expected
 
+@pytest.mark.parametrize(
+    "value, expected",
+    [
+        (None, failed),
+        (5.7, passed),
+        (np.nan, failed),
+    ],
+)
+def test_isvalid_check(value, expected):
+    assert isvalid(value) == expected
 
 @pytest.mark.parametrize(
     "value, expected",
     [
         (None, failed),
         (5.7, passed),
+        (np.nan, passed),
     ],
 )
 def test_value_check(value, expected):
     assert value_check(value) == expected
-
-
-@pytest.mark.parametrize(
-    "value, expected",
-    [
-        (None, failed),
-        (5.7, passed),
-    ],
-)
-def test_no_normal_check(value, expected):
-    assert no_normal_check(value) == expected
 
 
 @pytest.mark.parametrize(

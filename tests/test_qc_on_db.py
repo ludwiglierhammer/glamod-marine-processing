@@ -18,14 +18,14 @@ from glamod_marine_processing.qc_suite.modules.multiple_row_checks import (
     do_multiple_row_check,
 )
 from glamod_marine_processing.qc_suite.modules.next_level_qc import (
-    do_anomaly_check,
+    do_climatology_check,
     do_climatology_plus_stdev_check,
-    do_climatology_plus_stdev_plus_lowbar_check,
+    do_climatology_plus_stdev_with_lowbar_check,
     do_date_check,
     do_day_check,
     do_hard_limit_check,
     do_missing_value_check,
-    do_no_normal_check,
+    do_missing_value_clim_check,
     do_position_check,
     do_sst_freeze_check,
     do_supersaturation_check,
@@ -326,7 +326,7 @@ def test_do_at_hard_limit_check(testdata):
     pd.testing.assert_series_equal(results, expected)
 
 
-def test_do_at_no_normal_check(testdata, climdata):
+def test_do_at_missing_value_clim_check(testdata, climdata):
     db_ = testdata["observations-at"].copy()
     climatology = Climatology.open_netcdf_file(
         climdata["AT"]["mean"],
@@ -334,7 +334,7 @@ def test_do_at_no_normal_check(testdata, climdata):
         time_axis="pentad_time",
     )
     results = db_.apply(
-        lambda row: do_no_normal_check(
+        lambda row: do_missing_value_clim_check(
             climatology=climatology,
             lat=row["latitude"],
             lon=row["longitude"],
@@ -362,7 +362,7 @@ def test_do_at_no_normal_check(testdata, climdata):
     pd.testing.assert_series_equal(results, expected)
 
 
-def test_do_at_anomaly_check(testdata, climdata):
+def test_do_at_climatology_check(testdata, climdata):
     db_ = testdata["observations-at"].copy()
     climatology = Climatology.open_netcdf_file(
         climdata["AT"]["mean"],
@@ -372,7 +372,7 @@ def test_do_at_anomaly_check(testdata, climdata):
         source_units="degC",
     )
     results = db_.apply(
-        lambda row: do_anomaly_check(
+        lambda row: do_climatology_check(
             value=row["observation_value"],
             climatology=climatology,
             maximum_anomaly=10.0,  # K
@@ -475,11 +475,11 @@ def test_do_slp_missing_value_check(testdata):
     pd.testing.assert_series_equal(results, expected)
 
 
-def test_do_slp_no_normal_check(testdata, climdata):
+def test_do_slp_missing_value_clim_check(testdata, climdata):
     db_ = testdata["observations-slp"].copy()
     climatology = Climatology.open_netcdf_file(climdata["SLP"]["mean"], "slp")
     results = db_.apply(
-        lambda row: do_no_normal_check(
+        lambda row: do_missing_value_clim_check(
             climatology=climatology,
             lat=row["latitude"],
             lon=row["longitude"],
@@ -507,7 +507,7 @@ def test_do_slp_no_normal_check(testdata, climdata):
     pd.testing.assert_series_equal(results, expected)
 
 
-def test_do_slp_climatology_plus_stdev_plus_lowbar_check(testdata, climdata):
+def test_do_slp_climatology_plus_stdev_with_lowbar_check(testdata, climdata):
     db_ = testdata["observations-slp"].copy()
     climatology = Climatology.open_netcdf_file(
         climdata["SLP"]["mean"],
@@ -522,7 +522,7 @@ def test_do_slp_climatology_plus_stdev_plus_lowbar_check(testdata, climdata):
         source_units="hPa",
     )
     results = db_.apply(
-        lambda row: do_climatology_plus_stdev_plus_lowbar_check(
+        lambda row: do_climatology_plus_stdev_with_lowbar_check(
             value=row["observation_value"],
             climatology=climatology,
             stdev=stdev,
@@ -609,7 +609,7 @@ def test_do_dpt_hard_limit_check(testdata):
     pd.testing.assert_series_equal(results, expected)
 
 
-def test_do_dpt_no_normal_check(testdata, climdata):
+def test_do_dpt_missing_value_clim_check(testdata, climdata):
     db_ = testdata["observations-dpt"].copy()
     climatology = Climatology.open_netcdf_file(
         climdata["DPT"]["mean"],
@@ -617,7 +617,7 @@ def test_do_dpt_no_normal_check(testdata, climdata):
         time_axis="pentad_time",
     )
     results = db_.apply(
-        lambda row: do_no_normal_check(
+        lambda row: do_missing_value_clim_check(
             climatology=climatology,
             lat=row["latitude"],
             lon=row["longitude"],
@@ -810,7 +810,7 @@ def test_do_sst_hard_limit_check(testdata):
     pd.testing.assert_series_equal(results, expected)
 
 
-def test_do_sst_no_normal_check(testdata, climdata):
+def test_do_sst_missing_value_clim_check(testdata, climdata):
     db_ = testdata["observations-sst"].copy()
     climatology = Climatology.open_netcdf_file(
         climdata["SST"]["mean"],
@@ -846,7 +846,7 @@ def test_do_sst_no_normal_check(testdata, climdata):
     pd.testing.assert_series_equal(results, expected)
 
 
-def test_do_sst_anomaly_check(testdata, climdata):
+def test_do_sst_climatology_check(testdata, climdata):
     db_ = testdata["observations-sst"].copy()
     climatology = Climatology.open_netcdf_file(
         climdata["SST"]["mean"],
@@ -854,7 +854,7 @@ def test_do_sst_anomaly_check(testdata, climdata):
         valid_ntime=31,
     )
     results = db_.apply(
-        lambda row: do_anomaly_check(
+        lambda row: do_climatology_check(
             value=row["observation_value"],
             climatology=climatology,
             maximum_anomaly=1.0,
@@ -1060,14 +1060,14 @@ def test_multiple_row_check(testdata, climdata):
     }
     qc_dict = {
         "do_missing_value_check": {"names": {"value": "observation_value"}},
-        "do_no_normal_check": {
+        "do_missing_value_clim_check": {
             "arguments": {"climatology": "__preprocessed__"},
         },
         "do_hard_limit_check": {
             "names": {"value": "observation_value"},
             "arguments": {"hard_limits": [193.15, 338.15]},  # K
         },
-        "do_anomaly_check": {
+        "do_climatology_check": {
             "names": {
                 "value": "observation_value",
             },
