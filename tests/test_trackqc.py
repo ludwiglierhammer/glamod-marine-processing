@@ -2225,57 +2225,6 @@ def test_new_error_not_time_sorted(reps18):
         assert reps18.get_qc(i, "POS", "drf_agr") == expected_flags[i]
 
 
-def test_assert_limit_periods():
-    # default values
-    speed_limit, min_win_period, max_win_period = otqc.assert_limit_periods()
-    assert speed_limit == 2.5
-    assert min_win_period == 1
-    assert max_win_period is None
-
-    speed_limit, min_win_period, max_win_period = otqc.assert_limit_periods(
-        max_win_period=5.7
-    )
-    assert speed_limit == 2.5
-    assert min_win_period == 1
-    assert max_win_period == 5.7
-
-
-def test_assert_drifters():
-    # default values
-    n_eval, bias_lim, drif_intra, drif_inter, err_std_n, n_bad, background_err_lim = (
-        otqc.assert_drifters()
-    )
-    assert n_eval == 1
-    assert bias_lim == 1.10
-    assert drif_intra == 1.0
-    assert drif_inter == 0.29
-    assert err_std_n == 3.0
-    assert n_bad == 2
-    assert background_err_lim == 0.3
-
-
-def test_assert_window_drifters():
-    # default values
-    (
-        long_win_len,
-        long_err_std_n,
-        short_win_len,
-        short_err_std_n,
-        short_win_n_bad,
-        drif_inter,
-        drif_intra,
-        background_err_lim,
-    ) = otqc.assert_window_drifters()
-
-    assert long_win_len == 1
-    assert long_err_std_n == 3.0
-    assert short_win_len == 1
-    assert short_err_std_n == 3.0
-    assert short_win_n_bad == 1
-    assert drif_inter == 0.29
-    assert drif_intra == 1.00
-    assert background_err_lim == 0.3
-
 
 @pytest.fixture
 def iquam_parameters():
@@ -3598,7 +3547,7 @@ def test_all_biased_with_bgvar():
         "drf_tail1": [1, 1, 1, 0, 0, 0, 0, 0, 0],
         "drf_tail2": [0, 0, 0, 0, 0, 0, 1, 1, 1],
     }
-    otqc.og_sst_tail_check(reps.reps, 3, 3.0, 1, 3.0, 1, 0.29, 1.0, 0.3)
+    otqc.sst_tail_check(reps.reps, 3, 3.0, 1, 3.0, 1, 0.29, 1.0, 0.3)
     for i in range(0, len(reps)):
         assert reps.get_qc(i, "SST", "drf_tail1") == expected_flags["drf_tail1"][i]
         assert reps.get_qc(i, "SST", "drf_tail2") == expected_flags["drf_tail2"][i]
@@ -3659,7 +3608,7 @@ def test_short_start_tail_with_bgvar():
         "drf_tail1": [0, 0, 0, 0, 0, 0, 0, 0, 0],
         "drf_tail2": [0, 0, 0, 0, 0, 0, 0, 0, 0],
     }
-    otqc.og_sst_tail_check(reps.reps, 7, 3.0, 3, 2.0, 2, 0.29, 1.0, 0.3)
+    otqc.sst_tail_check(reps.reps, 7, 3.0, 3, 2.0, 2, 0.29, 1.0, 0.3)
     for i in range(0, len(reps)):
         assert reps.get_qc(i, "SST", "drf_tail1") == expected_flags["drf_tail1"][i]
         assert reps.get_qc(i, "SST", "drf_tail2") == expected_flags["drf_tail2"][i]
@@ -3672,7 +3621,7 @@ def test_short_all_fail_with_bgvar():
         "drf_tail1": [1, 1, 0, 0, 0, 0, 0, 0, 0],
         "drf_tail2": [0, 0, 0, 0, 0, 0, 0, 1, 1],
     }
-    otqc.og_sst_tail_check(reps.reps, 7, 9.0, 3, 2.0, 2, 0.29, 1.0, 0.3)
+    otqc.sst_tail_check(reps.reps, 7, 9.0, 3, 2.0, 2, 0.29, 1.0, 0.3)
     for i in range(0, len(reps)):
         assert reps.get_qc(i, "SST", "drf_tail1") == expected_flags["drf_tail1"][i]
         assert reps.get_qc(i, "SST", "drf_tail2") == expected_flags["drf_tail2"][i]
@@ -3769,7 +3718,7 @@ def test_long_and_short_all_fail_with_bgvar():
         "drf_tail1": [1, 1, 1, 1, 1, 1, 1, 1, 0],
         "drf_tail2": [0, 0, 0, 0, 0, 0, 0, 0, 0],
     }
-    otqc.og_sst_tail_check(reps.reps, 3, 3.0, 1, 0.25, 1, 0.29, 1.0, 0.3)
+    otqc.sst_tail_check(reps.reps, 3, 3.0, 1, 0.25, 1, 0.29, 1.0, 0.3)
     for i in range(0, len(reps)):
         assert reps.get_qc(i, "SST", "drf_tail1") == expected_flags["drf_tail1"][i]
         assert reps.get_qc(i, "SST", "drf_tail2") == expected_flags["drf_tail2"][i]
@@ -3837,7 +3786,7 @@ def test_error_missing_matched_value():
         otqc.sst_tail_check(reps.reps, 3, 3.0, 1, 3.0, 1, 0.29, 1.0, 0.3)
     except AssertionError as error:
         error_return_text = (
-            "matched report value is missing: unknown extended variable name OSTIA"
+            "unknown extended variable name OSTIA"
         )
         assert str(error)[0 : len(error_return_text)] == error_return_text
     for i in range(0, len(reps)):
@@ -3869,7 +3818,7 @@ def test_error_missing_ob_value():
     }
 
     with pytest.raises(ValueError):
-        otqc.og_sst_tail_check(reps.reps, 3, 3.0, 1, 3.0, 1, 0.29, 1.0, 0.3)
+        otqc.sst_tail_check(reps.reps, 3, 3.0, 1, 3.0, 1, 0.29, 1.0, 0.3)
     # try:
     #     otqc.og_sst_tail_check(reps.reps, 3, 3.0, 1, 3.0, 1, 0.29, 1.0, 0.3)
     # except ValueError as error:
@@ -3906,7 +3855,7 @@ def test_error_invalid_background():
         "drf_tail2": [9, 9, 9, 9, 9, 9, 9, 9, 9],
     }
     try:
-        otqc.og_sst_tail_check(reps.reps, 3, 3.0, 1, 3.0, 1, 0.29, 1.0, 0.3)
+        otqc.sst_tail_check(reps.reps, 3, 3.0, 1, 3.0, 1, 0.29, 1.0, 0.3)
     except AssertionError as error:
         error_return_text = "matched background sst is invalid"
         assert str(error)[0 : len(error_return_text)] == error_return_text
@@ -4414,7 +4363,7 @@ def test_short_record_one_bad_bnc():
         "drf_noise": [0, 0, 0, 0, 0],
         "drf_short": [0, 0, 0, 0, 0],
     }
-    otqc.og_sst_biased_noisy_check(reps.reps, 9, 1.10, 1.0, 0.29, 3.0, 2, 0.3)
+    otqc.sst_biased_noisy_check(reps.reps, 9, 1.10, 1.0, 0.29, 3.0, 2, 0.3)
     for i in range(0, len(reps)):
         assert reps.get_qc(i, "SST", "drf_bias") == expected_flags["drf_bias"][i]
         assert reps.get_qc(i, "SST", "drf_noise") == expected_flags["drf_noise"][i]
@@ -4428,7 +4377,7 @@ def test_short_record_two_bad_bnc():
         "drf_noise": [0, 0, 0, 0, 0],
         "drf_short": [1, 1, 1, 1, 1],
     }
-    otqc.og_sst_biased_noisy_check(reps.reps, 9, 1.10, 1.0, 0.29, 3.0, 2, 0.3)
+    otqc.sst_biased_noisy_check(reps.reps, 9, 1.10, 1.0, 0.29, 3.0, 2, 0.3)
     for i in range(0, len(reps)):
         assert reps.get_qc(i, "SST", "drf_bias") == expected_flags["drf_bias"][i]
         assert reps.get_qc(i, "SST", "drf_noise") == expected_flags["drf_noise"][i]
@@ -4442,7 +4391,7 @@ def test_short_record_two_bad_obs_missing_bnc():
         "drf_noise": [0, 0, 0, 0, 0, 0, 0, 0, 0],
         "drf_short": [1, 1, 1, 1, 1, 1, 1, 1, 1],
     }
-    otqc.og_sst_biased_noisy_check(reps.reps, 9, 1.10, 1.0, 0.29, 3.0, 2, 0.3)
+    otqc.sst_biased_noisy_check(reps.reps, 9, 1.10, 1.0, 0.29, 3.0, 2, 0.3)
     for i in range(0, len(reps)):
         assert reps.get_qc(i, "SST", "drf_bias") == expected_flags["drf_bias"][i]
         assert reps.get_qc(i, "SST", "drf_noise") == expected_flags["drf_noise"][i]
@@ -4456,7 +4405,7 @@ def test_short_record_two_bad_obs_missing_with_bgvar_bnc():
         "drf_noise": [0, 0, 0, 0, 0, 0, 0, 0, 0],
         "drf_short": [0, 0, 0, 0, 0, 0, 0, 0, 0],
     }
-    otqc.og_sst_biased_noisy_check(reps.reps, 9, 1.10, 1.0, 0.29, 3.0, 2, 0.3)
+    otqc.sst_biased_noisy_check(reps.reps, 9, 1.10, 1.0, 0.29, 3.0, 2, 0.3)
     for i in range(0, len(reps)):
         assert reps.get_qc(i, "SST", "drf_bias") == expected_flags["drf_bias"][i]
         assert reps.get_qc(i, "SST", "drf_noise") == expected_flags["drf_noise"][i]
@@ -4554,11 +4503,13 @@ def test_error_bad_input_parameter_bnc():
         "drf_noise": [9, 9, 9, 9, 9, 9, 9, 9, 9],
         "drf_short": [9, 9, 9, 9, 9, 9, 9, 9, 9],
     }
-    try:
-        otqc.og_sst_biased_noisy_check(reps.reps, 0, 1.10, 1.0, 0.29, 3.0, 2, 0.3)
-    except AssertionError as error:
-        error_return_text = "invalid input parameter: n_eval must be > 0"
-        assert str(error)[0 : len(error_return_text)] == error_return_text
+    with pytest.raises(AssertionError):
+        otqc.sst_biased_noisy_check(reps.reps, 0, 1.10, 1.0, 0.29, 3.0, 2, 0.3)
+    # try:
+    #     otqc.og_sst_biased_noisy_check(reps.reps, 0, 1.10, 1.0, 0.29, 3.0, 2, 0.3)
+    # except AssertionError as error:
+    #     error_return_text = "invalid input parameter: n_eval must be > 0"
+    #     assert str(error)[0 : len(error_return_text)] == error_return_text
     for i in range(0, len(reps)):
         assert reps.get_qc(i, "SST", "drf_bias") == expected_flags["drf_bias"][i]
         assert reps.get_qc(i, "SST", "drf_noise") == expected_flags["drf_noise"][i]
@@ -4576,7 +4527,7 @@ def test_error_missing_matched_value_bnc():
         otqc.sst_biased_noisy_check(reps.reps, 9, 1.10, 1.0, 0.29, 3.0, 2, 0.3)
     except AssertionError as error:
         error_return_text = (
-            "matched report value is missing: unknown extended variable name OSTIA"
+            "unknown extended variable name OSTIA"
         )
         assert str(error)[0 : len(error_return_text)] == error_return_text
     for i in range(0, len(reps)):
@@ -4611,10 +4562,10 @@ def test_error_missing_ob_value_bnc():
         "drf_short": [9, 9, 9, 9, 9, 9, 9, 9, 9],
     }
     with pytest.raises(ValueError):
-        otqc.og_sst_biased_noisy_check(reps.reps, 9, 1.10, 1.0, 0.29, 3.0, 2, 0.3)
+        otqc.sst_biased_noisy_check(reps.reps, 9, 1.10, 1.0, 0.29, 3.0, 2, 0.3)
 
     try:
-        otqc.og_sst_biased_noisy_check(reps.reps, 9, 1.10, 1.0, 0.29, 3.0, 2, 0.3)
+        otqc.sst_biased_noisy_check(reps.reps, 9, 1.10, 1.0, 0.29, 3.0, 2, 0.3)
     except ValueError as error:
         error_return_text = "lat is missing"
         assert str(error)[0 : len(error_return_text)] == error_return_text

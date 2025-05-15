@@ -232,7 +232,7 @@ def calc_alternate_speeds(df: pd.DataFrame) -> pd.DataFrame:
             row2 = df.iloc[i + 1]
             row1 = df.iloc[i - 1]
             ship_speed, ship_distance, ship_direction, ship_time_difference = (
-                row_difference(row1, row2)
+                row_difference(row2, row1)
             )
 
             alt_speed[i] = ship_speed
