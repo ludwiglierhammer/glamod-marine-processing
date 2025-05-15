@@ -97,18 +97,42 @@ def open_xrdataset(
 
 class Climatology:
     """Class for dealing with climatologies, reading, extracting values etc.
-    Automatically detects if this is a single field, pentad or daily climatology
+    Automatically detects if this is a single field, pentad or daily climatology.
+
+    Parameters
+    ----------
+    data: xr.DataArray
+        Climatology data
+    time_axis: str, optional
+        Name of time axis.
+        Set if time axis in `data` is not CF compatible.
+    lat_axis: str, optional
+        Name of latitude axis.
+        Set if latitude axis in `data` is not CF compatible.
+    lon_axis: str, optional
+        Name of longitude axis.
+        Set if longitude axis in `data` is not CF compatible.
+    source_units: str, optional
+        Name of units in `data`.
+        Set if units are not defined in `data`.
+    target_units: str, optional
+        Name of target units to which units must conform.
+    valid_ntime: int or list, default: [1, 73, 365]
+        Number of valid time steps:
+        1: single field climatology
+        73: pentad climatology
+        365: daily climatology
     """
 
     def __init__(
         self,
-        data,
-        time_axis=None,
-        lat_axis=None,
-        lon_axis=None,
-        valid_ntime=[1, 73, 365],
-        target_units=None,
-        source_units=None,
+        data: xr.DataArray,
+        time_axis: str | None = None,
+        lat_axis: str | None = None,
+        lon_axis: str | None = None,
+        source_units: str | None = None,
+        target_units: str | None = None,
+        valid_ntime: int | list = [1, 73, 365],
     ):
         self.data = data
         self.convert_units_to(target_units, source_units=source_units)
@@ -130,13 +154,13 @@ class Climatology:
         assert self.ntime in valid_ntime, "weird shaped field"
 
     @classmethod
-    def open_netcdf_file(cls, file_name, clim_name, **kwargs):
+    def open_netcdf_file(cls, file_name, clim_name, **kwargs) -> Climatology:
         """Open filename with xarray."""
         ds = open_xrdataset(file_name)
         da = ds[clim_name]
         return cls(da, **kwargs)
 
-    def convert_units_to(self, target_units, source_units=None):
+    def convert_units_to(self, target_units, source_units=None) -> None:
         """Convert units to user-specific units.
 
         Parameters
