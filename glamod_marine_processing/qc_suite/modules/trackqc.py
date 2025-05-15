@@ -30,10 +30,6 @@ References:
 Atkinson, C.P., N.A. Rayner, J. Roberts-Jones, R.O. Smith, 2013:
 Assessing the quality of sea surface temperature observations from
 drifting buoys and ships on a platform-by-platform basis (doi:10.1002/jgrc.20257).
-
-CMA FCM code repository:
-http://fcm9/projects/ClimateMonitoringAttribution/browser/Track_QC?order=name
-
 """
 
 
@@ -75,6 +71,11 @@ def track_day_test(
     -------
     bool
         True if daytime, else False.
+
+    Raises
+    ------
+    ValueError
+        When input values are invalid
     """
     if year is None:
         raise ValueError("year is missing")
@@ -188,6 +189,41 @@ def new_speed_check(reps, *args):
 
 
 class NewSpeedChecker:
+    """Check to see whether a drifter has been picked up by a ship (out of water) based on 1/100th degree
+    precision positions. A flag 'drf_spd' is set for each input report: flag=1 for reports deemed picked up,
+    else flag=0.
+
+    A drifter is deemed picked up if it is moving faster than might be expected for a fast ocean current
+    (a few m/s). Unreasonably fast movement is detected when speed of travel between report-pairs exceeds
+    the chosen 'speed_limit' (speed is estimated as distance between reports divided by time separation -
+    this 'straight line' speed between the two points is a minimum speed estimate given a less-direct
+    path may have been followed). Positional errors introduced by lon/lat 'jitter' and data precision
+    can be of order several km's. Reports must be separated by a suitably long period of time (the 'min_win_period')
+    to minimise the effect of these errors when calculating speed e.g. for reports separated by 9 hours
+    errors of order 10 cm/s would result which are a few percent of fast ocean current speed. Conversley,
+    the period of time chosen should not be too long so as to resolve short-lived burst of speed on
+    manouvering ships. Larger positional errors may also trigger the check.
+
+    For each report, speed is assessed over the shortest available period that exceeds 'min_win_period'.
+
+    Prior to assessment the drifter record is screened for positional errors using the iQuam track check
+    method (from :class:`.Voyage`). When running the iQuam check the record is treated as a ship (not a
+    drifter) so as to avoid accidentally filtering out observations made aboard a ship (which is what we
+    are trying to detect). This iQuam track check does not overwrite any existing iQuam track check flags.
+
+    IMPORTANT - for optimal performance, drifter records with observations failing this check should be
+    subsequently manually reviewed. Ships move around in all sorts of complicated ways that can readily
+    confuse such a simple check (e.g. pausing at sea, crisscrossing its own path) and once some erroneous
+    movement is detected it is likely a human operator can then better pick out the actual bad data. False
+    fails caused by positional errors (particularly in fast ocean currents) will also need reinstating.
+
+    The class has the following class attributes which can be modified using the set_parameters method.
+
+    iquam_parameters: Parameter dictionary for Voyage.iquam_track_check() function.
+    speed_limit: maximum allowable speed for an in situ drifting buoy (metres per second)
+    min_win_period: minimum period of time in days over which position is assessed for speed estimates (see
+    description)
+    """
 
     iquam_parameters = {}
     speed_limit = 3.0
@@ -201,7 +237,30 @@ class NewSpeedChecker:
         self.hrs = None
         self.iquam_track_ship = None
 
-    def set_parameters(self, iquam_parameters, speed_limit, min_win_period):
+    def set_parameters(
+        self, iquam_parameters: dict, speed_limit: float, min_win_period: float
+    ) -> None:
+        """Set the parameters of the QC check. Note that this will set parameters for all instances of the class.
+
+        Parameters
+        ----------
+        iquam_parameters: dict
+            Parameter dictionary for Voyage.iquam_track_check() function.
+        speed_limit: float
+            Maximum allowable speed for an in situ drifting buoy (metres per second)
+        min_win_period: float
+            minimum period of time in days over which position is assessed for speed estimates (see
+            description)
+
+        Returns
+        -------
+        None
+
+        Raises
+        ------
+        AssertionError
+            When any of the parameters is invalid
+        """
         try:
             speed_limit = float(speed_limit)
             min_win_period = float(min_win_period)
@@ -214,21 +273,24 @@ class NewSpeedChecker:
         NewSpeedChecker.speed_limit = speed_limit
         NewSpeedChecker.min_win_period = min_win_period
 
-    def do_qc(self):
-
+    def do_qc(self) -> None:
+        """Perform the new speed check QC"""
         nrep = len(self.reps)
+
         # pairs of records are needed to evaluate speed
         if nrep <= 1:
             for rep in self.reps:
                 rep.set_qc("POS", "drf_spd", 0)
             return
 
-        self.preprocess_reps()
-        self.initialise_reps()
-        self.do_speed_check()
+        self._preprocess_reps()
+        self._initialise_reps()
+        self._do_speed_check()
 
-    def preprocess_reps(self):
+    def _preprocess_reps(self) -> None:
+        """Process the reps and calculate the values used in the QC check"""
         nrep = len(self.reps)
+
         # retrieve lon/lat/time_diff variables from marine reports
         lon = np.empty(nrep)  # type: np.ndarray
         lon[:] = np.nan
@@ -276,16 +338,18 @@ class NewSpeedChecker:
         self.lon = lon
         self.hrs = hrs
 
-    def initialise_reps(self):
+    def _initialise_reps(self) -> None:
+        """Initialise the QC flags in the reports"""
         # begin by setting all reports to pass
         for rep in self.reps:
             rep.set_qc("POS", "drf_spd", 0)
 
-    def do_speed_check(self):
+    def _do_speed_check(self) -> None:
+        """Perform the actual speed check"""
         nrep = len(self.reps)
         min_win_period_hours = NewSpeedChecker.min_win_period * 24.0
-        # loop through timeseries to see if drifter is moving too fast
-        # and flag any occurences
+
+        # loop through timeseries to see if drifter is moving too fast and flag any occurrences
         index_arr = np.array(range(0, nrep))
         i = 0
         time_to_end = self.hrs[-1] - self.hrs[i]
@@ -328,6 +392,37 @@ def speed_check(reps, *args):
 
 
 class SpeedChecker:
+    """Check to see whether a drifter has been picked up by a ship (out of water) based on 1/100th degree
+    precision positions. A flag 'drf_spd' is set for each input report: flag=1 for reports deemed picked up,
+    else flag=0.
+
+    A drifter is deemed picked up if it is moving faster than might be expected for a fast ocean current
+    (a few m/s). Unreasonably fast movement is detected when speed of travel between report-pairs exceeds
+    the chosen 'speed_limit' (speed is estimated as distance between reports divided by time separation -
+    this 'straight line' speed between the two points is a minimum speed estimate given a less-direct
+    path may have been followed). Positional errors introduced by lon/lat 'jitter' and data precision
+    can be of order several km's. Reports must be separated by a suitably long period of time (the 'min_win_period')
+    to minimise the effect of these errors when calculating speed e.g. for reports separated by 24 hours
+    errors of several cm/s would result which are two orders of magnitude less than a fast ocean current
+    which seems reasonable. Conversley, the period of time chosen should not be too long so as to resolve
+    short-lived burst of speed on manouvering ships. Larger positional errors may also trigger the check.
+    Because temporal sampling can be erratic the time period over which this assessment is made is specified
+    as a range (bound by 'min_win_period' and 'max_win_period') - assesment uses the longest time separation
+    available within this range.
+
+    IMPORTANT - for optimal performance, drifter records with observations failing this check should be
+    subsequently manually reviewed. Ships move around in all sorts of complicated ways that can readily
+    confuse such a simple check (e.g. pausing at sea, crisscrossing its own path) and once some erroneous
+    movement is detected it is likely a human operator can then better pick out the actual bad data. False
+    fails caused by positional errors (particularly in fast ocean currents) will also need reinstating.
+
+    speed_limit: maximum allowable speed for an in situ drifting buoy (metres per second)
+    min_win_period: minimum period of time in days over which position is assessed for speed estimates (see
+      description)
+    max_win_period: maximum period of time in days over which position is assessed for speed estimates
+      (this should be greater than min_win_period and allow for some erratic temporal sampling e.g. min_win_period+0.2
+      to allow for gaps of up to 0.2-days in sampling).
+    """
 
     speed_limit = 2.5
     min_win_period = 0.8
@@ -341,7 +436,32 @@ class SpeedChecker:
         self.lat = None
         self.hrs = None
 
-    def set_parameters(self, speed_limit, min_win_period, max_win_period):
+    def set_parameters(
+        self, speed_limit: float, min_win_period: float, max_win_period: float
+    ) -> None:
+        """Set the parameters of the QC check. Note that this will set parameters for all instances of the class.
+
+        Parameters
+        ----------
+        speed_limit: float
+            maximum allowable speed for an in situ drifting buoy (metres per second)
+        min_win_period: float
+            minimum period of time in days over which position is assessed for speed estimates (see
+            description)
+        max_win_period: float
+            maximum period of time in days over which position is assessed for speed estimates
+            (this should be greater than min_win_period and allow for some erratic temporal sampling e.g. min_win_period+0.2
+            to allow for gaps of up to 0.2-days in sampling).
+
+        Returns
+        -------
+        None
+
+        Raises
+        ------
+        AssertionError
+            When any of the input parameters are invalid
+        """
         try:
             speed_limit = float(speed_limit)
             min_win_period = float(min_win_period)
@@ -359,7 +479,8 @@ class SpeedChecker:
         SpeedChecker.min_win_period = min_win_period
         SpeedChecker.max_win_period = max_win_period
 
-    def do_qc(self):
+    def do_qc(self) -> None:
+        """Perform the new speed check QC"""
         nrep = len(self.reps)
         # pairs of records are needed to evaluate speed
         if nrep <= 1:
@@ -367,17 +488,20 @@ class SpeedChecker:
                 rep.set_qc("POS", "drf_spd", 0)
             return
 
-        self.preprocess_reps()
-        self.initialise_reps()
-        self.do_speed_check()
+        self._preprocess_reps()
+        self._initialise_reps()
+        self._do_speed_check()
 
-    def initialise_reps(self):
+    def _initialise_reps(self) -> None:
+        """Initialise the QC flags in the reports"""
         # begin by setting all reports to pass
         for rep in self.reps:
             rep.set_qc("POS", "drf_spd", 0)
 
-    def preprocess_reps(self):
+    def _preprocess_reps(self):
+        """Process the reps and calculate the values used in the QC check"""
         nrep = len(self.reps)
+
         # retrieve lon/lat/time_diff variables from marine reports
         lon = np.empty(nrep)  # type: np.ndarray
         lon[:] = np.nan
@@ -408,7 +532,8 @@ class SpeedChecker:
         self.lat = lat
         self.hrs = hrs
 
-    def do_speed_check(self):
+    def _do_speed_check(self):
+        """Perform the actual speed check"""
         nrep = len(self.reps)
         min_win_period_hours = SpeedChecker.min_win_period * 24.0
         max_win_period_hours = SpeedChecker.max_win_period * 24.0
@@ -477,6 +602,15 @@ class AgroundChecker:
     max_win_period: maximum period of time in days over which position is assessed for no movement (this should be
     greater than min_win_period and allow for erratic temporal sampling e.g. min_win_period+2 to allow for gaps of
     up to 2-days in sampling).
+
+    The following Class attributes are used to store the parameters of the QC check. These can be modified using
+    the set_parameters method.
+
+    smooth_win: length of window (odd number) in datapoints used for smoothing lon/lat
+    min_win_period: minimum period of time in days over which position is assessed for no movement (see description)
+    max_win_period: maximum period of time in days over which position is assessed for no movement (this should be
+    greater than min_win_period and allow for erratic temporal sampling e.g. min_win_period+2 to allow for gaps of
+    up to 2-days in sampling).
     """
 
     smooth_win = 41
@@ -493,7 +627,31 @@ class AgroundChecker:
         self.lat_smooth = None
         self.hrs_smooth = None
 
-    def set_parameters(self, smooth_win, min_win_period, max_win_period):
+    def set_parameters(
+        self, smooth_win: int, min_win_period: int, max_win_period: int
+    ) -> None:
+        """Set the parameters of the QC check. Note that this will set parameters for all instances of the class.
+
+        Parameters
+        ----------
+        smooth_win: int
+            Length of window (odd number) in datapoints used for smoothing lon/lat
+        min_win_period: int
+            minimum period of time in days over which position is assessed for no movement (see description)
+        max_win_period: int
+            maximum period of time in days over which position is assessed for no movement (this should be greater
+            than min_win_period and allow for erratic temporal sampling e.g. min_win_period+2 to allow for gaps of
+            up to 2-days in sampling).
+
+        Returns
+        -------
+        None
+
+        Raises
+        ------
+        AssertionError
+            When any of the input values are invalid
+        """
         try:
             smooth_win = int(smooth_win)
             min_win_period = int(min_win_period)
@@ -513,7 +671,7 @@ class AgroundChecker:
         AgroundChecker.max_win_period = max_win_period
 
     def do_qc(self):
-
+        """Perform the new aground check QC"""
         nrep = len(self.reps)
         # records shorter than smoothing-window can't be evaluated
         if nrep <= AgroundChecker.smooth_win:
@@ -521,10 +679,11 @@ class AgroundChecker:
                 rep.set_qc("POS", "drf_agr", 0)
             return
 
-        self.preprocess_reps()
-        self.do_aground_check()
+        self._preprocess_reps()
+        self._do_aground_check()
 
-    def preprocess_reps(self):
+    def _preprocess_reps(self) -> None:
+        """Process the reps and calculate the values used in the QC check"""
         nrep = len(self.reps)
         half_win = int((AgroundChecker.smooth_win - 1) / 2)
 
@@ -580,7 +739,8 @@ class AgroundChecker:
         self.lat_smooth = lat_smooth
         self.hrs_smooth = hrs_smooth
 
-    def do_aground_check(self):
+    def _do_aground_check(self):
+        """Perform the actual aground check"""
         half_win = (AgroundChecker.smooth_win - 1) / 2
         min_win_period_hours = AgroundChecker.min_win_period * 24.0
         max_win_period_hours = AgroundChecker.max_win_period * 24.0
@@ -661,9 +821,10 @@ class NewAgroundChecker:
     is less than 'min_win_period'. If a drifter is deemed aground and subsequently starts moving (e.g. if a drifter
     has followed a circular path) incorrectly flagged reports will be reinstated.
 
+    The class has the following class attributes which can be modified using the set_parameters method.
+
     smooth_win: length of window (odd number) in datapoints used for smoothing lon/lat
-    min_win_period: minimum period of time in days over which position is assessed for no movement (see
-      description)
+    min_win_period: minimum period of time in days over which position is assessed for no movement (see description)
     """
 
     smooth_win = 41
@@ -673,7 +834,25 @@ class NewAgroundChecker:
     def __init__(self, reps):
         self.reps = reps
 
-    def set_parameters(self, smooth_win, min_win_period):
+    def set_parameters(self, smooth_win: int, min_win_period: int) -> None:
+        """Set the parameters of the QC check. Note that this will set parameters for all instances of the class.
+
+        Parameters
+        ----------
+        smooth_win: int
+            length of window (odd number) in datapoints used for smoothing lon/lat
+        min_win_period: int
+            minimum period of time in days over which position is assessed for no movement (see description)
+
+        Returns
+        -------
+        None
+
+        Raises
+        ------
+        AssertionError
+            When any of the input values are invalid
+        """
         try:
             smooth_win = int(smooth_win)
             min_win_period = int(min_win_period)
@@ -685,7 +864,8 @@ class NewAgroundChecker:
         NewAgroundChecker.smooth_win = smooth_win
         NewAgroundChecker.min_win_period = min_win_period
 
-    def do_qc(self):
+    def do_qc(self) -> None:
+        """Perform the new speed check QC"""
         nrep = len(self.reps)
 
         # records shorter than smoothing-window can't be evaluated
@@ -694,10 +874,11 @@ class NewAgroundChecker:
                 rep.set_qc("POS", "drf_agr", 0)
             return
 
-        self.preprocess_reps()
-        self.do_aground_check()
+        self._preprocess_reps()
+        self._do_aground_check()
 
-    def preprocess_reps(self):
+    def _preprocess_reps(self) -> None:
+        """Process the reps and calculate the values used in the QC check"""
         nrep = len(self.reps)
         half_win = int((NewAgroundChecker.smooth_win - 1) / 2)
         min_win_period_hours = NewAgroundChecker.min_win_period * 24.0
@@ -756,8 +937,8 @@ class NewAgroundChecker:
         self.lon_smooth = lon_smooth
         self.hrs_smooth = hrs_smooth
 
-    def do_aground_check(self):
-
+    def _do_aground_check(self) -> None:
+        """Perform the actual aground check"""
         half_win = int((NewAgroundChecker.smooth_win - 1) / 2)
         min_win_period_hours = NewAgroundChecker.min_win_period * 24.0
 
@@ -879,15 +1060,47 @@ class SSTTailChecker:
 
     def set_parameters(
         self,
-        long_win_len,
-        long_err_std_n,
-        short_win_len,
-        short_err_std_n,
-        short_win_n_bad,
-        drif_inter,
-        drif_intra,
-        background_err_lim,
-    ):
+        long_win_len: int,
+        long_err_std_n: float,
+        short_win_len: int,
+        short_err_std_n: float,
+        short_win_n_bad: int,
+        drif_inter: float,
+        drif_intra: float,
+        background_err_lim: float,
+    ) -> None:
+        """Set the parameters of the QC check. Note that this will set parameters for all instances of the class.
+
+        Parameters
+        ----------
+        long_win_len: int
+            Length of window (in data-points) over which to make long tail-check (must be an odd number)
+        long_err_std_n: float
+            Number of standard deviations of combined background and drifter bias error, beyond which
+            data fail bias check
+        short_win_len: int
+            Length of window (in data-points) over which to make the short tail-check
+        short_err_std_n: float
+            Number of standard deviations of combined background and drifter error, beyond which data
+            are deemed suspicious
+        short_win_n_bad: int
+            Minimum number of suspicious data points required for failure of short check window
+        drif_inter: float
+            spread of biases expected in drifter data (standard deviation, degC)
+        drif_intra: float
+            Maximum random measurement uncertainty reasonably expected in drifter data (standard deviation, degC)
+        background_err_lim: float
+            Background error variance beyond which the SST background is deemed unreliable (degC squared)
+
+        Returns
+        -------
+        None
+
+        Raises
+        ------
+        AssertionError
+            When any of the input values are invalid.
+        """
 
         try:
             long_win_len = int(long_win_len)
@@ -919,7 +1132,47 @@ class SSTTailChecker:
         SSTTailChecker.drif_intra = drif_intra
         SSTTailChecker.background_err_lim = background_err_lim
 
-    def initialise_reps(self):
+    def do_qc(self):
+        self._preprocess_reps()
+        self._initialise_reps()
+        if len(self.sst_anom) == 0:
+            return
+
+        nrep = len(self.sst_anom)
+        self.start_tail_ind = -1  # keeps track of index where start tail stops
+        self.end_tail_ind = nrep  # keeps track of index where end tail starts
+
+        # do long tail check - records shorter than long-window length aren't evaluated
+        if not (nrep < SSTTailChecker.long_win_len):
+            # run forwards then backwards over timeseries
+            self._do_long_tail_check(forward=True)
+            self._do_long_tail_check(forward=False)
+
+        # do short tail check on records that pass long tail check - whole record already failed long tail check
+        if not (self.start_tail_ind >= self.end_tail_ind):
+            first_pass_ind = (
+                self.start_tail_ind + 1
+            )  # first index passing long tail check
+            last_pass_ind = self.end_tail_ind - 1  # last index passing long tail check
+            self._do_short_tail_check(first_pass_ind, last_pass_ind, forward=True)
+            self._do_short_tail_check(first_pass_ind, last_pass_ind, forward=False)
+
+        # now flag reps - whole record failed tail checks, don't flag
+        if self.start_tail_ind >= self.end_tail_ind:
+            self.start_tail_ind = -1
+            self.end_tail_ind = nrep
+
+        if not self.start_tail_ind == -1:
+            for ind, rep in enumerate(self.reps):
+                if ind <= self.reps_ind[self.start_tail_ind]:
+                    rep.set_qc("SST", "drf_tail1", 1)
+        if not self.end_tail_ind == nrep:
+            for ind, rep in enumerate(self.reps):
+                if ind >= self.reps_ind[self.end_tail_ind]:
+                    rep.set_qc("SST", "drf_tail2", 1)
+
+    def _initialise_reps(self) -> None:
+        """Initialise the QC flags in the reports"""
         # set start and end tail flags to pass to ensure all obs receive flag
         # then exit if there are no obs suitable for assessment
         for rep in self.reps:
@@ -929,7 +1182,20 @@ class SSTTailChecker:
             return
 
     @staticmethod
-    def parse_rep(rep):
+    def _parse_rep(rep) -> (float, float, float, bool):
+        """
+
+        Parameters
+        ----------
+        rep: MarineReport
+            MarineReport from which the information is to be extracted
+
+        Returns
+        -------
+        (float, float, float, bool)
+            Background value, ice concentration, background variance, and a boolean variable indicating whether the
+            report is "good"
+        """
         bg_val = rep.getext("OSTIA")  # raises assertion error if not found
         ice_val = rep.getext("ICE")  # raises assertion error if not found
         bgvar_val = rep.getext("BGVAR")  # raises assertion error if not found
@@ -965,13 +1231,14 @@ class SSTTailChecker:
 
         return bg_val, ice_val, bgvar_val, good_match
 
-    def preprocess_reps(self):
+    def _preprocess_reps(self) -> None:
+        """Process the reps and calculate the values used in the QC check"""
         # test and filter out obs with unsuitable background matches
         reps_ind = []  # type: list
         sst_anom = []  # type: list
         bgvar = []  # type: list
         for ind, rep in enumerate(self.reps):
-            bg_val, ice_val, bgvar_val, good_match = SSTTailChecker.parse_rep(rep)
+            bg_val, ice_val, bgvar_val, good_match = SSTTailChecker._parse_rep(rep)
 
             if good_match:
                 assert (
@@ -992,8 +1259,18 @@ class SSTTailChecker:
         # standard deviation of background error
         self.bgerr = np.sqrt(np.array(bgvar))  # type: np.ndarray
 
-    def do_long_tail_check(self, forward=True):
+    def _do_long_tail_check(self, forward: bool = True) -> None:
+        """Perform the long tail check
 
+        Parameters
+        ----------
+        forward: bool
+            Flag to set for a forward (True) or backward (False) pass of the long tail check
+
+        Returns
+        -------
+        None
+        """
         nrep = len(self.sst_anom)
         mid_win_ind = int((SSTTailChecker.long_win_len - 1) / 2)
 
@@ -1028,8 +1305,22 @@ class SSTTailChecker:
             else:
                 break
 
-    def do_short_tail_check(self, first_pass_ind, last_pass_ind, forward=True):
+    def _do_short_tail_check(self, first_pass_ind, last_pass_ind, forward=True):
+        """Perform the short tail check
 
+        Parameters
+        ----------
+        first_pass_ind: int
+            Index
+        last_pass_ind: int
+            Index
+        forward: bool
+            Flag to set for a forward (True) or backward (False) pass of the short tail check
+
+        Returns
+        -------
+        None
+        """
         npass = last_pass_ind - first_pass_ind + 1
         assert npass > 0, "short tail check: npass not > 0"
 
@@ -1073,45 +1364,6 @@ class SSTTailChecker:
                         self.end_tail_ind -= 1
             else:
                 break
-
-    def do_qc(self):
-        self.preprocess_reps()
-        self.initialise_reps()
-        if len(self.sst_anom) == 0:
-            return
-
-        nrep = len(self.sst_anom)
-        self.start_tail_ind = -1  # keeps track of index where start tail stops
-        self.end_tail_ind = nrep  # keeps track of index where end tail starts
-
-        # do long tail check - records shorter than long-window length aren't evaluated
-        if not (nrep < SSTTailChecker.long_win_len):
-            # run forwards then backwards over timeseries
-            self.do_long_tail_check(forward=True)
-            self.do_long_tail_check(forward=False)
-
-        # do short tail check on records that pass long tail check - whole record already failed long tail check
-        if not (self.start_tail_ind >= self.end_tail_ind):
-            first_pass_ind = (
-                self.start_tail_ind + 1
-            )  # first index passing long tail check
-            last_pass_ind = self.end_tail_ind - 1  # last index passing long tail check
-            self.do_short_tail_check(first_pass_ind, last_pass_ind, forward=True)
-            self.do_short_tail_check(first_pass_ind, last_pass_ind, forward=False)
-
-        # now flag reps - whole record failed tail checks, don't flag
-        if self.start_tail_ind >= self.end_tail_ind:
-            self.start_tail_ind = -1
-            self.end_tail_ind = nrep
-
-        if not self.start_tail_ind == -1:
-            for ind, rep in enumerate(self.reps):
-                if ind <= self.reps_ind[self.start_tail_ind]:
-                    rep.set_qc("SST", "drf_tail1", 1)
-        if not self.end_tail_ind == nrep:
-            for ind, rep in enumerate(self.reps):
-                if ind >= self.reps_ind[self.end_tail_ind]:
-                    rep.set_qc("SST", "drf_tail2", 1)
 
 
 def sst_biased_noisy_check(reps, *args):
@@ -1186,16 +1438,15 @@ class SSTBiasedNoisyChecker:
 
     def set_parameters(
         self,
-        n_eval,
-        bias_lim,
-        drif_intra,
-        drif_inter,
-        err_std_n,
-        n_bad,
-        background_err_lim,
+        n_eval: int,
+        bias_lim: float,
+        drif_intra: float,
+        drif_inter: float,
+        err_std_n: float,
+        n_bad: int,
+        background_err_lim: float,
     ) -> None:
-        """
-        Set the parameters of the QC check
+        """Set the parameters of the QC check. Note that this will set parameters for all instances of the class.
 
         Parameters
         ----------
@@ -1241,8 +1492,21 @@ class SSTBiasedNoisyChecker:
         SSTBiasedNoisyChecker.n_bad = n_bad
         SSTBiasedNoisyChecker.background_err_lim = background_err_lim
 
+    def do_qc(self):
+        """Perform the bias/noise check QC"""
+        self._preprocess_reps()
+        self._initialise_flags()
+
+        long_record = not (len(self.sst_anom) < SSTBiasedNoisyChecker.n_eval)
+
+        if long_record:
+            self._long_record_qc()
+        else:
+            if not self.bgvar_is_masked:
+                self._short_record_qc()
+
     @staticmethod
-    def parse_rep(rep) -> (float, float, float, bool, bool):
+    def _parse_rep(rep) -> (float, float, float, bool, bool):
         """
         Extract QC-relevant variables from a marine report and
 
@@ -1258,6 +1522,11 @@ class SSTBiasedNoisyChecker:
         float, float, float, bool, bool
             Returns the background SST value, ice value, background SST variance, a flag that indicates a good match,
             and a flag that indicates if the background variance is valid.
+
+        Raises
+        ------
+        AssertionError
+            When bad values are identified
         """
         bg_val = rep.getext("OSTIA")
         ice_val = rep.getext("ICE")
@@ -1298,7 +1567,7 @@ class SSTBiasedNoisyChecker:
 
         return bg_val, ice_val, bgvar_val, good_match, bgvar_mask
 
-    def preprocess_reps(self):
+    def _preprocess_reps(self) -> None:
         """
         Fill SST anomalies and background errors used in the QC checks, as well as a flag
         indicating missing or invalid background values.
@@ -1318,7 +1587,7 @@ class SSTBiasedNoisyChecker:
 
         for rep in self.reps:
             bg_val, ice_val, bgvar_val, good_match, bgvar_mask = (
-                SSTBiasedNoisyChecker.parse_rep(rep)
+                SSTBiasedNoisyChecker._parse_rep(rep)
             )
 
             if bgvar_mask:
@@ -1342,13 +1611,15 @@ class SSTBiasedNoisyChecker:
         self.bgerr = bgerr
         self.bgvar_is_masked = bgvar_is_masked
 
-    def initialise_flags(self):
+    def _initialise_flags(self):
+        """Initialise the QC flags in the reports"""
         for rep in self.reps:
             rep.set_qc("SST", "drf_bias", 0)
             rep.set_qc("SST", "drf_noise", 0)
             rep.set_qc("SST", "drf_short", 0)
 
-    def long_record_qc(self):
+    def _long_record_qc(self) -> None:
+        """Perform the long record check"""
         sst_anom_avg = np.mean(self.sst_anom)
         sst_anom_stdev = np.std(self.sst_anom)
         bgerr_rms = np.sqrt(np.mean(self.bgerr**2))
@@ -1361,7 +1632,8 @@ class SSTBiasedNoisyChecker:
             for rep in self.reps:
                 rep.set_qc("SST", "drf_noise", 1)
 
-    def short_record_qc(self):
+    def _short_record_qc(self) -> None:
+        """Perform the short record check"""
         # Calculate the limit based on the combined uncertainties (background error, drifter inter and drifter intra
         # error) and then multiply by the err_std_n
         limit = SSTBiasedNoisyChecker.err_std_n * np.sqrt(
@@ -1375,16 +1647,3 @@ class SSTBiasedNoisyChecker:
         if np.sum(exceed_limit) >= SSTBiasedNoisyChecker.n_bad:
             for rep in self.reps:
                 rep.set_qc("SST", "drf_short", 1)
-
-    def do_qc(self):
-
-        self.preprocess_reps()
-        self.initialise_flags()
-
-        long_record = not (len(self.sst_anom) < SSTBiasedNoisyChecker.n_eval)
-
-        if long_record:
-            self.long_record_qc()
-        else:
-            if not self.bgvar_is_masked:
-                self.short_record_qc()
