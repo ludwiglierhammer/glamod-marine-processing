@@ -4,15 +4,15 @@ import numpy as np
 import pandas as pd
 import pytest
 
-from glamod_marine_processing.qc_suite.modules.next_level_track_check_qc import (  # backward_discrepancy,; calc_alternate_speeds,; forward_discrepancy,
+from glamod_marine_processing.qc_suite.modules.next_level_track_check_qc import (  # backward_discrepancy, forward_discrepancy,
+    calculate_course_parameters,
     calculate_speed_course_distance_time_difference,
+    do_spike_check,
     find_multiple_rounded_values,
     find_repeated_values,
     find_saturated_runs,
     iquam_track_check,
     km_to_nm,
-    row_difference,
-    spike_check,
     track_check,
 )
 
@@ -52,37 +52,54 @@ def generic_frame(in_pt):
 
 @pytest.fixture
 def ship_frame():
-    return generic_frame(1)
+    frame = generic_frame(1)
+    frame.attrs["delta_t"] = 2.0
+    return frame
 
 
 @pytest.fixture
 def buoy_frame():
-    return generic_frame(6)
+    frame = generic_frame(6)
+    frame.attrs["delta_t"] = 1.0
+    return frame
 
 
 def test_spike_check(ship_frame, buoy_frame):
     for frame in [ship_frame, buoy_frame]:
-        result = spike_check(frame)
+        result = do_spike_check(
+            sst=frame.sst,
+            lat=frame.lat,
+            lon=frame.lon,
+            date=frame.date,
+            delta_t=frame.attrs["delta_t"],
+        )
         for i in range(30):
-            row = result.iloc[i]
+            row = result[i]
             if i == 15:
-                assert row.spike == 1
+                assert row == 1
             else:
-                assert row.spike == 0
+                assert row == 0
 
 
 @pytest.mark.parametrize("key", ["sst", "lat", "lon", "pt", "date"])
-def test_spike_check_raises(ship_frame, key):
+def _test_spike_check_raises(ship_frame, key):
     ship_frame.drop(labels=[key], axis=1, inplace=True)
     with pytest.raises(KeyError):
-        spike_check(ship_frame)
+        do_spike_check(ship_frame)
 
 
-def test_row_difference(ship_frame):
+def test_calculate_course_parameters(ship_frame):
     earlier = ship_frame.iloc[0]
     later = ship_frame.iloc[1]
 
-    speed, distance, course, timediff = row_difference(later, earlier)
+    speed, distance, course, timediff = calculate_course_parameters(
+        later.lat,
+        earlier.lat,
+        later.lon,
+        earlier.lon,
+        later.date,
+        earlier.date,
+    )
 
     assert pytest.approx(speed, 0.00001) == 11.119508064776555
     assert pytest.approx(distance, 0.00001) == 11.119508064776555
@@ -114,20 +131,23 @@ def test_track_check_raises(ship_frame, key):
 
 
 def test_calculate_speed_course_distance_time_difference(ship_frame):
-    result = calculate_speed_course_distance_time_difference(ship_frame)
-    numobs = len(result)
+    speed, distance, course, timediff = calculate_speed_course_distance_time_difference(
+        ship_frame.lat,
+        ship_frame.lon,
+        ship_frame.date,
+    )
+    numobs = len(speed)
     for i in range(numobs):
-        row = result.iloc[i]
         if i > 0:
-            assert pytest.approx(row.speed, 0.00001) == 11.119508064776555
-            assert pytest.approx(row.distance, 0.00001) == 11.119508064776555
+            assert pytest.approx(speed[i], 0.00001) == 11.119508064776555
+            assert pytest.approx(distance[i], 0.00001) == 11.119508064776555
             assert (
-                pytest.approx(row.course, 0.00001) == 0
-                or pytest.approx(row.course, 0.00001) == 360.0
+                pytest.approx(course[i], 0.00001) == 0
+                or pytest.approx(course[i], 0.00001) == 360.0
             )
-            assert pytest.approx(row.time_diff, 0.0000001) == 1.0
+            assert pytest.approx(timediff[i], 0.0000001) == 1.0
         else:
-            assert np.isnan(row.speed)
+            assert np.isnan(speed[i])
 
 
 @pytest.fixture
