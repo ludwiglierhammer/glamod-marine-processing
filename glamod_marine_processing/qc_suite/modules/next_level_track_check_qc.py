@@ -240,8 +240,8 @@ def calculate_speed_course_distance_time_difference(
         second_entry = "i - 1"
 
     for i in range(1, range_end):
-        fe = eval(first_entry)
-        se = eval(second_entry)
+        fe = eval(first_entry)  # noqa
+        se = eval(second_entry)  # noqa
         ship_speed, ship_distance, ship_direction, ship_time_difference = (
             calculate_course_parameters(
                 lat[fe], lat[se], lon[fe], lon[se], date[fe], date[se]
@@ -260,8 +260,8 @@ def forward_discrepancy(
     lat: Sequence[float],
     lon: Sequence[float],
     date: Sequence[datetime],
-    speed: Sequence[float],
-    direction: Sequence[float],
+    vsi: Sequence[float],
+    dsi: Sequence[float],
 ) -> Sequence[float]:
     """Calculate what the distance is between the projected position (based on the reported
     speed and heading at the current and previous time steps) and the actual position. The
@@ -280,10 +280,10 @@ def forward_discrepancy(
         1-dimensional longitude array in degrees.
     date: array-like of datetime, shape (n,)
         1-dimensional date array.
-    speed: array-like of float, shape (n,)
-        1-dimensional speed array in kilometer per hour.
-    direction: array-like of float, shape (n,)
-        1-dimensional direction array.
+    vsi: array-like of float, shape (n,)
+        1-dimensional reported speed array in knots.
+    dsi: array-like of float, shape (n,)
+        1-dimensional reported heading array.
 
     Returns
     -------
@@ -298,11 +298,11 @@ def forward_discrepancy(
     lat = np.asarray(lat)
     lon = np.asarray(lon)
     date = np.asarray(date)
-    speed = np.asarray(speed) / km_to_nm
-    direction = np.asarray(direction)
+    vsi = np.asarray(vsi) / km_to_nm
+    dsi = np.asarray(dsi)
 
     for arr, name in zip(
-        [lat, lon, date, speed, direction], ["lat", "lon", "date", "speed", "direction"]
+        [lat, lon, date, vsi, dsi], ["lat", "lon", "date", "vsi", "dsi"]
     ):
         if arr.ndim != 1:
             raise ValueError(f"Input '{name}' must be one-dimensional.")
@@ -315,55 +315,57 @@ def forward_discrepancy(
 
     for i in range(1, number_of_obs):
 
-        vsi = speed[i]
-        vsi_minus_one = speed[i - 1]
-        dsi = direction[i]
-        dsi_minus_one = direction[i - 1]
-        tsi = pd.Timestamp(date[i])
-        tsi_minus_one = pd.Timestamp(date[i - 1])
-        lai = lat[i]
-        lai_minus_one = lat[i - 1]
-        loi = lon[i]
-        loi_minus_one = lon[i - 1]
+        vsi_current = vsi[i]
+        vsi_previous = vsi[i - 1]
+        dsi_current = dsi[i]
+        dsi_previous = dsi[i - 1]
+        tsi_current = pd.Timestamp(date[i])
+        tsi_previous = pd.Timestamp(date[i - 1])
+        lat_current = lat[i]
+        lat_previous = lat[i - 1]
+        lon_current = lon[i]
+        lon_previous = lon[i - 1]
 
         if (
-            vsi is None
-            or vsi_minus_one is None
-            or dsi is None
-            or dsi_minus_one is None
-            or tsi is None
-            or tsi_minus_one is None
-            or lai is None
-            or lai_minus_one is None
-            or loi is None
-            or loi_minus_one is None
+            vsi_current is None
+            or vsi_previous is None
+            or dsi_current is None
+            or dsi_previous is None
+            or tsi_current is None
+            or tsi_previous is None
+            or lat_current is None
+            or lat_previous is None
+            or lon_current is None
+            or lon_previous is None
         ):
             continue
 
-        time_diff = tsi - tsi_minus_one
+        timediff = (tsi_current - tsi_previous).total_seconds() / 3600
         # get increment from initial position
         lat1, lon1 = tc.increment_position(
-            lai_minus_one,
-            loi_minus_one,
-            vsi_minus_one,
-            dsi_minus_one,
-            time_diff,
+            lat_previous,
+            lon_previous,
+            vsi_previous,
+            dsi_current,
+            timediff,
         )
 
         lat2, lon2 = tc.increment_position(
-            lai,
-            loi,
-            vsi,
-            dsi,
-            time_diff,
+            lat_current,
+            lon_current,
+            vsi_current,
+            dsi_current,
+            timediff,
         )
 
         # apply increments to the lat and lon at i-1
-        updated_latitude = lai_minus_one + lat1 + lat2
-        updated_longitude = loi_minus_one + lon1 + lon2
+        updated_latitude = lat_previous + lat1 + lat2
+        updated_longitude = lon_previous + lon1 + lon2
 
         # calculate distance between calculated position and the second reported position
-        discrepancy = sg.sphere_distance(lai, loi, updated_latitude, updated_longitude)
+        discrepancy = sg.sphere_distance(
+            lat_current, lon_current, updated_latitude, updated_longitude
+        )
 
         distance_from_est_location[i] = discrepancy
 
@@ -374,8 +376,8 @@ def backward_discrepancy(
     lat: Sequence[float],
     lon: Sequence[float],
     date: Sequence[datetime],
-    speed: Sequence[float],
-    direction: Sequence[float],
+    vsi: Sequence[float],
+    dsi: Sequence[float],
 ) -> Sequence[float]:
     """Calculate what the distance is between the projected position (based on the reported speed and
     heading at the current and previous time steps) and the actual position. The calculation proceeds from the
@@ -393,10 +395,10 @@ def backward_discrepancy(
         1-dimensional longitude array in degrees.
     date: array-like of datetime, shape (n,)
         1-dimensional date array.
-    speed: array-like of float, shape (n,)
-        1-dimensional speed array in kilometer per hour.
-    direction: array-like of float, shape (n,)
-        1-dimensional direction array.
+    vsi: array-like of float, shape (n,)
+        1-dimensional reported speed array in knots.
+    dsi: array-like of float, shape (n,)
+        1-dimensional reported heading array.
 
     Returns
     -------
@@ -411,11 +413,11 @@ def backward_discrepancy(
     lat = np.asarray(lat)
     lon = np.asarray(lon)
     date = np.asarray(date)
-    speed = np.asarray(speed) / km_to_nm
-    direction = np.asarray(direction) - 180.0
+    vsi = np.asarray(vsi) / km_to_nm
+    dsi = np.asarray(dsi) - 180.0
 
     for arr, name in zip(
-        [lat, lon, date, speed, direction], ["lat", "lon", "date", "speed", "direction"]
+        [lat, lon, date, vsi, dsi], ["lat", "lon", "date", "vsi", "dsi"]
     ):
         if arr.ndim != 1:
             raise ValueError(f"Input '{name}' must be one-dimensional.")
@@ -428,57 +430,57 @@ def backward_discrepancy(
 
     for i in range(number_of_obs - 1, 0, -1):
 
-        vsi = speed[i]
-        vsi_minus_one = speed[i - 1]
-        dsi = direction[i]
-        dsi_minus_one = direction[i - 1]
-        tsi = pd.Timestamp(date[i])
-        tsi_minus_one = pd.Timestamp(date[i - 1])
-        lai = lat[i]
-        lai_minus_one = lat[i - 1]
-        loi = lon[i]
-        loi_minus_one = lon[i - 1]
+        vsi_current = vsi[i]
+        vsi_previous = vsi[i - 1]
+        dsi_current = dsi[i]
+        dsi_previous = dsi[i - 1]
+        tsi_current = pd.Timestamp(date[i])
+        tsi_previous = pd.Timestamp(date[i - 1])
+        lat_current = lat[i]
+        lat_previous = lat[i - 1]
+        lon_current = lon[i]
+        lon_previous = lon[i - 1]
 
         if (
-            vsi is None
-            or vsi_minus_one is None
-            or dsi is None
-            or dsi_minus_one is None
-            or tsi is None
-            or tsi_minus_one is None
-            or lai is None
-            or lai_minus_one is None
-            or loi is None
-            or loi_minus_one is None
+            vsi_current is None
+            or vsi_previous is None
+            or dsi_current is None
+            or dsi_previous is None
+            or tsi_current is None
+            or tsi_previous is None
+            or lat_current is None
+            or lat_previous is None
+            or lon_current is None
+            or lon_previous is None
         ):
             continue
 
-        time_diff = tsi - tsi_minus_one
+        timediff = (tsi_current - tsi_previous).total_seconds() / 3600
         # get increment from initial position - backwards in time
         # means reversing the direction by 180 degrees
         lat1, lon1 = tc.increment_position(
-            lai,
-            loi,
-            vsi,
-            dsi,
-            time_diff,
+            lat_current,
+            lon_current,
+            vsi_current,
+            dsi_current,
+            timediff,
         )
 
         lat2, lon2 = tc.increment_position(
-            lai_minus_one,
-            loi_minus_one,
-            vsi_minus_one,
-            dsi_minus_one,
-            time_diff,
+            lat_previous,
+            lon_previous,
+            vsi_previous,
+            dsi_previous,
+            timediff,
         )
 
         # apply increments to the lat and lon at i-1
-        updated_latitude = lai + lat1 + lat2
-        updated_longitude = loi + lon1 + lon2
+        updated_latitude = lat_current + lat1 + lat2
+        updated_longitude = lon_previous + lon1 + lon2
 
         # calculate distance between calculated position and the second reported position
         discrepancy = sg.sphere_distance(
-            lai_minus_one, loi_minus_one, updated_latitude, updated_longitude
+            lat_previous, lon_previous, updated_latitude, updated_longitude
         )
         distance_from_est_location[i] = discrepancy
 
@@ -565,73 +567,110 @@ def calculate_midpoint(
     return midpoint_discrepancies
 
 
-def track_check(df: pd.DataFrame) -> pd.DataFrame:
+def do_track_check(
+    lat: Sequence[float],
+    lon: Sequence[float],
+    date: Sequence[datetime],
+    id: Sequence[str],
+    pt: Sequence[int],
+    dck: Sequence[int],
+    vsi: Sequence[float],
+    dsi: Sequence[float],
+) -> tuple[int, int]:
     """Perform one pass of the track check.  This is an implementation of the MDS track check code
     which was originally written in the 1990s. I don't know why this piece of historic trivia so exercises
     my mind, but it does: the 1990s! I wish my code would last so long.
 
     Parameters
     ----------
-    df : pd.DataFrame
-        DataFrame containing the data to be checked
+    lat: array-like of float, shape (n,)
+        1-dimensional latitude array in degrees.
+    lon: array-like of float, shape (n,)
+        1-dimensional longitude array in degrees.
+    date: array-like of datetime, shape (n,)
+        1-dimensional date array.
+    id: array-like of str, shape (n,)
+        1-dimensional longitude marine report ID array.
+    pt: array-like of int, shape (n,)
+        1-dimensional platform type array.
+    dck: array-like of int, shape (n,)
+        1-dimensional marine report deck array.
+    vsi: array-like of float, shape (n,)
+        1-dimensional reported speed array in knots.
+    dsi: array-like of float, shape (n,)
+        1-dimensional reported heading array in knots.
 
     Returns
     -------
-    pd.DataFrame
-        DataFrame with track check QC
+    tuple of array-like of int, shape (n,)
+        A tuple of two 1-dimensional arrays of floats representing trk and few.
+        1 if track check fails, 0 otherwise.
+
+    Raises
+    ------
+    ValueError
+        If either input is not 1-dimensional or if their lengths do not match.
     """
-    required_columns = ["id", "date", "pt", "dck", "dsi", "vsi", "lat", "lon"]
-
-    for key in required_columns:
-        if key not in df:
-            raise KeyError(f"{key} not in DataFrame")
-
     max_direction_change = 60.0
     max_speed_change = 10.0
     max_absolute_speed = 40.0
     max_midpoint_discrepancy = 150.0
 
-    nobs = len(df)
+    lat = np.asarray(lat)
+    lon = np.asarray(lon)
+    date = np.asarray(date)
+    id = np.asarray(id)
+    pt = np.asarray(pt)
+    dck = np.asarray(dck)
+    vsi = np.asarray(vsi)
+    dsi = np.asarray(dsi)
+
+    for arr, name in zip(
+        [lat, lon, date, id, pt, dck, vsi, dsi],
+        ["lat", "lon", "date", "id", "pt", "dck", "vsi", "dsi"],
+    ):
+        if arr.ndim != 1:
+            raise ValueError(f"Input '{name}' must be one-dimensional.")
+        if len(arr) != len(lat):
+            raise ValueError(f"Input '{name}' must have the same length as 'lat'.")
+
+    number_of_obs = len(lat)
 
     # no obs in, no qc outcomes out
-    if nobs == 0:
-        return df
+    if number_of_obs == 0:
+        return (None, None)
 
+    current_year = pd.Timestamp(date[0]).year
     # Generic ids and buoys get a free pass on the track check
-    if icoads_identify.id_is_generic(df.iloc[0].id, df.iloc[0].date.year) or df.iloc[
-        0
-    ].pt in [6, 7]:
-        for i in range(0, nobs):
-            df["trk"] = np.zeros(nobs)
-            df["few"] = np.zeros(nobs)
-        return df
+    if icoads_identify.id_is_generic(id[0], current_year) or pt[0] in [6, 7]:
+        return np.asarray([passed] * number_of_obs), np.asarray(
+            [passed] * number_of_obs
+        )
 
     # fewer than three obs - set the fewsome flag
     # deck 720 gets a pass prior to 1891 see
     # Carella, Kent, Berry 2015 Appendix A3
-    if nobs < 3:
-        if df.iloc[0].dck == 720 and df.iloc[0].date.year < 1891:
-            df["trk"] = np.zeros(nobs)
-            df["few"] = np.zeros(nobs)
-            return df
+    if number_of_obs < 3:
+        if dck[0] == 720 and current_year < 1891:
+            return np.zeros(number_of_obs), np.zeros(number_of_obs)
         else:
-            df["trk"] = np.zeros(nobs)
-            df["few"] = np.zeros(nobs) + 1
-            return df
+            return np.zeros(number_of_obs), np.zeros(number_of_obs) + 1
 
     # work out speeds and distances between alternating points
-    speed_alt, distance_alt, course_alt, timediff_alt = (
+    speed_alt, _distance_alt, _course_alt, _timediff_alt = (
         calculate_speed_course_distance_time_difference(
-            lat=df.lat,
-            lon=df.lon,
-            date=df.date,
+            lat=lat,
+            lon=lon,
+            date=date,
             alternating=True,
         )
     )
-    speed, distance, course, timediff = calculate_speed_course_distance_time_difference(
-        lat=df.lat,
-        lon=df.lon,
-        date=df.date,
+    speed, _distance, course, timediff = (
+        calculate_speed_course_distance_time_difference(
+            lat=lat,
+            lon=lon,
+            date=date,
+        )
     )
 
     # what are the mean and mode speeds?
@@ -642,31 +681,31 @@ def track_check(df: pd.DataFrame) -> pd.DataFrame:
 
     # compare reported speeds and positions if we have them
     forward_diff_from_estimated = forward_discrepancy(
-        lat=df.lat,
-        lon=df.lon,
-        date=df.date,
-        speed=speed,
-        direction=direction,
+        lat=lat,
+        lon=lon,
+        date=date,
+        vsi=vsi,
+        dsi=dsi,
     )
     reverse_diff_from_estimated = backward_discrepancy(
-        lat=df.lat,
-        lon=df.lon,
-        date=df.date,
-        speed=speed,
-        direction=direction,
+        lat=lat,
+        lon=lon,
+        date=date,
+        vsi=vsi,
+        dsi=dsi,
     )
 
     midpoint_diff_from_estimated = calculate_midpoint(
-        lat=df.lat,
-        lon=df.lon,
+        lat=lat,
+        lon=lon,
         timediff=timediff,
     )
 
     # do QC
-    trk = np.zeros(nobs)  # type: np.ndarray
-    few = np.zeros(nobs)  # type: np.ndarray
+    trk = np.asarray([passed] * number_of_obs)
+    few = np.asarray([passed] * number_of_obs)
 
-    for i in range(1, nobs - 1):
+    for i in range(1, number_of_obs - 1):
         thisqc_a = 0
         thisqc_b = 0
 
@@ -696,23 +735,23 @@ def track_check(df: pd.DataFrame) -> pd.DataFrame:
         # Quality-control by examining the distance
         # between the calculated and reported second position.
         thisqc_b += tc.check_distance_from_estimate(
-            df.iloc[i].vsi,
-            df.iloc[i - 1].vsi,
+            vsi[i],
+            vsi[i - 1],
             timediff[i],
             forward_diff_from_estimated[i],
             reverse_diff_from_estimated[i],
         )
         # Check for continuity of direction
         thisqc_b += tc.direction_continuity(
-            df.iloc[i].dsi,
-            df.iloc[i - 1].dsi,
+            dsi[i],
+            dsi[i - 1],
             course[i],
             max_direction_change,
         )
         # Check for continuity of speed.
         thisqc_b += tc.speed_continuity(
-            df.iloc[i].vsi,
-            df.iloc[i - 1].vsi,
+            vsi[i],
+            vsi[i - 1],
             speed[i],
             max_speed_change,
         )
@@ -727,15 +766,18 @@ def track_check(df: pd.DataFrame) -> pd.DataFrame:
             and thisqc_a > 0
             and thisqc_b > 0
         ):
-            trk[i] = 1
-
-    trk[nobs - 1] = 0
-    few[nobs - 1] = 0
+            trk[i] = failed
 
     return trk, few
 
 
-def find_saturated_runs(df: pd.DataFrame) -> pd.DataFrame:
+def find_saturated_runs(
+    lat: Sequence[float],
+    lon: Sequence[float],
+    at: Sequence[float],
+    dpt: Sequence[float],
+    date: Sequence[datetime],
+) -> Sequence[int]:
     """Perform checks on persistence of 100% rh while going through the voyage.
     While going through the voyage repeated strings of 100 %rh (AT == DPT) are noted.
     If a string extends beyond 20 reports and two days/48 hrs in time then all values are set to
@@ -743,43 +785,70 @@ def find_saturated_runs(df: pd.DataFrame) -> pd.DataFrame:
 
     Parameters
     ----------
-    df : pd.DataFrame
-        DataFrame to be checked
+    lat: array-like of float, shape (n,)
+        1-dimensional latitude array in degrees.
+    lon: array-like of float, shape (n,)
+        1-dimensional longitude array in degrees.
+    at: array-like of float, shape (n,)
+        1-dimensional air temperature array.
+    dpt: array-like of float, shape (n,)
+        1-dimensional dew point temperature array in.
+    date: array-like of datetime, shape (n,)
+        1-dimensional date array.
 
     Returns
     -------
-    pd.DataFrame
+    array-like of int, shape (n,)
+        1-dimensional array containing repsat QC flags.
+        1 if saturated run found, 0 otherwise.
+
+    Raises
+    ------
+    ValueError
+        If either input is not 1-dimensional or if their lengths do not match.
     """
-    for key in ["dpt", "at", "date"]:
-        if key not in df:
-            raise KeyError(f"{key} not in dataframe")
+    lat = np.asarray(lat)
+    lon = np.asarray(lon)
+    at = np.asarray(at)
+    dpt = np.asarray(dpt)
+    date = np.asarray(date)
+
+    for arr, name in zip(
+        [lat, lon, at, dpt, date], ["lat", "lon", "at", "dpt", "date"]
+    ):
+        if arr.ndim != 1:
+            raise ValueError(f"Input '{name}' must be one-dimensional.")
+        if len(arr) != len(at):
+            raise ValueError(f"Input '{name}' must have the same length as 'at'.")
 
     min_time_threshold = 48.0  # hours
     shortest_run = 4  # number of obs
 
     satcount = []
 
-    numobs = len(df)
+    repsat = np.asarray([passed] * len(lat))
 
-    repsat = np.zeros(numobs)  # type: np.ndarray
+    for i in range(len(repsat)):
 
-    for i in range(numobs):
-
-        row = df.iloc[i]
-
-        saturated = row["dpt"] == row["at"]
+        saturated = dpt[i] == at[i]
 
         if saturated:
             satcount.append(i)
         elif not saturated and len(satcount) > shortest_run:
-
-            row2 = df.iloc[satcount[len(satcount) - 1]]
-            row1 = df.iloc[satcount[0]]
-            _, _, _, tdiff = calculate_course_parameters(row2, row1)
+            later = satcount[len(satcount) - 1]
+            earlier = satcount[0]
+            _, _, _, tdiff = calculate_course_parameters(
+                lat_later=lat[later],
+                lat_earlier=lat[earlier],
+                lon_later=lon[later],
+                lon_earlier=lon[earlier],
+                date_later=date[later],
+                date_earlier=date[earlier],
+            )
 
             if tdiff >= min_time_threshold:
                 for loc in satcount:
-                    repsat[loc] = 1
+                    repsat[loc] = failed
                 satcount = []
             else:
                 satcount = []
@@ -788,20 +857,25 @@ def find_saturated_runs(df: pd.DataFrame) -> pd.DataFrame:
             satcount = []
 
     if len(satcount) > shortest_run:
-        row2 = df.iloc[satcount[len(satcount) - 1]]
-        row1 = df.iloc[satcount[0]]
-        _, _, _, tdiff = calculate_course_parameters(row2, row1)
+        later = satcount[len(satcount) - 1]
+        earlier = satcount[0]
+        _, _, _, tdiff = calculate_course_parameters(
+            lat_later=lat[later],
+            lat_earlier=lat[earlier],
+            lon_later=lon[later],
+            lon_earlier=lon[earlier],
+            date_later=date[later],
+            date_earlier=date[earlier],
+        )
 
         if tdiff >= min_time_threshold:
             for loc in satcount:
-                repsat[loc] = 1
+                repsat[loc] = failed
 
-    df["repsat"] = repsat
-
-    return df
+    return repsat
 
 
-def find_multiple_rounded_values(df: pd.DataFrame, intype: str) -> pd.DataFrame:
+def find_multiple_rounded_values(value: Sequence[float]) -> Sequence[int]:
     """Find instances when more than "threshold" of the observations are
     whole numbers and set the 'round' flag. Used in the humidity QC
     where there are times when the values are rounded and this may
@@ -809,39 +883,34 @@ def find_multiple_rounded_values(df: pd.DataFrame, intype: str) -> pd.DataFrame:
 
     Parameters
     ----------
-    df : pd.DataFrame
-        DataFrame containing data to be checked
-    intype: str
-        Specifies which variable should be quality controlled
+    value: array-like of float, shape (n,)
+        1-dimensional array.
 
     Returns
     -------
-    pd.DataFrame
-        Returns dataframe with additional column "rounded" containing QC outcomes
+    array-like of int, shape (n,)
+        1-dimensional array containing rounded QC flag.
+        1 if value is whole number, otherwise 0.
     """
-    allowed_variables = ["sst", "at", "dpt"]
-    if intype not in allowed_variables:
-        raise ValueError(f"{intype} not one of {allowed_variables}")
-
     min_count = 20
     threshold = 0.5
 
     assert 0.0 <= threshold <= 1.0
 
-    numobs = len(df)
-    rounded = np.zeros(numobs)  # type: np.ndarray
+    number_of_obs = len(value)
+    rounded = np.asarray([passed] * number_of_obs)
 
     valcount = {}
     allcount = 0
 
-    for i in range(numobs):
-        row = df.iloc[i]
-        if row[intype] is not None:
+    for i in range(number_of_obs):
+        v = value[i]
+        if v is not None:
             allcount += 1
-            if str(row[intype]) in valcount:
-                valcount[str(row[intype])].append(i)
+            if str(v) in valcount:
+                valcount[str(v)].append(i)
             else:
-                valcount[str(row[intype])] = [i]
+                valcount[str(v)] = [i]
 
     if allcount > min_count:
         wholenums = 0
@@ -853,14 +922,12 @@ def find_multiple_rounded_values(df: pd.DataFrame, intype: str) -> pd.DataFrame:
             for key in valcount:
                 if float(key).is_integer():
                     for i in valcount[key]:
-                        rounded[i] = 1
+                        rounded[i] = failed
 
-    df["rounded"] = rounded
-
-    return df
+    return rounded
 
 
-def find_repeated_values(df: pd.DataFrame, intype: str) -> pd.DataFrame:
+def find_repeated_values(value: Sequence[float]) -> pd.DataFrame:
     """Find cases where more than a given proportion of SSTs have the same value
 
     This function goes through a voyage and finds any cases where more than a threshold fraction of
@@ -869,39 +936,33 @@ def find_repeated_values(df: pd.DataFrame, intype: str) -> pd.DataFrame:
 
     Parameters
     ----------
-    df : pd.DataFrame
-        DataFrame containing data to be checked
-    intype: str
-        Specifies which variable should be quality controlled
+    value: array-like of float, shape (n,)
+        1-dimensional array.
 
     Returns
     -------
-    pd.DataFrame
-        Returns dataframe with additional column "rep" containing QC outcomes
+    array-like of int, shape (n,)
+        1-dimensional array containing repeated QC flag.
+        1 if value is repeated, otherwise 0.
     """
-    allowed_variables = ["sst", "at", "dpt", "slp"]
-    if intype not in allowed_variables:
-        raise ValueError(f"{intype} not one of {allowed_variables}")
-
     threshold = 0.7
     assert 0.0 <= threshold <= 1.0
     min_count = 20
 
-    numobs = len(df)
-    rep = np.zeros(numobs)  # type: np.ndarray
+    number_of_obs = len(value)
+    rep = np.asarray([passed] * number_of_obs)
 
     valcount = {}
     allcount = 0
 
-    for i in range(numobs):
-        row = df.iloc[i]
-        value = row[intype]
-        if value is not None:
+    for i in range(number_of_obs):
+        v = value[i]
+        if v is not None:
             allcount += 1
-            if str(value) in valcount:
-                valcount[str(value)].append(i)
+            if str(v) in valcount:
+                valcount[str(v)].append(i)
             else:
-                valcount[str(value)] = [i]
+                valcount[str(v)] = [i]
 
     if allcount > min_count:
         for key in valcount:
@@ -909,12 +970,16 @@ def find_repeated_values(df: pd.DataFrame, intype: str) -> pd.DataFrame:
                 for i in valcount[key]:
                     rep[i] = 1
 
-    df["rep"] = rep
-
-    return df
+    return rep
 
 
-def iquam_track_check(df: pd.DataFrame) -> pd.DataFrame:
+def do_iquam_track_check(
+    lat: Sequence[float],
+    lon: Sequence[float],
+    date: Sequence[datetime],
+    id: Sequence[str],
+    pt: Sequence[int],
+) -> Sequence[int]:
     """Perform the IQUAM track check as detailed in Xu and Ignatov 2013
 
     The track check calculates speeds between pairs of observations and
@@ -925,17 +990,39 @@ def iquam_track_check(df: pd.DataFrame) -> pd.DataFrame:
 
     Parameters
     ----------
-    df : pd.DataFrame
-        DataFrame containing data to be track checked.
+    lat: array-like of float, shape (n,)
+        1-dimensional latitude array in degrees.
+    lon: array-like of float, shape (n,)
+        1-dimensional longitude array in degrees.
+    date: array-like of datetime, shape (n,)
+        1-dimensional date array.
+    id: array-like of str, shape (n,)
+        1-dimensional longitude marine report ID array.
+    pt: array-like of int, shape (n,)
+        1-dimensional platform type array.
 
     Returns
     -------
-    pd.DataFrame
-        Returns DataFrame with additional column "iquam_track" containing the outcomes of the QC
+    array-like of int, shape (n,)
+        1-dimensional array containing IQUAM QC flags.
+        1 if IQUAM QC failed, 0 otherwise.
+
+    Raises
+    ------
+    ValueError
+        If either input is not 1-dimensional or if their lengths do not match.
     """
-    for key in ["lat", "lon", "id", "date"]:
-        if key not in df:
-            raise KeyError(f"{key} not in dataframe")
+    lat = np.asarray(lat)
+    lon = np.asarray(lon)
+    date = np.asarray(date)
+    id = np.asarray(id)
+    pt = np.asarray(pt)
+
+    for arr, name in zip([lat, lon, date], ["lat", "lon", "date", ""]):
+        if arr.ndim != 1:
+            raise ValueError(f"Input '{name}' must be one-dimensional.")
+        if len(arr) != len(lat):
+            raise ValueError(f"Input '{name}' must have the same length as 'lat'.")
 
     buoy_speed_limit = 15.0  # km/h
     ship_speed_limit = 60.0  # km/h
@@ -945,16 +1032,16 @@ def iquam_track_check(df: pd.DataFrame) -> pd.DataFrame:
 
     n_neighbours = 5
 
-    numobs = len(df)
+    number_of_obs = len(lat)
 
-    if numobs == 0:
-        return df
+    if number_of_obs == 0:
+        return
 
-    if icoads_identify.id_is_generic(df.iloc[0].id, df.iloc[0].date.year):
-        df["iquam_track"] = np.zeros(numobs)
-        return df
+    current_year = pd.Timestamp(date[0]).year
+    if icoads_identify.id_is_generic(id[0], current_year):
+        return np.asarray([passed] * number_of_obs)
 
-    if df.iloc[0].pt in [6, 7]:
+    if pt[0] in [6, 7]:
         speed_limit = buoy_speed_limit
     else:
         speed_limit = ship_speed_limit
@@ -962,24 +1049,28 @@ def iquam_track_check(df: pd.DataFrame) -> pd.DataFrame:
     speed_violations = []
     count_speed_violations = []
 
-    iquam_track = np.zeros(numobs)  # type: np.ndarray
+    iquam_track = np.asarray([passed] * number_of_obs)
 
-    for t1 in range(0, numobs):
+    for t1 in range(0, number_of_obs):
         violations_for_this_report = []
         count_violations_this_report = 0.0
 
         lo = max(0, t1 - n_neighbours)
-        hi = min(numobs, t1 + n_neighbours + 1)
+        hi = min(number_of_obs, t1 + n_neighbours + 1)
 
         for t2 in range(lo, hi):
 
-            row2 = df.iloc[t2]
-            row1 = df.iloc[t1]
-
-            _, distance, _, time_diff = calculate_course_parameters(row2, row1)
+            _, distance, _, timediff = calculate_course_parameters(
+                lat_later=lat[t2],
+                lat_earlier=lat[t1],
+                lon_later=lon[t2],
+                lon_earlier=lon[t1],
+                date_later=date[t2],
+                date_earlier=date[t1],
+            )
 
             iquam_condition = max([abs(distance) - delta_d, 0.0]) / (
-                abs(time_diff) + delta_t
+                abs(timediff) + delta_t
             )
 
             if iquam_condition > speed_limit:
@@ -989,19 +1080,15 @@ def iquam_track_check(df: pd.DataFrame) -> pd.DataFrame:
         speed_violations.append(violations_for_this_report)
         count_speed_violations.append(count_violations_this_report)
 
-    count = 0
     while np.sum(count_speed_violations) > 0.0:
         most_fails = int(np.argmax(count_speed_violations))
-        iquam_track[most_fails] = 1
+        iquam_track[most_fails] = failed
 
         for index in speed_violations[most_fails]:
             if most_fails in speed_violations[index]:
                 speed_violations[index].remove(most_fails)
                 count_speed_violations[index] -= 1.0
 
-        count_speed_violations[most_fails] = 0
-        count += 1
+        count_speed_violations[most_fails] = passed
 
-    df["iquam_track"] = iquam_track
-
-    return df
+    return iquam_track
