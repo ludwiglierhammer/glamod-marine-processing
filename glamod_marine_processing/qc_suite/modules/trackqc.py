@@ -765,20 +765,15 @@ class AgroundChecker:
                 self.lon_smooth[f_win][-1],
             )
             if displace <= AgroundChecker.tolerance:
-                if is_aground:
-                    i += 1
-                    time_to_end = self.hrs_smooth[-1] - self.hrs_smooth[i]
-                    continue
-                else:
+                if not(is_aground):
                     is_aground = True
                     i_aground = i
-                    i += 1
-                    time_to_end = self.hrs_smooth[-1] - self.hrs_smooth[i]
             else:
                 is_aground = False
                 i_aground = np.nan
-                i += 1
-                time_to_end = self.hrs_smooth[-1] - self.hrs_smooth[i]
+
+            i += 1
+            time_to_end = self.hrs_smooth[-1] - self.hrs_smooth[i]
 
         # set flags
         if is_aground and i_aground > 0:
