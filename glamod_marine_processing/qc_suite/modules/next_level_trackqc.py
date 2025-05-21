@@ -6,9 +6,11 @@ from __future__ import annotations
 
 import copy
 import math
+import warnings
 
 import numpy as np
 
+from .qc import passed, failed, untested, untestable
 from . import Extended_IMMA as ex
 from .astronomical_geometry import sunangle
 from .spherical_geometry import sphere_distance
@@ -187,11 +189,33 @@ def convert_date_to_hours(dates):
         hours_elapsed[i] = duration_in_seconds/(60*60)
     return hours_elapsed
 
+
+def is_monotonic(inarr: np.ndarray) -> bool:
+    """
+    Tests if elements in an array are increasing monotonically. i.e. each element
+    is greater than or equal to the preceding element.
+
+    Parameters
+    ----------
+    inarr: np.ndarray
+
+    Returns
+    -------
+    bool
+        True if array is increasing monotonically, False otherwise
+    """
+    for i in range(1, len(inarr)):
+        if inarr[i] < inarr[i-1]:
+            return False
+    return True
+
+
 def do_speed_check(lons, lats, dates, *args):
     checker = SpeedChecker(lons, lats, dates)
     if args:
         checker.set_parameters(*args)
     return checker._do_speed_check()
+
 
 
 class SpeedChecker:
@@ -207,10 +231,10 @@ class SpeedChecker:
     can be of order several km's. Reports must be separated by a suitably long period of time (the 'min_win_period')
     to minimise the effect of these errors when calculating speed e.g. for reports separated by 24 hours
     errors of several cm/s would result which are two orders of magnitude less than a fast ocean current
-    which seems reasonable. Conversley, the period of time chosen should not be too long so as to resolve
-    short-lived burst of speed on manouvering ships. Larger positional errors may also trigger the check.
+    which seems reasonable. Conversely, the period of time chosen should not be too long so as to resolve
+    short-lived burst of speed on manoeuvring ships. Larger positional errors may also trigger the check.
     Because temporal sampling can be erratic the time period over which this assessment is made is specified
-    as a range (bound by 'min_win_period' and 'max_win_period') - assesment uses the longest time separation
+    as a range (bound by 'min_win_period' and 'max_win_period') - assessment uses the longest time separation
     available within this range.
 
     IMPORTANT - for optimal performance, drifter records with observations failing this check should be
@@ -232,10 +256,12 @@ class SpeedChecker:
     max_win_period = 1.0
 
     def __init__(self, lons, lats, dates):
+        self.good_parameters = True
         self.lon = lons
         self.lat = lats
         self.nreps = len(lons)
         self.hrs = convert_date_to_hours(dates)
+
 
     def set_parameters(
         self, speed_limit: float, min_win_period: float, max_win_period: float
@@ -274,69 +300,37 @@ class SpeedChecker:
                 max_win_period >= min_win_period
             ), "max_win_period must be >= min_win_period"
         except AssertionError as error:
-            raise AssertionError("invalid input parameter: " + str(error))
+            warnings.warn(UserWarning("invalid input parameter: " + str(error)))
+            self.good_parameters = False
 
         SpeedChecker.speed_limit = speed_limit
         SpeedChecker.min_win_period = min_win_period
         SpeedChecker.max_win_period = max_win_period
 
-    def do_qc(self) -> None:
-        """Perform the new speed check QC"""
-        # nrep = len(self.reps)
-        # # pairs of records are needed to evaluate speed
-        # if nrep <= 1:
-        #     for rep in self.reps:
-        #         rep.set_qc("POS", "drf_spd", 0)
-        #     return
-        #self._preprocess_reps()
-        #self._initialise_reps()
-        return self._do_speed_check()
-
-    # def _initialise_reps(self) -> None:
-    #     """Initialise the QC flags in the reports"""
-    #     # begin by setting all reports to pass
-    #     for rep in self.reps:
-    #         rep.set_qc("POS", "drf_spd", 0)
-    #
-    # def _preprocess_reps(self):
-    #     """Process the reps and calculate the values used in the QC check"""
-    #     nrep = len(self.reps)
-    #
-    #     # retrieve lon/lat/time_diff variables from marine reports
-    #     lon = np.empty(nrep)  # type: np.ndarray
-    #     lon[:] = np.nan
-    #     lat = np.empty(nrep)  # type: np.ndarray
-    #     lat[:] = np.nan
-    #     hrs = np.empty(nrep)  # type: np.ndarray
-    #     hrs[:] = np.nan
-    #     try:
-    #         for ind, rep in enumerate(self.reps):
-    #             lon[ind] = rep.getvar("LON")  # returns None if missing
-    #             lat[ind] = rep.getvar("LAT")  # returns None if missing
-    #             if ind == 0:
-    #                 hrs[ind] = 0
-    #             else:
-    #                 hrs[ind] = rep.getext(
-    #                     "time_diff"
-    #                 )  # raises assertion error if 'time_diff' not found
-    #         assert not any(np.isnan(lon)), "Nan(s) found in longitude"
-    #         assert not any(np.isnan(lat)), "Nan(s) found in latitude"
-    #         assert not any(np.isnan(hrs)), "Nan(s) found in time differences"
-    #         assert not any(np.less(hrs, 0)), "times are not sorted"
-    #     except AssertionError as error:
-    #         raise AssertionError("problem with report values: " + str(error))
-    #
-    #     hrs = np.cumsum(hrs)  # get time difference in hours relative to first report
-    #
-    #     self.lon = lon
-    #     self.lat = lat
-    #     self.hrs = hrs
+    def valid_arrays(self):
+        error = None
+        if any(np.isnan(self.lon)):
+            error = "Nan(s) found in longitude"
+        if any(np.isnan(self.lat)):
+            error = "Nan(s) found in latitude"
+        if any(np.isnan(self.hrs)):
+            error = "Nan(s) found in time differences"
+        if not(is_monotonic(self.hrs)):
+            error = "times are not sorted"
+        return error
 
     def _do_speed_check(self):
         """Perform the actual speed check"""
         nrep = self.nreps
         min_win_period_hours = SpeedChecker.min_win_period * 24.0
         max_win_period_hours = SpeedChecker.max_win_period * 24.0
+
+        if self.valid_arrays() is not None:
+            warnings.warn(UserWarning(self.valid_arrays()))
+            return np.zeros(self.nreps) + untestable
+
+        if not self.good_parameters:
+            return np.zeros(nrep) + untestable
 
         qc_outcomes = np.zeros(nrep)
 
@@ -370,3 +364,4 @@ class SpeedChecker:
                 time_to_end = self.hrs[-1] - self.hrs[i]
 
         return qc_outcomes
+
