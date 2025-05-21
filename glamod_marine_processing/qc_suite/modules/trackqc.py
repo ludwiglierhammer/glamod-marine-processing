@@ -181,7 +181,7 @@ def trim_std(inarr: list, trim: int) -> float:
     return trim
 
 
-def new_speed_check(reps, *args):
+def do_new_speed_check(reps, *args):
     checker = NewSpeedChecker(reps)
     if args:
         checker.set_parameters(*args)
@@ -384,7 +384,7 @@ class NewSpeedChecker:
                 time_to_end = self.hrs[-1] - self.hrs[i]
 
 
-def speed_check(reps, *args):
+def do_speed_check(reps, *args):
     checker = SpeedChecker(reps)
     if args:
         checker.set_parameters(*args)
@@ -568,7 +568,7 @@ class SpeedChecker:
                 time_to_end = self.hrs[-1] - self.hrs[i]
 
 
-def aground_check(reps, *args):
+def do_aground_check(reps, *args):
     checker = AgroundChecker(reps)
     if args:
         checker.set_parameters(*args)
@@ -792,7 +792,7 @@ class AgroundChecker:
                 rep.set_qc("POS", "drf_agr", 0)
 
 
-def new_aground_check(reps, *args):
+def do_new_aground_check(reps, *args):
     checker = NewAgroundChecker(reps)
     if args:
         checker.set_parameters(*args)
@@ -987,7 +987,7 @@ class NewAgroundChecker:
                 rep.set_qc("POS", "drf_agr", 0)
 
 
-def sst_tail_check(reps, *args):
+def do_sst_tail_check(reps, *args):
     checker = SSTTailChecker(reps)
     if args:
         checker.set_parameters(*args)
@@ -1366,7 +1366,7 @@ class SSTTailChecker:
                 break
 
 
-def sst_biased_noisy_check(reps, *args):
+def do_sst_biased_noisy_check(reps, *args):
     checker = SSTBiasedNoisyChecker(reps)
     if args:
         checker.set_parameters(*args)

@@ -8,9 +8,11 @@ import sys
 import numpy as np
 import pytest
 
+from datetime import datetime
+
 import glamod_marine_processing.qc_suite.modules.Extended_IMMA as ex
 
-# import glamod_marine_processing.qc_suite.modules.next_level_trackqc as tqc
+import glamod_marine_processing.qc_suite.modules.next_level_trackqc as tqc
 import glamod_marine_processing.qc_suite.modules.trackqc as otqc
 from glamod_marine_processing.qc_suite.modules.IMMA1 import IMMA
 from glamod_marine_processing.qc_suite.modules.next_level_track_check_qc import (
@@ -19,22 +21,22 @@ from glamod_marine_processing.qc_suite.modules.next_level_track_check_qc import 
 
 
 def test_daytime_exeter():
-    daytime = otqc.track_day_test(2019, 6, 21, 12.0, 50.7, -3.5, elevdlim=-2.5)
+    daytime = tqc.track_day_test(2019, 6, 21, 12.0, 50.7, -3.5, elevdlim=-2.5)
     assert daytime
 
 
 def test_nighttime_exeter():
-    daytime = otqc.track_day_test(2019, 6, 21, 0.0, 50.7, -3.5, elevdlim=-2.5)
+    daytime = tqc.track_day_test(2019, 6, 21, 0.0, 50.7, -3.5, elevdlim=-2.5)
     assert not (daytime)
 
 
 def test_large_elevdlim_exeter():
-    daytime = otqc.track_day_test(2019, 6, 21, 12.0, 50.7, -3.5, elevdlim=89.0)
+    daytime = tqc.track_day_test(2019, 6, 21, 12.0, 50.7, -3.5, elevdlim=89.0)
     assert not (daytime)
 
 
 def test_lat_is_zero():
-    assert otqc.track_day_test(2022, 5, 3, 12.0, 0.0, 0.0, elevdlim=-2.5)
+    assert tqc.track_day_test(2022, 5, 3, 12.0, 0.0, 0.0, elevdlim=-2.5)
 
 
 @pytest.mark.parametrize(
@@ -54,12 +56,12 @@ def test_lat_is_zero():
 )
 def test_error_invalid_parameter(year, month, day, hour, lat, lon):
     with pytest.raises(ValueError):
-        assert otqc.track_day_test(year, month, day, hour, lat, lon, elevdlim=-2.5)
+        assert tqc.track_day_test(year, month, day, hour, lat, lon, elevdlim=-2.5)
 
 
 def test_no_trim():
     arr = np.array([10.0, 4.0, 3.0, 2.0, 1.0])
-    trim = otqc.trim_mean(arr, 0)
+    trim = tqc.trim_mean(arr, 0)
     assert trim == 4.0
     assert np.all(
         arr == np.array([10.0, 4.0, 3.0, 2.0, 1.0])
@@ -68,7 +70,7 @@ def test_no_trim():
 
 def test_with_trim():
     arr = np.array([10.0, 4.0, 3.0, 2.0, 1.0])
-    trim = otqc.trim_mean(arr, 5)
+    trim = tqc.trim_mean(arr, 5)
     assert trim == 3.0
     assert np.all(
         arr == np.array([10.0, 4.0, 3.0, 2.0, 1.0])
@@ -77,7 +79,7 @@ def test_with_trim():
 
 def test_sd_no_trim():
     arr = np.array([6.0, 1.0, 1.0, 1.0, 1.0])
-    trim = otqc.trim_std(arr, 0)
+    trim = tqc.trim_std(arr, 0)
     assert trim == 2.0
     assert np.all(
         arr == np.array([6.0, 1.0, 1.0, 1.0, 1.0])
@@ -86,7 +88,7 @@ def test_sd_no_trim():
 
 def test_sd_with_trim():
     arr = np.array([6.0, 1.0, 1.0, 1.0, 1.0])
-    trim = otqc.trim_std(arr, 5)
+    trim = tqc.trim_std(arr, 5)
     assert trim == 0.0
     assert np.all(
         arr == np.array([6.0, 1.0, 1.0, 1.0, 1.0])
@@ -1503,21 +1505,29 @@ def reps1():
     ]
     # fmt: on
 
-    reps = ex.Voyage()
-
+    reps = {}
+    for key in vals1[0]:
+        reps[key] = []
     for v in vals1:
-        rec = IMMA()
-        for key in v:
-            rec.data[key] = v[key]
-        rep = ex.MarineReportQC(rec)
-        reps.add_report(rep)
+        for key in reps:
+            reps[key].append(v[key])
+    for key in reps:
+        reps[key] = np.array(reps[key])
+
+    # reps = ex.Voyage()
+    # for v in vals1:
+    #     rec = IMMA()
+    #     for key in v:
+    #         rec.data[key] = v[key]
+    #     rep = ex.MarineReportQC(rec)
+    #     reps.add_report(rep)
 
     return reps
 
 
 def test_stationary_b(reps1):
     expected_flags = [1, 1, 1, 1, 1, 1, 1]
-    otqc.aground_check(reps1.reps, 3, 1, 2)
+    otqc.do_aground_check(reps1.reps, 3, 1, 2)
     for i in range(0, len(reps1)):
         assert reps1.get_qc(i, "POS", "drf_agr") == expected_flags[i]
 
@@ -1549,7 +1559,7 @@ def reps2():
 
 def test_stationary_jitter_spikes(reps2):
     expected_flags = [1, 1, 1, 1, 1, 1, 1]
-    otqc.aground_check(reps2.reps, 3, 1, 2)
+    otqc.do_aground_check(reps2.reps, 3, 1, 2)
     for i in range(0, len(reps2)):
         assert reps2.get_qc(i, "POS", "drf_agr") == expected_flags[i]
 
@@ -1582,7 +1592,7 @@ def reps3():
 
 def test_stationary_big_remaining_jitter(reps3):
     expected_flags = [0, 0, 0, 0, 1, 1, 1]
-    otqc.aground_check(reps3.reps, 3, 1, 2)
+    otqc.do_aground_check(reps3.reps, 3, 1, 2)
     for i in range(0, len(reps3)):
         assert reps3.get_qc(i, "POS", "drf_agr") == expected_flags[i]
 
@@ -1614,7 +1624,7 @@ def reps4():
 
 def test_stationary_small_remaining_jitter(reps4):
     expected_flags = [1, 1, 1, 1, 1, 1, 1]
-    otqc.aground_check(reps4.reps, 3, 1, 2)
+    otqc.do_aground_check(reps4.reps, 3, 1, 2)
     for i in range(0, len(reps4)):
         assert reps4.get_qc(i, "POS", "drf_agr") == expected_flags[i]
 
@@ -1646,7 +1656,7 @@ def reps5():
 
 def test_moving_west(reps5):
     expected_flags = [0, 0, 0, 0, 0, 0, 0]
-    otqc.aground_check(reps5.reps, 3, 1, 2)
+    otqc.do_aground_check(reps5.reps, 3, 1, 2)
     for i in range(0, len(reps5)):
         assert reps5.get_qc(i, "POS", "drf_agr") == expected_flags[i]
 
@@ -1678,7 +1688,7 @@ def reps6():
 
 def test_moving_north(reps6):
     expected_flags = [0, 0, 0, 0, 0, 0, 0]
-    otqc.aground_check(reps6.reps, 3, 1, 2)
+    otqc.do_aground_check(reps6.reps, 3, 1, 2)
     for i in range(0, len(reps6)):
         assert reps6.get_qc(i, "POS", "drf_agr") == expected_flags[i]
 
@@ -1709,7 +1719,7 @@ def reps7():
 
 def test_moving_north_then_stop(reps7):
     expected_flags = [0, 0, 0, 0, 1, 1, 1]
-    otqc.aground_check(reps7.reps, 3, 1, 2)
+    otqc.do_aground_check(reps7.reps, 3, 1, 2)
     for i in range(0, len(reps7)):
         assert reps7.get_qc(i, "POS", "drf_agr") == expected_flags[i]
 
@@ -1741,7 +1751,7 @@ def reps8():
 
 def test_stationary_high_freq_sampling(reps8):
     expected_flags = [0, 0, 0, 0, 0, 0, 0]
-    otqc.aground_check(reps8.reps, 3, 1, 2)
+    otqc.do_aground_check(reps8.reps, 3, 1, 2)
     for i in range(0, len(reps8)):
         assert reps8.get_qc(i, "POS", "drf_agr") == expected_flags[i]
 
@@ -1773,7 +1783,7 @@ def reps9():
 
 def test_stationary_low_freq_sampling(reps9):
     expected_flags = [0, 0, 0, 0, 0, 0, 0]
-    otqc.aground_check(reps9.reps, 3, 1, 2)
+    otqc.do_aground_check(reps9.reps, 3, 1, 2)
     for i in range(0, len(reps9)):
         assert reps9.get_qc(i, "POS", "drf_agr") == expected_flags[i]
 
@@ -1806,7 +1816,7 @@ def reps10():
 
 def test_stationary_mid_freq_sampling(reps10):
     expected_flags = [1, 1, 1, 1, 1, 1, 1]
-    otqc.aground_check(reps10.reps, 3, 1, 2)
+    otqc.do_aground_check(reps10.reps, 3, 1, 2)
     for i in range(0, len(reps10)):
         assert reps10.get_qc(i, "POS", "drf_agr") == expected_flags[i]
 
@@ -1839,7 +1849,7 @@ def reps11():
 
 def test_stationary_low_to_mid_freq_sampling(reps11):
     expected_flags = [0, 0, 1, 1, 1, 1, 1]
-    otqc.aground_check(reps11.reps, 3, 1, 2)
+    otqc.do_aground_check(reps11.reps, 3, 1, 2)
     for i in range(0, len(reps11)):
         assert reps11.get_qc(i, "POS", "drf_agr") == expected_flags[i]
 
@@ -1871,7 +1881,7 @@ def reps12():
 
 def test_moving_slowly_northwest(reps12):
     expected_flags = [1, 1, 1, 1, 1, 1, 1]
-    otqc.aground_check(reps12.reps, 3, 1, 2)
+    otqc.do_aground_check(reps12.reps, 3, 1, 2)
     for i in range(0, len(reps12)):
         assert reps12.get_qc(i, "POS", "drf_agr") == expected_flags[i]
 
@@ -1903,7 +1913,7 @@ def reps13():
 
 def test_moving_slowly_west_in_arctic(reps13):
     expected_flags = [1, 1, 1, 1, 1, 1, 1]
-    otqc.aground_check(reps13.reps, 3, 1, 2)
+    otqc.do_aground_check(reps13.reps, 3, 1, 2)
     for i in range(0, len(reps13)):
         assert reps13.get_qc(i, "POS", "drf_agr") == expected_flags[i]
 
@@ -1936,7 +1946,7 @@ def reps14():
 
 def test_stop_then_moving_north(reps14):
     expected_flags = [0, 0, 0, 0, 0, 0, 0]
-    otqc.aground_check(reps14.reps, 3, 1, 2)
+    otqc.do_aground_check(reps14.reps, 3, 1, 2)
     for i in range(0, len(reps14)):
         assert reps14.get_qc(i, "POS", "drf_agr") == expected_flags[i]
 
@@ -1967,7 +1977,7 @@ def test_too_short_for_qc(reps15):
     old_stdout = sys.stdout
     f = open(os.devnull, "w")
     sys.stdout = f
-    otqc.aground_check(reps15.reps, 3, 1, 2)
+    otqc.do_aground_check(reps15.reps, 3, 1, 2)
     sys.stdout = old_stdout
     for i in range(0, len(reps15)):
         assert reps15.get_qc(i, "POS", "drf_agr") == expected_flags[i]
@@ -2001,7 +2011,7 @@ def reps16():
 def test_error_bad_input_parameter(reps16):
     expected_flags = [9, 9, 9, 9, 9, 9, 9]
     try:
-        otqc.aground_check(reps16.reps, 0, 1, 2)
+        otqc.do_aground_check(reps16.reps, 0, 1, 2)
     except AssertionError as error:
         error_return_text = "invalid input parameter: smooth_win must be >= 1"
         assert str(error)[0 : len(error_return_text)] == error_return_text
@@ -2038,7 +2048,7 @@ def reps17():
 def test_error_missing_observation(reps17):
     expected_flags = [9, 9, 9, 9, 9, 9, 9]
     try:
-        otqc.aground_check(reps17.reps, 3, 1, 2)
+        otqc.do_aground_check(reps17.reps, 3, 1, 2)
     except AssertionError as error:
         error_return_text = "problem with report values: Nan(s) found in longitude"
         assert str(error)[0 : len(error_return_text)] == error_return_text
@@ -2075,7 +2085,7 @@ def reps18():
 def test_error_not_time_sorted(reps18):
     expected_flags = [9, 9, 9, 9, 9, 9, 9]
     try:
-        otqc.aground_check(reps18.reps, 3, 1, 2)
+        otqc.do_aground_check(reps18.reps, 3, 1, 2)
     except AssertionError as error:
         error_return_text = "problem with report values: times are not sorted"
         assert str(error)[0 : len(error_return_text)] == error_return_text
@@ -2085,98 +2095,98 @@ def test_error_not_time_sorted(reps18):
 
 def test_new_stationary(reps1):
     expected_flags = [1, 1, 1, 1, 1, 1, 1]
-    otqc.new_aground_check(reps1.reps, 3, 1)
+    otqc.do_new_aground_check(reps1.reps, 3, 1)
     for i in range(0, len(reps1)):
         assert reps1.get_qc(i, "POS", "drf_agr") == expected_flags[i]
 
 
 def test_new_stationary_jitter_spikes(reps2):
     expected_flags = [1, 1, 1, 1, 1, 1, 1]
-    otqc.new_aground_check(reps2.reps, 3, 1)
+    otqc.do_new_aground_check(reps2.reps, 3, 1)
     for i in range(0, len(reps2)):
         assert reps2.get_qc(i, "POS", "drf_agr") == expected_flags[i]
 
 
 def test_new_stationary_big_remaining_jitter(reps3):
     expected_flags = [0, 0, 0, 0, 1, 1, 1]
-    otqc.new_aground_check(reps3.reps, 3, 1)
+    otqc.do_new_aground_check(reps3.reps, 3, 1)
     for i in range(0, len(reps3)):
         assert reps3.get_qc(i, "POS", "drf_agr") == expected_flags[i]
 
 
 def test_new_stationary_small_remaining_jitter(reps4):
     expected_flags = [1, 1, 1, 1, 1, 1, 1]
-    otqc.new_aground_check(reps4.reps, 3, 1)
+    otqc.do_new_aground_check(reps4.reps, 3, 1)
     for i in range(0, len(reps4)):
         assert reps4.get_qc(i, "POS", "drf_agr") == expected_flags[i]
 
 
 def test_new_moving_west(reps5):
     expected_flags = [0, 0, 0, 0, 0, 0, 0]
-    otqc.new_aground_check(reps5.reps, 3, 1)
+    otqc.do_new_aground_check(reps5.reps, 3, 1)
     for i in range(0, len(reps5)):
         assert reps5.get_qc(i, "POS", "drf_agr") == expected_flags[i]
 
 
 def test_new_moving_north(reps6):
     expected_flags = [0, 0, 0, 0, 0, 0, 0]
-    otqc.new_aground_check(reps6.reps, 3, 1)
+    otqc.do_new_aground_check(reps6.reps, 3, 1)
     for i in range(0, len(reps6)):
         assert reps6.get_qc(i, "POS", "drf_agr") == expected_flags[i]
 
 
 def test_new_moving_north_then_stop(reps7):
     expected_flags = [0, 0, 0, 0, 1, 1, 1]
-    otqc.new_aground_check(reps7.reps, 3, 1)
+    otqc.do_new_aground_check(reps7.reps, 3, 1)
     for i in range(0, len(reps7)):
         assert reps7.get_qc(i, "POS", "drf_agr") == expected_flags[i]
 
 
 def test_new_stationary_high_freq_sampling(reps8):
     expected_flags = [0, 0, 0, 0, 0, 0, 0]
-    otqc.new_aground_check(reps8.reps, 3, 1)
+    otqc.do_new_aground_check(reps8.reps, 3, 1)
     for i in range(0, len(reps8)):
         assert reps8.get_qc(i, "POS", "drf_agr") == expected_flags[i]
 
 
 def test_new_stationary_low_freq_sampling(reps9):
     expected_flags = [1, 1, 1, 1, 1, 1, 1]
-    otqc.new_aground_check(reps9.reps, 3, 1)
+    otqc.do_new_aground_check(reps9.reps, 3, 1)
     for i in range(0, len(reps9)):
         assert reps9.get_qc(i, "POS", "drf_agr") == expected_flags[i]
 
 
 def test_new_stationary_mid_freq_sampling(reps10):
     expected_flags = [1, 1, 1, 1, 1, 1, 1]
-    otqc.new_aground_check(reps10.reps, 3, 1)
+    otqc.do_new_aground_check(reps10.reps, 3, 1)
     for i in range(0, len(reps10)):
         assert reps10.get_qc(i, "POS", "drf_agr") == expected_flags[i]
 
 
 def test_new_stationary_low_to_mid_freq_sampling(reps11):
     expected_flags = [1, 1, 1, 1, 1, 1, 1]
-    otqc.new_aground_check(reps11.reps, 3, 1)
+    otqc.do_new_aground_check(reps11.reps, 3, 1)
     for i in range(0, len(reps11)):
         assert reps11.get_qc(i, "POS", "drf_agr") == expected_flags[i]
 
 
 def test_new_moving_slowly_northwest(reps12):
     expected_flags = [0, 0, 0, 1, 1, 1, 1]
-    otqc.new_aground_check(reps12.reps, 3, 1)
+    otqc.do_new_aground_check(reps12.reps, 3, 1)
     for i in range(0, len(reps12)):
         assert reps12.get_qc(i, "POS", "drf_agr") == expected_flags[i]
 
 
 def test_new_moving_slowly_west_in_arctic(reps13):
     expected_flags = [1, 1, 1, 1, 1, 1, 1]
-    otqc.new_aground_check(reps13.reps, 3, 1)
+    otqc.do_new_aground_check(reps13.reps, 3, 1)
     for i in range(0, len(reps13)):
         assert reps13.get_qc(i, "POS", "drf_agr") == expected_flags[i]
 
 
 def test_new_stop_then_moving_north(reps14):
     expected_flags = [0, 0, 0, 0, 0, 0, 0]
-    otqc.new_aground_check(reps14.reps, 3, 1)
+    otqc.do_new_aground_check(reps14.reps, 3, 1)
     for i in range(0, len(reps14)):
         assert reps14.get_qc(i, "POS", "drf_agr") == expected_flags[i]
 
@@ -2186,7 +2196,7 @@ def test_new_too_short_for_qc(reps15):
     old_stdout = sys.stdout
     f = open(os.devnull, "w")
     sys.stdout = f
-    otqc.new_aground_check(reps15.reps, 3, 1)
+    otqc.do_new_aground_check(reps15.reps, 3, 1)
     sys.stdout = old_stdout
     for i in range(0, len(reps15)):
         assert reps15.get_qc(i, "POS", "drf_agr") == expected_flags[i]
@@ -2195,7 +2205,7 @@ def test_new_too_short_for_qc(reps15):
 def test_new_error_bad_input_parameter(reps16):
     expected_flags = [9, 9, 9, 9, 9, 9, 9]
     try:
-        otqc.new_aground_check(reps16.reps, 2, 1)
+        otqc.do_new_aground_check(reps16.reps, 2, 1)
     except AssertionError as error:
         error_return_text = "invalid input parameter: smooth_win must be an odd number"
         assert str(error)[0 : len(error_return_text)] == error_return_text
@@ -2206,7 +2216,7 @@ def test_new_error_bad_input_parameter(reps16):
 def test_new_error_missing_observation(reps17):
     expected_flags = [9, 9, 9, 9, 9, 9, 9]
     try:
-        otqc.new_aground_check(reps17.reps, 3, 1)
+        otqc.do_new_aground_check(reps17.reps, 3, 1)
     except AssertionError as error:
         error_return_text = "problem with report values: Nan(s) found in longitude"
         assert str(error)[0 : len(error_return_text)] == error_return_text
@@ -2217,14 +2227,34 @@ def test_new_error_missing_observation(reps17):
 def test_new_error_not_time_sorted(reps18):
     expected_flags = [9, 9, 9, 9, 9, 9, 9]
     try:
-        otqc.new_aground_check(reps18.reps, 3, 1)
+        otqc.do_new_aground_check(reps18.reps, 3, 1)
     except AssertionError as error:
         error_return_text = "problem with report values: times are not sorted"
         assert str(error)[0 : len(error_return_text)] == error_return_text
     for i in range(0, len(reps18)):
         assert reps18.get_qc(i, "POS", "drf_agr") == expected_flags[i]
 
+from datetime import date
+# def convert_reps(reps):
+#     out_reps = {}
+#     for v in reps.reps:
+#         for key in ['ID', 'LAT', 'LON', 'YR', 'MO', 'DY', 'HR', 'SST', 'PT']:
+#             if v.getvar(key) is not None:
+#                 if key in out_reps:
+#                     out_reps[key].append(v.getvar(key))
+#                 else:
+#                     out_reps[key] = [v.getvar(key)]
+#
+#     for key in out_reps:
+#         out_reps[key] = np.array(out_reps[key])
+#
+#     dates = np.zeros(len(out_reps['YR'])
+#     for i in len(out_reps['YR']):
+#     dates = date(out_reps['YR'], out_reps['MO'], out_reps['DY'])
 
+
+
+    # return out_reps
 
 @pytest.fixture
 def iquam_parameters():
@@ -2251,21 +2281,39 @@ def reps1a():
         {"ID": "AAAAAAAAA", "YR": 2003, "MO": 12, "DY": 7, "HR": 12, "LAT": 0.0, "LON": 0.0, "SST": 5.0, "PT": 7, },
     ]
     # fmt: on
-    reps = ex.Voyage()
+    reps = {}
+    for key in vals1[0]:
+        reps[key] = []
+    reps['DATE'] = []
+
     for v in vals1:
-        rec = IMMA()
-        for key in v:
-            rec.data[key] = v[key]
-        rep = ex.MarineReportQC(rec)
-        reps.add_report(rep)
+        for key in reps:
+            if key != 'DATE':
+                reps[key].append(v[key])
+
+        hour = int(v['HR'])
+        minute = 60 * (v['HR'] - hour)
+        date = datetime(v['YR'], v['MO'], v['DY'], hour, minute)
+        reps['DATE'].append(date)
+
+    for key in reps:
+        reps[key] = np.array(reps[key])
 
     return reps
 
-
-@pytest.fixture
-def reps2a():
-    # fast moving drifter
+def speed_check_data(selector):
+    # stationary drifter
     # fmt: off
+    vals1 = [
+        {"ID": "AAAAAAAAA", "YR": 2003, "MO": 12, "DY": 1, "HR": 12, "LAT": 0.0, "LON": 0.0, "SST": 5.0, "PT": 7, },
+        {"ID": "AAAAAAAAA", "YR": 2003, "MO": 12, "DY": 2, "HR": 12, "LAT": 0.0, "LON": 0.0, "SST": 5.0, "PT": 7, },
+        {"ID": "AAAAAAAAA", "YR": 2003, "MO": 12, "DY": 3, "HR": 12, "LAT": 0.0, "LON": 0.0, "SST": 5.0, "PT": 7, },
+        {"ID": "AAAAAAAAA", "YR": 2003, "MO": 12, "DY": 4, "HR": 12, "LAT": 0.0, "LON": 0.0, "SST": 5.0, "PT": 7, },
+        {"ID": "AAAAAAAAA", "YR": 2003, "MO": 12, "DY": 5, "HR": 12, "LAT": 0.0, "LON": 0.0, "SST": 5.0, "PT": 7, },
+        {"ID": "AAAAAAAAA", "YR": 2003, "MO": 12, "DY": 6, "HR": 12, "LAT": 0.0, "LON": 0.0, "SST": 5.0, "PT": 7, },
+        {"ID": "AAAAAAAAA", "YR": 2003, "MO": 12, "DY": 7, "HR": 12, "LAT": 0.0, "LON": 0.0, "SST": 5.0, "PT": 7, },
+    ]
+    # fast moving drifter
     vals2 = [
         {"ID": "AAAAAAAAA", "YR": 2003, "MO": 12, "DY": 1, "HR": 12, "LAT": 0.0, "LON": 0.0, "SST": 5.0, "PT": 7, },
         {"ID": "AAAAAAAAA", "YR": 2003, "MO": 12, "DY": 2, "HR": 12, "LAT": 3.0, "LON": 0.0, "SST": 5.0, "PT": 7, },
@@ -2275,22 +2323,7 @@ def reps2a():
         {"ID": "AAAAAAAAA", "YR": 2003, "MO": 12, "DY": 6, "HR": 12, "LAT": 15.0, "LON": 0.0, "SST": 5.0, "PT": 7, },
         {"ID": "AAAAAAAAA", "YR": 2003, "MO": 12, "DY": 7, "HR": 12, "LAT": 18.0, "LON": 0.0, "SST": 5.0, "PT": 7, },
     ]
-    # fmt: on
-    reps = ex.Voyage()
-    for v in vals2:
-        rec = IMMA()
-        for key in v:
-            rec.data[key] = v[key]
-        rep = ex.MarineReportQC(rec)
-        reps.add_report(rep)
-
-    return reps
-
-
-@pytest.fixture
-def reps3a():
     # slow moving drifter
-    # fmt: off
     vals3 = [
         {"ID": "AAAAAAAAA", "YR": 2003, "MO": 12, "DY": 1, "HR": 12, "LAT": 0.0, "LON": 0.0, "SST": 5.0, "PT": 7, },
         {"ID": "AAAAAAAAA", "YR": 2003, "MO": 12, "DY": 2, "HR": 12, "LAT": 0.0, "LON": 1.0, "SST": 5.0, "PT": 7, },
@@ -2300,22 +2333,7 @@ def reps3a():
         {"ID": "AAAAAAAAA", "YR": 2003, "MO": 12, "DY": 6, "HR": 12, "LAT": 0.0, "LON": 5.0, "SST": 5.0, "PT": 7, },
         {"ID": "AAAAAAAAA", "YR": 2003, "MO": 12, "DY": 7, "HR": 12, "LAT": 0.0, "LON": 6.0, "SST": 5.0, "PT": 7, },
     ]
-    # fmt: on
-    reps = ex.Voyage()
-    for v in vals3:
-        rec = IMMA()
-        for key in v:
-            rec.data[key] = v[key]
-        rep = ex.MarineReportQC(rec)
-        reps.add_report(rep)
-
-    return reps
-
-
-@pytest.fixture
-def reps4a():
     # slow-fast-slow moving drifter
-    # fmt: off
     vals4 = [
         {"ID": "AAAAAAAAA", "YR": 2003, "MO": 12, "DY": 1, "HR": 12, "LAT": 0.0, "LON": 0.0, "SST": 5.0, "PT": 7, },
         {"ID": "AAAAAAAAA", "YR": 2003, "MO": 12, "DY": 2, "HR": 12, "LAT": 1.0, "LON": 0.0, "SST": 5.0, "PT": 7, },
@@ -2325,22 +2343,7 @@ def reps4a():
         {"ID": "AAAAAAAAA", "YR": 2003, "MO": 12, "DY": 6, "HR": 12, "LAT": 9.0, "LON": 0.0, "SST": 5.0, "PT": 7, },
         {"ID": "AAAAAAAAA", "YR": 2003, "MO": 12, "DY": 7, "HR": 12, "LAT": 10.0, "LON": 0.0, "SST": 5.0, "PT": 7, },
     ]
-    # fmt: on
-    reps = ex.Voyage()
-    for v in vals4:
-        rec = IMMA()
-        for key in v:
-            rec.data[key] = v[key]
-        rep = ex.MarineReportQC(rec)
-        reps.add_report(rep)
-
-    return reps
-
-
-@pytest.fixture
-def reps5a():
     # fast moving drifter (high frequency sampling)
-    # fmt: off
     vals5 = [
         {"ID": "AAAAAAAAA", "YR": 2003, "MO": 12, "DY": 1, "HR": 0, "LAT": 0.0, "LON": 0.0, "SST": 5.0, "PT": 7, },
         {"ID": "AAAAAAAAA", "YR": 2003, "MO": 12, "DY": 1, "HR": 1, "LAT": 3.0, "LON": 0.0, "SST": 5.0, "PT": 7, },
@@ -2350,22 +2353,7 @@ def reps5a():
         {"ID": "AAAAAAAAA", "YR": 2003, "MO": 12, "DY": 1, "HR": 5, "LAT": 15.0, "LON": 0.0, "SST": 5.0, "PT": 7, },
         {"ID": "AAAAAAAAA", "YR": 2003, "MO": 12, "DY": 1, "HR": 6, "LAT": 18.0, "LON": 0.0, "SST": 5.0, "PT": 7, },
     ]
-    # fmt: on
-    reps = ex.Voyage()
-    for v in vals5:
-        rec = IMMA()
-        for key in v:
-            rec.data[key] = v[key]
-        rep = ex.MarineReportQC(rec)
-        reps.add_report(rep)
-
-    return reps
-
-
-@pytest.fixture
-def reps6a():
     # fast moving drifter (low frequency sampling)
-    # fmt: off
     vals6 = [
         {"ID": "AAAAAAAAA", "YR": 2003, "MO": 12, "DY": 1, "HR": 12, "LAT": 0.0, "LON": 0.0, "SST": 5.0, "PT": 7, },
         {"ID": "AAAAAAAAA", "YR": 2003, "MO": 12, "DY": 2, "HR": 13, "LAT": 5.0, "LON": 0.0, "SST": 5.0, "PT": 7, },
@@ -2375,22 +2363,7 @@ def reps6a():
         {"ID": "AAAAAAAAA", "YR": 2003, "MO": 12, "DY": 6, "HR": 17, "LAT": 25.0, "LON": 0.0, "SST": 5.0, "PT": 7, },
         {"ID": "AAAAAAAAA", "YR": 2003, "MO": 12, "DY": 7, "HR": 18, "LAT": 30.0, "LON": 0.0, "SST": 5.0, "PT": 7, },
     ]
-    # fmt: on
-    reps = ex.Voyage()
-    for v in vals6:
-        rec = IMMA()
-        for key in v:
-            rec.data[key] = v[key]
-        rep = ex.MarineReportQC(rec)
-        reps.add_report(rep)
-
-    return reps
-
-
-@pytest.fixture
-def reps7a():
     # slow-fast-slow moving drifter (mid frequency sampling)
-    # fmt: off
     vals7 = [
         {"ID": "AAAAAAAAA", "YR": 2003, "MO": 12, "DY": 1, "HR": 0, "LAT": 0.0, "LON": 0.0, "SST": 5.0, "PT": 7, },
         {"ID": "AAAAAAAAA", "YR": 2003, "MO": 12, "DY": 1, "HR": 12, "LAT": 0.5, "LON": 0.0, "SST": 5.0, "PT": 7, },
@@ -2400,22 +2373,7 @@ def reps7a():
         {"ID": "AAAAAAAAA", "YR": 2003, "MO": 12, "DY": 3, "HR": 12, "LAT": 4.5, "LON": 0.0, "SST": 5.0, "PT": 7, },
         {"ID": "AAAAAAAAA", "YR": 2003, "MO": 12, "DY": 4, "HR": 0, "LAT": 5.0, "LON": 0.0, "SST": 5.0, "PT": 7, },
     ]
-    # fmt: on
-    reps = ex.Voyage()
-    for v in vals7:
-        rec = IMMA()
-        for key in v:
-            rec.data[key] = v[key]
-        rep = ex.MarineReportQC(rec)
-        reps.add_report(rep)
-
-    return reps
-
-
-@pytest.fixture
-def reps8a():
     # fast moving drifter (with irregular sampling)
-    # fmt: off
     vals8 = [
         {"ID": "AAAAAAAAA", "YR": 2003, "MO": 12, "DY": 1, "HR": 12, "LAT": 0.0, "LON": 0.0, "SST": 5.0, "PT": 7, },
         {"ID": "AAAAAAAAA", "YR": 2003, "MO": 12, "DY": 2, "HR": 12, "LAT": 3.0, "LON": 0.0, "SST": 5.0, "PT": 7, },
@@ -2425,22 +2383,7 @@ def reps8a():
         {"ID": "AAAAAAAAA", "YR": 2003, "MO": 12, "DY": 6, "HR": 23, "LAT": 14.0, "LON": 0.0, "SST": 5.0, "PT": 7, },
         {"ID": "AAAAAAAAA", "YR": 2003, "MO": 12, "DY": 7, "HR": 23, "LAT": 17.0, "LON": 0.0, "SST": 5.0, "PT": 7, },
     ]
-    # fmt: on
-    reps = ex.Voyage()
-    for v in vals8:
-        rec = IMMA()
-        for key in v:
-            rec.data[key] = v[key]
-        rep = ex.MarineReportQC(rec)
-        reps.add_report(rep)
-
-    return reps
-
-
-@pytest.fixture
-def reps9a():
     # fast moving Arctic drifter
-    # fmt: off
     vals9 = [
         {"ID": "AAAAAAAAA", "YR": 2003, "MO": 12, "DY": 1, "HR": 12, "LAT": 85.0, "LON": 0.0, "SST": 5.0, "PT": 7, },
         {"ID": "AAAAAAAAA", "YR": 2003, "MO": 12, "DY": 2, "HR": 12, "LAT": 85.0, "LON": 30.0, "SST": 5.0, "PT": 7, },
@@ -2450,22 +2393,7 @@ def reps9a():
         {"ID": "AAAAAAAAA", "YR": 2003, "MO": 12, "DY": 6, "HR": 12, "LAT": 85.0, "LON": 150.0, "SST": 5.0, "PT": 7, },
         {"ID": "AAAAAAAAA", "YR": 2003, "MO": 12, "DY": 7, "HR": 12, "LAT": 85.0, "LON": 180.0, "SST": 5.0, "PT": 7, },
     ]
-    # fmt: on
-    reps = ex.Voyage()
-    for v in vals9:
-        rec = IMMA()
-        for key in v:
-            rec.data[key] = v[key]
-        rep = ex.MarineReportQC(rec)
-        reps.add_report(rep)
-
-    return reps
-
-
-@pytest.fixture
-def reps10a():
     # stationary drifter (gross position errors)
-    # fmt: off
     vals10 = [
         {"ID": "AAAAAAAAA", "YR": 2003, "MO": 12, "DY": 1, "HR": 12, "LAT": 0.0, "LON": 0.0, "SST": 5.0, "PT": 7, },
         {"ID": "AAAAAAAAA", "YR": 2003, "MO": 12, "DY": 2, "HR": 12, "LAT": 0.0, "LON": 0.0, "SST": 5.0, "PT": 7, },
@@ -2475,42 +2403,12 @@ def reps10a():
         {"ID": "AAAAAAAAA", "YR": 2003, "MO": 12, "DY": 6, "HR": 12, "LAT": 50.0, "LON": 0.0, "SST": 5.0, "PT": 7, },
         {"ID": "AAAAAAAAA", "YR": 2003, "MO": 12, "DY": 7, "HR": 12, "LAT": 0.0, "LON": 0.0, "SST": 5.0, "PT": 7, },
     ]
-    # fmt: on
-    reps = ex.Voyage()
-    for v in vals10:
-        rec = IMMA()
-        for key in v:
-            rec.data[key] = v[key]
-        rep = ex.MarineReportQC(rec)
-        reps.add_report(rep)
-
-    return reps
-
-
-@pytest.fixture
-def reps11a():
     # too short for QC
-    # fmt: off
     vals11 = [
         {"ID": "AAAAAAAAA", "YR": 2003, "MO": 12, "DY": 1, "HR": 12, "LAT": 0.0, "LON": 0.0, "SST": 5.0, "PT": 7, },
         {"ID": "AAAAAAAAA", "YR": 2003, "MO": 12, "DY": 2, "HR": 12, "LAT": 0.0, "LON": 0.0, "SST": 5.0, "PT": 7, },
     ]
-    # fmt: on
-    reps = ex.Voyage()
-    for v in vals11:
-        rec = IMMA()
-        for key in v:
-            rec.data[key] = v[key]
-        rep = ex.MarineReportQC(rec)
-        reps.add_report(rep)
-
-    return reps
-
-
-@pytest.fixture
-def reps12a():
     # assertion error - bad input parameter
-    # fmt: off
     vals12 = [
         {"ID": "AAAAAAAAA", "YR": 2003, "MO": 12, "DY": 1, "HR": 12, "LAT": 0.0, "LON": 0.0, "SST": 5.0, "PT": 7, },
         {"ID": "AAAAAAAAA", "YR": 2003, "MO": 12, "DY": 2, "HR": 12, "LAT": 0.0, "LON": 0.0, "SST": 5.0, "PT": 7, },
@@ -2520,22 +2418,7 @@ def reps12a():
         {"ID": "AAAAAAAAA", "YR": 2003, "MO": 12, "DY": 6, "HR": 12, "LAT": 0.0, "LON": 0.0, "SST": 5.0, "PT": 7, },
         {"ID": "AAAAAAAAA", "YR": 2003, "MO": 12, "DY": 7, "HR": 12, "LAT": 0.0, "LON": 0.0, "SST": 5.0, "PT": 7, },
     ]
-    # fmt: on
-    reps = ex.Voyage()
-    for v in vals12:
-        rec = IMMA()
-        for key in v:
-            rec.data[key] = v[key]
-        rep = ex.MarineReportQC(rec)
-        reps.add_report(rep)
-
-    return reps
-
-
-@pytest.fixture
-def reps13a():
     # assertion error - missing observation
-    # fmt: off
     vals13 = [
         {"ID": "AAAAAAAAA", "YR": 2003, "MO": 12, "DY": 1, "HR": 12, "LAT": 0.0, "LON": 0.0, "SST": 5.0, "PT": 7, },
         {"ID": "AAAAAAAAA", "YR": 2003, "MO": 12, "DY": 2, "HR": 12, "LAT": 0.0, "LON": 0.0, "SST": 5.0, "PT": 7, },
@@ -2545,23 +2428,7 @@ def reps13a():
         {"ID": "AAAAAAAAA", "YR": 2003, "MO": 12, "DY": 6, "HR": 12, "LAT": 0.0, "LON": 0.0, "SST": 5.0, "PT": 7, },
         {"ID": "AAAAAAAAA", "YR": 2003, "MO": 12, "DY": 7, "HR": 12, "LAT": 0.0, "LON": 0.0, "SST": 5.0, "PT": 7, },
     ]
-    # fmt: on
-    reps = ex.Voyage()
-    for v in vals13:
-        rec = IMMA()
-        for key in v:
-            rec.data[key] = v[key]
-        rep = ex.MarineReportQC(rec)
-        reps.add_report(rep)
-    reps.setvar(1, "LON", None)
-
-    return reps
-
-
-@pytest.fixture
-def reps14a():
     # assertion error - times not sorted
-    # fmt: off
     vals14 = [
         {"ID": "AAAAAAAAA", "YR": 2003, "MO": 12, "DY": 1, "HR": 12, "LAT": 0.0, "LON": 0.0, "SST": 5.0, "PT": 7, },
         {"ID": "AAAAAAAAA", "YR": 2003, "MO": 12, "DY": 2, "HR": 12, "LAT": 0.0, "LON": 0.0, "SST": 5.0, "PT": 7, },
@@ -2572,84 +2439,420 @@ def reps14a():
         {"ID": "AAAAAAAAA", "YR": 2003, "MO": 12, "DY": 7, "HR": 12, "LAT": 0.0, "LON": 0.0, "SST": 5.0, "PT": 7, },
     ]
     # fmt: on
-    reps = ex.Voyage()
+    obs = locals()[f"vals{selector}"]
+    reps = {}
+    for key in obs[0]:
+        reps[key] = []
+    reps['DATE'] = []
 
-    for v in vals14:
-        rec = IMMA()
-        for key in v:
-            rec.data[key] = v[key]
-        rep = ex.MarineReportQC(rec)
-        reps.add_report(rep)
+    for v in obs:
+        for key in reps:
+            if key != 'DATE':
+                reps[key].append(v[key])
 
-    return reps
+        hour = int(v['HR'])
+        minute = 60 * (v['HR'] - hour)
+        date = datetime(v['YR'], v['MO'], v['DY'], hour, minute)
+        reps['DATE'].append(date)
+
+    for key in reps:
+        reps[key] = np.array(reps[key])
+
+    return reps['LAT'], reps['LON'], reps['DATE']
 
 
-def test_stationary_a(reps1a):
+# @pytest.fixture
+# def reps2a():
+#     # fast moving drifter
+#     # fmt: off
+#     vals2 = [
+#         {"ID": "AAAAAAAAA", "YR": 2003, "MO": 12, "DY": 1, "HR": 12, "LAT": 0.0, "LON": 0.0, "SST": 5.0, "PT": 7, },
+#         {"ID": "AAAAAAAAA", "YR": 2003, "MO": 12, "DY": 2, "HR": 12, "LAT": 3.0, "LON": 0.0, "SST": 5.0, "PT": 7, },
+#         {"ID": "AAAAAAAAA", "YR": 2003, "MO": 12, "DY": 3, "HR": 12, "LAT": 6.0, "LON": 0.0, "SST": 5.0, "PT": 7, },
+#         {"ID": "AAAAAAAAA", "YR": 2003, "MO": 12, "DY": 4, "HR": 12, "LAT": 9.0, "LON": 0.0, "SST": 5.0, "PT": 7, },
+#         {"ID": "AAAAAAAAA", "YR": 2003, "MO": 12, "DY": 5, "HR": 12, "LAT": 12.0, "LON": 0.0, "SST": 5.0, "PT": 7, },
+#         {"ID": "AAAAAAAAA", "YR": 2003, "MO": 12, "DY": 6, "HR": 12, "LAT": 15.0, "LON": 0.0, "SST": 5.0, "PT": 7, },
+#         {"ID": "AAAAAAAAA", "YR": 2003, "MO": 12, "DY": 7, "HR": 12, "LAT": 18.0, "LON": 0.0, "SST": 5.0, "PT": 7, },
+#     ]
+#     # fmt: on
+#     reps = ex.Voyage()
+#     for v in vals2:
+#         rec = IMMA()
+#         for key in v:
+#             rec.data[key] = v[key]
+#         rep = ex.MarineReportQC(rec)
+#         reps.add_report(rep)
+#
+#     return reps
+#
+#
+# @pytest.fixture
+# def reps3a():
+#     # slow moving drifter
+#     # fmt: off
+#     vals3 = [
+#         {"ID": "AAAAAAAAA", "YR": 2003, "MO": 12, "DY": 1, "HR": 12, "LAT": 0.0, "LON": 0.0, "SST": 5.0, "PT": 7, },
+#         {"ID": "AAAAAAAAA", "YR": 2003, "MO": 12, "DY": 2, "HR": 12, "LAT": 0.0, "LON": 1.0, "SST": 5.0, "PT": 7, },
+#         {"ID": "AAAAAAAAA", "YR": 2003, "MO": 12, "DY": 3, "HR": 12, "LAT": 0.0, "LON": 2.0, "SST": 5.0, "PT": 7, },
+#         {"ID": "AAAAAAAAA", "YR": 2003, "MO": 12, "DY": 4, "HR": 12, "LAT": 0.0, "LON": 3.0, "SST": 5.0, "PT": 7, },
+#         {"ID": "AAAAAAAAA", "YR": 2003, "MO": 12, "DY": 5, "HR": 12, "LAT": 0.0, "LON": 4.0, "SST": 5.0, "PT": 7, },
+#         {"ID": "AAAAAAAAA", "YR": 2003, "MO": 12, "DY": 6, "HR": 12, "LAT": 0.0, "LON": 5.0, "SST": 5.0, "PT": 7, },
+#         {"ID": "AAAAAAAAA", "YR": 2003, "MO": 12, "DY": 7, "HR": 12, "LAT": 0.0, "LON": 6.0, "SST": 5.0, "PT": 7, },
+#     ]
+#     # fmt: on
+#     reps = ex.Voyage()
+#     for v in vals3:
+#         rec = IMMA()
+#         for key in v:
+#             rec.data[key] = v[key]
+#         rep = ex.MarineReportQC(rec)
+#         reps.add_report(rep)
+#
+#     return reps
+#
+#
+# @pytest.fixture
+# def reps4a():
+#     # slow-fast-slow moving drifter
+#     # fmt: off
+#     vals4 = [
+#         {"ID": "AAAAAAAAA", "YR": 2003, "MO": 12, "DY": 1, "HR": 12, "LAT": 0.0, "LON": 0.0, "SST": 5.0, "PT": 7, },
+#         {"ID": "AAAAAAAAA", "YR": 2003, "MO": 12, "DY": 2, "HR": 12, "LAT": 1.0, "LON": 0.0, "SST": 5.0, "PT": 7, },
+#         {"ID": "AAAAAAAAA", "YR": 2003, "MO": 12, "DY": 3, "HR": 12, "LAT": 2.0, "LON": 0.0, "SST": 5.0, "PT": 7, },
+#         {"ID": "AAAAAAAAA", "YR": 2003, "MO": 12, "DY": 4, "HR": 12, "LAT": 5.0, "LON": 0.0, "SST": 5.0, "PT": 7, },
+#         {"ID": "AAAAAAAAA", "YR": 2003, "MO": 12, "DY": 5, "HR": 12, "LAT": 8.0, "LON": 0.0, "SST": 5.0, "PT": 7, },
+#         {"ID": "AAAAAAAAA", "YR": 2003, "MO": 12, "DY": 6, "HR": 12, "LAT": 9.0, "LON": 0.0, "SST": 5.0, "PT": 7, },
+#         {"ID": "AAAAAAAAA", "YR": 2003, "MO": 12, "DY": 7, "HR": 12, "LAT": 10.0, "LON": 0.0, "SST": 5.0, "PT": 7, },
+#     ]
+#     # fmt: on
+#     reps = ex.Voyage()
+#     for v in vals4:
+#         rec = IMMA()
+#         for key in v:
+#             rec.data[key] = v[key]
+#         rep = ex.MarineReportQC(rec)
+#         reps.add_report(rep)
+#
+#     return reps
+#
+#
+# @pytest.fixture
+# def reps5a():
+#     # fast moving drifter (high frequency sampling)
+#     # fmt: off
+#     vals5 = [
+#         {"ID": "AAAAAAAAA", "YR": 2003, "MO": 12, "DY": 1, "HR": 0, "LAT": 0.0, "LON": 0.0, "SST": 5.0, "PT": 7, },
+#         {"ID": "AAAAAAAAA", "YR": 2003, "MO": 12, "DY": 1, "HR": 1, "LAT": 3.0, "LON": 0.0, "SST": 5.0, "PT": 7, },
+#         {"ID": "AAAAAAAAA", "YR": 2003, "MO": 12, "DY": 1, "HR": 2, "LAT": 6.0, "LON": 0.0, "SST": 5.0, "PT": 7, },
+#         {"ID": "AAAAAAAAA", "YR": 2003, "MO": 12, "DY": 1, "HR": 3, "LAT": 9.0, "LON": 0.0, "SST": 5.0, "PT": 7, },
+#         {"ID": "AAAAAAAAA", "YR": 2003, "MO": 12, "DY": 1, "HR": 4, "LAT": 12.0, "LON": 0.0, "SST": 5.0, "PT": 7, },
+#         {"ID": "AAAAAAAAA", "YR": 2003, "MO": 12, "DY": 1, "HR": 5, "LAT": 15.0, "LON": 0.0, "SST": 5.0, "PT": 7, },
+#         {"ID": "AAAAAAAAA", "YR": 2003, "MO": 12, "DY": 1, "HR": 6, "LAT": 18.0, "LON": 0.0, "SST": 5.0, "PT": 7, },
+#     ]
+#     # fmt: on
+#     reps = ex.Voyage()
+#     for v in vals5:
+#         rec = IMMA()
+#         for key in v:
+#             rec.data[key] = v[key]
+#         rep = ex.MarineReportQC(rec)
+#         reps.add_report(rep)
+#
+#     return reps
+#
+#
+# @pytest.fixture
+# def reps6a():
+#     # fast moving drifter (low frequency sampling)
+#     # fmt: off
+#     vals6 = [
+#         {"ID": "AAAAAAAAA", "YR": 2003, "MO": 12, "DY": 1, "HR": 12, "LAT": 0.0, "LON": 0.0, "SST": 5.0, "PT": 7, },
+#         {"ID": "AAAAAAAAA", "YR": 2003, "MO": 12, "DY": 2, "HR": 13, "LAT": 5.0, "LON": 0.0, "SST": 5.0, "PT": 7, },
+#         {"ID": "AAAAAAAAA", "YR": 2003, "MO": 12, "DY": 3, "HR": 14, "LAT": 10.0, "LON": 0.0, "SST": 5.0, "PT": 7, },
+#         {"ID": "AAAAAAAAA", "YR": 2003, "MO": 12, "DY": 4, "HR": 15, "LAT": 15.0, "LON": 0.0, "SST": 5.0, "PT": 7, },
+#         {"ID": "AAAAAAAAA", "YR": 2003, "MO": 12, "DY": 5, "HR": 16, "LAT": 20.0, "LON": 0.0, "SST": 5.0, "PT": 7, },
+#         {"ID": "AAAAAAAAA", "YR": 2003, "MO": 12, "DY": 6, "HR": 17, "LAT": 25.0, "LON": 0.0, "SST": 5.0, "PT": 7, },
+#         {"ID": "AAAAAAAAA", "YR": 2003, "MO": 12, "DY": 7, "HR": 18, "LAT": 30.0, "LON": 0.0, "SST": 5.0, "PT": 7, },
+#     ]
+#     # fmt: on
+#     reps = ex.Voyage()
+#     for v in vals6:
+#         rec = IMMA()
+#         for key in v:
+#             rec.data[key] = v[key]
+#         rep = ex.MarineReportQC(rec)
+#         reps.add_report(rep)
+#
+#     return reps
+#
+#
+# @pytest.fixture
+# def reps7a():
+#     # slow-fast-slow moving drifter (mid frequency sampling)
+#     # fmt: off
+#     vals7 = [
+#         {"ID": "AAAAAAAAA", "YR": 2003, "MO": 12, "DY": 1, "HR": 0, "LAT": 0.0, "LON": 0.0, "SST": 5.0, "PT": 7, },
+#         {"ID": "AAAAAAAAA", "YR": 2003, "MO": 12, "DY": 1, "HR": 12, "LAT": 0.5, "LON": 0.0, "SST": 5.0, "PT": 7, },
+#         {"ID": "AAAAAAAAA", "YR": 2003, "MO": 12, "DY": 2, "HR": 0, "LAT": 1.0, "LON": 0.0, "SST": 5.0, "PT": 7, },
+#         {"ID": "AAAAAAAAA", "YR": 2003, "MO": 12, "DY": 2, "HR": 12, "LAT": 2.5, "LON": 0.0, "SST": 5.0, "PT": 7, },
+#         {"ID": "AAAAAAAAA", "YR": 2003, "MO": 12, "DY": 3, "HR": 0, "LAT": 4.0, "LON": 0.0, "SST": 5.0, "PT": 7, },
+#         {"ID": "AAAAAAAAA", "YR": 2003, "MO": 12, "DY": 3, "HR": 12, "LAT": 4.5, "LON": 0.0, "SST": 5.0, "PT": 7, },
+#         {"ID": "AAAAAAAAA", "YR": 2003, "MO": 12, "DY": 4, "HR": 0, "LAT": 5.0, "LON": 0.0, "SST": 5.0, "PT": 7, },
+#     ]
+#     # fmt: on
+#     reps = ex.Voyage()
+#     for v in vals7:
+#         rec = IMMA()
+#         for key in v:
+#             rec.data[key] = v[key]
+#         rep = ex.MarineReportQC(rec)
+#         reps.add_report(rep)
+#
+#     return reps
+#
+#
+# @pytest.fixture
+# def reps8a():
+#     # fast moving drifter (with irregular sampling)
+#     # fmt: off
+#     vals8 = [
+#         {"ID": "AAAAAAAAA", "YR": 2003, "MO": 12, "DY": 1, "HR": 12, "LAT": 0.0, "LON": 0.0, "SST": 5.0, "PT": 7, },
+#         {"ID": "AAAAAAAAA", "YR": 2003, "MO": 12, "DY": 2, "HR": 12, "LAT": 3.0, "LON": 0.0, "SST": 5.0, "PT": 7, },
+#         {"ID": "AAAAAAAAA", "YR": 2003, "MO": 12, "DY": 4, "HR": 12, "LAT": 12.0, "LON": 0.0, "SST": 5.0, "PT": 7, },
+#         {"ID": "AAAAAAAAA", "YR": 2003, "MO": 12, "DY": 5, "HR": 12, "LAT": 12.0, "LON": 0.0, "SST": 5.0, "PT": 7, },
+#         {"ID": "AAAAAAAAA", "YR": 2003, "MO": 12, "DY": 5, "HR": 23, "LAT": 14.0, "LON": 0.0, "SST": 5.0, "PT": 7, },
+#         {"ID": "AAAAAAAAA", "YR": 2003, "MO": 12, "DY": 6, "HR": 23, "LAT": 14.0, "LON": 0.0, "SST": 5.0, "PT": 7, },
+#         {"ID": "AAAAAAAAA", "YR": 2003, "MO": 12, "DY": 7, "HR": 23, "LAT": 17.0, "LON": 0.0, "SST": 5.0, "PT": 7, },
+#     ]
+#     # fmt: on
+#     reps = ex.Voyage()
+#     for v in vals8:
+#         rec = IMMA()
+#         for key in v:
+#             rec.data[key] = v[key]
+#         rep = ex.MarineReportQC(rec)
+#         reps.add_report(rep)
+#
+#     return reps
+#
+#
+# @pytest.fixture
+# def reps9a():
+#     # fast moving Arctic drifter
+#     # fmt: off
+#     vals9 = [
+#         {"ID": "AAAAAAAAA", "YR": 2003, "MO": 12, "DY": 1, "HR": 12, "LAT": 85.0, "LON": 0.0, "SST": 5.0, "PT": 7, },
+#         {"ID": "AAAAAAAAA", "YR": 2003, "MO": 12, "DY": 2, "HR": 12, "LAT": 85.0, "LON": 30.0, "SST": 5.0, "PT": 7, },
+#         {"ID": "AAAAAAAAA", "YR": 2003, "MO": 12, "DY": 3, "HR": 12, "LAT": 85.0, "LON": 60.0, "SST": 5.0, "PT": 7, },
+#         {"ID": "AAAAAAAAA", "YR": 2003, "MO": 12, "DY": 4, "HR": 12, "LAT": 85.0, "LON": 90.0, "SST": 5.0, "PT": 7, },
+#         {"ID": "AAAAAAAAA", "YR": 2003, "MO": 12, "DY": 5, "HR": 12, "LAT": 85.0, "LON": 120.0, "SST": 5.0, "PT": 7, },
+#         {"ID": "AAAAAAAAA", "YR": 2003, "MO": 12, "DY": 6, "HR": 12, "LAT": 85.0, "LON": 150.0, "SST": 5.0, "PT": 7, },
+#         {"ID": "AAAAAAAAA", "YR": 2003, "MO": 12, "DY": 7, "HR": 12, "LAT": 85.0, "LON": 180.0, "SST": 5.0, "PT": 7, },
+#     ]
+#     # fmt: on
+#     reps = ex.Voyage()
+#     for v in vals9:
+#         rec = IMMA()
+#         for key in v:
+#             rec.data[key] = v[key]
+#         rep = ex.MarineReportQC(rec)
+#         reps.add_report(rep)
+#
+#     return reps
+#
+#
+# @pytest.fixture
+# def reps10a():
+#     # stationary drifter (gross position errors)
+#     # fmt: off
+#     vals10 = [
+#         {"ID": "AAAAAAAAA", "YR": 2003, "MO": 12, "DY": 1, "HR": 12, "LAT": 0.0, "LON": 0.0, "SST": 5.0, "PT": 7, },
+#         {"ID": "AAAAAAAAA", "YR": 2003, "MO": 12, "DY": 2, "HR": 12, "LAT": 0.0, "LON": 0.0, "SST": 5.0, "PT": 7, },
+#         {"ID": "AAAAAAAAA", "YR": 2003, "MO": 12, "DY": 3, "HR": 12, "LAT": 50.0, "LON": 0.0, "SST": 5.0, "PT": 7, },
+#         {"ID": "AAAAAAAAA", "YR": 2003, "MO": 12, "DY": 4, "HR": 12, "LAT": 0.0, "LON": 0.0, "SST": 5.0, "PT": 7, },
+#         {"ID": "AAAAAAAAA", "YR": 2003, "MO": 12, "DY": 5, "HR": 12, "LAT": 0.0, "LON": 0.0, "SST": 5.0, "PT": 7, },
+#         {"ID": "AAAAAAAAA", "YR": 2003, "MO": 12, "DY": 6, "HR": 12, "LAT": 50.0, "LON": 0.0, "SST": 5.0, "PT": 7, },
+#         {"ID": "AAAAAAAAA", "YR": 2003, "MO": 12, "DY": 7, "HR": 12, "LAT": 0.0, "LON": 0.0, "SST": 5.0, "PT": 7, },
+#     ]
+#     # fmt: on
+#     reps = ex.Voyage()
+#     for v in vals10:
+#         rec = IMMA()
+#         for key in v:
+#             rec.data[key] = v[key]
+#         rep = ex.MarineReportQC(rec)
+#         reps.add_report(rep)
+#
+#     return reps
+#
+#
+# @pytest.fixture
+# def reps11a():
+#     # too short for QC
+#     # fmt: off
+#     vals11 = [
+#         {"ID": "AAAAAAAAA", "YR": 2003, "MO": 12, "DY": 1, "HR": 12, "LAT": 0.0, "LON": 0.0, "SST": 5.0, "PT": 7, },
+#         {"ID": "AAAAAAAAA", "YR": 2003, "MO": 12, "DY": 2, "HR": 12, "LAT": 0.0, "LON": 0.0, "SST": 5.0, "PT": 7, },
+#     ]
+#     # fmt: on
+#     reps = ex.Voyage()
+#     for v in vals11:
+#         rec = IMMA()
+#         for key in v:
+#             rec.data[key] = v[key]
+#         rep = ex.MarineReportQC(rec)
+#         reps.add_report(rep)
+#
+#     return reps
+#
+#
+# @pytest.fixture
+# def reps12a():
+#     # assertion error - bad input parameter
+#     # fmt: off
+#     vals12 = [
+#         {"ID": "AAAAAAAAA", "YR": 2003, "MO": 12, "DY": 1, "HR": 12, "LAT": 0.0, "LON": 0.0, "SST": 5.0, "PT": 7, },
+#         {"ID": "AAAAAAAAA", "YR": 2003, "MO": 12, "DY": 2, "HR": 12, "LAT": 0.0, "LON": 0.0, "SST": 5.0, "PT": 7, },
+#         {"ID": "AAAAAAAAA", "YR": 2003, "MO": 12, "DY": 3, "HR": 12, "LAT": 0.0, "LON": 0.0, "SST": 5.0, "PT": 7, },
+#         {"ID": "AAAAAAAAA", "YR": 2003, "MO": 12, "DY": 4, "HR": 12, "LAT": 0.0, "LON": 0.0, "SST": 5.0, "PT": 7, },
+#         {"ID": "AAAAAAAAA", "YR": 2003, "MO": 12, "DY": 5, "HR": 12, "LAT": 0.0, "LON": 0.0, "SST": 5.0, "PT": 7, },
+#         {"ID": "AAAAAAAAA", "YR": 2003, "MO": 12, "DY": 6, "HR": 12, "LAT": 0.0, "LON": 0.0, "SST": 5.0, "PT": 7, },
+#         {"ID": "AAAAAAAAA", "YR": 2003, "MO": 12, "DY": 7, "HR": 12, "LAT": 0.0, "LON": 0.0, "SST": 5.0, "PT": 7, },
+#     ]
+#     # fmt: on
+#     reps = ex.Voyage()
+#     for v in vals12:
+#         rec = IMMA()
+#         for key in v:
+#             rec.data[key] = v[key]
+#         rep = ex.MarineReportQC(rec)
+#         reps.add_report(rep)
+#
+#     return reps
+#
+#
+# @pytest.fixture
+# def reps13a():
+#     # assertion error - missing observation
+#     # fmt: off
+#     vals13 = [
+#         {"ID": "AAAAAAAAA", "YR": 2003, "MO": 12, "DY": 1, "HR": 12, "LAT": 0.0, "LON": 0.0, "SST": 5.0, "PT": 7, },
+#         {"ID": "AAAAAAAAA", "YR": 2003, "MO": 12, "DY": 2, "HR": 12, "LAT": 0.0, "LON": 0.0, "SST": 5.0, "PT": 7, },
+#         {"ID": "AAAAAAAAA", "YR": 2003, "MO": 12, "DY": 3, "HR": 12, "LAT": 0.0, "LON": 0.0, "SST": 5.0, "PT": 7, },
+#         {"ID": "AAAAAAAAA", "YR": 2003, "MO": 12, "DY": 4, "HR": 12, "LAT": 0.0, "LON": 0.0, "SST": 5.0, "PT": 7, },
+#         {"ID": "AAAAAAAAA", "YR": 2003, "MO": 12, "DY": 5, "HR": 12, "LAT": 0.0, "LON": 0.0, "SST": 5.0, "PT": 7, },
+#         {"ID": "AAAAAAAAA", "YR": 2003, "MO": 12, "DY": 6, "HR": 12, "LAT": 0.0, "LON": 0.0, "SST": 5.0, "PT": 7, },
+#         {"ID": "AAAAAAAAA", "YR": 2003, "MO": 12, "DY": 7, "HR": 12, "LAT": 0.0, "LON": 0.0, "SST": 5.0, "PT": 7, },
+#     ]
+#     # fmt: on
+#     reps = ex.Voyage()
+#     for v in vals13:
+#         rec = IMMA()
+#         for key in v:
+#             rec.data[key] = v[key]
+#         rep = ex.MarineReportQC(rec)
+#         reps.add_report(rep)
+#     reps.setvar(1, "LON", None)
+#
+#     return reps
+#
+#
+# @pytest.fixture
+# def reps14a():
+#     # assertion error - times not sorted
+#     # fmt: off
+#     vals14 = [
+#         {"ID": "AAAAAAAAA", "YR": 2003, "MO": 12, "DY": 1, "HR": 12, "LAT": 0.0, "LON": 0.0, "SST": 5.0, "PT": 7, },
+#         {"ID": "AAAAAAAAA", "YR": 2003, "MO": 12, "DY": 2, "HR": 12, "LAT": 0.0, "LON": 0.0, "SST": 5.0, "PT": 7, },
+#         {"ID": "AAAAAAAAA", "YR": 2003, "MO": 12, "DY": 3, "HR": 12, "LAT": 0.0, "LON": 0.0, "SST": 5.0, "PT": 7, },
+#         {"ID": "AAAAAAAAA", "YR": 2003, "MO": 12, "DY": 2, "HR": 12, "LAT": 0.0, "LON": 0.0, "SST": 5.0, "PT": 7, },
+#         {"ID": "AAAAAAAAA", "YR": 2003, "MO": 12, "DY": 5, "HR": 12, "LAT": 0.0, "LON": 0.0, "SST": 5.0, "PT": 7, },
+#         {"ID": "AAAAAAAAA", "YR": 2003, "MO": 12, "DY": 6, "HR": 12, "LAT": 0.0, "LON": 0.0, "SST": 5.0, "PT": 7, },
+#         {"ID": "AAAAAAAAA", "YR": 2003, "MO": 12, "DY": 7, "HR": 12, "LAT": 0.0, "LON": 0.0, "SST": 5.0, "PT": 7, },
+#     ]
+#     # fmt: on
+#     reps = ex.Voyage()
+#
+#     for v in vals14:
+#         rec = IMMA()
+#         for key in v:
+#             rec.data[key] = v[key]
+#         rep = ex.MarineReportQC(rec)
+#         reps.add_report(rep)
+#
+#     return reps
+
+
+def test_stationary_a():
+    lats, lons, dates = speed_check_data(1)
     expected_flags = [0, 0, 0, 0, 0, 0, 0]
-    otqc.speed_check(reps1a.reps, 2.5, 0.5, 1.0)
-    for i in range(0, len(reps1a)):
-        assert reps1a.get_qc(i, "POS", "drf_spd") == expected_flags[i]
+    qc_outcomes = tqc.do_speed_check(lons, lats, dates, 2.5, 0.5, 1.0)
+    for i in range(len(qc_outcomes)):
+        assert qc_outcomes[i] == expected_flags[i]
 
 
-def test_fast_drifter(reps2a):
+def test_fast_drifter():
+    lats, lons, dates = speed_check_data(2)
     expected_flags = [1, 1, 1, 1, 1, 1, 1]
-    otqc.speed_check(reps2a.reps, 2.5, 0.5, 1.0)
-    for i in range(0, len(reps2a)):
-        assert reps2a.get_qc(i, "POS", "drf_spd") == expected_flags[i]
+    qc_outcomes = tqc.do_speed_check(lons, lats, dates, 2.5, 0.5, 1.0)
+    for i in range(len(qc_outcomes)):
+        assert qc_outcomes[i] == expected_flags[i]
 
 
-def test_slow_drifter(reps3a):
+def test_slow_drifter():
+    lats, lons, dates = speed_check_data(3)
     expected_flags = [0, 0, 0, 0, 0, 0, 0]
-    otqc.speed_check(reps3a.reps, 2.5, 0.5, 1.0)
-    for i in range(0, len(reps3a)):
-        assert reps3a.get_qc(i, "POS", "drf_spd") == expected_flags[i]
+    qc_outcomes = tqc.do_speed_check(lons, lats, dates, 2.5, 0.5, 1.0)
+    for i in range(len(qc_outcomes)):
+        assert qc_outcomes[i] == expected_flags[i]
 
 
-def test_slow_fast_slow_drifter(reps4a):
+def test_slow_fast_slow_drifter():
+    lats, lons, dates = speed_check_data(4)
     expected_flags = [0, 0, 1, 1, 1, 0, 0]
-    otqc.speed_check(reps4a.reps, 2.5, 0.5, 1.0)
-    for i in range(0, len(reps4a)):
-        assert reps4a.get_qc(i, "POS", "drf_spd") == expected_flags[i]
+    qc_outcomes = tqc.do_speed_check(lons, lats, dates, 2.5, 0.5, 1.0)
+    for i in range(len(qc_outcomes)):
+        assert qc_outcomes[i] == expected_flags[i]
 
 
 def test_high_freqency_sampling(reps5a):
     expected_flags = [0, 0, 0, 0, 0, 0, 0]
-    otqc.speed_check(reps5a.reps, 2.5, 0.5, 1.0)
+    tqc.do_speed_check(reps5a.reps, 2.5, 0.5, 1.0)
     for i in range(0, len(reps5a)):
         assert reps5a.get_qc(i, "POS", "drf_spd") == expected_flags[i]
 
 
 def test_low_freqency_sampling(reps6a):
     expected_flags = [0, 0, 0, 0, 0, 0, 0]
-    otqc.speed_check(reps6a.reps, 2.5, 0.5, 1.0)
+    tqc.do_speed_check(reps6a.reps, 2.5, 0.5, 1.0)
     for i in range(0, len(reps6a)):
         assert reps6a.get_qc(i, "POS", "drf_spd") == expected_flags[i]
 
 
 def test_slow_fast_slow_mid_freqency_sampling(reps7a):
     expected_flags = [0, 1, 1, 1, 1, 1, 0]
-    otqc.speed_check(reps7a.reps, 2.5, 0.5, 1.0)
+    tqc.do_speed_check(reps7a.reps, 2.5, 0.5, 1.0)
     for i in range(0, len(reps7a)):
         assert reps7a.get_qc(i, "POS", "drf_spd") == expected_flags[i]
 
 
 def test_irregular_sampling(reps8a):
     expected_flags = [1, 1, 0, 0, 0, 1, 1]
-    otqc.speed_check(reps8a.reps, 2.5, 0.5, 1.0)
+    tqc.do_speed_check(reps8a.reps, 2.5, 0.5, 1.0)
     for i in range(0, len(reps8a)):
         assert reps8a.get_qc(i, "POS", "drf_spd") == expected_flags[i]
 
 
 def test_fast_arctic_drifter(reps9a):
     expected_flags = [1, 1, 1, 1, 1, 1, 1]
-    otqc.speed_check(reps9a.reps, 2.5, 0.5, 1.0)
+    tqc.do_speed_check(reps9a.reps, 2.5, 0.5, 1.0)
     for i in range(0, len(reps9a)):
         assert reps9a.get_qc(i, "POS", "drf_spd") == expected_flags[i]
 
 
 def test_stationary_gross_error(reps10a):
     expected_flags = [0, 1, 1, 1, 1, 1, 1]
-    otqc.speed_check(reps10a.reps, 2.5, 0.5, 1.0)
+    tqc.do_speed_check(reps10a.reps, 2.5, 0.5, 1.0)
     for i in range(0, len(reps10a)):
         assert reps10a.get_qc(i, "POS", "drf_spd") == expected_flags[i]
 
@@ -2659,7 +2862,7 @@ def test_too_short_for_qc_a(reps11a):
     old_stdout = sys.stdout
     f = open(os.devnull, "w")
     sys.stdout = f
-    otqc.speed_check(reps11a.reps, 2.5, 0.5, 1.0)
+    tqc.do_speed_check(reps11a.reps, 2.5, 0.5, 1.0)
     sys.stdout = old_stdout
     for i in range(0, len(reps11a)):
         assert reps11a.get_qc(i, "POS", "drf_spd") == expected_flags[i]
@@ -2668,7 +2871,7 @@ def test_too_short_for_qc_a(reps11a):
 def test_error_bad_input_parameter_a(reps12a):
     expected_flags = [9, 9, 9, 9, 9, 9, 9]
     try:
-        otqc.speed_check(reps12a.reps, -2.5, 0.5, 1.0)
+        tqc.do_speed_check(reps12a.reps, -2.5, 0.5, 1.0)
     except AssertionError as error:
         error_return_text = "invalid input parameter: speed_limit must be >= 0"
         assert str(error)[0 : len(error_return_text)] == error_return_text
@@ -2679,7 +2882,7 @@ def test_error_bad_input_parameter_a(reps12a):
 def test_error_missing_observation_a(reps13a):
     expected_flags = [9, 9, 9, 9, 9, 9, 9]
     try:
-        otqc.speed_check(reps13a.reps, 2.5, 0.5, 1.0)
+        tqc.do_speed_check(reps13a.reps, 2.5, 0.5, 1.0)
     except AssertionError as error:
         error_return_text = "problem with report values: Nan(s) found in longitude"
         assert str(error)[0 : len(error_return_text)] == error_return_text
@@ -2690,7 +2893,7 @@ def test_error_missing_observation_a(reps13a):
 def test_error_not_time_sorted_a(reps14a):
     expected_flags = [9, 9, 9, 9, 9, 9, 9]
     try:
-        otqc.speed_check(reps14a.reps, 2.5, 0.5, 1.0)
+        tqc.do_speed_check(reps14a.reps, 2.5, 0.5, 1.0)
     except AssertionError as error:
         error_return_text = "problem with report values: times are not sorted"
         assert str(error)[0 : len(error_return_text)] == error_return_text
@@ -2701,70 +2904,70 @@ def test_error_not_time_sorted_a(reps14a):
 # --- new speed check ---
 def test_new_stationary_a(reps1a, iquam_parameters):
     expected_flags = [0, 0, 0, 0, 0, 0, 0]
-    otqc.new_speed_check(reps1a.reps, iquam_parameters, 2.5, 0.5)
+    otqc.do_new_speed_check(reps1a.reps, iquam_parameters, 2.5, 0.5)
     for i in range(0, len(reps1a)):
         assert reps1a.get_qc(i, "POS", "drf_spd") == expected_flags[i]
 
 
 def test_new_fast_drifter(reps2a, iquam_parameters):
     expected_flags = [1, 1, 1, 1, 1, 1, 1]
-    otqc.new_speed_check(reps2a.reps, iquam_parameters, 2.5, 0.5)
+    otqc.do_new_speed_check(reps2a.reps, iquam_parameters, 2.5, 0.5)
     for i in range(0, len(reps2a)):
         assert reps2a.get_qc(i, "POS", "drf_spd") == expected_flags[i]
 
 
 def test_new_slow_drifter(reps3a, iquam_parameters):
     expected_flags = [0, 0, 0, 0, 0, 0, 0]
-    otqc.new_speed_check(reps3a.reps, iquam_parameters, 2.5, 0.5)
+    otqc.do_new_speed_check(reps3a.reps, iquam_parameters, 2.5, 0.5)
     for i in range(0, len(reps3a)):
         assert reps3a.get_qc(i, "POS", "drf_spd") == expected_flags[i]
 
 
 def test_new_slow_fast_slow_drifter(reps4a, iquam_parameters):
     expected_flags = [0, 0, 1, 1, 1, 0, 0]
-    otqc.new_speed_check(reps4a.reps, iquam_parameters, 2.5, 0.5)
+    otqc.do_new_speed_check(reps4a.reps, iquam_parameters, 2.5, 0.5)
     for i in range(0, len(reps4a)):
         assert reps4a.get_qc(i, "POS", "drf_spd") == expected_flags[i]
 
 
 def test_new_high_freqency_sampling(reps5a, iquam_parameters):
     expected_flags = [0, 0, 0, 0, 0, 0, 0]
-    otqc.new_speed_check(reps5a.reps, iquam_parameters, 2.5, 0.5)
+    otqc.do_new_speed_check(reps5a.reps, iquam_parameters, 2.5, 0.5)
     for i in range(0, len(reps5a)):
         assert reps5a.get_qc(i, "POS", "drf_spd") == expected_flags[i]
 
 
 def test_new_low_freqency_sampling(reps6a, iquam_parameters):
     expected_flags = [1, 1, 1, 1, 1, 1, 1]
-    otqc.new_speed_check(reps6a.reps, iquam_parameters, 2.5, 0.5)
+    otqc.do_new_speed_check(reps6a.reps, iquam_parameters, 2.5, 0.5)
     for i in range(0, len(reps6a)):
         assert reps6a.get_qc(i, "POS", "drf_spd") == expected_flags[i]
 
 
 def test_new_slow_fast_slow_mid_freqency_sampling(reps7a, iquam_parameters):
     expected_flags = [0, 0, 1, 1, 1, 0, 0]
-    otqc.new_speed_check(reps7a.reps, iquam_parameters, 2.5, 0.5)
+    otqc.do_new_speed_check(reps7a.reps, iquam_parameters, 2.5, 0.5)
     for i in range(0, len(reps7a)):
         assert reps7a.get_qc(i, "POS", "drf_spd") == expected_flags[i]
 
 
 def test_new_irregular_sampling(reps8a, iquam_parameters):
     expected_flags = [1, 1, 1, 0, 0, 1, 1]
-    otqc.new_speed_check(reps8a.reps, iquam_parameters, 2.5, 0.5)
+    otqc.do_new_speed_check(reps8a.reps, iquam_parameters, 2.5, 0.5)
     for i in range(0, len(reps8a)):
         assert reps8a.get_qc(i, "POS", "drf_spd") == expected_flags[i]
 
 
 def test_new_fast_arctic_drifter(reps9a, iquam_parameters):
     expected_flags = [1, 1, 1, 1, 1, 1, 1]
-    otqc.new_speed_check(reps9a.reps, iquam_parameters, 2.5, 0.5)
+    otqc.do_new_speed_check(reps9a.reps, iquam_parameters, 2.5, 0.5)
     for i in range(0, len(reps9a)):
         assert reps9a.get_qc(i, "POS", "drf_spd") == expected_flags[i]
 
 
 def test_new_stationary_gross_error(reps10a, iquam_parameters):
     expected_flags = [0, 0, 0, 0, 0, 0, 0]
-    otqc.new_speed_check(reps10a.reps, iquam_parameters, 2.5, 0.5)
+    otqc.do_new_speed_check(reps10a.reps, iquam_parameters, 2.5, 0.5)
     for i in range(0, len(reps10a)):
         assert reps10a.get_qc(i, "POS", "drf_spd") == expected_flags[i]
 
@@ -2774,7 +2977,7 @@ def test_new_too_short_for_qc_a(reps11a, iquam_parameters):
     old_stdout = sys.stdout
     f = open(os.devnull, "w")
     sys.stdout = f
-    otqc.new_speed_check(reps11a.reps, iquam_parameters, 2.5, 0.5)
+    otqc.do_new_speed_check(reps11a.reps, iquam_parameters, 2.5, 0.5)
     sys.stdout = old_stdout
     for i in range(0, len(reps11a)):
         assert reps11a.get_qc(i, "POS", "drf_spd") == expected_flags[i]
@@ -2783,7 +2986,7 @@ def test_new_too_short_for_qc_a(reps11a, iquam_parameters):
 def test_new_error_bad_input_parameter_a(reps12a, iquam_parameters):
     expected_flags = [9, 9, 9, 9, 9, 9, 9]
     try:
-        otqc.new_speed_check(reps12a.reps, iquam_parameters, -2.5, 0.5)
+        otqc.do_new_speed_check(reps12a.reps, iquam_parameters, -2.5, 0.5)
     except AssertionError as error:
         error_return_text = "invalid input parameter: speed_limit must be >= 0"
         assert str(error)[0 : len(error_return_text)] == error_return_text
@@ -2794,7 +2997,7 @@ def test_new_error_bad_input_parameter_a(reps12a, iquam_parameters):
 def test_new_error_missing_observation_a(reps13a, iquam_parameters):
     expected_flags = [9, 9, 9, 9, 9, 9, 9]
     try:
-        otqc.new_speed_check(reps13a.reps, iquam_parameters, 2.5, 0.5)
+        otqc.do_new_speed_check(reps13a.reps, iquam_parameters, 2.5, 0.5)
     except AssertionError as error:
         error_return_text = "problem with report values: Nan(s) found in longitude"
         assert str(error)[0 : len(error_return_text)] == error_return_text
@@ -2805,7 +3008,7 @@ def test_new_error_missing_observation_a(reps13a, iquam_parameters):
 def test_new_error_not_time_sorted_a(reps14a, iquam_parameters):
     expected_flags = [9, 9, 9, 9, 9, 9, 9]
     try:
-        otqc.new_speed_check(reps14a.reps, iquam_parameters, 2.5, 0.5)
+        otqc.do_new_speed_check(reps14a.reps, iquam_parameters, 2.5, 0.5)
     except AssertionError as error:
         error_return_text = "problem with report values: times are not sorted"
         assert str(error)[0 : len(error_return_text)] == error_return_text
@@ -3364,7 +3567,7 @@ def test_all_daytime():
         "drf_tail1": [0, 0, 0, 0, 0, 0, 0, 0, 0],
         "drf_tail2": [0, 0, 0, 0, 0, 0, 0, 0, 0],
     }
-    otqc.sst_tail_check(reps.reps, 3, 3.0, 1, 3.0, 1, 0.29, 1.0, 0.3)
+    otqc.do_sst_tail_check(reps.reps, 3, 3.0, 1, 3.0, 1, 0.29, 1.0, 0.3)
     for i in range(0, len(reps)):
         assert reps.get_qc(i, "SST", "drf_tail1") == expected_flags["drf_tail1"][i]
         assert reps.get_qc(i, "SST", "drf_tail2") == expected_flags["drf_tail2"][i]
@@ -3377,7 +3580,7 @@ def test_all_land_masked():
         "drf_tail1": [0, 0, 0, 0, 0, 0, 0, 0, 0],
         "drf_tail2": [0, 0, 0, 0, 0, 0, 0, 0, 0],
     }
-    otqc.sst_tail_check(reps.reps, 3, 3.0, 1, 3.0, 1, 0.29, 1.0, 0.3)
+    otqc.do_sst_tail_check(reps.reps, 3, 3.0, 1, 3.0, 1, 0.29, 1.0, 0.3)
     for i in range(0, len(reps)):
         assert reps.get_qc(i, "SST", "drf_tail1") == expected_flags["drf_tail1"][i]
         assert reps.get_qc(i, "SST", "drf_tail2") == expected_flags["drf_tail2"][i]
@@ -3390,7 +3593,7 @@ def test_all_ice():
         "drf_tail1": [0, 0, 0, 0, 0, 0, 0, 0, 0],
         "drf_tail2": [0, 0, 0, 0, 0, 0, 0, 0, 0],
     }
-    otqc.sst_tail_check(reps.reps, 3, 3.0, 1, 3.0, 1, 0.29, 1.0, 0.3)
+    otqc.do_sst_tail_check(reps.reps, 3, 3.0, 1, 3.0, 1, 0.29, 1.0, 0.3)
     for i in range(0, len(reps)):
         assert reps.get_qc(i, "SST", "drf_tail1") == expected_flags["drf_tail1"][i]
         assert reps.get_qc(i, "SST", "drf_tail2") == expected_flags["drf_tail2"][i]
@@ -3402,7 +3605,7 @@ def test_one_usable_value():
         "drf_tail1": [0, 0, 0, 0, 0, 0, 0, 0, 0],
         "drf_tail2": [0, 0, 0, 0, 0, 0, 0, 0, 0],
     }
-    otqc.sst_tail_check(reps.reps, 3, 3.0, 2, 3.0, 1, 0.29, 1.0, 0.3)
+    otqc.do_sst_tail_check(reps.reps, 3, 3.0, 2, 3.0, 1, 0.29, 1.0, 0.3)
     for i in range(0, len(reps)):
         assert reps.get_qc(i, "SST", "drf_tail1") == expected_flags["drf_tail1"][i]
         assert reps.get_qc(i, "SST", "drf_tail2") == expected_flags["drf_tail2"][i]
@@ -3414,7 +3617,7 @@ def test_start_tail_bias():
         "drf_tail1": [1, 1, 1, 0, 0, 0, 0, 0, 0],
         "drf_tail2": [0, 0, 0, 0, 0, 0, 0, 0, 0],
     }
-    otqc.sst_tail_check(reps.reps, 3, 3.0, 1, 3.0, 1, 0.29, 1.0, 0.3)
+    otqc.do_sst_tail_check(reps.reps, 3, 3.0, 1, 3.0, 1, 0.29, 1.0, 0.3)
     for i in range(0, len(reps)):
         assert reps.get_qc(i, "SST", "drf_tail1") == expected_flags["drf_tail1"][i]
         assert reps.get_qc(i, "SST", "drf_tail2") == expected_flags["drf_tail2"][i]
@@ -3426,7 +3629,7 @@ def test_start_tail_negative_bias():
         "drf_tail1": [1, 1, 1, 0, 0, 0, 0, 0, 0],
         "drf_tail2": [0, 0, 0, 0, 0, 0, 0, 0, 0],
     }
-    otqc.sst_tail_check(reps.reps, 3, 3.0, 1, 3.0, 1, 0.29, 1.0, 0.3)
+    otqc.do_sst_tail_check(reps.reps, 3, 3.0, 1, 3.0, 1, 0.29, 1.0, 0.3)
     for i in range(0, len(reps)):
         assert reps.get_qc(i, "SST", "drf_tail1") == expected_flags["drf_tail1"][i]
         assert reps.get_qc(i, "SST", "drf_tail2") == expected_flags["drf_tail2"][i]
@@ -3438,7 +3641,7 @@ def test_start_tail_bias_obs_missing():
         "drf_tail1": [1, 1, 1, 1, 1, 0, 0, 0, 0],
         "drf_tail2": [0, 0, 0, 0, 0, 0, 0, 0, 0],
     }
-    otqc.sst_tail_check(reps.reps, 3, 3.0, 1, 3.0, 1, 0.29, 1.0, 0.3)
+    otqc.do_sst_tail_check(reps.reps, 3, 3.0, 1, 3.0, 1, 0.29, 1.0, 0.3)
     for i in range(0, len(reps)):
         assert reps.get_qc(i, "SST", "drf_tail1") == expected_flags["drf_tail1"][i]
         assert reps.get_qc(i, "SST", "drf_tail2") == expected_flags["drf_tail2"][i]
@@ -3450,7 +3653,7 @@ def test_end_tail_bias():
         "drf_tail1": [0, 0, 0, 0, 0, 0, 0, 0, 0],
         "drf_tail2": [0, 0, 0, 0, 0, 0, 1, 1, 1],
     }
-    otqc.sst_tail_check(reps.reps, 3, 3.0, 1, 3.0, 1, 0.29, 1.0, 0.3)
+    otqc.do_sst_tail_check(reps.reps, 3, 3.0, 1, 3.0, 1, 0.29, 1.0, 0.3)
     for i in range(0, len(reps)):
         assert reps.get_qc(i, "SST", "drf_tail1") == expected_flags["drf_tail1"][i]
         assert reps.get_qc(i, "SST", "drf_tail2") == expected_flags["drf_tail2"][i]
@@ -3462,7 +3665,7 @@ def test_end_tail_bias_obs_missing():
         "drf_tail1": [0, 0, 0, 0, 0, 0, 0, 0, 0],
         "drf_tail2": [0, 0, 0, 0, 1, 1, 1, 1, 1],
     }
-    otqc.sst_tail_check(reps.reps, 3, 3.0, 1, 3.0, 1, 0.29, 1.0, 0.3)
+    otqc.do_sst_tail_check(reps.reps, 3, 3.0, 1, 3.0, 1, 0.29, 1.0, 0.3)
     for i in range(0, len(reps)):
         assert reps.get_qc(i, "SST", "drf_tail1") == expected_flags["drf_tail1"][i]
         assert reps.get_qc(i, "SST", "drf_tail2") == expected_flags["drf_tail2"][i]
@@ -3474,7 +3677,7 @@ def test_start_tail_noisy():
         "drf_tail1": [1, 1, 1, 0, 0, 0, 0, 0, 0],
         "drf_tail2": [0, 0, 0, 0, 0, 0, 0, 0, 0],
     }
-    otqc.sst_tail_check(reps.reps, 3, 3.0, 1, 3.0, 1, 0.29, 1.0, 0.3)
+    otqc.do_sst_tail_check(reps.reps, 3, 3.0, 1, 3.0, 1, 0.29, 1.0, 0.3)
     for i in range(0, len(reps)):
         assert reps.get_qc(i, "SST", "drf_tail1") == expected_flags["drf_tail1"][i]
         assert reps.get_qc(i, "SST", "drf_tail2") == expected_flags["drf_tail2"][i]
@@ -3486,7 +3689,7 @@ def test_end_tail_noisy():
         "drf_tail1": [0, 0, 0, 0, 0, 0, 0, 0, 0],
         "drf_tail2": [0, 0, 0, 0, 0, 0, 1, 1, 1],
     }
-    otqc.sst_tail_check(reps.reps, 3, 3.0, 1, 3.0, 1, 0.29, 1.0, 0.3)
+    otqc.do_sst_tail_check(reps.reps, 3, 3.0, 1, 3.0, 1, 0.29, 1.0, 0.3)
     for i in range(0, len(reps)):
         assert reps.get_qc(i, "SST", "drf_tail1") == expected_flags["drf_tail1"][i]
         assert reps.get_qc(i, "SST", "drf_tail2") == expected_flags["drf_tail2"][i]
@@ -3498,7 +3701,7 @@ def test_two_tails():
         "drf_tail1": [1, 1, 1, 0, 0, 0, 0, 0, 0],
         "drf_tail2": [0, 0, 0, 0, 0, 0, 1, 1, 1],
     }
-    otqc.sst_tail_check(reps.reps, 3, 3.0, 1, 3.0, 1, 0.29, 1.0, 0.3)
+    otqc.do_sst_tail_check(reps.reps, 3, 3.0, 1, 3.0, 1, 0.29, 1.0, 0.3)
     for i in range(0, len(reps)):
         assert reps.get_qc(i, "SST", "drf_tail1") == expected_flags["drf_tail1"][i]
         assert reps.get_qc(i, "SST", "drf_tail2") == expected_flags["drf_tail2"][i]
@@ -3510,7 +3713,7 @@ def test_all_biased():
         "drf_tail1": [0, 0, 0, 0, 0, 0, 0, 0, 0],
         "drf_tail2": [0, 0, 0, 0, 0, 0, 0, 0, 0],
     }
-    otqc.sst_tail_check(reps.reps, 3, 3.0, 1, 3.0, 1, 0.29, 1.0, 0.3)
+    otqc.do_sst_tail_check(reps.reps, 3, 3.0, 1, 3.0, 1, 0.29, 1.0, 0.3)
     for i in range(0, len(reps)):
         assert reps.get_qc(i, "SST", "drf_tail1") == expected_flags["drf_tail1"][i]
         assert reps.get_qc(i, "SST", "drf_tail2") == expected_flags["drf_tail2"][i]
@@ -3522,7 +3725,7 @@ def test_all_noisy():
         "drf_tail1": [0, 0, 0, 0, 0, 0, 0, 0, 0],
         "drf_tail2": [0, 0, 0, 0, 0, 0, 0, 0, 0],
     }
-    otqc.sst_tail_check(reps.reps, 3, 3.0, 1, 3.0, 1, 0.29, 1.0, 0.3)
+    otqc.do_sst_tail_check(reps.reps, 3, 3.0, 1, 3.0, 1, 0.29, 1.0, 0.3)
     for i in range(0, len(reps)):
         assert reps.get_qc(i, "SST", "drf_tail1") == expected_flags["drf_tail1"][i]
         assert reps.get_qc(i, "SST", "drf_tail2") == expected_flags["drf_tail2"][i]
@@ -3534,7 +3737,7 @@ def test_start_tail_bias_with_bgvar():
         "drf_tail1": [1, 1, 0, 0, 0, 0, 0, 0, 0],
         "drf_tail2": [0, 0, 0, 0, 0, 0, 0, 0, 0],
     }
-    otqc.sst_tail_check(reps.reps, 3, 3.0, 1, 3.0, 1, 0.29, 1.0, 0.3)
+    otqc.do_sst_tail_check(reps.reps, 3, 3.0, 1, 3.0, 1, 0.29, 1.0, 0.3)
     for i in range(0, len(reps)):
         assert reps.get_qc(i, "SST", "drf_tail1") == expected_flags["drf_tail1"][i]
         assert reps.get_qc(i, "SST", "drf_tail2") == expected_flags["drf_tail2"][i]
@@ -3547,7 +3750,7 @@ def test_all_biased_with_bgvar():
         "drf_tail1": [1, 1, 1, 0, 0, 0, 0, 0, 0],
         "drf_tail2": [0, 0, 0, 0, 0, 0, 1, 1, 1],
     }
-    otqc.sst_tail_check(reps.reps, 3, 3.0, 1, 3.0, 1, 0.29, 1.0, 0.3)
+    otqc.do_sst_tail_check(reps.reps, 3, 3.0, 1, 3.0, 1, 0.29, 1.0, 0.3)
     for i in range(0, len(reps)):
         assert reps.get_qc(i, "SST", "drf_tail1") == expected_flags["drf_tail1"][i]
         assert reps.get_qc(i, "SST", "drf_tail2") == expected_flags["drf_tail2"][i]
@@ -3559,7 +3762,7 @@ def test_short_start_tail():
         "drf_tail1": [1, 0, 0, 0, 0, 0, 0, 0, 0],
         "drf_tail2": [0, 0, 0, 0, 0, 0, 0, 0, 0],
     }
-    otqc.sst_tail_check(reps.reps, 7, 3.0, 3, 2.0, 2, 0.29, 1.0, 0.3)
+    otqc.do_sst_tail_check(reps.reps, 7, 3.0, 3, 2.0, 2, 0.29, 1.0, 0.3)
     for i in range(0, len(reps)):
         assert reps.get_qc(i, "SST", "drf_tail1") == expected_flags["drf_tail1"][i]
         assert reps.get_qc(i, "SST", "drf_tail2") == expected_flags["drf_tail2"][i]
@@ -3571,7 +3774,7 @@ def test_short_end_tail():
         "drf_tail1": [0, 0, 0, 0, 0, 0, 0, 0, 0],
         "drf_tail2": [0, 0, 0, 0, 0, 0, 0, 0, 1],
     }
-    otqc.sst_tail_check(reps.reps, 7, 3.0, 3, 2.0, 2, 0.29, 1.0, 0.3)
+    otqc.do_sst_tail_check(reps.reps, 7, 3.0, 3, 2.0, 2, 0.29, 1.0, 0.3)
     for i in range(0, len(reps)):
         assert reps.get_qc(i, "SST", "drf_tail1") == expected_flags["drf_tail1"][i]
         assert reps.get_qc(i, "SST", "drf_tail2") == expected_flags["drf_tail2"][i]
@@ -3583,7 +3786,7 @@ def test_short_two_tails():
         "drf_tail1": [1, 0, 0, 0, 0, 0, 0, 0, 0],
         "drf_tail2": [0, 0, 0, 0, 0, 0, 0, 0, 1],
     }
-    otqc.sst_tail_check(reps.reps, 7, 3.0, 3, 2.0, 2, 0.29, 1.0, 0.3)
+    otqc.do_sst_tail_check(reps.reps, 7, 3.0, 3, 2.0, 2, 0.29, 1.0, 0.3)
     for i in range(0, len(reps)):
         assert reps.get_qc(i, "SST", "drf_tail1") == expected_flags["drf_tail1"][i]
         assert reps.get_qc(i, "SST", "drf_tail2") == expected_flags["drf_tail2"][i]
@@ -3595,7 +3798,7 @@ def test_short_all_fail():
         "drf_tail1": [0, 0, 0, 0, 0, 0, 0, 0, 0],
         "drf_tail2": [0, 0, 0, 0, 0, 0, 0, 0, 0],
     }
-    otqc.sst_tail_check(reps.reps, 7, 9.0, 3, 2.0, 2, 0.29, 1.0, 0.3)
+    otqc.do_sst_tail_check(reps.reps, 7, 9.0, 3, 2.0, 2, 0.29, 1.0, 0.3)
     for i in range(0, len(reps)):
         assert reps.get_qc(i, "SST", "drf_tail1") == expected_flags["drf_tail1"][i]
         assert reps.get_qc(i, "SST", "drf_tail2") == expected_flags["drf_tail2"][i]
@@ -3608,7 +3811,7 @@ def test_short_start_tail_with_bgvar():
         "drf_tail1": [0, 0, 0, 0, 0, 0, 0, 0, 0],
         "drf_tail2": [0, 0, 0, 0, 0, 0, 0, 0, 0],
     }
-    otqc.sst_tail_check(reps.reps, 7, 3.0, 3, 2.0, 2, 0.29, 1.0, 0.3)
+    otqc.do_sst_tail_check(reps.reps, 7, 3.0, 3, 2.0, 2, 0.29, 1.0, 0.3)
     for i in range(0, len(reps)):
         assert reps.get_qc(i, "SST", "drf_tail1") == expected_flags["drf_tail1"][i]
         assert reps.get_qc(i, "SST", "drf_tail2") == expected_flags["drf_tail2"][i]
@@ -3621,7 +3824,7 @@ def test_short_all_fail_with_bgvar():
         "drf_tail1": [1, 1, 0, 0, 0, 0, 0, 0, 0],
         "drf_tail2": [0, 0, 0, 0, 0, 0, 0, 1, 1],
     }
-    otqc.sst_tail_check(reps.reps, 7, 9.0, 3, 2.0, 2, 0.29, 1.0, 0.3)
+    otqc.do_sst_tail_check(reps.reps, 7, 9.0, 3, 2.0, 2, 0.29, 1.0, 0.3)
     for i in range(0, len(reps)):
         assert reps.get_qc(i, "SST", "drf_tail1") == expected_flags["drf_tail1"][i]
         assert reps.get_qc(i, "SST", "drf_tail2") == expected_flags["drf_tail2"][i]
@@ -3633,7 +3836,7 @@ def test_long_and_short_start_tail():
         "drf_tail1": [1, 1, 1, 1, 0, 0, 0, 0, 0],
         "drf_tail2": [0, 0, 0, 0, 0, 0, 0, 0, 0],
     }
-    otqc.sst_tail_check(reps.reps, 3, 3.0, 1, 1.0, 1, 0.29, 1.0, 0.3)
+    otqc.do_sst_tail_check(reps.reps, 3, 3.0, 1, 1.0, 1, 0.29, 1.0, 0.3)
     for i in range(0, len(reps)):
         assert reps.get_qc(i, "SST", "drf_tail1") == expected_flags["drf_tail1"][i]
         assert reps.get_qc(i, "SST", "drf_tail2") == expected_flags["drf_tail2"][i]
@@ -3645,7 +3848,7 @@ def test_long_and_short_end_tail():
         "drf_tail1": [0, 0, 0, 0, 0, 0, 0, 0, 0],
         "drf_tail2": [0, 0, 0, 0, 0, 1, 1, 1, 1],
     }
-    otqc.sst_tail_check(reps.reps, 3, 3.0, 1, 1.0, 1, 0.29, 1.0, 0.3)
+    otqc.do_sst_tail_check(reps.reps, 3, 3.0, 1, 1.0, 1, 0.29, 1.0, 0.3)
     for i in range(0, len(reps)):
         assert reps.get_qc(i, "SST", "drf_tail1") == expected_flags["drf_tail1"][i]
         assert reps.get_qc(i, "SST", "drf_tail2") == expected_flags["drf_tail2"][i]
@@ -3657,7 +3860,7 @@ def test_long_and_short_two_tails():
         "drf_tail1": [1, 1, 1, 1, 0, 0, 0, 0, 0],
         "drf_tail2": [0, 0, 0, 0, 0, 1, 1, 1, 1],
     }
-    otqc.sst_tail_check(reps.reps, 3, 3.0, 1, 1.0, 1, 0.29, 1.0, 0.3)
+    otqc.do_sst_tail_check(reps.reps, 3, 3.0, 1, 1.0, 1, 0.29, 1.0, 0.3)
     for i in range(0, len(reps)):
         assert reps.get_qc(i, "SST", "drf_tail1") == expected_flags["drf_tail1"][i]
         assert reps.get_qc(i, "SST", "drf_tail2") == expected_flags["drf_tail2"][i]
@@ -3669,7 +3872,7 @@ def test_one_long_and_one_short_tail():
         "drf_tail1": [1, 1, 0, 0, 0, 0, 0, 0, 0],
         "drf_tail2": [0, 0, 0, 0, 0, 0, 0, 0, 1],
     }
-    otqc.sst_tail_check(reps.reps, 3, 3.0, 1, 1.0, 1, 0.29, 1.0, 0.3)
+    otqc.do_sst_tail_check(reps.reps, 3, 3.0, 1, 1.0, 1, 0.29, 1.0, 0.3)
     for i in range(0, len(reps)):
         assert reps.get_qc(i, "SST", "drf_tail1") == expected_flags["drf_tail1"][i]
         assert reps.get_qc(i, "SST", "drf_tail2") == expected_flags["drf_tail2"][i]
@@ -3681,7 +3884,7 @@ def test_too_short_for_short_tail():
         "drf_tail1": [1, 1, 1, 1, 1, 1, 1, 0, 0],
         "drf_tail2": [0, 0, 0, 0, 0, 0, 0, 0, 0],
     }
-    otqc.sst_tail_check(reps.reps, 3, 3.0, 3, 0.5, 1, 0.29, 1.0, 0.3)
+    otqc.do_sst_tail_check(reps.reps, 3, 3.0, 3, 0.5, 1, 0.29, 1.0, 0.3)
     for i in range(0, len(reps)):
         assert reps.get_qc(i, "SST", "drf_tail1") == expected_flags["drf_tail1"][i]
         assert reps.get_qc(i, "SST", "drf_tail2") == expected_flags["drf_tail2"][i]
@@ -3693,7 +3896,7 @@ def test_long_and_short_all_fail():
         "drf_tail1": [0, 0, 0, 0, 0, 0, 0, 0, 0],
         "drf_tail2": [0, 0, 0, 0, 0, 0, 0, 0, 0],
     }
-    otqc.sst_tail_check(reps.reps, 3, 3.0, 1, 0.25, 1, 0.29, 1.0, 0.3)
+    otqc.do_sst_tail_check(reps.reps, 3, 3.0, 1, 0.25, 1, 0.29, 1.0, 0.3)
     for i in range(0, len(reps)):
         assert reps.get_qc(i, "SST", "drf_tail1") == expected_flags["drf_tail1"][i]
         assert reps.get_qc(i, "SST", "drf_tail2") == expected_flags["drf_tail2"][i]
@@ -3705,7 +3908,7 @@ def test_long_and_short_start_tail_with_bgvar():
         "drf_tail1": [1, 1, 1, 0, 0, 0, 0, 0, 0],
         "drf_tail2": [0, 0, 0, 0, 0, 0, 0, 0, 0],
     }
-    otqc.sst_tail_check(reps.reps, 3, 3.0, 1, 1.0, 1, 0.29, 1.0, 0.3)
+    otqc.do_sst_tail_check(reps.reps, 3, 3.0, 1, 1.0, 1, 0.29, 1.0, 0.3)
     for i in range(0, len(reps)):
         assert reps.get_qc(i, "SST", "drf_tail1") == expected_flags["drf_tail1"][i]
         assert reps.get_qc(i, "SST", "drf_tail2") == expected_flags["drf_tail2"][i]
@@ -3718,7 +3921,7 @@ def test_long_and_short_all_fail_with_bgvar():
         "drf_tail1": [1, 1, 1, 1, 1, 1, 1, 1, 0],
         "drf_tail2": [0, 0, 0, 0, 0, 0, 0, 0, 0],
     }
-    otqc.sst_tail_check(reps.reps, 3, 3.0, 1, 0.25, 1, 0.29, 1.0, 0.3)
+    otqc.do_sst_tail_check(reps.reps, 3, 3.0, 1, 0.25, 1, 0.29, 1.0, 0.3)
     for i in range(0, len(reps)):
         assert reps.get_qc(i, "SST", "drf_tail1") == expected_flags["drf_tail1"][i]
         assert reps.get_qc(i, "SST", "drf_tail2") == expected_flags["drf_tail2"][i]
@@ -3730,7 +3933,7 @@ def test_good_data():
         "drf_tail1": [0, 0, 0, 0, 0, 0, 0, 0, 0],
         "drf_tail2": [0, 0, 0, 0, 0, 0, 0, 0, 0],
     }
-    otqc.sst_tail_check(reps.reps, 3, 3.0, 1, 3.0, 1, 0.29, 1.0, 0.3)
+    otqc.do_sst_tail_check(reps.reps, 3, 3.0, 1, 3.0, 1, 0.29, 1.0, 0.3)
     for i in range(0, len(reps)):
         assert reps.get_qc(i, "SST", "drf_tail1") == expected_flags["drf_tail1"][i]
         assert reps.get_qc(i, "SST", "drf_tail2") == expected_flags["drf_tail2"][i]
@@ -3742,7 +3945,7 @@ def test_long_and_short_start_tail_big_bgvar():
         "drf_tail1": [0, 0, 0, 0, 0, 0, 0, 0, 0],
         "drf_tail2": [0, 0, 0, 0, 0, 0, 0, 0, 0],
     }
-    otqc.sst_tail_check(reps.reps, 3, 3.0, 1, 1.0, 1, 0.29, 1.0, 0.3)
+    otqc.do_sst_tail_check(reps.reps, 3, 3.0, 1, 1.0, 1, 0.29, 1.0, 0.3)
     for i in range(0, len(reps)):
         assert reps.get_qc(i, "SST", "drf_tail1") == expected_flags["drf_tail1"][i]
         assert reps.get_qc(i, "SST", "drf_tail2") == expected_flags["drf_tail2"][i]
@@ -3754,7 +3957,7 @@ def test_start_tail_noisy_big_bgvar():
         "drf_tail1": [0, 0, 0, 0, 0, 0, 0, 0, 0],
         "drf_tail2": [0, 0, 0, 0, 0, 0, 0, 0, 0],
     }
-    otqc.sst_tail_check(reps.reps, 3, 3.0, 1, 3.0, 1, 0.29, 1.0, 2.0)
+    otqc.do_sst_tail_check(reps.reps, 3, 3.0, 1, 3.0, 1, 0.29, 1.0, 2.0)
     for i in range(0, len(reps)):
         assert reps.get_qc(i, "SST", "drf_tail1") == expected_flags["drf_tail1"][i]
         assert reps.get_qc(i, "SST", "drf_tail2") == expected_flags["drf_tail2"][i]
@@ -3767,7 +3970,7 @@ def test_error_bad_input_parameter_tail_check():
         "drf_tail2": [9, 9, 9, 9, 9, 9, 9, 9, 9],
     }
     try:
-        otqc.sst_tail_check(reps.reps, 0, 3.0, 1, 3.0, 1, 0.29, 1.0, 0.3)
+        otqc.do_sst_tail_check(reps.reps, 0, 3.0, 1, 3.0, 1, 0.29, 1.0, 0.3)
     except AssertionError as error:
         error_return_text = "invalid input parameter: long_win_len must be >= 1"
         assert str(error)[0 : len(error_return_text)] == error_return_text
@@ -3783,7 +3986,7 @@ def test_error_missing_matched_value():
         "drf_tail2": [9, 9, 9, 9, 9, 9, 9, 9, 9],
     }
     try:
-        otqc.sst_tail_check(reps.reps, 3, 3.0, 1, 3.0, 1, 0.29, 1.0, 0.3)
+        otqc.do_sst_tail_check(reps.reps, 3, 3.0, 1, 3.0, 1, 0.29, 1.0, 0.3)
     except AssertionError as error:
         error_return_text = (
             "unknown extended variable name OSTIA"
@@ -3801,7 +4004,7 @@ def test_error_invalid_ice_value():
         "drf_tail2": [9, 9, 9, 9, 9, 9, 9, 9, 9],
     }
     try:
-        otqc.sst_tail_check(reps.reps, 3, 3.0, 1, 3.0, 1, 0.29, 1.0, 0.3)
+        otqc.do_sst_tail_check(reps.reps, 3, 3.0, 1, 3.0, 1, 0.29, 1.0, 0.3)
     except AssertionError as error:
         error_return_text = "matched ice proportion is invalid"
         assert str(error)[0 : len(error_return_text)] == error_return_text
@@ -3818,7 +4021,7 @@ def test_error_missing_ob_value():
     }
 
     with pytest.raises(ValueError):
-        otqc.sst_tail_check(reps.reps, 3, 3.0, 1, 3.0, 1, 0.29, 1.0, 0.3)
+        otqc.do_sst_tail_check(reps.reps, 3, 3.0, 1, 3.0, 1, 0.29, 1.0, 0.3)
     # try:
     #     otqc.og_sst_tail_check(reps.reps, 3, 3.0, 1, 3.0, 1, 0.29, 1.0, 0.3)
     # except ValueError as error:
@@ -3838,7 +4041,7 @@ def test_error_not_time_sorted_tail_check():
         "drf_tail2": [9, 9, 9, 9, 9, 9, 9, 9, 9],
     }
     try:
-        otqc.sst_tail_check(reps.reps, 3, 3.0, 1, 3.0, 1, 0.29, 1.0, 0.3)
+        otqc.do_sst_tail_check(reps.reps, 3, 3.0, 1, 3.0, 1, 0.29, 1.0, 0.3)
     except AssertionError as error:
         error_return_text = "problem with report value: times are not sorted"
         assert str(error)[0 : len(error_return_text)] == error_return_text
@@ -3855,7 +4058,7 @@ def test_error_invalid_background():
         "drf_tail2": [9, 9, 9, 9, 9, 9, 9, 9, 9],
     }
     try:
-        otqc.sst_tail_check(reps.reps, 3, 3.0, 1, 3.0, 1, 0.29, 1.0, 0.3)
+        otqc.do_sst_tail_check(reps.reps, 3, 3.0, 1, 3.0, 1, 0.29, 1.0, 0.3)
     except AssertionError as error:
         error_return_text = "matched background sst is invalid"
         assert str(error)[0 : len(error_return_text)] == error_return_text
@@ -3871,7 +4074,7 @@ def test_error_invalid_background_error_variance():
         "drf_tail2": [9, 9, 9, 9, 9, 9, 9, 9, 9],
     }
     try:
-        otqc.sst_tail_check(reps.reps, 3, 3.0, 1, 3.0, 1, 0.29, 1.0, 0.3)
+        otqc.do_sst_tail_check(reps.reps, 3, 3.0, 1, 3.0, 1, 0.29, 1.0, 0.3)
     except AssertionError as error:
         error_return_text = "matched background error variance is invalid"
         assert str(error)[0 : len(error_return_text)] == error_return_text
@@ -4237,7 +4440,7 @@ def test_all_daytime_bnc():
         "drf_noise": [0, 0, 0, 0, 0, 0, 0, 0, 0],
         "drf_short": [0, 0, 0, 0, 0, 0, 0, 0, 0],
     }
-    otqc.sst_biased_noisy_check(reps.reps, 9, 1.10, 1.0, 0.29, 3.0, 2, 0.3)
+    otqc.do_sst_biased_noisy_check(reps.reps, 9, 1.10, 1.0, 0.29, 3.0, 2, 0.3)
     for i in range(0, len(reps)):
         assert reps.get_qc(i, "SST", "drf_bias") == expected_flags["drf_bias"][i]
         assert reps.get_qc(i, "SST", "drf_noise") == expected_flags["drf_noise"][i]
@@ -4251,7 +4454,7 @@ def test_all_land_masked_bnc():
         "drf_noise": [0, 0, 0, 0, 0, 0, 0, 0, 0],
         "drf_short": [0, 0, 0, 0, 0, 0, 0, 0, 0],
     }
-    otqc.sst_biased_noisy_check(reps.reps, 9, 1.10, 1.0, 0.29, 3.0, 2, 0.3)
+    otqc.do_sst_biased_noisy_check(reps.reps, 9, 1.10, 1.0, 0.29, 3.0, 2, 0.3)
     for i in range(0, len(reps)):
         assert reps.get_qc(i, "SST", "drf_bias") == expected_flags["drf_bias"][i]
         assert reps.get_qc(i, "SST", "drf_noise") == expected_flags["drf_noise"][i]
@@ -4265,7 +4468,7 @@ def test_all_ice_bnc():
         "drf_noise": [0, 0, 0, 0, 0, 0, 0, 0, 0],
         "drf_short": [0, 0, 0, 0, 0, 0, 0, 0, 0],
     }
-    otqc.sst_biased_noisy_check(reps.reps, 9, 1.10, 1.0, 0.29, 3.0, 2, 0.3)
+    otqc.do_sst_biased_noisy_check(reps.reps, 9, 1.10, 1.0, 0.29, 3.0, 2, 0.3)
     for i in range(0, len(reps)):
         assert reps.get_qc(i, "SST", "drf_bias") == expected_flags["drf_bias"][i]
         assert reps.get_qc(i, "SST", "drf_noise") == expected_flags["drf_noise"][i]
@@ -4279,7 +4482,7 @@ def test_all_bgvar_exceeds_limit_bnc():
         "drf_noise": [0, 0, 0, 0, 0, 0, 0, 0, 0],
         "drf_short": [0, 0, 0, 0, 0, 0, 0, 0, 0],
     }
-    otqc.sst_biased_noisy_check(reps.reps, 9, 1.10, 1.0, 0.29, 3.0, 2, 0.3)
+    otqc.do_sst_biased_noisy_check(reps.reps, 9, 1.10, 1.0, 0.29, 3.0, 2, 0.3)
     for i in range(0, len(reps)):
         assert reps.get_qc(i, "SST", "drf_bias") == expected_flags["drf_bias"][i]
         assert reps.get_qc(i, "SST", "drf_noise") == expected_flags["drf_noise"][i]
@@ -4293,7 +4496,7 @@ def test_biased_warm_bnc():
         "drf_noise": [0, 0, 0, 0, 0, 0, 0, 0, 0],
         "drf_short": [0, 0, 0, 0, 0, 0, 0, 0, 0],
     }
-    otqc.sst_biased_noisy_check(reps.reps, 9, 1.10, 1.0, 0.29, 3.0, 2, 0.3)
+    otqc.do_sst_biased_noisy_check(reps.reps, 9, 1.10, 1.0, 0.29, 3.0, 2, 0.3)
     for i in range(0, len(reps)):
         assert reps.get_qc(i, "SST", "drf_bias") == expected_flags["drf_bias"][i]
         assert reps.get_qc(i, "SST", "drf_noise") == expected_flags["drf_noise"][i]
@@ -4307,7 +4510,7 @@ def test_biased_cool_bnc():
         "drf_noise": [0, 0, 0, 0, 0, 0, 0, 0, 0],
         "drf_short": [0, 0, 0, 0, 0, 0, 0, 0, 0],
     }
-    otqc.sst_biased_noisy_check(reps.reps, 9, 1.10, 1.0, 0.29, 3.0, 2, 0.3)
+    otqc.do_sst_biased_noisy_check(reps.reps, 9, 1.10, 1.0, 0.29, 3.0, 2, 0.3)
     for i in range(0, len(reps)):
         assert reps.get_qc(i, "SST", "drf_bias") == expected_flags["drf_bias"][i]
         assert reps.get_qc(i, "SST", "drf_noise") == expected_flags["drf_noise"][i]
@@ -4321,7 +4524,7 @@ def test_noisy_bnc():
         "drf_noise": [1, 1, 1, 1, 1, 1, 1, 1, 1],
         "drf_short": [0, 0, 0, 0, 0, 0, 0, 0, 0],
     }
-    otqc.sst_biased_noisy_check(reps.reps, 9, 1.10, 1.0, 0.29, 3.0, 2, 0.3)
+    otqc.do_sst_biased_noisy_check(reps.reps, 9, 1.10, 1.0, 0.29, 3.0, 2, 0.3)
     for i in range(0, len(reps)):
         assert reps.get_qc(i, "SST", "drf_bias") == expected_flags["drf_bias"][i]
         assert reps.get_qc(i, "SST", "drf_noise") == expected_flags["drf_noise"][i]
@@ -4335,7 +4538,7 @@ def test_biased_and_noisy_bnc():
         "drf_noise": [1, 1, 1, 1, 1, 1, 1, 1, 1],
         "drf_short": [0, 0, 0, 0, 0, 0, 0, 0, 0],
     }
-    otqc.sst_biased_noisy_check(reps.reps, 9, 1.10, 1.0, 0.29, 3.0, 2, 0.3)
+    otqc.do_sst_biased_noisy_check(reps.reps, 9, 1.10, 1.0, 0.29, 3.0, 2, 0.3)
     for i in range(0, len(reps)):
         assert reps.get_qc(i, "SST", "drf_bias") == expected_flags["drf_bias"][i]
         assert reps.get_qc(i, "SST", "drf_noise") == expected_flags["drf_noise"][i]
@@ -4349,7 +4552,7 @@ def test_biased_warm_obs_missing_bnc():
         "drf_noise": [0, 0, 0, 0, 0, 0, 0, 0, 0],
         "drf_short": [0, 0, 0, 0, 0, 0, 0, 0, 0],
     }
-    otqc.sst_biased_noisy_check(reps.reps, 5, 1.10, 1.0, 0.29, 3.0, 2, 0.3)
+    otqc.do_sst_biased_noisy_check(reps.reps, 5, 1.10, 1.0, 0.29, 3.0, 2, 0.3)
     for i in range(0, len(reps)):
         assert reps.get_qc(i, "SST", "drf_bias") == expected_flags["drf_bias"][i]
         assert reps.get_qc(i, "SST", "drf_noise") == expected_flags["drf_noise"][i]
@@ -4363,7 +4566,7 @@ def test_short_record_one_bad_bnc():
         "drf_noise": [0, 0, 0, 0, 0],
         "drf_short": [0, 0, 0, 0, 0],
     }
-    otqc.sst_biased_noisy_check(reps.reps, 9, 1.10, 1.0, 0.29, 3.0, 2, 0.3)
+    otqc.do_sst_biased_noisy_check(reps.reps, 9, 1.10, 1.0, 0.29, 3.0, 2, 0.3)
     for i in range(0, len(reps)):
         assert reps.get_qc(i, "SST", "drf_bias") == expected_flags["drf_bias"][i]
         assert reps.get_qc(i, "SST", "drf_noise") == expected_flags["drf_noise"][i]
@@ -4377,7 +4580,7 @@ def test_short_record_two_bad_bnc():
         "drf_noise": [0, 0, 0, 0, 0],
         "drf_short": [1, 1, 1, 1, 1],
     }
-    otqc.sst_biased_noisy_check(reps.reps, 9, 1.10, 1.0, 0.29, 3.0, 2, 0.3)
+    otqc.do_sst_biased_noisy_check(reps.reps, 9, 1.10, 1.0, 0.29, 3.0, 2, 0.3)
     for i in range(0, len(reps)):
         assert reps.get_qc(i, "SST", "drf_bias") == expected_flags["drf_bias"][i]
         assert reps.get_qc(i, "SST", "drf_noise") == expected_flags["drf_noise"][i]
@@ -4391,7 +4594,7 @@ def test_short_record_two_bad_obs_missing_bnc():
         "drf_noise": [0, 0, 0, 0, 0, 0, 0, 0, 0],
         "drf_short": [1, 1, 1, 1, 1, 1, 1, 1, 1],
     }
-    otqc.sst_biased_noisy_check(reps.reps, 9, 1.10, 1.0, 0.29, 3.0, 2, 0.3)
+    otqc.do_sst_biased_noisy_check(reps.reps, 9, 1.10, 1.0, 0.29, 3.0, 2, 0.3)
     for i in range(0, len(reps)):
         assert reps.get_qc(i, "SST", "drf_bias") == expected_flags["drf_bias"][i]
         assert reps.get_qc(i, "SST", "drf_noise") == expected_flags["drf_noise"][i]
@@ -4405,7 +4608,7 @@ def test_short_record_two_bad_obs_missing_with_bgvar_bnc():
         "drf_noise": [0, 0, 0, 0, 0, 0, 0, 0, 0],
         "drf_short": [0, 0, 0, 0, 0, 0, 0, 0, 0],
     }
-    otqc.sst_biased_noisy_check(reps.reps, 9, 1.10, 1.0, 0.29, 3.0, 2, 0.3)
+    otqc.do_sst_biased_noisy_check(reps.reps, 9, 1.10, 1.0, 0.29, 3.0, 2, 0.3)
     for i in range(0, len(reps)):
         assert reps.get_qc(i, "SST", "drf_bias") == expected_flags["drf_bias"][i]
         assert reps.get_qc(i, "SST", "drf_noise") == expected_flags["drf_noise"][i]
@@ -4419,7 +4622,7 @@ def test_good_data_bnc_14():
         "drf_noise": [0, 0, 0, 0, 0, 0, 0, 0, 0],
         "drf_short": [0, 0, 0, 0, 0, 0, 0, 0, 0],
     }
-    otqc.sst_biased_noisy_check(reps.reps, 9, 1.10, 1.0, 0.29, 3.0, 2, 0.3)
+    otqc.do_sst_biased_noisy_check(reps.reps, 9, 1.10, 1.0, 0.29, 3.0, 2, 0.3)
     for i in range(0, len(reps)):
         assert reps.get_qc(i, "SST", "drf_bias") == expected_flags["drf_bias"][i]
         assert reps.get_qc(i, "SST", "drf_noise") == expected_flags["drf_noise"][i]
@@ -4433,7 +4636,7 @@ def test_short_record_good_data_bnc():
         "drf_noise": [0, 0, 0, 0, 0],
         "drf_short": [0, 0, 0, 0, 0],
     }
-    otqc.sst_biased_noisy_check(reps.reps, 9, 1.10, 1.0, 0.29, 3.0, 2, 0.3)
+    otqc.do_sst_biased_noisy_check(reps.reps, 9, 1.10, 1.0, 0.29, 3.0, 2, 0.3)
     for i in range(0, len(reps)):
         assert reps.get_qc(i, "SST", "drf_bias") == expected_flags["drf_bias"][i]
         assert reps.get_qc(i, "SST", "drf_noise") == expected_flags["drf_noise"][i]
@@ -4447,7 +4650,7 @@ def test_short_record_obs_missing_good_data_bnc():
         "drf_noise": [0, 0, 0, 0, 0, 0, 0, 0, 0],
         "drf_short": [0, 0, 0, 0, 0, 0, 0, 0, 0],
     }
-    otqc.sst_biased_noisy_check(reps.reps, 9, 1.10, 1.0, 0.29, 3.0, 2, 0.3)
+    otqc.do_sst_biased_noisy_check(reps.reps, 9, 1.10, 1.0, 0.29, 3.0, 2, 0.3)
     for i in range(0, len(reps)):
         assert reps.get_qc(i, "SST", "drf_bias") == expected_flags["drf_bias"][i]
         assert reps.get_qc(i, "SST", "drf_noise") == expected_flags["drf_noise"][i]
@@ -4461,7 +4664,7 @@ def test_noisy_big_bgvar_bnc():
         "drf_noise": [0, 0, 0, 0, 0, 0, 0, 0, 0],
         "drf_short": [0, 0, 0, 0, 0, 0, 0, 0, 0],
     }
-    otqc.sst_biased_noisy_check(reps.reps, 9, 1.10, 1.0, 0.29, 3.0, 2, 4.0)
+    otqc.do_sst_biased_noisy_check(reps.reps, 9, 1.10, 1.0, 0.29, 3.0, 2, 4.0)
     for i in range(0, len(reps)):
         assert reps.get_qc(i, "SST", "drf_bias") == expected_flags["drf_bias"][i]
         assert reps.get_qc(i, "SST", "drf_noise") == expected_flags["drf_noise"][i]
@@ -4475,7 +4678,7 @@ def test_short_record_two_bad_obs_missing_big_bgvar_bnc():
         "drf_noise": [0, 0, 0, 0, 0, 0, 0, 0, 0],
         "drf_short": [0, 0, 0, 0, 0, 0, 0, 0, 0],
     }
-    otqc.sst_biased_noisy_check(reps.reps, 9, 1.10, 1.0, 0.29, 3.0, 2, 4.0)
+    otqc.do_sst_biased_noisy_check(reps.reps, 9, 1.10, 1.0, 0.29, 3.0, 2, 4.0)
     for i in range(0, len(reps)):
         assert reps.get_qc(i, "SST", "drf_bias") == expected_flags["drf_bias"][i]
         assert reps.get_qc(i, "SST", "drf_noise") == expected_flags["drf_noise"][i]
@@ -4489,7 +4692,7 @@ def test_good_data_bnc_19():
         "drf_noise": [0, 0, 0, 0, 0, 0, 0, 0, 0],
         "drf_short": [0, 0, 0, 0, 0, 0, 0, 0, 0],
     }
-    otqc.sst_biased_noisy_check(reps.reps, 9, 1.10, 1.0, 0.29, 3.0, 2, 0.3)
+    otqc.do_sst_biased_noisy_check(reps.reps, 9, 1.10, 1.0, 0.29, 3.0, 2, 0.3)
     for i in range(0, len(reps)):
         assert reps.get_qc(i, "SST", "drf_bias") == expected_flags["drf_bias"][i]
         assert reps.get_qc(i, "SST", "drf_noise") == expected_flags["drf_noise"][i]
@@ -4504,7 +4707,7 @@ def test_error_bad_input_parameter_bnc():
         "drf_short": [9, 9, 9, 9, 9, 9, 9, 9, 9],
     }
     with pytest.raises(AssertionError):
-        otqc.sst_biased_noisy_check(reps.reps, 0, 1.10, 1.0, 0.29, 3.0, 2, 0.3)
+        otqc.do_sst_biased_noisy_check(reps.reps, 0, 1.10, 1.0, 0.29, 3.0, 2, 0.3)
     # try:
     #     otqc.og_sst_biased_noisy_check(reps.reps, 0, 1.10, 1.0, 0.29, 3.0, 2, 0.3)
     # except AssertionError as error:
@@ -4524,7 +4727,7 @@ def test_error_missing_matched_value_bnc():
         "drf_short": [9, 9, 9, 9, 9, 9, 9, 9, 9],
     }
     try:
-        otqc.sst_biased_noisy_check(reps.reps, 9, 1.10, 1.0, 0.29, 3.0, 2, 0.3)
+        otqc.do_sst_biased_noisy_check(reps.reps, 9, 1.10, 1.0, 0.29, 3.0, 2, 0.3)
     except AssertionError as error:
         error_return_text = (
             "unknown extended variable name OSTIA"
@@ -4544,7 +4747,7 @@ def test_error_invalid_ice_value_bnc():
         "drf_short": [9, 9, 9, 9, 9, 9, 9, 9, 9],
     }
     try:
-        otqc.sst_biased_noisy_check(reps.reps, 9, 1.10, 1.0, 0.29, 3.0, 2, 0.3)
+        otqc.do_sst_biased_noisy_check(reps.reps, 9, 1.10, 1.0, 0.29, 3.0, 2, 0.3)
     except AssertionError as error:
         error_return_text = "matched ice proportion is invalid"
         assert str(error)[0 : len(error_return_text)] == error_return_text
@@ -4562,10 +4765,10 @@ def test_error_missing_ob_value_bnc():
         "drf_short": [9, 9, 9, 9, 9, 9, 9, 9, 9],
     }
     with pytest.raises(ValueError):
-        otqc.sst_biased_noisy_check(reps.reps, 9, 1.10, 1.0, 0.29, 3.0, 2, 0.3)
+        otqc.do_sst_biased_noisy_check(reps.reps, 9, 1.10, 1.0, 0.29, 3.0, 2, 0.3)
 
     try:
-        otqc.sst_biased_noisy_check(reps.reps, 9, 1.10, 1.0, 0.29, 3.0, 2, 0.3)
+        otqc.do_sst_biased_noisy_check(reps.reps, 9, 1.10, 1.0, 0.29, 3.0, 2, 0.3)
     except ValueError as error:
         error_return_text = "lat is missing"
         assert str(error)[0 : len(error_return_text)] == error_return_text
@@ -4584,7 +4787,7 @@ def test_error_not_time_sorted_bnc():
         "drf_short": [9, 9, 9, 9, 9, 9, 9, 9, 9],
     }
     try:
-        otqc.sst_biased_noisy_check(reps.reps, 9, 1.10, 1.0, 0.29, 3.0, 2, 0.3)
+        otqc.do_sst_biased_noisy_check(reps.reps, 9, 1.10, 1.0, 0.29, 3.0, 2, 0.3)
     except AssertionError as error:
         error_return_text = "problem with report value: times are not sorted"
         assert str(error)[0 : len(error_return_text)] == error_return_text
@@ -4602,7 +4805,7 @@ def test_error_invalid_background_bnc():
         "drf_short": [9, 9, 9, 9, 9, 9, 9, 9, 9],
     }
     try:
-        otqc.sst_biased_noisy_check(reps.reps, 9, 1.10, 1.0, 0.29, 3.0, 2, 0.3)
+        otqc.do_sst_biased_noisy_check(reps.reps, 9, 1.10, 1.0, 0.29, 3.0, 2, 0.3)
     except AssertionError as error:
         error_return_text = "matched background sst is invalid"
         assert str(error)[0 : len(error_return_text)] == error_return_text
@@ -4620,7 +4823,7 @@ def test_error_invalid_background_error_variance_bnc():
         "drf_short": [9, 9, 9, 9, 9, 9, 9, 9, 9],
     }
     try:
-        otqc.sst_biased_noisy_check(reps.reps, 9, 1.10, 1.0, 0.29, 3.0, 2, 0.3)
+        otqc.do_sst_biased_noisy_check(reps.reps, 9, 1.10, 1.0, 0.29, 3.0, 2, 0.3)
     except AssertionError as error:
         error_return_text = "matched background error variance is invalid"
         assert str(error)[0 : len(error_return_text)] == error_return_text
