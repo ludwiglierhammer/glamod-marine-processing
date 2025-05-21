@@ -210,10 +210,8 @@ def is_monotonic(inarr: np.ndarray) -> bool:
     return True
 
 
-def do_speed_check(lons, lats, dates, *args):
-    checker = SpeedChecker(lons, lats, dates)
-    if args:
-        checker.set_parameters(*args)
+def do_speed_check(lons, lats, dates, speed_limit, min_win_period, max_win_period):
+    checker = SpeedChecker(lons, lats, dates, speed_limit, min_win_period, max_win_period)
     checker._do_speed_check()
     return checker.get_qc_outcomes()
 
@@ -252,16 +250,20 @@ class SpeedChecker:
       to allow for gaps of up to 0.2-days in sampling).
     """
 
-    speed_limit = 2.5
-    min_win_period = 0.8
-    max_win_period = 1.0
+    # speed_limit = 2.5
+    # min_win_period = 0.8
+    # max_win_period = 1.0
 
-    def __init__(self, lons, lats, dates):
+    def __init__(self, lons, lats, dates, speed_limit, min_win_period, max_win_period):
         self.good_parameters = True
         self.lon = lons
         self.lat = lats
         self.nreps = len(lons)
         self.hrs = convert_date_to_hours(dates)
+
+        self.speed_limit = speed_limit
+        self.min_win_period = min_win_period
+        self.max_win_period = max_win_period
 
         # Initialise QC outcomes with untested
         self.qc_outcomes = np.zeros(self.nreps) + untested
@@ -269,52 +271,24 @@ class SpeedChecker:
     def get_qc_outcomes(self):
         return self.qc_outcomes
 
-    def set_parameters(
-        self, speed_limit: float, min_win_period: float, max_win_period: float
-    ) -> None:
-        """Set the parameters of the QC check. Note that this will set parameters for all instances of the class.
+    def valid_parameters(self) -> bool:
+        """Check the parameters"""
+        valid = True
 
-        Parameters
-        ----------
-        speed_limit: float
-            maximum allowable speed for an in situ drifting buoy (metres per second)
-        min_win_period: float
-            minimum period of time in days over which position is assessed for speed estimates (see
-            description)
-        max_win_period: float
-            maximum period of time in days over which position is assessed for speed estimates
-            (this should be greater than min_win_period and allow for some erratic temporal sampling e.g. min_win_period+0.2
-            to allow for gaps of up to 0.2-days in sampling).
-
-        Returns
-        -------
-        None
-
-        Raises
-        ------
-        AssertionError
-            When any of the input parameters are invalid
-        """
-        self.good_parameters = True
         try:
-            speed_limit = float(speed_limit)
-            min_win_period = float(min_win_period)
-            max_win_period = float(max_win_period)
-            assert speed_limit >= 0, "speed_limit must be >= 0"
-            assert min_win_period >= 0, "min_win_period must be >= 0"
-            assert max_win_period >= 0, "max_win_period must be >= 0"
+            assert self.speed_limit >= 0, "speed_limit must be >= 0"
+            assert self.min_win_period >= 0, "min_win_period must be >= 0"
+            assert self.max_win_period >= 0, "max_win_period must be >= 0"
             assert (
-                max_win_period >= min_win_period
+            self.max_win_period >= self.min_win_period
             ), "max_win_period must be >= min_win_period"
         except AssertionError as error:
             warnings.warn(UserWarning("invalid input parameter: " + str(error)))
-            self.good_parameters = False
+            valid = False
 
-        SpeedChecker.speed_limit = speed_limit
-        SpeedChecker.min_win_period = min_win_period
-        SpeedChecker.max_win_period = max_win_period
+        return valid
 
-    def valid_arrays(self):
+    def valid_arrays(self) -> bool:
         valid = True
         if any(np.isnan(self.lon)):
             warnings.warn(UserWarning("Nan(s) found in longitude"))
@@ -333,10 +307,10 @@ class SpeedChecker:
     def _do_speed_check(self):
         """Perform the actual speed check"""
         nrep = self.nreps
-        min_win_period_hours = SpeedChecker.min_win_period * 24.0
-        max_win_period_hours = SpeedChecker.max_win_period * 24.0
+        min_win_period_hours = self.min_win_period * 24.0
+        max_win_period_hours = self.max_win_period * 24.0
 
-        if not self.valid_arrays() or not self.good_parameters:
+        if not self.valid_arrays() or not self.valid_parameters():
             self.qc_outcomes = np.zeros(self.nreps) + untestable
             return
 
@@ -371,7 +345,7 @@ class SpeedChecker:
 
             # If the average speed during the window is too high then set all
             # flags in the window to failed.
-            if speed > SpeedChecker.speed_limit:
+            if speed > self.speed_limit:
                 self.qc_outcomes[i:index_arr[f_win][-1] + 1] = failed
 
             i += 1
