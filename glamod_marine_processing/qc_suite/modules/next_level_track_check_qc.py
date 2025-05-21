@@ -2,7 +2,10 @@
 
 from __future__ import annotations
 
+import inspect
+from collections.abc import Callable
 from datetime import datetime
+from functools import wraps
 from typing import Sequence
 
 import numpy as np
@@ -16,6 +19,51 @@ from glamod_marine_processing.qc_suite.modules.qc import failed, passed
 km_to_nm = 0.539957
 
 
+def inspect_arrays(params: list[str]) -> Callable:
+    """Create a decorator to inspect input sequences and convert them to numpy arrays.
+
+    Parameters
+    ----------
+    params: list of str
+        List of parameter names to be inspected.
+
+    Returns
+    -------
+    Callable
+        The decorator function
+    """
+
+    def decorator(func):
+        @wraps(func)
+        def wrapper(*args, **kwargs):
+            sig = inspect.signature(func)
+            bound_args = sig.bind(*args, **kwargs)
+            bound_args.apply_defaults()
+
+            arrays = []
+            for name in params:
+                if name not in bound_args.arguments:
+                    raise ValueError(f"Parameter {name} is not a valid parameter.")
+
+                arr = np.asarray(bound_args.arguments[name])
+                print(arr)
+                if arr.ndim != 1:
+                    raise ValueError(f"Input '{name}' must be one-dimensional.")
+                arrays.append(arr)
+
+                bound_args.arguments[name] = arr
+            lengths = [len(arr) for arr in arrays]
+            if any(length != lengths[0] for length in lengths):
+                raise ValueError(f"Input {params} must all have the same length.")
+
+            return func(*bound_args.args, **bound_args.kwargs)
+
+        return wrapper
+
+    return decorator
+
+
+@inspect_arrays(["sst", "lat", "lon", "date"])
 def do_spike_check(
     sst: Sequence[float],
     lat: Sequence[float],
@@ -50,17 +98,6 @@ def do_spike_check(
     ValueError
         If either input is not 1-dimensional or if their lengths do not match.
     """
-    sst = np.asarray(sst)
-    lat = np.asarray(lat)
-    lon = np.asarray(lon)
-    date = np.asarray(date)
-
-    for arr, name in zip([sst, lat, lon, date], ["sst", "lat", "lon", "date"]):
-        if arr.ndim != 1:
-            raise ValueError(f"Input '{name}' must be one-dimensional.")
-        if len(arr) != len(sst):
-            raise ValueError(f"Input '{name}' must have the same length as 'sst'.")
-
     max_gradient_space = 0.5  # K/km
     max_gradient_time = 1.0  # K/hr
 
@@ -175,6 +212,7 @@ def calculate_course_parameters(
     return speed, distance, course, timediff
 
 
+@inspect_arrays(["lat", "lon", "date"])
 def calculate_speed_course_distance_time_difference(
     lat: Sequence[float],
     lon: Sequence[float],
@@ -205,16 +243,6 @@ def calculate_speed_course_distance_time_difference(
     ValueError
         If either input is not 1-dimensional or if their lengths do not match.
     """
-    lat = np.asarray(lat)
-    lon = np.asarray(lon)
-    date = np.asarray(date)
-
-    for arr, name in zip([lat, lon, date], ["lat", "lon", "date"]):
-        if arr.ndim != 1:
-            raise ValueError(f"Input '{name}' must be one-dimensional.")
-        if len(arr) != len(lat):
-            raise ValueError(f"Input '{name}' must have the same length as 'lat'.")
-
     number_of_obs = len(lat)
 
     speed = np.empty(number_of_obs)  # type: np.ndarray
@@ -255,12 +283,13 @@ def calculate_speed_course_distance_time_difference(
     return speed, distance, course, timediff
 
 
+@inspect_arrays(["vsi", "dsi", "lat", "lon", "date"])
 def forward_discrepancy(
+    vsi: Sequence[float],
+    dsi: Sequence[float],
     lat: Sequence[float],
     lon: Sequence[float],
     date: Sequence[datetime],
-    vsi: Sequence[float],
-    dsi: Sequence[float],
 ) -> Sequence[float]:
     """Calculate what the distance is between the projected position (based on the reported
     speed and heading at the current and previous time steps) and the actual position. The
@@ -273,16 +302,16 @@ def forward_discrepancy(
 
     Parameters
     ----------
+    vsi: array-like of float, shape (n,)
+        1-dimensional reported speed array in knots.
+    dsi: array-like of float, shape (n,)
+        1-dimensional reported heading array.
     lat: array-like of float, shape (n,)
         1-dimensional latitude array in degrees.
     lon: array-like of float, shape (n,)
         1-dimensional longitude array in degrees.
     date: array-like of datetime, shape (n,)
         1-dimensional date array.
-    vsi: array-like of float, shape (n,)
-        1-dimensional reported speed array in knots.
-    dsi: array-like of float, shape (n,)
-        1-dimensional reported heading array.
 
     Returns
     -------
@@ -294,20 +323,6 @@ def forward_discrepancy(
     ValueError
         If either input is not 1-dimensional or if their lengths do not match.
     """
-    lat = np.asarray(lat)
-    lon = np.asarray(lon)
-    date = np.asarray(date)
-    vsi = np.asarray(vsi) / km_to_nm
-    dsi = np.asarray(dsi)
-
-    for arr, name in zip(
-        [lat, lon, date, vsi, dsi], ["lat", "lon", "date", "vsi", "dsi"]
-    ):
-        if arr.ndim != 1:
-            raise ValueError(f"Input '{name}' must be one-dimensional.")
-        if len(arr) != len(lat):
-            raise ValueError(f"Input '{name}' must have the same length as 'lat'.")
-
     number_of_obs = len(lat)
 
     distance_from_est_location = np.asarray([np.nan] * number_of_obs)
@@ -371,6 +386,7 @@ def forward_discrepancy(
     return distance_from_est_location
 
 
+@inspect_arrays(["vsi", "dsi", "lat", "lon", "date"])
 def backward_discrepancy(
     lat: Sequence[float],
     lon: Sequence[float],
@@ -388,16 +404,16 @@ def backward_discrepancy(
 
     Parameters
     ----------
+    vsi: array-like of float, shape (n,)
+        1-dimensional reported speed array in knots.
+    dsi: array-like of float, shape (n,)
+        1-dimensional reported heading array.
     lat: array-like of float, shape (n,)
         1-dimensional latitude array in degrees.
     lon: array-like of float, shape (n,)
         1-dimensional longitude array in degrees.
     date: array-like of datetime, shape (n,)
         1-dimensional date array.
-    vsi: array-like of float, shape (n,)
-        1-dimensional reported speed array in knots.
-    dsi: array-like of float, shape (n,)
-        1-dimensional reported heading array.
 
     Returns
     -------
@@ -409,20 +425,6 @@ def backward_discrepancy(
     ValueError
         If either input is not 1-dimensional or if their lengths do not match.
     """
-    lat = np.asarray(lat)
-    lon = np.asarray(lon)
-    date = np.asarray(date)
-    vsi = np.asarray(vsi) / km_to_nm
-    dsi = np.asarray(dsi) - 180.0
-
-    for arr, name in zip(
-        [lat, lon, date, vsi, dsi], ["lat", "lon", "date", "vsi", "dsi"]
-    ):
-        if arr.ndim != 1:
-            raise ValueError(f"Input '{name}' must be one-dimensional.")
-        if len(arr) != len(lat):
-            raise ValueError(f"Input '{name}' must have the same length as 'lat'.")
-
     number_of_obs = len(lat)
 
     distance_from_est_location = np.asarray([np.nan] * number_of_obs)
@@ -487,6 +489,7 @@ def backward_discrepancy(
     return distance_from_est_location[::-1]
 
 
+@inspect_arrays(["lat", "lon", "timediff"])
 def calculate_midpoint(
     lat: Sequence[float],
     lon: Sequence[float],
@@ -518,16 +521,6 @@ def calculate_midpoint(
     ValueError
         If either input is not 1-dimensional or if their lengths do not match.
     """
-    lat = np.asarray(lat)
-    lon = np.asarray(lon)
-    timediff = np.asarray(timediff)
-
-    for arr, name in zip([lat, lon, timediff], ["lat", "lon", "timediff"]):
-        if arr.ndim != 1:
-            raise ValueError(f"Input '{name}' must be one-dimensional.")
-        if len(arr) != len(lat):
-            raise ValueError(f"Input '{name}' must have the same length as 'lat'.")
-
     number_of_obs = len(lat)
 
     midpoint_discrepancies = np.asarray([np.nan] * number_of_obs)
@@ -566,12 +559,13 @@ def calculate_midpoint(
     return midpoint_discrepancies
 
 
+@inspect_arrays(["vsi", "dsi", "lat", "lon", "date"])
 def do_track_check(
+    vsi: Sequence[float],
+    dsi: Sequence[float],
     lat: Sequence[float],
     lon: Sequence[float],
     date: Sequence[datetime],
-    vsi: Sequence[float],
-    dsi: Sequence[float],
 ) -> tuple[int, int]:
     """Perform one pass of the track check.  This is an implementation of the MDS track check code
     which was originally written in the 1990s. I don't know why this piece of historic trivia so exercises
@@ -579,16 +573,16 @@ def do_track_check(
 
     Parameters
     ----------
+    vsi: array-like of float, shape (n,)
+        1-dimensional reported speed array in knots.
+    dsi: array-like of float, shape (n,)
+        1-dimensional reported heading array.
     lat: array-like of float, shape (n,)
         1-dimensional latitude array in degrees.
     lon: array-like of float, shape (n,)
         1-dimensional longitude array in degrees.
     date: array-like of datetime, shape (n,)
         1-dimensional date array.
-    vsi: array-like of float, shape (n,)
-        1-dimensional reported speed array in knots.
-    dsi: array-like of float, shape (n,)
-        1-dimensional reported heading array in knots.
 
     Returns
     -------
@@ -605,21 +599,6 @@ def do_track_check(
     max_speed_change = 10.0
     max_absolute_speed = 40.0
     max_midpoint_discrepancy = 150.0
-
-    lat = np.asarray(lat)
-    lon = np.asarray(lon)
-    date = np.asarray(date)
-    vsi = np.asarray(vsi)
-    dsi = np.asarray(dsi)
-
-    for arr, name in zip(
-        [lat, lon, date, vsi, dsi],
-        ["lat", "lon", "date", "vsi", "dsi"],
-    ):
-        if arr.ndim != 1:
-            raise ValueError(f"Input '{name}' must be one-dimensional.")
-        if len(arr) != len(lat):
-            raise ValueError(f"Input '{name}' must have the same length as 'lat'.")
 
     number_of_obs = len(lat)
 
@@ -746,11 +725,12 @@ def do_track_check(
     return trk, few
 
 
+@inspect_arrays(["at", "dpt", "lat", "lon", "date"])
 def find_saturated_runs(
-    lat: Sequence[float],
-    lon: Sequence[float],
     at: Sequence[float],
     dpt: Sequence[float],
+    lat: Sequence[float],
+    lon: Sequence[float],
     date: Sequence[datetime],
 ) -> Sequence[int]:
     """Perform checks on persistence of 100% rh while going through the voyage.
@@ -760,14 +740,14 @@ def find_saturated_runs(
 
     Parameters
     ----------
-    lat: array-like of float, shape (n,)
-        1-dimensional latitude array in degrees.
-    lon: array-like of float, shape (n,)
-        1-dimensional longitude array in degrees.
     at: array-like of float, shape (n,)
         1-dimensional air temperature array.
     dpt: array-like of float, shape (n,)
         1-dimensional dew point temperature array in.
+    lat: array-like of float, shape (n,)
+        1-dimensional latitude array in degrees.
+    lon: array-like of float, shape (n,)
+        1-dimensional longitude array in degrees.
     date: array-like of datetime, shape (n,)
         1-dimensional date array.
 
@@ -782,20 +762,6 @@ def find_saturated_runs(
     ValueError
         If either input is not 1-dimensional or if their lengths do not match.
     """
-    lat = np.asarray(lat)
-    lon = np.asarray(lon)
-    at = np.asarray(at)
-    dpt = np.asarray(dpt)
-    date = np.asarray(date)
-
-    for arr, name in zip(
-        [lat, lon, at, dpt, date], ["lat", "lon", "at", "dpt", "date"]
-    ):
-        if arr.ndim != 1:
-            raise ValueError(f"Input '{name}' must be one-dimensional.")
-        if len(arr) != len(at):
-            raise ValueError(f"Input '{name}' must have the same length as 'at'.")
-
     min_time_threshold = 48.0  # hours
     shortest_run = 4  # number of obs
 
@@ -850,6 +816,7 @@ def find_saturated_runs(
     return repsat
 
 
+@inspect_arrays(["value"])
 def find_multiple_rounded_values(value: Sequence[float]) -> Sequence[int]:
     """Find instances when more than "threshold" of the observations are
     whole numbers and set the 'round' flag. Used in the humidity QC
@@ -902,6 +869,7 @@ def find_multiple_rounded_values(value: Sequence[float]) -> Sequence[int]:
     return rounded
 
 
+@inspect_arrays(["value"])
 def find_repeated_values(value: Sequence[float]) -> pd.DataFrame:
     """Find cases where more than a given proportion of SSTs have the same value
 
@@ -948,6 +916,7 @@ def find_repeated_values(value: Sequence[float]) -> pd.DataFrame:
     return rep
 
 
+@inspect_arrays(["lat", "lon", "date"])
 def do_iquam_track_check(
     lat: Sequence[float],
     lon: Sequence[float],
@@ -989,7 +958,7 @@ def do_iquam_track_check(
     lon = np.asarray(lon)
     date = np.asarray(date)
 
-    for arr, name in zip([lat, lon, date], ["lat", "lon", "date", ""]):
+    for arr, name in zip([lat, lon, date], ["lat", "lon", "date"]):
         if arr.ndim != 1:
             raise ValueError(f"Input '{name}' must be one-dimensional.")
         if len(arr) != len(lat):
