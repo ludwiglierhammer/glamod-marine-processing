@@ -32,6 +32,12 @@ from glamod_marine_processing.qc_suite.modules.next_level_qc import (
     do_time_check,
     do_wind_consistency_check,
 )
+from glamod_marine_processing.qc_suite.modules.next_level_track_check_qc import (  # find_saturated_runs,
+    do_iquam_track_check,
+    do_spike_check,
+    do_track_check,
+    find_repeated_values,
+)
 
 
 @pytest.fixture(scope="session")
@@ -87,6 +93,48 @@ def testdata():
         data_dict[table] = db_table
 
     return data_dict
+
+
+@pytest.fixture(scope="session")
+def testdata_track():
+    dataset = "ICOADS_R3.0.0T"
+    _settings = get_settings(dataset)
+    cache_dir = f".pytest_cache/Eqc/{dataset}/qc/{_settings.deck}"
+    tables = [
+        "header",
+        "observations-at",
+    ]
+    for table in tables:
+        load_file(
+            f"{_settings.input_dir}/cdm_tables/{table}-{_settings.cdm}.psv",
+            cache_dir=cache_dir,
+            within_drs=False,
+        )
+
+    db_tables = read_tables(cache_dir)
+    for table in tables:
+        db_tables.data[(table, "latitude")] = db_tables[(table, "latitude")].astype(
+            float
+        )
+        db_tables.data[(table, "longitude")] = db_tables[(table, "longitude")].astype(
+            float
+        )
+        if table == "header":
+            db_tables.data[(table, "report_timestamp")] = pd.to_datetime(
+                db_tables[(table, "report_timestamp")],
+                format="%Y-%m-%d %H:%M:%S",
+                errors="coerce",
+            )
+        else:
+            db_tables.data[(table, "observation_value")] = db_tables[
+                (table, "observation_value")
+            ].astype(float)
+            db_tables.data[(table, "date_time")] = pd.to_datetime(
+                db_tables[(table, "date_time")],
+                format="%Y-%m-%d %H:%M:%S",
+                errors="coerce",
+            )
+    return db_tables
 
 
 @pytest.fixture(scope="session")
@@ -1022,6 +1070,147 @@ def test_do_wind_consistency_check(testdata):
         ]
     )
     pd.testing.assert_series_equal(results, expected)
+
+
+def test_do_spike_check(testdata_track):
+    db_ = testdata_track.copy()
+    db_.data[("observations-at", "observation_value")] += [
+        0,
+        0,
+        25,
+        0,
+        0,
+        0,
+        0,
+        15,
+        0,
+        0,
+    ]
+    groups = db_.groupby([("header", "primary_station_id")])
+    results = groups.apply(
+        lambda track: do_spike_check(
+            value=track[("observations-at", "observation_value")],
+            lat=track[("observations-at", "latitude")],
+            lon=track[("observations-at", "longitude")],
+            date=track[("observations-at", "date_time")],
+        )
+    )
+    results = results.explode()
+    results.index = db_.index
+    results = results.astype(int)
+    expected = pd.Series(
+        [
+            qc.passed,
+            qc.passed,
+            qc.failed,
+            qc.passed,
+            qc.passed,
+            qc.passed,
+            qc.passed,
+            qc.failed,
+            qc.passed,
+            qc.passed,
+        ]
+    )
+    pd.testing.assert_series_equal(results, expected, check_names=False)
+    raise ValueError("We need a more reasonable test data!")
+
+
+def test_do_track_check(testdata_track):
+    db_ = testdata_track.copy()
+    groups = db_.groupby([("header", "primary_station_id")])
+    results = groups.apply(
+        lambda track: do_track_check(
+            vsi=track[("header", "station_speed")],
+            dsi=track[("header", "station_course")],
+            lat=track[("header", "latitude")],
+            lon=track[("header", "longitude")],
+            date=track[("header", "report_timestamp")],
+        )
+    )
+    results = results.explode()
+    results.index = db_.index
+    results = results.astype(int)
+    expected = pd.Series(
+        [
+            qc.passed,
+            qc.passed,
+            qc.failed,
+            qc.passed,
+            qc.passed,
+            qc.passed,
+            qc.passed,
+            qc.failed,
+            qc.passed,
+            qc.passed,
+        ]
+    )
+    pd.testing.assert_series_equal(results, expected, check_names=False)
+    raise ValueError("We need a more reasonable test data!")
+
+
+def test_do_iquam_track_check(testdata_track):
+    db_ = testdata_track.copy()
+    groups = db_.groupby([("header", "primary_station_id")])
+    results = groups.apply(
+        lambda track: do_iquam_track_check(
+            lat=track[("header", "latitude")],
+            lon=track[("header", "longitude")],
+            date=track[("header", "report_timestamp")],
+        )
+    )
+    results = results.explode()
+    results.index = db_.index
+    results = results.astype(int)
+    expected = pd.Series(
+        [
+            qc.passed,
+            qc.passed,
+            qc.passed,
+            qc.passed,
+            qc.passed,
+            qc.passed,
+            qc.passed,
+            qc.passed,
+            qc.passed,
+            qc.passed,
+        ]
+    )
+    pd.testing.assert_series_equal(results, expected, check_names=False)
+    raise ValueError("We need a more reasonable test data!")
+
+
+def test_find_repeated_values(testdata_track):
+    db_ = testdata_track.copy()
+    groups = db_.groupby([("header", "primary_station_id")])
+    results = groups.apply(
+        lambda track: find_repeated_values(
+            value=track[("observations-at", "observation_value")],
+        )
+    )
+    results = results.explode()
+    results.index = db_.index
+    results = results.astype(int)
+    expected = pd.Series(
+        [
+            qc.passed,
+            qc.passed,
+            qc.passed,
+            qc.passed,
+            qc.passed,
+            qc.passed,
+            qc.passed,
+            qc.passed,
+            qc.passed,
+            qc.passed,
+        ]
+    )
+    pd.testing.assert_series_equal(results, expected, check_names=False)
+    raise ValueError("We need a more reasonable test data!")
+
+
+def test_find_saturated_runs(testdata_track):
+    raise ValueError("We need a more reasonable test data!")
 
 
 def test_multiple_row_check(testdata, climdata):
