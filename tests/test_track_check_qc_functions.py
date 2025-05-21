@@ -119,9 +119,6 @@ def test_do_track_check_passed(ship_frame):
         lat=ship_frame.lat,
         lon=ship_frame.lon,
         date=ship_frame.date,
-        id=ship_frame.id,
-        pt=ship_frame.pt,
-        dck=ship_frame.dck,
         vsi=ship_frame.vsi,
         dsi=ship_frame.dsi,
     )
@@ -137,9 +134,6 @@ def test_do_track_check_mixed(ship_frame):
         lat=ship_frame.lat,
         lon=ship_frame.lon,
         date=ship_frame.date,
-        id=ship_frame.id,
-        pt=ship_frame.pt,
-        dck=ship_frame.dck,
         vsi=ship_frame.vsi,
         dsi=ship_frame.dsi,
     )
@@ -150,12 +144,12 @@ def test_do_track_check_mixed(ship_frame):
             assert trk[i] == 0
 
 
-@pytest.mark.parametrize("key", ["lat", "lon", "date", "id", "pt", "dck", "vsi", "dsi"])
+@pytest.mark.parametrize("key", ["lat", "lon", "date", "vsi", "dsi"])
 def test_do_track_check_raises(ship_frame, key):
     series = ship_frame[key]
     series.loc[len(series)] = 1
     kwargs = {}
-    for k in ["lat", "lon", "date", "id", "pt", "dck", "vsi", "dsi"]:
+    for k in ["lat", "lon", "date", "vsi", "dsi"]:
         if k == key:
             kwargs[k] = series
         else:
@@ -423,8 +417,7 @@ def test_do_iquam_track_check_drifter(iquam_drifter):
         lat=iquam_drifter.lat,
         lon=iquam_drifter.lon,
         date=iquam_drifter.date,
-        id=iquam_drifter.id,
-        pt=iquam_drifter.pt,
+        speed_limit=15.0,
     )
     for i in range(len(iquam_track)):
         assert iquam_track[i] == 0
@@ -435,23 +428,19 @@ def test_do_iquam_track_check_ship(iquam_ship):
         lat=iquam_ship.lat,
         lon=iquam_ship.lon,
         date=iquam_ship.date,
-        id=iquam_ship.id,
-        pt=iquam_ship.pt,
     )
     for i in range(len(iquam_track)):
         assert iquam_track[i] == 0
 
 
 def test_do_iquam_track_check_ship_lon(iquam_ship):
-    lon = iquam_drifter.lon.array
+    lon = iquam_ship.lon.array
     lon[15] = 30.0
-    iquam_drifter["lon"] = lon
+    iquam_ship["lon"] = lon
     iquam_track = do_iquam_track_check(
         lat=iquam_ship.lat,
         lon=iquam_ship.lon,
         date=iquam_ship.date,
-        id=iquam_ship.id,
-        pt=iquam_ship.pt,
     )
     for i in range(len(iquam_track)):
         if i == 15:
@@ -460,15 +449,15 @@ def test_do_iquam_track_check_ship_lon(iquam_ship):
             assert iquam_track[i] == 0
 
 
-def test_do_iquam_track_check_drifter_id(iquam_drifter):
-    id = ["SHIP     " for _ in range(30)]
-    iquam_ship["id"] = id
+def test_do_iquam_track_check_drifter_speed_limit(iquam_drifter):
     iquam_track = do_iquam_track_check(
         lat=iquam_drifter.lat,
         lon=iquam_drifter.lon,
         date=iquam_drifter.date,
-        id=iquam_drifter.id,
-        pt=iquam_drifter.pt,
+        speed_limit=10.8,
     )
     for i in range(len(iquam_track)):
-        assert iquam_track[i] == 0
+        if i in [4, 5, 6, 7, 8, 13, 14, 15, 16, 17, 21, 22, 23, 24, 25]:
+            assert iquam_track[i] == 1
+        else:
+            assert iquam_track[i] == 0

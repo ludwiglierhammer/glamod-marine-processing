@@ -8,7 +8,6 @@ from typing import Sequence
 import numpy as np
 import pandas as pd
 
-import glamod_marine_processing.qc_suite.modules.icoads_identify as icoads_identify
 import glamod_marine_processing.qc_suite.modules.spherical_geometry as sg
 import glamod_marine_processing.qc_suite.modules.time_control as time_control
 import glamod_marine_processing.qc_suite.modules.track_check as tc
@@ -37,7 +36,7 @@ def do_spike_check(
     date: array-like of datetime, shape (n,)
         1-dimensional date array.
     delta_t: float, default 2.0
-        ???
+        Temperature delta.
         This should be 2.0 for ships and 1.0 for drifting buoys.
 
     Returns
@@ -571,9 +570,6 @@ def do_track_check(
     lat: Sequence[float],
     lon: Sequence[float],
     date: Sequence[datetime],
-    id: Sequence[str],
-    pt: Sequence[int],
-    dck: Sequence[int],
     vsi: Sequence[float],
     dsi: Sequence[float],
 ) -> tuple[int, int]:
@@ -589,12 +585,6 @@ def do_track_check(
         1-dimensional longitude array in degrees.
     date: array-like of datetime, shape (n,)
         1-dimensional date array.
-    id: array-like of str, shape (n,)
-        1-dimensional longitude marine report ID array.
-    pt: array-like of int, shape (n,)
-        1-dimensional platform type array.
-    dck: array-like of int, shape (n,)
-        1-dimensional marine report deck array.
     vsi: array-like of float, shape (n,)
         1-dimensional reported speed array in knots.
     dsi: array-like of float, shape (n,)
@@ -619,15 +609,12 @@ def do_track_check(
     lat = np.asarray(lat)
     lon = np.asarray(lon)
     date = np.asarray(date)
-    id = np.asarray(id)
-    pt = np.asarray(pt)
-    dck = np.asarray(dck)
     vsi = np.asarray(vsi)
     dsi = np.asarray(dsi)
 
     for arr, name in zip(
-        [lat, lon, date, id, pt, dck, vsi, dsi],
-        ["lat", "lon", "date", "id", "pt", "dck", "vsi", "dsi"],
+        [lat, lon, date, vsi, dsi],
+        ["lat", "lon", "date", "vsi", "dsi"],
     ):
         if arr.ndim != 1:
             raise ValueError(f"Input '{name}' must be one-dimensional.")
@@ -640,21 +627,9 @@ def do_track_check(
     if number_of_obs == 0:
         return (None, None)
 
-    current_year = pd.Timestamp(date[0]).year
-    # Generic ids and buoys get a free pass on the track check
-    if icoads_identify.id_is_generic(id[0], current_year) or pt[0] in [6, 7]:
-        return np.asarray([passed] * number_of_obs), np.asarray(
-            [passed] * number_of_obs
-        )
-
     # fewer than three obs - set the fewsome flag
-    # deck 720 gets a pass prior to 1891 see
-    # Carella, Kent, Berry 2015 Appendix A3
     if number_of_obs < 3:
-        if dck[0] == 720 and current_year < 1891:
-            return np.zeros(number_of_obs), np.zeros(number_of_obs)
-        else:
-            return np.zeros(number_of_obs), np.zeros(number_of_obs) + 1
+        return np.zeros(number_of_obs), np.zeros(number_of_obs) + 1
 
     # work out speeds and distances between alternating points
     speed_alt, _distance_alt, _course_alt, _timediff_alt = (
@@ -977,8 +952,7 @@ def do_iquam_track_check(
     lat: Sequence[float],
     lon: Sequence[float],
     date: Sequence[datetime],
-    id: Sequence[str],
-    pt: Sequence[int],
+    speed_limit: float = 60.0,
 ) -> Sequence[int]:
     """Perform the IQUAM track check as detailed in Xu and Ignatov 2013
 
@@ -996,10 +970,9 @@ def do_iquam_track_check(
         1-dimensional longitude array in degrees.
     date: array-like of datetime, shape (n,)
         1-dimensional date array.
-    id: array-like of str, shape (n,)
-        1-dimensional longitude marine report ID array.
-    pt: array-like of int, shape (n,)
-        1-dimensional platform type array.
+    speed_limit: float, default: 60.0
+        Speed limit of platform in km/h.
+        This should be 60.0 for ships and 15.0 for drifting buoys.
 
     Returns
     -------
@@ -1015,17 +988,12 @@ def do_iquam_track_check(
     lat = np.asarray(lat)
     lon = np.asarray(lon)
     date = np.asarray(date)
-    id = np.asarray(id)
-    pt = np.asarray(pt)
 
     for arr, name in zip([lat, lon, date], ["lat", "lon", "date", ""]):
         if arr.ndim != 1:
             raise ValueError(f"Input '{name}' must be one-dimensional.")
         if len(arr) != len(lat):
             raise ValueError(f"Input '{name}' must have the same length as 'lat'.")
-
-    buoy_speed_limit = 15.0  # km/h
-    ship_speed_limit = 60.0  # km/h
 
     delta_d = 1.11  # 0.1 degrees of latitude
     delta_t = 0.01  # one hundredth of an hour
@@ -1036,15 +1004,6 @@ def do_iquam_track_check(
 
     if number_of_obs == 0:
         return
-
-    current_year = pd.Timestamp(date[0]).year
-    if icoads_identify.id_is_generic(id[0], current_year):
-        return np.asarray([passed] * number_of_obs)
-
-    if pt[0] in [6, 7]:
-        speed_limit = buoy_speed_limit
-    else:
-        speed_limit = ship_speed_limit
 
     speed_violations = []
     count_speed_violations = []
