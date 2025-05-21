@@ -1492,6 +1492,208 @@ def test_sd_with_trim():
 #         assert vals1.drf_agr == expected_flags[i]
 
 
+def aground_check_test_data(selector):
+    # stationary drifter
+    # fmt: off
+    vals1 = [
+        {"ID": "AAAAAAAAA", "YR": 2003, "MO": 12, "DY": 1, "HR": 12, "LAT": 0.0, "LON": 0.0, "SST": 5.0, },
+        {"ID": "AAAAAAAAA", "YR": 2003, "MO": 12, "DY": 2, "HR": 12, "LAT": 0.0, "LON": 0.0, "SST": 5.0, },
+        {"ID": "AAAAAAAAA", "YR": 2003, "MO": 12, "DY": 3, "HR": 12, "LAT": 0.0, "LON": 0.0, "SST": 5.0, },
+        {"ID": "AAAAAAAAA", "YR": 2003, "MO": 12, "DY": 4, "HR": 12, "LAT": 0.0, "LON": 0.0, "SST": 5.0, },
+        {"ID": "AAAAAAAAA", "YR": 2003, "MO": 12, "DY": 5, "HR": 12, "LAT": 0.0, "LON": 0.0, "SST": 5.0, },
+        {"ID": "AAAAAAAAA", "YR": 2003, "MO": 12, "DY": 6, "HR": 12, "LAT": 0.0, "LON": 0.0, "SST": 5.0, },
+        {"ID": "AAAAAAAAA", "YR": 2003, "MO": 12, "DY": 7, "HR": 12, "LAT": 0.0, "LON": 0.0, "SST": 5.0, },
+    ]
+    # stationary drifter (artificial 'jitter' spikes)
+    vals2 = [
+        {"ID": "AAAAAAAAA", "YR": 2003, "MO": 12, "DY": 1, "HR": 12, "LAT": 0.0, "LON": 0.0, "SST": 5.0, },
+        {"ID": "AAAAAAAAA", "YR": 2003, "MO": 12, "DY": 2, "HR": 12, "LAT": 0.0, "LON": 0.0, "SST": 5.0, },
+        {"ID": "AAAAAAAAA", "YR": 2003, "MO": 12, "DY": 3, "HR": 12, "LAT": 1.0, "LON": 0.0, "SST": 5.0, },
+        {"ID": "AAAAAAAAA", "YR": 2003, "MO": 12, "DY": 4, "HR": 12, "LAT": 0.0, "LON": 0.0, "SST": 5.0, },
+        {"ID": "AAAAAAAAA", "YR": 2003, "MO": 12, "DY": 5, "HR": 12, "LAT": 0.0, "LON": 1.0, "SST": 5.0, },
+        {"ID": "AAAAAAAAA", "YR": 2003, "MO": 12, "DY": 6, "HR": 12, "LAT": 0.0, "LON": 0.0, "SST": 5.0, },
+        {"ID": "AAAAAAAAA", "YR": 2003, "MO": 12, "DY": 7, "HR": 12, "LAT": 0.0, "LON": 0.0, "SST": 5.0, },
+    ]
+    # stationary drifter (artificial 'jitter' which won't be fully smoothed and outside tolerance)
+    vals3 = [
+        {"ID": "AAAAAAAAA", "YR": 2003, "MO": 12, "DY": 1, "HR": 12, "LAT": 0.0, "LON": 0.0, "SST": 5.0, },
+        {"ID": "AAAAAAAAA", "YR": 2003, "MO": 12, "DY": 2, "HR": 12, "LAT": 0.0, "LON": 0.0, "SST": 5.0, },
+        {"ID": "AAAAAAAAA", "YR": 2003, "MO": 12, "DY": 3, "HR": 12, "LAT": 1.0, "LON": 0.0, "SST": 5.0, },
+        {"ID": "AAAAAAAAA", "YR": 2003, "MO": 12, "DY": 4, "HR": 12, "LAT": 1.0, "LON": 0.0, "SST": 5.0, },
+        {"ID": "AAAAAAAAA", "YR": 2003, "MO": 12, "DY": 5, "HR": 12, "LAT": 0.0, "LON": 0.0, "SST": 5.0, },
+        {"ID": "AAAAAAAAA", "YR": 2003, "MO": 12, "DY": 6, "HR": 12, "LAT": 0.0, "LON": 0.0, "SST": 5.0, },
+        {"ID": "AAAAAAAAA", "YR": 2003, "MO": 12, "DY": 7, "HR": 12, "LAT": 0.0, "LON": 0.0, "SST": 5.0, },
+    ]
+    # stationary drifter (artificial 'jitter' which won't be fully smoothed and within tolerance)
+    vals4 = [
+        {"ID": "AAAAAAAAA", "YR": 2003, "MO": 12, "DY": 1, "HR": 12, "LAT": 0.0, "LON": 0.0, "SST": 5.0, },
+        {"ID": "AAAAAAAAA", "YR": 2003, "MO": 12, "DY": 2, "HR": 12, "LAT": 0.0, "LON": 0.0, "SST": 5.0, },
+        {"ID": "AAAAAAAAA", "YR": 2003, "MO": 12, "DY": 3, "HR": 12, "LAT": 0.01, "LON": 0.01, "SST": 5.0, },
+        {"ID": "AAAAAAAAA", "YR": 2003, "MO": 12, "DY": 4, "HR": 12, "LAT": 0.01, "LON": 0.01, "SST": 5.0, },
+        {"ID": "AAAAAAAAA", "YR": 2003, "MO": 12, "DY": 5, "HR": 12, "LAT": 0.0, "LON": 0.0, "SST": 5.0, },
+        {"ID": "AAAAAAAAA", "YR": 2003, "MO": 12, "DY": 6, "HR": 12, "LAT": 0.0, "LON": 0.0, "SST": 5.0, },
+        {"ID": "AAAAAAAAA", "YR": 2003, "MO": 12, "DY": 7, "HR": 12, "LAT": 0.0, "LON": 0.0, "SST": 5.0, },
+    ]
+    # moving drifter (going west)
+    vals5 = [
+        {"ID": "AAAAAAAAA", "YR": 2003, "MO": 12, "DY": 1, "HR": 12, "LAT": 0.0, "LON": 0.0, "SST": 5.0, },
+        {"ID": "AAAAAAAAA", "YR": 2003, "MO": 12, "DY": 2, "HR": 12, "LAT": 0.0, "LON": -0.02, "SST": 5.0, },
+        {"ID": "AAAAAAAAA", "YR": 2003, "MO": 12, "DY": 3, "HR": 12, "LAT": 0.0, "LON": -0.04, "SST": 5.0, },
+        {"ID": "AAAAAAAAA", "YR": 2003, "MO": 12, "DY": 4, "HR": 12, "LAT": 0.0, "LON": -0.06, "SST": 5.0, },
+        {"ID": "AAAAAAAAA", "YR": 2003, "MO": 12, "DY": 5, "HR": 12, "LAT": 0.0, "LON": -0.08, "SST": 5.0, },
+        {"ID": "AAAAAAAAA", "YR": 2003, "MO": 12, "DY": 6, "HR": 12, "LAT": 0.0, "LON": -0.10, "SST": 5.0, },
+        {"ID": "AAAAAAAAA", "YR": 2003, "MO": 12, "DY": 7, "HR": 12, "LAT": 0.0, "LON": -0.12, "SST": 5.0, },
+    ]
+    # moving drifter (going north)
+    vals6 = [
+        {"ID": "AAAAAAAAA", "YR": 2003, "MO": 12, "DY": 1, "HR": 12, "LAT": 0.0, "LON": 0.0, "SST": 5.0, },
+        {"ID": "AAAAAAAAA", "YR": 2003, "MO": 12, "DY": 2, "HR": 12, "LAT": 0.02, "LON": 0.0, "SST": 5.0, },
+        {"ID": "AAAAAAAAA", "YR": 2003, "MO": 12, "DY": 3, "HR": 12, "LAT": 0.04, "LON": 0.0, "SST": 5.0, },
+        {"ID": "AAAAAAAAA", "YR": 2003, "MO": 12, "DY": 4, "HR": 12, "LAT": 0.06, "LON": 0.0, "SST": 5.0, },
+        {"ID": "AAAAAAAAA", "YR": 2003, "MO": 12, "DY": 5, "HR": 12, "LAT": 0.08, "LON": 0.0, "SST": 5.0, },
+        {"ID": "AAAAAAAAA", "YR": 2003, "MO": 12, "DY": 6, "HR": 12, "LAT": 0.10, "LON": 0.0, "SST": 5.0, },
+        {"ID": "AAAAAAAAA", "YR": 2003, "MO": 12, "DY": 7, "HR": 12, "LAT": 0.12, "LON": 0.0, "SST": 5.0, },
+    ]
+    # runs aground (drifter going north then stops)
+    vals7 = [
+        {"ID": "AAAAAAAAA", "YR": 2003, "MO": 12, "DY": 1, "HR": 12, "LAT": 0.0, "LON": 0.0, "SST": 5.0, },
+        {"ID": "AAAAAAAAA", "YR": 2003, "MO": 12, "DY": 2, "HR": 12, "LAT": 0.02, "LON": 0.0, "SST": 5.0, },
+        {"ID": "AAAAAAAAA", "YR": 2003, "MO": 12, "DY": 3, "HR": 12, "LAT": 0.04, "LON": 0.0, "SST": 5.0, },
+        {"ID": "AAAAAAAAA", "YR": 2003, "MO": 12, "DY": 4, "HR": 12, "LAT": 0.06, "LON": 0.0, "SST": 5.0, },
+        {"ID": "AAAAAAAAA", "YR": 2003, "MO": 12, "DY": 5, "HR": 12, "LAT": 0.08, "LON": 0.0, "SST": 5.0, },
+        {"ID": "AAAAAAAAA", "YR": 2003, "MO": 12, "DY": 6, "HR": 12, "LAT": 0.08, "LON": 0.0, "SST": 5.0, },
+        {"ID": "AAAAAAAAA", "YR": 2003, "MO": 12, "DY": 7, "HR": 12, "LAT": 0.08, "LON": 0.0, "SST": 5.0, },
+    ]
+    # stationary drifter (high frequency sampling prevents detection)
+    vals8 = [
+        {"ID": "AAAAAAAAA", "YR": 2003, "MO": 12, "DY": 1, "HR": 1, "LAT": 0.0, "LON": 0.0, "SST": 5.0, },
+        {"ID": "AAAAAAAAA", "YR": 2003, "MO": 12, "DY": 1, "HR": 2, "LAT": 0.0, "LON": 0.0, "SST": 5.0, },
+        {"ID": "AAAAAAAAA", "YR": 2003, "MO": 12, "DY": 1, "HR": 3, "LAT": 0.0, "LON": 0.0, "SST": 5.0, },
+        {"ID": "AAAAAAAAA", "YR": 2003, "MO": 12, "DY": 1, "HR": 4, "LAT": 0.0, "LON": 0.0, "SST": 5.0, },
+        {"ID": "AAAAAAAAA", "YR": 2003, "MO": 12, "DY": 1, "HR": 5, "LAT": 0.0, "LON": 0.0, "SST": 5.0, },
+        {"ID": "AAAAAAAAA", "YR": 2003, "MO": 12, "DY": 1, "HR": 6, "LAT": 0.0, "LON": 0.0, "SST": 5.0, },
+        {"ID": "AAAAAAAAA", "YR": 2003, "MO": 12, "DY": 1, "HR": 7, "LAT": 0.0, "LON": 0.0, "SST": 5.0, },
+    ]
+    # stationary drifter (low frequency sampling prevents detection)
+    vals9 = [
+        {"ID": "AAAAAAAAA", "YR": 2003, "MO": 12, "DY": 1, "HR": 12, "LAT": 0.0, "LON": 0.0, "SST": 5.0, },
+        {"ID": "AAAAAAAAA", "YR": 2003, "MO": 12, "DY": 4, "HR": 12, "LAT": 0.0, "LON": 0.0, "SST": 5.0, },
+        {"ID": "AAAAAAAAA", "YR": 2003, "MO": 12, "DY": 7, "HR": 12, "LAT": 0.0, "LON": 0.0, "SST": 5.0, },
+        {"ID": "AAAAAAAAA", "YR": 2003, "MO": 12, "DY": 10, "HR": 12, "LAT": 0.0, "LON": 0.0, "SST": 5.0, },
+        {"ID": "AAAAAAAAA", "YR": 2003, "MO": 12, "DY": 13, "HR": 12, "LAT": 0.0, "LON": 0.0, "SST": 5.0, },
+        {"ID": "AAAAAAAAA", "YR": 2003, "MO": 12, "DY": 16, "HR": 12, "LAT": 0.0, "LON": 0.0, "SST": 5.0, },
+        {"ID": "AAAAAAAAA", "YR": 2003, "MO": 12, "DY": 19, "HR": 12, "LAT": 0.0, "LON": 0.0, "SST": 5.0, },
+    ]
+    # stationary drifter (mid frequency sampling enables detection)
+    vals10 = [
+        {"ID": "AAAAAAAAA", "YR": 2003, "MO": 12, "DY": 1, "HR": 12, "LAT": 0.0, "LON": 0.0, "SST": 5.0, },
+        {"ID": "AAAAAAAAA", "YR": 2003, "MO": 12, "DY": 3, "HR": 0, "LAT": 0.0, "LON": 0.0, "SST": 5.0, },
+        {"ID": "AAAAAAAAA", "YR": 2003, "MO": 12, "DY": 4, "HR": 12, "LAT": 0.0, "LON": 0.0, "SST": 5.0, },
+        {"ID": "AAAAAAAAA", "YR": 2003, "MO": 12, "DY": 6, "HR": 0, "LAT": 0.0, "LON": 0.0, "SST": 5.0, },
+        {"ID": "AAAAAAAAA", "YR": 2003, "MO": 12, "DY": 7, "HR": 12, "LAT": 0.0, "LON": 0.0, "SST": 5.0, },
+        {"ID": "AAAAAAAAA", "YR": 2003, "MO": 12, "DY": 9, "HR": 0, "LAT": 0.0, "LON": 0.0, "SST": 5.0, },
+        {"ID": "AAAAAAAAA", "YR": 2003, "MO": 12, "DY": 10, "HR": 12, "LAT": 0.0, "LON": 0.0, "SST": 5.0, },
+    ]
+    # stationary drifter (changed sampling prevents early detection)
+    vals11 = [
+        {"ID": "AAAAAAAAA", "YR": 2003, "MO": 12, "DY": 1, "HR": 12, "LAT": 0.0, "LON": 0.0, "SST": 5.0, },
+        {"ID": "AAAAAAAAA", "YR": 2003, "MO": 12, "DY": 4, "HR": 12, "LAT": 0.0, "LON": 0.0, "SST": 5.0, },
+        {"ID": "AAAAAAAAA", "YR": 2003, "MO": 12, "DY": 7, "HR": 12, "LAT": 0.0, "LON": 0.0, "SST": 5.0, },
+        {"ID": "AAAAAAAAA", "YR": 2003, "MO": 12, "DY": 8, "HR": 12, "LAT": 0.0, "LON": 0.0, "SST": 5.0, },
+        {"ID": "AAAAAAAAA", "YR": 2003, "MO": 12, "DY": 9, "HR": 12, "LAT": 0.0, "LON": 0.0, "SST": 5.0, },
+        {"ID": "AAAAAAAAA", "YR": 2003, "MO": 12, "DY": 10, "HR": 12, "LAT": 0.0, "LON": 0.0, "SST": 5.0, },
+        {"ID": "AAAAAAAAA", "YR": 2003, "MO": 12, "DY": 11, "HR": 12, "LAT": 0.0, "LON": 0.0, "SST": 5.0, },
+    ]
+    # moving drifter (going northwest at equator but going slowly and within tolerance)
+    vals12 = [
+        {"ID": "AAAAAAAAA", "YR": 2003, "MO": 12, "DY": 1, "HR": 12, "LAT": 0.0, "LON": 0.0, "SST": 5.0, },
+        {"ID": "AAAAAAAAA", "YR": 2003, "MO": 12, "DY": 2, "HR": 12, "LAT": 0.005, "LON": -0.005, "SST": 5.0, },
+        {"ID": "AAAAAAAAA", "YR": 2003, "MO": 12, "DY": 3, "HR": 12, "LAT": 0.01, "LON": -0.01, "SST": 5.0, },
+        {"ID": "AAAAAAAAA", "YR": 2003, "MO": 12, "DY": 4, "HR": 12, "LAT": 0.015, "LON": -0.015, "SST": 5.0, },
+        {"ID": "AAAAAAAAA", "YR": 2003, "MO": 12, "DY": 5, "HR": 12, "LAT": 0.02, "LON": -0.02, "SST": 5.0, },
+        {"ID": "AAAAAAAAA", "YR": 2003, "MO": 12, "DY": 6, "HR": 12, "LAT": 0.025, "LON": -0.025, "SST": 5.0, },
+        {"ID": "AAAAAAAAA", "YR": 2003, "MO": 12, "DY": 7, "HR": 12, "LAT": 0.03, "LON": -0.03, "SST": 5.0, },
+    ]
+    # moving drifter (going west in high Arctic but going slower than tolerance set at equator)
+    vals13 = [
+        {"ID": "AAAAAAAAA", "YR": 2003, "MO": 12, "DY": 1, "HR": 12, "LAT": 85.0, "LON": 0.0, "SST": 5.0, },
+        {"ID": "AAAAAAAAA", "YR": 2003, "MO": 12, "DY": 2, "HR": 12, "LAT": 85.0, "LON": -0.02, "SST": 5.0, },
+        {"ID": "AAAAAAAAA", "YR": 2003, "MO": 12, "DY": 3, "HR": 12, "LAT": 85.0, "LON": -0.04, "SST": 5.0, },
+        {"ID": "AAAAAAAAA", "YR": 2003, "MO": 12, "DY": 4, "HR": 12, "LAT": 85.0, "LON": -0.06, "SST": 5.0, },
+        {"ID": "AAAAAAAAA", "YR": 2003, "MO": 12, "DY": 5, "HR": 12, "LAT": 85.0, "LON": -0.08, "SST": 5.0, },
+        {"ID": "AAAAAAAAA", "YR": 2003, "MO": 12, "DY": 6, "HR": 12, "LAT": 85.0, "LON": -0.10, "SST": 5.0, },
+        {"ID": "AAAAAAAAA", "YR": 2003, "MO": 12, "DY": 7, "HR": 12, "LAT": 85.0, "LON": -0.12, "SST": 5.0, },
+    ]
+    # stationary then moves
+    vals14 = [
+        {"ID": "AAAAAAAAA", "YR": 2003, "MO": 12, "DY": 1, "HR": 12, "LAT": 0.0, "LON": 0.0, "SST": 5.0, },
+        {"ID": "AAAAAAAAA", "YR": 2003, "MO": 12, "DY": 2, "HR": 12, "LAT": 0.0, "LON": 0.0, "SST": 5.0, },
+        {"ID": "AAAAAAAAA", "YR": 2003, "MO": 12, "DY": 3, "HR": 12, "LAT": 0.0, "LON": 0.0, "SST": 5.0, },
+        {"ID": "AAAAAAAAA", "YR": 2003, "MO": 12, "DY": 4, "HR": 12, "LAT": 0.0, "LON": 0.0, "SST": 5.0, },
+        {"ID": "AAAAAAAAA", "YR": 2003, "MO": 12, "DY": 5, "HR": 12, "LAT": 0.02, "LON": 0.0, "SST": 5.0, },
+        {"ID": "AAAAAAAAA", "YR": 2003, "MO": 12, "DY": 6, "HR": 12, "LAT": 0.04, "LON": 0.0, "SST": 5.0, },
+        {"ID": "AAAAAAAAA", "YR": 2003, "MO": 12, "DY": 7, "HR": 12, "LAT": 0.06, "LON": 0.0, "SST": 5.0, },
+    ]
+    # too short for QC
+    vals15 = [
+        {"ID": "AAAAAAAAA", "YR": 2003, "MO": 12, "DY": 1, "HR": 12, "LAT": 0.0, "LON": 0.0, "SST": 5.0, },
+        {"ID": "AAAAAAAAA", "YR": 2003, "MO": 12, "DY": 2, "HR": 12, "LAT": 0.0, "LON": -0.02, "SST": 5.0, },
+    ]
+    # assertion error - bad input parameter
+    vals16 = [
+        {"ID": "AAAAAAAAA", "YR": 2003, "MO": 12, "DY": 1, "HR": 12, "LAT": 0.0, "LON": 0.0, "SST": 5.0, },
+        {"ID": "AAAAAAAAA", "YR": 2003, "MO": 12, "DY": 2, "HR": 12, "LAT": 0.0, "LON": -0.02, "SST": 5.0, },
+        {"ID": "AAAAAAAAA", "YR": 2003, "MO": 12, "DY": 3, "HR": 12, "LAT": 0.0, "LON": -0.04, "SST": 5.0, },
+        {"ID": "AAAAAAAAA", "YR": 2003, "MO": 12, "DY": 4, "HR": 12, "LAT": 0.0, "LON": -0.06, "SST": 5.0, },
+        {"ID": "AAAAAAAAA", "YR": 2003, "MO": 12, "DY": 5, "HR": 12, "LAT": 0.0, "LON": -0.08, "SST": 5.0, },
+        {"ID": "AAAAAAAAA", "YR": 2003, "MO": 12, "DY": 6, "HR": 12, "LAT": 0.0, "LON": -0.10, "SST": 5.0, },
+        {"ID": "AAAAAAAAA", "YR": 2003, "MO": 12, "DY": 7, "HR": 12, "LAT": 0.0, "LON": -0.12, "SST": 5.0, },
+    ]
+    # assertion error - missing observation
+    vals17 = [
+        {"ID": "AAAAAAAAA", "YR": 2003, "MO": 12, "DY": 1, "HR": 12, "LAT": 0.0, "LON": 0.0, "SST": 5.0, },
+        {"ID": "AAAAAAAAA", "YR": 2003, "MO": 12, "DY": 2, "HR": 12, "LAT": 0.0, "LON": -0.02, "SST": 5.0, },
+        {"ID": "AAAAAAAAA", "YR": 2003, "MO": 12, "DY": 3, "HR": 12, "LAT": 0.0, "LON": -0.04, "SST": 5.0, },
+        {"ID": "AAAAAAAAA", "YR": 2003, "MO": 12, "DY": 4, "HR": 12, "LAT": 0.0, "LON": -0.06, "SST": 5.0, },
+        {"ID": "AAAAAAAAA", "YR": 2003, "MO": 12, "DY": 5, "HR": 12, "LAT": 0.0, "LON": -0.08, "SST": 5.0, },
+        {"ID": "AAAAAAAAA", "YR": 2003, "MO": 12, "DY": 6, "HR": 12, "LAT": 0.0, "LON": -0.10, "SST": 5.0, },
+        {"ID": "AAAAAAAAA", "YR": 2003, "MO": 12, "DY": 7, "HR": 12, "LAT": 0.0, "LON": -0.12, "SST": 5.0, },
+    ]
+    # assertion error - times not sorted
+    vals18 = [
+        {"ID": "AAAAAAAAA", "YR": 2003, "MO": 12, "DY": 1, "HR": 12, "LAT": 0.0, "LON": 0.0, "SST": 5.0, },
+        {"ID": "AAAAAAAAA", "YR": 2003, "MO": 12, "DY": 2, "HR": 12, "LAT": 0.0, "LON": -0.02, "SST": 5.0, },
+        {"ID": "AAAAAAAAA", "YR": 2003, "MO": 12, "DY": 3, "HR": 12, "LAT": 0.0, "LON": -0.04, "SST": 5.0, },
+        {"ID": "AAAAAAAAA", "YR": 2003, "MO": 12, "DY": 2, "HR": 12, "LAT": 0.0, "LON": -0.06, "SST": 5.0, },
+        {"ID": "AAAAAAAAA", "YR": 2003, "MO": 12, "DY": 5, "HR": 12, "LAT": 0.0, "LON": -0.08, "SST": 5.0, },
+        {"ID": "AAAAAAAAA", "YR": 2003, "MO": 12, "DY": 6, "HR": 12, "LAT": 0.0, "LON": -0.10, "SST": 5.0, },
+        {"ID": "AAAAAAAAA", "YR": 2003, "MO": 12, "DY": 7, "HR": 12, "LAT": 0.0, "LON": -0.12, "SST": 5.0, },
+    ]
+    obs = locals()[f"vals{selector}"]
+    reps = {}
+    for key in obs[0]:
+        reps[key] = []
+    reps['DATE'] = []
+
+    for v in obs:
+        for key in reps:
+            if key != 'DATE':
+                reps[key].append(v[key])
+
+        hour = int(v['HR'])
+        minute = 60 * (v['HR'] - hour)
+        date = datetime(v['YR'], v['MO'], v['DY'], hour, minute)
+        reps['DATE'].append(date)
+
+    for key in reps:
+        reps[key] = np.array(reps[key])
+
+    if selector == 17:
+        reps['LON'][1] = np.nan
+
+
+    return reps['LAT'], reps['LON'], reps['DATE']
+
 @pytest.fixture
 def reps1():
     # stationary drifter
@@ -1517,14 +1719,6 @@ def reps1():
 
     return reps
 
-
-def test_stationary_b(reps1):
-    expected_flags = [1, 1, 1, 1, 1, 1, 1]
-    otqc.do_aground_check(reps1.reps, 3, 1, 2)
-    for i in range(0, len(reps1)):
-        assert reps1.get_qc(i, "POS", "drf_agr") == expected_flags[i]
-
-
 @pytest.fixture
 def reps2():
     # stationary drifter (artificial 'jitter' spikes)
@@ -1548,13 +1742,6 @@ def reps2():
         reps.add_report(rep)
 
     return reps
-
-
-def test_stationary_jitter_spikes(reps2):
-    expected_flags = [1, 1, 1, 1, 1, 1, 1]
-    otqc.do_aground_check(reps2.reps, 3, 1, 2)
-    for i in range(0, len(reps2)):
-        assert reps2.get_qc(i, "POS", "drf_agr") == expected_flags[i]
 
 
 @pytest.fixture
@@ -1583,13 +1770,6 @@ def reps3():
     return reps
 
 
-def test_stationary_big_remaining_jitter(reps3):
-    expected_flags = [0, 0, 0, 0, 1, 1, 1]
-    otqc.do_aground_check(reps3.reps, 3, 1, 2)
-    for i in range(0, len(reps3)):
-        assert reps3.get_qc(i, "POS", "drf_agr") == expected_flags[i]
-
-
 @pytest.fixture
 def reps4():
     # stationary drifter (artificial 'jitter' which won't be fully smoothed and within tolerance)
@@ -1613,14 +1793,6 @@ def reps4():
         reps.add_report(rep)
 
     return reps
-
-
-def test_stationary_small_remaining_jitter(reps4):
-    expected_flags = [1, 1, 1, 1, 1, 1, 1]
-    otqc.do_aground_check(reps4.reps, 3, 1, 2)
-    for i in range(0, len(reps4)):
-        assert reps4.get_qc(i, "POS", "drf_agr") == expected_flags[i]
-
 
 @pytest.fixture
 def reps5():
@@ -1646,14 +1818,6 @@ def reps5():
 
     return reps
 
-
-def test_moving_west(reps5):
-    expected_flags = [0, 0, 0, 0, 0, 0, 0]
-    otqc.do_aground_check(reps5.reps, 3, 1, 2)
-    for i in range(0, len(reps5)):
-        assert reps5.get_qc(i, "POS", "drf_agr") == expected_flags[i]
-
-
 @pytest.fixture
 def reps6():
     # moving drifter (going north)
@@ -1678,14 +1842,6 @@ def reps6():
 
     return reps
 
-
-def test_moving_north(reps6):
-    expected_flags = [0, 0, 0, 0, 0, 0, 0]
-    otqc.do_aground_check(reps6.reps, 3, 1, 2)
-    for i in range(0, len(reps6)):
-        assert reps6.get_qc(i, "POS", "drf_agr") == expected_flags[i]
-
-
 @pytest.fixture
 def reps7():
     # runs aground (drifter going north then stops)
@@ -1708,13 +1864,6 @@ def reps7():
         rep = ex.MarineReportQC(rec)
         reps.add_report(rep)
     return reps
-
-
-def test_moving_north_then_stop(reps7):
-    expected_flags = [0, 0, 0, 0, 1, 1, 1]
-    otqc.do_aground_check(reps7.reps, 3, 1, 2)
-    for i in range(0, len(reps7)):
-        assert reps7.get_qc(i, "POS", "drf_agr") == expected_flags[i]
 
 
 @pytest.fixture
@@ -1742,13 +1891,6 @@ def reps8():
     return reps
 
 
-def test_stationary_high_freq_sampling(reps8):
-    expected_flags = [0, 0, 0, 0, 0, 0, 0]
-    otqc.do_aground_check(reps8.reps, 3, 1, 2)
-    for i in range(0, len(reps8)):
-        assert reps8.get_qc(i, "POS", "drf_agr") == expected_flags[i]
-
-
 @pytest.fixture
 def reps9():
     # stationary drifter (low frequency sampling prevents detection)
@@ -1772,13 +1914,6 @@ def reps9():
         reps.add_report(rep)
 
     return reps
-
-
-def test_stationary_low_freq_sampling(reps9):
-    expected_flags = [0, 0, 0, 0, 0, 0, 0]
-    otqc.do_aground_check(reps9.reps, 3, 1, 2)
-    for i in range(0, len(reps9)):
-        assert reps9.get_qc(i, "POS", "drf_agr") == expected_flags[i]
 
 
 @pytest.fixture
@@ -1807,13 +1942,6 @@ def reps10():
     return reps
 
 
-def test_stationary_mid_freq_sampling(reps10):
-    expected_flags = [1, 1, 1, 1, 1, 1, 1]
-    otqc.do_aground_check(reps10.reps, 3, 1, 2)
-    for i in range(0, len(reps10)):
-        assert reps10.get_qc(i, "POS", "drf_agr") == expected_flags[i]
-
-
 @pytest.fixture
 def reps11():
     # stationary drifter (changed sampling prevents early detection)
@@ -1838,13 +1966,6 @@ def reps11():
         reps.add_report(rep)
 
     return reps
-
-
-def test_stationary_low_to_mid_freq_sampling(reps11):
-    expected_flags = [0, 0, 1, 1, 1, 1, 1]
-    otqc.do_aground_check(reps11.reps, 3, 1, 2)
-    for i in range(0, len(reps11)):
-        assert reps11.get_qc(i, "POS", "drf_agr") == expected_flags[i]
 
 
 @pytest.fixture
@@ -1872,13 +1993,6 @@ def reps12():
     return reps
 
 
-def test_moving_slowly_northwest(reps12):
-    expected_flags = [1, 1, 1, 1, 1, 1, 1]
-    otqc.do_aground_check(reps12.reps, 3, 1, 2)
-    for i in range(0, len(reps12)):
-        assert reps12.get_qc(i, "POS", "drf_agr") == expected_flags[i]
-
-
 @pytest.fixture
 def reps13():
     # moving drifter (going west in high Arctic but going slower than tolerance set at equator)
@@ -1902,14 +2016,6 @@ def reps13():
         reps.add_report(rep)
 
     return reps
-
-
-def test_moving_slowly_west_in_arctic(reps13):
-    expected_flags = [1, 1, 1, 1, 1, 1, 1]
-    otqc.do_aground_check(reps13.reps, 3, 1, 2)
-    for i in range(0, len(reps13)):
-        assert reps13.get_qc(i, "POS", "drf_agr") == expected_flags[i]
-
 
 @pytest.fixture
 def reps14():
@@ -1937,13 +2043,6 @@ def reps14():
     return reps
 
 
-def test_stop_then_moving_north(reps14):
-    expected_flags = [0, 0, 0, 0, 0, 0, 0]
-    otqc.do_aground_check(reps14.reps, 3, 1, 2)
-    for i in range(0, len(reps14)):
-        assert reps14.get_qc(i, "POS", "drf_agr") == expected_flags[i]
-
-
 @pytest.fixture
 def reps15():
     # too short for QC
@@ -1963,18 +2062,6 @@ def reps15():
         reps.add_report(rep)
 
     return reps
-
-
-def test_too_short_for_qc(reps15):
-    expected_flags = [0, 0]
-    old_stdout = sys.stdout
-    f = open(os.devnull, "w")
-    sys.stdout = f
-    otqc.do_aground_check(reps15.reps, 3, 1, 2)
-    sys.stdout = old_stdout
-    for i in range(0, len(reps15)):
-        assert reps15.get_qc(i, "POS", "drf_agr") == expected_flags[i]
-
 
 @pytest.fixture
 def reps16():
@@ -1999,17 +2086,6 @@ def reps16():
         reps.add_report(rep)
 
     return reps
-
-
-def test_error_bad_input_parameter(reps16):
-    expected_flags = [9, 9, 9, 9, 9, 9, 9]
-    try:
-        otqc.do_aground_check(reps16.reps, 0, 1, 2)
-    except AssertionError as error:
-        error_return_text = "invalid input parameter: smooth_win must be >= 1"
-        assert str(error)[0 : len(error_return_text)] == error_return_text
-    for i in range(0, len(reps16)):
-        assert reps16.get_qc(i, "POS", "drf_agr") == expected_flags[i]
 
 
 @pytest.fixture
@@ -2038,17 +2114,6 @@ def reps17():
     return reps
 
 
-def test_error_missing_observation(reps17):
-    expected_flags = [9, 9, 9, 9, 9, 9, 9]
-    try:
-        otqc.do_aground_check(reps17.reps, 3, 1, 2)
-    except AssertionError as error:
-        error_return_text = "problem with report values: Nan(s) found in longitude"
-        assert str(error)[0 : len(error_return_text)] == error_return_text
-    for i in range(0, len(reps17)):
-        assert reps17.get_qc(i, "POS", "drf_agr") == expected_flags[i]
-
-
 @pytest.fixture
 def reps18():
     # assertion error - times not sorted
@@ -2075,10 +2140,157 @@ def reps18():
     return reps
 
 
+def test_stationary_b(reps1):
+    expected_flags = [1, 1, 1, 1, 1, 1, 1]
+    tqc.do_aground_check(reps1.reps, 3, 1, 2)
+    for i in range(0, len(reps1)):
+        assert reps1.get_qc(i, "POS", "drf_agr") == expected_flags[i]
+
+
+
+def test_stationary_jitter_spikes(reps2):
+    expected_flags = [1, 1, 1, 1, 1, 1, 1]
+    tqc.do_aground_check(reps2.reps, 3, 1, 2)
+    for i in range(0, len(reps2)):
+        assert reps2.get_qc(i, "POS", "drf_agr") == expected_flags[i]
+
+
+
+def test_stationary_big_remaining_jitter(reps3):
+    expected_flags = [0, 0, 0, 0, 1, 1, 1]
+    tqc.do_aground_check(reps3.reps, 3, 1, 2)
+    for i in range(0, len(reps3)):
+        assert reps3.get_qc(i, "POS", "drf_agr") == expected_flags[i]
+
+
+def test_stationary_small_remaining_jitter(reps4):
+    expected_flags = [1, 1, 1, 1, 1, 1, 1]
+    tqc.do_aground_check(reps4.reps, 3, 1, 2)
+    for i in range(0, len(reps4)):
+        assert reps4.get_qc(i, "POS", "drf_agr") == expected_flags[i]
+
+
+
+def test_moving_west(reps5):
+    expected_flags = [0, 0, 0, 0, 0, 0, 0]
+    tqc.do_aground_check(reps5.reps, 3, 1, 2)
+    for i in range(0, len(reps5)):
+        assert reps5.get_qc(i, "POS", "drf_agr") == expected_flags[i]
+
+
+
+
+def test_moving_north(reps6):
+    expected_flags = [0, 0, 0, 0, 0, 0, 0]
+    tqc.do_aground_check(reps6.reps, 3, 1, 2)
+    for i in range(0, len(reps6)):
+        assert reps6.get_qc(i, "POS", "drf_agr") == expected_flags[i]
+
+
+
+def test_moving_north_then_stop(reps7):
+    expected_flags = [0, 0, 0, 0, 1, 1, 1]
+    tqc.do_aground_check(reps7.reps, 3, 1, 2)
+    for i in range(0, len(reps7)):
+        assert reps7.get_qc(i, "POS", "drf_agr") == expected_flags[i]
+
+
+
+def test_stationary_high_freq_sampling(reps8):
+    expected_flags = [0, 0, 0, 0, 0, 0, 0]
+    tqc.do_aground_check(reps8.reps, 3, 1, 2)
+    for i in range(0, len(reps8)):
+        assert reps8.get_qc(i, "POS", "drf_agr") == expected_flags[i]
+
+
+def test_stationary_low_freq_sampling(reps9):
+    expected_flags = [0, 0, 0, 0, 0, 0, 0]
+    tqc.do_aground_check(reps9.reps, 3, 1, 2)
+    for i in range(0, len(reps9)):
+        assert reps9.get_qc(i, "POS", "drf_agr") == expected_flags[i]
+
+
+
+
+def test_stationary_mid_freq_sampling(reps10):
+    expected_flags = [1, 1, 1, 1, 1, 1, 1]
+    tqc.do_aground_check(reps10.reps, 3, 1, 2)
+    for i in range(0, len(reps10)):
+        assert reps10.get_qc(i, "POS", "drf_agr") == expected_flags[i]
+
+
+
+def test_stationary_low_to_mid_freq_sampling(reps11):
+    expected_flags = [0, 0, 1, 1, 1, 1, 1]
+    tqc.do_aground_check(reps11.reps, 3, 1, 2)
+    for i in range(0, len(reps11)):
+        assert reps11.get_qc(i, "POS", "drf_agr") == expected_flags[i]
+
+
+
+def test_moving_slowly_northwest(reps12):
+    expected_flags = [1, 1, 1, 1, 1, 1, 1]
+    tqc.do_aground_check(reps12.reps, 3, 1, 2)
+    for i in range(0, len(reps12)):
+        assert reps12.get_qc(i, "POS", "drf_agr") == expected_flags[i]
+
+
+
+def test_moving_slowly_west_in_arctic(reps13):
+    expected_flags = [1, 1, 1, 1, 1, 1, 1]
+    tqc.do_aground_check(reps13.reps, 3, 1, 2)
+    for i in range(0, len(reps13)):
+        assert reps13.get_qc(i, "POS", "drf_agr") == expected_flags[i]
+
+
+
+def test_stop_then_moving_north(reps14):
+    expected_flags = [0, 0, 0, 0, 0, 0, 0]
+    tqc.do_aground_check(reps14.reps, 3, 1, 2)
+    for i in range(0, len(reps14)):
+        assert reps14.get_qc(i, "POS", "drf_agr") == expected_flags[i]
+
+
+def test_too_short_for_qc(reps15):
+    expected_flags = [0, 0]
+    old_stdout = sys.stdout
+    f = open(os.devnull, "w")
+    sys.stdout = f
+    tqc.do_aground_check(reps15.reps, 3, 1, 2)
+    sys.stdout = old_stdout
+    for i in range(0, len(reps15)):
+        assert reps15.get_qc(i, "POS", "drf_agr") == expected_flags[i]
+
+
+
+
+def test_error_bad_input_parameter(reps16):
+    expected_flags = [9, 9, 9, 9, 9, 9, 9]
+    try:
+        tqc.do_aground_check(reps16.reps, 0, 1, 2)
+    except AssertionError as error:
+        error_return_text = "invalid input parameter: smooth_win must be >= 1"
+        assert str(error)[0 : len(error_return_text)] == error_return_text
+    for i in range(0, len(reps16)):
+        assert reps16.get_qc(i, "POS", "drf_agr") == expected_flags[i]
+
+
+def test_error_missing_observation(reps17):
+    expected_flags = [9, 9, 9, 9, 9, 9, 9]
+    try:
+        tqc.do_aground_check(reps17.reps, 3, 1, 2)
+    except AssertionError as error:
+        error_return_text = "problem with report values: Nan(s) found in longitude"
+        assert str(error)[0 : len(error_return_text)] == error_return_text
+    for i in range(0, len(reps17)):
+        assert reps17.get_qc(i, "POS", "drf_agr") == expected_flags[i]
+
+
+
 def test_error_not_time_sorted(reps18):
     expected_flags = [9, 9, 9, 9, 9, 9, 9]
     try:
-        otqc.do_aground_check(reps18.reps, 3, 1, 2)
+        tqc.do_aground_check(reps18.reps, 3, 1, 2)
     except AssertionError as error:
         error_return_text = "problem with report values: times are not sorted"
         assert str(error)[0 : len(error_return_text)] == error_return_text
