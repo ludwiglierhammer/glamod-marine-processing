@@ -214,7 +214,8 @@ def do_speed_check(lons, lats, dates, *args):
     checker = SpeedChecker(lons, lats, dates)
     if args:
         checker.set_parameters(*args)
-    return checker._do_speed_check()
+    checker._do_speed_check()
+    return checker.get_qc_outcomes()
 
 
 
@@ -262,6 +263,11 @@ class SpeedChecker:
         self.nreps = len(lons)
         self.hrs = convert_date_to_hours(dates)
 
+        # Initialise QC outcomes with untested
+        self.qc_outcomes = np.zeros(self.nreps) + untested
+
+    def get_qc_outcomes(self):
+        return self.qc_outcomes
 
     def set_parameters(
         self, speed_limit: float, min_win_period: float, max_win_period: float
@@ -289,6 +295,7 @@ class SpeedChecker:
         AssertionError
             When any of the input parameters are invalid
         """
+        self.good_parameters = True
         try:
             speed_limit = float(speed_limit)
             min_win_period = float(min_win_period)
@@ -308,16 +315,20 @@ class SpeedChecker:
         SpeedChecker.max_win_period = max_win_period
 
     def valid_arrays(self):
-        error = None
+        valid = True
         if any(np.isnan(self.lon)):
-            error = "Nan(s) found in longitude"
+            warnings.warn(UserWarning("Nan(s) found in longitude"))
+            valid = False
         if any(np.isnan(self.lat)):
-            error = "Nan(s) found in latitude"
+            warnings.warn(UserWarning("Nan(s) found in latitude"))
+            valid = False
         if any(np.isnan(self.hrs)):
-            error = "Nan(s) found in time differences"
+            warnings.warn(UserWarning("Nan(s) found in time differences"))
+            valid = False
         if not(is_monotonic(self.hrs)):
-            error = "times are not sorted"
-        return error
+            warnings.warn(UserWarning("times are not sorted"))
+            valid = False
+        return valid
 
     def _do_speed_check(self):
         """Perform the actual speed check"""
@@ -325,14 +336,12 @@ class SpeedChecker:
         min_win_period_hours = SpeedChecker.min_win_period * 24.0
         max_win_period_hours = SpeedChecker.max_win_period * 24.0
 
-        if self.valid_arrays() is not None:
-            warnings.warn(UserWarning(self.valid_arrays()))
-            return np.zeros(self.nreps) + untestable
+        if not self.valid_arrays() or not self.good_parameters:
+            self.qc_outcomes = np.zeros(self.nreps) + untestable
+            return
 
-        if not self.good_parameters:
-            return np.zeros(nrep) + untestable
-
-        qc_outcomes = np.zeros(nrep)
+        # Initialise
+        self.qc_outcomes = np.zeros(nrep) + passed
 
         # loop through timeseries to see if drifter is moving too fast
         # and flag any occurrences
@@ -340,28 +349,33 @@ class SpeedChecker:
         i = 0
         time_to_end = self.hrs[-1] - self.hrs[i]
         while time_to_end >= min_win_period_hours:
+            # Find all time points before current time plus the max window period
             f_win = self.hrs <= self.hrs[i] + max_win_period_hours
+            # Window length is the difference between the latest time point in
+            # the window and the current time
             win_len = self.hrs[f_win][-1] - self.hrs[i]
+            # If the actual window length is shorter than the minimum window period
+            # then go to the next time step
             if win_len < min_win_period_hours:
                 i += 1
                 time_to_end = self.hrs[-1] - self.hrs[i]
                 continue
 
+            # If the actual window length is long enough then calculate the speed
+            # based on the first and last points in the window
             displace = sphere_distance(
                 self.lat[i], self.lon[i], self.lat[f_win][-1], self.lon[f_win][-1]
             )
             speed = displace / win_len  # km per hr
             speed = speed * 1000.0 / (60.0 * 60)  # metres per sec
 
+            # If the average speed during the window is too high then set all
+            # flags in the window to failed.
             if speed > SpeedChecker.speed_limit:
-                for ix in range(i, index_arr[f_win][-1] + 1):
-                    if qc_outcomes[ix] == 0:
-                        qc_outcomes[ix] = 1
-                i += 1
-                time_to_end = self.hrs[-1] - self.hrs[i]
-            else:
-                i += 1
-                time_to_end = self.hrs[-1] - self.hrs[i]
+                self.qc_outcomes[i:index_arr[f_win][-1] + 1] = failed
 
-        return qc_outcomes
+            i += 1
+            time_to_end = self.hrs[-1] - self.hrs[i]
+
+        return
 
