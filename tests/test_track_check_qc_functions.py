@@ -67,7 +67,7 @@ def buoy_frame():
 def test_do_spike_check(ship_frame, buoy_frame):
     for frame in [ship_frame, buoy_frame]:
         result = do_spike_check(
-            sst=frame.sst,
+            value=frame.sst,
             lat=frame.lat,
             lon=frame.lon,
             date=frame.date,
@@ -87,10 +87,14 @@ def test_do_spike_check_raises(ship_frame, key):
     series.loc[len(series)] = 1
     kwargs = {}
     for k in ["sst", "lat", "lon", "date"]:
-        if k == key:
-            kwargs[k] = series
+        if k == "sst":
+            k_ = "value"
         else:
-            kwargs[k] = ship_frame[k]
+            k_ = k
+        if k == key:
+            kwargs[k_] = series
+        else:
+            kwargs[k_] = ship_frame[k]
     with pytest.raises(ValueError):
         do_spike_check(**kwargs)
 

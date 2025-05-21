@@ -63,29 +63,40 @@ def inspect_arrays(params: list[str]) -> Callable:
     return decorator
 
 
-@inspect_arrays(["sst", "lat", "lon", "date"])
+@inspect_arrays(["value", "lat", "lon", "date"])
 def do_spike_check(
-    sst: Sequence[float],
+    value: Sequence[float],
     lat: Sequence[float],
     lon: Sequence[float],
     date: Sequence[datetime],
+    max_gradient_space: float = 0.5,
+    max_gradient_time: float = 1.0,
     delta_t: float = 2.0,
+    n_neighbours: int = 5,
 ) -> Sequence[int]:
     """Perform IQUAM like spike check.
 
     Parameters
     ----------
-    sst: array-like of float, shape (n,)
-        1-dimensional sea surface temperature array.
+    value: array-like of float, shape (n,)
+        1-dimensional value array.
     lat: array-like of float, shape (n,)
         1-dimensional latitude array in degrees.
     lon: array-like of float, shape (n,)
         1-dimensional longitude array in degrees.
     date: array-like of datetime, shape (n,)
         1-dimensional date array.
+    max_gradient_space: float, default: 0.5
+        Maximum gradient in space.
+        The units is 'units of value' per kilometer.
+    max_gradient_time: float, default: 1.0
+        Maximum gradient in time.
+        The units is 'units of value' per hour.
     delta_t: float, default 2.0
         Temperature delta.
         This should be 2.0 for ships and 1.0 for drifting buoys.
+    n_neighbours: int, default: 5
+        Number of neighbours.
 
     Returns
     -------
@@ -98,15 +109,10 @@ def do_spike_check(
     ValueError
         If either input is not 1-dimensional or if their lengths do not match.
     """
-    max_gradient_space = 0.5  # K/km
-    max_gradient_time = 1.0  # K/hr
-
-    n_neighbours = 5
-
     gradient_violations = []
     count_gradient_violations = []
 
-    number_of_obs = len(sst)
+    number_of_obs = len(value)
 
     spike_qc = np.asarray([passed] * number_of_obs)
 
@@ -120,13 +126,13 @@ def do_spike_check(
 
         for t2 in range(lo, hi):
 
-            if sst[t1] is None or sst[t2] is None:
+            if value[t1] is None or value[t2] is None:
                 continue
 
             distance = sg.sphere_distance(lat[t1], lon[t1], lat[t2], lon[t2])
             delta = pd.Timestamp(date[t2]) - pd.Timestamp(date[t2])
             time_diff = abs(delta.days * 24 + delta.seconds / 3600.0)
-            val_change = abs(sst[t2] - sst[t1])
+            val_change = abs(value[t2] - value[t1])
 
             iquam_condition = max(
                 [
@@ -566,6 +572,10 @@ def do_track_check(
     lat: Sequence[float],
     lon: Sequence[float],
     date: Sequence[datetime],
+    max_direction_change: float = 60.0,
+    max_speed_change: float = 10.0,
+    max_absolute_speed: float = 40.0,
+    max_midpoint_discrepancy: float = 150.0,
 ) -> tuple[int, int]:
     """Perform one pass of the track check.  This is an implementation of the MDS track check code
     which was originally written in the 1990s. I don't know why this piece of historic trivia so exercises
@@ -583,6 +593,14 @@ def do_track_check(
         1-dimensional longitude array in degrees.
     date: array-like of datetime, shape (n,)
         1-dimensional date array.
+    max_direction_change: float, default: 60.0
+        Maximum valid direction change in ???.
+    max_speed_change: float, default: 10.0
+        Maximum valid speed change in ???.
+    max_absolute_speed: float, default: 40.0
+        Maximum valid absolute speed in ???.
+    max_midpoint_discrepancy: float, default: 150.0
+        Maximum valid midpoint discrepancy in ???.
 
     Returns
     -------
@@ -595,11 +613,6 @@ def do_track_check(
     ValueError
         If either input is not 1-dimensional or if their lengths do not match.
     """
-    max_direction_change = 60.0
-    max_speed_change = 10.0
-    max_absolute_speed = 40.0
-    max_midpoint_discrepancy = 150.0
-
     number_of_obs = len(lat)
 
     # no obs in, no qc outcomes out
@@ -732,6 +745,8 @@ def find_saturated_runs(
     lat: Sequence[float],
     lon: Sequence[float],
     date: Sequence[datetime],
+    min_time_threshold: float = 48.0,
+    shortest_run: int = 4,
 ) -> Sequence[int]:
     """Perform checks on persistence of 100% rh while going through the voyage.
     While going through the voyage repeated strings of 100 %rh (AT == DPT) are noted.
@@ -750,6 +765,10 @@ def find_saturated_runs(
         1-dimensional longitude array in degrees.
     date: array-like of datetime, shape (n,)
         1-dimensional date array.
+    min_time_threshold: float, default: 48,0
+        Minimum time thresholf in hours.
+    shortest_run: int, default: 4
+        Shortest number of observations.
 
     Returns
     -------
@@ -762,9 +781,6 @@ def find_saturated_runs(
     ValueError
         If either input is not 1-dimensional or if their lengths do not match.
     """
-    min_time_threshold = 48.0  # hours
-    shortest_run = 4  # number of obs
-
     satcount = []
 
     repsat = np.asarray([passed] * len(lat))
@@ -817,7 +833,9 @@ def find_saturated_runs(
 
 
 @inspect_arrays(["value"])
-def find_multiple_rounded_values(value: Sequence[float]) -> Sequence[int]:
+def find_multiple_rounded_values(
+    value: Sequence[float], min_count: int = 20, threshold: float = 0.5
+) -> Sequence[int]:
     """Find instances when more than "threshold" of the observations are
     whole numbers and set the 'round' flag. Used in the humidity QC
     where there are times when the values are rounded and this may
@@ -827,6 +845,10 @@ def find_multiple_rounded_values(value: Sequence[float]) -> Sequence[int]:
     ----------
     value: array-like of float, shape (n,)
         1-dimensional array.
+    min_count: int, default: 20
+        ???
+    threshold: float, default: 0.5
+        ???
 
     Returns
     -------
@@ -834,9 +856,6 @@ def find_multiple_rounded_values(value: Sequence[float]) -> Sequence[int]:
         1-dimensional array containing rounded QC flag.
         1 if value is whole number, otherwise 0.
     """
-    min_count = 20
-    threshold = 0.5
-
     assert 0.0 <= threshold <= 1.0
 
     number_of_obs = len(value)
@@ -870,7 +889,9 @@ def find_multiple_rounded_values(value: Sequence[float]) -> Sequence[int]:
 
 
 @inspect_arrays(["value"])
-def find_repeated_values(value: Sequence[float]) -> pd.DataFrame:
+def find_repeated_values(
+    value: Sequence[float], min_count: int = 20, threshold: float = 0.7
+) -> pd.DataFrame:
     """Find cases where more than a given proportion of SSTs have the same value
 
     This function goes through a voyage and finds any cases where more than a threshold fraction of
@@ -881,6 +902,10 @@ def find_repeated_values(value: Sequence[float]) -> pd.DataFrame:
     ----------
     value: array-like of float, shape (n,)
         1-dimensional array.
+    min_count: int, default: 20
+        ???
+    threshold: float, default: 0.7
+        ???
 
     Returns
     -------
@@ -888,9 +913,7 @@ def find_repeated_values(value: Sequence[float]) -> pd.DataFrame:
         1-dimensional array containing repeated QC flag.
         1 if value is repeated, otherwise 0.
     """
-    threshold = 0.7
     assert 0.0 <= threshold <= 1.0
-    min_count = 20
 
     number_of_obs = len(value)
     rep = np.asarray([passed] * number_of_obs)
@@ -922,6 +945,9 @@ def do_iquam_track_check(
     lon: Sequence[float],
     date: Sequence[datetime],
     speed_limit: float = 60.0,
+    delta_d: float = 1.11,
+    delta_t: float = 0.01,
+    n_neighbours: int = 5,
 ) -> Sequence[int]:
     """Perform the IQUAM track check as detailed in Xu and Ignatov 2013
 
@@ -942,6 +968,12 @@ def do_iquam_track_check(
     speed_limit: float, default: 60.0
         Speed limit of platform in km/h.
         This should be 60.0 for ships and 15.0 for drifting buoys.
+    delta_d: float, default: 1.11
+        ??? degrees of latitude
+    delta_t: float, default: 0.01
+        ??? one hundredth of an hour
+    n_neighbours: int, default: 5
+        Number of neighbours.
 
     Returns
     -------
@@ -954,21 +986,6 @@ def do_iquam_track_check(
     ValueError
         If either input is not 1-dimensional or if their lengths do not match.
     """
-    lat = np.asarray(lat)
-    lon = np.asarray(lon)
-    date = np.asarray(date)
-
-    for arr, name in zip([lat, lon, date], ["lat", "lon", "date"]):
-        if arr.ndim != 1:
-            raise ValueError(f"Input '{name}' must be one-dimensional.")
-        if len(arr) != len(lat):
-            raise ValueError(f"Input '{name}' must have the same length as 'lat'.")
-
-    delta_d = 1.11  # 0.1 degrees of latitude
-    delta_t = 0.01  # one hundredth of an hour
-
-    n_neighbours = 5
-
     number_of_obs = len(lat)
 
     if number_of_obs == 0:
