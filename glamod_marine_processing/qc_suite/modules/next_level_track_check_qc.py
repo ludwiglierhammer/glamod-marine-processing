@@ -576,7 +576,7 @@ def do_track_check(
     max_speed_change: float = 10.0,
     max_absolute_speed: float = 40.0,
     max_midpoint_discrepancy: float = 150.0,
-) -> tuple[int, int]:
+) -> Sequence[int]:
     """Perform one pass of the track check.  This is an implementation of the MDS track check code
     which was originally written in the 1990s. I don't know why this piece of historic trivia so exercises
     my mind, but it does: the 1990s! I wish my code would last so long.
@@ -604,24 +604,28 @@ def do_track_check(
 
     Returns
     -------
-    tuple of array-like of int, shape (n,)
-        A tuple of two 1-dimensional arrays of floats representing trk and few.
+    array-like of int, shape (n,)
+        1-dimensional arrays of ints representing track check QC flags.
         1 if track check fails, 0 otherwise.
 
     Raises
     ------
     ValueError
         If either input is not 1-dimensional or if their lengths do not match.
+
+    Note
+    ----
+    If number of observations is less than three, the track check always passes.
     """
     number_of_obs = len(lat)
 
     # no obs in, no qc outcomes out
     if number_of_obs == 0:
-        return (None, None)
+        return
 
     # fewer than three obs - set the fewsome flag
     if number_of_obs < 3:
-        return np.zeros(number_of_obs), np.zeros(number_of_obs) + 1
+        return np.asarray([passed] * number_of_obs)
 
     # work out speeds and distances between alternating points
     speed_alt, _distance_alt, _course_alt, _timediff_alt = (
@@ -670,7 +674,6 @@ def do_track_check(
 
     # do QC
     trk = np.asarray([passed] * number_of_obs)
-    few = np.asarray([passed] * number_of_obs)
 
     for i in range(1, number_of_obs - 1):
         thisqc_a = 0
@@ -735,7 +738,42 @@ def do_track_check(
         ):
             trk[i] = failed
 
-    return trk, few
+    return trk
+
+
+@inspect_arrays(["value"])
+def do_few_check(
+    value: Sequence[float],
+) -> Sequence[int]:
+    """Checks if number of observations is less than 3.
+
+    Parameters
+    ----------
+    value: array-like of float, shape (n,)
+        1-dimensional value array.
+
+    Returns
+    -------
+    array-like of int, shape (n,)
+        A 1-dimensional arrays of ints containing QC flags.
+        1 if number of observations is less than 3, 0 otherwise.
+
+    Raises
+    ------
+    ValueError
+        If either input is not 1-dimensional.
+    """
+    number_of_obs = len(value)
+
+    # no obs in, no qc outcomes out
+    if number_of_obs == 0:
+        return
+
+    # fewer than three obs - set the fewsome flag
+    if number_of_obs < 3:
+        return np.asarray([failed] * number_of_obs)
+
+    return np.asarray([passed] * number_of_obs)
 
 
 @inspect_arrays(["at", "dpt", "lat", "lon", "date"])
