@@ -1087,14 +1087,15 @@ def test_do_spike_check(testdata_track):
         0,
         0,
     ]
-    groups = db_.groupby([("header", "primary_station_id")])
+    groups = db_.groupby([("header", "primary_station_id")], group_keys=False)
     results = groups.apply(
         lambda track: do_spike_check(
             value=track[("observations-at", "observation_value")],
             lat=track[("observations-at", "latitude")],
             lon=track[("observations-at", "longitude")],
             date=track[("observations-at", "date_time")],
-        )
+        ),
+        include_groups=False,
     )
     results = results.explode()
     results.index = db_.index
@@ -1119,7 +1120,7 @@ def test_do_spike_check(testdata_track):
 
 def test_do_track_check(testdata_track):
     db_ = testdata_track.copy()
-    groups = db_.groupby([("header", "primary_station_id")])
+    groups = db_.groupby([("header", "primary_station_id")], group_keys=False)
     results = groups.apply(
         lambda track: do_track_check(
             vsi=track[("header", "station_speed")],
@@ -1127,7 +1128,8 @@ def test_do_track_check(testdata_track):
             lat=track[("header", "latitude")],
             lon=track[("header", "longitude")],
             date=track[("header", "report_timestamp")],
-        )
+        ),
+        include_groups=False,
     )
     results = results.explode()
     results.index = db_.index
@@ -1152,11 +1154,12 @@ def test_do_track_check(testdata_track):
 
 def test_do_few_check_passed(testdata_track):
     db_ = testdata_track.copy()
-    groups = db_.groupby([("header", "primary_station_id")])
+    groups = db_.groupby([("header", "primary_station_id")], group_keys=False)
     results = groups.apply(
         lambda track: do_few_check(
             value=track[("header", "latitude")],
-        )
+        ),
+        include_groups=False,
     )
     results = results.explode()
     results.index = db_.index
@@ -1179,12 +1182,13 @@ def test_do_few_check_passed(testdata_track):
 
 
 def test_do_few_check_failed(testdata_track):
-    db_ = testdata_track.copy()
-    groups = db_.groupby([("header", "primary_station_id")])
+    db_ = testdata_track.copy()[:2]
+    groups = db_.groupby([("header", "primary_station_id")], group_keys=False)
     results = groups.apply(
         lambda track: do_few_check(
-            value=track[("header", "latitude")][:2],
-        )
+            value=track[("header", "latitude")],
+        ),
+        include_groups=False,
     )
     results = results.explode()
     results.index = db_.index
@@ -1200,13 +1204,14 @@ def test_do_few_check_failed(testdata_track):
 
 def test_do_iquam_track_check(testdata_track):
     db_ = testdata_track.copy()
-    groups = db_.groupby([("header", "primary_station_id")])
+    groups = db_.groupby([("header", "primary_station_id")], group_keys=False)
     results = groups.apply(
         lambda track: do_iquam_track_check(
             lat=track[("header", "latitude")],
             lon=track[("header", "longitude")],
             date=track[("header", "report_timestamp")],
-        )
+        ),
+        include_groups=False,
     )
     results = results.explode()
     results.index = db_.index
@@ -1231,11 +1236,12 @@ def test_do_iquam_track_check(testdata_track):
 
 def test_find_repeated_values(testdata_track):
     db_ = testdata_track.copy()
-    groups = db_.groupby([("header", "primary_station_id")])
+    groups = db_.groupby([("header", "primary_station_id")], group_keys=False)
     results = groups.apply(
         lambda track: find_repeated_values(
             value=track[("observations-at", "observation_value")],
-        )
+        ),
+        include_groups=False,
     )
     results = results.explode()
     results.index = db_.index
