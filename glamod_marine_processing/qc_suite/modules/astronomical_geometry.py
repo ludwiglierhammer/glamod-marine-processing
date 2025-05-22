@@ -8,97 +8,12 @@ import numpy as np
 
 from .time_control import (
     convert_time_in_hours,
-    dayinyear,
     leap_year_correction,
     relative_year_number,
 )
 
 # Conversion factor between degrees and radians
 degrad = np.pi / 180.0
-
-
-def day_test(
-    year: int,
-    month: int,
-    day: int,
-    hour: int,
-    lat: float,
-    lon: float,
-    time_since_sun_above_horizon: float = 1.0,
-) -> int:
-    """Given year month day hour lat and long calculate if the sun was above the horizon an hour ago.
-
-    Parameters
-    ----------
-    year: int
-        Year.
-    month: int
-        Month.
-    day: int
-        Day.
-    hour: int
-        Hour.
-    lat: float
-        Latitude in degrees.
-    lon: float
-        Longitude in degrees.
-    time_since_sun_above_horizon: float, default:1.0
-        Time since sun was above horizon for test.
-
-    Returns
-    -------
-    int
-        0 if the sun was above the horizon an hour ago, 1 otherwise.
-
-    Note
-    ----
-    This is the "day" test used to decide whether a Marine Air Temperature (MAT) measurement is
-    a Night MAT (NMAT) or a Day (MAT). This is important because solar heating of the ship biases
-    the MAT measurements. It uses the function sunangle to calculate the elevation of the sun.
-    """
-    assert 1 <= month <= 12
-    assert 1 <= day <= 31
-    assert 0 <= hour <= 24
-    assert 90 >= lat >= -90
-
-    result = 0
-
-    if year is not None and month is not None and day is not None and hour is not None:
-        year2 = year
-        day2 = dayinyear(year, month, day)
-        hour2 = math.floor(hour)
-        minute2 = (hour - math.floor(hour)) * 60.0
-
-        # go back one hour and test if the sun was above the horizon
-        hour2 = hour2 - time_since_sun_above_horizon
-        if hour2 < 0:
-            hour2 = hour2 + 24.0
-            day2 = day2 - 1
-            if day2 <= 0:
-                year2 = year2 - 1
-                day2 = dayinyear(year2, 12, 31)
-
-        lat2 = lat
-        lon2 = lon
-        if lat == 0:
-            lat2 = 0.0001
-        if lon == 0:
-            lon2 = 0.0001
-
-        azimuth, elevation, rta, hra, sid, dec = sunangle(
-            year2, day2, hour2, minute2, 0, 0, 0, lat2, lon2
-        )
-        del azimuth
-        del rta
-        del hra
-        del sid
-        del dec
-
-        if elevation > 0:
-            result = 1
-
-    assert result == 1 or result == 0
-    return result
 
 
 def angle_diff(angle1: float, angle2: float) -> float:
