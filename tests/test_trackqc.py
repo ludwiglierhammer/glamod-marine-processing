@@ -1698,24 +1698,24 @@ def aground_check_test_data(selector):
 @pytest.mark.parametrize(
     "selector, smooth_win, min_win_period, max_win_period, expected, warns",
     [
-        (1, 3, 1, 2, [1, 1, 1, 1, 1, 1, 1], False), # test_stationary
-        (2, 3, 1, 2, [1, 1, 1, 1, 1, 1, 1], False), # test_stationary jitter spikes
-        (3, 3, 1, 2, [0, 0, 0, 0, 1, 1, 1], False), # test stationary big remaining jitter
-        (4, 3, 1, 2, [1, 1, 1, 1, 1, 1, 1], False), # test_stationary_small_remaining_jitter
-        (5, 3, 1, 2, [0, 0, 0, 0, 0, 0, 0], False), # test_moving_west
-        (6, 3, 1, 2, [0, 0, 0, 0, 0, 0, 0], False), # test_moving_north
-        (7, 3, 1, 2, [0, 0, 0, 0, 1, 1, 1], False), # test_moving_north_then_stop
-        (8, 3, 1, 2, [0, 0, 0, 0, 0, 0, 0], False), # test_stationary_high_freq_sampling
-        (9, 3, 1, 2, [0, 0, 0, 0, 0, 0, 0], False), # test_stationary_low_freq_sampling
-        (10, 3, 1, 2, [1, 1, 1, 1, 1, 1, 1], False), # test_stationary_mid_freq_sampling
-        (11, 3, 1, 2, [0, 0, 1, 1, 1, 1, 1], False), # test_stationary_low_to_mid_freq_sampling
-        (12, 3, 1, 2, [1, 1, 1, 1, 1, 1, 1], False), # test_moving_slowly_northwest
-        (13, 3, 1, 2, [1, 1, 1, 1, 1, 1, 1], False), # test_moving_slowly_west_in_arctic
-        (14, 3, 1, 2, [0, 0, 0, 0, 0, 0, 0], False), # test_stop_then_moving_north
-        (15, 3, 1, 2, [0, 0], False), # test_too_short_for_qc
-        (16, 0, 1, 2, [untestable for x in range(7)], True), # test_error_bad_input_parameter
-        (17, 3, 1, 2, [untestable for x in range(7)], True), # test_error_missing_observation
-        (18, 3, 1, 2, [untestable for x in range(7)], True), # test_error_not_time_sorted
+        (1, 3, 1, 2, [1, 1, 1, 1, 1, 1, 1], False),  # test_stationary
+        (2, 3, 1, 2, [1, 1, 1, 1, 1, 1, 1], False),  # test_stationary jitter spikes
+        (3, 3, 1, 2, [0, 0, 0, 0, 1, 1, 1], False),  # test stationary big remaining jitter
+        (4, 3, 1, 2, [1, 1, 1, 1, 1, 1, 1], False),  # test_stationary_small_remaining_jitter
+        (5, 3, 1, 2, [0, 0, 0, 0, 0, 0, 0], False),  # test_moving_west
+        (6, 3, 1, 2, [0, 0, 0, 0, 0, 0, 0], False),  # test_moving_north
+        (7, 3, 1, 2, [0, 0, 0, 0, 1, 1, 1], False),  # test_moving_north_then_stop
+        (8, 3, 1, 2, [0, 0, 0, 0, 0, 0, 0], False),  # test_stationary_high_freq_sampling
+        (9, 3, 1, 2, [0, 0, 0, 0, 0, 0, 0], False),  # test_stationary_low_freq_sampling
+        (10, 3, 1, 2, [1, 1, 1, 1, 1, 1, 1], False),  # test_stationary_mid_freq_sampling
+        (11, 3, 1, 2, [0, 0, 1, 1, 1, 1, 1], False),  # test_stationary_low_to_mid_freq_sampling
+        (12, 3, 1, 2, [1, 1, 1, 1, 1, 1, 1], False),  # test_moving_slowly_northwest
+        (13, 3, 1, 2, [1, 1, 1, 1, 1, 1, 1], False),  # test_moving_slowly_west_in_arctic
+        (14, 3, 1, 2, [0, 0, 0, 0, 0, 0, 0], False),  # test_stop_then_moving_north
+        (15, 3, 1, 2, [0, 0], False),  # test_too_short_for_qc
+        (16, 0, 1, 2, [untestable for x in range(7)], True),  # test_error_bad_input_parameter
+        (17, 3, 1, 2, [untestable for x in range(7)], True),  # test_error_missing_observation
+        (18, 3, 1, 2, [untestable for x in range(7)], True),  # test_error_not_time_sorted
     ]
 )
 def test_generic_aground(selector, smooth_win, min_win_period, max_win_period, expected, warns):
@@ -1731,24 +1731,24 @@ def test_generic_aground(selector, smooth_win, min_win_period, max_win_period, e
 @pytest.mark.parametrize(
     "selector, smooth_win, min_win_period, max_win_period, expected, warns",
     [
-        (1, 3, 1, 2, [1, 1, 1, 1, 1, 1, 1], False), # test_stationary
-        (2, 3, 1, 2, [1, 1, 1, 1, 1, 1, 1], False), # test_stationary jitter spikes
-        (3, 3, 1, 2, [0, 0, 0, 0, 1, 1, 1], False), # test stationary big remaining jitter
-        (4, 3, 1, 2, [1, 1, 1, 1, 1, 1, 1], False), # test_stationary_small_remaining_jitter
-        (5, 3, 1, 2, [0, 0, 0, 0, 0, 0, 0], False), # test_moving_west
-        (6, 3, 1, 2, [0, 0, 0, 0, 0, 0, 0], False), # test_moving_north
-        (7, 3, 1, 2, [0, 0, 0, 0, 1, 1, 1], False), # test_moving_north_then_stop
-        (8, 3, 1, 2, [0, 0, 0, 0, 0, 0, 0], False), # test_stationary_high_freq_sampling
-        (9, 3, 1, 2, [1, 1, 1, 1, 1, 1, 1], False), # test_stationary_low_freq_sampling
-        (10, 3, 1, 2, [1, 1, 1, 1, 1, 1, 1], False), # test_stationary_mid_freq_sampling
-        (11, 3, 1, 2, [1, 1, 1, 1, 1, 1, 1], False), # test_stationary_low_to_mid_freq_sampling
-        (12, 3, 1, 2, [0, 0, 0, 1, 1, 1, 1], False), # test_moving_slowly_northwest
-        (13, 3, 1, 2, [1, 1, 1, 1, 1, 1, 1], False), # test_moving_slowly_west_in_arctic
-        (14, 3, 1, 2, [0, 0, 0, 0, 0, 0, 0], False), # test_stop_then_moving_north
-        (15, 3, 1, 2, [0, 0], False), # test_too_short_for_qc
-        (16, 0, 1, 2, [untestable for x in range(7)], True), # test_error_bad_input_parameter
-        (17, 3, 1, 2, [untestable for x in range(7)], True), # test_error_missing_observation
-        (18, 3, 1, 2, [untestable for x in range(7)], True), # test_error_not_time_sorted
+        (1, 3, 1, 2, [1, 1, 1, 1, 1, 1, 1], False),  # test_stationary
+        (2, 3, 1, 2, [1, 1, 1, 1, 1, 1, 1], False),  # test_stationary jitter spikes
+        (3, 3, 1, 2, [0, 0, 0, 0, 1, 1, 1], False),  # test stationary big remaining jitter
+        (4, 3, 1, 2, [1, 1, 1, 1, 1, 1, 1], False),  # test_stationary_small_remaining_jitter
+        (5, 3, 1, 2, [0, 0, 0, 0, 0, 0, 0], False),  # test_moving_west
+        (6, 3, 1, 2, [0, 0, 0, 0, 0, 0, 0], False),  # test_moving_north
+        (7, 3, 1, 2, [0, 0, 0, 0, 1, 1, 1], False),  # test_moving_north_then_stop
+        (8, 3, 1, 2, [0, 0, 0, 0, 0, 0, 0], False),  # test_stationary_high_freq_sampling
+        (9, 3, 1, 2, [1, 1, 1, 1, 1, 1, 1], False),  # test_stationary_low_freq_sampling
+        (10, 3, 1, 2, [1, 1, 1, 1, 1, 1, 1], False),  # test_stationary_mid_freq_sampling
+        (11, 3, 1, 2, [1, 1, 1, 1, 1, 1, 1], False),  # test_stationary_low_to_mid_freq_sampling
+        (12, 3, 1, 2, [0, 0, 0, 1, 1, 1, 1], False),  # test_moving_slowly_northwest
+        (13, 3, 1, 2, [1, 1, 1, 1, 1, 1, 1], False),  # test_moving_slowly_west_in_arctic
+        (14, 3, 1, 2, [0, 0, 0, 0, 0, 0, 0], False),  # test_stop_then_moving_north
+        (15, 3, 1, 2, [0, 0], False),  # test_too_short_for_qc
+        (16, 0, 1, 2, [untestable for x in range(7)], True),  # test_error_bad_input_parameter
+        (17, 3, 1, 2, [untestable for x in range(7)], True),  # test_error_missing_observation
+        (18, 3, 1, 2, [untestable for x in range(7)], True),  # test_error_not_time_sorted
     ]
 )
 def test_new_generic_aground(selector, smooth_win, min_win_period, max_win_period, expected, warns):
@@ -2626,408 +2626,56 @@ def tailcheck_vals(selector):
 
     return reps
 
-
-def test_all_daytime():
-    reps = tailcheck_vals(1)
-
-    expected_flags = {
-        "drf_tail1": [0, 0, 0, 0, 0, 0, 0, 0, 0],
-        "drf_tail2": [0, 0, 0, 0, 0, 0, 0, 0, 0],
-    }
-    otqc.do_sst_tail_check(reps.reps, 3, 3.0, 1, 3.0, 1, 0.29, 1.0, 0.3)
+@pytest.mark.parametrize(
+    "selector, long_win_len, long_err_std_n, short_win_len, short_err_std_n, short_win_n_bad, drif_inter, drif_intra, background_err_lim, expected1, expected2, warns",
+    [
+        (1, 3, 3.0, 1, 3.0, 1, 0.29, 1.0, 0.3, [0, 0, 0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0, 0, 0], False),  # test_all_daytime
+        (2, 3, 3.0, 1, 3.0, 1, 0.29, 1.0, 0.3, [0, 0, 0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0, 0, 0], False),  # test_all_land_masked
+        (3, 3, 3.0, 1, 3.0, 1, 0.29, 1.0, 0.3, [0, 0, 0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0, 0, 0], False),  # test_all_ice
+        (4, 3, 3.0, 2, 3.0, 1, 0.29, 1.0, 0.3, [0, 0, 0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0, 0, 0], False),  # test_one_usable_value
+        (5, 3, 3.0, 1, 3.0, 1, 0.29, 1.0, 0.3, [1, 1, 1, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0, 0, 0], False),  # test_start_tail_bias
+        (6, 3, 3.0, 1, 3.0, 1, 0.29, 1.0, 0.3, [1, 1, 1, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0, 0, 0], False),  # test_start_tail_negative_bias
+        (7, 3, 3.0, 1, 3.0, 1, 0.29, 1.0, 0.3, [1, 1, 1, 1, 1, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0, 0, 0], False),  # test_start_tail_bias_obs_missing
+        (8, 3, 3.0, 1, 3.0, 1, 0.29, 1.0, 0.3, [0, 0, 0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 1, 1, 1], False),  # test_end_tail_bias
+        (9, 3, 3.0, 1, 3.0, 1, 0.29, 1.0, 0.3, [0, 0, 0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 1, 1, 1, 1, 1], False),  # test_end_tail_bias_obs_missing
+        (10, 3, 3.0, 1, 3.0, 1, 0.29, 1.0, 0.3, [1, 1, 1, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0, 0, 0], False),  # test_start_tail_noisy
+        (11, 3, 3.0, 1, 3.0, 1, 0.29, 1.0, 0.3, [0, 0, 0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 1, 1, 1], False),  # test_end_tail_noisy
+        (12, 3, 3.0, 1, 3.0, 1, 0.29, 1.0, 0.3, [1, 1, 1, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 1, 1, 1], False),  # test_two_tails
+        (13, 3, 3.0, 1, 3.0, 1, 0.29, 1.0, 0.3, [0, 0, 0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0, 0, 0], False),  # test_all_biased
+        (14, 3, 3.0, 1, 3.0, 1, 0.29, 1.0, 0.3, [0, 0, 0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0, 0, 0], False),  # test_all_noisy
+        (15, 3, 3.0, 1, 3.0, 1, 0.29, 1.0, 0.3, [1, 1, 0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0, 0, 0], False),  # test_start_tail_bias_with_bgvar
+        (16, 3, 3.0, 1, 3.0, 1, 0.29, 1.0, 0.3, [1, 1, 1, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 1, 1, 1], False),  # test_all_biased_with_bgvar
+        (17, 7, 3.0, 3, 2.0, 2, 0.29, 1.0, 0.3, [1, 0, 0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0, 0, 0], False),  # test_short_start_tail
+        (18, 7, 3.0, 3, 2.0, 2, 0.29, 1.0, 0.3, [0, 0, 0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0, 0, 1], False),  # test_short_end_tail
+        (19, 7, 3.0, 3, 2.0, 2, 0.29, 1.0, 0.3, [1, 0, 0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0, 0, 1], False),  # test_short_two_tails
+        (20, 7, 9.0, 3, 2.0, 2, 0.29, 1.0, 0.3, [0, 0, 0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0, 0, 0], False),  # test_short_all_fail
+        (21, 7, 3.0, 3, 2.0, 2, 0.29, 1.0, 0.3, [0, 0, 0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0, 0, 0], False),  # test_short_start_tail_with_bgvar
+        (22, 7, 9.0, 3, 2.0, 2, 0.29, 1.0, 0.3, [1, 1, 0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0, 1, 1], False),  # test_short_all_fail_with_bgvar
+        (23, 3, 3.0, 1, 1.0, 1, 0.29, 1.0, 0.3, [1, 1, 1, 1, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0, 0, 0], False),  # test_long_and_short_start_tail
+        (24, 3, 3.0, 1, 1.0, 1, 0.29, 1.0, 0.3, [0, 0, 0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 1, 1, 1, 1], False),  # test_long_and_short_end_tail
+        (25, 3, 3.0, 1, 1.0, 1, 0.29, 1.0, 0.3, [1, 1, 1, 1, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 1, 1, 1, 1], False),  # test_long_and_short_two_tails
+        (26, 3, 3.0, 1, 1.0, 1, 0.29, 1.0, 0.3, [1, 1, 0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0, 0, 1], False),  # test_one_long_and_one_short_tail
+        (27, 3, 3.0, 3, 0.5, 1, 0.29, 1.0, 0.3, [1, 1, 1, 1, 1, 1, 1, 0, 0], [0, 0, 0, 0, 0, 0, 0, 0, 0], False),  # test_too_short_for_short_tail
+        (28, 3, 3.0, 1, 0.25, 1, 0.29, 1.0, 0.3, [0, 0, 0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0, 0, 0], False),  # test_long_and_short_all_fail
+        (29, 3, 3.0, 1, 1.0, 1, 0.29, 1.0, 0.3, [1, 1, 1, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0, 0, 0], False),  #  test_long_and_short_start_tail_with_bgvar
+        (30, 3, 3.0, 1, 0.25, 1, 0.29, 1.0, 0.3, [1, 1, 1, 1, 1, 1, 1, 1, 0], [0, 0, 0, 0, 0, 0, 0, 0, 0], False),  # test_long_and_short_all_fail_with_bgvar
+        (31, 3, 3.0, 1, 3.0, 1, 0.29, 1.0, 0.3, [0, 0, 0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0, 0, 0], False),  # test_good_data
+        (32, 3, 3.0, 1, 1.0, 1, 0.29, 1.0, 0.3, [0, 0, 0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0, 0, 0], False),  # test_long_and_short_start_tail_big_bgvar
+        (33, 3, 3.0, 1, 3.0, 1, 0.29, 1.0, 2.0, [0, 0, 0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0, 0, 0], False),  # test_start_tail_noisy_big_bgvar
+    ]
+)
+def test_generic_tailcheck(
+        selector, long_win_len, long_err_std_n, short_win_len, short_err_std_n,
+        short_win_n_bad, drif_inter, drif_intra, background_err_lim, expected1, expected2, warns
+):
+    reps = tailcheck_vals(selector)
+    otqc.do_sst_tail_check(
+        reps.reps, long_win_len, long_err_std_n, short_win_len, short_err_std_n,
+        short_win_n_bad, drif_inter, drif_intra, background_err_lim
+    )
     for i in range(0, len(reps)):
-        assert reps.get_qc(i, "SST", "drf_tail1") == expected_flags["drf_tail1"][i]
-        assert reps.get_qc(i, "SST", "drf_tail2") == expected_flags["drf_tail2"][i]
-
-
-def test_all_land_masked():
-    reps = tailcheck_vals(2)
-
-    expected_flags = {
-        "drf_tail1": [0, 0, 0, 0, 0, 0, 0, 0, 0],
-        "drf_tail2": [0, 0, 0, 0, 0, 0, 0, 0, 0],
-    }
-    otqc.do_sst_tail_check(reps.reps, 3, 3.0, 1, 3.0, 1, 0.29, 1.0, 0.3)
-    for i in range(0, len(reps)):
-        assert reps.get_qc(i, "SST", "drf_tail1") == expected_flags["drf_tail1"][i]
-        assert reps.get_qc(i, "SST", "drf_tail2") == expected_flags["drf_tail2"][i]
-
-
-def test_all_ice():
-    reps = tailcheck_vals(3)
-
-    expected_flags = {
-        "drf_tail1": [0, 0, 0, 0, 0, 0, 0, 0, 0],
-        "drf_tail2": [0, 0, 0, 0, 0, 0, 0, 0, 0],
-    }
-    otqc.do_sst_tail_check(reps.reps, 3, 3.0, 1, 3.0, 1, 0.29, 1.0, 0.3)
-    for i in range(0, len(reps)):
-        assert reps.get_qc(i, "SST", "drf_tail1") == expected_flags["drf_tail1"][i]
-        assert reps.get_qc(i, "SST", "drf_tail2") == expected_flags["drf_tail2"][i]
-
-
-def test_one_usable_value():
-    reps = tailcheck_vals(4)
-    expected_flags = {
-        "drf_tail1": [0, 0, 0, 0, 0, 0, 0, 0, 0],
-        "drf_tail2": [0, 0, 0, 0, 0, 0, 0, 0, 0],
-    }
-    otqc.do_sst_tail_check(reps.reps, 3, 3.0, 2, 3.0, 1, 0.29, 1.0, 0.3)
-    for i in range(0, len(reps)):
-        assert reps.get_qc(i, "SST", "drf_tail1") == expected_flags["drf_tail1"][i]
-        assert reps.get_qc(i, "SST", "drf_tail2") == expected_flags["drf_tail2"][i]
-
-
-def test_start_tail_bias():
-    reps = tailcheck_vals(5)
-    expected_flags = {
-        "drf_tail1": [1, 1, 1, 0, 0, 0, 0, 0, 0],
-        "drf_tail2": [0, 0, 0, 0, 0, 0, 0, 0, 0],
-    }
-    otqc.do_sst_tail_check(reps.reps, 3, 3.0, 1, 3.0, 1, 0.29, 1.0, 0.3)
-    for i in range(0, len(reps)):
-        assert reps.get_qc(i, "SST", "drf_tail1") == expected_flags["drf_tail1"][i]
-        assert reps.get_qc(i, "SST", "drf_tail2") == expected_flags["drf_tail2"][i]
-
-
-def test_start_tail_negative_bias():
-    reps = tailcheck_vals(6)
-    expected_flags = {
-        "drf_tail1": [1, 1, 1, 0, 0, 0, 0, 0, 0],
-        "drf_tail2": [0, 0, 0, 0, 0, 0, 0, 0, 0],
-    }
-    otqc.do_sst_tail_check(reps.reps, 3, 3.0, 1, 3.0, 1, 0.29, 1.0, 0.3)
-    for i in range(0, len(reps)):
-        assert reps.get_qc(i, "SST", "drf_tail1") == expected_flags["drf_tail1"][i]
-        assert reps.get_qc(i, "SST", "drf_tail2") == expected_flags["drf_tail2"][i]
-
-
-def test_start_tail_bias_obs_missing():
-    reps = tailcheck_vals(7)
-    expected_flags = {
-        "drf_tail1": [1, 1, 1, 1, 1, 0, 0, 0, 0],
-        "drf_tail2": [0, 0, 0, 0, 0, 0, 0, 0, 0],
-    }
-    otqc.do_sst_tail_check(reps.reps, 3, 3.0, 1, 3.0, 1, 0.29, 1.0, 0.3)
-    for i in range(0, len(reps)):
-        assert reps.get_qc(i, "SST", "drf_tail1") == expected_flags["drf_tail1"][i]
-        assert reps.get_qc(i, "SST", "drf_tail2") == expected_flags["drf_tail2"][i]
-
-
-def test_end_tail_bias():
-    reps = tailcheck_vals(8)
-    expected_flags = {
-        "drf_tail1": [0, 0, 0, 0, 0, 0, 0, 0, 0],
-        "drf_tail2": [0, 0, 0, 0, 0, 0, 1, 1, 1],
-    }
-    otqc.do_sst_tail_check(reps.reps, 3, 3.0, 1, 3.0, 1, 0.29, 1.0, 0.3)
-    for i in range(0, len(reps)):
-        assert reps.get_qc(i, "SST", "drf_tail1") == expected_flags["drf_tail1"][i]
-        assert reps.get_qc(i, "SST", "drf_tail2") == expected_flags["drf_tail2"][i]
-
-
-def test_end_tail_bias_obs_missing():
-    reps = tailcheck_vals(9)
-    expected_flags = {
-        "drf_tail1": [0, 0, 0, 0, 0, 0, 0, 0, 0],
-        "drf_tail2": [0, 0, 0, 0, 1, 1, 1, 1, 1],
-    }
-    otqc.do_sst_tail_check(reps.reps, 3, 3.0, 1, 3.0, 1, 0.29, 1.0, 0.3)
-    for i in range(0, len(reps)):
-        assert reps.get_qc(i, "SST", "drf_tail1") == expected_flags["drf_tail1"][i]
-        assert reps.get_qc(i, "SST", "drf_tail2") == expected_flags["drf_tail2"][i]
-
-
-def test_start_tail_noisy():
-    reps = tailcheck_vals(10)
-    expected_flags = {
-        "drf_tail1": [1, 1, 1, 0, 0, 0, 0, 0, 0],
-        "drf_tail2": [0, 0, 0, 0, 0, 0, 0, 0, 0],
-    }
-    otqc.do_sst_tail_check(reps.reps, 3, 3.0, 1, 3.0, 1, 0.29, 1.0, 0.3)
-    for i in range(0, len(reps)):
-        assert reps.get_qc(i, "SST", "drf_tail1") == expected_flags["drf_tail1"][i]
-        assert reps.get_qc(i, "SST", "drf_tail2") == expected_flags["drf_tail2"][i]
-
-
-def test_end_tail_noisy():
-    reps = tailcheck_vals(11)
-    expected_flags = {
-        "drf_tail1": [0, 0, 0, 0, 0, 0, 0, 0, 0],
-        "drf_tail2": [0, 0, 0, 0, 0, 0, 1, 1, 1],
-    }
-    otqc.do_sst_tail_check(reps.reps, 3, 3.0, 1, 3.0, 1, 0.29, 1.0, 0.3)
-    for i in range(0, len(reps)):
-        assert reps.get_qc(i, "SST", "drf_tail1") == expected_flags["drf_tail1"][i]
-        assert reps.get_qc(i, "SST", "drf_tail2") == expected_flags["drf_tail2"][i]
-
-
-def test_two_tails():
-    reps = tailcheck_vals(12)
-    expected_flags = {
-        "drf_tail1": [1, 1, 1, 0, 0, 0, 0, 0, 0],
-        "drf_tail2": [0, 0, 0, 0, 0, 0, 1, 1, 1],
-    }
-    otqc.do_sst_tail_check(reps.reps, 3, 3.0, 1, 3.0, 1, 0.29, 1.0, 0.3)
-    for i in range(0, len(reps)):
-        assert reps.get_qc(i, "SST", "drf_tail1") == expected_flags["drf_tail1"][i]
-        assert reps.get_qc(i, "SST", "drf_tail2") == expected_flags["drf_tail2"][i]
-
-
-def test_all_biased():
-    reps = tailcheck_vals(13)
-    expected_flags = {
-        "drf_tail1": [0, 0, 0, 0, 0, 0, 0, 0, 0],
-        "drf_tail2": [0, 0, 0, 0, 0, 0, 0, 0, 0],
-    }
-    otqc.do_sst_tail_check(reps.reps, 3, 3.0, 1, 3.0, 1, 0.29, 1.0, 0.3)
-    for i in range(0, len(reps)):
-        assert reps.get_qc(i, "SST", "drf_tail1") == expected_flags["drf_tail1"][i]
-        assert reps.get_qc(i, "SST", "drf_tail2") == expected_flags["drf_tail2"][i]
-
-
-def test_all_noisy():
-    reps = tailcheck_vals(14)
-    expected_flags = {
-        "drf_tail1": [0, 0, 0, 0, 0, 0, 0, 0, 0],
-        "drf_tail2": [0, 0, 0, 0, 0, 0, 0, 0, 0],
-    }
-    otqc.do_sst_tail_check(reps.reps, 3, 3.0, 1, 3.0, 1, 0.29, 1.0, 0.3)
-    for i in range(0, len(reps)):
-        assert reps.get_qc(i, "SST", "drf_tail1") == expected_flags["drf_tail1"][i]
-        assert reps.get_qc(i, "SST", "drf_tail2") == expected_flags["drf_tail2"][i]
-
-
-def test_start_tail_bias_with_bgvar():
-    reps = tailcheck_vals(15)
-    expected_flags = {
-        "drf_tail1": [1, 1, 0, 0, 0, 0, 0, 0, 0],
-        "drf_tail2": [0, 0, 0, 0, 0, 0, 0, 0, 0],
-    }
-    otqc.do_sst_tail_check(reps.reps, 3, 3.0, 1, 3.0, 1, 0.29, 1.0, 0.3)
-    for i in range(0, len(reps)):
-        assert reps.get_qc(i, "SST", "drf_tail1") == expected_flags["drf_tail1"][i]
-        assert reps.get_qc(i, "SST", "drf_tail2") == expected_flags["drf_tail2"][i]
-
-
-# BROKEN TEST FIXED BY REVERTING TO ORIGINAL CODE
-def test_all_biased_with_bgvar():
-    reps = tailcheck_vals(16)
-    expected_flags = {
-        "drf_tail1": [1, 1, 1, 0, 0, 0, 0, 0, 0],
-        "drf_tail2": [0, 0, 0, 0, 0, 0, 1, 1, 1],
-    }
-    otqc.do_sst_tail_check(reps.reps, 3, 3.0, 1, 3.0, 1, 0.29, 1.0, 0.3)
-    for i in range(0, len(reps)):
-        assert reps.get_qc(i, "SST", "drf_tail1") == expected_flags["drf_tail1"][i]
-        assert reps.get_qc(i, "SST", "drf_tail2") == expected_flags["drf_tail2"][i]
-
-
-def test_short_start_tail():
-    reps = tailcheck_vals(17)
-    expected_flags = {
-        "drf_tail1": [1, 0, 0, 0, 0, 0, 0, 0, 0],
-        "drf_tail2": [0, 0, 0, 0, 0, 0, 0, 0, 0],
-    }
-    otqc.do_sst_tail_check(reps.reps, 7, 3.0, 3, 2.0, 2, 0.29, 1.0, 0.3)
-    for i in range(0, len(reps)):
-        assert reps.get_qc(i, "SST", "drf_tail1") == expected_flags["drf_tail1"][i]
-        assert reps.get_qc(i, "SST", "drf_tail2") == expected_flags["drf_tail2"][i]
-
-
-def test_short_end_tail():
-    reps = tailcheck_vals(18)
-    expected_flags = {
-        "drf_tail1": [0, 0, 0, 0, 0, 0, 0, 0, 0],
-        "drf_tail2": [0, 0, 0, 0, 0, 0, 0, 0, 1],
-    }
-    otqc.do_sst_tail_check(reps.reps, 7, 3.0, 3, 2.0, 2, 0.29, 1.0, 0.3)
-    for i in range(0, len(reps)):
-        assert reps.get_qc(i, "SST", "drf_tail1") == expected_flags["drf_tail1"][i]
-        assert reps.get_qc(i, "SST", "drf_tail2") == expected_flags["drf_tail2"][i]
-
-
-def test_short_two_tails():
-    reps = tailcheck_vals(19)
-    expected_flags = {
-        "drf_tail1": [1, 0, 0, 0, 0, 0, 0, 0, 0],
-        "drf_tail2": [0, 0, 0, 0, 0, 0, 0, 0, 1],
-    }
-    otqc.do_sst_tail_check(reps.reps, 7, 3.0, 3, 2.0, 2, 0.29, 1.0, 0.3)
-    for i in range(0, len(reps)):
-        assert reps.get_qc(i, "SST", "drf_tail1") == expected_flags["drf_tail1"][i]
-        assert reps.get_qc(i, "SST", "drf_tail2") == expected_flags["drf_tail2"][i]
-
-
-def test_short_all_fail():
-    reps = tailcheck_vals(20)
-    expected_flags = {
-        "drf_tail1": [0, 0, 0, 0, 0, 0, 0, 0, 0],
-        "drf_tail2": [0, 0, 0, 0, 0, 0, 0, 0, 0],
-    }
-    otqc.do_sst_tail_check(reps.reps, 7, 9.0, 3, 2.0, 2, 0.29, 1.0, 0.3)
-    for i in range(0, len(reps)):
-        assert reps.get_qc(i, "SST", "drf_tail1") == expected_flags["drf_tail1"][i]
-        assert reps.get_qc(i, "SST", "drf_tail2") == expected_flags["drf_tail2"][i]
-
-
-# BROKEN TEST FIXED BY REVERTING TO ORIGINAL CODE
-def test_short_start_tail_with_bgvar():
-    reps = tailcheck_vals(21)
-    expected_flags = {
-        "drf_tail1": [0, 0, 0, 0, 0, 0, 0, 0, 0],
-        "drf_tail2": [0, 0, 0, 0, 0, 0, 0, 0, 0],
-    }
-    otqc.do_sst_tail_check(reps.reps, 7, 3.0, 3, 2.0, 2, 0.29, 1.0, 0.3)
-    for i in range(0, len(reps)):
-        assert reps.get_qc(i, "SST", "drf_tail1") == expected_flags["drf_tail1"][i]
-        assert reps.get_qc(i, "SST", "drf_tail2") == expected_flags["drf_tail2"][i]
-
-
-# BROKEN TEST FIXED BY REVERTING TO ORIGINAL CODE
-def test_short_all_fail_with_bgvar():
-    reps = tailcheck_vals(22)
-    expected_flags = {
-        "drf_tail1": [1, 1, 0, 0, 0, 0, 0, 0, 0],
-        "drf_tail2": [0, 0, 0, 0, 0, 0, 0, 1, 1],
-    }
-    otqc.do_sst_tail_check(reps.reps, 7, 9.0, 3, 2.0, 2, 0.29, 1.0, 0.3)
-    for i in range(0, len(reps)):
-        assert reps.get_qc(i, "SST", "drf_tail1") == expected_flags["drf_tail1"][i]
-        assert reps.get_qc(i, "SST", "drf_tail2") == expected_flags["drf_tail2"][i]
-
-
-def test_long_and_short_start_tail():
-    reps = tailcheck_vals(23)
-    expected_flags = {
-        "drf_tail1": [1, 1, 1, 1, 0, 0, 0, 0, 0],
-        "drf_tail2": [0, 0, 0, 0, 0, 0, 0, 0, 0],
-    }
-    otqc.do_sst_tail_check(reps.reps, 3, 3.0, 1, 1.0, 1, 0.29, 1.0, 0.3)
-    for i in range(0, len(reps)):
-        assert reps.get_qc(i, "SST", "drf_tail1") == expected_flags["drf_tail1"][i]
-        assert reps.get_qc(i, "SST", "drf_tail2") == expected_flags["drf_tail2"][i]
-
-
-def test_long_and_short_end_tail():
-    reps = tailcheck_vals(24)
-    expected_flags = {
-        "drf_tail1": [0, 0, 0, 0, 0, 0, 0, 0, 0],
-        "drf_tail2": [0, 0, 0, 0, 0, 1, 1, 1, 1],
-    }
-    otqc.do_sst_tail_check(reps.reps, 3, 3.0, 1, 1.0, 1, 0.29, 1.0, 0.3)
-    for i in range(0, len(reps)):
-        assert reps.get_qc(i, "SST", "drf_tail1") == expected_flags["drf_tail1"][i]
-        assert reps.get_qc(i, "SST", "drf_tail2") == expected_flags["drf_tail2"][i]
-
-
-def test_long_and_short_two_tails():
-    reps = tailcheck_vals(25)
-    expected_flags = {
-        "drf_tail1": [1, 1, 1, 1, 0, 0, 0, 0, 0],
-        "drf_tail2": [0, 0, 0, 0, 0, 1, 1, 1, 1],
-    }
-    otqc.do_sst_tail_check(reps.reps, 3, 3.0, 1, 1.0, 1, 0.29, 1.0, 0.3)
-    for i in range(0, len(reps)):
-        assert reps.get_qc(i, "SST", "drf_tail1") == expected_flags["drf_tail1"][i]
-        assert reps.get_qc(i, "SST", "drf_tail2") == expected_flags["drf_tail2"][i]
-
-
-def test_one_long_and_one_short_tail():
-    reps = tailcheck_vals(26)
-    expected_flags = {
-        "drf_tail1": [1, 1, 0, 0, 0, 0, 0, 0, 0],
-        "drf_tail2": [0, 0, 0, 0, 0, 0, 0, 0, 1],
-    }
-    otqc.do_sst_tail_check(reps.reps, 3, 3.0, 1, 1.0, 1, 0.29, 1.0, 0.3)
-    for i in range(0, len(reps)):
-        assert reps.get_qc(i, "SST", "drf_tail1") == expected_flags["drf_tail1"][i]
-        assert reps.get_qc(i, "SST", "drf_tail2") == expected_flags["drf_tail2"][i]
-
-
-def test_too_short_for_short_tail():
-    reps = tailcheck_vals(27)
-    expected_flags = {
-        "drf_tail1": [1, 1, 1, 1, 1, 1, 1, 0, 0],
-        "drf_tail2": [0, 0, 0, 0, 0, 0, 0, 0, 0],
-    }
-    otqc.do_sst_tail_check(reps.reps, 3, 3.0, 3, 0.5, 1, 0.29, 1.0, 0.3)
-    for i in range(0, len(reps)):
-        assert reps.get_qc(i, "SST", "drf_tail1") == expected_flags["drf_tail1"][i]
-        assert reps.get_qc(i, "SST", "drf_tail2") == expected_flags["drf_tail2"][i]
-
-
-def test_long_and_short_all_fail():
-    reps = tailcheck_vals(28)
-    expected_flags = {
-        "drf_tail1": [0, 0, 0, 0, 0, 0, 0, 0, 0],
-        "drf_tail2": [0, 0, 0, 0, 0, 0, 0, 0, 0],
-    }
-    otqc.do_sst_tail_check(reps.reps, 3, 3.0, 1, 0.25, 1, 0.29, 1.0, 0.3)
-    for i in range(0, len(reps)):
-        assert reps.get_qc(i, "SST", "drf_tail1") == expected_flags["drf_tail1"][i]
-        assert reps.get_qc(i, "SST", "drf_tail2") == expected_flags["drf_tail2"][i]
-
-
-def test_long_and_short_start_tail_with_bgvar():
-    reps = tailcheck_vals(29)
-    expected_flags = {
-        "drf_tail1": [1, 1, 1, 0, 0, 0, 0, 0, 0],
-        "drf_tail2": [0, 0, 0, 0, 0, 0, 0, 0, 0],
-    }
-    otqc.do_sst_tail_check(reps.reps, 3, 3.0, 1, 1.0, 1, 0.29, 1.0, 0.3)
-    for i in range(0, len(reps)):
-        assert reps.get_qc(i, "SST", "drf_tail1") == expected_flags["drf_tail1"][i]
-        assert reps.get_qc(i, "SST", "drf_tail2") == expected_flags["drf_tail2"][i]
-
-
-# BROKEN TEST FIXED BY REVERTING TO ORIGINAL CODE
-def test_long_and_short_all_fail_with_bgvar():
-    reps = tailcheck_vals(30)
-    expected_flags = {
-        "drf_tail1": [1, 1, 1, 1, 1, 1, 1, 1, 0],
-        "drf_tail2": [0, 0, 0, 0, 0, 0, 0, 0, 0],
-    }
-    otqc.do_sst_tail_check(reps.reps, 3, 3.0, 1, 0.25, 1, 0.29, 1.0, 0.3)
-    for i in range(0, len(reps)):
-        assert reps.get_qc(i, "SST", "drf_tail1") == expected_flags["drf_tail1"][i]
-        assert reps.get_qc(i, "SST", "drf_tail2") == expected_flags["drf_tail2"][i]
-
-
-def test_good_data():
-    reps = tailcheck_vals(31)
-    expected_flags = {
-        "drf_tail1": [0, 0, 0, 0, 0, 0, 0, 0, 0],
-        "drf_tail2": [0, 0, 0, 0, 0, 0, 0, 0, 0],
-    }
-    otqc.do_sst_tail_check(reps.reps, 3, 3.0, 1, 3.0, 1, 0.29, 1.0, 0.3)
-    for i in range(0, len(reps)):
-        assert reps.get_qc(i, "SST", "drf_tail1") == expected_flags["drf_tail1"][i]
-        assert reps.get_qc(i, "SST", "drf_tail2") == expected_flags["drf_tail2"][i]
-
-
-def test_long_and_short_start_tail_big_bgvar():
-    reps = tailcheck_vals(32)
-    expected_flags = {
-        "drf_tail1": [0, 0, 0, 0, 0, 0, 0, 0, 0],
-        "drf_tail2": [0, 0, 0, 0, 0, 0, 0, 0, 0],
-    }
-    otqc.do_sst_tail_check(reps.reps, 3, 3.0, 1, 1.0, 1, 0.29, 1.0, 0.3)
-    for i in range(0, len(reps)):
-        assert reps.get_qc(i, "SST", "drf_tail1") == expected_flags["drf_tail1"][i]
-        assert reps.get_qc(i, "SST", "drf_tail2") == expected_flags["drf_tail2"][i]
-
-
-def test_start_tail_noisy_big_bgvar():
-    reps = tailcheck_vals(33)
-    expected_flags = {
-        "drf_tail1": [0, 0, 0, 0, 0, 0, 0, 0, 0],
-        "drf_tail2": [0, 0, 0, 0, 0, 0, 0, 0, 0],
-    }
-    otqc.do_sst_tail_check(reps.reps, 3, 3.0, 1, 3.0, 1, 0.29, 1.0, 2.0)
-    for i in range(0, len(reps)):
-        assert reps.get_qc(i, "SST", "drf_tail1") == expected_flags["drf_tail1"][i]
-        assert reps.get_qc(i, "SST", "drf_tail2") == expected_flags["drf_tail2"][i]
+        assert reps.get_qc(i, "SST", "drf_tail1") == expected1[i]
+        assert reps.get_qc(i, "SST", "drf_tail2") == expected2[i]
 
 
 def test_error_bad_input_parameter_tail_check():
@@ -3089,13 +2737,7 @@ def test_error_missing_ob_value():
 
     with pytest.raises(ValueError):
         otqc.do_sst_tail_check(reps.reps, 3, 3.0, 1, 3.0, 1, 0.29, 1.0, 0.3)
-    # try:
-    #     otqc.og_sst_tail_check(reps.reps, 3, 3.0, 1, 3.0, 1, 0.29, 1.0, 0.3)
-    # except ValueError as error:
-    #     print("CHAPPED")
-    # except AssertionError as error:
-    #     error_return_text = 'problem with report value: latitude is missing'
-    #     assert str(error)[0:len(error_return_text)] == error_return_text
+
     for i in range(0, len(reps)):
         assert reps.get_qc(i, "SST", "drf_tail1") == expected_flags["drf_tail1"][i]
         assert reps.get_qc(i, "SST", "drf_tail2") == expected_flags["drf_tail2"][i]

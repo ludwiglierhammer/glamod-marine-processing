@@ -1145,9 +1145,7 @@ class SSTTailChecker:
 
         # do short tail check on records that pass long tail check - whole record already failed long tail check
         if not (self.start_tail_ind >= self.end_tail_ind):
-            first_pass_ind = (
-                self.start_tail_ind + 1
-            )  # first index passing long tail check
+            first_pass_ind = self.start_tail_ind + 1  # first index passing long tail check
             last_pass_ind = self.end_tail_ind - 1  # last index passing long tail check
             self._do_short_tail_check(first_pass_ind, last_pass_ind, forward=True)
             self._do_short_tail_check(first_pass_ind, last_pass_ind, forward=False)
