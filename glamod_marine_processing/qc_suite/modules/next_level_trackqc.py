@@ -255,7 +255,7 @@ class SpeedChecker:
     # max_win_period = 1.0
 
     def __init__(self, lons, lats, dates, speed_limit, min_win_period, max_win_period):
-        self.good_parameters = True
+
         self.lon = lons
         self.lat = lats
         self.nreps = len(lons)
@@ -290,19 +290,16 @@ class SpeedChecker:
 
     def valid_arrays(self) -> bool:
         valid = True
-        if any(np.isnan(self.lon)):
-            warnings.warn(UserWarning("Nan(s) found in longitude"))
-            valid = False
-        if any(np.isnan(self.lat)):
-            warnings.warn(UserWarning("Nan(s) found in latitude"))
-            valid = False
-        if any(np.isnan(self.hrs)):
-            warnings.warn(UserWarning("Nan(s) found in time differences"))
-            valid = False
-        if not(is_monotonic(self.hrs)):
-            warnings.warn(UserWarning("times are not sorted"))
+        try:
+            assert not any(np.isnan(self.lon)), "Nan(s) found in longitude"
+            assert not any(np.isnan(self.lat)), "Nan(s) found in latitude"
+            assert not any(np.isnan(self.hrs)), "Nan(s) found in time differences"
+            assert is_monotonic(self.hrs), "times are not sorted"
+        except AssertionError as error:
+            warnings.warn(UserWarning("problem with report values: " + str(error)))
             valid = False
         return valid
+
 
     def _do_speed_check(self):
         """Perform the actual speed check"""
@@ -410,6 +407,7 @@ class AgroundChecker:
         self.lon = lons
         self.lat = lats
         self.nreps = len(lons)
+        self.hrs = convert_date_to_hours(dates)
 
         self.smooth_win = smooth_win
         self.min_win_period = min_win_period
@@ -426,28 +424,7 @@ class AgroundChecker:
         return self.qc_outcomes
 
     def valid_parameters(self) -> bool:
-        """Set the parameters of the QC check. Note that this will set parameters for all instances of the class.
-
-        Parameters
-        ----------
-        smooth_win: int
-            Length of window (odd number) in datapoints used for smoothing lon/lat
-        min_win_period: int
-            minimum period of time in days over which position is assessed for no movement (see description)
-        max_win_period: int
-            maximum period of time in days over which position is assessed for no movement (this should be greater
-            than min_win_period and allow for erratic temporal sampling e.g. min_win_period+2 to allow for gaps of
-            up to 2-days in sampling).
-
-        Returns
-        -------
-        None
-
-        Raises
-        ------
-        AssertionError
-            When any of the input values are invalid
-        """
+        """Check parameters are valid"""
         valid = True
         try:
             assert self.smooth_win >= 1, "smooth_win must be >= 1"
@@ -463,70 +440,103 @@ class AgroundChecker:
 
         return valid
 
-    def do_qc(self):
-        """Perform the new aground check QC"""
-        nrep = len(self.reps)
-        # records shorter than smoothing-window can't be evaluated
-        if nrep <= AgroundChecker.smooth_win:
-            for rep in self.reps:
-                rep.set_qc("POS", "drf_agr", 0)
-            return
+    # def do_qc(self):
+    #     """Perform the new aground check QC"""
+    #     nrep = len(self.reps)
+    #     # records shorter than smoothing-window can't be evaluated
+    #     if nrep <= AgroundChecker.smooth_win:
+    #         for rep in self.reps:
+    #             rep.set_qc("POS", "drf_agr", 0)
+    #         return
+    #
+    #     self._preprocess_reps()
+    #     self._do_aground_check()
+    #
+    # def _preprocess_reps(self) -> None:
+    #     """Process the reps and calculate the values used in the QC check"""
+    #     nrep = len(self.reps)
+    #     half_win = int((AgroundChecker.smooth_win - 1) / 2)
+    #
+    #     # retrieve lon/lat/time_diff variables from marine reports
+    #     lon = np.empty(nrep)  # type: np.ndarray
+    #     lon[:] = np.nan
+    #     lat = np.empty(nrep)  # type: np.ndarray
+    #     lat[:] = np.nan
+    #     hrs = np.empty(nrep)  # type: np.ndarray
+    #     hrs[:] = np.nan
+    #     try:
+    #         for ind, rep in enumerate(self.reps):
+    #             lon[ind] = rep.getvar("LON")  # returns None if missing
+    #             lat[ind] = rep.getvar("LAT")  # returns None if missing
+    #             if ind == 0:
+    #                 hrs[ind] = 0
+    #             else:
+    #                 # raises assertion error if 'time_diff' not found
+    #                 hrs[ind] = rep.getext("time_diff")
+    #         assert not any(np.isnan(lon)), "Nan(s) found in longitude"
+    #         assert not any(np.isnan(lat)), "Nan(s) found in latitude"
+    #         assert not any(np.isnan(hrs)), "Nan(s) found in time differences"
+    #         assert not any(np.less(hrs, 0)), "times are not sorted"
+    #     except AssertionError as error:
+    #         raise AssertionError("problem with report values: " + str(error))
+    #
+    #     hrs = np.cumsum(hrs)  # get time difference in hours relative to first report
+    #
+    #     # create smoothed lon/lat timeseries
+    #     nrep_smooth = (
+    #         nrep - AgroundChecker.smooth_win + 1
+    #     )  # length of series after smoothing
+    #     lon_smooth = np.empty(nrep_smooth)  # type: np.ndarray
+    #     lon_smooth[:] = np.nan
+    #     lat_smooth = np.empty(nrep_smooth)  # type: np.ndarray
+    #     lat_smooth[:] = np.nan
+    #     hrs_smooth = np.empty(nrep_smooth)  # type: np.ndarray
+    #     hrs_smooth[:] = np.nan
+    #     try:
+    #         for i in range(0, nrep_smooth):
+    #             lon_smooth[i] = np.median(lon[i : i + AgroundChecker.smooth_win])
+    #             lat_smooth[i] = np.median(lat[i : i + AgroundChecker.smooth_win])
+    #             hrs_smooth[i] = hrs[i + half_win]
+    #         assert not any(np.isnan(lon_smooth)), "Nan(s) found in smoothed longitude"
+    #         assert not any(np.isnan(lat_smooth)), "Nan(s) found in smoothed latitude"
+    #         assert not any(
+    #             np.isnan(hrs_smooth)
+    #         ), "Nan(s) found in smoothed time differences"
+    #     except AssertionError as error:
+    #         raise AssertionError("problem with smoothed report values: " + str(error))
+    #
+    #     self.lon_smooth = lon_smooth
+    #     self.lat_smooth = lat_smooth
+    #     self.hrs_smooth = hrs_smooth
 
-        self._preprocess_reps()
-        self._do_aground_check()
-
-    def _preprocess_reps(self) -> None:
-        """Process the reps and calculate the values used in the QC check"""
-        nrep = len(self.reps)
-        half_win = int((AgroundChecker.smooth_win - 1) / 2)
-
-        # retrieve lon/lat/time_diff variables from marine reports
-        lon = np.empty(nrep)  # type: np.ndarray
-        lon[:] = np.nan
-        lat = np.empty(nrep)  # type: np.ndarray
-        lat[:] = np.nan
-        hrs = np.empty(nrep)  # type: np.ndarray
-        hrs[:] = np.nan
+    def valid_arrays(self):
+        valid = True
         try:
-            for ind, rep in enumerate(self.reps):
-                lon[ind] = rep.getvar("LON")  # returns None if missing
-                lat[ind] = rep.getvar("LAT")  # returns None if missing
-                if ind == 0:
-                    hrs[ind] = 0
-                else:
-                    # raises assertion error if 'time_diff' not found
-                    hrs[ind] = rep.getext("time_diff")
-            assert not any(np.isnan(lon)), "Nan(s) found in longitude"
-            assert not any(np.isnan(lat)), "Nan(s) found in latitude"
-            assert not any(np.isnan(hrs)), "Nan(s) found in time differences"
-            assert not any(np.less(hrs, 0)), "times are not sorted"
+            assert not any(np.isnan(self.lon)), "Nan(s) found in longitude"
+            assert not any(np.isnan(self.lat)), "Nan(s) found in latitude"
+            assert not any(np.isnan(self.hrs)), "Nan(s) found in time differences"
+            assert is_monotonic(self.hrs), "times are not sorted"
         except AssertionError as error:
-            raise AssertionError("problem with report values: " + str(error))
+            warnings.warn(UserWarning("problem with report values: " + str(error)))
+            valid = False
+        return valid
 
-        hrs = np.cumsum(hrs)  # get time difference in hours relative to first report
 
+    def smooth_arrays(self):
+        half_win = int((self.smooth_win - 1) / 2)
         # create smoothed lon/lat timeseries
-        nrep_smooth = (
-            nrep - AgroundChecker.smooth_win + 1
-        )  # length of series after smoothing
+        nrep_smooth = self.nreps- self.smooth_win + 1 # length of series after smoothing
         lon_smooth = np.empty(nrep_smooth)  # type: np.ndarray
         lon_smooth[:] = np.nan
         lat_smooth = np.empty(nrep_smooth)  # type: np.ndarray
         lat_smooth[:] = np.nan
         hrs_smooth = np.empty(nrep_smooth)  # type: np.ndarray
         hrs_smooth[:] = np.nan
-        try:
-            for i in range(0, nrep_smooth):
-                lon_smooth[i] = np.median(lon[i : i + AgroundChecker.smooth_win])
-                lat_smooth[i] = np.median(lat[i : i + AgroundChecker.smooth_win])
-                hrs_smooth[i] = hrs[i + half_win]
-            assert not any(np.isnan(lon_smooth)), "Nan(s) found in smoothed longitude"
-            assert not any(np.isnan(lat_smooth)), "Nan(s) found in smoothed latitude"
-            assert not any(
-                np.isnan(hrs_smooth)
-            ), "Nan(s) found in smoothed time differences"
-        except AssertionError as error:
-            raise AssertionError("problem with smoothed report values: " + str(error))
+
+        for i in range(0, nrep_smooth):
+            lon_smooth[i] = np.median(self.lon[i : i + self.smooth_win])
+            lat_smooth[i] = np.median(self.lat[i : i + self.smooth_win])
+            hrs_smooth[i] = self.hrs[i + half_win]
 
         self.lon_smooth = lon_smooth
         self.lat_smooth = lat_smooth
@@ -534,9 +544,19 @@ class AgroundChecker:
 
     def _do_aground_check(self):
         """Perform the actual aground check"""
-        half_win = (AgroundChecker.smooth_win - 1) / 2
-        min_win_period_hours = AgroundChecker.min_win_period * 24.0
-        max_win_period_hours = AgroundChecker.max_win_period * 24.0
+        half_win = (self.smooth_win - 1) / 2
+        min_win_period_hours = self.min_win_period * 24.0
+        max_win_period_hours = self.max_win_period * 24.0
+
+        if not self.valid_parameters() or not self.valid_arrays():
+            self.qc_outcomes = np.zeros(self.nreps) + untestable
+            return
+
+        if self.nreps <= self.smooth_win:
+            self.qc_outcomes = np.zeros(self.nreps) + passed
+            return
+
+        self.smooth_arrays()
 
         # loop through smoothed timeseries to see if drifter has run aground
         i = 0
@@ -573,9 +593,6 @@ class AgroundChecker:
             i_aground += half_win
         # this gets the first index the drifter is deemed aground for the original (un-smoothed) timeseries
         # n.b. if i_aground=0 then the entire drifter record is deemed aground and flagged as such
-        for ind, rep in enumerate(self.reps):
-            if is_aground and ind >= i_aground:
-                rep.set_qc("POS", "drf_agr", 1)
-            else:
-                rep.set_qc("POS", "drf_agr", 0)
-
+        self.qc_outcomes[:] = passed
+        if is_aground:
+            self.qc_outcomes[int(i_aground):] = failed
