@@ -7,6 +7,8 @@ from typing import Literal
 
 import cf_xarray  # noqa
 import xarray as xr
+from numpy import ndarray
+from xclim.core.units import convert_units_to
 
 from .time_control import day_in_year, split_date, which_pentad
 
@@ -95,28 +97,88 @@ def open_xrdataset(
 
 class Climatology:
     """Class for dealing with climatologies, reading, extracting values etc.
-    Automatically detects if this is a single field, pentad or daily climatology
+    Automatically detects if this is a single field, pentad or daily climatology.
+
+    Parameters
+    ----------
+    data: xr.DataArray
+        Climatology data
+    time_axis: str, optional
+        Name of time axis.
+        Set if time axis in `data` is not CF compatible.
+    lat_axis: str, optional
+        Name of latitude axis.
+        Set if latitude axis in `data` is not CF compatible.
+    lon_axis: str, optional
+        Name of longitude axis.
+        Set if longitude axis in `data` is not CF compatible.
+    source_units: str, optional
+        Name of units in `data`.
+        Set if units are not defined in `data`.
+    target_units: str, optional
+        Name of target units to which units must conform.
+    valid_ntime: int or list, default: [1, 73, 365]
+        Number of valid time steps:
+        1: single field climatology
+        73: pentad climatology
+        365: daily climatology
     """
 
-    def __init__(self, data, obs_name, statistics):
+    def __init__(
+        self,
+        data: xr.DataArray,
+        time_axis: str | None = None,
+        lat_axis: str | None = None,
+        lon_axis: str | None = None,
+        source_units: str | None = None,
+        target_units: str | None = None,
+        valid_ntime: int | list = [1, 73, 365],
+    ):
         self.data = data
-        self.time_axis = data.cf.coordinates["time"][0]
-        self.lat_axis = data.cf.coordinates["latitude"][0]
-        self.lon_axis = data.cf.coordinates["longitude"][0]
+        self.convert_units_to(target_units, source_units=source_units)
+        if time_axis is None:
+            self.time_axis = data.cf.coordinates["time"][0]
+        else:
+            self.time_axis = time_axis
+        if lat_axis is None:
+            self.lat_axis = data.cf.coordinates["latitude"][0]
+        else:
+            self.lat_axis = lat_axis
+        if lon_axis is None:
+            self.lon_axis = data.cf.coordinates["longitude"][0]
+        else:
+            self.lon_axis = lon_axis
+        if not isinstance(valid_ntime, list):
+            valid_ntime = [valid_ntime]
         self.ntime = len(data[self.time_axis])
-        assert self.ntime in [1, 73, 365], "weird shaped field"
-        self.nlat = len(data[self.lat_axis])
-        self.nlon = len(data[self.lon_axis])
-        self.res = 180.0 / self.nlat
-        self.obs_name = obs_name
-        self.statistics = statistics
+        assert self.ntime in valid_ntime, "weird shaped field"
 
     @classmethod
-    def open_netcdf_file(cls, file_name, clim_name, **kwargs):
+    def open_netcdf_file(cls, file_name, clim_name, **kwargs) -> Climatology:
         """Open filename with xarray."""
         ds = open_xrdataset(file_name)
         da = ds[clim_name]
         return cls(da, **kwargs)
+
+    def convert_units_to(self, target_units, source_units=None) -> None:
+        """Convert units to user-specific units.
+
+        Parameters
+        ----------
+        target_units: str
+            Target units to which units must conform.
+        source_units, str, optional
+            Source units if not specified in :py:class:`Climatology`.
+
+        Note
+        ----
+        For more information see: :py:func:`xclim.core.units.convert_units_to`
+        """
+        if target_units is None:
+            return
+        if source_units is not None:
+            self.data.attrs["units"] = source_units
+        self.data = convert_units_to(self.data, target_units)
 
     def get_value(
         self,
@@ -125,8 +187,8 @@ class Climatology:
         date: datetime | None = None,
         month: int | None = None,
         day: int | None = None,
-    ) -> float:
-        """Get the value from the climatology at the give position and time.
+    ) -> ndarray:
+        """Get the value from a climatology at the give position and time.
 
         Parameters
         ----------
@@ -143,7 +205,7 @@ class Climatology:
 
         Returns
         -------
-        float
+        ndarray
             Climatology value at specified location and time.
 
         Note
@@ -185,5 +247,22 @@ class Climatology:
             return 0
         elif self.ntime == 73:
             return which_pentad(month, day) - 1
-        elif self.ntime == 365:
-            return day_in_year(month, day) - 1
+        return day_in_year(month, day) - 1
+
+
+def get_climatological_value(climatology: Climatology, **kwargs) -> ndarray:
+    """Get the value from a climatology.
+
+    Parameters
+    ----------
+    climatology: Climatology
+        Climatology class
+    kwargs: dict
+        Pass keyword-arguments to :py:class:~Climatology.get_value`
+
+    Returns
+    -------
+    ndarray
+            Climatology value at specified location and time.
+    """
+    return climatology.get_value(**kwargs)

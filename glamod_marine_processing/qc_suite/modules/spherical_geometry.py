@@ -39,8 +39,7 @@ def sphere_distance(lat1: float, lon1: float, lat2: float, lon2: float) -> float
     float
         Return the great circle distance in kilometres between the two points
     """
-    delta = angular_distance(lat1, lon1, lat2, lon2) * earths_radius
-    return delta
+    return angular_distance(lat1, lon1, lat2, lon2) * earths_radius
 
 
 def angular_distance(lat1: float, lon1: float, lat2: float, lon2: float) -> float:
@@ -90,9 +89,7 @@ def angular_distance(lat1: float, lon1: float, lat2: float, lon2: float) -> floa
     bottombit = np.sin(lat1) * np.sin(lat2) + np.cos(lat1) * np.cos(lat2) * np.cos(
         delta_lambda
     )
-    delta = np.arctan2(topbit, bottombit)
-
-    return delta
+    return np.arctan2(topbit, bottombit)
 
 
 def lat_lon_from_course_and_distance(

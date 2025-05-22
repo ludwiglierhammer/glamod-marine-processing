@@ -238,9 +238,7 @@ def trimmed_mean(inarr: list[float], trim: int) -> float:
 
     index1 = int(length / trim)
 
-    trim = np.mean(inarr[index1 : length - index1])
-
-    return trim
+    return np.mean(inarr[index1 : length - index1])
 
 
 def missing_mean(inarr: list[float]) -> float | None:
@@ -264,5 +262,4 @@ def missing_mean(inarr: list[float]) -> float | None:
             num += 1.0
     if num == 0.0:
         return None
-    else:
-        return result / num
+    return result / num

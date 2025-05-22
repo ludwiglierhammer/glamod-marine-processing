@@ -29,9 +29,9 @@ def climatology_plus_stdev_with_lowbar_check(
     standard_deviation : float
         The standard deviation which will be used to test the anomaly
     limit : float
-        Maximum standardised anomaly
+        Maximum standardised anomaly.
     lowbar : float
-        The anomaly must be greater than lowbar to fail regardless of standard deviation
+        The anomaly must be greater than lowbar to fail regardless of standard deviation.
 
     Returns
     -------
@@ -110,13 +110,12 @@ def climatology_plus_stdev_check(
     ):
         return failed
 
-    stdev = standard_deviation
-    if stdev < stdev_limits[0]:
-        stdev = stdev_limits[0]
-    if stdev > stdev_limits[1]:
-        stdev = stdev_limits[1]
+    if standard_deviation < stdev_limits[0]:
+        standard_deviation = stdev_limits[0]
+    if standard_deviation > stdev_limits[1]:
+        standard_deviation = stdev_limits[1]
 
-    if abs(value - climate_normal) / stdev > limit:
+    if abs(value - climate_normal) / standard_deviation > limit:
         return failed
 
     return passed
@@ -186,24 +185,6 @@ def value_check(inval: float | None) -> int:
         Returns 1 if the input value is None, 0 otherwise.
     """
     if inval is None:
-        return failed
-    return passed
-
-
-def no_normal_check(inclimav: float) -> int:
-    """Check if a climatological average is equal to None.
-
-    Parameters
-    ----------
-    inclimav: float
-        The input value
-
-    Returns
-    -------
-    int
-        Returns 1 if the input value is None, 0 otherwise.
-    """
-    if isvalid(inclimav) == failed:
         return failed
     return passed
 
