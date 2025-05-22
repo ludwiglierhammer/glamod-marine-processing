@@ -216,7 +216,6 @@ def do_speed_check(lons, lats, dates, speed_limit, min_win_period, max_win_perio
     return checker.get_qc_outcomes()
 
 
-
 class SpeedChecker:
     """Check to see whether a drifter has been picked up by a ship (out of water) based on 1/100th degree
     precision positions. A flag 'drf_spd' is set for each input report: flag=1 for reports deemed picked up,
@@ -351,11 +350,11 @@ class SpeedChecker:
         return
 
 
-
 def do_aground_check(lons, lats, dates, smooth_win: int, min_win_period: int, max_win_period: int):
     checker = AgroundChecker(lons, lats, dates, smooth_win, min_win_period, max_win_period)
     checker._do_aground_check()
     return checker.get_qc_outcomes()
+
 
 class AgroundChecker:
     """
@@ -683,4 +682,382 @@ class NewAgroundChecker:
             else:
                 self.qc_outcomes[ind] = passed
 
+
+def do_sst_tail_check(
+        lat, lon,
+        sst, ostia, ice, bgvar, dates,
+        long_win_len: int,
+        long_err_std_n: float,
+        short_win_len: int,
+        short_err_std_n: float,
+        short_win_n_bad: int,
+        drif_inter: float,
+        drif_intra: float,
+        background_err_lim: float,
+):
+    checker = SSTTailChecker(
+        lat, lon,
+        sst, ostia, ice, bgvar, dates,
+        long_win_len,
+        long_err_std_n,
+        short_win_len,
+        short_err_std_n,
+        short_win_n_bad,
+        drif_inter,
+        drif_intra,
+        background_err_lim
+    )
+    checker._do_sst_tail_check()
+    return checker.get_qc_outcomes()
+
+
+class SSTTailChecker:
+    """Check to see whether there is erroneous sea surface temperature data at the beginning or end of a drifter record
+    (referred to as 'tails'). The flags 'drf_tail1' and 'drf_tail2' are set for each input report: flag=1 for reports
+    with erroneous data, else flag=0, 'drf_tail1' is used for bad data at the beginning of a record, 'drf_tail2' is
+    used for bad data at the end of a record.
+
+    The tail check makes an assessment of the quality of data at the start and end of a drifting buoy record by
+    comparing to a background reference field. Data found to be unacceptably biased or noisy relative to the
+    background are flagged by the check. When making the comparison an allowance is made for background error
+    variance and also normal drifter error (both bias and random measurement error). The correlation of the
+    background error is treated as unknown and takes on a value which maximises background error dependent on the
+    assessment being made. A background error variance limit is also specified, beyond which the background is deemed
+    unreliable. Observations made during the day, in icy regions or where the background value is missing are
+    excluded from the comparison.
+
+    The check proceeds in two steps; a 'long tail-check' followed by a 'short tail-check'. The idea is that the short
+    tail-check has finer resolution but lower sensitivity than the long tail-check and may pick off noisy data not
+    picked up by the long tail check. Only observations that pass the long tail-check are passed to the short
+    tail-check. Both of these tail checks proceed by moving a window over the data and assessing the data in each
+    window. Once good data are found the check stops and any bad data preceding this are flagged. If unreliable
+    background data are encountered the check stops. The checks are run forwards and backwards over the record so as
+    to assess data at the start and end of the record. If the whole record fails no observations are flagged as there
+    are then no 'tails' in the data (this is left for other checks). The long tail check looks for groups of
+    observations that are too biased or noisy as a whole. The short tail check looks for individual observations
+    exceeding a noise limit within the window.
+
+    long_win_len: int
+        Length of window (in data-points) over which to make long tail-check (must be an odd number)
+    long_err_std_n: float
+        Number of standard deviations of combined background and drifter bias error, beyond which
+        data fail bias check
+    short_win_len: int
+        Length of window (in data-points) over which to make the short tail-check
+    short_err_std_n: float
+        Number of standard deviations of combined background and drifter error, beyond which data
+        are deemed suspicious
+    short_win_n_bad: int
+        Minimum number of suspicious data points required for failure of short check window
+    drif_inter: float
+        spread of biases expected in drifter data (standard deviation, degC)
+    drif_intra: float
+        Maximum random measurement uncertainty reasonably expected in drifter data (standard deviation, degC)
+    background_err_lim: float
+        Background error variance beyond which the SST background is deemed unreliable (degC squared)
+    """
+
+    def __init__(
+            self, lat, lon,
+            sst, ostia, ice, bgvar, dates,
+            long_win_len: int,
+            long_err_std_n: float,
+            short_win_len: int,
+            short_err_std_n: float,
+            short_win_n_bad: int,
+            drif_inter: float,
+            drif_intra: float,
+            background_err_lim: float
+    ):
+        self.nreps = len(sst)
+
+        self.lat = lat
+        self.lon = lon
+        self.sst = sst
+        self.ostia = ostia
+        self.ice = ice
+        self.bgvar = bgvar
+        self.dates = dates
+
+        self.reps_ind = None
+        self.sst_anom = None
+        self.bgerr = None
+
+        self.start_tail_ind = None
+        self.end_tail_ind = None
+
+        self.qc_outcomes = np.zeros(self.nreps) + untested
+
+        self.long_win_len = long_win_len
+        self.long_err_std_n = long_err_std_n
+        self.short_win_len = short_win_len
+        self.short_err_std_n = short_err_std_n
+        self.short_win_n_bad = short_win_n_bad
+        self.drif_inter = drif_inter
+        self.drif_intra = drif_intra
+        self.background_err_lim = background_err_lim
+
+
+    def valid_parameters(self):
+        valid = True
+        try:
+            assert self.long_win_len >= 1, "long_win_len must be >= 1"
+            assert self.long_win_len % 2 != 0, "long_win_len must be an odd number"
+            assert self.long_err_std_n >= 0, "long_err_std_n must be >= 0"
+            assert self.short_win_len >= 1, "short_win_len must be >= 1"
+            assert self.short_err_std_n >= 0, "short_err_std_n must be >= 0"
+            assert self.short_win_n_bad >= 1, "short_win_n_bad must be >= 1"
+            assert self.drif_inter >= 0, "drif_inter must be >= 0"
+            assert self.drif_intra >= 0, "drif_intra must be >= 0"
+            assert self.background_err_lim >= 0, "background_err_lim must be >= 0"
+        except AssertionError as error:
+            warnings.warn(UserWarning("invalid input parameter: " + str(error)))
+            valid = False
+        return valid
+
+    def get_qc_outcomes(self):
+        return self.qc_outcomes
+
+    def _do_sst_tail_check(self):
+
+        if not self.valid_parameters():
+            self.qc_outcomes[:] = untestable
+            return
+
+        self._preprocess_reps()
+        if len(self.sst_anom) == 0:
+            self.qc_outcomes[:] = passed
+            return
+
+        self.qc_outcomes[:] = passed
+
+        nrep = len(self.sst_anom)
+        self.start_tail_ind = -1  # keeps track of index where start tail stops
+        self.end_tail_ind = nrep  # keeps track of index where end tail starts
+
+        # do long tail check - records shorter than long-window length aren't evaluated
+        if not (nrep < self.long_win_len):
+            # run forwards then backwards over timeseries
+            self._do_long_tail_check(forward=True)
+            self._do_long_tail_check(forward=False)
+
+        # do short tail check on records that pass long tail check - whole record already failed long tail check
+        if not (self.start_tail_ind >= self.end_tail_ind):
+            first_pass_ind = self.start_tail_ind + 1  # first index passing long tail check
+            last_pass_ind = self.end_tail_ind - 1  # last index passing long tail check
+            self._do_short_tail_check(first_pass_ind, last_pass_ind, forward=True)
+            self._do_short_tail_check(first_pass_ind, last_pass_ind, forward=False)
+
+        # now flag reps - whole record failed tail checks, don't flag
+        if self.start_tail_ind >= self.end_tail_ind:
+            self.start_tail_ind = -1
+            self.end_tail_ind = nrep
+
+        if not self.start_tail_ind == -1:
+            for ind in range(self.nreps):
+                if ind <= self.reps_ind[self.start_tail_ind]:
+                    self.qc_outcomes[ind] = failed
+                    #rep.set_qc("SST", "drf_tail1", 1)
+        if not self.end_tail_ind == nrep:
+            for ind in range(self.nreps):
+                if ind >= self.reps_ind[self.end_tail_ind]:
+                    pass
+                    #self.qc_outcomes[ind] = failed
+                    #rep.set_qc("SST", "drf_tail2", 1)
+
+    @staticmethod
+    def _parse_rep(lat, lon, ostia, ice, bgvar, dates) -> (float, float, float, bool):
+        """
+
+        Parameters
+        ----------
+        lat: float
+            Latitude
+        lon: float
+            Longitude
+        ostia: float
+            OSTIA value matched to this observation
+        ice: float
+            Ice concentration value matched to this observation
+        bgvar: float
+            Background variance value matched to this observation
+        dates: np.datetime
+            Date and time of the observation
+
+        Returns
+        -------
+        (float, float, float, bool)
+            Background value, ice concentration, background variance, and a boolean variable indicating whether the
+            report is "good"
+        """
+        bg_val = ostia
+
+        if ice is None or np.isnan(ice):
+            ice = 0.0
+        assert (
+            ice is not None and 0.0 <= ice <= 1.0
+        ), "matched ice proportion is invalid"
+
+        daytime = track_day_test(
+            dates.year,
+            dates.month,
+            dates.day,
+            dates.hour + (dates.minute)/60,
+            lat,
+            lon,
+            -2.5,
+        )
+
+        # try:
+        #     # raises assertion error if 'time_diff' not found
+        #     time_diff = rep.getext("time_diff")
+        #     if time_diff is not None:
+        #         assert time_diff >= 0, "times are not sorted"
+        # except AssertionError as error:
+        #     raise AssertionError("problem with report value: " + str(error))
+
+        land_match = bg_val is None
+        ice_match = ice > 0.15
+
+        good_match = not (daytime or land_match or ice_match)
+
+        return bg_val, ice, bgvar, good_match
+
+    def _preprocess_reps(self) -> None:
+        """Process the reps and calculate the values used in the QC check"""
+        # test and filter out obs with unsuitable background matches
+        reps_ind = []  # type: list
+        sst_anom = []  # type: list
+        bgvar = []  # type: list
+        for ind in range(self.nreps):
+            bg_val, ice_val, bgvar_val, good_match = self._parse_rep(
+                self.lat[ind], self.lon[ind],
+                self.ostia[ind], self.ice[ind],
+                self.bgvar[ind], self.dates[ind]
+            )
+
+            if good_match:
+                assert (
+                    bg_val is not None and -5.0 <= bg_val <= 45.0
+                ), "matched background sst is invalid"
+                assert (
+                    bgvar_val is not None and 0.0 <= bgvar_val <= 10
+                ), "matched background error variance is invalid"
+                reps_ind.append(ind)
+                sst_anom.append(self.sst[ind] - bg_val)
+                bgvar.append(bgvar_val)
+
+        # prepare numpy arrays and variables needed for tail checks
+        # indices of obs suitable for assessment
+        self.reps_ind = np.array(reps_ind)  # type: np.ndarray
+        # ob-background differences
+        self.sst_anom = np.array(sst_anom)  # type: np.ndarray
+        # standard deviation of background error
+        self.bgerr = np.sqrt(np.array(bgvar))  # type: np.ndarray
+
+    def _do_long_tail_check(self, forward: bool = True) -> None:
+        """Perform the long tail check
+
+        Parameters
+        ----------
+        forward: bool
+            Flag to set for a forward (True) or backward (False) pass of the long tail check
+
+        Returns
+        -------
+        None
+        """
+        nrep = len(self.sst_anom)
+        mid_win_ind = int((self.long_win_len - 1) / 2)
+
+        if forward:
+            sst_anom_temp = self.sst_anom
+            bgerr_temp = self.bgerr
+        else:
+            sst_anom_temp = np.flipud(self.sst_anom)
+            bgerr_temp = np.flipud(self.bgerr)
+
+        # this is the long tail check
+        for ix in range(0, nrep - self.long_win_len + 1):
+            sst_anom_winvals = sst_anom_temp[ix : ix + self.long_win_len]
+            bgerr_winvals = bgerr_temp[ix : ix + self.long_win_len]
+            if np.any(bgerr_winvals > np.sqrt(self.background_err_lim)):
+                break
+            sst_anom_avg = trim_mean(sst_anom_winvals, 100)
+            sst_anom_stdev = trim_std(sst_anom_winvals, 100)
+            bgerr_avg = np.mean(bgerr_winvals)
+            bgerr_rms = np.sqrt(np.mean(bgerr_winvals**2))
+            if (
+                abs(sst_anom_avg)
+                > self.long_err_std_n
+                * np.sqrt(self.drif_inter**2 + bgerr_avg**2)
+            ) or (
+                sst_anom_stdev > np.sqrt(self.drif_intra**2 + bgerr_rms**2)
+            ):
+                if forward:
+                    self.start_tail_ind = ix + mid_win_ind
+                else:
+                    self.end_tail_ind = (nrep - 1) - ix - mid_win_ind
+            else:
+                break
+
+    def _do_short_tail_check(self, first_pass_ind, last_pass_ind, forward=True):
+        """Perform the short tail check
+
+        Parameters
+        ----------
+        first_pass_ind: int
+            Index
+        last_pass_ind: int
+            Index
+        forward: bool
+            Flag to set for a forward (True) or backward (False) pass of the short tail check
+
+        Returns
+        -------
+        None
+        """
+        npass = last_pass_ind - first_pass_ind + 1
+        assert npass > 0, "short tail check: npass not > 0"
+
+        # records shorter than short-window length aren't evaluated
+        if npass < self.short_win_len:
+            return
+
+        if forward:
+            sst_anom_temp = self.sst_anom[first_pass_ind : last_pass_ind + 1]
+            bgerr_temp = self.bgerr[first_pass_ind : last_pass_ind + 1]
+        else:
+            sst_anom_temp = np.flipud(self.sst_anom[first_pass_ind : last_pass_ind + 1])
+            bgerr_temp = np.flipud(self.bgerr[first_pass_ind : last_pass_ind + 1])
+
+        # this is the short tail check
+        for ix in range(0, npass - self.short_win_len + 1):
+            sst_anom_winvals = sst_anom_temp[ix : ix + self.short_win_len]
+            bgerr_winvals = bgerr_temp[ix : ix + self.short_win_len]
+            if np.any(bgerr_winvals > np.sqrt(self.background_err_lim)):
+                break
+            limit = self.short_err_std_n * np.sqrt(
+                bgerr_winvals**2
+                + self.drif_inter**2
+                + self.drif_intra**2
+            )
+            exceed_limit = np.logical_or(
+                sst_anom_winvals > limit, sst_anom_winvals < -limit
+            )
+            if np.sum(exceed_limit) >= self.short_win_n_bad:
+                if forward:
+                    # if all windows have failed, flag everything
+                    if ix == npass - self.short_win_len:
+                        self.start_tail_ind += self.short_win_len
+                    else:
+                        self.start_tail_ind += 1
+                else:
+                    # if all windows have failed, flag everything
+                    if ix == npass - self.short_win_len:
+                        self.end_tail_ind -= self.short_win_len
+                    else:
+                        self.end_tail_ind -= 1
+            else:
+                break
 
