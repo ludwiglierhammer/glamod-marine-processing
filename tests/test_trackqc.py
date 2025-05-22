@@ -1937,132 +1937,38 @@ def speed_check_data(selector):
     return reps['LAT'], reps['LON'], reps['DATE']
 
 
-def test_stationary_a():
-    lats, lons, dates = speed_check_data(1)
-    expected_flags = [0, 0, 0, 0, 0, 0, 0]
-    qc_outcomes = tqc.do_speed_check(lons, lats, dates, 2.5, 0.5, 1.0)
+@pytest.mark.parametrize(
+    "selector, speed_limit, min_win_period, max_win_period, expected, warns",
+    [
+        (1, 2.5, 0.5, 1.0, [0, 0, 0, 0, 0, 0, 0], False), # test stationary
+        (2, 2.5, 0.5, 1.0, [1, 1, 1, 1, 1, 1, 1], False), # test_fast_drifter
+        (3, 2.5, 0.5, 1.0, [0, 0, 0, 0, 0, 0, 0], False), # test_slow_drifter
+        (4, 2.5, 0.5, 1.0, [0, 0, 1, 1, 1, 0, 0], False), # test_slow_fast_slow_drifter
+        (5, 2.5, 0.5, 1.0, [0, 0, 0, 0, 0, 0, 0], False), # test_high_freqency_sampling
+        (6, 2.5, 0.5, 1.0, [0, 0, 0, 0, 0, 0, 0], False), # test_low_freqency_sampling
+        (7, 2.5, 0.5, 1.0, [0, 1, 1, 1, 1, 1, 0], False), # test_slow_fast_slow_mid_freqency_sampling
+        (8, 2.5, 0.5, 1.0, [1, 1, 0, 0, 0, 1, 1], False), # test_irregular_sampling
+        (9, 2.5, 0.5, 1.0, [1, 1, 1, 1, 1, 1, 1], False), # test_fast_arctic_drifter
+        (10, 2.5, 0.5, 1.0, [0, 1, 1, 1, 1, 1, 1], False), # test_stationary_gross_error
+        (11, 2.5, 0.5, 1.0, [0, 0], False), # test_too_short_for_qc_a
+        (12, -2.5, 0.5, 1.0, [untestable for x in range(7)], True), # test_error_bad_input_parameter_a
+        (13, 2.5, 0.5, 1.0, [untestable for x in range(7)], True), # test_error_missing_observation_a
+        (14, 2.5 ,0.5, 1.0, [untestable for x in range(7)], True), # test_error_not_time_sorted_a
+    ]
+)
+def test_generic_speed_tests(selector, speed_limit, min_win_period, max_win_period, expected, warns):
+    lats, lons, dates = speed_check_data(selector)
+    if warns:
+        with pytest.warns(UserWarning):
+            qc_outcomes = tqc.do_speed_check(lons, lats, dates, speed_limit, min_win_period, max_win_period)
+    else:
+        qc_outcomes = tqc.do_speed_check(lons, lats, dates, speed_limit, min_win_period, max_win_period)
     for i in range(len(qc_outcomes)):
-        assert qc_outcomes[i] == expected_flags[i]
+        assert qc_outcomes[i] == expected[i]
 
 
-def test_fast_drifter():
-    lats, lons, dates = speed_check_data(2)
-    expected_flags = [1, 1, 1, 1, 1, 1, 1]
-    qc_outcomes = tqc.do_speed_check(lons, lats, dates, 2.5, 0.5, 1.0)
-    for i in range(len(qc_outcomes)):
-        assert qc_outcomes[i] == expected_flags[i]
 
-
-def test_slow_drifter():
-    lats, lons, dates = speed_check_data(3)
-    expected_flags = [0, 0, 0, 0, 0, 0, 0]
-    qc_outcomes = tqc.do_speed_check(lons, lats, dates, 2.5, 0.5, 1.0)
-    for i in range(len(qc_outcomes)):
-        assert qc_outcomes[i] == expected_flags[i]
-
-
-def test_slow_fast_slow_drifter():
-    lats, lons, dates = speed_check_data(4)
-    expected_flags = [0, 0, 1, 1, 1, 0, 0]
-    qc_outcomes = tqc.do_speed_check(lons, lats, dates, 2.5, 0.5, 1.0)
-    for i in range(len(qc_outcomes)):
-        assert qc_outcomes[i] == expected_flags[i]
-
-
-def test_high_freqency_sampling():
-    lats, lons, dates = speed_check_data(5)
-    expected_flags = [0, 0, 0, 0, 0, 0, 0]
-    qc_outcomes = tqc.do_speed_check(lons, lats, dates, 2.5, 0.5, 1.0)
-    for i in range(len(qc_outcomes)):
-        assert qc_outcomes[i] == expected_flags[i]
-
-
-def test_low_freqency_sampling():
-    lats, lons, dates = speed_check_data(6)
-    expected_flags = [0, 0, 0, 0, 0, 0, 0]
-    qc_outcomes = tqc.do_speed_check(lons, lats, dates, 2.5, 0.5, 1.0)
-    for i in range(len(qc_outcomes)):
-        assert qc_outcomes[i] == expected_flags[i]
-
-
-def test_slow_fast_slow_mid_freqency_sampling():
-    lats, lons, dates = speed_check_data(7)
-    expected_flags = [0, 1, 1, 1, 1, 1, 0]
-    qc_outcomes = tqc.do_speed_check(lons, lats, dates, 2.5, 0.5, 1.0)
-    for i in range(len(qc_outcomes)):
-        assert qc_outcomes[i] == expected_flags[i]
-
-
-def test_irregular_sampling():
-    lats, lons, dates = speed_check_data(8)
-    expected_flags = [1, 1, 0, 0, 0, 1, 1]
-    qc_outcomes = tqc.do_speed_check(lons, lats, dates, 2.5, 0.5, 1.0)
-    for i in range(len(qc_outcomes)):
-        assert qc_outcomes[i] == expected_flags[i]
-
-
-def test_fast_arctic_drifter():
-    lats, lons, dates = speed_check_data(9)
-    expected_flags = [1, 1, 1, 1, 1, 1, 1]
-    qc_outcomes = tqc.do_speed_check(lons, lats, dates,  2.5, 0.5, 1.0)
-    for i in range(len(qc_outcomes)):
-        assert qc_outcomes[i] == expected_flags[i]
-
-
-def test_stationary_gross_error():
-    lats, lons, dates = speed_check_data(10)
-    expected_flags = [0, 1, 1, 1, 1, 1, 1]
-    qc_outcomes = tqc.do_speed_check(lons, lats, dates, 2.5, 0.5, 1.0)
-    for i in range(len(qc_outcomes)):
-        assert qc_outcomes[i] == expected_flags[i]
-
-
-def test_too_short_for_qc_a():
-    lats, lons, dates = speed_check_data(11)
-    expected_flags = [0, 0]
-    old_stdout = sys.stdout
-    f = open(os.devnull, "w")
-    sys.stdout = f
-    qc_outcomes = tqc.do_speed_check(lons, lats, dates, 2.5, 0.5, 1.0)
-    sys.stdout = old_stdout
-    for i in range(len(qc_outcomes)):
-        assert qc_outcomes[i] == expected_flags[i]
-
-
-def test_error_bad_input_parameter_a():
-    lats, lons, dates = speed_check_data(12)
-    expected_flags = [untestable for x in range(7)]
-
-    with pytest.warns(UserWarning):
-        qc_outcomes = tqc.do_speed_check(lons, lats, dates, -2.5, 0.5, 1.0)
-
-    for i in range(len(qc_outcomes)):
-        assert qc_outcomes[i] == expected_flags[i]
-
-
-def test_error_missing_observation_a():
-    lats, lons, dates = speed_check_data(13)
-    expected_flags = [untestable for x in range(7)]
-
-    with pytest.warns(UserWarning):
-        qc_outcomes = tqc.do_speed_check(lons, lats, dates, 2.5, 0.5, 1.0)
-
-    for i in range(len(qc_outcomes)):
-        assert qc_outcomes[i] == expected_flags[i]
-
-
-def test_error_not_time_sorted_a():
-    lats, lons, dates = speed_check_data(14)
-    expected_flags = [untestable for x in range(7)]
-
-    with pytest.warns(UserWarning):
-        qc_outcomes = tqc.do_speed_check(lons, lats, dates, 2.5, 0.5, 1.0)
-
-    for i in range(len(qc_outcomes)):
-        assert qc_outcomes[i] == expected_flags[i]
-
-
-# --- new speed check ---
+# --- new speed check --- NEEDS IQUAM TO BE AVAILABLE
 # def test_new_stationary_a(reps1a, iquam_parameters):
 #     expected_flags = [0, 0, 0, 0, 0, 0, 0]
 #     otqc.do_new_speed_check(reps1a.reps, iquam_parameters, 2.5, 0.5)
