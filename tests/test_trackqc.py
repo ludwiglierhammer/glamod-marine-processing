@@ -1728,170 +1728,40 @@ def test_generic_aground(selector, smooth_win, min_win_period, max_win_period, e
     for i in range(len(lons)):
         assert qc_outcomes[i] == expected[i]
 
+@pytest.mark.parametrize(
+    "selector, smooth_win, min_win_period, max_win_period, expected, warns",
+    [
+        (1, 3, 1, 2, [1, 1, 1, 1, 1, 1, 1], False), # test_stationary
+        (2, 3, 1, 2, [1, 1, 1, 1, 1, 1, 1], False), # test_stationary jitter spikes
+        (3, 3, 1, 2, [0, 0, 0, 0, 1, 1, 1], False), # test stationary big remaining jitter
+        (4, 3, 1, 2, [1, 1, 1, 1, 1, 1, 1], False), # test_stationary_small_remaining_jitter
+        (5, 3, 1, 2, [0, 0, 0, 0, 0, 0, 0], False), # test_moving_west
+        (6, 3, 1, 2, [0, 0, 0, 0, 0, 0, 0], False), # test_moving_north
+        (7, 3, 1, 2, [0, 0, 0, 0, 1, 1, 1], False), # test_moving_north_then_stop
+        (8, 3, 1, 2, [0, 0, 0, 0, 0, 0, 0], False), # test_stationary_high_freq_sampling
+        (9, 3, 1, 2, [1, 1, 1, 1, 1, 1, 1], False), # test_stationary_low_freq_sampling
+        (10, 3, 1, 2, [1, 1, 1, 1, 1, 1, 1], False), # test_stationary_mid_freq_sampling
+        (11, 3, 1, 2, [1, 1, 1, 1, 1, 1, 1], False), # test_stationary_low_to_mid_freq_sampling
+        (12, 3, 1, 2, [0, 0, 0, 1, 1, 1, 1], False), # test_moving_slowly_northwest
+        (13, 3, 1, 2, [1, 1, 1, 1, 1, 1, 1], False), # test_moving_slowly_west_in_arctic
+        (14, 3, 1, 2, [0, 0, 0, 0, 0, 0, 0], False), # test_stop_then_moving_north
+        (15, 3, 1, 2, [0, 0], False), # test_too_short_for_qc
+        (16, 0, 1, 2, [untestable for x in range(7)], True), # test_error_bad_input_parameter
+        (17, 3, 1, 2, [untestable for x in range(7)], True), # test_error_missing_observation
+        (18, 3, 1, 2, [untestable for x in range(7)], True), # test_error_not_time_sorted
+    ]
+)
+def test_new_generic_aground(selector, smooth_win, min_win_period, max_win_period, expected, warns):
+    lats, lons, dates = aground_check_test_data(selector)
+    if warns:
+        with pytest.warns(UserWarning):
+            qc_outcomes = tqc.do_new_aground_check(lons, lats, dates, smooth_win, min_win_period)
+    else:
+        qc_outcomes = tqc.do_new_aground_check(lons, lats, dates, smooth_win, min_win_period)
+    for i in range(len(lons)):
+        assert qc_outcomes[i] == expected[i]
 
 
-def test_new_stationary(reps1):
-    expected_flags = [1, 1, 1, 1, 1, 1, 1]
-    otqc.do_new_aground_check(reps1.reps, 3, 1)
-    for i in range(0, len(reps1)):
-        assert reps1.get_qc(i, "POS", "drf_agr") == expected_flags[i]
-
-
-def test_new_stationary_jitter_spikes(reps2):
-    expected_flags = [1, 1, 1, 1, 1, 1, 1]
-    otqc.do_new_aground_check(reps2.reps, 3, 1)
-    for i in range(0, len(reps2)):
-        assert reps2.get_qc(i, "POS", "drf_agr") == expected_flags[i]
-
-
-def test_new_stationary_big_remaining_jitter(reps3):
-    expected_flags = [0, 0, 0, 0, 1, 1, 1]
-    otqc.do_new_aground_check(reps3.reps, 3, 1)
-    for i in range(0, len(reps3)):
-        assert reps3.get_qc(i, "POS", "drf_agr") == expected_flags[i]
-
-
-def test_new_stationary_small_remaining_jitter(reps4):
-    expected_flags = [1, 1, 1, 1, 1, 1, 1]
-    otqc.do_new_aground_check(reps4.reps, 3, 1)
-    for i in range(0, len(reps4)):
-        assert reps4.get_qc(i, "POS", "drf_agr") == expected_flags[i]
-
-
-def test_new_moving_west(reps5):
-    expected_flags = [0, 0, 0, 0, 0, 0, 0]
-    otqc.do_new_aground_check(reps5.reps, 3, 1)
-    for i in range(0, len(reps5)):
-        assert reps5.get_qc(i, "POS", "drf_agr") == expected_flags[i]
-
-
-def test_new_moving_north(reps6):
-    expected_flags = [0, 0, 0, 0, 0, 0, 0]
-    otqc.do_new_aground_check(reps6.reps, 3, 1)
-    for i in range(0, len(reps6)):
-        assert reps6.get_qc(i, "POS", "drf_agr") == expected_flags[i]
-
-
-def test_new_moving_north_then_stop(reps7):
-    expected_flags = [0, 0, 0, 0, 1, 1, 1]
-    otqc.do_new_aground_check(reps7.reps, 3, 1)
-    for i in range(0, len(reps7)):
-        assert reps7.get_qc(i, "POS", "drf_agr") == expected_flags[i]
-
-
-def test_new_stationary_high_freq_sampling(reps8):
-    expected_flags = [0, 0, 0, 0, 0, 0, 0]
-    otqc.do_new_aground_check(reps8.reps, 3, 1)
-    for i in range(0, len(reps8)):
-        assert reps8.get_qc(i, "POS", "drf_agr") == expected_flags[i]
-
-
-def test_new_stationary_low_freq_sampling(reps9):
-    expected_flags = [1, 1, 1, 1, 1, 1, 1]
-    otqc.do_new_aground_check(reps9.reps, 3, 1)
-    for i in range(0, len(reps9)):
-        assert reps9.get_qc(i, "POS", "drf_agr") == expected_flags[i]
-
-
-def test_new_stationary_mid_freq_sampling(reps10):
-    expected_flags = [1, 1, 1, 1, 1, 1, 1]
-    otqc.do_new_aground_check(reps10.reps, 3, 1)
-    for i in range(0, len(reps10)):
-        assert reps10.get_qc(i, "POS", "drf_agr") == expected_flags[i]
-
-
-def test_new_stationary_low_to_mid_freq_sampling(reps11):
-    expected_flags = [1, 1, 1, 1, 1, 1, 1]
-    otqc.do_new_aground_check(reps11.reps, 3, 1)
-    for i in range(0, len(reps11)):
-        assert reps11.get_qc(i, "POS", "drf_agr") == expected_flags[i]
-
-
-def test_new_moving_slowly_northwest(reps12):
-    expected_flags = [0, 0, 0, 1, 1, 1, 1]
-    otqc.do_new_aground_check(reps12.reps, 3, 1)
-    for i in range(0, len(reps12)):
-        assert reps12.get_qc(i, "POS", "drf_agr") == expected_flags[i]
-
-
-def test_new_moving_slowly_west_in_arctic(reps13):
-    expected_flags = [1, 1, 1, 1, 1, 1, 1]
-    otqc.do_new_aground_check(reps13.reps, 3, 1)
-    for i in range(0, len(reps13)):
-        assert reps13.get_qc(i, "POS", "drf_agr") == expected_flags[i]
-
-
-def test_new_stop_then_moving_north(reps14):
-    expected_flags = [0, 0, 0, 0, 0, 0, 0]
-    otqc.do_new_aground_check(reps14.reps, 3, 1)
-    for i in range(0, len(reps14)):
-        assert reps14.get_qc(i, "POS", "drf_agr") == expected_flags[i]
-
-
-def test_new_too_short_for_qc(reps15):
-    expected_flags = [0, 0]
-    old_stdout = sys.stdout
-    f = open(os.devnull, "w")
-    sys.stdout = f
-    otqc.do_new_aground_check(reps15.reps, 3, 1)
-    sys.stdout = old_stdout
-    for i in range(0, len(reps15)):
-        assert reps15.get_qc(i, "POS", "drf_agr") == expected_flags[i]
-
-
-def test_new_error_bad_input_parameter(reps16):
-    expected_flags = [9, 9, 9, 9, 9, 9, 9]
-    try:
-        otqc.do_new_aground_check(reps16.reps, 2, 1)
-    except AssertionError as error:
-        error_return_text = "invalid input parameter: smooth_win must be an odd number"
-        assert str(error)[0 : len(error_return_text)] == error_return_text
-    for i in range(0, len(reps16)):
-        assert reps16.get_qc(i, "POS", "drf_agr") == expected_flags[i]
-
-
-def test_new_error_missing_observation(reps17):
-    expected_flags = [9, 9, 9, 9, 9, 9, 9]
-    try:
-        otqc.do_new_aground_check(reps17.reps, 3, 1)
-    except AssertionError as error:
-        error_return_text = "problem with report values: Nan(s) found in longitude"
-        assert str(error)[0 : len(error_return_text)] == error_return_text
-    for i in range(0, len(reps17)):
-        assert reps17.get_qc(i, "POS", "drf_agr") == expected_flags[i]
-
-
-def test_new_error_not_time_sorted(reps18):
-    expected_flags = [9, 9, 9, 9, 9, 9, 9]
-    try:
-        otqc.do_new_aground_check(reps18.reps, 3, 1)
-    except AssertionError as error:
-        error_return_text = "problem with report values: times are not sorted"
-        assert str(error)[0 : len(error_return_text)] == error_return_text
-    for i in range(0, len(reps18)):
-        assert reps18.get_qc(i, "POS", "drf_agr") == expected_flags[i]
-
-from datetime import date
-# def convert_reps(reps):
-#     out_reps = {}
-#     for v in reps.reps:
-#         for key in ['ID', 'LAT', 'LON', 'YR', 'MO', 'DY', 'HR', 'SST', 'PT']:
-#             if v.getvar(key) is not None:
-#                 if key in out_reps:
-#                     out_reps[key].append(v.getvar(key))
-#                 else:
-#                     out_reps[key] = [v.getvar(key)]
-#
-#     for key in out_reps:
-#         out_reps[key] = np.array(out_reps[key])
-#
-#     dates = np.zeros(len(out_reps['YR'])
-#     for i in len(out_reps['YR']):
-#     dates = date(out_reps['YR'], out_reps['MO'], out_reps['DY'])
-
-
-
-    # return out_reps
 
 @pytest.fixture
 def iquam_parameters():
