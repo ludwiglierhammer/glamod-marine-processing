@@ -6,7 +6,6 @@ from _settings import get_settings
 from cdm_reader_mapper import DataBundle, read_tables
 from cdm_reader_mapper.common.getting_files import load_file
 
-import glamod_marine_processing.qc_suite.modules.qc as qc
 from glamod_marine_processing.qc_suite.modules.external_clim import Climatology
 from glamod_marine_processing.qc_suite.modules.icoads_identify import (
     is_buoy,
@@ -33,11 +32,13 @@ from glamod_marine_processing.qc_suite.modules.next_level_qc import (
     do_wind_consistency_check,
 )
 from glamod_marine_processing.qc_suite.modules.next_level_track_check_qc import (  # find_saturated_runs,
+    do_few_check,
     do_iquam_track_check,
     do_spike_check,
     do_track_check,
     find_repeated_values,
 )
+from glamod_marine_processing.qc_suite.modules.qc import failed, passed, untestable
 
 
 @pytest.fixture(scope="session")
@@ -190,17 +191,17 @@ def climdata():
         [
             "platform_type",
             [4, 5, 6],
-            pd.Series([qc.failed] * 13),
+            pd.Series([failed] * 13),
         ],  # platform type is 2 which is not a buoy (4: moored buoy, 5: drifting buoy, 6: ice buoy)
         [
             "platform_type",
             5,
-            pd.Series([qc.failed] * 13),
+            pd.Series([failed] * 13),
         ],  # platform type is 2 which is not a drfiting buoy (5: drifting buoy)
         [
             "platform_type",
             2,
-            pd.Series([qc.passed] * 13),
+            pd.Series([passed] * 13),
         ],  # platform type is 2 which is a ship
     ],
 )
@@ -220,7 +221,7 @@ def test_is_buoy(testdata):
         axis=1,
     )
     expected = pd.Series(
-        [qc.failed] * 13
+        [failed] * 13
     )  # platform type is 2 which is not a buoy (4: moored buoy, 5: drifting buoy, 6: ice buoy)
     pd.testing.assert_series_equal(results, expected)
 
@@ -231,7 +232,7 @@ def test_is_drifter(testdata):
         lambda row: is_drifter(platform_type=row["platform_type"], valid_list=5), axis=1
     )
     expected = pd.Series(
-        [qc.failed] * 13
+        [failed] * 13
     )  # platform type is 2 which is not a drifting buoy (5: drifting buoy)
     pd.testing.assert_series_equal(results, expected)
 
@@ -241,7 +242,7 @@ def test_is_ship(testdata):
     results = db_.apply(
         lambda row: is_ship(platform_type=row["platform_type"], valid_list=2), axis=1
     )
-    expected = pd.Series([qc.passed] * 13)  # platform type is 2 which is a ship
+    expected = pd.Series([passed] * 13)  # platform type is 2 which is a ship
     pd.testing.assert_series_equal(results, expected)
 
 
@@ -253,7 +254,7 @@ def test_do_position_check(testdata):
         ),
         axis=1,
     )
-    expected = pd.Series([qc.passed] * 13)  # all positions are valid
+    expected = pd.Series([passed] * 13)  # all positions are valid
     pd.testing.assert_series_equal(results, expected)
 
 
@@ -262,19 +263,19 @@ def test_do_date_check(testdata):
     results = db_.apply(lambda row: do_date_check(date=row["report_timestamp"]), axis=1)
     expected = pd.Series(
         [
-            qc.untestable,
-            qc.passed,
-            qc.passed,
-            qc.passed,
-            qc.passed,
-            qc.passed,
-            qc.passed,
-            qc.passed,
-            qc.passed,
-            qc.passed,
-            qc.passed,
-            qc.passed,
-            qc.passed,
+            untestable,
+            passed,
+            passed,
+            passed,
+            passed,
+            passed,
+            passed,
+            passed,
+            passed,
+            passed,
+            passed,
+            passed,
+            passed,
         ]
     )  # first entry is null
     pd.testing.assert_series_equal(results, expected)
@@ -287,19 +288,19 @@ def test_do_time_check(testdata):
     )
     expected = pd.Series(
         [
-            qc.failed,
-            qc.passed,
-            qc.passed,
-            qc.passed,
-            qc.passed,
-            qc.passed,
-            qc.passed,
-            qc.passed,
-            qc.passed,
-            qc.passed,
-            qc.passed,
-            qc.passed,
-            qc.passed,
+            failed,
+            passed,
+            passed,
+            passed,
+            passed,
+            passed,
+            passed,
+            passed,
+            passed,
+            passed,
+            passed,
+            passed,
+            passed,
         ]
     )  # first entry is null
     pd.testing.assert_series_equal(results, expected)
@@ -315,7 +316,7 @@ def test_do_day_check(testdata):
         ),
         axis=1,
     )
-    expected = pd.Series([qc.failed] * 13)  # observations are at night
+    expected = pd.Series([failed] * 13)  # observations are at night
     pd.testing.assert_series_equal(results, expected)
 
 
@@ -327,19 +328,19 @@ def test_do_at_missing_value_check(testdata):
     )
     expected = pd.Series(
         [
-            qc.passed,
-            qc.passed,
-            qc.failed,
-            qc.passed,
-            qc.failed,
-            qc.passed,
-            qc.passed,
-            qc.passed,
-            qc.passed,
-            qc.passed,
-            qc.passed,
-            qc.passed,
-            qc.passed,
+            passed,
+            passed,
+            failed,
+            passed,
+            failed,
+            passed,
+            passed,
+            passed,
+            passed,
+            passed,
+            passed,
+            passed,
+            passed,
         ]
     )
     pd.testing.assert_series_equal(results, expected)
@@ -356,19 +357,19 @@ def test_do_at_hard_limit_check(testdata):
     )
     expected = pd.Series(
         [
-            qc.passed,
-            qc.passed,
-            qc.failed,
-            qc.passed,
-            qc.failed,
-            qc.passed,
-            qc.passed,
-            qc.passed,
-            qc.passed,
-            qc.passed,
-            qc.passed,
-            qc.passed,
-            qc.passed,
+            passed,
+            passed,
+            failed,
+            passed,
+            failed,
+            passed,
+            passed,
+            passed,
+            passed,
+            passed,
+            passed,
+            passed,
+            passed,
         ]
     )
     pd.testing.assert_series_equal(results, expected)
@@ -392,19 +393,19 @@ def test_do_at_missing_value_clim_check(testdata, climdata):
     )
     expected = pd.Series(
         [
-            qc.failed,
-            qc.passed,
-            qc.failed,
-            qc.passed,
-            qc.failed,
-            qc.passed,
-            qc.passed,
-            qc.passed,
-            qc.passed,
-            qc.passed,
-            qc.passed,
-            qc.passed,
-            qc.passed,
+            failed,
+            passed,
+            failed,
+            passed,
+            failed,
+            passed,
+            passed,
+            passed,
+            passed,
+            passed,
+            passed,
+            passed,
+            passed,
         ]
     )
     pd.testing.assert_series_equal(results, expected)
@@ -432,19 +433,19 @@ def test_do_at_climatology_check(testdata, climdata):
     )
     expected = pd.Series(
         [
-            qc.failed,
-            qc.failed,
-            qc.failed,
-            qc.passed,
-            qc.failed,
-            qc.passed,
-            qc.passed,
-            qc.passed,
-            qc.passed,
-            qc.passed,
-            qc.passed,
-            qc.passed,
-            qc.passed,
+            failed,
+            failed,
+            failed,
+            passed,
+            failed,
+            passed,
+            passed,
+            passed,
+            passed,
+            passed,
+            passed,
+            passed,
+            passed,
         ]
     )
     pd.testing.assert_series_equal(results, expected)
@@ -479,19 +480,19 @@ def test_do_at_climatology_plus_stdev_check(testdata, climdata):
     )
     expected = pd.Series(
         [
-            qc.failed,
-            qc.passed,
-            qc.failed,
-            qc.passed,
-            qc.failed,
-            qc.passed,
-            qc.passed,
-            qc.passed,
-            qc.passed,
-            qc.passed,
-            qc.passed,
-            qc.passed,
-            qc.passed,
+            failed,
+            passed,
+            failed,
+            passed,
+            failed,
+            passed,
+            passed,
+            passed,
+            passed,
+            passed,
+            passed,
+            passed,
+            passed,
         ]
     )
     pd.testing.assert_series_equal(results, expected)
@@ -505,19 +506,19 @@ def test_do_slp_missing_value_check(testdata):
     )
     expected = pd.Series(
         [
-            qc.passed,
-            qc.passed,
-            qc.failed,
-            qc.passed,
-            qc.failed,
-            qc.passed,
-            qc.passed,
-            qc.passed,
-            qc.passed,
-            qc.passed,
-            qc.passed,
-            qc.passed,
-            qc.passed,
+            passed,
+            passed,
+            failed,
+            passed,
+            failed,
+            passed,
+            passed,
+            passed,
+            passed,
+            passed,
+            passed,
+            passed,
+            passed,
         ]
     )
     pd.testing.assert_series_equal(results, expected)
@@ -537,19 +538,19 @@ def test_do_slp_missing_value_clim_check(testdata, climdata):
     )
     expected = pd.Series(
         [
-            qc.failed,
-            qc.passed,
-            qc.failed,
-            qc.passed,
-            qc.failed,
-            qc.passed,
-            qc.passed,
-            qc.passed,
-            qc.passed,
-            qc.passed,
-            qc.passed,
-            qc.passed,
-            qc.passed,
+            failed,
+            passed,
+            failed,
+            passed,
+            failed,
+            passed,
+            passed,
+            passed,
+            passed,
+            passed,
+            passed,
+            passed,
+            passed,
         ]
     )
     pd.testing.assert_series_equal(results, expected)
@@ -584,19 +585,19 @@ def test_do_slp_climatology_plus_stdev_with_lowbar_check(testdata, climdata):
     )
     expected = pd.Series(
         [
-            qc.failed,
-            qc.passed,
-            qc.failed,
-            qc.passed,
-            qc.failed,
-            qc.passed,
-            qc.passed,
-            qc.passed,
-            qc.passed,
-            qc.passed,
-            qc.passed,
-            qc.passed,
-            qc.passed,
+            failed,
+            passed,
+            failed,
+            passed,
+            failed,
+            passed,
+            passed,
+            passed,
+            passed,
+            passed,
+            passed,
+            passed,
+            passed,
         ]
     )
     pd.testing.assert_series_equal(results, expected)
@@ -610,19 +611,19 @@ def test_do_dpt_missing_value_check(testdata):
     )
     expected = pd.Series(
         [
-            qc.failed,
-            qc.passed,
-            qc.failed,
-            qc.passed,
-            qc.failed,
-            qc.passed,
-            qc.passed,
-            qc.passed,
-            qc.passed,
-            qc.passed,
-            qc.passed,
-            qc.passed,
-            qc.passed,
+            failed,
+            passed,
+            failed,
+            passed,
+            failed,
+            passed,
+            passed,
+            passed,
+            passed,
+            passed,
+            passed,
+            passed,
+            passed,
         ]
     )
     pd.testing.assert_series_equal(results, expected)
@@ -639,19 +640,19 @@ def test_do_dpt_hard_limit_check(testdata):
     )
     expected = pd.Series(
         [
-            qc.failed,
-            qc.passed,
-            qc.failed,
-            qc.passed,
-            qc.failed,
-            qc.passed,
-            qc.passed,
-            qc.passed,
-            qc.passed,
-            qc.passed,
-            qc.passed,
-            qc.passed,
-            qc.passed,
+            failed,
+            passed,
+            failed,
+            passed,
+            failed,
+            passed,
+            passed,
+            passed,
+            passed,
+            passed,
+            passed,
+            passed,
+            passed,
         ]
     )
     pd.testing.assert_series_equal(results, expected)
@@ -675,19 +676,19 @@ def test_do_dpt_missing_value_clim_check(testdata, climdata):
     )
     expected = pd.Series(
         [
-            qc.failed,
-            qc.passed,
-            qc.failed,
-            qc.passed,
-            qc.failed,
-            qc.passed,
-            qc.passed,
-            qc.passed,
-            qc.passed,
-            qc.passed,
-            qc.passed,
-            qc.passed,
-            qc.passed,
+            failed,
+            passed,
+            failed,
+            passed,
+            failed,
+            passed,
+            passed,
+            passed,
+            passed,
+            passed,
+            passed,
+            passed,
+            passed,
         ]
     )
     pd.testing.assert_series_equal(results, expected)
@@ -723,19 +724,19 @@ def test_do_dpt_climatology_plus_stdev_check(testdata, climdata):
     )
     expected = pd.Series(
         [
-            qc.failed,
-            qc.passed,
-            qc.failed,
-            qc.passed,
-            qc.failed,
-            qc.passed,
-            qc.passed,
-            qc.passed,
-            qc.passed,
-            qc.passed,
-            qc.passed,
-            qc.passed,
-            qc.passed,
+            failed,
+            passed,
+            failed,
+            passed,
+            failed,
+            passed,
+            passed,
+            passed,
+            passed,
+            passed,
+            passed,
+            passed,
+            passed,
         ]
     )
     pd.testing.assert_series_equal(results, expected)
@@ -755,19 +756,19 @@ def test_do_supersaturation_check(testdata):
     )
     expected = pd.Series(
         [
-            qc.failed,
-            qc.passed,
-            qc.failed,
-            qc.passed,
-            qc.failed,
-            qc.passed,
-            qc.passed,
-            qc.passed,
-            qc.passed,
-            qc.passed,
-            qc.passed,
-            qc.passed,
-            qc.passed,
+            failed,
+            passed,
+            failed,
+            passed,
+            failed,
+            passed,
+            passed,
+            passed,
+            passed,
+            passed,
+            passed,
+            passed,
+            passed,
         ]
     )
     pd.testing.assert_series_equal(results, expected)
@@ -781,19 +782,19 @@ def test_do_sst_missing_value_check(testdata):
     )
     expected = pd.Series(
         [
-            qc.passed,
-            qc.passed,
-            qc.failed,
-            qc.failed,
-            qc.failed,
-            qc.failed,
-            qc.failed,
-            qc.failed,
-            qc.failed,
-            qc.failed,
-            qc.failed,
-            qc.failed,
-            qc.failed,
+            passed,
+            passed,
+            failed,
+            failed,
+            failed,
+            failed,
+            failed,
+            failed,
+            failed,
+            failed,
+            failed,
+            failed,
+            failed,
         ]
     )
     pd.testing.assert_series_equal(results, expected)
@@ -811,19 +812,19 @@ def test_do_sst_freeze_check(testdata):
     )
     expected = pd.Series(
         [
-            qc.passed,
-            qc.passed,
-            qc.failed,
-            qc.failed,
-            qc.failed,
-            qc.failed,
-            qc.failed,
-            qc.failed,
-            qc.failed,
-            qc.failed,
-            qc.failed,
-            qc.failed,
-            qc.failed,
+            passed,
+            passed,
+            failed,
+            failed,
+            failed,
+            failed,
+            failed,
+            failed,
+            failed,
+            failed,
+            failed,
+            failed,
+            failed,
         ]
     )
     pd.testing.assert_series_equal(results, expected)
@@ -840,19 +841,19 @@ def test_do_sst_hard_limit_check(testdata):
     )
     expected = pd.Series(
         [
-            qc.passed,
-            qc.passed,
-            qc.failed,
-            qc.failed,
-            qc.failed,
-            qc.failed,
-            qc.failed,
-            qc.failed,
-            qc.failed,
-            qc.failed,
-            qc.failed,
-            qc.failed,
-            qc.failed,
+            passed,
+            passed,
+            failed,
+            failed,
+            failed,
+            failed,
+            failed,
+            failed,
+            failed,
+            failed,
+            failed,
+            failed,
+            failed,
         ]
     )
     pd.testing.assert_series_equal(results, expected)
@@ -876,19 +877,19 @@ def test_do_sst_missing_value_clim_check(testdata, climdata):
     )
     expected = pd.Series(
         [
-            qc.failed,
-            qc.passed,
-            qc.failed,
-            qc.failed,
-            qc.failed,
-            qc.failed,
-            qc.failed,
-            qc.failed,
-            qc.failed,
-            qc.failed,
-            qc.failed,
-            qc.failed,
-            qc.failed,
+            failed,
+            passed,
+            failed,
+            failed,
+            failed,
+            failed,
+            failed,
+            failed,
+            failed,
+            failed,
+            failed,
+            failed,
+            failed,
         ]
     )
     pd.testing.assert_series_equal(results, expected)
@@ -914,19 +915,19 @@ def test_do_sst_climatology_check(testdata, climdata):
     )
     expected = pd.Series(
         [
-            qc.failed,
-            qc.passed,
-            qc.failed,
-            qc.failed,
-            qc.failed,
-            qc.failed,
-            qc.failed,
-            qc.failed,
-            qc.failed,
-            qc.failed,
-            qc.failed,
-            qc.failed,
-            qc.failed,
+            failed,
+            passed,
+            failed,
+            failed,
+            failed,
+            failed,
+            failed,
+            failed,
+            failed,
+            failed,
+            failed,
+            failed,
+            failed,
         ]
     )
     pd.testing.assert_series_equal(results, expected)
@@ -940,19 +941,19 @@ def test_do_wind_speed_missing_value_check(testdata):
     )
     expected = pd.Series(
         [
-            qc.passed,
-            qc.passed,
-            qc.failed,
-            qc.passed,
-            qc.failed,
-            qc.passed,
-            qc.passed,
-            qc.passed,
-            qc.passed,
-            qc.passed,
-            qc.passed,
-            qc.passed,
-            qc.passed,
+            passed,
+            passed,
+            failed,
+            passed,
+            failed,
+            passed,
+            passed,
+            passed,
+            passed,
+            passed,
+            passed,
+            passed,
+            passed,
         ]
     )
     pd.testing.assert_series_equal(results, expected)
@@ -969,19 +970,19 @@ def test_do_wind_speed_hard_limit_check(testdata):
     )
     expected = pd.Series(
         [
-            qc.passed,
-            qc.passed,
-            qc.failed,
-            qc.passed,
-            qc.failed,
-            qc.failed,
-            qc.passed,
-            qc.passed,
-            qc.passed,
-            qc.passed,
-            qc.passed,
-            qc.passed,
-            qc.passed,
+            passed,
+            passed,
+            failed,
+            passed,
+            failed,
+            failed,
+            passed,
+            passed,
+            passed,
+            passed,
+            passed,
+            passed,
+            passed,
         ]
     )
     pd.testing.assert_series_equal(results, expected)
@@ -995,19 +996,19 @@ def test_do_wind_direction_missing_value_check(testdata):
     )
     expected = pd.Series(
         [
-            qc.passed,
-            qc.passed,
-            qc.failed,
-            qc.passed,
-            qc.failed,
-            qc.passed,
-            qc.passed,
-            qc.passed,
-            qc.passed,
-            qc.passed,
-            qc.passed,
-            qc.passed,
-            qc.passed,
+            passed,
+            passed,
+            failed,
+            passed,
+            failed,
+            passed,
+            passed,
+            passed,
+            passed,
+            passed,
+            passed,
+            passed,
+            passed,
         ]
     )
     pd.testing.assert_series_equal(results, expected)
@@ -1023,19 +1024,19 @@ def test_do_wind_direction_hard_limit_check(testdata):
     )
     expected = pd.Series(
         [
-            qc.passed,
-            qc.passed,
-            qc.failed,
-            qc.passed,
-            qc.failed,
-            qc.passed,
-            qc.failed,
-            qc.failed,
-            qc.passed,
-            qc.passed,
-            qc.passed,
-            qc.passed,
-            qc.passed,
+            passed,
+            passed,
+            failed,
+            passed,
+            failed,
+            passed,
+            failed,
+            failed,
+            passed,
+            passed,
+            passed,
+            passed,
+            passed,
         ]
     )
     pd.testing.assert_series_equal(results, expected)
@@ -1054,19 +1055,19 @@ def test_do_wind_consistency_check(testdata):
     )
     expected = pd.Series(
         [
-            qc.passed,
-            qc.passed,
-            qc.failed,
-            qc.passed,
-            qc.failed,
-            qc.passed,
-            qc.passed,
-            qc.passed,
-            qc.failed,
-            qc.failed,
-            qc.failed,
-            qc.failed,
-            qc.failed,
+            passed,
+            passed,
+            failed,
+            passed,
+            failed,
+            passed,
+            passed,
+            passed,
+            failed,
+            failed,
+            failed,
+            failed,
+            failed,
         ]
     )
     pd.testing.assert_series_equal(results, expected)
@@ -1100,16 +1101,16 @@ def test_do_spike_check(testdata_track):
     results = results.astype(int)
     expected = pd.Series(
         [
-            qc.passed,
-            qc.passed,
-            qc.failed,
-            qc.passed,
-            qc.passed,
-            qc.passed,
-            qc.passed,
-            qc.failed,
-            qc.passed,
-            qc.passed,
+            passed,
+            passed,
+            failed,
+            passed,
+            passed,
+            passed,
+            passed,
+            failed,
+            passed,
+            passed,
         ]
     )
     pd.testing.assert_series_equal(results, expected, check_names=False)
@@ -1133,20 +1134,68 @@ def test_do_track_check(testdata_track):
     results = results.astype(int)
     expected = pd.Series(
         [
-            qc.passed,
-            qc.passed,
-            qc.failed,
-            qc.passed,
-            qc.passed,
-            qc.passed,
-            qc.passed,
-            qc.failed,
-            qc.passed,
-            qc.passed,
+            passed,
+            passed,
+            failed,
+            passed,
+            passed,
+            passed,
+            passed,
+            failed,
+            passed,
+            passed,
         ]
     )
     pd.testing.assert_series_equal(results, expected, check_names=False)
     raise ValueError("We need a more reasonable test data!")
+
+
+def test_do_few_check_passed(testdata_track):
+    db_ = testdata_track.copy()
+    groups = db_.groupby([("header", "primary_station_id")])
+    results = groups.apply(
+        lambda track: do_few_check(
+            value=track[("header", "latitude")],
+        )
+    )
+    results = results.explode()
+    results.index = db_.index
+    results = results.astype(int)
+    expected = pd.Series(
+        [
+            passed,
+            passed,
+            passed,
+            passed,
+            passed,
+            passed,
+            passed,
+            passed,
+            passed,
+            passed,
+        ]
+    )
+    pd.testing.assert_series_equal(results, expected, check_names=False)
+
+
+def test_do_few_check_failed(testdata_track):
+    db_ = testdata_track.copy()
+    groups = db_.groupby([("header", "primary_station_id")])
+    results = groups.apply(
+        lambda track: do_few_check(
+            value=track[("header", "latitude")][:2],
+        )
+    )
+    results = results.explode()
+    results.index = db_.index
+    results = results.astype(int)
+    expected = pd.Series(
+        [
+            failed,
+            failed,
+        ]
+    )
+    pd.testing.assert_series_equal(results, expected, check_names=False)
 
 
 def test_do_iquam_track_check(testdata_track):
@@ -1164,16 +1213,16 @@ def test_do_iquam_track_check(testdata_track):
     results = results.astype(int)
     expected = pd.Series(
         [
-            qc.passed,
-            qc.passed,
-            qc.passed,
-            qc.passed,
-            qc.passed,
-            qc.passed,
-            qc.passed,
-            qc.passed,
-            qc.passed,
-            qc.passed,
+            passed,
+            passed,
+            passed,
+            passed,
+            passed,
+            passed,
+            passed,
+            passed,
+            passed,
+            passed,
         ]
     )
     pd.testing.assert_series_equal(results, expected, check_names=False)
@@ -1193,16 +1242,16 @@ def test_find_repeated_values(testdata_track):
     results = results.astype(int)
     expected = pd.Series(
         [
-            qc.passed,
-            qc.passed,
-            qc.passed,
-            qc.passed,
-            qc.passed,
-            qc.passed,
-            qc.passed,
-            qc.passed,
-            qc.passed,
-            qc.passed,
+            passed,
+            passed,
+            passed,
+            passed,
+            passed,
+            passed,
+            passed,
+            passed,
+            passed,
+            passed,
         ]
     )
     pd.testing.assert_series_equal(results, expected, check_names=False)
@@ -1285,19 +1334,19 @@ def test_multiple_row_check(testdata, climdata):
     )
     expected = pd.Series(
         [
-            qc.failed,
-            qc.failed,
-            qc.failed,
-            qc.passed,
-            qc.failed,
-            qc.passed,
-            qc.passed,
-            qc.passed,
-            qc.passed,
-            qc.passed,
-            qc.passed,
-            qc.passed,
-            qc.passed,
+            failed,
+            failed,
+            failed,
+            passed,
+            failed,
+            passed,
+            passed,
+            passed,
+            passed,
+            passed,
+            passed,
+            passed,
+            passed,
         ]
     )
     pd.testing.assert_series_equal(results, expected)
