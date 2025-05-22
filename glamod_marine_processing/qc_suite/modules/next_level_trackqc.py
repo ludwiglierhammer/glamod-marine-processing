@@ -355,12 +355,10 @@ class SpeedChecker:
 
 
 
-def do_aground_check(reps, *args):
-    checker = AgroundChecker(reps)
-    if args:
-        checker.set_parameters(*args)
-    checker.do_qc()
-
+def do_aground_check(lons, lats, dates, smooth_win: int, min_win_period: int, max_win_period: int):
+    checker = AgroundChecker(lons, lats, dates, smooth_win, min_win_period, max_win_period)
+    checker._do_aground_check()
+    return checker.get_qc_outcomes()
 
 class AgroundChecker:
     """
@@ -400,23 +398,34 @@ class AgroundChecker:
     up to 2-days in sampling).
     """
 
-    smooth_win = 41
-    min_win_period = 8
-    max_win_period = 10
+    # smooth_win = 41
+    # min_win_period = 8
+    # max_win_period = 10
 
     # displacement resulting from 1/100th deg 'position-jitter' at equator (km)
     tolerance = sphere_distance(0, 0, 0.01, 0.01)
 
-    def __init__(self, reps):
-        self.reps = reps
+    def __init__(self, lons, lats, dates, smooth_win, min_win_period, max_win_period):
+
+        self.lon = lons
+        self.lat = lats
+        self.nreps = len(lons)
+
+        self.smooth_win = smooth_win
+        self.min_win_period = min_win_period
+        self.max_win_period = max_win_period
 
         self.lon_smooth = None
         self.lat_smooth = None
         self.hrs_smooth = None
 
-    def set_parameters(
-        self, smooth_win: int, min_win_period: int, max_win_period: int
-    ) -> None:
+        # Initialise QC outcomes with untested
+        self.qc_outcomes = np.zeros(self.nreps) + untested
+
+    def get_qc_outcomes(self):
+        return self.qc_outcomes
+
+    def valid_parameters(self) -> bool:
         """Set the parameters of the QC check. Note that this will set parameters for all instances of the class.
 
         Parameters
@@ -439,23 +448,20 @@ class AgroundChecker:
         AssertionError
             When any of the input values are invalid
         """
+        valid = True
         try:
-            smooth_win = int(smooth_win)
-            min_win_period = int(min_win_period)
-            max_win_period = int(max_win_period)
-            assert smooth_win >= 1, "smooth_win must be >= 1"
-            assert smooth_win % 2 != 0, "smooth_win must be an odd number"
-            assert min_win_period >= 1, "min_win_period must be >= 1"
-            assert max_win_period >= 1, "max_win_period must be >= 1"
+            assert self.smooth_win >= 1, "smooth_win must be >= 1"
+            assert self.smooth_win % 2 != 0, "smooth_win must be an odd number"
+            assert self.min_win_period >= 1, "min_win_period must be >= 1"
+            assert self.max_win_period >= 1, "max_win_period must be >= 1"
             assert (
-                max_win_period >= min_win_period
+                self.max_win_period >= self.min_win_period
             ), "max_win_period must be >= min_win_period"
         except AssertionError as error:
-            raise AssertionError("invalid input parameter: " + str(error))
+            warnings.warn(UserWarning("invalid input parameter: " + str(error)))
+            valid = False
 
-        AgroundChecker.smooth_win = smooth_win
-        AgroundChecker.min_win_period = min_win_period
-        AgroundChecker.max_win_period = max_win_period
+        return valid
 
     def do_qc(self):
         """Perform the new aground check QC"""
