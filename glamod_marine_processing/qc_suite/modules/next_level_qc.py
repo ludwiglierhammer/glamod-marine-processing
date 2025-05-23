@@ -271,7 +271,6 @@ def do_missing_value_clim_check(climatology: float | Climatology, **kwargs) -> i
     ----
     If ``climatology`` is a Climatology object, pass ``lon`` and ``lat`` and ``date`` or ``month`` and ``day`` as keyword-arguments!
     """
-    print(climatology)
     return value_check(climatology)
 
 
