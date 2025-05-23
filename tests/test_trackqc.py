@@ -2633,24 +2633,6 @@ def tailcheck_vals(selector):
 
     return reps['LAT'], reps['LON'], reps['DATE'], reps['SST'], reps['OSTIA'], reps['BGVAR'], reps['ICE']
 
-    # obs = locals()[f"vals{selector}"]
-    # reps = ex.Voyage()
-    # for v in obs:
-    #     rec = IMMA()
-    #     for key in v:
-    #         if key not in ["OSTIA", "BGVAR", "ICE"]:
-    #             rec.data[key] = v[key]
-    #     rep = ex.MarineReportQC(rec)
-    #     if selector != 35:
-    #         rep.setext("OSTIA", v["OSTIA"])
-    #     rep.setext("BGVAR", v["BGVAR"])
-    #     rep.setext("ICE", v["ICE"])
-    #     reps.add_report(rep)
-    #
-    # if selector == 37:
-    #     reps.setvar(1, "LAT", None)
-    #
-    # return reps
 
 @pytest.mark.parametrize(
     "selector, long_win_len, long_err_std_n, short_win_len, short_err_std_n, short_win_n_bad, drif_inter, drif_intra, background_err_lim, expected1, expected2, warns",
@@ -3087,26 +3069,58 @@ def sst_biased_noisy_check_vals(selector):
               {'ID': 'AAAAAAAAA', 'YR': 2003, 'MO': 12, 'DY': 1, 'HR': 0.8, 'LAT': 0.0, 'LON': 0.0, 'SST': 5.0, 'OSTIA': 5.0, 'BGVAR': 0.01, 'ICE': 0.0}]
     # fmt: on
     # @formatter:on
-
-    reps = ex.Voyage()
     obs = locals()[f"vals{selector}"]
+    reps = {}
+    for key in obs[0]:
+        reps[key] = []
+    reps['DATE'] = []
 
     for v in obs:
-        rec = IMMA()
-        for key in v:
-            if key not in ["OSTIA", "BGVAR", "ICE"]:
-                rec.data[key] = v[key]
-        rep = ex.MarineReportQC(rec)
-        if selector != 21:
-            rep.setext("OSTIA", v["OSTIA"])
-        rep.setext("BGVAR", v["BGVAR"])
-        rep.setext("ICE", v["ICE"])
-        reps.add_report(rep)
+        for key in reps:
+            if key != 'DATE':
+                reps[key].append(v[key])
+
+        hour = int(v['HR'])
+        minute = int(60 * (v['HR'] - hour))
+        date = datetime(int(v['YR']), int(v['MO']), int(v['DY']), hour, minute)
+        reps['DATE'].append(date)
+
+    for key in reps:
+        reps[key] = np.array(reps[key])
 
     if selector == 23:
-        reps.setvar(1, "LAT", None)
+        reps['LAT'][1] = np.nan
+    if selector == 21:
+        reps['OSTIA'][:] = np.nan
 
-    return reps
+    return reps['LAT'], reps['LON'], reps['DATE'], reps['SST'], reps['OSTIA'], reps['BGVAR'], reps['ICE']
+
+@pytest.mark.parametrize(
+    "selector, n_eval, bias_lim, drif_intra, drif_inter, err_std_n, n_bad, background_err_lim, expected1, warns",
+    [
+        (1, 9, 1.10, 1.0, 0.29, 3.0, 2, 0.3, [0, 0, 0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0, 0, 0], False),  # test_all_daytime_bnc
+    ]
+)
+def test_sst_biased_noisy_check_generic(
+        selector, n_eval, bias_lim, drif_intra, drif_inter, err_std_n, n_bad,
+        background_err_lim, expected1, warns
+):
+    lat, lon, dates, sst, ostia, bgvar, ice = sst_biased_noisy_check_vals(selector)
+    if warns:
+        with pytest.warns(UserWarning):
+            qc_outcomes = tqc.do_sst_biased_noisy_check(
+                lat, lon, dates, sst, ostia, bgvar, ice,
+                n_eval, bias_lim, drif_intra, drif_inter, err_std_n, n_bad,
+                background_err_lim
+            )
+    else:
+        qc_outcomes = tqc.do_sst_biased_noisy_check(
+            reps.reps,
+            n_eval, bias_lim, drif_intra, drif_inter, err_std_n, n_bad,
+            background_err_lim
+        )
+    for i in range(len(qc_outcomes)):
+        assert qc_outcomes[i] == expected1[i]
 
 
 def test_all_daytime_bnc():
