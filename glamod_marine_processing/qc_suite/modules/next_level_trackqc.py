@@ -683,7 +683,7 @@ class NewAgroundChecker:
                 self.qc_outcomes[ind] = passed
 
 
-def do_sst_tail_check(
+def do_sst_start_tail_check(
         lat, lon,
         sst, ostia, ice, bgvar, dates,
         long_win_len: int,
@@ -705,7 +705,36 @@ def do_sst_tail_check(
         short_win_n_bad,
         drif_inter,
         drif_intra,
-        background_err_lim
+        background_err_lim,
+        True
+    )
+    checker._do_sst_tail_check()
+    return checker.get_qc_outcomes()
+
+def do_sst_end_tail_check(
+        lat, lon,
+        sst, ostia, ice, bgvar, dates,
+        long_win_len: int,
+        long_err_std_n: float,
+        short_win_len: int,
+        short_err_std_n: float,
+        short_win_n_bad: int,
+        drif_inter: float,
+        drif_intra: float,
+        background_err_lim: float,
+):
+    checker = SSTTailChecker(
+        lat, lon,
+        sst, ostia, ice, bgvar, dates,
+        long_win_len,
+        long_err_std_n,
+        short_win_len,
+        short_err_std_n,
+        short_win_n_bad,
+        drif_inter,
+        drif_intra,
+        background_err_lim,
+        False
     )
     checker._do_sst_tail_check()
     return checker.get_qc_outcomes()
@@ -767,7 +796,8 @@ class SSTTailChecker:
             short_win_n_bad: int,
             drif_inter: float,
             drif_intra: float,
-            background_err_lim: float
+            background_err_lim: float,
+            start_tail: bool
     ):
         self.nreps = len(sst)
 
@@ -778,6 +808,8 @@ class SSTTailChecker:
         self.ice = ice
         self.bgvar = bgvar
         self.dates = dates
+
+        self.start_tail = start_tail
 
         self.reps_ind = None
         self.sst_anom = None
@@ -856,13 +888,14 @@ class SSTTailChecker:
         if not self.start_tail_ind == -1:
             for ind in range(self.nreps):
                 if ind <= self.reps_ind[self.start_tail_ind]:
-                    self.qc_outcomes[ind] = failed
+                    if self.start_tail:
+                        self.qc_outcomes[ind] = failed
                     #rep.set_qc("SST", "drf_tail1", 1)
         if not self.end_tail_ind == nrep:
             for ind in range(self.nreps):
                 if ind >= self.reps_ind[self.end_tail_ind]:
-                    pass
-                    #self.qc_outcomes[ind] = failed
+                    if not self.start_tail:
+                        self.qc_outcomes[ind] = failed
                     #rep.set_qc("SST", "drf_tail2", 1)
 
     @staticmethod

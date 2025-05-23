@@ -2695,13 +2695,19 @@ def test_generic_tailcheck(
         short_win_n_bad, drif_inter, drif_intra, background_err_lim, expected1, expected2, warns
 ):
     lat, lon, dates, sst, ostia, bgvar, ice = tailcheck_vals(selector)
-    qc_outcomes = tqc.do_sst_tail_check(lat, lon, sst, ostia, ice, bgvar, dates,
+    qc_outcomes = tqc.do_sst_start_tail_check(lat, lon, sst, ostia, ice, bgvar, dates,
         long_win_len, long_err_std_n, short_win_len, short_err_std_n,
         short_win_n_bad, drif_inter, drif_intra, background_err_lim
     )
     for i in range(len(qc_outcomes)):
         assert qc_outcomes[i] == expected1[i]
-        #assert reps.get_qc(i, "SST", "drf_tail2") == expected2[i]
+
+    qc_outcomes = tqc.do_sst_end_tail_check(lat, lon, sst, ostia, ice, bgvar, dates,
+        long_win_len, long_err_std_n, short_win_len, short_err_std_n,
+        short_win_n_bad, drif_inter, drif_intra, background_err_lim
+    )
+    for i in range(len(qc_outcomes)):
+        assert qc_outcomes[i] == expected2[i]
 
 
 def test_error_bad_input_parameter_tail_check():
