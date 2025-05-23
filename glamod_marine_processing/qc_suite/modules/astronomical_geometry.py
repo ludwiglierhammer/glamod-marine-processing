@@ -6,6 +6,7 @@ import math
 
 import numpy as np
 
+from .auxiliary import isvalid
 from .time_control import (
     convert_time_in_hours,
     leap_year_correction,
@@ -31,8 +32,13 @@ def angle_diff(angle1: float, angle2: float) -> float:
     -------
     float
         Angle between the two input points in radians.
+
+    Raises
+    ------
+    ValueError
+        If either angle1 or angle2 is numerically invalid or None.
     """
-    if angle1 is None or angle2 is None:
+    if not isvalid(angle1) or not isvalid(angle2):
         raise ValueError("One or more angles is None")
 
     # calculate angle between two angles

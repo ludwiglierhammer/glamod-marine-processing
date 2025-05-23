@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+from .auxiliary import isvalid
 from .statistics import missing_mean
 
 
@@ -215,24 +216,24 @@ def fill_missing_vals(
     outq21 = q21
     outq22 = q22
 
-    if outq11 is None:
+    if not isvalid(outq11):
         outq11 = missing_mean([q12, q21])
-    if outq11 is None:
+    if not isvalid(outq11):
         outq11 = q22
 
-    if outq22 is None:
+    if not isvalid(outq22):
         outq22 = missing_mean([q12, q21])
-    if outq22 is None:
+    if not isvalid(outq22):
         outq22 = q11
 
-    if outq12 is None:
+    if not isvalid(outq12):
         outq12 = missing_mean([q11, q22])
-    if outq12 is None:
+    if not isvalid(outq12):
         outq12 = q21
 
-    if outq21 is None:
+    if not isvalid(outq21):
         outq21 = missing_mean([q11, q22])
-    if outq21 is None:
+    if not isvalid(outq21):
         outq21 = q12
 
     return outq11, outq12, outq21, outq22

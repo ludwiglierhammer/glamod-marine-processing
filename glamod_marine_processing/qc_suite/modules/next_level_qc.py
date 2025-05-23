@@ -6,17 +6,18 @@ import math
 from datetime import datetime
 
 from .astronomical_geometry import sunangle
-from .external_clim import Climatology
+from .auxiliary import isvalid
+from .external_clim import Climatology, inspect_climatology
 from .qc import (
     climatology_check,
     climatology_plus_stdev_check,
     climatology_plus_stdev_with_lowbar_check,
     failed,
     hard_limit_check,
-    isvalid,
     passed,
     sst_freeze_check,
     untestable,
+    value_check,
 )
 from .time_control import dayinyear, get_month_lengths, split_date
 
@@ -37,11 +38,13 @@ def do_position_check(latitude: float, longitude: float) -> int:
     Returns
     -------
     int
-        1 if either latitude or longitude is invalid, 0 otherwise
+        2 if either latitude or longitude is numerically invalid or None,
+        1 if either latitude or longitude is not in valid range,
+        0 otherwise
     """
-    if isvalid(latitude):
+    if not isvalid(latitude):
         return untestable
-    if isvalid(longitude):
+    if not isvalid(longitude):
         return untestable
 
     if latitude < -90 or latitude > 90:
@@ -75,20 +78,20 @@ def do_date_check(
     Returns
     -------
     int
-        1 if the date is invalid, 0 otherwise
+        2 if either year, month or day is numerically invalid or None,
+        1 if the date is not a valid date,
+        0 otherwise
     """
     if isinstance(date, datetime):
         date_ = split_date(date)
-        if date_ is None:
-            return untestable
         year = date_["year"]
         month = date_["month"]
         day = date_["day"]
-    if isvalid(year) == failed:
+    if not isvalid(year):
         return untestable
-    if isvalid(month) == failed:
+    if not isvalid(month):
         return untestable
-    if isvalid(day) == failed:
+    if not isvalid(day):
         return untestable
 
     if year > 2025 or year < 1850:
@@ -119,15 +122,15 @@ def do_time_check(date: datetime | None = None, hour: float | None = None) -> in
     Returns
     -------
     int
-        Return 1 if hour is invalid, 0 otherwise
+        2 if hour is numerically invalid or None,
+        1 if hour is not a valid hour,
+        0 otherwise
     """
     if isinstance(date, datetime):
         date_ = split_date(date)
-        if date_ is None:
-            return failed
         hour = date_["hour"]
-    if isvalid(hour) == failed:
-        return failed
+    if not isvalid(hour):
+        return untestable
 
     if hour >= 24 or hour < 0:
         return failed
@@ -178,20 +181,22 @@ def do_day_check(
     """
     if isinstance(date, datetime):
         date_ = split_date(date)
-        if date_ is None:
-            return failed
         year = date_["year"]
         month = date_["month"]
         day = date_["day"]
         hour = date_["hour"]
 
+    p_check = do_position_check(latitude, longitude)
+    d_check = do_date_check(year=year, month=month, day=day)
+    t_check = do_time_check(hour=hour)
+
     # Defaults to FAIL if the location, date or time are bad
-    if (
-        do_position_check(latitude, longitude) == 1
-        or do_date_check(year=year, month=month, day=day) == 1
-        or do_time_check(hour=hour) == 1
-    ):
+    if p_check == failed or d_check == failed or t_check == failed:
         return failed
+
+    # Defaults to FAIL if the location, date or time are bad
+    if p_check == untestable or d_check == untestable or t_check == untestable:
+        return untestable
 
     year2 = year
     day2 = dayinyear(year, month, day)
@@ -243,9 +248,10 @@ def do_missing_value_check(value: float) -> int:
     int
         1 if value is missing, 0 otherwise
     """
-    return isvalid(value)
+    return value_check(value)
 
 
+@inspect_climatology("climatology")
 def do_missing_value_clim_check(climatology: float | Climatology, **kwargs) -> int:
     """
     Check that climatological value is present
@@ -265,9 +271,8 @@ def do_missing_value_clim_check(climatology: float | Climatology, **kwargs) -> i
     ----
     If ``climatology`` is a Climatology object, pass ``lon`` and ``lat`` and ``date`` or ``month`` and ``day`` as keyword-arguments!
     """
-    if isinstance(climatology, Climatology):
-        climatology = climatology.get_value(**kwargs)
-    return isvalid(climatology)
+    print(climatology)
+    return value_check(climatology)
 
 
 def do_hard_limit_check(value: float, hard_limits: list) -> int:
@@ -289,6 +294,7 @@ def do_hard_limit_check(value: float, hard_limits: list) -> int:
     return hard_limit_check(value, hard_limits)
 
 
+@inspect_climatology("climatology")
 def do_climatology_check(
     value: float,
     climatology: float | Climatology,
@@ -317,11 +323,10 @@ def do_climatology_check(
     ----
     If ``climatology`` is a Climatology object, pass ``lon`` and ``lat`` and ``date`` or ``month`` and ``day`` as keyword-arguments!
     """
-    if isinstance(climatology, Climatology):
-        climatology = climatology.get_value(**kwargs)
     return climatology_check(value, climatology, maximum_anomaly)
 
 
+@inspect_climatology("climatology", "stdev")
 def do_climatology_plus_stdev_check(
     value: float,
     climatology: float | Climatology,
@@ -362,11 +367,6 @@ def do_climatology_plus_stdev_check(
     ----
     If ``climatology`` and/or ``stdev`` is a Climatology object, pass ``lon`` and ``lat`` and ``date`` or ``month`` and ``day`` as keyword-arguments!
     """
-    if isinstance(climatology, Climatology):
-        climatology = climatology.get_value(**kwargs)
-    if isinstance(stdev, Climatology):
-        stdev = stdev.get_value(**kwargs)
-
     return climatology_plus_stdev_check(
         value,
         climatology,
@@ -376,6 +376,7 @@ def do_climatology_plus_stdev_check(
     )
 
 
+@inspect_climatology("climatology", "stdev")
 def do_climatology_plus_stdev_with_lowbar_check(
     value: float,
     climatology: float | Climatology,
@@ -444,10 +445,12 @@ def do_supersaturation_check(dpt: float, at2: float) -> int:
     Returns
     -------
     int
-        Set to 1 if supersaturation is detected, 0 otherwise
+        2 if either dpt or at2 is numerically invalid or None,
+        1 if supersaturation is detected,
+        0 otherwise
     """
-    if isvalid(dpt) == failed or isvalid(at2) == failed:
-        return failed
+    if not isvalid(dpt) or not isvalid(at2):
+        return untestable
     elif dpt > at2:
         return failed
 
@@ -495,10 +498,12 @@ def do_wind_consistency_check(
     Returns
     -------
     int
-        1 if windspeed and direction are inconsistent, 0 otherwise
+        2 if either wind_speed or wind_direction is numerically invalid or None,
+        1 if windspeed and direction are inconsistent,
+        0 otherwise
     """
-    if isvalid(wind_speed) == failed or isvalid(wind_direction) == failed:
-        return failed
+    if not isvalid(wind_speed) or not isvalid(wind_direction):
+        return untestable
     if wind_speed == 0.0 and wind_direction != 0:
         return failed
 
