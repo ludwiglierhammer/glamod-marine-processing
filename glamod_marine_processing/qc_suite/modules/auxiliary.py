@@ -57,9 +57,6 @@ def inspect_arrays(params: list[str]) -> Callable:
                 arr = np.asarray(bound_args.arguments[name])
                 if arr.ndim != 1:
                     raise ValueError(f"Input '{name}' must be one-dimensional.")
-                # print(name)
-                # print(arr)
-                # print('--------------------------------------')
                 arrays.append(arr)
 
                 bound_args.arguments[name] = arr
