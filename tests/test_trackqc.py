@@ -2626,9 +2626,10 @@ def tailcheck_vals(selector):
     for key in reps:
         reps[key] = np.array(reps[key])
 
-    if selector == 13:
-        reps['LON'][1] = np.nan
-
+    if selector == 37:
+        reps['LAT'][1] = np.nan
+    if selector == 35:
+        reps['OSTIA'][:] = np.nan
 
     return reps['LAT'], reps['LON'], reps['DATE'], reps['SST'], reps['OSTIA'], reps['BGVAR'], reps['ICE']
 
