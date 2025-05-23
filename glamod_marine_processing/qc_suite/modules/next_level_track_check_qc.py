@@ -2,65 +2,19 @@
 
 from __future__ import annotations
 
-import inspect
-from collections.abc import Callable
 from datetime import datetime
-from functools import wraps
 from typing import Sequence
 
 import numpy as np
 import pandas as pd
 
-import glamod_marine_processing.qc_suite.modules.spherical_geometry as sg
-import glamod_marine_processing.qc_suite.modules.time_control as time_control
-import glamod_marine_processing.qc_suite.modules.track_check as tc
-from glamod_marine_processing.qc_suite.modules.qc import failed, passed
+from . import spherical_geometry as sg
+from . import time_control as time_control
+from . import track_check as tc
+from .auxiliary import inspect_arrays, isvalid
+from .qc import failed, passed
 
 km_to_nm = 0.539957
-
-
-def inspect_arrays(params: list[str]) -> Callable:
-    """Create a decorator to inspect input sequences and convert them to numpy arrays.
-
-    Parameters
-    ----------
-    params: list of str
-        List of parameter names to be inspected.
-
-    Returns
-    -------
-    Callable
-        The decorator function
-    """
-
-    def decorator(func):
-        @wraps(func)
-        def wrapper(*args, **kwargs):
-            sig = inspect.signature(func)
-            bound_args = sig.bind(*args, **kwargs)
-            bound_args.apply_defaults()
-
-            arrays = []
-            for name in params:
-                if name not in bound_args.arguments:
-                    raise ValueError(f"Parameter {name} is not a valid parameter.")
-
-                arr = np.asarray(bound_args.arguments[name])
-                print(arr)
-                if arr.ndim != 1:
-                    raise ValueError(f"Input '{name}' must be one-dimensional.")
-                arrays.append(arr)
-
-                bound_args.arguments[name] = arr
-            lengths = [len(arr) for arr in arrays]
-            if any(length != lengths[0] for length in lengths):
-                raise ValueError(f"Input {params} must all have the same length.")
-
-            return func(*bound_args.args, **bound_args.kwargs)
-
-        return wrapper
-
-    return decorator
 
 
 @inspect_arrays(["value", "lat", "lon", "date"])
@@ -126,7 +80,7 @@ def do_spike_check(
 
         for t2 in range(lo, hi):
 
-            if value[t1] is None or value[t2] is None:
+            if not isvalid(value[t1]) or not isvalid(value[t2]):
                 continue
 
             distance = sg.sphere_distance(lat[t1], lon[t1], lat[t2], lon[t2])
@@ -207,7 +161,7 @@ def calculate_course_parameters(
         date_later.day,
         date_later.hour,
     )
-    if timediff != 0 and timediff is not None:
+    if timediff != 0 and isvalid(timediff):
         speed = distance / abs(timediff)
     else:
         timediff = 0.0
@@ -347,16 +301,16 @@ def forward_discrepancy(
         lon_previous = lon[i - 1]
 
         if (
-            vsi_current is None
-            or vsi_previous is None
-            or dsi_current is None
-            or dsi_previous is None
-            or tsi_current is None
-            or tsi_previous is None
-            or lat_current is None
-            or lat_previous is None
-            or lon_current is None
-            or lon_previous is None
+            not isvalid(vsi_current)
+            or not isvalid(vsi_previous)
+            or not isvalid(dsi_current)
+            or not isvalid(dsi_previous)
+            or not isvalid(tsi_current)
+            or not isvalid(tsi_previous)
+            or not isvalid(lat_current)
+            or not isvalid(lat_previous)
+            or not isvalid(lon_current)
+            or not isvalid(lon_previous)
         ):
             continue
 
@@ -449,16 +403,16 @@ def backward_discrepancy(
         lon_previous = lon[i - 1]
 
         if (
-            vsi_current is None
-            or vsi_previous is None
-            or dsi_current is None
-            or dsi_previous is None
-            or tsi_current is None
-            or tsi_previous is None
-            or lat_current is None
-            or lat_previous is None
-            or lon_current is None
-            or lon_previous is None
+            not isvalid(vsi_current)
+            or not isvalid(vsi_previous)
+            or not isvalid(dsi_current)
+            or not isvalid(dsi_previous)
+            or not isvalid(tsi_current)
+            or not isvalid(tsi_previous)
+            or not isvalid(lat_current)
+            or not isvalid(lat_previous)
+            or not isvalid(lon_current)
+            or not isvalid(lon_previous)
         ):
             continue
 
@@ -576,7 +530,7 @@ def do_track_check(
     max_speed_change: float = 10.0,
     max_absolute_speed: float = 40.0,
     max_midpoint_discrepancy: float = 150.0,
-) -> tuple[int, int]:
+) -> Sequence[int]:
     """Perform one pass of the track check.  This is an implementation of the MDS track check code
     which was originally written in the 1990s. I don't know why this piece of historic trivia so exercises
     my mind, but it does: the 1990s! I wish my code would last so long.
@@ -604,24 +558,28 @@ def do_track_check(
 
     Returns
     -------
-    tuple of array-like of int, shape (n,)
-        A tuple of two 1-dimensional arrays of floats representing trk and few.
+    array-like of int, shape (n,)
+        1-dimensional arrays of ints representing track check QC flags.
         1 if track check fails, 0 otherwise.
 
     Raises
     ------
     ValueError
         If either input is not 1-dimensional or if their lengths do not match.
+
+    Note
+    ----
+    If number of observations is less than three, the track check always passes.
     """
     number_of_obs = len(lat)
 
     # no obs in, no qc outcomes out
     if number_of_obs == 0:
-        return (None, None)
+        return
 
     # fewer than three obs - set the fewsome flag
     if number_of_obs < 3:
-        return np.zeros(number_of_obs), np.zeros(number_of_obs) + 1
+        return np.asarray([passed] * number_of_obs)
 
     # work out speeds and distances between alternating points
     speed_alt, _distance_alt, _course_alt, _timediff_alt = (
@@ -670,7 +628,6 @@ def do_track_check(
 
     # do QC
     trk = np.asarray([passed] * number_of_obs)
-    few = np.asarray([passed] * number_of_obs)
 
     for i in range(1, number_of_obs - 1):
         thisqc_a = 0
@@ -678,23 +635,23 @@ def do_track_check(
 
         # together these cover the speeds calculate from point i
         if (
-            speed[i] is not None
+            isvalid(speed[i])
             and speed[i] > amax
-            and speed_alt[i - 1] is not None
+            and isvalid(speed_alt[i - 1])
             and speed_alt[i - 1] > amax
         ):
             thisqc_a += 1.00
         elif (
-            speed[i + 1] is not None
+            isvalid(speed[i + 1])
             and speed[i + 1] > amax
-            and speed_alt[i + 1] is not None
+            and isvalid(speed_alt[i + 1])
             and speed_alt[i + 1] > amax
         ):
             thisqc_a += 2.00
         elif (
-            speed[i] is not None
+            isvalid(speed[i])
             and speed[i] > amax
-            and speed[i + 1] is not None
+            and isvalid(speed[i + 1])
             and speed[i + 1] > amax
         ):
             thisqc_a += 3.00
@@ -735,7 +692,42 @@ def do_track_check(
         ):
             trk[i] = failed
 
-    return trk, few
+    return trk
+
+
+@inspect_arrays(["value"])
+def do_few_check(
+    value: Sequence[float],
+) -> Sequence[int]:
+    """Checks if number of observations is less than 3.
+
+    Parameters
+    ----------
+    value: array-like of float, shape (n,)
+        1-dimensional value array.
+
+    Returns
+    -------
+    array-like of int, shape (n,)
+        A 1-dimensional arrays of ints containing QC flags.
+        1 if number of observations is less than 3, 0 otherwise.
+
+    Raises
+    ------
+    ValueError
+        If either input is not 1-dimensional.
+    """
+    number_of_obs = len(value)
+
+    # no obs in, no qc outcomes out
+    if number_of_obs == 0:
+        return
+
+    # fewer than three obs - set the fewsome flag
+    if number_of_obs < 3:
+        return np.asarray([failed] * number_of_obs)
+
+    return np.asarray([passed] * number_of_obs)
 
 
 @inspect_arrays(["at", "dpt", "lat", "lon", "date"])
@@ -866,7 +858,7 @@ def find_multiple_rounded_values(
 
     for i in range(number_of_obs):
         v = value[i]
-        if v is not None:
+        if isvalid(v):
             allcount += 1
             if str(v) in valcount:
                 valcount[str(v)].append(i)
@@ -923,7 +915,7 @@ def find_repeated_values(
 
     for i in range(number_of_obs):
         v = value[i]
-        if v is not None:
+        if isvalid(v):
             allcount += 1
             if str(v) in valcount:
                 valcount[str(v)].append(i)

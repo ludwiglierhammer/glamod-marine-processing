@@ -9,13 +9,12 @@ import numpy as np
 import pytest
 
 import glamod_marine_processing.qc_suite.modules.Extended_IMMA as ex
-
-# import glamod_marine_processing.qc_suite.modules.next_level_trackqc as tqc
 import glamod_marine_processing.qc_suite.modules.trackqc as otqc
 from glamod_marine_processing.qc_suite.modules.IMMA1 import IMMA
-from glamod_marine_processing.qc_suite.modules.next_level_track_check_qc import (
-    calculate_speed_course_distance_time_difference,
-)
+
+# from glamod_marine_processing.qc_suite.modules.next_level_track_check_qc import (
+#    calculate_speed_course_distance_time_difference,
+# )
 
 
 def test_daytime_exeter():

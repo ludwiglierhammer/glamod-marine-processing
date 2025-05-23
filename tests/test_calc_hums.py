@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import numpy as np
 import pytest  # noqa
 
 import glamod_marine_processing.qc_suite.modules.CalcHums as ch
@@ -9,7 +10,7 @@ def test_vap_from_example():
     """Test from Kate's example in the file."""
     assert ch.vap(10.0, 15.0, 1013) == 12.3
     assert ch.vap(-15.0, -10.0, 1013) == 1.7
-    assert ch.vap(None, 15.0, 1013) is None
+    assert np.isnan(ch.vap(None, 15.0, 1013))
 
 
 def test_vap_from_sh():
@@ -20,7 +21,7 @@ def test_vap_from_sh():
 def test_sh():
     """Test from Kate's example in the file."""
     assert ch.sh(10.0, 15.0, 1013.0) == 7.6
-    assert ch.sh(None, 15.0, 1013.0) is None
+    assert np.isnan(ch.sh(None, 15.0, 1013.0))
     assert ch.sh(-15.0, -10.0, 1013.0) == 1.0
 
 
@@ -33,20 +34,20 @@ def test_rh():
     """Test from Kate's example in the file."""
     assert ch.rh(10.0, 15.0, 1013.0) == 72.0
     assert ch.rh(-15.0, -10.0, 1013.0) == 63.6
-    assert ch.rh(None, 15.0, 1013.0) is None
+    assert np.isnan(ch.rh(None, 15.0, 1013.0))
 
 
 def test_wb():
     """Test from Kate's example in the file."""
     assert ch.wb(10.0, 15.0, 1013) == 12.2
     assert ch.wb(-15.0, -10.0, 1013) == -10.9
-    assert ch.wb(None, 15.0, 1013) is None
+    assert np.isnan(ch.wb(None, 15.0, 1013))
 
 
 def test_dpd():
     """Test from Kate's example in the file."""
     assert ch.dpd(10.0, 15.0) == 5.0
-    assert ch.dpd(None, 15.0) is None
+    assert np.isnan(ch.dpd(None, 15.0))
 
 
 def test_td_from_vap():
