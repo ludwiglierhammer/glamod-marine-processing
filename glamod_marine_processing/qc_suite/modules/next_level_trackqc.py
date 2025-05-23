@@ -808,6 +808,7 @@ class SSTTailChecker:
         self.ice = ice
         self.bgvar = bgvar
         self.dates = dates
+        self.hrs = convert_date_to_hours(dates)
 
         self.start_tail = start_tail
 
@@ -856,7 +857,16 @@ class SSTTailChecker:
             self.qc_outcomes[:] = untestable
             return
 
-        self._preprocess_reps()
+        if not is_monotonic(self.hrs):
+            warnings.warn(UserWarning("Times do not increase monotonically"))
+            self.qc_outcomes[:] = untestable
+            return
+
+        invalid_series = self._preprocess_reps()
+        if invalid_series:
+            self.qc_outcomes[:] = untestable
+            return
+
         if len(self.sst_anom) == 0:
             self.qc_outcomes[:] = passed
             return
@@ -890,13 +900,11 @@ class SSTTailChecker:
                 if ind <= self.reps_ind[self.start_tail_ind]:
                     if self.start_tail:
                         self.qc_outcomes[ind] = failed
-                    #rep.set_qc("SST", "drf_tail1", 1)
         if not self.end_tail_ind == nrep:
             for ind in range(self.nreps):
                 if ind >= self.reps_ind[self.end_tail_ind]:
                     if not self.start_tail:
                         self.qc_outcomes[ind] = failed
-                    #rep.set_qc("SST", "drf_tail2", 1)
 
     @staticmethod
     def _parse_rep(lat, lon, ostia, ice, bgvar, dates) -> (float, float, float, bool):
@@ -923,59 +931,54 @@ class SSTTailChecker:
             Background value, ice concentration, background variance, and a boolean variable indicating whether the
             report is "good"
         """
+        invalid_ob = False
+
         bg_val = ostia
 
         if ice is None or np.isnan(ice):
             ice = 0.0
-        assert (
-            ice is not None and 0.0 <= ice <= 1.0
-        ), "matched ice proportion is invalid"
+        if ice < 0.0 or ice > 1.0:
+            warnings.warn(UserWarning("Invalid ice value"))
+            invalid_ob = True
 
-        daytime = track_day_test(
-            dates.year,
-            dates.month,
-            dates.day,
-            dates.hour + (dates.minute)/60,
-            lat,
-            lon,
-            -2.5,
-        )
-
-        # try:
-        #     # raises assertion error if 'time_diff' not found
-        #     time_diff = rep.getext("time_diff")
-        #     if time_diff is not None:
-        #         assert time_diff >= 0, "times are not sorted"
-        # except AssertionError as error:
-        #     raise AssertionError("problem with report value: " + str(error))
+        try:
+            daytime = track_day_test(dates.year, dates.month, dates.day, dates.hour + (dates.minute)/60, lat, lon, -2.5,)
+        except ValueError as error:
+            warnings.warn(f"Daytime check failed with {error}")
+            daytime = True
+            invalid_ob = True
 
         land_match = bg_val is None
         ice_match = ice > 0.15
 
         good_match = not (daytime or land_match or ice_match)
 
-        return bg_val, ice, bgvar, good_match
+        return bg_val, ice, bgvar, good_match, invalid_ob
 
-    def _preprocess_reps(self) -> None:
+    def _preprocess_reps(self) -> bool:
         """Process the reps and calculate the values used in the QC check"""
+        invalid_series = False
         # test and filter out obs with unsuitable background matches
         reps_ind = []  # type: list
         sst_anom = []  # type: list
         bgvar = []  # type: list
         for ind in range(self.nreps):
-            bg_val, ice_val, bgvar_val, good_match = self._parse_rep(
+            bg_val, ice_val, bgvar_val, good_match, invalid_ob = self._parse_rep(
                 self.lat[ind], self.lon[ind],
                 self.ostia[ind], self.ice[ind],
                 self.bgvar[ind], self.dates[ind]
             )
+            if invalid_ob:
+                invalid_series = True
 
             if good_match:
-                assert (
-                    bg_val is not None and -5.0 <= bg_val <= 45.0
-                ), "matched background sst is invalid"
-                assert (
-                    bgvar_val is not None and 0.0 <= bgvar_val <= 10
-                ), "matched background error variance is invalid"
+                if bg_val < -5.0 or bg_val > 45.0:
+                    warnings.warn(UserWarning("Background value is invalid"))
+                    invalid_series = True
+                if bgvar_val < 0 or bgvar_val > 10.0:
+                    warnings.warn(UserWarning("Background variance is invalid"))
+                    invalid_series = True
+
                 reps_ind.append(ind)
                 sst_anom.append(self.sst[ind] - bg_val)
                 bgvar.append(bgvar_val)
@@ -987,6 +990,8 @@ class SSTTailChecker:
         self.sst_anom = np.array(sst_anom)  # type: np.ndarray
         # standard deviation of background error
         self.bgerr = np.sqrt(np.array(bgvar))  # type: np.ndarray
+
+        return invalid_series
 
     def _do_long_tail_check(self, forward: bool = True) -> None:
         """Perform the long tail check

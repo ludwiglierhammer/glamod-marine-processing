@@ -2688,6 +2688,13 @@ def tailcheck_vals(selector):
         (31, 3, 3.0, 1, 3.0, 1, 0.29, 1.0, 0.3, [0, 0, 0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0, 0, 0], False),  # test_good_data
         (32, 3, 3.0, 1, 1.0, 1, 0.29, 1.0, 0.3, [0, 0, 0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0, 0, 0], False),  # test_long_and_short_start_tail_big_bgvar
         (33, 3, 3.0, 1, 3.0, 1, 0.29, 1.0, 2.0, [0, 0, 0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0, 0, 0], False),  # test_start_tail_noisy_big_bgvar
+        (34, 0, 3.0, 1, 3.0, 1, 0.29, 1.0, 0.3, [untestable for x in range(9)], [untestable for x in range(9)], True),  # test_error_bad_input_parameter_tail_check
+        (36, 3, 3.0, 1, 3.0, 1, 0.29, 1.0, 0.3, [untestable for x in range(9)], [untestable for x in range(9)], True),  # test_error_invalid_ice_value
+        (37, 3, 3.0, 1, 3.0, 1, 0.29, 1.0, 0.3, [untestable for x in range(9)], [untestable for x in range(9)], True),  # test_error_missing_ob_value
+        (38, 3, 3.0, 1, 3.0, 1, 0.29, 1.0, 0.3, [untestable for x in range(9)], [untestable for x in range(9)], True),  # test_error_not_time_sorted_tail_check
+        (39, 3, 3.0, 1, 3.0, 1, 0.29, 1.0, 0.3, [untestable for x in range(9)], [untestable for x in range(9)], True),  # test_error_invalid_background
+        (40, 3, 3.0, 1, 3.0, 1, 0.29, 1.0, 0.3, [untestable for x in range(9)], [untestable for x in range(9)], True),  # test_error_invalid_background_error_variance
+
     ]
 )
 def test_generic_tailcheck(
@@ -2695,183 +2702,111 @@ def test_generic_tailcheck(
         short_win_n_bad, drif_inter, drif_intra, background_err_lim, expected1, expected2, warns
 ):
     lat, lon, dates, sst, ostia, bgvar, ice = tailcheck_vals(selector)
-    qc_outcomes = tqc.do_sst_start_tail_check(lat, lon, sst, ostia, ice, bgvar, dates,
-        long_win_len, long_err_std_n, short_win_len, short_err_std_n,
-        short_win_n_bad, drif_inter, drif_intra, background_err_lim
-    )
+    # First do the start tail check
+    if warns:
+        with pytest.warns(UserWarning):
+            qc_outcomes = tqc.do_sst_start_tail_check(lat, lon, sst, ostia, ice, bgvar, dates,
+                long_win_len, long_err_std_n, short_win_len, short_err_std_n,
+                short_win_n_bad, drif_inter, drif_intra, background_err_lim
+        )
+    else:
+        qc_outcomes = tqc.do_sst_start_tail_check(lat, lon, sst, ostia, ice, bgvar, dates,
+                                                  long_win_len, long_err_std_n, short_win_len, short_err_std_n,
+                                                  short_win_n_bad, drif_inter, drif_intra, background_err_lim
+                                                  )
     for i in range(len(qc_outcomes)):
         assert qc_outcomes[i] == expected1[i]
 
-    qc_outcomes = tqc.do_sst_end_tail_check(lat, lon, sst, ostia, ice, bgvar, dates,
-        long_win_len, long_err_std_n, short_win_len, short_err_std_n,
-        short_win_n_bad, drif_inter, drif_intra, background_err_lim
-    )
+    # Then do the end tail check on the same data
+    if warns:
+        with pytest.warns(UserWarning):
+            qc_outcomes = tqc.do_sst_end_tail_check(lat, lon, sst, ostia, ice, bgvar, dates,
+                long_win_len, long_err_std_n, short_win_len, short_err_std_n,
+                short_win_n_bad, drif_inter, drif_intra, background_err_lim
+        )
+    else:
+        qc_outcomes = tqc.do_sst_end_tail_check(lat, lon, sst, ostia, ice, bgvar, dates,
+                                                  long_win_len, long_err_std_n, short_win_len, short_err_std_n,
+                                                  short_win_n_bad, drif_inter, drif_intra, background_err_lim
+                                                  )
     for i in range(len(qc_outcomes)):
         assert qc_outcomes[i] == expected2[i]
 
 
-def test_error_bad_input_parameter_tail_check():
-    reps = tailcheck_vals(34)
-    expected_flags = {
-        "drf_tail1": [9, 9, 9, 9, 9, 9, 9, 9, 9],
-        "drf_tail2": [9, 9, 9, 9, 9, 9, 9, 9, 9],
-    }
-    try:
-        otqc.do_sst_tail_check(reps.reps, 0, 3.0, 1, 3.0, 1, 0.29, 1.0, 0.3)
-    except AssertionError as error:
-        error_return_text = "invalid input parameter: long_win_len must be >= 1"
-        assert str(error)[0 : len(error_return_text)] == error_return_text
-    for i in range(0, len(reps)):
-        assert reps.get_qc(i, "SST", "drf_tail1") == expected_flags["drf_tail1"][i]
-        assert reps.get_qc(i, "SST", "drf_tail2") == expected_flags["drf_tail2"][i]
-
-
+# This test tests if one of the inputs is missing, but this can't happen now that we
+# are using arrays to pass this information, If there is no input at some point then the
+# call to the test would raise a syntax error
+@pytest.mark.skip
 def test_error_missing_matched_value():
-    reps = tailcheck_vals(35)
-    expected_flags = {
-        "drf_tail1": [9, 9, 9, 9, 9, 9, 9, 9, 9],
-        "drf_tail2": [9, 9, 9, 9, 9, 9, 9, 9, 9],
-    }
-    try:
-        otqc.do_sst_tail_check(reps.reps, 3, 3.0, 1, 3.0, 1, 0.29, 1.0, 0.3)
-    except AssertionError as error:
-        error_return_text = (
-            "unknown extended variable name OSTIA"
+    lat, lon, dates, sst, ostia, bgvar, ice  = tailcheck_vals(35)
+    expected_flags1 = [untestable for x in range(9)]
+    expected_flags2 = [untestable for x in range(9)]
+    with pytest.warns(UserWarning):
+        qc_outcomes1 = tqc.do_sst_start_tail_check(
+            lat, lon, sst, ostia, ice, bgvar, dates,
+            3, 3.0, 1, 3.0, 1, 0.29, 1.0, 0.3
         )
-        assert str(error)[0 : len(error_return_text)] == error_return_text
-    for i in range(0, len(reps)):
-        assert reps.get_qc(i, "SST", "drf_tail1") == expected_flags["drf_tail1"][i]
-        assert reps.get_qc(i, "SST", "drf_tail2") == expected_flags["drf_tail2"][i]
+    with pytest.warns(UserWarning):
+        qc_outcomes2 = tqc.do_sst_end_tail_check(
+            lat, lon, sst, ostia, ice, bgvar, dates,
+            3, 3.0, 1, 3.0, 1, 0.29, 1.0, 0.3
+        )
+
+    for i in range(len(qc_outcomes1)):
+        assert qc_outcomes1[i] == expected_flags1[i]
+    for i in range(len(qc_outcomes2)):
+        assert qc_outcomes2[i] == expected_flags2[i]
 
 
-def test_error_invalid_ice_value():
-    reps = tailcheck_vals(36)
-    expected_flags = {
-        "drf_tail1": [9, 9, 9, 9, 9, 9, 9, 9, 9],
-        "drf_tail2": [9, 9, 9, 9, 9, 9, 9, 9, 9],
-    }
-    try:
-        otqc.do_sst_tail_check(reps.reps, 3, 3.0, 1, 3.0, 1, 0.29, 1.0, 0.3)
-    except AssertionError as error:
-        error_return_text = "matched ice proportion is invalid"
-        assert str(error)[0 : len(error_return_text)] == error_return_text
-    for i in range(0, len(reps)):
-        assert reps.get_qc(i, "SST", "drf_tail1") == expected_flags["drf_tail1"][i]
-        assert reps.get_qc(i, "SST", "drf_tail2") == expected_flags["drf_tail2"][i]
-
-
-def test_error_missing_ob_value():
-    reps = tailcheck_vals(37)
-    expected_flags = {
-        "drf_tail1": [9, 9, 9, 9, 9, 9, 9, 9, 9],
-        "drf_tail2": [9, 9, 9, 9, 9, 9, 9, 9, 9],
-    }
-
-    with pytest.raises(ValueError):
-        otqc.do_sst_tail_check(reps.reps, 3, 3.0, 1, 3.0, 1, 0.29, 1.0, 0.3)
-
-    for i in range(0, len(reps)):
-        assert reps.get_qc(i, "SST", "drf_tail1") == expected_flags["drf_tail1"][i]
-        assert reps.get_qc(i, "SST", "drf_tail2") == expected_flags["drf_tail2"][i]
-
-
-def test_error_not_time_sorted_tail_check():
-    reps = tailcheck_vals(38)
-    expected_flags = {
-        "drf_tail1": [9, 9, 9, 9, 9, 9, 9, 9, 9],
-        "drf_tail2": [9, 9, 9, 9, 9, 9, 9, 9, 9],
-    }
-    try:
-        otqc.do_sst_tail_check(reps.reps, 3, 3.0, 1, 3.0, 1, 0.29, 1.0, 0.3)
-    except AssertionError as error:
-        error_return_text = "problem with report value: times are not sorted"
-        assert str(error)[0 : len(error_return_text)] == error_return_text
-    for i in range(0, len(reps)):
-        assert reps.get_qc(i, "SST", "drf_tail1") == expected_flags["drf_tail1"][i]
-        assert reps.get_qc(i, "SST", "drf_tail2") == expected_flags["drf_tail2"][i]
-
-
-# BROKEN TEST FIXED BY REVERTING TO ORIGINAL CODE
-def test_error_invalid_background():
-    reps = tailcheck_vals(39)
-    expected_flags = {
-        "drf_tail1": [9, 9, 9, 9, 9, 9, 9, 9, 9],
-        "drf_tail2": [9, 9, 9, 9, 9, 9, 9, 9, 9],
-    }
-    try:
-        otqc.do_sst_tail_check(reps.reps, 3, 3.0, 1, 3.0, 1, 0.29, 1.0, 0.3)
-    except AssertionError as error:
-        error_return_text = "matched background sst is invalid"
-        assert str(error)[0 : len(error_return_text)] == error_return_text
-    for i in range(0, len(reps)):
-        assert reps.get_qc(i, "SST", "drf_tail1") == expected_flags["drf_tail1"][i]
-        assert reps.get_qc(i, "SST", "drf_tail2") == expected_flags["drf_tail2"][i]
-
-
-def test_error_invalid_background_error_variance():
-    reps = tailcheck_vals(40)
-    expected_flags = {
-        "drf_tail1": [9, 9, 9, 9, 9, 9, 9, 9, 9],
-        "drf_tail2": [9, 9, 9, 9, 9, 9, 9, 9, 9],
-    }
-    try:
-        otqc.do_sst_tail_check(reps.reps, 3, 3.0, 1, 3.0, 1, 0.29, 1.0, 0.3)
-    except AssertionError as error:
-        error_return_text = "matched background error variance is invalid"
-        assert str(error)[0 : len(error_return_text)] == error_return_text
-    for i in range(0, len(reps)):
-        assert reps.get_qc(i, "SST", "drf_tail1") == expected_flags["drf_tail1"][i]
-        assert reps.get_qc(i, "SST", "drf_tail2") == expected_flags["drf_tail2"][i]
-
-        # tests summary
-    """
-    - NO CHECK MADE
-    + alldaytime
-    + all OSTIA missing
-    + all ice
-    + record too short for either check
-    - LONG-TAIL ONLY
-    + start tail bias
-    + start tail negative bias
-    + start tail bias first few obs missing
-    + end tail bias
-    + end tail bias last few obs missing
-    + start tail noisy
-    + end tail noisy
-    + two tails
-    + all record biased
-    + all record noisy
-    + background error short circuits start tail
-    + background error short circuits all biased
-    - SHORT-TAIL ONLY
-    + start tail
-    + end tail
-    + two tails
-    + all record fail
-    + background error short circuits start tail
-    + background error short circuits all fail
-    - LONG-TAIL then SHORT-TAIL
-    + long and short start tail
-    + long and short end tail
-    + long and short two tails
-    + one long tail and one short tail
-    + too short for short tail
-    + long and short combined fail whole record
-    + background error short circuits start tail
-    + background error short circuits all fail
-    - NO-TAILS
-    + no tails
-    - EXTRA
-    + long and short start tail big bgvar
-    + start tail noisy big bgvar
-    + assertion error - bad input parameter
-    + assertion error - missing matched value
-    + assertion error - missing ob value
-    + assertion error - invalid ice value
-    + assertion error - data not time-sorted
-    + assertion error - invalid background sst
-    + assertion error - invalid background error
-    """
+# tests summary
+"""
+- NO CHECK MADE
++ alldaytime
++ all OSTIA missing
++ all ice
++ record too short for either check
+- LONG-TAIL ONLY
++ start tail bias
++ start tail negative bias
++ start tail bias first few obs missing
++ end tail bias
++ end tail bias last few obs missing
++ start tail noisy
++ end tail noisy
++ two tails
++ all record biased
++ all record noisy
++ background error short circuits start tail
++ background error short circuits all biased
+- SHORT-TAIL ONLY
++ start tail
++ end tail
++ two tails
++ all record fail
++ background error short circuits start tail
++ background error short circuits all fail
+- LONG-TAIL then SHORT-TAIL
++ long and short start tail
++ long and short end tail
++ long and short two tails
++ one long tail and one short tail
++ too short for short tail
++ long and short combined fail whole record
++ background error short circuits start tail
++ background error short circuits all fail
+- NO-TAILS
++ no tails
+- EXTRA
++ long and short start tail big bgvar
++ start tail noisy big bgvar
++ assertion error - bad input parameter
++ assertion error - missing matched value
++ assertion error - missing ob value
++ assertion error - invalid ice value
++ assertion error - data not time-sorted
++ assertion error - invalid background sst
++ assertion error - invalid background error
+"""
 
 
 def sst_biased_noisy_check_vals(selector):
