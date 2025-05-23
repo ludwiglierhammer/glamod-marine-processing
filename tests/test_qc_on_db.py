@@ -113,6 +113,7 @@ def testdata_track():
         )
 
     db_tables = read_tables(cache_dir)
+    db_tables.data = db_tables.replace("null", None)
     for table in tables:
         db_tables.data[(table, "latitude")] = db_tables[(table, "latitude")].astype(
             float
@@ -126,6 +127,12 @@ def testdata_track():
                 format="%Y-%m-%d %H:%M:%S",
                 errors="coerce",
             )
+            db_tables.data[(table, "station_speed")] = db_tables[
+                (table, "station_speed")
+            ].astype(float)
+            db_tables.data[(table, "station_course")] = db_tables[
+                (table, "station_course")
+            ].astype(float)
         else:
             db_tables.data[(table, "observation_value")] = db_tables[
                 (table, "observation_value")
@@ -286,23 +293,7 @@ def test_do_time_check(testdata):
     results = db_.apply(
         lambda row: do_time_check(hour=row["report_timestamp"].hour), axis=1
     )
-    expected = pd.Series(
-        [
-            failed,
-            passed,
-            passed,
-            passed,
-            passed,
-            passed,
-            passed,
-            passed,
-            passed,
-            passed,
-            passed,
-            passed,
-            passed,
-        ]
-    )  # first entry is null
+    expected = pd.Series([untestable] + [passed] * 12)  # first entry is null
     pd.testing.assert_series_equal(results, expected)
 
 
@@ -316,7 +307,7 @@ def test_do_day_check(testdata):
         ),
         axis=1,
     )
-    expected = pd.Series([failed] * 13)  # observations are at night
+    expected = pd.Series([untestable] + [failed] * 12)  # observations are at night
     pd.testing.assert_series_equal(results, expected)
 
 
@@ -359,9 +350,9 @@ def test_do_at_hard_limit_check(testdata):
         [
             passed,
             passed,
-            failed,
+            untestable,
             passed,
-            failed,
+            untestable,
             passed,
             passed,
             passed,
@@ -433,11 +424,11 @@ def test_do_at_climatology_check(testdata, climdata):
     )
     expected = pd.Series(
         [
+            untestable,
             failed,
-            failed,
-            failed,
+            untestable,
             passed,
-            failed,
+            untestable,
             passed,
             passed,
             passed,
@@ -480,11 +471,11 @@ def test_do_at_climatology_plus_stdev_check(testdata, climdata):
     )
     expected = pd.Series(
         [
-            failed,
+            untestable,
             passed,
-            failed,
+            untestable,
             passed,
-            failed,
+            untestable,
             passed,
             passed,
             passed,
@@ -585,11 +576,11 @@ def test_do_slp_climatology_plus_stdev_with_lowbar_check(testdata, climdata):
     )
     expected = pd.Series(
         [
-            failed,
+            untestable,
             passed,
-            failed,
+            untestable,
             passed,
-            failed,
+            untestable,
             passed,
             passed,
             passed,
@@ -640,11 +631,11 @@ def test_do_dpt_hard_limit_check(testdata):
     )
     expected = pd.Series(
         [
-            failed,
+            untestable,
             passed,
-            failed,
+            untestable,
             passed,
-            failed,
+            untestable,
             passed,
             passed,
             passed,
@@ -676,11 +667,11 @@ def test_do_dpt_missing_value_clim_check(testdata, climdata):
     )
     expected = pd.Series(
         [
-            failed,
+            failed,  # This should be untesable since lat is not avaiable
             passed,
-            failed,
+            failed,  # This should be untesable since lat is not avaiable
             passed,
-            failed,
+            failed,  # This should be untesable since lat is not avaiable
             passed,
             passed,
             passed,
@@ -724,11 +715,11 @@ def test_do_dpt_climatology_plus_stdev_check(testdata, climdata):
     )
     expected = pd.Series(
         [
-            failed,
+            untestable,
             passed,
-            failed,
+            untestable,
             passed,
-            failed,
+            untestable,
             passed,
             passed,
             passed,
@@ -756,11 +747,11 @@ def test_do_supersaturation_check(testdata):
     )
     expected = pd.Series(
         [
-            failed,
+            untestable,
             passed,
-            failed,
+            untestable,
             passed,
-            failed,
+            untestable,
             passed,
             passed,
             passed,
@@ -814,17 +805,17 @@ def test_do_sst_freeze_check(testdata):
         [
             passed,
             passed,
-            failed,
-            failed,
-            failed,
-            failed,
-            failed,
-            failed,
-            failed,
-            failed,
-            failed,
-            failed,
-            failed,
+            untestable,
+            untestable,
+            untestable,
+            untestable,
+            untestable,
+            untestable,
+            untestable,
+            untestable,
+            untestable,
+            untestable,
+            untestable,
         ]
     )
     pd.testing.assert_series_equal(results, expected)
@@ -843,17 +834,17 @@ def test_do_sst_hard_limit_check(testdata):
         [
             passed,
             passed,
-            failed,
-            failed,
-            failed,
-            failed,
-            failed,
-            failed,
-            failed,
-            failed,
-            failed,
-            failed,
-            failed,
+            untestable,
+            untestable,
+            untestable,
+            untestable,
+            untestable,
+            untestable,
+            untestable,
+            untestable,
+            untestable,
+            untestable,
+            untestable,
         ]
     )
     pd.testing.assert_series_equal(results, expected)
@@ -915,19 +906,19 @@ def test_do_sst_climatology_check(testdata, climdata):
     )
     expected = pd.Series(
         [
-            failed,
+            untestable,
             passed,
-            failed,
-            failed,
-            failed,
-            failed,
-            failed,
-            failed,
-            failed,
-            failed,
-            failed,
-            failed,
-            failed,
+            untestable,
+            untestable,
+            untestable,
+            untestable,
+            untestable,
+            untestable,
+            untestable,
+            untestable,
+            untestable,
+            untestable,
+            untestable,
         ]
     )
     pd.testing.assert_series_equal(results, expected)
@@ -972,9 +963,9 @@ def test_do_wind_speed_hard_limit_check(testdata):
         [
             passed,
             passed,
-            failed,
+            untestable,
             passed,
-            failed,
+            untestable,
             failed,
             passed,
             passed,
@@ -1026,9 +1017,9 @@ def test_do_wind_direction_hard_limit_check(testdata):
         [
             passed,
             passed,
-            failed,
+            untestable,
             passed,
-            failed,
+            untestable,
             passed,
             failed,
             failed,
@@ -1057,9 +1048,9 @@ def test_do_wind_consistency_check(testdata):
         [
             passed,
             passed,
-            failed,
+            untestable,
             passed,
-            failed,
+            untestable,
             passed,
             passed,
             passed,

@@ -20,9 +20,9 @@ from glamod_marine_processing.qc_suite.modules.qc import (
 @pytest.mark.parametrize(
     "value, climate_normal, standard_deviation, limit, lowbar, expected",
     [
-        (None, 0.0, 1.0, 3.0, 0.5, failed),  # check None returns fail
-        (1.0, None, 1.0, 3.0, 0.5, failed),
-        (1.0, 0.0, None, 3.0, 0.5, failed),
+        (None, 0.0, 1.0, 3.0, 0.5, untestable),  # check None returns untestable
+        (1.0, None, 1.0, 3.0, 0.5, untestable),
+        (1.0, 0.0, None, 3.0, 0.5, untestable),
         (
             1.0,
             0.0,
@@ -71,9 +71,9 @@ def test_climatology_plus_stdev_with_lowbar(
 @pytest.mark.parametrize(
     "value, climate_normal, standard_deviation, stdev_limits, limit, expected",
     [
-        (None, 0.0, 0.5, [0.0, 1.0], 5.0, failed),  # fails with None
-        (2.0, None, 0.5, [0.0, 1.0], 5.0, failed),  # fails with None
-        (2.0, 0.0, None, [0.0, 1.0], 5.0, failed),  # fails with None
+        (None, 0.0, 0.5, [0.0, 1.0], 5.0, untestable),  # untestable with None
+        (2.0, None, 0.5, [0.0, 1.0], 5.0, untestable),  # untestable with None
+        (2.0, 0.0, None, [0.0, 1.0], 5.0, untestable),  # untestable with None
         (2.0, 0.0, 0.5, [0.0, 1.0], 5.0, passed),  # simple pass
         (2.0, 0.0, 0.5, [0.0, 1.0], 3.0, failed),  # simple fail
         (3.0, 0.0, 1.5, [0.0, 1.0], 2.0, failed),  # fail with limited stdev
@@ -115,9 +115,9 @@ def _test_climatology_plus_stdev_check_raises():
         (0.0, 9.0, 8.0, failed),  # fail with same anomaly but negative
         (9.0, 0.0, 11.0, passed),  # pass with higher limit
         (0.0, 9.0, 11.0, passed),  # same with negative anomaly
-        (None, 0.0, 8.0, failed),  # Fail with Nones as inputs
-        (9.0, None, 8.0, failed),  # Fail with Nones as inputs
-        (9.0, 0.0, None, failed),  # Fail with Nones as inputs
+        (None, 0.0, 8.0, untestable),  # untestable with Nones as inputs
+        (9.0, None, 8.0, untestable),  # untestable with Nones as inputs
+        (9.0, 0.0, None, untestable),  # untestable with Nones as inputs
     ],
 )
 def test_climatology_check(value, climate_normal, limit, expected):
@@ -127,9 +127,9 @@ def test_climatology_check(value, climate_normal, limit, expected):
 @pytest.mark.parametrize(
     "value, expected",
     [
-        (None, failed),
-        (5.7, passed),
-        (np.nan, failed),
+        (None, False),
+        (5.7, True),
+        (np.nan, False),
     ],
 )
 def test_isvalid_check(value, expected):
@@ -141,7 +141,7 @@ def test_isvalid_check(value, expected):
     [
         (None, failed),
         (5.7, passed),
-        (np.nan, passed),
+        (np.nan, failed),
     ],
 )
 def test_value_check(value, expected):

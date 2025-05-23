@@ -150,6 +150,60 @@ def test_do_track_check_mixed(ship_frame):
             assert trk[i] == passed
 
 
+def test_do_track_check_testdata():
+    vsi = [np.nan] * 10
+    dsi = [np.nan] * 10
+    lat = [46.53, 46.31, 46.09, 45.87, 45.88, 46.53, 46.31, 46.09, 45.87, 45.88]
+    lon = [
+        -13.17,
+        -12.99,
+        -12.81,
+        -12.62,
+        -12.57,
+        -13.17,
+        -12.99,
+        -12.81,
+        -12.62,
+        -12.57,
+    ]
+    date = np.array(
+        [
+            "1873-01-01T01:00:00.000000000",
+            "1873-01-01T05:00:00.000000000",
+            "1873-01-01T09:00:00.000000000",
+            "1873-01-01T13:00:00.000000000",
+            "1873-01-01T17:00:00.000000000",
+            "1875-01-01T01:00:00.000000000",
+            "1875-01-01T05:00:00.000000000",
+            "1875-01-01T09:00:00.000000000",
+            "1875-01-01T13:00:00.000000000",
+            "1875-01-01T17:00:00.000000000",
+        ]
+    )
+    date = pd.to_datetime(date).tolist()
+
+    results = do_track_check(
+        vsi=vsi,
+        dsi=dsi,
+        lat=lat,
+        lon=lon,
+        date=date,
+    )
+    expected = [
+        passed,
+        passed,
+        failed,
+        passed,
+        passed,
+        passed,
+        passed,
+        failed,
+        passed,
+        passed,
+    ]
+    np.testing.assert_array_equal(results, expected)
+
+
 @pytest.mark.parametrize("key", ["lat", "lon", "date", "vsi", "dsi"])
 def test_do_track_check_raises(ship_frame, key):
     series = ship_frame[key]

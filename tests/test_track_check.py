@@ -35,8 +35,8 @@ def test_ship_heading_north_at_60knots_goes1degree_in_1hour():
         assert pytest.approx(alon2, 0.001) == 0
         assert pytest.approx(alat2, 0.001) == 1
         alat2, alon2 = increment_position(alat1, alon1, avs, ads, None)
-        assert alat2 is None
-        assert alon2 is None
+        assert np.isnan(alat2)
+        assert np.isnan(alon2)
 
 
 def test_ship_heading_east_at_60knots_goes1degree_in_1hour():
@@ -78,12 +78,12 @@ def test_ship_goes_southwest():
 
 def test_noinput():
     m = modesp([])
-    assert m is None
+    assert np.isnan(m)
 
 
 def test_one_input():
     m = modesp([17.0])
-    assert m is None
+    assert np.isnan(m)
 
 
 def test_zero_index_input():
