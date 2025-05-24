@@ -289,6 +289,7 @@ def calculate_speed_course_distance_time_difference(
     return speed, distance, course, timediff
 
 
+
 @inspect_arrays(["vsi", "dsi", "lat", "lon", "date"])
 def forward_discrepancy(
     vsi: Sequence[float],
@@ -514,7 +515,7 @@ def calculate_midpoint(
         1-dimensional latitude array in degrees.
     lon: array-like of float, shape (n,)
         1-dimensional longitude array in degrees.
-    time_diff: array-like of datetime, shape (n,)
+    timediff: array-like of datetime, shape (n,)
         1-dimensional time difference array.
 
     Returns
