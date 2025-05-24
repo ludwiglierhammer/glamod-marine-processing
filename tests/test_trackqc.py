@@ -3096,31 +3096,31 @@ def sst_biased_noisy_check_vals(selector):
     return reps['LAT'], reps['LON'], reps['DATE'], reps['SST'], reps['OSTIA'], reps['BGVAR'], reps['ICE']
 
 @pytest.mark.parametrize(
-    "selector, n_eval, bias_lim, drif_intra, drif_inter, err_std_n, n_bad, background_err_lim, expected1, warns",
+    "selector, n_eval, bias_lim, drif_intra, drif_inter, err_std_n, n_bad, background_err_lim, expected_bias, expected_noisy, expected_short, warns",
     [
         (1, 9, 1.10, 1.0, 0.29, 3.0, 2, 0.3, [0, 0, 0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0, 0, 0], False),  # test_all_daytime_bnc
     ]
 )
 def test_sst_biased_noisy_check_generic(
         selector, n_eval, bias_lim, drif_intra, drif_inter, err_std_n, n_bad,
-        background_err_lim, expected1, warns
+        background_err_lim, expected_bias, expected_noisy, expected_short, warns
 ):
     lat, lon, dates, sst, ostia, bgvar, ice = sst_biased_noisy_check_vals(selector)
     if warns:
         with pytest.warns(UserWarning):
-            qc_outcomes = tqc.do_sst_biased_noisy_check(
+            qc_outcomes = tqc.do_sst_biased_check(
                 lat, lon, dates, sst, ostia, bgvar, ice,
                 n_eval, bias_lim, drif_intra, drif_inter, err_std_n, n_bad,
                 background_err_lim
             )
     else:
-        qc_outcomes = tqc.do_sst_biased_noisy_check(
-            reps.reps,
+        qc_outcomes = tqc.do_sst_biased_check(
+            lat, lon, dates, sst, ostia, bgvar, ice,
             n_eval, bias_lim, drif_intra, drif_inter, err_std_n, n_bad,
             background_err_lim
         )
     for i in range(len(qc_outcomes)):
-        assert qc_outcomes[i] == expected1[i]
+        assert qc_outcomes[i] == expected_bias[i]
 
 
 def test_all_daytime_bnc():

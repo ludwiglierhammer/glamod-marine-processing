@@ -1109,7 +1109,7 @@ def do_sst_biased_check(
         n_eval, bias_lim, drif_intra, drif_inter, err_std_n, n_bad,
         background_err_lim
     )
-    checker._do_sst_biased_noist_check()
+    checker._do_sst_biased_noisy_check()
     return checker.get_qc_outcomes_bias()
 
 def do_sst_noisy_check(
@@ -1122,7 +1122,7 @@ def do_sst_noisy_check(
         n_eval, bias_lim, drif_intra, drif_inter, err_std_n, n_bad,
         background_err_lim
     )
-    checker._do_sst_biased_noist_check()
+    checker._do_sst_biased_noisy_check()
     return checker.get_qc_outcomes_noise()
 
 def do_sst_biased_noisy_short_check(
@@ -1135,7 +1135,7 @@ def do_sst_biased_noisy_short_check(
         n_eval, bias_lim, drif_intra, drif_inter, err_std_n, n_bad,
         background_err_lim
     )
-    checker._do_sst_biased_noist_check()
+    checker._do_sst_biased_noisy_check()
     return checker.get_qc_outcomes_short()
 
 
@@ -1236,13 +1236,13 @@ class SSTBiasedNoisyChecker:
         return valid
 
     def get_qc_outcomes_bias(self):
-        return self.qc_outcomes_bias()
+        return self.qc_outcomes_bias
     def get_qc_outcomes_noise(self):
-        return self.qc_outcomes_noise()
+        return self.qc_outcomes_noise
     def get_qc_outcomes_short(self):
-        return self.qc_outcomes_short()
+        return self.qc_outcomes_short
 
-    def _do_sst_biased_noist_check(self):
+    def _do_sst_biased_noisy_check(self):
         """Perform the bias/noise check QC"""
         invalid_series = self._preprocess_reps()
         if invalid_series:
@@ -1252,6 +1252,10 @@ class SSTBiasedNoisyChecker:
             return
 
         long_record = not (len(self.sst_anom) < self.n_eval)
+
+        self.qc_outcomes_bias[:] = passed
+        self.qc_outcomes_noise[:] = passed
+        self.qc_outcomes_short[:] = passed
 
         if long_record:
             self._long_record_qc()
