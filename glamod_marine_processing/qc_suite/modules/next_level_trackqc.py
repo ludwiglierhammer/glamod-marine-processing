@@ -182,11 +182,12 @@ def trim_std(inarr: list, trim: int) -> float:
 
     return trim
 
+
 def convert_date_to_hours(dates):
     hours_elapsed = np.zeros(len(dates))
     for i in range(len(dates)):
         duration_in_seconds = (dates[i] - dates[0]).total_seconds()
-        hours_elapsed[i] = duration_in_seconds/(60*60)
+        hours_elapsed[i] = duration_in_seconds / (60 * 60)
     return hours_elapsed
 
 
@@ -205,15 +206,9 @@ def is_monotonic(inarr: np.ndarray) -> bool:
         True if array is increasing monotonically, False otherwise
     """
     for i in range(1, len(inarr)):
-        if inarr[i] < inarr[i-1]:
+        if inarr[i] < inarr[i - 1]:
             return False
     return True
-
-
-def do_speed_check(lons, lats, dates, speed_limit, min_win_period, max_win_period):
-    checker = SpeedChecker(lons, lats, dates, speed_limit, min_win_period, max_win_period)
-    checker._do_speed_check()
-    return checker.get_qc_outcomes()
 
 
 class SpeedChecker:
@@ -279,7 +274,7 @@ class SpeedChecker:
             assert self.min_win_period >= 0, "min_win_period must be >= 0"
             assert self.max_win_period >= 0, "max_win_period must be >= 0"
             assert (
-            self.max_win_period >= self.min_win_period
+                self.max_win_period >= self.min_win_period
             ), "max_win_period must be >= min_win_period"
         except AssertionError as error:
             warnings.warn(UserWarning("invalid input parameter: " + str(error)))
@@ -299,7 +294,6 @@ class SpeedChecker:
             valid = False
         return valid
 
-
     def _do_speed_check(self):
         """Perform the actual speed check"""
         nrep = self.nreps
@@ -315,7 +309,7 @@ class SpeedChecker:
 
         # loop through timeseries to see if drifter is moving too fast
         # and flag any occurrences
-        index_arr = np.array(range(0, nrep)) # type: np.ndarray
+        index_arr = np.array(range(0, nrep))  # type: np.ndarray
         i = 0
         time_to_end = self.hrs[-1] - self.hrs[i]
         while time_to_end >= min_win_period_hours:
@@ -342,18 +336,12 @@ class SpeedChecker:
             # If the average speed during the window is too high then set all
             # flags in the window to failed.
             if speed > self.speed_limit:
-                self.qc_outcomes[i:index_arr[f_win][-1] + 1] = failed
+                self.qc_outcomes[i : index_arr[f_win][-1] + 1] = failed
 
             i += 1
             time_to_end = self.hrs[-1] - self.hrs[i]
 
         return
-
-
-def do_aground_check(lons, lats, dates, smooth_win: int, min_win_period: int, max_win_period: int):
-    checker = AgroundChecker(lons, lats, dates, smooth_win, min_win_period, max_win_period)
-    checker._do_aground_check()
-    return checker.get_qc_outcomes()
 
 
 class AgroundChecker:
@@ -425,14 +413,14 @@ class AgroundChecker:
             assert self.smooth_win >= 1, "smooth_win must be >= 1"
             assert self.smooth_win % 2 != 0, "smooth_win must be an odd number"
             assert self.min_win_period >= 1, "min_win_period must be >= 1"
-            assert self.max_win_period >= 1, "max_win_period must be >= 1"
-            assert (
-                self.max_win_period >= self.min_win_period
-            ), "max_win_period must be >= min_win_period"
+            if self.max_win_period is not None:
+                assert self.max_win_period >= 1, "max_win_period must be >= 1"
+                assert (
+                    self.max_win_period >= self.min_win_period
+                ), "max_win_period must be >= min_win_period"
         except AssertionError as error:
             warnings.warn(UserWarning("invalid input parameter: " + str(error)))
             valid = False
-
         return valid
 
     def valid_arrays(self):
@@ -447,11 +435,10 @@ class AgroundChecker:
             valid = False
         return valid
 
-
     def smooth_arrays(self):
         half_win = int((self.smooth_win - 1) / 2)
-        # create smoothed lon/lat timeseries
-        nrep_smooth = self.nreps- self.smooth_win + 1 # length of series after smoothing
+        # create smoothed lon/lat timeseries  # length of series after smoothing
+        nrep_smooth = self.nreps - self.smooth_win + 1
         lon_smooth = np.empty(nrep_smooth)  # type: np.ndarray
         lon_smooth[:] = np.nan
         lat_smooth = np.empty(nrep_smooth)  # type: np.ndarray
@@ -472,14 +459,15 @@ class AgroundChecker:
         """Perform the actual aground check"""
         half_win = (self.smooth_win - 1) / 2
         min_win_period_hours = self.min_win_period * 24.0
-        max_win_period_hours = self.max_win_period * 24.0
+        if self.max_win_period is not None:
+            max_win_period_hours = self.max_win_period * 24.0
 
         if not self.valid_parameters() or not self.valid_arrays():
-            self.qc_outcomes = np.zeros(self.nreps) + untestable
+            self.qc_outcomes[:] = untestable
             return
 
         if self.nreps <= self.smooth_win:
-            self.qc_outcomes = np.zeros(self.nreps) + passed
+            self.qc_outcomes[:] = passed
             return
 
         self.smooth_arrays()
@@ -490,21 +478,31 @@ class AgroundChecker:
         i_aground = np.nan  # keeps track of index when drifter first ran aground
         time_to_end = self.hrs_smooth[-1] - self.hrs_smooth[i]
         while time_to_end >= min_win_period_hours:
-            f_win = self.hrs_smooth <= self.hrs_smooth[i] + max_win_period_hours
-            win_len = self.hrs_smooth[f_win][-1] - self.hrs_smooth[i]
-            if win_len < min_win_period_hours:
-                i += 1
-                time_to_end = self.hrs_smooth[-1] - self.hrs_smooth[i]
-                continue
 
-            displace = sphere_distance(
-                self.lat_smooth[i],
-                self.lon_smooth[i],
-                self.lat_smooth[f_win][-1],
-                self.lon_smooth[f_win][-1],
-            )
+            if self.max_win_period is not None:
+                f_win = self.hrs_smooth <= self.hrs_smooth[i] + max_win_period_hours
+                win_len = self.hrs_smooth[f_win][-1] - self.hrs_smooth[i]
+                if win_len < min_win_period_hours:
+                    i += 1
+                    time_to_end = self.hrs_smooth[-1] - self.hrs_smooth[i]
+                    continue
+
+                displace = sphere_distance(
+                    self.lat_smooth[i],
+                    self.lon_smooth[i],
+                    self.lat_smooth[f_win][-1],
+                    self.lon_smooth[f_win][-1],
+                )
+            else:
+                displace = sphere_distance(
+                    self.lat_smooth[i],
+                    self.lon_smooth[i],
+                    self.lat_smooth[-1],
+                    self.lon_smooth[-1],
+                )
+
             if displace <= AgroundChecker.tolerance:
-                if not(is_aground):
+                if not is_aground:
                     is_aground = True
                     i_aground = i
             else:
@@ -522,12 +520,6 @@ class AgroundChecker:
         self.qc_outcomes[:] = passed
         if is_aground:
             self.qc_outcomes[int(i_aground):] = failed
-
-
-def do_new_aground_check(lons, lats, dates, smooth_win: int, min_win_period: int):
-    checker = NewAgroundChecker(lons, lats, dates, smooth_win, min_win_period)
-    checker._do_new_aground_check()
-    return checker.get_qc_outcomes()
 
 
 class NewAgroundChecker:
@@ -605,8 +597,8 @@ class NewAgroundChecker:
 
     def smooth_arrays(self):
         half_win = int((self.smooth_win - 1) / 2)
-        # create smoothed lon/lat timeseries
-        nrep_smooth = self.nreps- self.smooth_win + 1 # length of series after smoothing
+        # create smoothed lon/lat timeseries # length of series after smoothing
+        nrep_smooth = self.nreps - self.smooth_win + 1
         lon_smooth = np.empty(nrep_smooth)  # type: np.ndarray
         lon_smooth[:] = np.nan
         lat_smooth = np.empty(nrep_smooth)  # type: np.ndarray
@@ -629,11 +621,11 @@ class NewAgroundChecker:
         min_win_period_hours = self.min_win_period * 24.0
 
         if not self.valid_parameters() or not self.valid_arrays():
-            self.qc_outcomes = np.zeros(self.nreps) + untestable
+            self.qc_outcomes[:] = untestable
             return
 
         if self.nreps <= self.smooth_win:
-            self.qc_outcomes = np.zeros(self.nreps) + passed
+            self.qc_outcomes[:] = passed
             return
 
         self.smooth_arrays()
@@ -652,92 +644,24 @@ class NewAgroundChecker:
                 self.lon_smooth[-1],
             )
             if displace <= NewAgroundChecker.tolerance:
-                if is_aground:
-                    i += 1
-                    time_to_end = self.hrs_smooth[-1] - self.hrs_smooth[i]
-                    continue
-                else:
+                if not(is_aground):
                     is_aground = True
                     i_aground = i
-                    i += 1
-                    time_to_end = self.hrs_smooth[-1] - self.hrs_smooth[i]
             else:
                 is_aground = False
                 i_aground = np.nan
-                i += 1
-                time_to_end = self.hrs_smooth[-1] - self.hrs_smooth[i]
 
-                # set flags
+            i += 1
+            time_to_end = self.hrs_smooth[-1] - self.hrs_smooth[i]
+
+        # set flags
+        if is_aground and i_aground > 0:
+            i_aground += half_win
+        # this gets the first index the drifter is deemed aground for the original (un-smoothed) timeseries
+        # n.b. if i_aground=0 then the entire drifter record is deemed aground and flagged as such
+        self.qc_outcomes[:] = passed
         if is_aground:
-            if i_aground > 0:
-                i_aground += half_win
-            # this gets the first index the drifter is deemed aground for the original (un-smoothed) timeseries
-            # n.b. if i_aground=0 then the entire drifter record is deemed aground and flagged as such
-        for ind in range(self.nreps):
-            if is_aground:
-                if ind < i_aground:
-                    self.qc_outcomes[ind] = passed
-                else:
-                    self.qc_outcomes[ind] = failed
-            else:
-                self.qc_outcomes[ind] = passed
-
-
-def do_sst_start_tail_check(
-        lat, lon,
-        sst, ostia, ice, bgvar, dates,
-        long_win_len: int,
-        long_err_std_n: float,
-        short_win_len: int,
-        short_err_std_n: float,
-        short_win_n_bad: int,
-        drif_inter: float,
-        drif_intra: float,
-        background_err_lim: float,
-):
-    checker = SSTTailChecker(
-        lat, lon,
-        sst, ostia, ice, bgvar, dates,
-        long_win_len,
-        long_err_std_n,
-        short_win_len,
-        short_err_std_n,
-        short_win_n_bad,
-        drif_inter,
-        drif_intra,
-        background_err_lim,
-        True
-    )
-    checker._do_sst_tail_check()
-    return checker.get_qc_outcomes()
-
-def do_sst_end_tail_check(
-        lat, lon,
-        sst, ostia, ice, bgvar, dates,
-        long_win_len: int,
-        long_err_std_n: float,
-        short_win_len: int,
-        short_err_std_n: float,
-        short_win_n_bad: int,
-        drif_inter: float,
-        drif_intra: float,
-        background_err_lim: float,
-):
-    checker = SSTTailChecker(
-        lat, lon,
-        sst, ostia, ice, bgvar, dates,
-        long_win_len,
-        long_err_std_n,
-        short_win_len,
-        short_err_std_n,
-        short_win_n_bad,
-        drif_inter,
-        drif_intra,
-        background_err_lim,
-        False
-    )
-    checker._do_sst_tail_check()
-    return checker.get_qc_outcomes()
+            self.qc_outcomes[int(i_aground) :] = failed
 
 
 class SSTTailChecker:
@@ -787,17 +711,23 @@ class SSTTailChecker:
     """
 
     def __init__(
-            self, lat, lon,
-            sst, ostia, ice, bgvar, dates,
-            long_win_len: int,
-            long_err_std_n: float,
-            short_win_len: int,
-            short_err_std_n: float,
-            short_win_n_bad: int,
-            drif_inter: float,
-            drif_intra: float,
-            background_err_lim: float,
-            start_tail: bool
+        self,
+        lat,
+        lon,
+        sst,
+        ostia,
+        ice,
+        bgvar,
+        dates,
+        long_win_len: int,
+        long_err_std_n: float,
+        short_win_len: int,
+        short_err_std_n: float,
+        short_win_n_bad: int,
+        drif_inter: float,
+        drif_intra: float,
+        background_err_lim: float,
+        start_tail: bool,
     ):
         self.nreps = len(sst)
 
@@ -829,7 +759,6 @@ class SSTTailChecker:
         self.drif_inter = drif_inter
         self.drif_intra = drif_intra
         self.background_err_lim = background_err_lim
-
 
     def valid_parameters(self):
         valid = True
@@ -885,7 +814,9 @@ class SSTTailChecker:
 
         # do short tail check on records that pass long tail check - whole record already failed long tail check
         if not (self.start_tail_ind >= self.end_tail_ind):
-            first_pass_ind = self.start_tail_ind + 1  # first index passing long tail check
+            first_pass_ind = (
+                self.start_tail_ind + 1
+            )  # first index passing long tail check
             last_pass_ind = self.end_tail_ind - 1  # last index passing long tail check
             self._do_short_tail_check(first_pass_ind, last_pass_ind, forward=True)
             self._do_short_tail_check(first_pass_ind, last_pass_ind, forward=False)
@@ -942,7 +873,15 @@ class SSTTailChecker:
             invalid_ob = True
 
         try:
-            daytime = track_day_test(dates.year, dates.month, dates.day, dates.hour + (dates.minute)/60, lat, lon, -2.5,)
+            daytime = track_day_test(
+                dates.year,
+                dates.month,
+                dates.day,
+                dates.hour + (dates.minute) / 60,
+                lat,
+                lon,
+                -2.5,
+            )
         except ValueError as error:
             warnings.warn(f"Daytime check failed with {error}")
             daytime = True
@@ -964,9 +903,12 @@ class SSTTailChecker:
         bgvar = []  # type: list
         for ind in range(self.nreps):
             bg_val, ice_val, bgvar_val, good_match, invalid_ob = self._parse_rep(
-                self.lat[ind], self.lon[ind],
-                self.ostia[ind], self.ice[ind],
-                self.bgvar[ind], self.dates[ind]
+                self.lat[ind],
+                self.lon[ind],
+                self.ostia[ind],
+                self.ice[ind],
+                self.bgvar[ind],
+                self.dates[ind],
             )
             if invalid_ob:
                 invalid_series = True
@@ -1027,11 +969,8 @@ class SSTTailChecker:
             bgerr_rms = np.sqrt(np.mean(bgerr_winvals**2))
             if (
                 abs(sst_anom_avg)
-                > self.long_err_std_n
-                * np.sqrt(self.drif_inter**2 + bgerr_avg**2)
-            ) or (
-                sst_anom_stdev > np.sqrt(self.drif_intra**2 + bgerr_rms**2)
-            ):
+                > self.long_err_std_n * np.sqrt(self.drif_inter**2 + bgerr_avg**2)
+            ) or (sst_anom_stdev > np.sqrt(self.drif_intra**2 + bgerr_rms**2)):
                 if forward:
                     self.start_tail_ind = ix + mid_win_ind
                 else:
@@ -1076,9 +1015,7 @@ class SSTTailChecker:
             if np.any(bgerr_winvals > np.sqrt(self.background_err_lim)):
                 break
             limit = self.short_err_std_n * np.sqrt(
-                bgerr_winvals**2
-                + self.drif_inter**2
-                + self.drif_intra**2
+                bgerr_winvals**2 + self.drif_inter**2 + self.drif_intra**2
             )
             exceed_limit = np.logical_or(
                 sst_anom_winvals > limit, sst_anom_winvals < -limit
@@ -1098,45 +1035,6 @@ class SSTTailChecker:
                         self.end_tail_ind -= 1
             else:
                 break
-
-def do_sst_biased_check(
-        lat, lon, dates, sst, ostia, bgvar, ice,
-        n_eval, bias_lim, drif_intra, drif_inter, err_std_n, n_bad,
-        background_err_lim
-):
-    checker = SSTBiasedNoisyChecker(
-        lat, lon, dates, sst, ostia, bgvar, ice,
-        n_eval, bias_lim, drif_intra, drif_inter, err_std_n, n_bad,
-        background_err_lim
-    )
-    checker._do_sst_biased_noisy_check()
-    return checker.get_qc_outcomes_bias()
-
-def do_sst_noisy_check(
-        lat, lon, dates, sst, ostia, bgvar, ice,
-        n_eval, bias_lim, drif_intra, drif_inter, err_std_n, n_bad,
-        background_err_lim
-):
-    checker = SSTBiasedNoisyChecker(
-        lat, lon, dates, sst, ostia, bgvar, ice,
-        n_eval, bias_lim, drif_intra, drif_inter, err_std_n, n_bad,
-        background_err_lim
-    )
-    checker._do_sst_biased_noisy_check()
-    return checker.get_qc_outcomes_noise()
-
-def do_sst_biased_noisy_short_check(
-        lat, lon, dates, sst, ostia, bgvar, ice,
-        n_eval, bias_lim, drif_intra, drif_inter, err_std_n, n_bad,
-        background_err_lim
-):
-    checker = SSTBiasedNoisyChecker(
-        lat, lon, dates, sst, ostia, bgvar, ice,
-        n_eval, bias_lim, drif_intra, drif_inter, err_std_n, n_bad,
-        background_err_lim
-    )
-    checker._do_sst_biased_noisy_check()
-    return checker.get_qc_outcomes_short()
 
 
 class SSTBiasedNoisyChecker:
@@ -1189,9 +1087,21 @@ class SSTBiasedNoisyChecker:
     """
 
     def __init__(
-            self, lat, lon, dates, sst, ostia, bgvar, ice,
-                n_eval, bias_lim, drif_intra, drif_inter, err_std_n, n_bad,
-                background_err_lim
+        self,
+        lat,
+        lon,
+        dates,
+        sst,
+        ostia,
+        bgvar,
+        ice,
+        n_eval,
+        bias_lim,
+        drif_intra,
+        drif_inter,
+        err_std_n,
+        n_bad,
+        background_err_lim,
     ):
         self.lat = lat
         self.lon = lon
@@ -1202,12 +1112,13 @@ class SSTBiasedNoisyChecker:
         self.ice = ice
 
         self.nreps = len(lat)
+        self.hrs = convert_date_to_hours(dates)
 
         self.n_eval = n_eval
         self.bias_lim = bias_lim
         self.drif_intra = drif_intra
         self.drif_inter = drif_inter
-        self. err_std_n = err_std_n
+        self.err_std_n = err_std_n
         self.n_bad = n_bad
         self.background_err_lim = background_err_lim
 
@@ -1237,25 +1148,32 @@ class SSTBiasedNoisyChecker:
 
     def get_qc_outcomes_bias(self):
         return self.qc_outcomes_bias
+
     def get_qc_outcomes_noise(self):
         return self.qc_outcomes_noise
+
     def get_qc_outcomes_short(self):
         return self.qc_outcomes_short
 
+    def set_all_qc_outcomes_to(self, instate):
+        self.qc_outcomes_short[:] = instate
+        self.qc_outcomes_noise[:] = instate
+        self.qc_outcomes_bias[:] = instate
+
     def _do_sst_biased_noisy_check(self):
         """Perform the bias/noise check QC"""
+        if not self.valid_parameters():
+            self.set_all_qc_outcomes_to(untestable)
+            return
+
         invalid_series = self._preprocess_reps()
         if invalid_series:
-            self.qc_outcomes_short[:] = untestable
-            self.qc_outcomes_noise[:] = untestable
-            self.qc_outcomes_bias[:] = untestable
+            self.set_all_qc_outcomes_to(untestable)
             return
 
         long_record = not (len(self.sst_anom) < self.n_eval)
 
-        self.qc_outcomes_bias[:] = passed
-        self.qc_outcomes_noise[:] = passed
-        self.qc_outcomes_short[:] = passed
+        self.set_all_qc_outcomes_to(passed)
 
         if long_record:
             self._long_record_qc()
@@ -1265,7 +1183,7 @@ class SSTBiasedNoisyChecker:
 
     @staticmethod
     def _parse_rep(
-            lat, lon, ostia, ice, bgvar, dates, background_err_lim
+        lat, lon, ostia, ice, bgvar, dates, background_err_lim
     ) -> (float, float, float, bool, bool):
         """
         Extract QC-relevant variables from a marine report and
@@ -1296,7 +1214,15 @@ class SSTBiasedNoisyChecker:
             invalid_ob = True
 
         try:
-            daytime = track_day_test(dates.year, dates.month, dates.day, dates.hour + (dates.minute)/60, lat, lon, -2.5,)
+            daytime = track_day_test(
+                dates.year,
+                dates.month,
+                dates.day,
+                dates.hour + (dates.minute) / 60,
+                lat,
+                lon,
+                -2.5,
+            )
         except ValueError as error:
             warnings.warn(f"Daytime check failed with {error}")
             daytime = True
@@ -1304,10 +1230,7 @@ class SSTBiasedNoisyChecker:
 
         land_match = bg_val is None
         ice_match = ice > 0.15
-        bgvar_mask = (
-            bgvar is not None
-            and bgvar > background_err_lim
-        )
+        bgvar_mask = bgvar is not None and bgvar > background_err_lim
 
         good_match = not (daytime or land_match or ice_match or bgvar_mask)
 
@@ -1325,10 +1248,14 @@ class SSTBiasedNoisyChecker:
         for ind in range(self.nreps):
             bg_val, ice_val, bgvar_val, good_match, bgvar_mask, invalid_ob = (
                 SSTBiasedNoisyChecker._parse_rep(
-                self.lat[ind], self.lon[ind],
-                self.ostia[ind], self.ice[ind],
-                self.bgvar[ind], self.dates[ind],
-                self.background_err_lim)
+                    self.lat[ind],
+                    self.lon[ind],
+                    self.ostia[ind],
+                    self.ice[ind],
+                    self.bgvar[ind],
+                    self.dates[ind],
+                    self.background_err_lim,
+                )
             )
             if invalid_ob:
                 invalid_series = True
@@ -1355,6 +1282,10 @@ class SSTBiasedNoisyChecker:
         self.bgerr = bgerr
         self.bgvar_is_masked = bgvar_is_masked
 
+        if not is_monotonic(self.hrs):
+            warnings.warn(UserWarning("Not sorted in time order"))
+            invalid_series = True
+
         return invalid_series
 
     def _long_record_qc(self) -> None:
@@ -1376,9 +1307,7 @@ class SSTBiasedNoisyChecker:
         # Calculate the limit based on the combined uncertainties (background error, drifter inter and drifter intra
         # error) and then multiply by the err_std_n
         limit = self.err_std_n * np.sqrt(
-            self.bgerr**2
-            + self.drif_inter**2
-            + self.drif_intra**2
+            self.bgerr**2 + self.drif_inter**2 + self.drif_intra**2
         )
 
         # If the number of obs outside the limit exceed n_bad then flag them all as bad
@@ -1386,3 +1315,215 @@ class SSTBiasedNoisyChecker:
         exceed_limit = np.logical_or(self.sst_anom > limit, self.sst_anom < -limit)
         if np.sum(exceed_limit) >= self.n_bad:
             self.qc_outcomes_short[:] = failed
+
+
+def do_speed_check(
+        lons, lats, dates, speed_limit, min_win_period, max_win_period
+):
+    checker = SpeedChecker(
+        lons, lats, dates, speed_limit, min_win_period, max_win_period
+    )
+    checker._do_speed_check()
+    return checker.get_qc_outcomes()
+
+
+def do_aground_check(
+    lons, lats, dates, smooth_win: int, min_win_period: int, max_win_period: int
+):
+    checker = AgroundChecker(lons, lats, dates, smooth_win, min_win_period, max_win_period)
+    checker._do_aground_check()
+    return checker.get_qc_outcomes()
+
+
+def do_new_aground_check(
+        lons, lats, dates, smooth_win: int, min_win_period: int
+):
+    checker = AgroundChecker(lons, lats, dates, smooth_win, min_win_period, None)
+    checker._do_aground_check()
+    return checker.get_qc_outcomes()
+
+
+def do_sst_start_tail_check(
+    lat,
+    lon,
+    sst,
+    ostia,
+    ice,
+    bgvar,
+    dates,
+    long_win_len: int,
+    long_err_std_n: float,
+    short_win_len: int,
+    short_err_std_n: float,
+    short_win_n_bad: int,
+    drif_inter: float,
+    drif_intra: float,
+    background_err_lim: float,
+):
+    checker = SSTTailChecker(
+        lat,
+        lon,
+        sst,
+        ostia,
+        ice,
+        bgvar,
+        dates,
+        long_win_len,
+        long_err_std_n,
+        short_win_len,
+        short_err_std_n,
+        short_win_n_bad,
+        drif_inter,
+        drif_intra,
+        background_err_lim,
+        True,
+    )
+    checker._do_sst_tail_check()
+    return checker.get_qc_outcomes()
+
+
+def do_sst_end_tail_check(
+    lat,
+    lon,
+    sst,
+    ostia,
+    ice,
+    bgvar,
+    dates,
+    long_win_len: int,
+    long_err_std_n: float,
+    short_win_len: int,
+    short_err_std_n: float,
+    short_win_n_bad: int,
+    drif_inter: float,
+    drif_intra: float,
+    background_err_lim: float,
+):
+    checker = SSTTailChecker(
+        lat,
+        lon,
+        sst,
+        ostia,
+        ice,
+        bgvar,
+        dates,
+        long_win_len,
+        long_err_std_n,
+        short_win_len,
+        short_err_std_n,
+        short_win_n_bad,
+        drif_inter,
+        drif_intra,
+        background_err_lim,
+        False,
+    )
+    checker._do_sst_tail_check()
+    return checker.get_qc_outcomes()
+
+
+def do_sst_biased_check(
+    lat,
+    lon,
+    dates,
+    sst,
+    ostia,
+    bgvar,
+    ice,
+    n_eval,
+    bias_lim,
+    drif_intra,
+    drif_inter,
+    err_std_n,
+    n_bad,
+    background_err_lim,
+):
+    checker = SSTBiasedNoisyChecker(
+        lat,
+        lon,
+        dates,
+        sst,
+        ostia,
+        bgvar,
+        ice,
+        n_eval,
+        bias_lim,
+        drif_intra,
+        drif_inter,
+        err_std_n,
+        n_bad,
+        background_err_lim,
+    )
+    checker._do_sst_biased_noisy_check()
+    return checker.get_qc_outcomes_bias()
+
+
+def do_sst_noisy_check(
+    lat,
+    lon,
+    dates,
+    sst,
+    ostia,
+    bgvar,
+    ice,
+    n_eval,
+    bias_lim,
+    drif_intra,
+    drif_inter,
+    err_std_n,
+    n_bad,
+    background_err_lim,
+):
+    checker = SSTBiasedNoisyChecker(
+        lat,
+        lon,
+        dates,
+        sst,
+        ostia,
+        bgvar,
+        ice,
+        n_eval,
+        bias_lim,
+        drif_intra,
+        drif_inter,
+        err_std_n,
+        n_bad,
+        background_err_lim,
+    )
+    checker._do_sst_biased_noisy_check()
+    return checker.get_qc_outcomes_noise()
+
+
+def do_sst_biased_noisy_short_check(
+    lat,
+    lon,
+    dates,
+    sst,
+    ostia,
+    bgvar,
+    ice,
+    n_eval,
+    bias_lim,
+    drif_intra,
+    drif_inter,
+    err_std_n,
+    n_bad,
+    background_err_lim,
+):
+    checker = SSTBiasedNoisyChecker(
+        lat,
+        lon,
+        dates,
+        sst,
+        ostia,
+        bgvar,
+        ice,
+        n_eval,
+        bias_lim,
+        drif_intra,
+        drif_inter,
+        err_std_n,
+        n_bad,
+        background_err_lim,
+    )
+    checker._do_sst_biased_noisy_check()
+    return checker.get_qc_outcomes_short()

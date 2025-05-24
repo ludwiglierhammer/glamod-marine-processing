@@ -10,7 +10,12 @@ import pytest
 
 from datetime import datetime
 
-from glamod_marine_processing.qc_suite.modules.qc import passed, failed, untestable, untested
+from glamod_marine_processing.qc_suite.modules.qc import (
+    passed,
+    failed,
+    untestable,
+    untested,
+)
 
 import glamod_marine_processing.qc_suite.modules.Extended_IMMA as ex
 
@@ -95,1401 +100,6 @@ def test_sd_with_trim():
     assert np.all(
         arr == np.array([6.0, 1.0, 1.0, 1.0, 1.0])
     )  # this checks the array is not modifed by the function
-
-
-# def make_test_data(selection):
-#     if selection == 1:
-#         # stationary drifter
-#         vals = [
-#             {
-#                 "ID": "AAAAAAAAA",
-#                 "YR": 2003,
-#                 "MO": 12,
-#                 "DY": 1,
-#                 "HR": 12,
-#                 "LAT": 0.0,
-#                 "LON": 0.0,
-#                 "SST": 5.0,
-#             },
-#             {
-#                 "ID": "AAAAAAAAA",
-#                 "YR": 2003,
-#                 "MO": 12,
-#                 "DY": 2,
-#                 "HR": 12,
-#                 "LAT": 0.0,
-#                 "LON": 0.0,
-#                 "SST": 5.0,
-#             },
-#             {
-#                 "ID": "AAAAAAAAA",
-#                 "YR": 2003,
-#                 "MO": 12,
-#                 "DY": 3,
-#                 "HR": 12,
-#                 "LAT": 0.0,
-#                 "LON": 0.0,
-#                 "SST": 5.0,
-#             },
-#             {
-#                 "ID": "AAAAAAAAA",
-#                 "YR": 2003,
-#                 "MO": 12,
-#                 "DY": 4,
-#                 "HR": 12,
-#                 "LAT": 0.0,
-#                 "LON": 0.0,
-#                 "SST": 5.0,
-#             },
-#             {
-#                 "ID": "AAAAAAAAA",
-#                 "YR": 2003,
-#                 "MO": 12,
-#                 "DY": 5,
-#                 "HR": 12,
-#                 "LAT": 0.0,
-#                 "LON": 0.0,
-#                 "SST": 5.0,
-#             },
-#             {
-#                 "ID": "AAAAAAAAA",
-#                 "YR": 2003,
-#                 "MO": 12,
-#                 "DY": 6,
-#                 "HR": 12,
-#                 "LAT": 0.0,
-#                 "LON": 0.0,
-#                 "SST": 5.0,
-#             },
-#             {
-#                 "ID": "AAAAAAAAA",
-#                 "YR": 2003,
-#                 "MO": 12,
-#                 "DY": 7,
-#                 "HR": 12,
-#                 "LAT": 0.0,
-#                 "LON": 0.0,
-#                 "SST": 5.0,
-#             },
-#         ]
-#     elif selection == 2:
-#         # stationary drifter (artificial 'jitter' spikes)
-#         vals = [
-#             {
-#                 "ID": "AAAAAAAAA",
-#                 "YR": 2003,
-#                 "MO": 12,
-#                 "DY": 1,
-#                 "HR": 12,
-#                 "LAT": 0.0,
-#                 "LON": 0.0,
-#                 "SST": 5.0,
-#             },
-#             {
-#                 "ID": "AAAAAAAAA",
-#                 "YR": 2003,
-#                 "MO": 12,
-#                 "DY": 2,
-#                 "HR": 12,
-#                 "LAT": 0.0,
-#                 "LON": 0.0,
-#                 "SST": 5.0,
-#             },
-#             {
-#                 "ID": "AAAAAAAAA",
-#                 "YR": 2003,
-#                 "MO": 12,
-#                 "DY": 3,
-#                 "HR": 12,
-#                 "LAT": 1.0,
-#                 "LON": 0.0,
-#                 "SST": 5.0,
-#             },
-#             {
-#                 "ID": "AAAAAAAAA",
-#                 "YR": 2003,
-#                 "MO": 12,
-#                 "DY": 4,
-#                 "HR": 12,
-#                 "LAT": 0.0,
-#                 "LON": 0.0,
-#                 "SST": 5.0,
-#             },
-#             {
-#                 "ID": "AAAAAAAAA",
-#                 "YR": 2003,
-#                 "MO": 12,
-#                 "DY": 5,
-#                 "HR": 12,
-#                 "LAT": 0.0,
-#                 "LON": 1.0,
-#                 "SST": 5.0,
-#             },
-#             {
-#                 "ID": "AAAAAAAAA",
-#                 "YR": 2003,
-#                 "MO": 12,
-#                 "DY": 6,
-#                 "HR": 12,
-#                 "LAT": 0.0,
-#                 "LON": 0.0,
-#                 "SST": 5.0,
-#             },
-#             {
-#                 "ID": "AAAAAAAAA",
-#                 "YR": 2003,
-#                 "MO": 12,
-#                 "DY": 7,
-#                 "HR": 12,
-#                 "LAT": 0.0,
-#                 "LON": 0.0,
-#                 "SST": 5.0,
-#             },
-#         ]
-#     elif selection == 3:
-#         # stationary drifter (artificial 'jitter' which won't be fully smoothed and outside tolerance)
-#         vals = [
-#             {
-#                 "ID": "AAAAAAAAA",
-#                 "YR": 2003,
-#                 "MO": 12,
-#                 "DY": 1,
-#                 "HR": 12,
-#                 "LAT": 0.0,
-#                 "LON": 0.0,
-#                 "SST": 5.0,
-#             },
-#             {
-#                 "ID": "AAAAAAAAA",
-#                 "YR": 2003,
-#                 "MO": 12,
-#                 "DY": 2,
-#                 "HR": 12,
-#                 "LAT": 0.0,
-#                 "LON": 0.0,
-#                 "SST": 5.0,
-#             },
-#             {
-#                 "ID": "AAAAAAAAA",
-#                 "YR": 2003,
-#                 "MO": 12,
-#                 "DY": 3,
-#                 "HR": 12,
-#                 "LAT": 1.0,
-#                 "LON": 0.0,
-#                 "SST": 5.0,
-#             },
-#             {
-#                 "ID": "AAAAAAAAA",
-#                 "YR": 2003,
-#                 "MO": 12,
-#                 "DY": 4,
-#                 "HR": 12,
-#                 "LAT": 1.0,
-#                 "LON": 0.0,
-#                 "SST": 5.0,
-#             },
-#             {
-#                 "ID": "AAAAAAAAA",
-#                 "YR": 2003,
-#                 "MO": 12,
-#                 "DY": 5,
-#                 "HR": 12,
-#                 "LAT": 0.0,
-#                 "LON": 0.0,
-#                 "SST": 5.0,
-#             },
-#             {
-#                 "ID": "AAAAAAAAA",
-#                 "YR": 2003,
-#                 "MO": 12,
-#                 "DY": 6,
-#                 "HR": 12,
-#                 "LAT": 0.0,
-#                 "LON": 0.0,
-#                 "SST": 5.0,
-#             },
-#             {
-#                 "ID": "AAAAAAAAA",
-#                 "YR": 2003,
-#                 "MO": 12,
-#                 "DY": 7,
-#                 "HR": 12,
-#                 "LAT": 0.0,
-#                 "LON": 0.0,
-#                 "SST": 5.0,
-#             },
-#         ]
-#     elif selection == 4:
-#         # stationary drifter (artificial 'jitter' which won't be fully smoothed and within tolerance)
-#         vals = [
-#             {
-#                 "ID": "AAAAAAAAA",
-#                 "YR": 2003,
-#                 "MO": 12,
-#                 "DY": 1,
-#                 "HR": 12,
-#                 "LAT": 0.0,
-#                 "LON": 0.0,
-#                 "SST": 5.0,
-#             },
-#             {
-#                 "ID": "AAAAAAAAA",
-#                 "YR": 2003,
-#                 "MO": 12,
-#                 "DY": 2,
-#                 "HR": 12,
-#                 "LAT": 0.0,
-#                 "LON": 0.0,
-#                 "SST": 5.0,
-#             },
-#             {
-#                 "ID": "AAAAAAAAA",
-#                 "YR": 2003,
-#                 "MO": 12,
-#                 "DY": 3,
-#                 "HR": 12,
-#                 "LAT": 0.01,
-#                 "LON": 0.01,
-#                 "SST": 5.0,
-#             },
-#             {
-#                 "ID": "AAAAAAAAA",
-#                 "YR": 2003,
-#                 "MO": 12,
-#                 "DY": 4,
-#                 "HR": 12,
-#                 "LAT": 0.01,
-#                 "LON": 0.01,
-#                 "SST": 5.0,
-#             },
-#             {
-#                 "ID": "AAAAAAAAA",
-#                 "YR": 2003,
-#                 "MO": 12,
-#                 "DY": 5,
-#                 "HR": 12,
-#                 "LAT": 0.0,
-#                 "LON": 0.0,
-#                 "SST": 5.0,
-#             },
-#             {
-#                 "ID": "AAAAAAAAA",
-#                 "YR": 2003,
-#                 "MO": 12,
-#                 "DY": 6,
-#                 "HR": 12,
-#                 "LAT": 0.0,
-#                 "LON": 0.0,
-#                 "SST": 5.0,
-#             },
-#             {
-#                 "ID": "AAAAAAAAA",
-#                 "YR": 2003,
-#                 "MO": 12,
-#                 "DY": 7,
-#                 "HR": 12,
-#                 "LAT": 0.0,
-#                 "LON": 0.0,
-#                 "SST": 5.0,
-#             },
-#         ]
-#     elif selection == 5:
-#         # moving drifter (going west)
-#         vals = [
-#             {
-#                 "ID": "AAAAAAAAA",
-#                 "YR": 2003,
-#                 "MO": 12,
-#                 "DY": 1,
-#                 "HR": 12,
-#                 "LAT": 0.0,
-#                 "LON": 0.0,
-#                 "SST": 5.0,
-#             },
-#             {
-#                 "ID": "AAAAAAAAA",
-#                 "YR": 2003,
-#                 "MO": 12,
-#                 "DY": 2,
-#                 "HR": 12,
-#                 "LAT": 0.0,
-#                 "LON": -0.02,
-#                 "SST": 5.0,
-#             },
-#             {
-#                 "ID": "AAAAAAAAA",
-#                 "YR": 2003,
-#                 "MO": 12,
-#                 "DY": 3,
-#                 "HR": 12,
-#                 "LAT": 0.0,
-#                 "LON": -0.04,
-#                 "SST": 5.0,
-#             },
-#             {
-#                 "ID": "AAAAAAAAA",
-#                 "YR": 2003,
-#                 "MO": 12,
-#                 "DY": 4,
-#                 "HR": 12,
-#                 "LAT": 0.0,
-#                 "LON": -0.06,
-#                 "SST": 5.0,
-#             },
-#             {
-#                 "ID": "AAAAAAAAA",
-#                 "YR": 2003,
-#                 "MO": 12,
-#                 "DY": 5,
-#                 "HR": 12,
-#                 "LAT": 0.0,
-#                 "LON": -0.08,
-#                 "SST": 5.0,
-#             },
-#             {
-#                 "ID": "AAAAAAAAA",
-#                 "YR": 2003,
-#                 "MO": 12,
-#                 "DY": 6,
-#                 "HR": 12,
-#                 "LAT": 0.0,
-#                 "LON": -0.10,
-#                 "SST": 5.0,
-#             },
-#             {
-#                 "ID": "AAAAAAAAA",
-#                 "YR": 2003,
-#                 "MO": 12,
-#                 "DY": 7,
-#                 "HR": 12,
-#                 "LAT": 0.0,
-#                 "LON": -0.12,
-#                 "SST": 5.0,
-#             },
-#         ]
-#     elif selection == 6:
-#         # moving drifter (going north)
-#         vals = [
-#             {
-#                 "ID": "AAAAAAAAA",
-#                 "YR": 2003,
-#                 "MO": 12,
-#                 "DY": 1,
-#                 "HR": 12,
-#                 "LAT": 0.0,
-#                 "LON": 0.0,
-#                 "SST": 5.0,
-#             },
-#             {
-#                 "ID": "AAAAAAAAA",
-#                 "YR": 2003,
-#                 "MO": 12,
-#                 "DY": 2,
-#                 "HR": 12,
-#                 "LAT": 0.02,
-#                 "LON": 0.0,
-#                 "SST": 5.0,
-#             },
-#             {
-#                 "ID": "AAAAAAAAA",
-#                 "YR": 2003,
-#                 "MO": 12,
-#                 "DY": 3,
-#                 "HR": 12,
-#                 "LAT": 0.04,
-#                 "LON": 0.0,
-#                 "SST": 5.0,
-#             },
-#             {
-#                 "ID": "AAAAAAAAA",
-#                 "YR": 2003,
-#                 "MO": 12,
-#                 "DY": 4,
-#                 "HR": 12,
-#                 "LAT": 0.06,
-#                 "LON": 0.0,
-#                 "SST": 5.0,
-#             },
-#             {
-#                 "ID": "AAAAAAAAA",
-#                 "YR": 2003,
-#                 "MO": 12,
-#                 "DY": 5,
-#                 "HR": 12,
-#                 "LAT": 0.08,
-#                 "LON": 0.0,
-#                 "SST": 5.0,
-#             },
-#             {
-#                 "ID": "AAAAAAAAA",
-#                 "YR": 2003,
-#                 "MO": 12,
-#                 "DY": 6,
-#                 "HR": 12,
-#                 "LAT": 0.10,
-#                 "LON": 0.0,
-#                 "SST": 5.0,
-#             },
-#             {
-#                 "ID": "AAAAAAAAA",
-#                 "YR": 2003,
-#                 "MO": 12,
-#                 "DY": 7,
-#                 "HR": 12,
-#                 "LAT": 0.12,
-#                 "LON": 0.0,
-#                 "SST": 5.0,
-#             },
-#         ]
-#     elif selection == 7:
-#         # runs aground (drifter going north then stops)
-#         vals = [
-#             {
-#                 "ID": "AAAAAAAAA",
-#                 "YR": 2003,
-#                 "MO": 12,
-#                 "DY": 1,
-#                 "HR": 12,
-#                 "LAT": 0.0,
-#                 "LON": 0.0,
-#                 "SST": 5.0,
-#             },
-#             {
-#                 "ID": "AAAAAAAAA",
-#                 "YR": 2003,
-#                 "MO": 12,
-#                 "DY": 2,
-#                 "HR": 12,
-#                 "LAT": 0.02,
-#                 "LON": 0.0,
-#                 "SST": 5.0,
-#             },
-#             {
-#                 "ID": "AAAAAAAAA",
-#                 "YR": 2003,
-#                 "MO": 12,
-#                 "DY": 3,
-#                 "HR": 12,
-#                 "LAT": 0.04,
-#                 "LON": 0.0,
-#                 "SST": 5.0,
-#             },
-#             {
-#                 "ID": "AAAAAAAAA",
-#                 "YR": 2003,
-#                 "MO": 12,
-#                 "DY": 4,
-#                 "HR": 12,
-#                 "LAT": 0.06,
-#                 "LON": 0.0,
-#                 "SST": 5.0,
-#             },
-#             {
-#                 "ID": "AAAAAAAAA",
-#                 "YR": 2003,
-#                 "MO": 12,
-#                 "DY": 5,
-#                 "HR": 12,
-#                 "LAT": 0.08,
-#                 "LON": 0.0,
-#                 "SST": 5.0,
-#             },
-#             {
-#                 "ID": "AAAAAAAAA",
-#                 "YR": 2003,
-#                 "MO": 12,
-#                 "DY": 6,
-#                 "HR": 12,
-#                 "LAT": 0.08,
-#                 "LON": 0.0,
-#                 "SST": 5.0,
-#             },
-#             {
-#                 "ID": "AAAAAAAAA",
-#                 "YR": 2003,
-#                 "MO": 12,
-#                 "DY": 7,
-#                 "HR": 12,
-#                 "LAT": 0.08,
-#                 "LON": 0.0,
-#                 "SST": 5.0,
-#             },
-#         ]
-#     elif selection == 8:
-#         # stationary drifter (high frequency sampling prevents detection)
-#         vals = [
-#             {
-#                 "ID": "AAAAAAAAA",
-#                 "YR": 2003,
-#                 "MO": 12,
-#                 "DY": 1,
-#                 "HR": 1,
-#                 "LAT": 0.0,
-#                 "LON": 0.0,
-#                 "SST": 5.0,
-#             },
-#             {
-#                 "ID": "AAAAAAAAA",
-#                 "YR": 2003,
-#                 "MO": 12,
-#                 "DY": 1,
-#                 "HR": 2,
-#                 "LAT": 0.0,
-#                 "LON": 0.0,
-#                 "SST": 5.0,
-#             },
-#             {
-#                 "ID": "AAAAAAAAA",
-#                 "YR": 2003,
-#                 "MO": 12,
-#                 "DY": 1,
-#                 "HR": 3,
-#                 "LAT": 0.0,
-#                 "LON": 0.0,
-#                 "SST": 5.0,
-#             },
-#             {
-#                 "ID": "AAAAAAAAA",
-#                 "YR": 2003,
-#                 "MO": 12,
-#                 "DY": 1,
-#                 "HR": 4,
-#                 "LAT": 0.0,
-#                 "LON": 0.0,
-#                 "SST": 5.0,
-#             },
-#             {
-#                 "ID": "AAAAAAAAA",
-#                 "YR": 2003,
-#                 "MO": 12,
-#                 "DY": 1,
-#                 "HR": 5,
-#                 "LAT": 0.0,
-#                 "LON": 0.0,
-#                 "SST": 5.0,
-#             },
-#             {
-#                 "ID": "AAAAAAAAA",
-#                 "YR": 2003,
-#                 "MO": 12,
-#                 "DY": 1,
-#                 "HR": 6,
-#                 "LAT": 0.0,
-#                 "LON": 0.0,
-#                 "SST": 5.0,
-#             },
-#             {
-#                 "ID": "AAAAAAAAA",
-#                 "YR": 2003,
-#                 "MO": 12,
-#                 "DY": 1,
-#                 "HR": 7,
-#                 "LAT": 0.0,
-#                 "LON": 0.0,
-#                 "SST": 5.0,
-#             },
-#         ]
-#     elif selection == 9:
-#         # stationary drifter (low frequency sampling prevents detection)
-#         vals = [
-#             {
-#                 "ID": "AAAAAAAAA",
-#                 "YR": 2003,
-#                 "MO": 12,
-#                 "DY": 1,
-#                 "HR": 12,
-#                 "LAT": 0.0,
-#                 "LON": 0.0,
-#                 "SST": 5.0,
-#             },
-#             {
-#                 "ID": "AAAAAAAAA",
-#                 "YR": 2003,
-#                 "MO": 12,
-#                 "DY": 4,
-#                 "HR": 12,
-#                 "LAT": 0.0,
-#                 "LON": 0.0,
-#                 "SST": 5.0,
-#             },
-#             {
-#                 "ID": "AAAAAAAAA",
-#                 "YR": 2003,
-#                 "MO": 12,
-#                 "DY": 7,
-#                 "HR": 12,
-#                 "LAT": 0.0,
-#                 "LON": 0.0,
-#                 "SST": 5.0,
-#             },
-#             {
-#                 "ID": "AAAAAAAAA",
-#                 "YR": 2003,
-#                 "MO": 12,
-#                 "DY": 10,
-#                 "HR": 12,
-#                 "LAT": 0.0,
-#                 "LON": 0.0,
-#                 "SST": 5.0,
-#             },
-#             {
-#                 "ID": "AAAAAAAAA",
-#                 "YR": 2003,
-#                 "MO": 12,
-#                 "DY": 13,
-#                 "HR": 12,
-#                 "LAT": 0.0,
-#                 "LON": 0.0,
-#                 "SST": 5.0,
-#             },
-#             {
-#                 "ID": "AAAAAAAAA",
-#                 "YR": 2003,
-#                 "MO": 12,
-#                 "DY": 16,
-#                 "HR": 12,
-#                 "LAT": 0.0,
-#                 "LON": 0.0,
-#                 "SST": 5.0,
-#             },
-#             {
-#                 "ID": "AAAAAAAAA",
-#                 "YR": 2003,
-#                 "MO": 12,
-#                 "DY": 19,
-#                 "HR": 12,
-#                 "LAT": 0.0,
-#                 "LON": 0.0,
-#                 "SST": 5.0,
-#             },
-#         ]
-#     elif selection == 10:
-#         # stationary drifter (mid frequency sampling enables detection)
-#         vals = [
-#             {
-#                 "ID": "AAAAAAAAA",
-#                 "YR": 2003,
-#                 "MO": 12,
-#                 "DY": 1,
-#                 "HR": 12,
-#                 "LAT": 0.0,
-#                 "LON": 0.0,
-#                 "SST": 5.0,
-#             },
-#             {
-#                 "ID": "AAAAAAAAA",
-#                 "YR": 2003,
-#                 "MO": 12,
-#                 "DY": 3,
-#                 "HR": 0,
-#                 "LAT": 0.0,
-#                 "LON": 0.0,
-#                 "SST": 5.0,
-#             },
-#             {
-#                 "ID": "AAAAAAAAA",
-#                 "YR": 2003,
-#                 "MO": 12,
-#                 "DY": 4,
-#                 "HR": 12,
-#                 "LAT": 0.0,
-#                 "LON": 0.0,
-#                 "SST": 5.0,
-#             },
-#             {
-#                 "ID": "AAAAAAAAA",
-#                 "YR": 2003,
-#                 "MO": 12,
-#                 "DY": 6,
-#                 "HR": 0,
-#                 "LAT": 0.0,
-#                 "LON": 0.0,
-#                 "SST": 5.0,
-#             },
-#             {
-#                 "ID": "AAAAAAAAA",
-#                 "YR": 2003,
-#                 "MO": 12,
-#                 "DY": 7,
-#                 "HR": 12,
-#                 "LAT": 0.0,
-#                 "LON": 0.0,
-#                 "SST": 5.0,
-#             },
-#             {
-#                 "ID": "AAAAAAAAA",
-#                 "YR": 2003,
-#                 "MO": 12,
-#                 "DY": 9,
-#                 "HR": 0,
-#                 "LAT": 0.0,
-#                 "LON": 0.0,
-#                 "SST": 5.0,
-#             },
-#             {
-#                 "ID": "AAAAAAAAA",
-#                 "YR": 2003,
-#                 "MO": 12,
-#                 "DY": 10,
-#                 "HR": 12,
-#                 "LAT": 0.0,
-#                 "LON": 0.0,
-#                 "SST": 5.0,
-#             },
-#         ]
-#     elif selection == 11:
-#         # stationary drifter (changed sampling prevents early detection)
-#         vals = [
-#             {
-#                 "ID": "AAAAAAAAA",
-#                 "YR": 2003,
-#                 "MO": 12,
-#                 "DY": 1,
-#                 "HR": 12,
-#                 "LAT": 0.0,
-#                 "LON": 0.0,
-#                 "SST": 5.0,
-#             },
-#             {
-#                 "ID": "AAAAAAAAA",
-#                 "YR": 2003,
-#                 "MO": 12,
-#                 "DY": 4,
-#                 "HR": 12,
-#                 "LAT": 0.0,
-#                 "LON": 0.0,
-#                 "SST": 5.0,
-#             },
-#             {
-#                 "ID": "AAAAAAAAA",
-#                 "YR": 2003,
-#                 "MO": 12,
-#                 "DY": 7,
-#                 "HR": 12,
-#                 "LAT": 0.0,
-#                 "LON": 0.0,
-#                 "SST": 5.0,
-#             },
-#             {
-#                 "ID": "AAAAAAAAA",
-#                 "YR": 2003,
-#                 "MO": 12,
-#                 "DY": 8,
-#                 "HR": 12,
-#                 "LAT": 0.0,
-#                 "LON": 0.0,
-#                 "SST": 5.0,
-#             },
-#             {
-#                 "ID": "AAAAAAAAA",
-#                 "YR": 2003,
-#                 "MO": 12,
-#                 "DY": 9,
-#                 "HR": 12,
-#                 "LAT": 0.0,
-#                 "LON": 0.0,
-#                 "SST": 5.0,
-#             },
-#             {
-#                 "ID": "AAAAAAAAA",
-#                 "YR": 2003,
-#                 "MO": 12,
-#                 "DY": 10,
-#                 "HR": 12,
-#                 "LAT": 0.0,
-#                 "LON": 0.0,
-#                 "SST": 5.0,
-#             },
-#             {
-#                 "ID": "AAAAAAAAA",
-#                 "YR": 2003,
-#                 "MO": 12,
-#                 "DY": 11,
-#                 "HR": 12,
-#                 "LAT": 0.0,
-#                 "LON": 0.0,
-#                 "SST": 5.0,
-#             },
-#         ]
-#     elif selection == 12:
-#         # moving drifter (going northwest at equator but going slowly and within tolerance)
-#         vals = [
-#             {
-#                 "ID": "AAAAAAAAA",
-#                 "YR": 2003,
-#                 "MO": 12,
-#                 "DY": 1,
-#                 "HR": 12,
-#                 "LAT": 0.0,
-#                 "LON": 0.0,
-#                 "SST": 5.0,
-#             },
-#             {
-#                 "ID": "AAAAAAAAA",
-#                 "YR": 2003,
-#                 "MO": 12,
-#                 "DY": 2,
-#                 "HR": 12,
-#                 "LAT": 0.005,
-#                 "LON": -0.005,
-#                 "SST": 5.0,
-#             },
-#             {
-#                 "ID": "AAAAAAAAA",
-#                 "YR": 2003,
-#                 "MO": 12,
-#                 "DY": 3,
-#                 "HR": 12,
-#                 "LAT": 0.01,
-#                 "LON": -0.01,
-#                 "SST": 5.0,
-#             },
-#             {
-#                 "ID": "AAAAAAAAA",
-#                 "YR": 2003,
-#                 "MO": 12,
-#                 "DY": 4,
-#                 "HR": 12,
-#                 "LAT": 0.015,
-#                 "LON": -0.015,
-#                 "SST": 5.0,
-#             },
-#             {
-#                 "ID": "AAAAAAAAA",
-#                 "YR": 2003,
-#                 "MO": 12,
-#                 "DY": 5,
-#                 "HR": 12,
-#                 "LAT": 0.02,
-#                 "LON": -0.02,
-#                 "SST": 5.0,
-#             },
-#             {
-#                 "ID": "AAAAAAAAA",
-#                 "YR": 2003,
-#                 "MO": 12,
-#                 "DY": 6,
-#                 "HR": 12,
-#                 "LAT": 0.025,
-#                 "LON": -0.025,
-#                 "SST": 5.0,
-#             },
-#             {
-#                 "ID": "AAAAAAAAA",
-#                 "YR": 2003,
-#                 "MO": 12,
-#                 "DY": 7,
-#                 "HR": 12,
-#                 "LAT": 0.03,
-#                 "LON": -0.03,
-#                 "SST": 5.0,
-#             },
-#         ]
-#     elif selection == 13:
-#         # moving drifter (going west in high Arctic but going slower than tolerance set at equator)
-#         vals = [
-#             {
-#                 "ID": "AAAAAAAAA",
-#                 "YR": 2003,
-#                 "MO": 12,
-#                 "DY": 1,
-#                 "HR": 12,
-#                 "LAT": 85.0,
-#                 "LON": 0.0,
-#                 "SST": 5.0,
-#             },
-#             {
-#                 "ID": "AAAAAAAAA",
-#                 "YR": 2003,
-#                 "MO": 12,
-#                 "DY": 2,
-#                 "HR": 12,
-#                 "LAT": 85.0,
-#                 "LON": -0.02,
-#                 "SST": 5.0,
-#             },
-#             {
-#                 "ID": "AAAAAAAAA",
-#                 "YR": 2003,
-#                 "MO": 12,
-#                 "DY": 3,
-#                 "HR": 12,
-#                 "LAT": 85.0,
-#                 "LON": -0.04,
-#                 "SST": 5.0,
-#             },
-#             {
-#                 "ID": "AAAAAAAAA",
-#                 "YR": 2003,
-#                 "MO": 12,
-#                 "DY": 4,
-#                 "HR": 12,
-#                 "LAT": 85.0,
-#                 "LON": -0.06,
-#                 "SST": 5.0,
-#             },
-#             {
-#                 "ID": "AAAAAAAAA",
-#                 "YR": 2003,
-#                 "MO": 12,
-#                 "DY": 5,
-#                 "HR": 12,
-#                 "LAT": 85.0,
-#                 "LON": -0.08,
-#                 "SST": 5.0,
-#             },
-#             {
-#                 "ID": "AAAAAAAAA",
-#                 "YR": 2003,
-#                 "MO": 12,
-#                 "DY": 6,
-#                 "HR": 12,
-#                 "LAT": 85.0,
-#                 "LON": -0.10,
-#                 "SST": 5.0,
-#             },
-#             {
-#                 "ID": "AAAAAAAAA",
-#                 "YR": 2003,
-#                 "MO": 12,
-#                 "DY": 7,
-#                 "HR": 12,
-#                 "LAT": 85.0,
-#                 "LON": -0.12,
-#                 "SST": 5.0,
-#             },
-#         ]
-#     elif selection == 14:
-#         # stationary then moves
-#         vals = [
-#             {
-#                 "ID": "AAAAAAAAA",
-#                 "YR": 2003,
-#                 "MO": 12,
-#                 "DY": 1,
-#                 "HR": 12,
-#                 "LAT": 0.0,
-#                 "LON": 0.0,
-#                 "SST": 5.0,
-#             },
-#             {
-#                 "ID": "AAAAAAAAA",
-#                 "YR": 2003,
-#                 "MO": 12,
-#                 "DY": 2,
-#                 "HR": 12,
-#                 "LAT": 0.0,
-#                 "LON": 0.0,
-#                 "SST": 5.0,
-#             },
-#             {
-#                 "ID": "AAAAAAAAA",
-#                 "YR": 2003,
-#                 "MO": 12,
-#                 "DY": 3,
-#                 "HR": 12,
-#                 "LAT": 0.0,
-#                 "LON": 0.0,
-#                 "SST": 5.0,
-#             },
-#             {
-#                 "ID": "AAAAAAAAA",
-#                 "YR": 2003,
-#                 "MO": 12,
-#                 "DY": 4,
-#                 "HR": 12,
-#                 "LAT": 0.0,
-#                 "LON": 0.0,
-#                 "SST": 5.0,
-#             },
-#             {
-#                 "ID": "AAAAAAAAA",
-#                 "YR": 2003,
-#                 "MO": 12,
-#                 "DY": 5,
-#                 "HR": 12,
-#                 "LAT": 0.02,
-#                 "LON": 0.0,
-#                 "SST": 5.0,
-#             },
-#             {
-#                 "ID": "AAAAAAAAA",
-#                 "YR": 2003,
-#                 "MO": 12,
-#                 "DY": 6,
-#                 "HR": 12,
-#                 "LAT": 0.04,
-#                 "LON": 0.0,
-#                 "SST": 5.0,
-#             },
-#             {
-#                 "ID": "AAAAAAAAA",
-#                 "YR": 2003,
-#                 "MO": 12,
-#                 "DY": 7,
-#                 "HR": 12,
-#                 "LAT": 0.06,
-#                 "LON": 0.0,
-#                 "SST": 5.0,
-#             },
-#         ]
-#     elif selection == 15:
-#         # too short for QC
-#         vals = [
-#             {
-#                 "ID": "AAAAAAAAA",
-#                 "YR": 2003,
-#                 "MO": 12,
-#                 "DY": 1,
-#                 "HR": 12,
-#                 "LAT": 0.0,
-#                 "LON": 0.0,
-#                 "SST": 5.0,
-#             },
-#             {
-#                 "ID": "AAAAAAAAA",
-#                 "YR": 2003,
-#                 "MO": 12,
-#                 "DY": 2,
-#                 "HR": 12,
-#                 "LAT": 0.0,
-#                 "LON": -0.02,
-#                 "SST": 5.0,
-#             },
-#         ]
-#     elif selection == 16:
-#         # assertion error - bad input parameter
-#         vals = [
-#             {
-#                 "ID": "AAAAAAAAA",
-#                 "YR": 2003,
-#                 "MO": 12,
-#                 "DY": 1,
-#                 "HR": 12,
-#                 "LAT": 0.0,
-#                 "LON": 0.0,
-#                 "SST": 5.0,
-#             },
-#             {
-#                 "ID": "AAAAAAAAA",
-#                 "YR": 2003,
-#                 "MO": 12,
-#                 "DY": 2,
-#                 "HR": 12,
-#                 "LAT": 0.0,
-#                 "LON": -0.02,
-#                 "SST": 5.0,
-#             },
-#             {
-#                 "ID": "AAAAAAAAA",
-#                 "YR": 2003,
-#                 "MO": 12,
-#                 "DY": 3,
-#                 "HR": 12,
-#                 "LAT": 0.0,
-#                 "LON": -0.04,
-#                 "SST": 5.0,
-#             },
-#             {
-#                 "ID": "AAAAAAAAA",
-#                 "YR": 2003,
-#                 "MO": 12,
-#                 "DY": 4,
-#                 "HR": 12,
-#                 "LAT": 0.0,
-#                 "LON": -0.06,
-#                 "SST": 5.0,
-#             },
-#             {
-#                 "ID": "AAAAAAAAA",
-#                 "YR": 2003,
-#                 "MO": 12,
-#                 "DY": 5,
-#                 "HR": 12,
-#                 "LAT": 0.0,
-#                 "LON": -0.08,
-#                 "SST": 5.0,
-#             },
-#             {
-#                 "ID": "AAAAAAAAA",
-#                 "YR": 2003,
-#                 "MO": 12,
-#                 "DY": 6,
-#                 "HR": 12,
-#                 "LAT": 0.0,
-#                 "LON": -0.10,
-#                 "SST": 5.0,
-#             },
-#             {
-#                 "ID": "AAAAAAAAA",
-#                 "YR": 2003,
-#                 "MO": 12,
-#                 "DY": 7,
-#                 "HR": 12,
-#                 "LAT": 0.0,
-#                 "LON": -0.12,
-#                 "SST": 5.0,
-#             },
-#         ]
-#     elif selection == 17:
-#         # assertion error - missing observation
-#         vals = [
-#             {
-#                 "ID": "AAAAAAAAA",
-#                 "YR": 2003,
-#                 "MO": 12,
-#                 "DY": 1,
-#                 "HR": 12,
-#                 "LAT": 0.0,
-#                 "LON": 0.0,
-#                 "SST": 5.0,
-#             },
-#             {
-#                 "ID": "AAAAAAAAA",
-#                 "YR": 2003,
-#                 "MO": 12,
-#                 "DY": 2,
-#                 "HR": 12,
-#                 "LAT": 0.0,
-#                 "LON": -0.02,
-#                 "SST": 5.0,
-#             },
-#             {
-#                 "ID": "AAAAAAAAA",
-#                 "YR": 2003,
-#                 "MO": 12,
-#                 "DY": 3,
-#                 "HR": 12,
-#                 "LAT": 0.0,
-#                 "LON": -0.04,
-#                 "SST": 5.0,
-#             },
-#             {
-#                 "ID": "AAAAAAAAA",
-#                 "YR": 2003,
-#                 "MO": 12,
-#                 "DY": 4,
-#                 "HR": 12,
-#                 "LAT": 0.0,
-#                 "LON": -0.06,
-#                 "SST": 5.0,
-#             },
-#             {
-#                 "ID": "AAAAAAAAA",
-#                 "YR": 2003,
-#                 "MO": 12,
-#                 "DY": 5,
-#                 "HR": 12,
-#                 "LAT": 0.0,
-#                 "LON": -0.08,
-#                 "SST": 5.0,
-#             },
-#             {
-#                 "ID": "AAAAAAAAA",
-#                 "YR": 2003,
-#                 "MO": 12,
-#                 "DY": 6,
-#                 "HR": 12,
-#                 "LAT": 0.0,
-#                 "LON": -0.10,
-#                 "SST": 5.0,
-#             },
-#             {
-#                 "ID": "AAAAAAAAA",
-#                 "YR": 2003,
-#                 "MO": 12,
-#                 "DY": 7,
-#                 "HR": 12,
-#                 "LAT": 0.0,
-#                 "LON": -0.12,
-#                 "SST": 5.0,
-#             },
-#         ]
-#     elif selection == 18:
-#         # assertion error - times not sorted
-#         vals = [
-#             {
-#                 "ID": "AAAAAAAAA",
-#                 "YR": 2003,
-#                 "MO": 12,
-#                 "DY": 1,
-#                 "HR": 12,
-#                 "LAT": 0.0,
-#                 "LON": 0.0,
-#                 "SST": 5.0,
-#             },
-#             {
-#                 "ID": "AAAAAAAAA",
-#                 "YR": 2003,
-#                 "MO": 12,
-#                 "DY": 2,
-#                 "HR": 12,
-#                 "LAT": 0.0,
-#                 "LON": -0.02,
-#                 "SST": 5.0,
-#             },
-#             {
-#                 "ID": "AAAAAAAAA",
-#                 "YR": 2003,
-#                 "MO": 12,
-#                 "DY": 3,
-#                 "HR": 12,
-#                 "LAT": 0.0,
-#                 "LON": -0.04,
-#                 "SST": 5.0,
-#             },
-#             {
-#                 "ID": "AAAAAAAAA",
-#                 "YR": 2003,
-#                 "MO": 12,
-#                 "DY": 2,
-#                 "HR": 12,
-#                 "LAT": 0.0,
-#                 "LON": -0.06,
-#                 "SST": 5.0,
-#             },
-#             {
-#                 "ID": "AAAAAAAAA",
-#                 "YR": 2003,
-#                 "MO": 12,
-#                 "DY": 5,
-#                 "HR": 12,
-#                 "LAT": 0.0,
-#                 "LON": -0.08,
-#                 "SST": 5.0,
-#             },
-#             {
-#                 "ID": "AAAAAAAAA",
-#                 "YR": 2003,
-#                 "MO": 12,
-#                 "DY": 6,
-#                 "HR": 12,
-#                 "LAT": 0.0,
-#                 "LON": -0.10,
-#                 "SST": 5.0,
-#             },
-#             {
-#                 "ID": "AAAAAAAAA",
-#                 "YR": 2003,
-#                 "MO": 12,
-#                 "DY": 7,
-#                 "HR": 12,
-#                 "LAT": 0.0,
-#                 "LON": -0.12,
-#                 "SST": 5.0,
-#             },
-#         ]
-#
-#     from datetime import datetime
-#
-#     id = [x["ID"] for x in vals]
-#     date = [datetime(x["YR"], x["MO"], x["DY"], x["HR"]) for x in vals]
-#     lat = [x["LAT"] for x in vals]
-#     lon = [x["LON"] for x in vals]
-#     sst = [x["SST"] for x in vals]
-#
-#     df = pd.DataFrame({"id": id, "date": date, "lat": lat, "lon": lon, "sst": sst})
-#     df = calculate_speed_course_distance_time_difference(df)
-#
-#     return df
-#
-#
-# @pytest.fixture
-# def vals1():
-#     return make_test_data(1)
-#
-#
-# @pytest.fixture
-# def vals2():
-#     return make_test_data(2)
-#
-#
-# @pytest.fixture
-# def vals3():
-#     return make_test_data(3)
-#
-#
-# @pytest.fixture
-# def vals4():
-#     return make_test_data(4)
-#
-#
-# @pytest.fixture
-# def vals5():
-#     return make_test_data(5)
-#
-#
-# @pytest.fixture
-# def vals6():
-#     return make_test_data(6)
-#
-#
-# @pytest.fixture
-# def vals7():
-#     return make_test_data(7)
-#
-#
-# @pytest.fixture
-# def vals8():
-#     return make_test_data(8)
-#
-#
-# @pytest.fixture
-# def vals9():
-#     return make_test_data(9)
-#
-#
-# @pytest.fixture
-# def vals10():
-#     return make_test_data(10)
-#
-#
-# @pytest.fixture
-# def vals11():
-#     return make_test_data(11)
-#
-#
-# @pytest.fixture
-# def vals12():
-#     return make_test_data(12)
-#
-#
-# @pytest.fixture
-# def vals13():
-#     return make_test_data(13)
-#
-#
-# @pytest.fixture
-# def vals14():
-#     return make_test_data(14)
-#
-#
-# @pytest.fixture
-# def vals15():
-#     return make_test_data(15)
-#
-#
-# @pytest.fixture
-# def vals16():
-#     return make_test_data(16)
-#
-#
-# @pytest.fixture
-# def vals17():
-#     return make_test_data(17)
-#
-#
-# @pytest.fixture
-# def vals18():
-#     return make_test_data(18)
-#
-#
-# def test_stationary(vals1):
-#     expected_flags = [1, 1, 1, 1, 1, 1, 1]
-#     otqc.aground_check(vals1, 3, 1, 2)
-#     for i in range(len(vals1)):
-#         assert vals1.drf_agr == expected_flags[i]
 
 
 def aground_check_test_data(selector):
@@ -1674,28 +284,29 @@ def aground_check_test_data(selector):
     reps = {}
     for key in obs[0]:
         reps[key] = []
-    reps['DATE'] = []
+    reps["DATE"] = []
 
     for v in obs:
         for key in reps:
-            if key != 'DATE':
+            if key != "DATE":
                 reps[key].append(v[key])
 
-        hour = int(v['HR'])
-        minute = 60 * (v['HR'] - hour)
-        date = datetime(v['YR'], v['MO'], v['DY'], hour, minute)
-        reps['DATE'].append(date)
+        hour = int(v["HR"])
+        minute = 60 * (v["HR"] - hour)
+        date = datetime(v["YR"], v["MO"], v["DY"], hour, minute)
+        reps["DATE"].append(date)
 
     for key in reps:
         reps[key] = np.array(reps[key])
 
     if selector == 17:
-        reps['LON'][1] = np.nan
+        reps["LON"][1] = np.nan
 
-    return reps['LAT'], reps['LON'], reps['DATE']
+    return reps["LAT"], reps["LON"], reps["DATE"]
 
 
 @pytest.mark.parametrize(
+    # fmt: off
     "selector, smooth_win, min_win_period, max_win_period, expected, warns",
     [
         (1, 3, 1, 2, [1, 1, 1, 1, 1, 1, 1], False),  # test_stationary
@@ -1716,19 +327,28 @@ def aground_check_test_data(selector):
         (16, 0, 1, 2, [untestable for x in range(7)], True),  # test_error_bad_input_parameter
         (17, 3, 1, 2, [untestable for x in range(7)], True),  # test_error_missing_observation
         (18, 3, 1, 2, [untestable for x in range(7)], True),  # test_error_not_time_sorted
+        # fmt: off
     ]
 )
-def test_generic_aground(selector, smooth_win, min_win_period, max_win_period, expected, warns):
+def test_generic_aground(
+    selector, smooth_win, min_win_period, max_win_period, expected, warns
+):
     lats, lons, dates = aground_check_test_data(selector)
     if warns:
         with pytest.warns(UserWarning):
-            qc_outcomes = tqc.do_aground_check(lons, lats, dates, smooth_win, min_win_period, max_win_period)
+            qc_outcomes = tqc.do_aground_check(
+                lons, lats, dates, smooth_win, min_win_period, max_win_period
+            )
     else:
-        qc_outcomes = tqc.do_aground_check(lons, lats, dates, smooth_win, min_win_period, max_win_period)
+        qc_outcomes = tqc.do_aground_check(
+            lons, lats, dates, smooth_win, min_win_period, max_win_period
+        )
     for i in range(len(lons)):
         assert qc_outcomes[i] == expected[i]
 
+
 @pytest.mark.parametrize(
+    # fmt: off
     "selector, smooth_win, min_win_period, max_win_period, expected, warns",
     [
         (1, 3, 1, 2, [1, 1, 1, 1, 1, 1, 1], False),  # test_stationary
@@ -1750,17 +370,23 @@ def test_generic_aground(selector, smooth_win, min_win_period, max_win_period, e
         (17, 3, 1, 2, [untestable for x in range(7)], True),  # test_error_missing_observation
         (18, 3, 1, 2, [untestable for x in range(7)], True),  # test_error_not_time_sorted
     ]
+    # fmt: off
 )
-def test_new_generic_aground(selector, smooth_win, min_win_period, max_win_period, expected, warns):
+def test_new_generic_aground(
+    selector, smooth_win, min_win_period, max_win_period, expected, warns
+):
     lats, lons, dates = aground_check_test_data(selector)
     if warns:
         with pytest.warns(UserWarning):
-            qc_outcomes = tqc.do_new_aground_check(lons, lats, dates, smooth_win, min_win_period)
+            qc_outcomes = tqc.do_new_aground_check(
+                lons, lats, dates, smooth_win, min_win_period
+            )
     else:
-        qc_outcomes = tqc.do_new_aground_check(lons, lats, dates, smooth_win, min_win_period)
+        qc_outcomes = tqc.do_new_aground_check(
+            lons, lats, dates, smooth_win, min_win_period
+        )
     for i in range(len(lons)):
         assert qc_outcomes[i] == expected[i]
-
 
 
 @pytest.fixture
@@ -1772,6 +398,7 @@ def iquam_parameters():
         "delta_d": 1.11,
         "delta_t": 0.01,
     }
+
 
 def speed_check_data(selector):
     # stationary drifter
@@ -1915,29 +542,29 @@ def speed_check_data(selector):
     reps = {}
     for key in obs[0]:
         reps[key] = []
-    reps['DATE'] = []
+    reps["DATE"] = []
 
     for v in obs:
         for key in reps:
-            if key != 'DATE':
+            if key != "DATE":
                 reps[key].append(v[key])
 
-        hour = int(v['HR'])
-        minute = 60 * (v['HR'] - hour)
-        date = datetime(v['YR'], v['MO'], v['DY'], hour, minute)
-        reps['DATE'].append(date)
+        hour = int(v["HR"])
+        minute = 60 * (v["HR"] - hour)
+        date = datetime(v["YR"], v["MO"], v["DY"], hour, minute)
+        reps["DATE"].append(date)
 
     for key in reps:
         reps[key] = np.array(reps[key])
 
     if selector == 13:
-        reps['LON'][1] = np.nan
+        reps["LON"][1] = np.nan
 
-
-    return reps['LAT'], reps['LON'], reps['DATE']
+    return reps["LAT"], reps["LON"], reps["DATE"]
 
 
 @pytest.mark.parametrize(
+    # fmt: off
     "selector, speed_limit, min_win_period, max_win_period, expected, warns",
     [
         (1, 2.5, 0.5, 1.0, [0, 0, 0, 0, 0, 0, 0], False), # test stationary
@@ -1955,17 +582,23 @@ def speed_check_data(selector):
         (13, 2.5, 0.5, 1.0, [untestable for x in range(7)], True), # test_error_missing_observation_a
         (14, 2.5 ,0.5, 1.0, [untestable for x in range(7)], True), # test_error_not_time_sorted_a
     ]
+    # fmt: off
 )
-def test_generic_speed_tests(selector, speed_limit, min_win_period, max_win_period, expected, warns):
+def test_generic_speed_tests(
+    selector, speed_limit, min_win_period, max_win_period, expected, warns
+):
     lats, lons, dates = speed_check_data(selector)
     if warns:
         with pytest.warns(UserWarning):
-            qc_outcomes = tqc.do_speed_check(lons, lats, dates, speed_limit, min_win_period, max_win_period)
+            qc_outcomes = tqc.do_speed_check(
+                lons, lats, dates, speed_limit, min_win_period, max_win_period
+            )
     else:
-        qc_outcomes = tqc.do_speed_check(lons, lats, dates, speed_limit, min_win_period, max_win_period)
+        qc_outcomes = tqc.do_speed_check(
+            lons, lats, dates, speed_limit, min_win_period, max_win_period
+        )
     for i in range(len(qc_outcomes)):
         assert qc_outcomes[i] == expected[i]
-
 
 
 # --- new speed check --- NEEDS IQUAM TO BE AVAILABLE
@@ -2611,30 +1244,39 @@ def tailcheck_vals(selector):
     reps = {}
     for key in obs[0]:
         reps[key] = []
-    reps['DATE'] = []
+    reps["DATE"] = []
 
     for v in obs:
         for key in reps:
-            if key != 'DATE':
+            if key != "DATE":
                 reps[key].append(v[key])
 
-        hour = int(v['HR'])
-        minute = int(60 * (v['HR'] - hour))
-        date = datetime(int(v['YR']), int(v['MO']), int(v['DY']), hour, minute)
-        reps['DATE'].append(date)
+        hour = int(v["HR"])
+        minute = int(60 * (v["HR"] - hour))
+        date = datetime(int(v["YR"]), int(v["MO"]), int(v["DY"]), hour, minute)
+        reps["DATE"].append(date)
 
     for key in reps:
         reps[key] = np.array(reps[key])
 
     if selector == 37:
-        reps['LAT'][1] = np.nan
+        reps["LAT"][1] = np.nan
     if selector == 35:
-        reps['OSTIA'][:] = np.nan
+        reps["OSTIA"][:] = np.nan
 
-    return reps['LAT'], reps['LON'], reps['DATE'], reps['SST'], reps['OSTIA'], reps['BGVAR'], reps['ICE']
+    return (
+        reps["LAT"],
+        reps["LON"],
+        reps["DATE"],
+        reps["SST"],
+        reps["OSTIA"],
+        reps["BGVAR"],
+        reps["ICE"],
+    )
 
 
 @pytest.mark.parametrize(
+    # fmt: off
     "selector, long_win_len, long_err_std_n, short_win_len, short_err_std_n, short_win_n_bad, drif_inter, drif_intra, background_err_lim, expected1, expected2, warns",
     [
         (1, 3, 3.0, 1, 3.0, 1, 0.29, 1.0, 0.3, [0, 0, 0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0, 0, 0], False),  # test_all_daytime
@@ -2676,69 +1318,105 @@ def tailcheck_vals(selector):
         (38, 3, 3.0, 1, 3.0, 1, 0.29, 1.0, 0.3, [untestable for x in range(9)], [untestable for x in range(9)], True),  # test_error_not_time_sorted_tail_check
         (39, 3, 3.0, 1, 3.0, 1, 0.29, 1.0, 0.3, [untestable for x in range(9)], [untestable for x in range(9)], True),  # test_error_invalid_background
         (40, 3, 3.0, 1, 3.0, 1, 0.29, 1.0, 0.3, [untestable for x in range(9)], [untestable for x in range(9)], True),  # test_error_invalid_background_error_variance
-
+        # fmt: on
     ]
 )
 def test_generic_tailcheck(
-        selector, long_win_len, long_err_std_n, short_win_len, short_err_std_n,
-        short_win_n_bad, drif_inter, drif_intra, background_err_lim, expected1, expected2, warns
+    selector,
+    long_win_len,
+    long_err_std_n,
+    short_win_len,
+    short_err_std_n,
+    short_win_n_bad,
+    drif_inter,
+    drif_intra,
+    background_err_lim,
+    expected1,
+    expected2,
+    warns,
 ):
     lat, lon, dates, sst, ostia, bgvar, ice = tailcheck_vals(selector)
     # First do the start tail check
     if warns:
         with pytest.warns(UserWarning):
-            qc_outcomes = tqc.do_sst_start_tail_check(lat, lon, sst, ostia, ice, bgvar, dates,
-                long_win_len, long_err_std_n, short_win_len, short_err_std_n,
-                short_win_n_bad, drif_inter, drif_intra, background_err_lim
-        )
+            qc_outcomes = tqc.do_sst_start_tail_check(
+                lat,
+                lon,
+                sst,
+                ostia,
+                ice,
+                bgvar,
+                dates,
+                long_win_len,
+                long_err_std_n,
+                short_win_len,
+                short_err_std_n,
+                short_win_n_bad,
+                drif_inter,
+                drif_intra,
+                background_err_lim,
+            )
     else:
-        qc_outcomes = tqc.do_sst_start_tail_check(lat, lon, sst, ostia, ice, bgvar, dates,
-                                                  long_win_len, long_err_std_n, short_win_len, short_err_std_n,
-                                                  short_win_n_bad, drif_inter, drif_intra, background_err_lim
-                                                  )
+        qc_outcomes = tqc.do_sst_start_tail_check(
+            lat,
+            lon,
+            sst,
+            ostia,
+            ice,
+            bgvar,
+            dates,
+            long_win_len,
+            long_err_std_n,
+            short_win_len,
+            short_err_std_n,
+            short_win_n_bad,
+            drif_inter,
+            drif_intra,
+            background_err_lim,
+        )
     for i in range(len(qc_outcomes)):
         assert qc_outcomes[i] == expected1[i]
 
     # Then do the end tail check on the same data
     if warns:
         with pytest.warns(UserWarning):
-            qc_outcomes = tqc.do_sst_end_tail_check(lat, lon, sst, ostia, ice, bgvar, dates,
-                long_win_len, long_err_std_n, short_win_len, short_err_std_n,
-                short_win_n_bad, drif_inter, drif_intra, background_err_lim
-        )
+            qc_outcomes = tqc.do_sst_end_tail_check(
+                lat,
+                lon,
+                sst,
+                ostia,
+                ice,
+                bgvar,
+                dates,
+                long_win_len,
+                long_err_std_n,
+                short_win_len,
+                short_err_std_n,
+                short_win_n_bad,
+                drif_inter,
+                drif_intra,
+                background_err_lim,
+            )
     else:
-        qc_outcomes = tqc.do_sst_end_tail_check(lat, lon, sst, ostia, ice, bgvar, dates,
-                                                  long_win_len, long_err_std_n, short_win_len, short_err_std_n,
-                                                  short_win_n_bad, drif_inter, drif_intra, background_err_lim
-                                                  )
+        qc_outcomes = tqc.do_sst_end_tail_check(
+            lat,
+            lon,
+            sst,
+            ostia,
+            ice,
+            bgvar,
+            dates,
+            long_win_len,
+            long_err_std_n,
+            short_win_len,
+            short_err_std_n,
+            short_win_n_bad,
+            drif_inter,
+            drif_intra,
+            background_err_lim,
+        )
     for i in range(len(qc_outcomes)):
         assert qc_outcomes[i] == expected2[i]
-
-
-# This test tests if one of the inputs is missing, but this can't happen now that we
-# are using arrays to pass this information, If there is no input at some point then the
-# call to the test would raise a syntax error
-@pytest.mark.skip
-def test_error_missing_matched_value():
-    lat, lon, dates, sst, ostia, bgvar, ice  = tailcheck_vals(35)
-    expected_flags1 = [untestable for x in range(9)]
-    expected_flags2 = [untestable for x in range(9)]
-    with pytest.warns(UserWarning):
-        qc_outcomes1 = tqc.do_sst_start_tail_check(
-            lat, lon, sst, ostia, ice, bgvar, dates,
-            3, 3.0, 1, 3.0, 1, 0.29, 1.0, 0.3
-        )
-    with pytest.warns(UserWarning):
-        qc_outcomes2 = tqc.do_sst_end_tail_check(
-            lat, lon, sst, ostia, ice, bgvar, dates,
-            3, 3.0, 1, 3.0, 1, 0.29, 1.0, 0.3
-        )
-
-    for i in range(len(qc_outcomes1)):
-        assert qc_outcomes1[i] == expected_flags1[i]
-    for i in range(len(qc_outcomes2)):
-        assert qc_outcomes2[i] == expected_flags2[i]
-
 
 # tests summary
 """
@@ -3073,342 +1751,126 @@ def sst_biased_noisy_check_vals(selector):
     reps = {}
     for key in obs[0]:
         reps[key] = []
-    reps['DATE'] = []
+    reps["DATE"] = []
 
     for v in obs:
         for key in reps:
-            if key != 'DATE':
+            if key != "DATE":
                 reps[key].append(v[key])
 
-        hour = int(v['HR'])
-        minute = int(60 * (v['HR'] - hour))
-        date = datetime(int(v['YR']), int(v['MO']), int(v['DY']), hour, minute)
-        reps['DATE'].append(date)
+        hour = int(v["HR"])
+        minute = int(60 * (v["HR"] - hour))
+        date = datetime(int(v["YR"]), int(v["MO"]), int(v["DY"]), hour, minute)
+        reps["DATE"].append(date)
 
     for key in reps:
         reps[key] = np.array(reps[key])
 
     if selector == 23:
-        reps['LAT'][1] = np.nan
+        reps["LAT"][1] = np.nan
     if selector == 21:
-        reps['OSTIA'][:] = np.nan
+        reps["OSTIA"][:] = np.nan
 
-    return reps['LAT'], reps['LON'], reps['DATE'], reps['SST'], reps['OSTIA'], reps['BGVAR'], reps['ICE']
+    return (
+        reps["LAT"],
+        reps["LON"],
+        reps["DATE"],
+        reps["SST"],
+        reps["OSTIA"],
+        reps["BGVAR"],
+        reps["ICE"],
+    )
+
 
 @pytest.mark.parametrize(
+    # fmt: off
     "selector, n_eval, bias_lim, drif_intra, drif_inter, err_std_n, n_bad, background_err_lim, expected_bias, expected_noisy, expected_short, warns",
     [
         (1, 9, 1.10, 1.0, 0.29, 3.0, 2, 0.3, [0, 0, 0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0, 0, 0], False),  # test_all_daytime_bnc
+        (2, 9, 1.10, 1.0, 0.29, 3.0, 2, 0.3, [0, 0, 0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0, 0, 0], False),  # test_all_land_masked_bnc
+        (3, 9, 1.10, 1.0, 0.29, 3.0, 2, 0.3, [0, 0, 0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0, 0, 0], False),  # test_all_ice_bnc
+        (4, 9, 1.10, 1.0, 0.29, 3.0, 2, 0.3, [0, 0, 0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0, 0, 0], False),  # test_all_bgvar_exceeds_limit_bnc
+        (5, 9, 1.10, 1.0, 0.29, 3.0, 2, 0.3, [1, 1, 1, 1, 1, 1, 1, 1, 1], [0, 0, 0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0, 0, 0], False),  # test_biased_warm_bnc
+        (6, 9, 1.10, 1.0, 0.29, 3.0, 2, 0.3, [1, 1, 1, 1, 1, 1, 1, 1, 1], [0, 0, 0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0, 0, 0], False),  # test_biased_cool_bnc
+        (7, 9, 1.10, 1.0, 0.29, 3.0, 2, 0.3, [0, 0, 0, 0, 0, 0, 0, 0, 0], [1, 1, 1, 1, 1, 1, 1, 1, 1], [0, 0, 0, 0, 0, 0, 0, 0, 0], False),  # test_noisy_bnc
+        (8, 9, 1.10, 1.0, 0.29, 3.0, 2, 0.3, [1, 1, 1, 1, 1, 1, 1, 1, 1], [1, 1, 1, 1, 1, 1, 1, 1, 1], [0, 0, 0, 0, 0, 0, 0, 0, 0], False),  # test_biased_and_noisy_bnc
+        (9, 5, 1.10, 1.0, 0.29, 3.0, 2, 0.3, [1, 1, 1, 1, 1, 1, 1, 1, 1], [0, 0, 0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0, 0, 0], False),  # test_biased_warm_obs_missing_bnc
+        (10, 9, 1.10, 1.0, 0.29, 3.0, 2, 0.3, [0, 0, 0, 0, 0],[0, 0, 0, 0, 0],[0, 0, 0, 0, 0], False),  # test_short_record_one_bad_bnc
+        (11, 9, 1.10, 1.0, 0.29, 3.0, 2, 0.3,[0, 0, 0, 0, 0],[0, 0, 0, 0, 0], [1, 1, 1, 1, 1], False),  # test_short_record_two_bad_bnc
+        (12, 9, 1.10, 1.0, 0.29, 3.0, 2, 0.3, [0, 0, 0, 0, 0, 0, 0, 0, 0],[0, 0, 0, 0, 0, 0, 0, 0, 0],[1, 1, 1, 1, 1, 1, 1, 1, 1],False),  # test_short_record_two_bad_obs_missing_bnc
+        (13, 9, 1.10, 1.0, 0.29, 3.0, 2, 0.3, [0, 0, 0, 0, 0, 0, 0, 0, 0],[0, 0, 0, 0, 0, 0, 0, 0, 0],[0, 0, 0, 0, 0, 0, 0, 0, 0],False),  # test_short_record_two_bad_obs_missing_with_bgvar_bnc
+        (14, 9, 1.10, 1.0, 0.29, 3.0, 2, 0.3, [0, 0, 0, 0, 0, 0, 0, 0, 0],[0, 0, 0, 0, 0, 0, 0, 0, 0],[0, 0, 0, 0, 0, 0, 0, 0, 0],False),  # test_good_data_bnc_14
+        (15, 9, 1.10, 1.0, 0.29, 3.0, 2, 0.3, [0, 0, 0, 0, 0],[0, 0, 0, 0, 0],[0, 0, 0, 0, 0],False),  # test_short_record_good_data_bnc
+        (16, 9, 1.10, 1.0, 0.29, 3.0, 2, 0.3, [0, 0, 0, 0, 0, 0, 0, 0, 0],[0, 0, 0, 0, 0, 0, 0, 0, 0],[0, 0, 0, 0, 0, 0, 0, 0, 0],False),  # test_short_record_obs_missing_good_data_bnc
+        (17, 9, 1.10, 1.0, 0.29, 3.0, 2, 4.0, [0, 0, 0, 0, 0, 0, 0, 0, 0],[0, 0, 0, 0, 0, 0, 0, 0, 0],[0, 0, 0, 0, 0, 0, 0, 0, 0],False),  # test_noisy_big_bgvar_bnc
+        (18, 9, 1.10, 1.0, 0.29, 3.0, 2, 4.0, [0, 0, 0, 0, 0, 0, 0, 0, 0],[0, 0, 0, 0, 0, 0, 0, 0, 0],[0, 0, 0, 0, 0, 0, 0, 0, 0],False),  # test_short_record_two_bad_obs_missing_big_bgvar_bnc
+        (19, 9, 1.10, 1.0, 0.29, 3.0, 2, 0.3, [0, 0, 0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0, 0, 0], False),  # test_good_data_bnc_19
+        (20, 0, 1.10, 1.0, 0.29, 3.0, 2, 0.3, [untestable for _ in range(9)], [untestable for _ in range(9)], [untestable for _ in range(9)], True),  # test_error_bad_input_parameter_bnc
+        # Mising on purpose - test is no longer relevant after refactoring
+        (22, 9, 1.10, 1.0, 0.29, 3.0, 2, 0.3, [untestable for _ in range(9)], [untestable for _ in range(9)], [untestable for _ in range(9)], True),  # test_error_invalid_ice_value_bnc
+        (23, 9, 1.10, 1.0, 0.29, 3.0, 2, 0.3, [untestable for _ in range(9)], [untestable for _ in range(9)], [untestable for _ in range(9)], True),  # test_error_missing_ob_value_bnc
+        (24, 9, 1.10, 1.0, 0.29, 3.0, 2, 0.3, [untestable for _ in range(9)], [untestable for _ in range(9)], [untestable for _ in range(9)], True),  # test_error_not_time_sorted_bnc
+        (25, 9, 1.10, 1.0, 0.29, 3.0, 2, 0.3, [untestable for _ in range(9)], [untestable for _ in range(9)], [untestable for _ in range(9)], True),  # test_error_invalid_background_bnc
+        (26, 9, 1.10, 1.0, 0.29, 3.0, 2, 0.3, [untestable for _ in range(9)], [untestable for _ in range(9)], [untestable for _ in range(9)], True),  # test_error_invalid_background_error_variance_bnc
+    # fmt: on
     ]
 )
 def test_sst_biased_noisy_check_generic(
-        selector, n_eval, bias_lim, drif_intra, drif_inter, err_std_n, n_bad,
-        background_err_lim, expected_bias, expected_noisy, expected_short, warns
+    selector,
+    n_eval,
+    bias_lim,
+    drif_intra,
+    drif_inter,
+    err_std_n,
+    n_bad,
+    background_err_lim,
+    expected_bias,
+    expected_noisy,
+    expected_short,
+    warns,
 ):
     lat, lon, dates, sst, ostia, bgvar, ice = sst_biased_noisy_check_vals(selector)
     if warns:
         with pytest.warns(UserWarning):
             qc_outcomes = tqc.do_sst_biased_check(
-                lat, lon, dates, sst, ostia, bgvar, ice,
-                n_eval, bias_lim, drif_intra, drif_inter, err_std_n, n_bad,
-                background_err_lim
+                lat,
+                lon,
+                dates,
+                sst,
+                ostia,
+                bgvar,
+                ice,
+                n_eval,
+                bias_lim,
+                drif_intra,
+                drif_inter,
+                err_std_n,
+                n_bad,
+                background_err_lim,
             )
     else:
         qc_outcomes = tqc.do_sst_biased_check(
-            lat, lon, dates, sst, ostia, bgvar, ice,
-            n_eval, bias_lim, drif_intra, drif_inter, err_std_n, n_bad,
-            background_err_lim
+            lat,
+            lon,
+            dates,
+            sst,
+            ostia,
+            bgvar,
+            ice,
+            n_eval,
+            bias_lim,
+            drif_intra,
+            drif_inter,
+            err_std_n,
+            n_bad,
+            background_err_lim,
         )
     for i in range(len(qc_outcomes)):
         assert qc_outcomes[i] == expected_bias[i]
 
 
-def test_all_daytime_bnc():
-    reps = sst_biased_noisy_check_vals(1)
-    expected_flags = {
-        "drf_bias": [0, 0, 0, 0, 0, 0, 0, 0, 0],
-        "drf_noise": [0, 0, 0, 0, 0, 0, 0, 0, 0],
-        "drf_short": [0, 0, 0, 0, 0, 0, 0, 0, 0],
-    }
-    otqc.do_sst_biased_noisy_check(reps.reps, 9, 1.10, 1.0, 0.29, 3.0, 2, 0.3)
-    for i in range(0, len(reps)):
-        assert reps.get_qc(i, "SST", "drf_bias") == expected_flags["drf_bias"][i]
-        assert reps.get_qc(i, "SST", "drf_noise") == expected_flags["drf_noise"][i]
-        assert reps.get_qc(i, "SST", "drf_short") == expected_flags["drf_short"][i]
-
-
-def test_all_land_masked_bnc():
-    reps = sst_biased_noisy_check_vals(2)
-    expected_flags = {
-        "drf_bias": [0, 0, 0, 0, 0, 0, 0, 0, 0],
-        "drf_noise": [0, 0, 0, 0, 0, 0, 0, 0, 0],
-        "drf_short": [0, 0, 0, 0, 0, 0, 0, 0, 0],
-    }
-    otqc.do_sst_biased_noisy_check(reps.reps, 9, 1.10, 1.0, 0.29, 3.0, 2, 0.3)
-    for i in range(0, len(reps)):
-        assert reps.get_qc(i, "SST", "drf_bias") == expected_flags["drf_bias"][i]
-        assert reps.get_qc(i, "SST", "drf_noise") == expected_flags["drf_noise"][i]
-        assert reps.get_qc(i, "SST", "drf_short") == expected_flags["drf_short"][i]
-
-
-def test_all_ice_bnc():
-    reps = sst_biased_noisy_check_vals(3)
-    expected_flags = {
-        "drf_bias": [0, 0, 0, 0, 0, 0, 0, 0, 0],
-        "drf_noise": [0, 0, 0, 0, 0, 0, 0, 0, 0],
-        "drf_short": [0, 0, 0, 0, 0, 0, 0, 0, 0],
-    }
-    otqc.do_sst_biased_noisy_check(reps.reps, 9, 1.10, 1.0, 0.29, 3.0, 2, 0.3)
-    for i in range(0, len(reps)):
-        assert reps.get_qc(i, "SST", "drf_bias") == expected_flags["drf_bias"][i]
-        assert reps.get_qc(i, "SST", "drf_noise") == expected_flags["drf_noise"][i]
-        assert reps.get_qc(i, "SST", "drf_short") == expected_flags["drf_short"][i]
-
-
-def test_all_bgvar_exceeds_limit_bnc():
-    reps = sst_biased_noisy_check_vals(4)
-    expected_flags = {
-        "drf_bias": [0, 0, 0, 0, 0, 0, 0, 0, 0],
-        "drf_noise": [0, 0, 0, 0, 0, 0, 0, 0, 0],
-        "drf_short": [0, 0, 0, 0, 0, 0, 0, 0, 0],
-    }
-    otqc.do_sst_biased_noisy_check(reps.reps, 9, 1.10, 1.0, 0.29, 3.0, 2, 0.3)
-    for i in range(0, len(reps)):
-        assert reps.get_qc(i, "SST", "drf_bias") == expected_flags["drf_bias"][i]
-        assert reps.get_qc(i, "SST", "drf_noise") == expected_flags["drf_noise"][i]
-        assert reps.get_qc(i, "SST", "drf_short") == expected_flags["drf_short"][i]
-
-
-def test_biased_warm_bnc():
-    reps = sst_biased_noisy_check_vals(5)
-    expected_flags = {
-        "drf_bias": [1, 1, 1, 1, 1, 1, 1, 1, 1],
-        "drf_noise": [0, 0, 0, 0, 0, 0, 0, 0, 0],
-        "drf_short": [0, 0, 0, 0, 0, 0, 0, 0, 0],
-    }
-    otqc.do_sst_biased_noisy_check(reps.reps, 9, 1.10, 1.0, 0.29, 3.0, 2, 0.3)
-    for i in range(0, len(reps)):
-        assert reps.get_qc(i, "SST", "drf_bias") == expected_flags["drf_bias"][i]
-        assert reps.get_qc(i, "SST", "drf_noise") == expected_flags["drf_noise"][i]
-        assert reps.get_qc(i, "SST", "drf_short") == expected_flags["drf_short"][i]
-
-
-def test_biased_cool_bnc():
-    reps = sst_biased_noisy_check_vals(6)
-    expected_flags = {
-        "drf_bias": [1, 1, 1, 1, 1, 1, 1, 1, 1],
-        "drf_noise": [0, 0, 0, 0, 0, 0, 0, 0, 0],
-        "drf_short": [0, 0, 0, 0, 0, 0, 0, 0, 0],
-    }
-    otqc.do_sst_biased_noisy_check(reps.reps, 9, 1.10, 1.0, 0.29, 3.0, 2, 0.3)
-    for i in range(0, len(reps)):
-        assert reps.get_qc(i, "SST", "drf_bias") == expected_flags["drf_bias"][i]
-        assert reps.get_qc(i, "SST", "drf_noise") == expected_flags["drf_noise"][i]
-        assert reps.get_qc(i, "SST", "drf_short") == expected_flags["drf_short"][i]
-
-
-def test_noisy_bnc():
-    reps = sst_biased_noisy_check_vals(7)
-    expected_flags = {
-        "drf_bias": [0, 0, 0, 0, 0, 0, 0, 0, 0],
-        "drf_noise": [1, 1, 1, 1, 1, 1, 1, 1, 1],
-        "drf_short": [0, 0, 0, 0, 0, 0, 0, 0, 0],
-    }
-    otqc.do_sst_biased_noisy_check(reps.reps, 9, 1.10, 1.0, 0.29, 3.0, 2, 0.3)
-    for i in range(0, len(reps)):
-        assert reps.get_qc(i, "SST", "drf_bias") == expected_flags["drf_bias"][i]
-        assert reps.get_qc(i, "SST", "drf_noise") == expected_flags["drf_noise"][i]
-        assert reps.get_qc(i, "SST", "drf_short") == expected_flags["drf_short"][i]
-
-
-def test_biased_and_noisy_bnc():
-    reps = sst_biased_noisy_check_vals(8)
-    expected_flags = {
-        "drf_bias": [1, 1, 1, 1, 1, 1, 1, 1, 1],
-        "drf_noise": [1, 1, 1, 1, 1, 1, 1, 1, 1],
-        "drf_short": [0, 0, 0, 0, 0, 0, 0, 0, 0],
-    }
-    otqc.do_sst_biased_noisy_check(reps.reps, 9, 1.10, 1.0, 0.29, 3.0, 2, 0.3)
-    for i in range(0, len(reps)):
-        assert reps.get_qc(i, "SST", "drf_bias") == expected_flags["drf_bias"][i]
-        assert reps.get_qc(i, "SST", "drf_noise") == expected_flags["drf_noise"][i]
-        assert reps.get_qc(i, "SST", "drf_short") == expected_flags["drf_short"][i]
-
-
-def test_biased_warm_obs_missing_bnc():
-    reps = sst_biased_noisy_check_vals(9)
-    expected_flags = {
-        "drf_bias": [1, 1, 1, 1, 1, 1, 1, 1, 1],
-        "drf_noise": [0, 0, 0, 0, 0, 0, 0, 0, 0],
-        "drf_short": [0, 0, 0, 0, 0, 0, 0, 0, 0],
-    }
-    otqc.do_sst_biased_noisy_check(reps.reps, 5, 1.10, 1.0, 0.29, 3.0, 2, 0.3)
-    for i in range(0, len(reps)):
-        assert reps.get_qc(i, "SST", "drf_bias") == expected_flags["drf_bias"][i]
-        assert reps.get_qc(i, "SST", "drf_noise") == expected_flags["drf_noise"][i]
-        assert reps.get_qc(i, "SST", "drf_short") == expected_flags["drf_short"][i]
-
-
-def test_short_record_one_bad_bnc():
-    reps = sst_biased_noisy_check_vals(10)
-    expected_flags = {
-        "drf_bias": [0, 0, 0, 0, 0],
-        "drf_noise": [0, 0, 0, 0, 0],
-        "drf_short": [0, 0, 0, 0, 0],
-    }
-    otqc.do_sst_biased_noisy_check(reps.reps, 9, 1.10, 1.0, 0.29, 3.0, 2, 0.3)
-    for i in range(0, len(reps)):
-        assert reps.get_qc(i, "SST", "drf_bias") == expected_flags["drf_bias"][i]
-        assert reps.get_qc(i, "SST", "drf_noise") == expected_flags["drf_noise"][i]
-        assert reps.get_qc(i, "SST", "drf_short") == expected_flags["drf_short"][i]
-
-
-def test_short_record_two_bad_bnc():
-    reps = sst_biased_noisy_check_vals(11)
-    expected_flags = {
-        "drf_bias": [0, 0, 0, 0, 0],
-        "drf_noise": [0, 0, 0, 0, 0],
-        "drf_short": [1, 1, 1, 1, 1],
-    }
-    otqc.do_sst_biased_noisy_check(reps.reps, 9, 1.10, 1.0, 0.29, 3.0, 2, 0.3)
-    for i in range(0, len(reps)):
-        assert reps.get_qc(i, "SST", "drf_bias") == expected_flags["drf_bias"][i]
-        assert reps.get_qc(i, "SST", "drf_noise") == expected_flags["drf_noise"][i]
-        assert reps.get_qc(i, "SST", "drf_short") == expected_flags["drf_short"][i]
-
-
-def test_short_record_two_bad_obs_missing_bnc():
-    reps = sst_biased_noisy_check_vals(12)
-    expected_flags = {
-        "drf_bias": [0, 0, 0, 0, 0, 0, 0, 0, 0],
-        "drf_noise": [0, 0, 0, 0, 0, 0, 0, 0, 0],
-        "drf_short": [1, 1, 1, 1, 1, 1, 1, 1, 1],
-    }
-    otqc.do_sst_biased_noisy_check(reps.reps, 9, 1.10, 1.0, 0.29, 3.0, 2, 0.3)
-    for i in range(0, len(reps)):
-        assert reps.get_qc(i, "SST", "drf_bias") == expected_flags["drf_bias"][i]
-        assert reps.get_qc(i, "SST", "drf_noise") == expected_flags["drf_noise"][i]
-        assert reps.get_qc(i, "SST", "drf_short") == expected_flags["drf_short"][i]
-
-
-def test_short_record_two_bad_obs_missing_with_bgvar_bnc():
-    reps = sst_biased_noisy_check_vals(13)
-    expected_flags = {
-        "drf_bias": [0, 0, 0, 0, 0, 0, 0, 0, 0],
-        "drf_noise": [0, 0, 0, 0, 0, 0, 0, 0, 0],
-        "drf_short": [0, 0, 0, 0, 0, 0, 0, 0, 0],
-    }
-    otqc.do_sst_biased_noisy_check(reps.reps, 9, 1.10, 1.0, 0.29, 3.0, 2, 0.3)
-    for i in range(0, len(reps)):
-        assert reps.get_qc(i, "SST", "drf_bias") == expected_flags["drf_bias"][i]
-        assert reps.get_qc(i, "SST", "drf_noise") == expected_flags["drf_noise"][i]
-        assert reps.get_qc(i, "SST", "drf_short") == expected_flags["drf_short"][i]
-
-
-def test_good_data_bnc_14():
-    reps = sst_biased_noisy_check_vals(14)
-    expected_flags = {
-        "drf_bias": [0, 0, 0, 0, 0, 0, 0, 0, 0],
-        "drf_noise": [0, 0, 0, 0, 0, 0, 0, 0, 0],
-        "drf_short": [0, 0, 0, 0, 0, 0, 0, 0, 0],
-    }
-    otqc.do_sst_biased_noisy_check(reps.reps, 9, 1.10, 1.0, 0.29, 3.0, 2, 0.3)
-    for i in range(0, len(reps)):
-        assert reps.get_qc(i, "SST", "drf_bias") == expected_flags["drf_bias"][i]
-        assert reps.get_qc(i, "SST", "drf_noise") == expected_flags["drf_noise"][i]
-        assert reps.get_qc(i, "SST", "drf_short") == expected_flags["drf_short"][i]
-
-
-def test_short_record_good_data_bnc():
-    reps = sst_biased_noisy_check_vals(15)
-    expected_flags = {
-        "drf_bias": [0, 0, 0, 0, 0],
-        "drf_noise": [0, 0, 0, 0, 0],
-        "drf_short": [0, 0, 0, 0, 0],
-    }
-    otqc.do_sst_biased_noisy_check(reps.reps, 9, 1.10, 1.0, 0.29, 3.0, 2, 0.3)
-    for i in range(0, len(reps)):
-        assert reps.get_qc(i, "SST", "drf_bias") == expected_flags["drf_bias"][i]
-        assert reps.get_qc(i, "SST", "drf_noise") == expected_flags["drf_noise"][i]
-        assert reps.get_qc(i, "SST", "drf_short") == expected_flags["drf_short"][i]
-
-
-def test_short_record_obs_missing_good_data_bnc():
-    reps = sst_biased_noisy_check_vals(16)
-    expected_flags = {
-        "drf_bias": [0, 0, 0, 0, 0, 0, 0, 0, 0],
-        "drf_noise": [0, 0, 0, 0, 0, 0, 0, 0, 0],
-        "drf_short": [0, 0, 0, 0, 0, 0, 0, 0, 0],
-    }
-    otqc.do_sst_biased_noisy_check(reps.reps, 9, 1.10, 1.0, 0.29, 3.0, 2, 0.3)
-    for i in range(0, len(reps)):
-        assert reps.get_qc(i, "SST", "drf_bias") == expected_flags["drf_bias"][i]
-        assert reps.get_qc(i, "SST", "drf_noise") == expected_flags["drf_noise"][i]
-        assert reps.get_qc(i, "SST", "drf_short") == expected_flags["drf_short"][i]
-
-
-def test_noisy_big_bgvar_bnc():
-    reps = sst_biased_noisy_check_vals(17)
-    expected_flags = {
-        "drf_bias": [0, 0, 0, 0, 0, 0, 0, 0, 0],
-        "drf_noise": [0, 0, 0, 0, 0, 0, 0, 0, 0],
-        "drf_short": [0, 0, 0, 0, 0, 0, 0, 0, 0],
-    }
-    otqc.do_sst_biased_noisy_check(reps.reps, 9, 1.10, 1.0, 0.29, 3.0, 2, 4.0)
-    for i in range(0, len(reps)):
-        assert reps.get_qc(i, "SST", "drf_bias") == expected_flags["drf_bias"][i]
-        assert reps.get_qc(i, "SST", "drf_noise") == expected_flags["drf_noise"][i]
-        assert reps.get_qc(i, "SST", "drf_short") == expected_flags["drf_short"][i]
-
-
-def test_short_record_two_bad_obs_missing_big_bgvar_bnc():
-    reps = sst_biased_noisy_check_vals(18)
-    expected_flags = {
-        "drf_bias": [0, 0, 0, 0, 0, 0, 0, 0, 0],
-        "drf_noise": [0, 0, 0, 0, 0, 0, 0, 0, 0],
-        "drf_short": [0, 0, 0, 0, 0, 0, 0, 0, 0],
-    }
-    otqc.do_sst_biased_noisy_check(reps.reps, 9, 1.10, 1.0, 0.29, 3.0, 2, 4.0)
-    for i in range(0, len(reps)):
-        assert reps.get_qc(i, "SST", "drf_bias") == expected_flags["drf_bias"][i]
-        assert reps.get_qc(i, "SST", "drf_noise") == expected_flags["drf_noise"][i]
-        assert reps.get_qc(i, "SST", "drf_short") == expected_flags["drf_short"][i]
-
-
-def test_good_data_bnc_19():
-    reps = sst_biased_noisy_check_vals(19)
-    expected_flags = {
-        "drf_bias": [0, 0, 0, 0, 0, 0, 0, 0, 0],
-        "drf_noise": [0, 0, 0, 0, 0, 0, 0, 0, 0],
-        "drf_short": [0, 0, 0, 0, 0, 0, 0, 0, 0],
-    }
-    otqc.do_sst_biased_noisy_check(reps.reps, 9, 1.10, 1.0, 0.29, 3.0, 2, 0.3)
-    for i in range(0, len(reps)):
-        assert reps.get_qc(i, "SST", "drf_bias") == expected_flags["drf_bias"][i]
-        assert reps.get_qc(i, "SST", "drf_noise") == expected_flags["drf_noise"][i]
-        assert reps.get_qc(i, "SST", "drf_short") == expected_flags["drf_short"][i]
-
-
-def test_error_bad_input_parameter_bnc():
-    reps = sst_biased_noisy_check_vals(20)
-    expected_flags = {
-        "drf_bias": [9, 9, 9, 9, 9, 9, 9, 9, 9],
-        "drf_noise": [9, 9, 9, 9, 9, 9, 9, 9, 9],
-        "drf_short": [9, 9, 9, 9, 9, 9, 9, 9, 9],
-    }
-    with pytest.raises(AssertionError):
-        otqc.do_sst_biased_noisy_check(reps.reps, 0, 1.10, 1.0, 0.29, 3.0, 2, 0.3)
-    # try:
-    #     otqc.og_sst_biased_noisy_check(reps.reps, 0, 1.10, 1.0, 0.29, 3.0, 2, 0.3)
-    # except AssertionError as error:
-    #     error_return_text = "invalid input parameter: n_eval must be > 0"
-    #     assert str(error)[0 : len(error_return_text)] == error_return_text
-    for i in range(0, len(reps)):
-        assert reps.get_qc(i, "SST", "drf_bias") == expected_flags["drf_bias"][i]
-        assert reps.get_qc(i, "SST", "drf_noise") == expected_flags["drf_noise"][i]
-        assert reps.get_qc(i, "SST", "drf_short") == expected_flags["drf_short"][i]
-
-
+# no longer appropriate now we pass arrays to the functions
+@pytest.mark.skip
 def test_error_missing_matched_value_bnc():
     reps = sst_biased_noisy_check_vals(21)
     expected_flags = {
@@ -3419,105 +1881,32 @@ def test_error_missing_matched_value_bnc():
     try:
         otqc.do_sst_biased_noisy_check(reps.reps, 9, 1.10, 1.0, 0.29, 3.0, 2, 0.3)
     except AssertionError as error:
-        error_return_text = (
-            "unknown extended variable name OSTIA"
+        error_return_text = "unknown extended variable name OSTIA"
+        assert str(error)[0 : len(error_return_text)] == error_return_text
+    for i in range(0, len(reps)):
+        assert reps.get_qc(i, "SST", "drf_bias") == expected_flags["drf_bias"][i]
+        assert reps.get_qc(i, "SST", "drf_noise") == expected_flags["drf_noise"][i]
+        assert reps.get_qc(i, "SST", "drf_short") == expected_flags["drf_short"][i]
+
+
+# This test tests if one of the inputs is missing, but this can't happen now that we
+# are using arrays to pass this information, If there is no input at some point then the
+# call to the test would raise a syntax error
+@pytest.mark.skip
+def test_error_missing_matched_value():
+    lat, lon, dates, sst, ostia, bgvar, ice = tailcheck_vals(35)
+    expected_flags1 = [untestable for x in range(9)]
+    expected_flags2 = [untestable for x in range(9)]
+    with pytest.warns(UserWarning):
+        qc_outcomes1 = tqc.do_sst_start_tail_check(
+            lat, lon, sst, ostia, ice, bgvar, dates, 3, 3.0, 1, 3.0, 1, 0.29, 1.0, 0.3
         )
-        assert str(error)[0 : len(error_return_text)] == error_return_text
-    for i in range(0, len(reps)):
-        assert reps.get_qc(i, "SST", "drf_bias") == expected_flags["drf_bias"][i]
-        assert reps.get_qc(i, "SST", "drf_noise") == expected_flags["drf_noise"][i]
-        assert reps.get_qc(i, "SST", "drf_short") == expected_flags["drf_short"][i]
+    with pytest.warns(UserWarning):
+        qc_outcomes2 = tqc.do_sst_end_tail_check(
+            lat, lon, sst, ostia, ice, bgvar, dates, 3, 3.0, 1, 3.0, 1, 0.29, 1.0, 0.3
+        )
 
-
-def test_error_invalid_ice_value_bnc():
-    reps = sst_biased_noisy_check_vals(22)
-    expected_flags = {
-        "drf_bias": [9, 9, 9, 9, 9, 9, 9, 9, 9],
-        "drf_noise": [9, 9, 9, 9, 9, 9, 9, 9, 9],
-        "drf_short": [9, 9, 9, 9, 9, 9, 9, 9, 9],
-    }
-    try:
-        otqc.do_sst_biased_noisy_check(reps.reps, 9, 1.10, 1.0, 0.29, 3.0, 2, 0.3)
-    except AssertionError as error:
-        error_return_text = "matched ice proportion is invalid"
-        assert str(error)[0 : len(error_return_text)] == error_return_text
-    for i in range(0, len(reps)):
-        assert reps.get_qc(i, "SST", "drf_bias") == expected_flags["drf_bias"][i]
-        assert reps.get_qc(i, "SST", "drf_noise") == expected_flags["drf_noise"][i]
-        assert reps.get_qc(i, "SST", "drf_short") == expected_flags["drf_short"][i]
-
-
-def test_error_missing_ob_value_bnc():
-    reps = sst_biased_noisy_check_vals(23)
-    expected_flags = {
-        "drf_bias": [9, 9, 9, 9, 9, 9, 9, 9, 9],
-        "drf_noise": [9, 9, 9, 9, 9, 9, 9, 9, 9],
-        "drf_short": [9, 9, 9, 9, 9, 9, 9, 9, 9],
-    }
-    with pytest.raises(ValueError):
-        otqc.do_sst_biased_noisy_check(reps.reps, 9, 1.10, 1.0, 0.29, 3.0, 2, 0.3)
-
-    try:
-        otqc.do_sst_biased_noisy_check(reps.reps, 9, 1.10, 1.0, 0.29, 3.0, 2, 0.3)
-    except ValueError as error:
-        error_return_text = "lat is missing"
-        assert str(error)[0 : len(error_return_text)] == error_return_text
-
-    for i in range(0, len(reps)):
-        assert reps.get_qc(i, "SST", "drf_bias") == expected_flags["drf_bias"][i]
-        assert reps.get_qc(i, "SST", "drf_noise") == expected_flags["drf_noise"][i]
-        assert reps.get_qc(i, "SST", "drf_short") == expected_flags["drf_short"][i]
-
-
-def test_error_not_time_sorted_bnc():
-    reps = sst_biased_noisy_check_vals(24)
-    expected_flags = {
-        "drf_bias": [9, 9, 9, 9, 9, 9, 9, 9, 9],
-        "drf_noise": [9, 9, 9, 9, 9, 9, 9, 9, 9],
-        "drf_short": [9, 9, 9, 9, 9, 9, 9, 9, 9],
-    }
-    try:
-        otqc.do_sst_biased_noisy_check(reps.reps, 9, 1.10, 1.0, 0.29, 3.0, 2, 0.3)
-    except AssertionError as error:
-        error_return_text = "problem with report value: times are not sorted"
-        assert str(error)[0 : len(error_return_text)] == error_return_text
-    for i in range(0, len(reps)):
-        assert reps.get_qc(i, "SST", "drf_bias") == expected_flags["drf_bias"][i]
-        assert reps.get_qc(i, "SST", "drf_noise") == expected_flags["drf_noise"][i]
-        assert reps.get_qc(i, "SST", "drf_short") == expected_flags["drf_short"][i]
-
-
-def test_error_invalid_background_bnc():
-    reps = sst_biased_noisy_check_vals(25)
-    expected_flags = {
-        "drf_bias": [9, 9, 9, 9, 9, 9, 9, 9, 9],
-        "drf_noise": [9, 9, 9, 9, 9, 9, 9, 9, 9],
-        "drf_short": [9, 9, 9, 9, 9, 9, 9, 9, 9],
-    }
-    try:
-        otqc.do_sst_biased_noisy_check(reps.reps, 9, 1.10, 1.0, 0.29, 3.0, 2, 0.3)
-    except AssertionError as error:
-        error_return_text = "matched background sst is invalid"
-        assert str(error)[0 : len(error_return_text)] == error_return_text
-    for i in range(0, len(reps)):
-        assert reps.get_qc(i, "SST", "drf_bias") == expected_flags["drf_bias"][i]
-        assert reps.get_qc(i, "SST", "drf_noise") == expected_flags["drf_noise"][i]
-        assert reps.get_qc(i, "SST", "drf_short") == expected_flags["drf_short"][i]
-
-
-def test_error_invalid_background_error_variance_bnc():
-    reps = sst_biased_noisy_check_vals(26)
-    expected_flags = {
-        "drf_bias": [9, 9, 9, 9, 9, 9, 9, 9, 9],
-        "drf_noise": [9, 9, 9, 9, 9, 9, 9, 9, 9],
-        "drf_short": [9, 9, 9, 9, 9, 9, 9, 9, 9],
-    }
-    try:
-        otqc.do_sst_biased_noisy_check(reps.reps, 9, 1.10, 1.0, 0.29, 3.0, 2, 0.3)
-    except AssertionError as error:
-        error_return_text = "matched background error variance is invalid"
-        assert str(error)[0 : len(error_return_text)] == error_return_text
-    for i in range(0, len(reps)):
-        assert reps.get_qc(i, "SST", "drf_bias") == expected_flags["drf_bias"][i]
-        assert reps.get_qc(i, "SST", "drf_noise") == expected_flags["drf_noise"][i]
-        assert reps.get_qc(i, "SST", "drf_short") == expected_flags["drf_short"][i]
+    for i in range(len(qc_outcomes1)):
+        assert qc_outcomes1[i] == expected_flags1[i]
+    for i in range(len(qc_outcomes2)):
+        assert qc_outcomes2[i] == expected_flags2[i]
