@@ -7,6 +7,8 @@ from __future__ import annotations
 import copy
 import math
 import warnings
+from datetime import datetime
+from typing import Sequence
 
 import numpy as np
 
@@ -15,6 +17,7 @@ from . import Extended_IMMA as ex
 from .astronomical_geometry import sunangle
 from .spherical_geometry import sphere_distance
 from .time_control import dayinyear
+from .next_level_track_check_qc import do_iquam_track_check
 
 """
 The trackqc module contains a set of functions for performing the tracking QC
@@ -342,6 +345,169 @@ class SpeedChecker:
             time_to_end = self.hrs[-1] - self.hrs[i]
 
         return
+
+
+def do_new_speed_check(
+        lons, lats, dates, speed_limit, min_win_period,
+                       ship_speed_limit, delta_d, delta_t, n_neighbours
+):
+    checker = NewSpeedChecker(lons, lats, dates, speed_limit, min_win_period,
+                       ship_speed_limit, delta_d, delta_t, n_neighbours)
+    checker._do_new_speed_check()
+    return checker.get_qc_outcomes()
+
+
+class NewSpeedChecker:
+    """Check to see whether a drifter has been picked up by a ship (out of water) based on 1/100th degree
+    precision positions. A flag 'drf_spd' is set for each input report: flag=1 for reports deemed picked up,
+    else flag=0.
+
+    A drifter is deemed picked up if it is moving faster than might be expected for a fast ocean current
+    (a few m/s). Unreasonably fast movement is detected when speed of travel between report-pairs exceeds
+    the chosen 'speed_limit' (speed is estimated as distance between reports divided by time separation -
+    this 'straight line' speed between the two points is a minimum speed estimate given a less-direct
+    path may have been followed). Positional errors introduced by lon/lat 'jitter' and data precision
+    can be of order several km's. Reports must be separated by a suitably long period of time (the 'min_win_period')
+    to minimise the effect of these errors when calculating speed e.g. for reports separated by 9 hours
+    errors of order 10 cm/s would result which are a few percent of fast ocean current speed. Conversley,
+    the period of time chosen should not be too long so as to resolve short-lived burst of speed on
+    manouvering ships. Larger positional errors may also trigger the check.
+
+    For each report, speed is assessed over the shortest available period that exceeds 'min_win_period'.
+
+    Prior to assessment the drifter record is screened for positional errors using the iQuam track check
+    method (from :class:`.Voyage`). When running the iQuam check the record is treated as a ship (not a
+    drifter) so as to avoid accidentally filtering out observations made aboard a ship (which is what we
+    are trying to detect). This iQuam track check does not overwrite any existing iQuam track check flags.
+
+    IMPORTANT - for optimal performance, drifter records with observations failing this check should be
+    subsequently manually reviewed. Ships move around in all sorts of complicated ways that can readily
+    confuse such a simple check (e.g. pausing at sea, crisscrossing its own path) and once some erroneous
+    movement is detected it is likely a human operator can then better pick out the actual bad data. False
+    fails caused by positional errors (particularly in fast ocean currents) will also need reinstating.
+
+    The class has the following class attributes which can be modified using the set_parameters method.
+
+    iquam_parameters: Parameter dictionary for Voyage.iquam_track_check() function.
+    speed_limit: maximum allowable speed for an in situ drifting buoy (metres per second)
+    min_win_period: minimum period of time in days over which position is assessed for speed estimates (see
+    description)
+    """
+
+    iquam_parameters = {}
+    speed_limit = 3.0
+    min_win_period = 0.375
+
+    def __init__(
+            self,
+            lons: Sequence[float],
+            lats: Sequence[float],
+            dates: Sequence[datetime],
+            speed_limit,
+            min_win_period,
+            ship_speed_limit,
+            delta_d,
+            delta_t,
+            n_neighbours
+    ):
+
+        self.lon = lons
+        self.lat = lats
+        self.nreps = len(lons)
+        self.dates = dates
+        self.hrs = convert_date_to_hours(dates)
+
+        self.speed_limit = speed_limit
+        self.min_win_period = min_win_period
+
+        self.ship_speed_limit = ship_speed_limit
+        self.delta_d = delta_d
+        self.delta_t = delta_t
+        self.n_neighbours = n_neighbours
+
+        self.iquam_track_ship = None
+
+        # Initialise QC outcomes with untested
+        self.qc_outcomes = np.zeros(self.nreps) + untested
+
+    def get_qc_outcomes(self):
+        return self.qc_outcomes
+
+    def valid_parameters(self) -> bool:
+        """Check parameters"""
+        valid = True
+        try:
+            assert self.speed_limit >= 0, "speed_limit must be >= 0"
+            assert self.min_win_period >= 0, "min_win_period must be >= 0"
+        except AssertionError as error:
+            valid = False
+            warnings.warn(UserWarning(f"invalid input parameter: {error}"))
+
+        return valid
+
+    def valid_arrays(self) -> bool:
+        valid = True
+        try:
+            assert not any(np.isnan(self.lon)), "Nan(s) found in longitude"
+            assert not any(np.isnan(self.lat)), "Nan(s) found in latitude"
+            assert not any(np.isnan(self.hrs)), "Nan(s) found in time differences"
+            assert is_monotonic(self.hrs), "times are not sorted"
+        except AssertionError as error:
+            warnings.warn(UserWarning("problem with report values: " + str(error)))
+            valid = False
+        return valid
+
+    def perform_iquam_track_check(self):
+        # perform iQuam track check as if a ship
+        # a deep copy of reps is made so metadata can be safely modified ahead of iQuam check
+        # an array of qc flags (iquam_track_ship) is the result
+        self.iquam_track_ship = do_iquam_track_check(
+            self.lat, self.lon, self.dates,
+            self.ship_speed_limit, self.delta_d, self.delta_t, self.n_neighbours
+        )
+
+
+    def _do_new_speed_check(self) -> None:
+        """Perform the actual speed check"""
+        nrep = self.nreps
+        min_win_period_hours = self.min_win_period * 24.0
+
+        if not self.valid_arrays() or not self.valid_parameters():
+            self.qc_outcomes = np.zeros(self.nreps) + untestable
+            return
+
+        self.perform_iquam_track_check()
+
+        # Initialise
+        self.qc_outcomes = np.zeros(nrep) + passed
+
+        # loop through timeseries to see if drifter is moving too fast and flag any occurrences
+        index_arr = np.array(range(0, nrep)) # type: np.ndarray
+        i = 0
+        time_to_end = self.hrs[-1] - self.hrs[i]
+        while time_to_end >= min_win_period_hours:
+            if self.iquam_track_ship[i] == failed:
+                i += 1
+                time_to_end = self.hrs[-1] - self.hrs[i]
+                continue
+            f_win = (self.hrs >= self.hrs[i] + min_win_period_hours) & (self.iquam_track_ship == passed)
+            if not any(f_win):
+                i += 1
+                time_to_end = self.hrs[-1] - self.hrs[i]
+                continue
+
+            win_len = self.hrs[f_win][0] - self.hrs[i]
+            displace = sphere_distance(self.lat[i], self.lon[i], self.lat[f_win][0], self.lon[f_win][0])
+            speed = displace / win_len  # km per hr
+            speed = speed * 1000.0 / (60.0 * 60)  # metres per sec
+
+            if speed > self.speed_limit:
+                self.qc_outcomes[i: index_arr[f_win][0] + 1] = failed
+
+            i += 1
+            time_to_end = self.hrs[-1] - self.hrs[i]
+
+
 
 
 class AgroundChecker:

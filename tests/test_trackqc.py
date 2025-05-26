@@ -601,119 +601,66 @@ def test_generic_speed_tests(
         assert qc_outcomes[i] == expected[i]
 
 
-# --- new speed check --- NEEDS IQUAM TO BE AVAILABLE
-# def test_new_stationary_a(reps1a, iquam_parameters):
-#     expected_flags = [0, 0, 0, 0, 0, 0, 0]
-#     otqc.do_new_speed_check(reps1a.reps, iquam_parameters, 2.5, 0.5)
-#     for i in range(0, len(reps1a)):
-#         assert reps1a.get_qc(i, "POS", "drf_spd") == expected_flags[i]
-#
-#
-# def test_new_fast_drifter(reps2a, iquam_parameters):
-#     expected_flags = [1, 1, 1, 1, 1, 1, 1]
-#     otqc.do_new_speed_check(reps2a.reps, iquam_parameters, 2.5, 0.5)
-#     for i in range(0, len(reps2a)):
-#         assert reps2a.get_qc(i, "POS", "drf_spd") == expected_flags[i]
-#
-#
-# def test_new_slow_drifter(reps3a, iquam_parameters):
-#     expected_flags = [0, 0, 0, 0, 0, 0, 0]
-#     otqc.do_new_speed_check(reps3a.reps, iquam_parameters, 2.5, 0.5)
-#     for i in range(0, len(reps3a)):
-#         assert reps3a.get_qc(i, "POS", "drf_spd") == expected_flags[i]
-#
-#
-# def test_new_slow_fast_slow_drifter(reps4a, iquam_parameters):
-#     expected_flags = [0, 0, 1, 1, 1, 0, 0]
-#     otqc.do_new_speed_check(reps4a.reps, iquam_parameters, 2.5, 0.5)
-#     for i in range(0, len(reps4a)):
-#         assert reps4a.get_qc(i, "POS", "drf_spd") == expected_flags[i]
-#
-#
-# def test_new_high_freqency_sampling(reps5a, iquam_parameters):
-#     expected_flags = [0, 0, 0, 0, 0, 0, 0]
-#     otqc.do_new_speed_check(reps5a.reps, iquam_parameters, 2.5, 0.5)
-#     for i in range(0, len(reps5a)):
-#         assert reps5a.get_qc(i, "POS", "drf_spd") == expected_flags[i]
-#
-#
-# def test_new_low_freqency_sampling(reps6a, iquam_parameters):
-#     expected_flags = [1, 1, 1, 1, 1, 1, 1]
-#     otqc.do_new_speed_check(reps6a.reps, iquam_parameters, 2.5, 0.5)
-#     for i in range(0, len(reps6a)):
-#         assert reps6a.get_qc(i, "POS", "drf_spd") == expected_flags[i]
-#
-#
-# def test_new_slow_fast_slow_mid_freqency_sampling(reps7a, iquam_parameters):
-#     expected_flags = [0, 0, 1, 1, 1, 0, 0]
-#     otqc.do_new_speed_check(reps7a.reps, iquam_parameters, 2.5, 0.5)
-#     for i in range(0, len(reps7a)):
-#         assert reps7a.get_qc(i, "POS", "drf_spd") == expected_flags[i]
-#
-#
-# def test_new_irregular_sampling(reps8a, iquam_parameters):
-#     expected_flags = [1, 1, 1, 0, 0, 1, 1]
-#     otqc.do_new_speed_check(reps8a.reps, iquam_parameters, 2.5, 0.5)
-#     for i in range(0, len(reps8a)):
-#         assert reps8a.get_qc(i, "POS", "drf_spd") == expected_flags[i]
-#
-#
-# def test_new_fast_arctic_drifter(reps9a, iquam_parameters):
-#     expected_flags = [1, 1, 1, 1, 1, 1, 1]
-#     otqc.do_new_speed_check(reps9a.reps, iquam_parameters, 2.5, 0.5)
-#     for i in range(0, len(reps9a)):
-#         assert reps9a.get_qc(i, "POS", "drf_spd") == expected_flags[i]
-#
-#
-# def test_new_stationary_gross_error(reps10a, iquam_parameters):
-#     expected_flags = [0, 0, 0, 0, 0, 0, 0]
-#     otqc.do_new_speed_check(reps10a.reps, iquam_parameters, 2.5, 0.5)
-#     for i in range(0, len(reps10a)):
-#         assert reps10a.get_qc(i, "POS", "drf_spd") == expected_flags[i]
-#
-#
-# def test_new_too_short_for_qc_a(reps11a, iquam_parameters):
-#     expected_flags = [0, 0]
-#     old_stdout = sys.stdout
-#     f = open(os.devnull, "w")
-#     sys.stdout = f
-#     otqc.do_new_speed_check(reps11a.reps, iquam_parameters, 2.5, 0.5)
-#     sys.stdout = old_stdout
-#     for i in range(0, len(reps11a)):
-#         assert reps11a.get_qc(i, "POS", "drf_spd") == expected_flags[i]
-#
-#
-# def test_new_error_bad_input_parameter_a(reps12a, iquam_parameters):
-#     expected_flags = [9, 9, 9, 9, 9, 9, 9]
-#     try:
-#         otqc.do_new_speed_check(reps12a.reps, iquam_parameters, -2.5, 0.5)
-#     except AssertionError as error:
-#         error_return_text = "invalid input parameter: speed_limit must be >= 0"
-#         assert str(error)[0 : len(error_return_text)] == error_return_text
-#     for i in range(0, len(reps12a)):
-#         assert reps12a.get_qc(i, "POS", "drf_spd") == expected_flags[i]
-#
-#
-# def test_new_error_missing_observation_a(reps13a, iquam_parameters):
-#     expected_flags = [9, 9, 9, 9, 9, 9, 9]
-#     try:
-#         otqc.do_new_speed_check(reps13a.reps, iquam_parameters, 2.5, 0.5)
-#     except AssertionError as error:
-#         error_return_text = "problem with report values: Nan(s) found in longitude"
-#         assert str(error)[0 : len(error_return_text)] == error_return_text
-#     for i in range(0, len(reps13a)):
-#         assert reps13a.get_qc(i, "POS", "drf_spd") == expected_flags[i]
-#
-#
-# def test_new_error_not_time_sorted_a(reps14a, iquam_parameters):
-#     expected_flags = [9, 9, 9, 9, 9, 9, 9]
-#     try:
-#         otqc.do_new_speed_check(reps14a.reps, iquam_parameters, 2.5, 0.5)
-#     except AssertionError as error:
-#         error_return_text = "problem with report values: times are not sorted"
-#         assert str(error)[0 : len(error_return_text)] == error_return_text
-#     for i in range(0, len(reps14a)):
-#         assert reps14a.get_qc(i, "POS", "drf_spd") == expected_flags[i]
+@pytest.mark.parametrize(
+    # fmt: off
+    "selector, speed_limit, min_win_period, ship_speed_limit, delta_d, delta_t, n_neighbours, expected, warns",
+    [
+        (1, 2.5, 0.5, 60.0, 1.11, 0.01, 5, [0, 0, 0, 0, 0, 0, 0], False),  # test_new_stationary_a
+        (2, 2.5, 0.5, 60.0, 1.11, 0.01, 5, [1, 1, 1, 1, 1, 1, 1], False),  # test_new_fast_drifter
+        (3, 2.5, 0.5, 60.0, 1.11, 0.01, 5, [0, 0, 0, 0, 0, 0, 0], False),  # test_new_slow_drifter
+        (4, 2.5, 0.5, 60.0, 1.11, 0.01, 5, [0, 0, 1, 1, 1, 0, 0], False),  # test_new_slow_fast_slow_drifter
+        (5, 2.5, 0.5, 60.0, 1.11, 0.01, 5, [0, 0, 0, 0, 0, 0, 0], False),  # test_new_high_freqency_sampling
+        (6, 2.5, 0.5, 60.0, 1.11, 0.01, 5, [1, 1, 1, 1, 1, 1, 1], False),  # test_new_low_freqency_sampling
+        (7, 2.5, 0.5, 60.0, 1.11, 0.01, 5, [0, 0, 1, 1, 1, 0, 0], False),  # test_new_slow_fast_slow_mid_freqency_sampling
+        (8, 2.5, 0.5, 60.0, 1.11, 0.01, 5, [1, 1, 1, 0, 0, 1, 1], False),  # test_new_irregular_sampling
+        (9, 2.5, 0.5, 60.0, 1.11, 0.01, 5, [1, 1, 1, 1, 1, 1, 1], False),  # test_new_fast_arctic_drifter
+        (10, 2.5, 0.5, 60.0, 1.11, 0.01, 5, [0, 0, 0, 0, 0, 0, 0], False),  # test_new_stationary_gross_error
+        (11, 2.5, 0.5, 60.0, 1.11, 0.01, 5, [0, 0], False),  # test_new_too_short_for_qc_a
+        (12, -2.5, 0.5, 60.0, 1.11, 0.01, 5, [untestable for _ in range(7)], True),  # test_new_error_bad_input_parameter_a
+        (13, 2.5, 0.5, 60.0, 1.11, 0.01, 5, [untestable for _ in range(7)], True),  # test_new_error_missing_observation_a
+        (14, 2.5, 0.5, 60.0, 1.11, 0.01, 5, [untestable for _ in range(7)], True),  # test_new_error_not_time_sorted_a
+    ]
+    # fmt: on
+)
+def test_generic_new_speed_tests(
+    selector,
+    speed_limit,
+    min_win_period,
+    ship_speed_limit,
+    delta_d,
+    delta_t,
+    n_neighbours,
+    expected,
+    warns,
+):
+    lats, lons, dates = speed_check_data(selector)
+    if warns:
+        with pytest.warns(UserWarning):
+            qc_outcomes = tqc.do_new_speed_check(
+                lons,
+                lats,
+                dates,
+                speed_limit,
+                min_win_period,
+                ship_speed_limit,
+                delta_d,
+                delta_t,
+                n_neighbours,
+            )
+    else:
+        qc_outcomes = tqc.do_new_speed_check(
+            lons,
+            lats,
+            dates,
+            speed_limit,
+            min_win_period,
+            ship_speed_limit,
+            delta_d,
+            delta_t,
+            n_neighbours,
+        )
+    for i in range(len(qc_outcomes)):
+        assert qc_outcomes[i] == expected[i]
 
 
 def tailcheck_vals(selector):
@@ -1417,6 +1364,7 @@ def test_generic_tailcheck(
         )
     for i in range(len(qc_outcomes)):
         assert qc_outcomes[i] == expected2[i]
+
 
 # tests summary
 """
