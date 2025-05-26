@@ -7,6 +7,8 @@ import pytest
 from glamod_marine_processing.qc_suite.modules.next_level_track_check_qc import (
     calculate_course_parameters,
     calculate_speed_course_distance_time_difference,
+    forward_discrepancy,
+    backward_discrepancy,
     do_iquam_track_check,
     do_spike_check,
     do_track_check,
@@ -163,19 +165,20 @@ def test_forward_discrepancy(ship_frame):
 
 
 def test_calc_alternate_speeds(ship_frame):
-    result = calc_alternate_speeds(ship_frame)
-    for column in ['alt_speed', 'alt_course', 'alt_distance', 'alt_time_diff']:
-        assert column in result
+    speed, distance, course, timediff = calculate_speed_course_distance_time_difference(
+        ship_frame.lat, ship_frame.lon, ship_frame.date, alternating=True
+    )
+    # for column in ['alt_speed', 'alt_course', 'alt_distance', 'alt_time_diff']:
+    #     assert column in result
 
-    for i in range(1, len(result)-1):
-        row = result.iloc[i]
+    for i in range(1, len(speed)-1):
         # Reports are spaced by 1 hour and each hour the ship goes 0.1 degrees of latitude which is 11.11951 km
         # So with alternating reports, the speed is 11.11951 km/hour, the course is due north (0/360) the distance
         # between alternate reports is twice the hourly distance 22.23902 and the time difference is 2 hours
-        assert pytest.approx(row.alt_speed, abs=0.0001) == 11.11951
-        assert pytest.approx(row.alt_course, abs=0.0001) == 0.0 or pytest.approx(row.alt_course, abs=0.0001) == 360.0
-        assert pytest.approx(row.alt_distance, abs=0.0001) == 22.23902
-        assert pytest.approx(row.alt_time_diff, abs=0.0001) == 2.0
+        assert pytest.approx(speed[i], abs=0.0001) == 11.11951
+        assert pytest.approx(course[i], abs=0.0001) == 0.0 or pytest.approx(course[i], abs=0.0001) == 360.0
+        assert pytest.approx(distance[i], abs=0.0001) == 22.23902
+        assert pytest.approx(timediff[i], abs=0.0001) == 2.0
 
 @pytest.mark.parametrize("key", ["lat", "lon", "date", "vsi", "dsi"])
 def test_do_track_check_raises(ship_frame, key):

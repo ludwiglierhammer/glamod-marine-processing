@@ -120,14 +120,13 @@ def track_day_test(
 
     return daytime
 
-
 def trim_mean(inarr: list, trim: int) -> float:
     """Calculate a resistant (aka robust) mean of an input array given a trimming criteria.
 
     Parameters
     ----------
     inarr: list
-        Array of numbers
+        1-dimensional array of numbers
     trim: int
         trimming criteria. A value of 10 trims one tenth of the values off each end of the sorted array
         before calculating the mean.
@@ -149,7 +148,6 @@ def trim_mean(inarr: list, trim: int) -> float:
     trim = float(np.mean(arr[index1 : length - index1]))
 
     return trim
-
 
 def trim_std(inarr: list, trim: int) -> float:
     """Calculate a resistant (aka robust) standard deviation of an input array given a trimming criteria.

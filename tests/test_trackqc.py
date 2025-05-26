@@ -2,8 +2,7 @@
 
 from __future__ import annotations
 
-import os
-import sys
+import copy
 
 import numpy as np
 import pytest
@@ -17,33 +16,23 @@ from glamod_marine_processing.qc_suite.modules.qc import (
     untested,
 )
 
-import glamod_marine_processing.qc_suite.modules.Extended_IMMA as ex
-
 import glamod_marine_processing.qc_suite.modules.next_level_trackqc as tqc
-import glamod_marine_processing.qc_suite.modules.trackqc as otqc
-from glamod_marine_processing.qc_suite.modules.IMMA1 import IMMA
-from glamod_marine_processing.qc_suite.modules.next_level_track_check_qc import (
-    calculate_speed_course_distance_time_difference,
+
+
+@pytest.mark.parametrize(
+    "year, month, day, hour, lat, lon, elevdlim, expected",
+    [
+        (2019, 6, 21, 12.0, 50.7, -3.5, -2.5, True),
+        (2019, 6, 21, 0.0, 50.7, -3.5, -2.5, False),
+        (2019, 6, 21, 0.0, 50.7, -3.5, 89.0, False),
+        (2022, 5, 3, 12.0, 0.0, 0.0, -2.5, True),
+        (2025, 5, 26, 4.0 + 55.0 / 60.0, -20.00, 23.42, -2.5, True),
+        (2025, 5, 26, 4.0 + 35.0 / 60.0, -20.00, 23.42, -2.5, False),
+    ],
 )
-
-
-def test_daytime_exeter():
-    daytime = tqc.track_day_test(2019, 6, 21, 12.0, 50.7, -3.5, elevdlim=-2.5)
-    assert daytime
-
-
-def test_nighttime_exeter():
-    daytime = tqc.track_day_test(2019, 6, 21, 0.0, 50.7, -3.5, elevdlim=-2.5)
-    assert not (daytime)
-
-
-def test_large_elevdlim_exeter():
-    daytime = tqc.track_day_test(2019, 6, 21, 12.0, 50.7, -3.5, elevdlim=89.0)
-    assert not (daytime)
-
-
-def test_lat_is_zero():
-    assert tqc.track_day_test(2022, 5, 3, 12.0, 0.0, 0.0, elevdlim=-2.5)
+def test_daytime(year, month, day, hour, lat, lon, elevdlim, expected):
+    datetime = tqc.track_day_test(year, month, day, hour, lat, lon, elevdlim=elevdlim)
+    assert datetime == expected
 
 
 @pytest.mark.parametrize(
@@ -61,45 +50,53 @@ def test_lat_is_zero():
         (2019, 12, 21, 0.0, -99.0, -3.5),
     ],
 )
-def test_error_invalid_parameter(year, month, day, hour, lat, lon):
+def test_daytime_error_invalid_parameter(year, month, day, hour, lat, lon):
     with pytest.raises(ValueError):
         assert tqc.track_day_test(year, month, day, hour, lat, lon, elevdlim=-2.5)
 
 
-def test_no_trim():
-    arr = np.array([10.0, 4.0, 3.0, 2.0, 1.0])
-    trim = tqc.trim_mean(arr, 0)
-    assert trim == 4.0
+@pytest.mark.parametrize(
+    "inarr, trimming, expected",
+    [
+        ([10.0, 4.0, 3.0, 2.0, 1.0], 0, 4.0),
+        ([10.0, 4.0, 3.0, 2.0, 1.0], 5, 3.0),
+    ],
+)
+def test_trim_mean(inarr, trimming, expected):
+    original_array = copy.deepcopy(inarr)
+    trim = tqc.trim_mean(inarr, trimming)
+    assert trim == expected
     assert np.all(
-        arr == np.array([10.0, 4.0, 3.0, 2.0, 1.0])
-    )  # this checks the array is not modifed by the function
+        inarr == original_array
+    )  # This checks the array is not modifed by the function
 
 
-def test_with_trim():
-    arr = np.array([10.0, 4.0, 3.0, 2.0, 1.0])
-    trim = tqc.trim_mean(arr, 5)
-    assert trim == 3.0
+@pytest.mark.parametrize(
+    "inarr, trimming, expected",
+    [
+        ([6.0, 1.0, 1.0, 1.0, 1.0], 0, 2.0),
+        ([6.0, 1.0, 1.0, 1.0, 1.0], 5, 0.0),
+    ],
+)
+def test_trim_std(inarr, trimming, expected):
+    original_array = copy.deepcopy(inarr)
+    trim = tqc.trim_std(inarr, trimming)
+    assert trim == expected
     assert np.all(
-        arr == np.array([10.0, 4.0, 3.0, 2.0, 1.0])
-    )  # this checks the array is not modifed by the function
+        inarr == original_array
+    )  # This checks the array is not modifed by the function
 
 
-def test_sd_no_trim():
-    arr = np.array([6.0, 1.0, 1.0, 1.0, 1.0])
-    trim = tqc.trim_std(arr, 0)
-    assert trim == 2.0
-    assert np.all(
-        arr == np.array([6.0, 1.0, 1.0, 1.0, 1.0])
-    )  # this checks the array is not modifed by the function
-
-
-def test_sd_with_trim():
-    arr = np.array([6.0, 1.0, 1.0, 1.0, 1.0])
-    trim = tqc.trim_std(arr, 5)
-    assert trim == 0.0
-    assert np.all(
-        arr == np.array([6.0, 1.0, 1.0, 1.0, 1.0])
-    )  # this checks the array is not modifed by the function
+@pytest.mark.parametrize(
+    "inarr, expected",
+    [
+        ([2, 3, 4], True),
+        ([0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], True),
+        ([2, 3, 4, 5, 4], False),
+    ],
+)
+def test_is_monotonic(inarr, expected):
+    assert tqc.is_monotonic(inarr) == expected
 
 
 def aground_check_test_data(selector):
@@ -1827,7 +1824,7 @@ def test_error_missing_matched_value_bnc():
         "drf_short": [9, 9, 9, 9, 9, 9, 9, 9, 9],
     }
     try:
-        otqc.do_sst_biased_noisy_check(reps.reps, 9, 1.10, 1.0, 0.29, 3.0, 2, 0.3)
+        tqc.do_sst_biased_noisy_check(reps.reps, 9, 1.10, 1.0, 0.29, 3.0, 2, 0.3)
     except AssertionError as error:
         error_return_text = "unknown extended variable name OSTIA"
         assert str(error)[0 : len(error_return_text)] == error_return_text

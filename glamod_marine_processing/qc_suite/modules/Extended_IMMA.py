@@ -21,7 +21,6 @@ from . import qc
 from . import spherical_geometry as sph
 from . import time_control
 from . import track_check as tc
-from . import trackqc as tqc
 
 VARLIST = [
     "YR",
