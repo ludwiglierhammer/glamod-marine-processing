@@ -6,7 +6,8 @@ import numpy as np
 from netCDF4 import Dataset
 
 from . import qc
-
+from . location_control import mds_lat_to_yindex, mds_lon_to_xindex, lat_to_yindex, lon_to_xindex
+from . time_control import which_pentad, pentad_to_month_day, get_month_lengths, day_in_year
 
 class Climatology:
     """
@@ -101,9 +102,9 @@ class Climatology:
         if self.n == 1:
             tindex = 0
         if self.n == 73:
-            tindex = qc.which_pentad(month, day) - 1
+            tindex = which_pentad(month, day) - 1
         if self.n == 365:
-            tindex = qc.day_in_year(month, day) - 1
+            tindex = day_in_year(month, day) - 1
 
         return tindex
 
@@ -155,12 +156,12 @@ class Climatology:
             return
         if month < 1 or month > 12:
             return
-        ml = qc.get_month_lengths(2004)
+        ml = get_month_lengths(2004)
         if day < 1 or day > ml[month - 1]:
             return
 
-        yindex = qc.mds_lat_to_yindex(lat)
-        xindex = qc.mds_lon_to_xindex(lon)
+        yindex = mds_lat_to_yindex(lat)
+        xindex = mds_lon_to_xindex(lon)
         tindex = self.get_tindex(month, day)
 
         result = self.field[tindex, yindex, xindex]
@@ -196,12 +197,12 @@ class Climatology:
             return
         if month < 1 or month > 12:
             return None
-        ml = qc.get_month_lengths(2004)
+        ml = get_month_lengths(2004)
         if day < 1 or day > ml[month - 1]:
             return None
 
-        yindex = qc.lat_to_yindex(lat, self.res)
-        xindex = qc.lon_to_xindex(lon, self.res)
+        yindex = lat_to_yindex(lat, self.res)
+        xindex = lon_to_xindex(lon, self.res)
         tindex = self.get_tindex(month, day)
 
         result = self.field[tindex, yindex, xindex]

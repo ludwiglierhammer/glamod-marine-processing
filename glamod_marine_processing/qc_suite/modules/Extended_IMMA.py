@@ -18,6 +18,8 @@ import numpy as np
 from . import CalcHums
 from . import icoads_identify as ii
 from . import qc
+from . location_control import mds_lat_to_yindex, mds_lon_to_xindex
+from . time_control import which_pentad, pentad_to_month_day
 from . import spherical_geometry as sph
 from . import time_control
 from . import track_check as tc
@@ -1094,7 +1096,7 @@ class MarineReport:
                 repout.append(",")
                 # pentad
                 try:
-                    p = qc.which_pentad(self.getvar("MO"), self.getvar("DY"))
+                    p = which_pentad(self.getvar("MO"), self.getvar("DY"))
                 except Exception:
                     p = 0
 
@@ -2821,9 +2823,9 @@ class Np_Super_Ob:
 
     def add_rep(self, lat, lon, year, month, day, anom):
         """Add an anomaly to the grid from specified lat lon and date."""
-        xindex = qc.mds_lon_to_xindex(lon)
-        yindex = qc.mds_lat_to_yindex(lat)
-        pindex = qc.which_pentad(month, day) - 1
+        xindex = mds_lon_to_xindex(lon)
+        yindex = mds_lat_to_yindex(lat)
+        pindex = which_pentad(month, day) - 1
 
         assert 0 <= xindex < 360, "bad lon" + str(lon)
         assert 0 <= yindex < 180, "bad lat" + str(lat)
@@ -2889,7 +2891,7 @@ class Np_Super_Ob:
             xindex = nonmiss[0][i]
             yindex = nonmiss[1][i]
             pindex = nonmiss[2][i]
-            m, d = qc.pentad_to_month_day(pindex + 1)
+            m, d = pentad_to_month_day(pindex + 1)
 
             stdev = pentad_stdev.get_value_mds_style(
                 89.5 - yindex, -179.5 + xindex, m, d
@@ -3051,7 +3053,7 @@ class Np_Super_Ob:
             yindex = nonmiss[1][i]
             pindex = nonmiss[2][i]
 
-            m, d = qc.pentad_to_month_day(pindex + 1)
+            m, d = pentad_to_month_day(pindex + 1)
 
             stdev1_ex = stdev1.get_value(89.5 - yindex, -179.5 + xindex, m, d)
             stdev2_ex = stdev2.get_value(89.5 - yindex, -179.5 + xindex, m, d)
@@ -3111,9 +3113,9 @@ class Np_Super_Ob:
         :type month: integer
         :type day: integer
         """
-        xindex = qc.mds_lon_to_xindex(lon)
-        yindex = qc.mds_lat_to_yindex(lat)
-        pindex = qc.which_pentad(month, day) - 1
+        xindex = mds_lon_to_xindex(lon)
+        yindex = mds_lat_to_yindex(lat)
+        pindex = which_pentad(month, day) - 1
         return self.buddy_mean[xindex][yindex][pindex]
 
     def get_buddy_stdev(self, lat, lon, month, day):
@@ -3129,9 +3131,9 @@ class Np_Super_Ob:
         :type month: integer
         :type day: integer
         """
-        xindex = qc.mds_lon_to_xindex(lon)
-        yindex = qc.mds_lat_to_yindex(lat)
-        pindex = qc.which_pentad(month, day) - 1
+        xindex = mds_lon_to_xindex(lon)
+        yindex = mds_lat_to_yindex(lat)
+        pindex = which_pentad(month, day) - 1
         return self.buddy_stdev[xindex][yindex][pindex]
 
 
