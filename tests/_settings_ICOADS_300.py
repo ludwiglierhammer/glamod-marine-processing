@@ -1,7 +1,5 @@
 from __future__ import annotations
 
-import numpy as np
-
 data_model = "icoads"
 release = "r300"
 deck = "d702"

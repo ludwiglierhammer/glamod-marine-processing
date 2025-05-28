@@ -3,20 +3,17 @@
 from __future__ import annotations
 
 import copy
+from datetime import datetime
 
 import numpy as np
 import pytest
 
-from datetime import datetime
-
-from glamod_marine_processing.qc_suite.modules.qc import (
-    passed,
-    failed,
-    untestable,
-    untested,
-)
-
 import glamod_marine_processing.qc_suite.modules.next_level_trackqc as tqc
+from glamod_marine_processing.qc_suite.modules.qc import untestable
+
+# from glamod_marine_processing.qc_suite.modules.next_level_track_check_qc import (
+#    calculate_speed_course_distance_time_difference,
+# )
 
 
 @pytest.mark.parametrize(
@@ -344,30 +341,91 @@ def test_generic_aground(
         assert qc_outcomes[i] == expected[i]
 
 
-@pytest.mark.parametrize(
-    # fmt: off
+@pytest.mark.parametrize(  # fmt: off
     "selector, smooth_win, min_win_period, max_win_period, expected, warns",
     [
         (1, 3, 1, 2, [1, 1, 1, 1, 1, 1, 1], False),  # test_stationary
         (2, 3, 1, 2, [1, 1, 1, 1, 1, 1, 1], False),  # test_stationary jitter spikes
-        (3, 3, 1, 2, [0, 0, 0, 0, 1, 1, 1], False),  # test stationary big remaining jitter
-        (4, 3, 1, 2, [1, 1, 1, 1, 1, 1, 1], False),  # test_stationary_small_remaining_jitter
+        (
+            3,
+            3,
+            1,
+            2,
+            [0, 0, 0, 0, 1, 1, 1],
+            False,
+        ),  # test stationary big remaining jitter
+        (
+            4,
+            3,
+            1,
+            2,
+            [1, 1, 1, 1, 1, 1, 1],
+            False,
+        ),  # test_stationary_small_remaining_jitter
         (5, 3, 1, 2, [0, 0, 0, 0, 0, 0, 0], False),  # test_moving_west
         (6, 3, 1, 2, [0, 0, 0, 0, 0, 0, 0], False),  # test_moving_north
         (7, 3, 1, 2, [0, 0, 0, 0, 1, 1, 1], False),  # test_moving_north_then_stop
-        (8, 3, 1, 2, [0, 0, 0, 0, 0, 0, 0], False),  # test_stationary_high_freq_sampling
+        (
+            8,
+            3,
+            1,
+            2,
+            [0, 0, 0, 0, 0, 0, 0],
+            False,
+        ),  # test_stationary_high_freq_sampling
         (9, 3, 1, 2, [1, 1, 1, 1, 1, 1, 1], False),  # test_stationary_low_freq_sampling
-        (10, 3, 1, 2, [1, 1, 1, 1, 1, 1, 1], False),  # test_stationary_mid_freq_sampling
-        (11, 3, 1, 2, [1, 1, 1, 1, 1, 1, 1], False),  # test_stationary_low_to_mid_freq_sampling
+        (
+            10,
+            3,
+            1,
+            2,
+            [1, 1, 1, 1, 1, 1, 1],
+            False,
+        ),  # test_stationary_mid_freq_sampling
+        (
+            11,
+            3,
+            1,
+            2,
+            [1, 1, 1, 1, 1, 1, 1],
+            False,
+        ),  # test_stationary_low_to_mid_freq_sampling
         (12, 3, 1, 2, [0, 0, 0, 1, 1, 1, 1], False),  # test_moving_slowly_northwest
-        (13, 3, 1, 2, [1, 1, 1, 1, 1, 1, 1], False),  # test_moving_slowly_west_in_arctic
+        (
+            13,
+            3,
+            1,
+            2,
+            [1, 1, 1, 1, 1, 1, 1],
+            False,
+        ),  # test_moving_slowly_west_in_arctic
         (14, 3, 1, 2, [0, 0, 0, 0, 0, 0, 0], False),  # test_stop_then_moving_north
         (15, 3, 1, 2, [0, 0], False),  # test_too_short_for_qc
-        (16, 0, 1, 2, [untestable for x in range(7)], True),  # test_error_bad_input_parameter
-        (17, 3, 1, 2, [untestable for x in range(7)], True),  # test_error_missing_observation
-        (18, 3, 1, 2, [untestable for x in range(7)], True),  # test_error_not_time_sorted
-    ]
-    # fmt: off
+        (
+            16,
+            0,
+            1,
+            2,
+            [untestable for x in range(7)],
+            True,
+        ),  # test_error_bad_input_parameter
+        (
+            17,
+            3,
+            1,
+            2,
+            [untestable for x in range(7)],
+            True,
+        ),  # test_error_missing_observation
+        (
+            18,
+            3,
+            1,
+            2,
+            [untestable for x in range(7)],
+            True,
+        ),  # test_error_not_time_sorted
+    ],  # fmt: off
 )
 def test_new_generic_aground(
     selector, smooth_win, min_win_period, max_win_period, expected, warns
@@ -560,26 +618,59 @@ def speed_check_data(selector):
     return reps["LAT"], reps["LON"], reps["DATE"]
 
 
-@pytest.mark.parametrize(
-    # fmt: off
+@pytest.mark.parametrize(  # fmt: off
     "selector, speed_limit, min_win_period, max_win_period, expected, warns",
     [
-        (1, 2.5, 0.5, 1.0, [0, 0, 0, 0, 0, 0, 0], False), # test stationary
-        (2, 2.5, 0.5, 1.0, [1, 1, 1, 1, 1, 1, 1], False), # test_fast_drifter
-        (3, 2.5, 0.5, 1.0, [0, 0, 0, 0, 0, 0, 0], False), # test_slow_drifter
-        (4, 2.5, 0.5, 1.0, [0, 0, 1, 1, 1, 0, 0], False), # test_slow_fast_slow_drifter
-        (5, 2.5, 0.5, 1.0, [0, 0, 0, 0, 0, 0, 0], False), # test_high_freqency_sampling
-        (6, 2.5, 0.5, 1.0, [0, 0, 0, 0, 0, 0, 0], False), # test_low_freqency_sampling
-        (7, 2.5, 0.5, 1.0, [0, 1, 1, 1, 1, 1, 0], False), # test_slow_fast_slow_mid_freqency_sampling
-        (8, 2.5, 0.5, 1.0, [1, 1, 0, 0, 0, 1, 1], False), # test_irregular_sampling
-        (9, 2.5, 0.5, 1.0, [1, 1, 1, 1, 1, 1, 1], False), # test_fast_arctic_drifter
-        (10, 2.5, 0.5, 1.0, [0, 1, 1, 1, 1, 1, 1], False), # test_stationary_gross_error
-        (11, 2.5, 0.5, 1.0, [0, 0], False), # test_too_short_for_qc_a
-        (12, -2.5, 0.5, 1.0, [untestable for x in range(7)], True), # test_error_bad_input_parameter_a
-        (13, 2.5, 0.5, 1.0, [untestable for x in range(7)], True), # test_error_missing_observation_a
-        (14, 2.5 ,0.5, 1.0, [untestable for x in range(7)], True), # test_error_not_time_sorted_a
-    ]
-    # fmt: off
+        (1, 2.5, 0.5, 1.0, [0, 0, 0, 0, 0, 0, 0], False),  # test stationary
+        (2, 2.5, 0.5, 1.0, [1, 1, 1, 1, 1, 1, 1], False),  # test_fast_drifter
+        (3, 2.5, 0.5, 1.0, [0, 0, 0, 0, 0, 0, 0], False),  # test_slow_drifter
+        (4, 2.5, 0.5, 1.0, [0, 0, 1, 1, 1, 0, 0], False),  # test_slow_fast_slow_drifter
+        (5, 2.5, 0.5, 1.0, [0, 0, 0, 0, 0, 0, 0], False),  # test_high_freqency_sampling
+        (6, 2.5, 0.5, 1.0, [0, 0, 0, 0, 0, 0, 0], False),  # test_low_freqency_sampling
+        (
+            7,
+            2.5,
+            0.5,
+            1.0,
+            [0, 1, 1, 1, 1, 1, 0],
+            False,
+        ),  # test_slow_fast_slow_mid_freqency_sampling
+        (8, 2.5, 0.5, 1.0, [1, 1, 0, 0, 0, 1, 1], False),  # test_irregular_sampling
+        (9, 2.5, 0.5, 1.0, [1, 1, 1, 1, 1, 1, 1], False),  # test_fast_arctic_drifter
+        (
+            10,
+            2.5,
+            0.5,
+            1.0,
+            [0, 1, 1, 1, 1, 1, 1],
+            False,
+        ),  # test_stationary_gross_error
+        (11, 2.5, 0.5, 1.0, [0, 0], False),  # test_too_short_for_qc_a
+        (
+            12,
+            -2.5,
+            0.5,
+            1.0,
+            [untestable for x in range(7)],
+            True,
+        ),  # test_error_bad_input_parameter_a
+        (
+            13,
+            2.5,
+            0.5,
+            1.0,
+            [untestable for x in range(7)],
+            True,
+        ),  # test_error_missing_observation_a
+        (
+            14,
+            2.5,
+            0.5,
+            1.0,
+            [untestable for x in range(7)],
+            True,
+        ),  # test_error_not_time_sorted_a
+    ],  # fmt: off
 )
 def test_generic_speed_tests(
     selector, speed_limit, min_win_period, max_win_period, expected, warns
@@ -1251,7 +1342,7 @@ def tailcheck_vals(selector):
         (26, 3, 3.0, 1, 1.0, 1, 0.29, 1.0, 0.3, [1, 1, 0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0, 0, 1], False),  # test_one_long_and_one_short_tail
         (27, 3, 3.0, 3, 0.5, 1, 0.29, 1.0, 0.3, [1, 1, 1, 1, 1, 1, 1, 0, 0], [0, 0, 0, 0, 0, 0, 0, 0, 0], False),  # test_too_short_for_short_tail
         (28, 3, 3.0, 1, 0.25, 1, 0.29, 1.0, 0.3, [0, 0, 0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0, 0, 0], False),  # test_long_and_short_all_fail
-        (29, 3, 3.0, 1, 1.0, 1, 0.29, 1.0, 0.3, [1, 1, 1, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0, 0, 0], False),  #  test_long_and_short_start_tail_with_bgvar
+        (29, 3, 3.0, 1, 1.0, 1, 0.29, 1.0, 0.3, [1, 1, 1, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0, 0, 0], False),  # test_long_and_short_start_tail_with_bgvar
         (30, 3, 3.0, 1, 0.25, 1, 0.29, 1.0, 0.3, [1, 1, 1, 1, 1, 1, 1, 1, 0], [0, 0, 0, 0, 0, 0, 0, 0, 0], False),  # test_long_and_short_all_fail_with_bgvar
         (31, 3, 3.0, 1, 3.0, 1, 0.29, 1.0, 0.3, [0, 0, 0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0, 0, 0], False),  # test_good_data
         (32, 3, 3.0, 1, 1.0, 1, 0.29, 1.0, 0.3, [0, 0, 0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0, 0, 0], False),  # test_long_and_short_start_tail_big_bgvar
@@ -1740,15 +1831,15 @@ def sst_biased_noisy_check_vals(selector):
         (7, 9, 1.10, 1.0, 0.29, 3.0, 2, 0.3, [0, 0, 0, 0, 0, 0, 0, 0, 0], [1, 1, 1, 1, 1, 1, 1, 1, 1], [0, 0, 0, 0, 0, 0, 0, 0, 0], False),  # test_noisy_bnc
         (8, 9, 1.10, 1.0, 0.29, 3.0, 2, 0.3, [1, 1, 1, 1, 1, 1, 1, 1, 1], [1, 1, 1, 1, 1, 1, 1, 1, 1], [0, 0, 0, 0, 0, 0, 0, 0, 0], False),  # test_biased_and_noisy_bnc
         (9, 5, 1.10, 1.0, 0.29, 3.0, 2, 0.3, [1, 1, 1, 1, 1, 1, 1, 1, 1], [0, 0, 0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0, 0, 0], False),  # test_biased_warm_obs_missing_bnc
-        (10, 9, 1.10, 1.0, 0.29, 3.0, 2, 0.3, [0, 0, 0, 0, 0],[0, 0, 0, 0, 0],[0, 0, 0, 0, 0], False),  # test_short_record_one_bad_bnc
-        (11, 9, 1.10, 1.0, 0.29, 3.0, 2, 0.3,[0, 0, 0, 0, 0],[0, 0, 0, 0, 0], [1, 1, 1, 1, 1], False),  # test_short_record_two_bad_bnc
-        (12, 9, 1.10, 1.0, 0.29, 3.0, 2, 0.3, [0, 0, 0, 0, 0, 0, 0, 0, 0],[0, 0, 0, 0, 0, 0, 0, 0, 0],[1, 1, 1, 1, 1, 1, 1, 1, 1],False),  # test_short_record_two_bad_obs_missing_bnc
-        (13, 9, 1.10, 1.0, 0.29, 3.0, 2, 0.3, [0, 0, 0, 0, 0, 0, 0, 0, 0],[0, 0, 0, 0, 0, 0, 0, 0, 0],[0, 0, 0, 0, 0, 0, 0, 0, 0],False),  # test_short_record_two_bad_obs_missing_with_bgvar_bnc
-        (14, 9, 1.10, 1.0, 0.29, 3.0, 2, 0.3, [0, 0, 0, 0, 0, 0, 0, 0, 0],[0, 0, 0, 0, 0, 0, 0, 0, 0],[0, 0, 0, 0, 0, 0, 0, 0, 0],False),  # test_good_data_bnc_14
-        (15, 9, 1.10, 1.0, 0.29, 3.0, 2, 0.3, [0, 0, 0, 0, 0],[0, 0, 0, 0, 0],[0, 0, 0, 0, 0],False),  # test_short_record_good_data_bnc
-        (16, 9, 1.10, 1.0, 0.29, 3.0, 2, 0.3, [0, 0, 0, 0, 0, 0, 0, 0, 0],[0, 0, 0, 0, 0, 0, 0, 0, 0],[0, 0, 0, 0, 0, 0, 0, 0, 0],False),  # test_short_record_obs_missing_good_data_bnc
-        (17, 9, 1.10, 1.0, 0.29, 3.0, 2, 4.0, [0, 0, 0, 0, 0, 0, 0, 0, 0],[0, 0, 0, 0, 0, 0, 0, 0, 0],[0, 0, 0, 0, 0, 0, 0, 0, 0],False),  # test_noisy_big_bgvar_bnc
-        (18, 9, 1.10, 1.0, 0.29, 3.0, 2, 4.0, [0, 0, 0, 0, 0, 0, 0, 0, 0],[0, 0, 0, 0, 0, 0, 0, 0, 0],[0, 0, 0, 0, 0, 0, 0, 0, 0],False),  # test_short_record_two_bad_obs_missing_big_bgvar_bnc
+        (10, 9, 1.10, 1.0, 0.29, 3.0, 2, 0.3, [0, 0, 0, 0, 0], [0, 0, 0, 0, 0], [0, 0, 0, 0, 0], False),  # test_short_record_one_bad_bnc
+        (11, 9, 1.10, 1.0, 0.29, 3.0, 2, 0.3, [0, 0, 0, 0, 0], [0, 0, 0, 0, 0], [1, 1, 1, 1, 1], False),  # test_short_record_two_bad_bnc
+        (12, 9, 1.10, 1.0, 0.29, 3.0, 2, 0.3, [0, 0, 0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0, 0, 0], [1, 1, 1, 1, 1, 1, 1, 1, 1], False),  # test_short_record_two_bad_obs_missing_bnc
+        (13, 9, 1.10, 1.0, 0.29, 3.0, 2, 0.3, [0, 0, 0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0, 0, 0], False),  # test_short_record_two_bad_obs_missing_with_bgvar_bnc
+        (14, 9, 1.10, 1.0, 0.29, 3.0, 2, 0.3, [0, 0, 0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0, 0, 0], False),  # test_good_data_bnc_14
+        (15, 9, 1.10, 1.0, 0.29, 3.0, 2, 0.3, [0, 0, 0, 0, 0], [0, 0, 0, 0, 0], [0, 0, 0, 0, 0], False),  # test_short_record_good_data_bnc
+        (16, 9, 1.10, 1.0, 0.29, 3.0, 2, 0.3, [0, 0, 0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0, 0, 0], False),  # test_short_record_obs_missing_good_data_bnc
+        (17, 9, 1.10, 1.0, 0.29, 3.0, 2, 4.0, [0, 0, 0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0, 0, 0], False),  # test_noisy_big_bgvar_bnc
+        (18, 9, 1.10, 1.0, 0.29, 3.0, 2, 4.0, [0, 0, 0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0, 0, 0], False),  # test_short_record_two_bad_obs_missing_big_bgvar_bnc
         (19, 9, 1.10, 1.0, 0.29, 3.0, 2, 0.3, [0, 0, 0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0, 0, 0], False),  # test_good_data_bnc_19
         (20, 0, 1.10, 1.0, 0.29, 3.0, 2, 0.3, [untestable for _ in range(9)], [untestable for _ in range(9)], [untestable for _ in range(9)], True),  # test_error_bad_input_parameter_bnc
         # Mising on purpose - test is no longer relevant after refactoring

@@ -2,6 +2,7 @@ from __future__ import annotations
 
 from datetime import datetime
 
+import numpy as np
 import pytest
 
 from glamod_marine_processing.qc_suite.modules.time_control import (
@@ -58,7 +59,6 @@ def test_month_match(y1, m1, y2, m2, expected):
         (2023, 3, 1, 2023, 2, 28),
         (2024, 12, 31, 2024, 12, 30),
         (2024, 2, 29, 2024, 2, 28),
-        (2025, 2, 29, None, None, None),
     ],
 )
 def test_yesterday(year, month, day, expected_year, expected_month, expected_day):
@@ -67,6 +67,13 @@ def test_yesterday(year, month, day, expected_year, expected_month, expected_day
         expected_month,
         expected_day,
     )
+
+
+def test_yesterday_nan():
+    year, month, day = yesterday(2025, 2, 29)
+    assert np.isnan(year)
+    assert np.isnan(month)
+    assert np.isnan(day)
 
 
 @pytest.mark.parametrize(

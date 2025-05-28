@@ -99,7 +99,7 @@ def _test_do_date_check_raises_value_error():
         (24.0, failed),  # 24 hours not allowed
         (29.2, failed),  # nothing over 24 either
         (6.34451, passed),  # check floats
-        (None, failed),
+        (None, untestable),
     ],
 )
 def test_do_time_check(hour, expected):
@@ -199,7 +199,7 @@ def test_do_time_check_datetime(date, expected):
             1,
             failed,
         ),  # 0 lat 0 lon near midnight should trigger fail
-        (2015, 1, 1, None, 0.0, 0.0, 1, failed),  # missing hour should trigger fail
+        (2015, 1, 1, None, 0.0, 0.0, 1, untestable),  # missing hour should trigger fail
     ],
 )
 def test_do_day_check(year, month, day, hour, latitude, longitude, time, expected):
@@ -300,8 +300,8 @@ def test_do_air_temperature_missing_value_check(at, expected):
     "at, at_climatology, maximum_anomaly, expected",
     [
         (5.6, 2.2, 10.0, passed),
-        (None, 2.2, 10.0, failed),
-        (np.nan, 2.2, 10.0, failed),  # not sure if np.nan should trigger FAIL
+        (None, 2.2, 10.0, untestable),
+        (np.nan, 2.2, 10.0, untestable),  # not sure if np.nan should trigger FAIL
     ],
 )
 def test_do_air_temperature_climatology_check(
@@ -323,8 +323,8 @@ def test_do_air_temperature_missing_value_clim_check(at_climatology, expected):
     [
         (5.6, [-10.0, 10.0], passed),
         (15.6, [-10.0, 10.0], failed),
-        (None, [-10.0, 10.0], failed),
-        (np.nan, [-10.0, 10.0], failed),
+        (None, [-10.0, 10.0], untestable),
+        (np.nan, [-10.0, 10.0], untestable),
     ],
 )
 def test_do_air_temperature_hard_limit_check(at, hard_limits, expected):
@@ -372,7 +372,7 @@ def test_do_air_temperature_hard_limit_check(at, hard_limits, expected):
             3.3,
             [1.0, 10.0],
             2.0,
-            failed,
+            untestable,
         ),
         (
             np.nan,
@@ -380,7 +380,7 @@ def test_do_air_temperature_hard_limit_check(at, hard_limits, expected):
             3.3,
             [1.0, 10.0],
             2.0,
-            failed,  # not sure if np.nan should trigger FAIL
+            untestable,  # not sure if np.nan should trigger FAIL
         ),
     ],
 )
@@ -445,9 +445,16 @@ def test_do_air_temperature_climatology_plus_stdev_check(
             3.3,
             1.0,
             2.0,
-            failed,
+            untestable,
         ),  # None causes failed
-        (np.nan, 2.2, 3.3, 1.0, 2.0, failed),  # not sure if np.nan should trigger FAIL
+        (
+            np.nan,
+            2.2,
+            3.3,
+            1.0,
+            2.0,
+            untestable,
+        ),  # not sure if np.nan should trigger FAIL
     ],
 )
 def test_do_slp_climatology_plus_stdev_with_lowbar_check(
@@ -518,7 +525,7 @@ def test_do_dpt_missing_value_check(dpt, expected):
             3.3,
             [1.0, 10.0],
             2.0,
-            failed,
+            untestable,
         ),
         (
             np.nan,
@@ -526,7 +533,7 @@ def test_do_dpt_missing_value_check(dpt, expected):
             3.3,
             [1.0, 10.0],
             2.0,
-            failed,  # not sure if np.nan should trigger FAIL
+            untestable,  # not sure if np.nan should trigger FAIL
         ),
     ],
 )
@@ -568,8 +575,8 @@ def test_do_dpt_temperature_missing_value_clim_check(dpt_climatology, expected):
         (3.6, 5.6, passed),  # clearly unsaturated
         (5.6, 5.6, passed),  # 100% saturation
         (15.6, 13.6, failed),  # clearly supersaturated
-        (None, 12.0, failed),  # missing dpt FAIL
-        (12.0, None, failed),  # missing at FAIL
+        (None, 12.0, untestable),  # missing dpt FAIL
+        (12.0, None, untestable),  # missing at FAIL
     ],
 )
 def test_do_supersaturation_check(dpt, at, expected):
@@ -587,8 +594,8 @@ def test_do_sst_missing_value_check(sst, expected):
     "sst, sst_climatology, maximum_anomaly, expected",
     [
         (5.6, 2.2, 10.0, passed),
-        (None, 2.2, 10.0, failed),
-        (np.nan, 2.2, 10.0, failed),  # not sure if np.nan should trigger FAIL
+        (None, 2.2, 10.0, untestable),
+        (np.nan, 2.2, 10.0, untestable),  # not sure if np.nan should trigger FAIL
     ],
 )
 def test_do_sst_climatology_check(sst, sst_climatology, maximum_anomaly, expected):
@@ -632,8 +639,8 @@ def test_do_wind_speed_missing_value_check(ws, expected):
     [
         (5.6, [-10.0, 10.0], passed),
         (15.6, [-10.0, 10.0], failed),
-        (None, [-10.0, 10.0], failed),
-        (np.nan, [-10.0, 10.0], failed),
+        (None, [-10.0, 10.0], untestable),
+        (np.nan, [-10.0, 10.0], untestable),
     ],
 )
 def test_do_wind_speed_hard_limit_check(ws, hard_limits, expected):
@@ -652,8 +659,8 @@ def test_do_wind_direction_missing_value_check(wd, expected):
     [
         (56, [-100, 100], passed),
         (156, [-100, 100], failed),
-        (None, [-100, 100], failed),
-        (np.nan, [-100, 100], failed),
+        (None, [-100, 100], untestable),
+        (np.nan, [-100, 100], untestable),
     ],
 )
 def test_do_wind_direction_hard_limit_check(wd, hard_limits, expected):
@@ -663,8 +670,8 @@ def test_do_wind_direction_hard_limit_check(wd, hard_limits, expected):
 @pytest.mark.parametrize(
     "wind_speed, wind_direction, expected",
     [
-        (None, 4, failed),  # missing wind speed; failed
-        (4, None, failed),  # missing wind directory; failed
+        (None, 4, untestable),  # missing wind speed; failed
+        (4, None, untestable),  # missing wind directory; failed
         (0, 0, passed),
         (0, 120, failed),
         (5.0, 0, failed),

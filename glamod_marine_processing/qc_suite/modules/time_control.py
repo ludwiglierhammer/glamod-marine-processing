@@ -8,6 +8,8 @@ from datetime import datetime, timedelta
 
 import numpy as np
 
+from .auxiliary import isvalid
+
 
 def split_date(date: datetime) -> dict:
     """Split datetime date into year, month, day and hour.
@@ -28,7 +30,7 @@ def split_date(date: datetime) -> dict:
         day = int(date.day)
         hour = date.hour + date.minute / 60.0 + date.second / 3600.0
     except ValueError:
-        return None
+        return {"year": np.nan, "month": np.nan, "day": np.nan, "hour": np.nan}
     return {"year": year, "month": month, "day": day, "hour": hour}
 
 
@@ -65,7 +67,7 @@ def yesterday(
     year: int,
     month: int,
     day: int,
-) -> tuple[int | None, int | None, int | None]:
+) -> tuple[int | np.nan, int | np.nan, int | np.nan]:
     """For specified year, month and day return the year, month and day of the day before.
 
     Parameters
@@ -80,8 +82,8 @@ def yesterday(
     Returns
     -------
     tuple of int
-        A tuple of four ints representing year, month and day of the day before,
-        returns a tuple of four ``None`` values if the input day does not exist (e.g. Feb 30th).
+        A tuple of three ints representing year, month and day of the day before,
+        returns a tuple of three ``np.nan`` values if the input day does not exist (e.g. Feb 30th).
     """
     try:
         dt = datetime(year, month, day)
@@ -89,7 +91,7 @@ def yesterday(
         dt = dt + delta
         return dt.year, dt.month, dt.day
     except Exception:
-        return None, None, None
+        return np.nan, np.nan, np.nan
 
 
 def season(month: int) -> str | None:
@@ -291,7 +293,7 @@ def pentad_to_month_day(p: int) -> tuple[int, int]:
     return m[p - 1], d[p - 1]
 
 
-def which_pentad(inmonth: int, inday: int) -> int:
+def which_pentad(month: int, day: int) -> int:
     """Take month and day as inputs and return pentad in range 1-73.
 
     Parameters
@@ -306,17 +308,22 @@ def which_pentad(inmonth: int, inday: int) -> int:
     int
         Pentad (5-day period) containing input day, from 1 (1 Jan-5 Jan) to 73 (27-31 Dec).
 
+    Raises
+    ------
+    ValueError
+        If month not in range 1-12 or day not in range 1-31
+
     Note
     ----
     The calculation is rather simple. It just loops through the year and adds up days till it reaches
     the day we are interested in. February 29th is treated as though it were March 1st in a regular year.
     """
-    if not (12 >= inmonth >= 1):
-        raise ValueError(f"Month {inmonth} not in range 1-12")
-    if not (31 >= inday >= 1):
-        raise ValueError(f"Day {inday} not in range 1-31")
+    if not (12 >= month >= 1):
+        raise ValueError(f"Month {month} not in range 1-12")
+    if not (31 >= day >= 1):
+        raise ValueError(f"Day {day} not in range 1-31")
 
-    pentad = int((day_in_year(inmonth, inday) - 1) / 5)
+    pentad = int((day_in_year(month, day) - 1) / 5)
     pentad = pentad + 1
 
     assert pentad >= 1
@@ -346,7 +353,7 @@ def day_in_year(month: int, day: int) -> int:
     Raises
     ------
     ValueError
-        When month not in range 1-12 or day not in range 1-31
+        If month not in range 1-12 or day not in range 1-31
     """
     if month < 1 or month > 12:
         raise ValueError("Month not in range 1-12")
@@ -565,8 +572,17 @@ def time_difference(
         Difference in hours between the two times.
     """
     # return time difference in hours
-    if None in [year1, year2, month1, month2, day1, day2, hour1, hour2]:
-        return
+    if (
+        not isvalid(year1)
+        or not isvalid(year2)
+        or not isvalid(month1)
+        or not isvalid(month2)
+        or not isvalid(day1)
+        or not isvalid(day2)
+        or not isvalid(hour1)
+        or not isvalid(hour2)
+    ):
+        return np.nan
 
     assert 0 <= hour1 < 24 and 0 <= hour2 < 24
 
@@ -653,6 +669,12 @@ def year_month_gen(year1: int, month1: int, year2: int, month2: int) -> tuple[in
     -------
     tuple of int
         An iterator that yields tuples of a year and month
+
+    Raises
+    ------
+    ValueError
+        If year2 is less than year1 or
+        if either month1 or month2 not in range 1-12.
     """
     if year2 < year1:
         raise ValueError(

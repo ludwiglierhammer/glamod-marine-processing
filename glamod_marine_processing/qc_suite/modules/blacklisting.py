@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+from .auxiliary import isvalid
 from .qc import failed, passed
 
 
@@ -53,7 +54,7 @@ def do_blacklist(
     if latitude == 0.0 and longitude == 0.0:
         return failed  # blacklist all obs at 0,0 as this is a common error.
 
-    if platform_type is not None and platform_type == 13:
+    if isvalid(platform_type) and platform_type == 13:
         return failed  # C-MAN data - we do not want coastal stations
 
     if id == "SUPERIGORINA":
