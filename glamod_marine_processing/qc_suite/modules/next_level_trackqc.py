@@ -890,7 +890,7 @@ class SSTTailChecker:
         start_tail: bool,
     ):
         """
-
+        Create SSTTailChecker object to perform the SST Tail QC Check
 
         Parameters
         ----------
