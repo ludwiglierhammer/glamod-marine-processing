@@ -6,6 +6,8 @@ import math
 
 import numpy as np
 
+from .auxiliary import isvalid
+
 """
 The spherical geometry module is a simple collection of calculations on a sphere
 Sourced from http://williams.best.vwh.net/avform.htm
@@ -61,14 +63,19 @@ def angular_distance(lat1: float, lon1: float, lat2: float, lon2: float) -> floa
     -------
     float
         Return the angular great circle distance between the two points in radians
+
+    Raises
+    ------
+    ValueError
+        If either lat1, lat2, lon1 or lon2 is numerically invalid or None.
     """
-    if lat1 is None or math.isnan(lat1):
+    if not isvalid(lat1):
         raise ValueError("First latitude point is missing of non-finite")
-    if lat2 is None or math.isnan(lat2):
+    if not isvalid(lat2):
         raise ValueError("Second latitude point is missing of non-finite")
-    if lon1 is None or math.isnan(lon1):
+    if not isvalid(lon1):
         raise ValueError("First longitude point is missing of non-finite")
-    if lon2 is None or math.isnan(lon2):
+    if not isvalid(lon2):
         raise ValueError("Second longitude point is missing of non-finite")
 
     # convert degrees to radians
@@ -234,6 +241,11 @@ def intermediate_point(
     float
         return the latitude and longitude of the point a fraction f along the great circle between the
         first and second points.
+
+    Raises
+    ------
+    ValueError
+        If f is greater than 1.
     """
     if f > 1.0:
         raise ValueError(f"f greater than 1.0 {f}")

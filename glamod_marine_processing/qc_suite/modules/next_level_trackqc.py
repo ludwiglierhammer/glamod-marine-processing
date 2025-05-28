@@ -26,6 +26,7 @@ import pandas as pd
 import glamod_marine_processing.qc_suite.modules.spherical_geometry as sg
 
 from .astronomical_geometry import sunangle
+from .auxiliary import isvalid
 from .time_control import dayinyear
 
 
@@ -66,18 +67,24 @@ def track_day_test(
     -------
     bool
         True if daytime, else False.
+
+    Raises
+    ------
+    ValueError
+        If either year, month, day, hour, lat or lon is numerically invalid or None
+        of if either month, day, hour or lat is not in valid range.
     """
-    if year is None:
+    if not isvalid(year):
         raise ValueError("year is missing")
-    if month is None:
+    if not isvalid(month):
         raise ValueError("month is missing")
-    if day is None:
+    if not isvalid(day):
         raise ValueError("day is missing")
-    if hour is None:
+    if not isvalid(hour):
         raise ValueError("hour is missing")
-    if lat is None:
+    if not isvalid(lat):
         raise ValueError("lat is missing")
-    if lon is None:
+    if not isvalid(lon):
         raise ValueError("lon is missing")
     if not (1 <= month <= 12):
         raise ValueError("Month not in range 1-12")

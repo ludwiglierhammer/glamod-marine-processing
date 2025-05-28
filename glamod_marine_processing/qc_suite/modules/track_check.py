@@ -11,8 +11,11 @@ from __future__ import annotations
 
 import math
 
+import numpy as np
+
 from . import Extended_IMMA as ex
 from . import spherical_geometry as sph
+from .auxiliary import isvalid
 
 km_to_nm = 0.539957
 
@@ -54,6 +57,7 @@ def modesp(awork: list) -> float:
     ntime = len(awork)
     atmode = 0
     icmode = 0
+    amode = np.nan
     if ntime > 1:
         for i in range(1, ntime):
             # fixed so that indexing starts at zero
@@ -74,10 +78,7 @@ def modesp(awork: list) -> float:
         if amode <= 8.50:
             amode = 8.50
 
-    else:
-        amode = None
-
-    if amode is not None:
+    if isvalid(amode):
         amode /= km_to_nm
 
     return amode
@@ -100,7 +101,7 @@ def set_speed_limits(amode: float) -> (float, float, float):
     amaxx = 20.00 / km_to_nm
     amin = 0.00 / km_to_nm
 
-    if amode is not None:
+    if isvalid(amode):
         if amode <= 8.51 / km_to_nm:
             amax = 15.00 / km_to_nm
             amaxx = 20.00 / km_to_nm
@@ -137,14 +138,13 @@ def increment_position(
     (float, float) or (None, None)
         Returns latitude and longitude increment or None and None if timedif is None
     """
-    if timdif is not None:
+    lat = np.nan
+    lon = np.nan
+    if isvalid(timdif):
         distance = avs * timdif / 2.0
         lat, lon = sph.lat_lon_from_course_and_distance(alat1, alon1, ads, distance)
         lat -= alat1
         lon -= alon1
-    else:
-        lat = None
-        lon = None
 
     return lat, lon
 
@@ -385,23 +385,23 @@ def direction_continuity(
     # of travel or previous reported direction of travel.
     result = 0.0
 
-    allowed_list = [0, 45, 90, 135, 180, 225, 270, 315, 360, None]
+    if not isvalid(dsi) or not isvalid(dsi_previous) or not isvalid(ship_directions):
+        return result
+
+    allowed_list = [0, 45, 90, 135, 180, 225, 270, 315, 360]
     if dsi not in allowed_list:
         raise ValueError(f"dsi not one of allowed values {dsi}")
     if dsi_previous not in allowed_list:
         raise ValueError(f"dsi_previous not one of allowed values {dsi_previous}")
 
-    if dsi is not None and dsi_previous is not None and ship_directions is not None:
-        if (
-            max_direction_change
-            < abs(dsi - ship_directions)
-            < 360 - max_direction_change
-        ) or (
-            max_direction_change
-            < abs(dsi_previous - ship_directions)
-            < 360 - max_direction_change
-        ):
-            result = 10.0
+    if (
+        max_direction_change < abs(dsi - ship_directions) < 360 - max_direction_change
+    ) or (
+        max_direction_change
+        < abs(dsi_previous - ship_directions)
+        < 360 - max_direction_change
+    ):
+        result = 10.0
 
     return result
 
@@ -429,12 +429,14 @@ def speed_continuity(
         Returns 10 if the reported and calculated speeds differ by more than 10 knots, 0 otherwise
     """
     result = 0.0
-    if vsi is not None and vsi_previous is not None and speeds is not None:
-        if (
-            abs(vsi / km_to_nm - speeds) > max_speed_change / km_to_nm
-            and abs(vsi_previous / km_to_nm - speeds) > max_speed_change / km_to_nm
-        ):
-            result = 10.0
+    if not isvalid(vsi) or not isvalid(vsi_previous) or not isvalid(speeds):
+        return result
+
+    if (
+        abs(vsi / km_to_nm - speeds) > max_speed_change / km_to_nm
+        and abs(vsi_previous / km_to_nm - speeds) > max_speed_change / km_to_nm
+    ):
+        result = 10.0
 
     return result
 
@@ -472,11 +474,11 @@ def check_distance_from_estimate(
     result = 0.0
 
     if (
-        vsi is None
-        or vsi_previous is None
-        or time_differences is None
-        or fwd_diff_from_estimated is None
-        or rev_diff_from_estimated is None
+        not isvalid(vsi)
+        or not isvalid(vsi_previous)
+        or not isvalid(time_differences)
+        or not isvalid(fwd_diff_from_estimated)
+        or not isvalid(rev_diff_from_estimated)
     ):
         return result
 

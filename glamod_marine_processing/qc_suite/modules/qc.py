@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-import math
+from .auxiliary import isvalid
 
 passed = 0
 failed = 1
@@ -36,22 +36,24 @@ def climatology_plus_stdev_with_lowbar_check(
     Returns
     -------
     int
-        Return 1 if the difference is outside the specified range, 0 otherwise.
+        2 if limit is equal or less than 0 or if either value, climate_normal or standard_deviation is numerically invalid or None
+        1 if the difference is outside the specified range,
+        0 otherwise.
 
     Raises
     ------
     ValueError
         When limit is zero or negative
     """
-    if limit <= 0:
+    if (
+        not isvalid(value)
+        or not isvalid(climate_normal)
+        or not isvalid(standard_deviation)
+    ):
         return untestable
 
-    if (
-        isvalid(value) == failed
-        or isvalid(climate_normal)
-        or isvalid(standard_deviation)
-    ):
-        return failed
+    if limit <= 0:
+        return untestable
 
     if (
         abs(value - climate_normal) / standard_deviation > limit
@@ -91,24 +93,27 @@ def climatology_plus_stdev_check(
     Returns
     -------
     int
-        Return 1 if the difference is outside the specified limit, 0 otherwise (or if any input is None)
+        2 if stdev_limits[1] is equal or less than stdev_limits[0], if limit is equal or less than 0 or
+        if either value, climatE_normal or standard_deviation is numerically invalid or None,
+        1 if the difference is outside the specified limit,
+        0 otherwise (or if any input is None)
 
     Raises
     ------
     ValueError
         When stdev_limits are in wrong order or limit is zero or negative.
     """
-    if not (stdev_limits[1] > stdev_limits[0]):
+    if (
+        not isvalid(value)
+        or not isvalid(climate_normal)
+        or not isvalid(standard_deviation)
+    ):
+        return untestable
+
+    if stdev_limits[1] <= stdev_limits[0]:
         return untestable
     if limit <= 0:
         return untestable
-
-    if (
-        isvalid(value) == failed
-        or isvalid(climate_normal) == failed
-        or isvalid(standard_deviation) == failed
-    ):
-        return failed
 
     if standard_deviation < stdev_limits[0]:
         standard_deviation = stdev_limits[0]
@@ -137,37 +142,19 @@ def climatology_check(value: float, climate_normal: float, limit: float = 8.0) -
     Returns
     -------
     int
-        Return 1 if the difference is outside the specified limit, 0 otherwise
+        2 if limit is equal or less than 0 or if either value or climate_normal is numerically invalid or None,
+        1 if the difference is outside the specified limit,
+        0 otherwise
     """
-    # if value is None or climate_normal is None or limit is None:
-    if (
-        isvalid(value) == failed
-        or isvalid(climate_normal) == failed
-        or isvalid(limit) == failed
-    ):
-        return failed
+    if not isvalid(value) or not isvalid(climate_normal) or not isvalid(limit):
+        return untestable
+
+    if limit <= 0:
+        return untestable
 
     if abs(value - climate_normal) > limit:
         return failed
 
-    return passed
-
-
-def isvalid(inval: float | None) -> int:
-    """Check if a value is numerically valid.
-
-    Parameters
-    ----------
-    inval : float or None
-        The input value to be tested
-
-    Returns
-    -------
-    int
-        Returns 1 if the input value is numerically invalid, 0 otherwise
-    """
-    if inval is None or math.isnan(inval):
-        return failed
     return passed
 
 
@@ -182,11 +169,11 @@ def value_check(inval: float | None) -> int:
     Returns
     -------
     int
-        Returns 1 if the input value is None, 0 otherwise.
+        Returns 1 if the input value is numerically invalid or None, 0 otherwise
     """
-    if inval is None:
-        return failed
-    return passed
+    if isvalid(inval):
+        return passed
+    return failed
 
 
 def hard_limit_check(val: float, limits: tuple[float, float]) -> int:
@@ -202,18 +189,15 @@ def hard_limit_check(val: float, limits: tuple[float, float]) -> int:
     Returns
     -------
     int
-        Returns 1 if the input is outside the limits, 0 otherwise
-
-    Raises
-    ------
-    ValueError
-        When limits are specified in wrong order. First element should be lower than second
+        2 if limits[1] is equal or less than limits[0] of if val is numerically invalid or None,
+        1 if val is outside the limits,
+        0 otherwise
     """
-    if not (limits[1] > limits[0]):
+    if limits[1] <= limits[0]:
         return untestable
 
-    if isvalid(val) == failed:
-        return failed
+    if not isvalid(val):
+        return untestable
 
     if limits[0] <= val <= limits[1]:
         return passed
@@ -252,22 +236,20 @@ def sst_freeze_check(
     Returns
     -------
     int
-        1 if the input SST is below freezing point by more than twice the uncertainty, 0 otherwise
-
-    Raises
-    ------
-    ValueError
-        When sst_uncertainty or freezing_point is None
+        2 if either insst, sst_uncertainty, freezing_point or n_sigma is numerically invalid or None,
+        1 if the insst is below freezing point by more than twice the uncertainty,
+        0 otherwise
     """
-    if sst_uncertainty is None:
+    if not isvalid(insst):
         return untestable
-    if freezing_point is None:
+    if not isvalid(sst_uncertainty):
+        return untestable
+    if not isvalid(freezing_point):
+        return untestable
+    if not isvalid(n_sigma):
         return untestable
 
     # fail if SST below the freezing point by more than twice the uncertainty
-    if isvalid(insst) == failed:
-        return failed
-
     if insst < (freezing_point - n_sigma * sst_uncertainty):
         return failed
 

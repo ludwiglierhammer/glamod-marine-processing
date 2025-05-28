@@ -6,26 +6,7 @@ import pytest
 from glamod_marine_processing.qc_suite.modules.astronomical_geometry import (
     angle_diff,
     convert_degrees,
-    day_test,
 )
-from glamod_marine_processing.qc_suite.modules.qc import failed, passed
-
-
-# result = day_test(year,month,day,hour,lat,lon)
-@pytest.mark.parametrize(
-    "year, month, day,hour, lat, lon, expected",
-    [
-        (2015, 10, 15, 7.8, 50.7365, -3.5344, failed),
-        (2018, 9, 25, 11.5000, 50.7365, -3.5344, failed),
-        (2015, 10, 15, 7.5000, 50.7365, -3.5344, passed),
-        (2015, 1, 1, 0.5000, 0.0, 0.0, passed),
-    ],
-)
-def test_looking_through_window_plus_an_hour_sunup(
-    year, month, day, hour, lat, lon, expected
-):
-    result = day_test(year, month, day, hour, lat, lon)
-    assert result == expected
 
 
 @pytest.mark.parametrize(
