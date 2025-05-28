@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import pytest
 
-from glamod_marine_processing.obs_suite.modules.icoads_identify import (
+from glamod_marine_processing.qc_suite.modules.icoads_identify import (
     id_is_generic,
     is_buoy,
     is_deck,

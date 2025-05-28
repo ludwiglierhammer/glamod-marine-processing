@@ -198,17 +198,17 @@ def climdata():
         [
             "platform_type",
             [4, 5, 6],
-            pd.Series([failed] * 13),
+            pd.Series([False] * 13),
         ],  # platform type is 2 which is not a buoy (4: moored buoy, 5: drifting buoy, 6: ice buoy)
         [
             "platform_type",
             5,
-            pd.Series([failed] * 13),
+            pd.Series([False] * 13),
         ],  # platform type is 2 which is not a drfiting buoy (5: drifting buoy)
         [
             "platform_type",
             2,
-            pd.Series([passed] * 13),
+            pd.Series([True] * 13),
         ],  # platform type is 2 which is a ship
     ],
 )
@@ -228,7 +228,7 @@ def test_is_buoy(testdata):
         axis=1,
     )
     expected = pd.Series(
-        [failed] * 13
+        [False] * 13
     )  # platform type is 2 which is not a buoy (4: moored buoy, 5: drifting buoy, 6: ice buoy)
     pd.testing.assert_series_equal(results, expected)
 
@@ -239,7 +239,7 @@ def test_is_drifter(testdata):
         lambda row: is_drifter(platform_type=row["platform_type"], valid_list=5), axis=1
     )
     expected = pd.Series(
-        [failed] * 13
+        [False] * 13
     )  # platform type is 2 which is not a drifting buoy (5: drifting buoy)
     pd.testing.assert_series_equal(results, expected)
 
@@ -249,7 +249,7 @@ def test_is_ship(testdata):
     results = db_.apply(
         lambda row: is_ship(platform_type=row["platform_type"], valid_list=2), axis=1
     )
-    expected = pd.Series([passed] * 13)  # platform type is 2 which is a ship
+    expected = pd.Series([True] * 13)  # platform type is 2 which is a ship
     pd.testing.assert_series_equal(results, expected)
 
 
