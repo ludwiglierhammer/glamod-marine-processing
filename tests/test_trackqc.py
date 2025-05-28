@@ -1866,43 +1866,40 @@ def test_sst_biased_noisy_check_generic(
     warns,
 ):
     lat, lon, dates, sst, ostia, bgvar, ice = sst_biased_noisy_check_vals(selector)
+
+    inputs = [
+        lat,
+        lon,
+        dates,
+        sst,
+        ostia,
+        bgvar,
+        ice,
+        n_eval,
+        bias_lim,
+        drif_intra,
+        drif_inter,
+        err_std_n,
+        n_bad,
+        background_err_lim,
+    ]
+
     if warns:
         with pytest.warns(UserWarning):
-            qc_outcomes = tqc.do_sst_biased_check(
-                lat,
-                lon,
-                dates,
-                sst,
-                ostia,
-                bgvar,
-                ice,
-                n_eval,
-                bias_lim,
-                drif_intra,
-                drif_inter,
-                err_std_n,
-                n_bad,
-                background_err_lim,
-            )
+            bias_qc_outcomes = tqc.do_sst_biased_check(*inputs)
+        with pytest.warns(UserWarning):
+            noise_qc_outcomes = tqc.do_sst_noisy_check(*inputs)
+        with pytest.warns(UserWarning):
+            short_qc_outcomes = tqc.do_sst_biased_noisy_short_check(*inputs)
     else:
-        qc_outcomes = tqc.do_sst_biased_check(
-            lat,
-            lon,
-            dates,
-            sst,
-            ostia,
-            bgvar,
-            ice,
-            n_eval,
-            bias_lim,
-            drif_intra,
-            drif_inter,
-            err_std_n,
-            n_bad,
-            background_err_lim,
-        )
-    for i in range(len(qc_outcomes)):
-        assert qc_outcomes[i] == expected_bias[i]
+        bias_qc_outcomes = tqc.do_sst_biased_check(*inputs)
+        noise_qc_outcomes = tqc.do_sst_noisy_check(*inputs)
+        short_qc_outcomes = tqc.do_sst_biased_noisy_short_check(*inputs)
+
+    for i in range(len(bias_qc_outcomes)):
+        assert bias_qc_outcomes[i] == expected_bias[i]
+        assert noise_qc_outcomes[i] == expected_noisy[i]
+        assert short_qc_outcomes[i] == expected_short[i]
 
 
 # no longer appropriate now we pass arrays to the functions
