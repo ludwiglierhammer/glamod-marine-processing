@@ -207,14 +207,7 @@ def test_do_track_check_testdata():
 
 
 def test_backward_discrepancy(ship_frame):
-    # speed, _distance, course, _timediff = (
-    #     calculate_speed_course_distance_time_difference(
-    #         lat=ship_frame["lat"],
-    #         lon=ship_frame["lon"],
-    #         date=ship_frame["date"],
-    #         alternating=False,
-    #     )
-    # )
+
     result = backward_discrepancy(
         vsi=ship_frame["vsi"],
         dsi=ship_frame["dsi"],
@@ -228,13 +221,7 @@ def test_backward_discrepancy(ship_frame):
 
 
 def test_forward_discrepancy(ship_frame):
-    # speed, _distance, course, _timediff = (
-    #     calculate_speed_course_distance_time_difference(
-    #         lat=ship_frame["lat"],
-    #         lon=ship_frame["lon"],
-    #         date=ship_frame["date"],
-    #     )
-    # )
+
     result = forward_discrepancy(
         vsi=ship_frame["vsi"],
         dsi=ship_frame["dsi"],
