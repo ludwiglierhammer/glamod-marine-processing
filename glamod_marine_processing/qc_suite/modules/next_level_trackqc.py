@@ -12,12 +12,12 @@ from typing import Sequence
 
 import numpy as np
 
-from .qc import passed, failed, untested, untestable
-from . import Extended_IMMA as ex
 from .astronomical_geometry import sunangle
+from .auxiliary import isvalid
+from .next_level_track_check_qc import do_iquam_track_check, inspect_arrays
+from .qc import failed, passed, untestable, untested
 from .spherical_geometry import sphere_distance
 from .time_control import dayinyear
-from .next_level_track_check_qc import do_iquam_track_check, inspect_arrays
 
 """
 The trackqc module contains a set of functions for performing the tracking QC
@@ -36,6 +36,7 @@ Atkinson, C.P., N.A. Rayner, J. Roberts-Jones, R.O. Smith, 2013:
 Assessing the quality of sea surface temperature observations from
 drifting buoys and ships on a platform-by-platform basis (doi:10.1002/jgrc.20257).
 """
+
 
 def track_day_test(
     year: int,
@@ -286,7 +287,6 @@ class SpeedChecker:
             (this should be greater than min_win_period and allow for some erratic temporal sampling e.g.
             min_win_period + 0.2 to allow for gaps of up to 0.2 - days in sampling).
         """
-
         self.lon = lons
         self.lat = lats
         self.nreps = len(lons)
@@ -459,7 +459,7 @@ class NewSpeedChecker:
     For each report, speed is assessed over the shortest available period that exceeds 'min_win_period'.
 
     Prior to assessment the drifter record is screened for positional errors using the iQuam track check
-    method (from :class:`.Voyage`). When running the iQuam check the record is treated as a ship (not a
+    method (from :py:class:`ex.Voyage`). When running the iQuam check the record is treated as a ship (not a
     drifter) so as to avoid accidentally filtering out observations made aboard a ship (which is what we
     are trying to detect). This iQuam track check does not overwrite any existing iQuam track check flags.
 
@@ -515,7 +515,6 @@ class NewSpeedChecker:
         n_neighbours: int
             Number of neighbours considered in the IQUAM track check
         """
-
         self.lon = lons
         self.lat = lats
         self.nreps = len(lons)
@@ -540,7 +539,7 @@ class NewSpeedChecker:
         return self.qc_outcomes
 
     def valid_parameters(self) -> bool:
-        """Check the parameters are valud. Raises a warning and returns False if not valid"""
+        """Check the parameters are valid. Raises a warning and returns False if not valid"""
         valid = True
         try:
             assert self.speed_limit >= 0, "speed_limit must be >= 0"
@@ -641,7 +640,7 @@ class AgroundChecker:
     than necessary as buoys that run aground for less than min_win_period will not be detected.
 
     Because temporal sampling can be erratic the time period over which an assessment is made is specified
-    as a range (bound by 'min_win_period' and 'max_win_period') - assesment uses the longest time separation
+    as a range (bound by 'min_win_period' and 'max_win_period') - assessment uses the longest time separation
     available within this range. If a drifter is deemed aground and subsequently starts moving (e.g. if a drifter
     has moved very slowly for a prolonged period) incorrectly flagged reports will be reinstated.
 
@@ -684,7 +683,6 @@ class AgroundChecker:
             than min_win_period and allow for erratic temporal sampling e.g. min_win_period+2 to allow for gaps of
             up to 2-days in sampling).
         """
-
         self.lon = lons
         self.lat = lats
         self.nreps = len(lons)
@@ -706,7 +704,7 @@ class AgroundChecker:
         return self.qc_outcomes
 
     def valid_parameters(self) -> bool:
-        """Check the parameters are valud. Raises a warning and returns False if not valid"""
+        """Check the parameters are valid. Raises a warning and returns False if not valid"""
         valid = True
         try:
             assert self.smooth_win >= 1, "smooth_win must be >= 1"
@@ -850,6 +848,8 @@ class SSTTailChecker:
     observations that are too biased or noisy as a whole. The short tail check looks for individual observations
     exceeding a noise limit within the window.
 
+    Parameters
+    ----------
     long_win_len: int
         Length of window (in data-points) over which to make long tail-check (must be an odd number)
     long_err_std_n: float
@@ -890,8 +890,6 @@ class SSTTailChecker:
         start_tail: bool,
     ):
         """
-
-
         Parameters
         ----------
         lat: array-like of float, shape (n,)
@@ -964,7 +962,7 @@ class SSTTailChecker:
         return self.qc_outcomes
 
     def valid_parameters(self):
-        """Check the parameters are valud. Raises a warning and returns False if not valid"""
+        """Check the parameters are valid. Raises a warning and returns False if not valid"""
         valid = True
         try:
             assert self.long_win_len >= 1, "long_win_len must be >= 1"
@@ -980,7 +978,6 @@ class SSTTailChecker:
             warnings.warn(UserWarning("invalid input parameter: " + str(error)))
             valid = False
         return valid
-
 
     def _do_sst_tail_check(self):
         """Perform the actual SST tail check"""
@@ -1042,7 +1039,6 @@ class SSTTailChecker:
     @staticmethod
     def _parse_rep(lat, lon, ostia, ice, bgvar, dates) -> (float, float, float, bool):
         """
-
         Parameters
         ----------
         lat: float
@@ -1104,7 +1100,7 @@ class SSTTailChecker:
         sst_anom = []  # type: list
         bgvar = []  # type: list
         for ind in range(self.nreps):
-            bg_val, ice_val, bgvar_val, good_match, invalid_ob = self._parse_rep(
+            bg_val, _ice_val, bgvar_val, good_match, invalid_ob = self._parse_rep(
                 self.lat[ind],
                 self.lon[ind],
                 self.ostia[ind],
@@ -1181,7 +1177,7 @@ class SSTTailChecker:
                 break
 
     def _do_short_tail_check(self, first_pass_ind, last_pass_ind, forward=True):
-        """Perform the short tail check
+        """Perform the short tail check.
 
         Parameters
         ----------
@@ -1378,7 +1374,12 @@ class SSTBiasedNoisyChecker:
 
     def set_all_qc_outcomes_to(self, input_state):
         """Set all the QC outcomes to the specified input_state"""
-        assert input_state in [passed, failed, untested, untestable], f"Unknown input_state {input_state}"
+        assert input_state in [
+            passed,
+            failed,
+            untested,
+            untestable,
+        ], f"Unknown input_state {input_state}"
         self.qc_outcomes_short[:] = input_state
         self.qc_outcomes_noise[:] = input_state
         self.qc_outcomes_bias[:] = input_state
@@ -1468,8 +1469,10 @@ class SSTBiasedNoisyChecker:
         return bg_val, ice, bgvar, good_match, bgvar_mask, invalid_ob
 
     def _preprocess_reps(self) -> bool:
-        """Fill SST anomalies and background errors used in the QC checks, as well as a flag
-        indicating missing or invalid background values."""
+        """
+        Fill SST anomalies and background errors used in the QC checks, as well as a flag
+        indicating missing or invalid background values.
+        """
         invalid_series = False
         # test and filter out obs with unsuitable background matches
         sst_anom = []
@@ -1477,7 +1480,7 @@ class SSTBiasedNoisyChecker:
         bgvar_is_masked = False
 
         for ind in range(self.nreps):
-            bg_val, ice_val, bgvar_val, good_match, bgvar_mask, invalid_ob = (
+            bg_val, _ice_val, bgvar_val, good_match, bgvar_mask, invalid_ob = (
                 SSTBiasedNoisyChecker._parse_rep(
                     self.lat[ind],
                     self.lon[ind],
@@ -1549,12 +1552,12 @@ class SSTBiasedNoisyChecker:
 
 
 def do_speed_check(
-        lons: Sequence[float],
-        lats: Sequence[float],
-        dates: Sequence[datetime],
-        speed_limit: float,
-        min_win_period: float,
-        max_win_period: float
+    lons: Sequence[float],
+    lats: Sequence[float],
+    dates: Sequence[datetime],
+    speed_limit: float,
+    min_win_period: float,
+    max_win_period: float,
 ) -> Sequence[int]:
     """
     Perform the Track QC speed check
@@ -1591,12 +1594,12 @@ def do_speed_check(
 
 
 def do_aground_check(
-        lons: Sequence[float],
-        lats: Sequence[float],
-        dates: Sequence[datetime],
-        smooth_win: int,
-        min_win_period: int,
-        max_win_period: int
+    lons: Sequence[float],
+    lats: Sequence[float],
+    dates: Sequence[datetime],
+    smooth_win: int,
+    min_win_period: int,
+    max_win_period: int,
 ):
     """
     Perform the aground check
@@ -1632,11 +1635,12 @@ def do_aground_check(
 
 
 def do_new_aground_check(
-        lons: Sequence[float],
-        lats: Sequence[float],
-        dates: Sequence[datetime],
-        smooth_win: int,
-        min_win_period: int):
+    lons: Sequence[float],
+    lats: Sequence[float],
+    dates: Sequence[datetime],
+    smooth_win: int,
+    min_win_period: int,
+):
     """
     Perform the new aground check
 

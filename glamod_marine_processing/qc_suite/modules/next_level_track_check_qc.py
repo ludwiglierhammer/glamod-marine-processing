@@ -243,7 +243,6 @@ def calculate_speed_course_distance_time_difference(
     return speed, distance, course, timediff
 
 
-
 @inspect_arrays(["vsi", "dsi", "lat", "lon", "date"])
 def forward_discrepancy(
     vsi: Sequence[float],
