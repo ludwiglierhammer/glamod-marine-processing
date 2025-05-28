@@ -9,6 +9,7 @@ from glamod_marine_processing.qc_suite.modules.next_level_track_check_qc import 
     calculate_speed_course_distance_time_difference,
     forward_discrepancy,
     backward_discrepancy,
+    do_few_check,
     do_iquam_track_check,
     do_spike_check,
     do_track_check,
@@ -17,6 +18,7 @@ from glamod_marine_processing.qc_suite.modules.next_level_track_check_qc import 
     find_saturated_runs,
     km_to_nm,
 )
+from glamod_marine_processing.qc_suite.modules.qc import failed, passed
 
 
 def generic_frame(in_pt):
@@ -78,9 +80,9 @@ def test_do_spike_check(ship_frame, buoy_frame):
         for i in range(30):
             row = result[i]
             if i == 15:
-                assert row == 1
+                assert row == failed
             else:
-                assert row == 0
+                assert row == passed
 
 
 @pytest.mark.parametrize("key", ["sst", "lat", "lon", "date"])
@@ -121,7 +123,7 @@ def test_calculate_course_parameters(ship_frame):
 
 
 def test_do_track_check_passed(ship_frame):
-    trk, _few = do_track_check(
+    trk = do_track_check(
         lat=ship_frame.lat,
         lon=ship_frame.lon,
         date=ship_frame.date,
@@ -129,14 +131,14 @@ def test_do_track_check_passed(ship_frame):
         dsi=ship_frame.dsi,
     )
     for i in range(len(trk)):
-        assert trk[i] == 0
+        assert trk[i] == passed
 
 
 def test_do_track_check_mixed(ship_frame):
     lon = ship_frame.lon.array
     lon[15] = 30.0
     ship_frame["lon"] = lon
-    trk, _few = do_track_check(
+    trk = do_track_check(
         lat=ship_frame.lat,
         lon=ship_frame.lon,
         date=ship_frame.date,
@@ -145,9 +147,63 @@ def test_do_track_check_mixed(ship_frame):
     )
     for i in range(len(trk)):
         if i == 15:
-            assert trk[i] == 1
+            assert trk[i] == failed
         else:
-            assert trk[i] == 0
+            assert trk[i] == passed
+
+
+def test_do_track_check_testdata():
+    vsi = [np.nan] * 10
+    dsi = [np.nan] * 10
+    lat = [46.53, 46.31, 46.09, 45.87, 45.88, 46.53, 46.31, 46.09, 45.87, 45.88]
+    lon = [
+        -13.17,
+        -12.99,
+        -12.81,
+        -12.62,
+        -12.57,
+        -13.17,
+        -12.99,
+        -12.81,
+        -12.62,
+        -12.57,
+    ]
+    date = np.array(
+        [
+            "1873-01-01T01:00:00.000000000",
+            "1873-01-01T05:00:00.000000000",
+            "1873-01-01T09:00:00.000000000",
+            "1873-01-01T13:00:00.000000000",
+            "1873-01-01T17:00:00.000000000",
+            "1875-01-01T01:00:00.000000000",
+            "1875-01-01T05:00:00.000000000",
+            "1875-01-01T09:00:00.000000000",
+            "1875-01-01T13:00:00.000000000",
+            "1875-01-01T17:00:00.000000000",
+        ]
+    )
+    date = pd.to_datetime(date).tolist()
+
+    results = do_track_check(
+        vsi=vsi,
+        dsi=dsi,
+        lat=lat,
+        lon=lon,
+        date=date,
+    )
+    expected = [
+        passed,
+        passed,
+        failed,
+        passed,
+        passed,
+        passed,
+        passed,
+        failed,
+        passed,
+        passed,
+    ]
+    np.testing.assert_array_equal(results, expected)
 
 def test_backward_discrepancy(ship_frame):
     result = calculate_speed_course_distance_time_difference(ship_frame)
@@ -192,6 +248,22 @@ def test_do_track_check_raises(ship_frame, key):
             kwargs[k] = ship_frame[k]
     with pytest.raises(ValueError):
         do_track_check(**kwargs)
+
+
+def test_do_few_check_passed(ship_frame):
+    few = do_few_check(
+        value=ship_frame["lat"],
+    )
+    for i in range(len(few)):
+        assert few[i] == passed
+
+
+def test_do_few_check_failed(ship_frame):
+    few = do_few_check(
+        value=ship_frame["lat"][:2],
+    )
+    for i in range(len(few)):
+        assert few[i] == failed
 
 
 def test_calculate_speed_course_distance_time_difference(ship_frame):
@@ -296,7 +368,7 @@ def test_find_saturated_runs_long_frame(long_frame):
         date=long_frame["date"],
     )
     for i in range(len(repsat)):
-        assert repsat[i] == 0
+        assert repsat[i] == passed
 
 
 def test_find_saturated_runs_longer_frame(longer_frame):
@@ -308,7 +380,7 @@ def test_find_saturated_runs_longer_frame(longer_frame):
         date=longer_frame["date"],
     )
     for i in range(len(repsat)):
-        assert repsat[i] == 1
+        assert repsat[i] == failed
 
 
 def test_find_saturated_runs_longer_frame_last_passes(longer_frame_last_passes):
@@ -320,8 +392,8 @@ def test_find_saturated_runs_longer_frame_last_passes(longer_frame_last_passes):
         date=longer_frame_last_passes["date"],
     )
     for i in range(len(repsat) - 1):
-        assert repsat[i] == 1
-    assert repsat[49] == 0
+        assert repsat[i] == failed
+    assert repsat[49] == passed
 
 
 def test_find_saturated_runs_longer_frame_broken_run(longer_frame_broken_run):
@@ -333,7 +405,7 @@ def test_find_saturated_runs_longer_frame_broken_run(longer_frame_broken_run):
         date=longer_frame_broken_run["date"],
     )
     for i in range(len(repsat)):
-        assert repsat[i] == 0
+        assert repsat[i] == passed
 
 
 def test_find_saturated_runs_longer_frame_early_broken_run(
@@ -347,7 +419,7 @@ def test_find_saturated_runs_longer_frame_early_broken_run(
         date=longer_frame_early_broken_run["date"],
     )
     for i in range(len(repsat)):
-        assert repsat[i] == 0
+        assert repsat[i] == passed
 
 
 @pytest.fixture
@@ -375,11 +447,11 @@ def rounded_data():
 def test_find_multiple_rounded_values(rounded_data, unrounded_data):
     rounded = find_multiple_rounded_values(unrounded_data["at"])
     for i in range(len(rounded)):
-        assert rounded[i] == 0
+        assert rounded[i] == passed
 
     rounded = find_multiple_rounded_values(rounded_data["at"])
     for i in range(len(rounded)):
-        assert rounded[i] == 1
+        assert rounded[i] == failed
 
 
 @pytest.fixture
@@ -410,12 +482,12 @@ def almost_repeated_data():
 def test_find_repeated_values(repeated_data, almost_repeated_data):
     repeated = find_repeated_values(repeated_data["at"])
     for i in range(len(repeated) - 1):
-        assert repeated[i] == 1
-    assert repeated[49] == 0
+        assert repeated[i] == failed
+    assert repeated[49] == passed
 
     repeated = find_repeated_values(almost_repeated_data["at"])
     for i in range(len(repeated)):
-        assert repeated[i] == 0
+        assert repeated[i] == passed
 
 
 def iquam_frame(in_pt):
@@ -456,7 +528,7 @@ def test_do_iquam_track_check_drifter(iquam_drifter):
         speed_limit=15.0,
     )
     for i in range(len(iquam_track)):
-        assert iquam_track[i] == 0
+        assert iquam_track[i] == passed
 
 
 def test_do_iquam_track_check_ship(iquam_ship):
@@ -466,7 +538,7 @@ def test_do_iquam_track_check_ship(iquam_ship):
         date=iquam_ship.date,
     )
     for i in range(len(iquam_track)):
-        assert iquam_track[i] == 0
+        assert iquam_track[i] == passed
 
 
 def test_do_iquam_track_check_ship_lon(iquam_ship):
@@ -480,9 +552,9 @@ def test_do_iquam_track_check_ship_lon(iquam_ship):
     )
     for i in range(len(iquam_track)):
         if i == 15:
-            assert iquam_track[i] == 1
+            assert iquam_track[i] == failed
         else:
-            assert iquam_track[i] == 0
+            assert iquam_track[i] == passed
 
 
 def test_do_iquam_track_check_drifter_speed_limit(iquam_drifter):
@@ -494,6 +566,6 @@ def test_do_iquam_track_check_drifter_speed_limit(iquam_drifter):
     )
     for i in range(len(iquam_track)):
         if i in [4, 5, 6, 7, 8, 13, 14, 15, 16, 17, 21, 22, 23, 24, 25]:
-            assert iquam_track[i] == 1
+            assert iquam_track[i] == failed
         else:
-            assert iquam_track[i] == 0
+            assert iquam_track[i] == passed

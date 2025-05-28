@@ -7,14 +7,15 @@ import copy
 import numpy as np
 import pytest
 
-from datetime import datetime
 
-from glamod_marine_processing.qc_suite.modules.qc import (
-    passed,
-    failed,
-    untestable,
-    untested,
-)
+import glamod_marine_processing.qc_suite.modules.Extended_IMMA as ex
+import glamod_marine_processing.qc_suite.modules.trackqc as otqc
+from glamod_marine_processing.qc_suite.modules.IMMA1 import IMMA
+
+# from glamod_marine_processing.qc_suite.modules.next_level_track_check_qc import (
+#    calculate_speed_course_distance_time_difference,
+# )
+>>>>>>> next_level_qc
 
 import glamod_marine_processing.qc_suite.modules.next_level_trackqc as tqc
 
