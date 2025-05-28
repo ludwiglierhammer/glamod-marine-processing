@@ -28,7 +28,7 @@ def generic_frame(in_pt):
     sst = [22 for _ in range(30)]
     sst[15] = 33
 
-    vsi = [11.11951 * km_to_nm for _ in range(30)]
+    vsi = [11.11951 * km_to_nm for _ in range(30)]  # knots
     dsi = [0 for _ in range(30)]
     dck = [193 for _ in range(30)]
 
@@ -212,19 +212,19 @@ def test_backward_discrepancy(ship_frame):
             lat=ship_frame["lat"],
             lon=ship_frame["lon"],
             date=ship_frame["date"],
-            alternating=True,
+            alternating=False,
         )
     )
     result = backward_discrepancy(
-        vsi=speed,
-        dsi=course,
+        vsi=ship_frame["vsi"],
+        dsi=ship_frame["dsi"],
         lat=ship_frame["lat"],
         lon=ship_frame["lon"],
         date=ship_frame["date"],
     )
     for i in range(len(result) - 1):
         assert pytest.approx(result[i], abs=0.00001) == 0.0
-    assert result[-1] is None
+    assert np.isnan(result[-1])
 
 
 def test_forward_discrepancy(ship_frame):
@@ -236,15 +236,15 @@ def test_forward_discrepancy(ship_frame):
         )
     )
     result = forward_discrepancy(
-        vsi=speed,
-        dsi=course,
+        vsi=ship_frame["vsi"],
+        dsi=ship_frame["dsi"],
         lat=ship_frame["lat"],
         lon=ship_frame["lon"],
         date=ship_frame["date"],
     )
     for i in range(1, len(result)):
         assert pytest.approx(result[i], abs=0.00001) == 0.0
-    assert result[0] is None
+    assert np.isnan(result[0])
 
 
 def test_calc_alternate_speeds(ship_frame):

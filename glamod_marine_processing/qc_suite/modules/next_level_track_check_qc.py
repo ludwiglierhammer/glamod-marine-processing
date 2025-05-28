@@ -319,7 +319,7 @@ def forward_discrepancy(
         lat1, lon1 = tc.increment_position(
             lat_previous,
             lon_previous,
-            vsi_previous,
+            vsi_previous / km_to_nm,
             dsi_current,
             timediff,
         )
@@ -327,7 +327,7 @@ def forward_discrepancy(
         lat2, lon2 = tc.increment_position(
             lat_current,
             lon_current,
-            vsi_current,
+            vsi_current / km_to_nm,
             dsi_current,
             timediff,
         )
@@ -417,27 +417,26 @@ def backward_discrepancy(
             continue
 
         timediff = (tsi_current - tsi_previous).total_seconds() / 3600
-        # get increment from initial position - backwards in time
-        # means reversing the direction by 180 degrees
+        # get increment from initial position - backwards in time means reversing the direction by 180 degrees
         lat1, lon1 = tc.increment_position(
             lat_current,
             lon_current,
-            vsi_current,
-            dsi_current,
+            vsi_current / km_to_nm,
+            dsi_current-180.,
             timediff,
         )
 
         lat2, lon2 = tc.increment_position(
             lat_previous,
             lon_previous,
-            vsi_previous,
-            dsi_previous,
+            vsi_previous / km_to_nm,
+            dsi_previous-180.,
             timediff,
         )
 
         # apply increments to the lat and lon at i-1
         updated_latitude = lat_current + lat1 + lat2
-        updated_longitude = lon_previous + lon1 + lon2
+        updated_longitude = lon_current + lon1 + lon2
 
         # calculate distance between calculated position and the second reported position
         discrepancy = sg.sphere_distance(
