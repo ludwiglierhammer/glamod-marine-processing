@@ -2,8 +2,6 @@
 
 from __future__ import annotations
 
-from .qc import failed, passed
-
 
 def is_in_valid_list(
     value: str | int | float, valid_list: str | int | float | list
@@ -25,8 +23,8 @@ def is_in_valid_list(
     if not isinstance(valid_list, list):
         valid_list = [valid_list]
     if value in valid_list:
-        return passed
-    return failed
+        return True
+    return False
 
 
 def is_buoy(platform_type: int, valid_list: list | int = [6, 7]) -> int:
@@ -168,7 +166,6 @@ def id_is_generic(inid: str, inyear: int) -> bool:
         generic_ids.append("7        ")
         generic_ids.append("00007    ")
 
-    result = False
     if inid in generic_ids:
-        result = True
-    return result
+        return True
+    return False

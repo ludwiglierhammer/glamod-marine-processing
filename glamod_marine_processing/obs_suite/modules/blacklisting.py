@@ -2,8 +2,7 @@
 
 from __future__ import annotations
 
-from .auxiliary import isvalid
-from .qc import failed, passed
+import pandas as pd
 
 
 def do_blacklist(
@@ -52,13 +51,13 @@ def do_blacklist(
         longitude -= 360
 
     if latitude == 0.0 and longitude == 0.0:
-        return failed  # blacklist all obs at 0,0 as this is a common error.
+        return False  # blacklist all obs at 0,0 as this is a common error.
 
-    if isvalid(platform_type) and platform_type == 13:
-        return failed  # C-MAN data - we do not want coastal stations
+    if not pd.isna(platform_type) and platform_type == 13:
+        return False  # C-MAN data - we do not want coastal stations
 
     if id == "SUPERIGORINA":
-        return failed
+        return False
 
     # these are the definitions of the regions which are blacklisted for Deck 732
     region = {
@@ -111,10 +110,10 @@ def do_blacklist(
                     thisreg[0] <= longitude <= thisreg[2]
                     and thisreg[1] <= latitude <= thisreg[3]
                 ):
-                    return failed
+                    return False
 
     if deck == 874:
-        return failed  # SEAS data gets blacklisted
+        return False  # SEAS data gets blacklisted
 
     # For a short period, observations from drifting buoys with these IDs had very erroneous values in the
     # Tropical Pacific. These were identified offline and added to the blacklist
@@ -153,9 +152,9 @@ def do_blacklist(
             "53901    ",
             "53902    ",
         ]:
-            return failed
+            return False
 
-    return passed
+    return True
 
 
 def do_humidity_blacklist(platform_type: int) -> int:
@@ -173,9 +172,9 @@ def do_humidity_blacklist(platform_type: int) -> int:
         Return 1 if report is ineligible for humidity QC, otherwise 0.
     """
     if platform_type in [0, 1, 2, 3, 4, 5, 6, 8, 9, 10, 15]:
-        return passed
+        return True
     else:
-        return failed
+        return False
 
 
 def do_mat_blacklist(
@@ -218,7 +217,7 @@ def do_mat_blacklist(
     # the World Ocean Database) [Boyer et al., 2009] were found to be erroneous (Z. Ji and S. Worley, personal
     # communication, 2011) and were excluded from HadNMAT2.
     if platform_type == 5 and deck == 780:
-        return failed
+        return False
 
     # North Atlantic, Suez and indian ocean to be excluded from MAT processing
     # See figure 8 from Kent et al.
@@ -233,9 +232,9 @@ def do_mat_blacklist(
             or (95.0 <= longitude <= 105.0 and -10.0 <= latitude <= 5.0)
         )
     ):
-        return failed
+        return False
 
-    return passed
+    return True
 
 
 def do_wind_blacklist(deck):
@@ -253,6 +252,6 @@ def do_wind_blacklist(deck):
         Set to 1 if deck is in black list, 0 otherwise
     """
     if deck in [708, 780]:
-        return failed
+        return False
 
-    return passed
+    return True
