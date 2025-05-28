@@ -13,7 +13,7 @@ def do_blacklist(
     latitude: float,
     longitude: float,
     platform_type: int,
-) -> int:
+) -> bool:
     """
     Do basic blacklisting on the report. The blacklist is used to remove data that are known to be bad
     and shouldn't be passed to the QC.
@@ -43,21 +43,21 @@ def do_blacklist(
 
     Returns
     -------
-    int
-        1 if the report is blacklisted, 0 otherwise
+    bool
+        True if the report is blacklisted, False otherwise
     """
     # Fold longitudes into ICOADS range
     if longitude > 180.0:
         longitude -= 360
 
     if latitude == 0.0 and longitude == 0.0:
-        return False  # blacklist all obs at 0,0 as this is a common error.
+        return True  # blacklist all obs at 0,0 as this is a common error.
 
     if not pd.isna(platform_type) and platform_type == 13:
-        return False  # C-MAN data - we do not want coastal stations
+        return True  # C-MAN data - we do not want coastal stations
 
     if id == "SUPERIGORINA":
-        return False
+        return True
 
     # these are the definitions of the regions which are blacklisted for Deck 732
     region = {
@@ -110,10 +110,10 @@ def do_blacklist(
                     thisreg[0] <= longitude <= thisreg[2]
                     and thisreg[1] <= latitude <= thisreg[3]
                 ):
-                    return False
+                    return True
 
     if deck == 874:
-        return False  # SEAS data gets blacklisted
+        return True  # SEAS data gets blacklisted
 
     # For a short period, observations from drifting buoys with these IDs had very erroneous values in the
     # Tropical Pacific. These were identified offline and added to the blacklist
@@ -152,12 +152,12 @@ def do_blacklist(
             "53901    ",
             "53902    ",
         ]:
-            return False
+            return True
 
-    return True
+    return False
 
 
-def do_humidity_blacklist(platform_type: int) -> int:
+def do_humidity_blacklist(platform_type: int) -> bool:
     """
     Flag certain sources as ineligible for humidity QC.
 
@@ -168,13 +168,12 @@ def do_humidity_blacklist(platform_type: int) -> int:
 
     Returns
     -------
-    int
-        Return 1 if report is ineligible for humidity QC, otherwise 0.
+    bool
+        True if report is ineligible for humidity QC, otherwise False.
     """
     if platform_type in [0, 1, 2, 3, 4, 5, 6, 8, 9, 10, 15]:
-        return True
-    else:
         return False
+    return True
 
 
 def do_mat_blacklist(
@@ -183,7 +182,7 @@ def do_mat_blacklist(
     latitude: float,
     longitude: float,
     year: int,
-) -> int:
+) -> bool:
     """
     Flag certain decks, areas and other sources as ineligible for MAT QC.
 
@@ -206,8 +205,8 @@ def do_mat_blacklist(
 
     Returns
     -------
-    int
-        Returns 1 if report is ineligible for MAT QC, otherwise 0.
+    bool
+        True if report is ineligible for MAT QC, otherwise False.
 
     References
     ----------
@@ -217,7 +216,7 @@ def do_mat_blacklist(
     # the World Ocean Database) [Boyer et al., 2009] were found to be erroneous (Z. Ji and S. Worley, personal
     # communication, 2011) and were excluded from HadNMAT2.
     if platform_type == 5 and deck == 780:
-        return False
+        return True
 
     # North Atlantic, Suez and indian ocean to be excluded from MAT processing
     # See figure 8 from Kent et al.
@@ -232,12 +231,12 @@ def do_mat_blacklist(
             or (95.0 <= longitude <= 105.0 and -10.0 <= latitude <= 5.0)
         )
     ):
-        return False
+        return True
 
-    return True
+    return False
 
 
-def do_wind_blacklist(deck):
+def do_wind_blacklist(deck: int) -> bool:
     """
     Flag certain sources as ineligible for wind QC. Based on Shawn Smith's list.
 
@@ -248,10 +247,10 @@ def do_wind_blacklist(deck):
 
     Returns
     -------
-    int
-        Set to 1 if deck is in black list, 0 otherwise
+    bool
+        True if deck is in black list, False otherwise
     """
     if deck in [708, 780]:
-        return False
+        return True
 
-    return True
+    return False
