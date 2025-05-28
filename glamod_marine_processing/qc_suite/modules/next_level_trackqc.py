@@ -69,7 +69,7 @@ def track_day_test(
         Latitude in degrees
     lon: float
         Longitude in degrees
-    elevdlim: float
+    elevdlim: float, default: -2.5
         Elevation day/night delimiter in degrees above horizon
 
     Returns
