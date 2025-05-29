@@ -9,6 +9,7 @@ import numpy as np
 import pytest
 
 import glamod_marine_processing.qc_suite.modules.next_level_trackqc as tqc
+import glamod_marine_processing.qc_suite.modules.statistics
 from glamod_marine_processing.qc_suite.modules.qc import untestable
 
 # from glamod_marine_processing.qc_suite.modules.next_level_track_check_qc import (
@@ -61,7 +62,7 @@ def test_daytime_error_invalid_parameter(year, month, day, hour, lat, lon):
 )
 def test_trim_mean(inarr, trimming, expected):
     original_array = copy.deepcopy(inarr)
-    trim = tqc.trim_mean(inarr, trimming)
+    trim = glamod_marine_processing.qc_suite.modules.statistics.trim_mean(inarr, trimming)
     assert trim == expected
     assert np.all(
         inarr == original_array
@@ -77,7 +78,7 @@ def test_trim_mean(inarr, trimming, expected):
 )
 def test_trim_std(inarr, trimming, expected):
     original_array = copy.deepcopy(inarr)
-    trim = tqc.trim_std(inarr, trimming)
+    trim = glamod_marine_processing.qc_suite.modules.statistics.trim_std(inarr, trimming)
     assert trim == expected
     assert np.all(
         inarr == original_array

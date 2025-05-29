@@ -4,7 +4,6 @@
 
 from __future__ import annotations
 
-import copy
 import math
 import warnings
 from datetime import datetime
@@ -17,6 +16,7 @@ from .auxiliary import isvalid
 from .next_level_track_check_qc import do_iquam_track_check, inspect_arrays
 from .qc import failed, passed, untestable, untested
 from .spherical_geometry import sphere_distance
+from .statistics import trim_mean, trim_std
 from .time_control import dayinyear
 
 """
@@ -125,68 +125,6 @@ def track_day_test(
         daytime = True
 
     return daytime
-
-
-@inspect_arrays(["inarr"])
-def trim_mean(inarr: Sequence[float], trim: int) -> float:
-    """Calculate a resistant (aka robust) mean of an input array given a trimming criteria.
-
-    Parameters
-    ----------
-    inarr: array-like of float, shape (n,)
-        1-dimensional value array.
-    trim: int
-        trimming criteria. A value of 10 trims one tenth of the values off each end of the sorted array
-        before calculating the mean.
-
-    Returns
-    -------
-    float
-        Trimmed mean
-    """
-    arr = copy.deepcopy(inarr)
-    if trim == 0:
-        return float(np.mean(arr))
-
-    length = len(arr)
-    arr.sort()
-
-    index1 = int(length / trim)
-
-    trim = float(np.mean(arr[index1 : length - index1]))
-
-    return trim
-
-
-@inspect_arrays(["inarr"])
-def trim_std(inarr: Sequence[float], trim: int) -> float:
-    """Calculate a resistant (aka robust) standard deviation of an input array given a trimming criteria.
-
-    Parameters
-    ----------
-    inarr: array-like of float, shape (n,)
-        1-dimensional value array.
-    trim: int
-        trimming criteria. A value of 10 trims one tenth of the values off each end of the sorted array before
-        calculating the standard deviation.
-
-    Returns
-    -------
-    float
-        Returns trimmed standard deviation
-    """
-    arr = copy.deepcopy(inarr)
-    if trim == 0:
-        return float(np.std(arr))
-
-    length = len(arr)
-    arr.sort()
-
-    index1 = int(length / trim)
-
-    trim = float(np.std(arr[index1 : length - index1]))
-
-    return trim
 
 
 def convert_date_to_hours(dates: Sequence[datetime]) -> Sequence[float]:

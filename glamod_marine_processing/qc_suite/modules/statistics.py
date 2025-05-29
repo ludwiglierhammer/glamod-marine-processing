@@ -2,9 +2,12 @@
 
 from __future__ import annotations
 
+import copy
 import math
+from typing import Sequence
 
 import numpy as np
+
 
 
 def p_data_given_good(
@@ -263,3 +266,63 @@ def missing_mean(inarr: list[float]) -> float | None:
     if num == 0.0:
         return None
     return result / num
+
+
+def trim_mean(inarr: Sequence[float], trim: int) -> float:
+    """Calculate a resistant (aka robust) mean of an input array given a trimming criteria.
+
+    Parameters
+    ----------
+    inarr: array-like of float, shape (n,)
+        1-dimensional value array.
+    trim: int
+        trimming criteria. A value of 10 trims one tenth of the values off each end of the sorted array
+        before calculating the mean.
+
+    Returns
+    -------
+    float
+        Trimmed mean
+    """
+    arr = copy.deepcopy(inarr)
+    if trim == 0:
+        return float(np.mean(arr))
+
+    length = len(arr)
+    arr.sort()
+
+    index1 = int(length / trim)
+
+    trim = float(np.mean(arr[index1 : length - index1]))
+
+    return trim
+
+
+def trim_std(inarr: Sequence[float], trim: int) -> float:
+    """Calculate a resistant (aka robust) standard deviation of an input array given a trimming criteria.
+
+    Parameters
+    ----------
+    inarr: array-like of float, shape (n,)
+        1-dimensional value array.
+    trim: int
+        trimming criteria. A value of 10 trims one tenth of the values off each end of the sorted array before
+        calculating the standard deviation.
+
+    Returns
+    -------
+    float
+        Returns trimmed standard deviation
+    """
+    arr = copy.deepcopy(inarr)
+    if trim == 0:
+        return float(np.std(arr))
+
+    length = len(arr)
+    arr.sort()
+
+    index1 = int(length / trim)
+
+    trim = float(np.std(arr[index1 : length - index1]))
+
+    return trim
