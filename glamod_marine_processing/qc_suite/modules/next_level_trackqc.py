@@ -17,7 +17,7 @@ from .next_level_track_check_qc import do_iquam_track_check, inspect_arrays
 from .qc import failed, passed, untestable, untested
 from .spherical_geometry import sphere_distance
 from .statistics import trim_mean, trim_std
-from .time_control import dayinyear
+from .time_control import dayinyear, convert_date_to_hours
 
 """
 The trackqc module contains a set of functions for performing the tracking QC
@@ -125,27 +125,6 @@ def track_day_test(
         daytime = True
 
     return daytime
-
-
-def convert_date_to_hours(dates: Sequence[datetime]) -> Sequence[float]:
-    """
-    Convert an array of datetimes to an array of hours since the first element.
-
-    Parameters
-    ----------
-    dates: array-like of datetime, shape (n,)
-        1-dimensional date array.
-
-    Returns
-    -------
-    array-like of float, shape (n,)
-        1- dimensional array containing hours since the first element in the array.
-    """
-    hours_elapsed = np.zeros(len(dates))
-    for i in range(len(dates)):
-        duration_in_seconds = (dates[i] - dates[0]).total_seconds()
-        hours_elapsed[i] = duration_in_seconds / (60 * 60)
-    return hours_elapsed
 
 
 def is_monotonic(inarr: Sequence[float]) -> bool:

@@ -5,6 +5,7 @@ from __future__ import annotations
 import calendar
 import math
 from datetime import datetime, timedelta
+from typing import Sequence
 
 import numpy as np
 
@@ -717,3 +718,24 @@ def get_month_lengths(year: int) -> list[int]:
         month_lengths = [31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31]
 
     return month_lengths
+
+
+def convert_date_to_hours(dates: Sequence[datetime]) -> Sequence[float]:
+    """
+    Convert an array of datetimes to an array of hours since the first element.
+
+    Parameters
+    ----------
+    dates: array-like of datetime, shape (n,)
+        1-dimensional date array.
+
+    Returns
+    -------
+    array-like of float, shape (n,)
+        1- dimensional array containing hours since the first element in the array.
+    """
+    hours_elapsed = np.zeros(len(dates))
+    for i in range(len(dates)):
+        duration_in_seconds = (dates[i] - dates[0]).total_seconds()
+        hours_elapsed[i] = duration_in_seconds / (60 * 60)
+    return hours_elapsed
