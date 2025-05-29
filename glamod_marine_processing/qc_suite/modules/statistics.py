@@ -9,7 +9,6 @@ from typing import Sequence
 import numpy as np
 
 
-
 def p_data_given_good(
     x: float, q: float, r_hi: float, r_lo: float, mu: float, sigma: float
 ) -> float:
@@ -233,15 +232,16 @@ def trimmed_mean(inarr: list[float], trim: int) -> float:
     float
         Trimmed mean.
     """
-    if trim == 0:
-        return np.mean(inarr)
-
-    length = len(inarr)
-    inarr.sort()
-
-    index1 = int(length / trim)
-
-    return np.mean(inarr[index1 : length - index1])
+    return trim_mean(inarr, trim)
+    # if trim == 0:
+    #     return np.mean(inarr)
+    #
+    # length = len(inarr)
+    # inarr.sort()
+    #
+    # index1 = int(length / trim)
+    #
+    # return np.mean(inarr[index1 : length - index1])
 
 
 def missing_mean(inarr: list[float]) -> float | None:
