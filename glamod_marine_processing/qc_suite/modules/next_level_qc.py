@@ -191,11 +191,11 @@ def do_day_check(
     t_check = do_time_check(hour=hour)
 
     # Defaults to FAIL if the location, date or time are bad
-    if p_check == failed or d_check == failed or t_check == failed:
+    if failed in [p_check, d_check, t_check]:
         return failed
 
     # Defaults to FAIL if the location, date or time are bad
-    if p_check == untestable or d_check == untestable or t_check == untestable:
+    if untestable in [p_check, d_check, t_check]:
         return untestable
 
     year2 = year
@@ -450,7 +450,8 @@ def do_supersaturation_check(dpt: float, at2: float) -> int:
     """
     if not isvalid(dpt) or not isvalid(at2):
         return untestable
-    elif dpt > at2:
+
+    if dpt > at2:
         return failed
 
     return passed

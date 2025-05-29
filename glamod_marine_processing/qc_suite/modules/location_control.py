@@ -84,14 +84,12 @@ def lat_to_yindex(lat: float, res: float = 1.0) -> int:
         yindex = int(90 - lat)
         if yindex >= 180:
             yindex = 179
-        if yindex < 0:
-            yindex = 0
     else:
         yindex = int((90 - lat) / res)
         if yindex >= 180 / res:
             yindex = int(180 / res - 1)
-        if yindex < 0:
-            yindex = 0
+    yindex = max(yindex, 0)
+
     return yindex
 
 

@@ -572,18 +572,11 @@ def time_difference(
     float
         Difference in hours between the two times.
     """
-    # return time difference in hours
-    if (
-        not isvalid(year1)
-        or not isvalid(year2)
-        or not isvalid(month1)
-        or not isvalid(month2)
-        or not isvalid(day1)
-        or not isvalid(day2)
-        or not isvalid(hour1)
-        or not isvalid(hour2)
-    ):
-        return np.nan
+    # First check if any of the input parameters are invalid
+    args = locals()
+    for _, value in args.items():
+        if not isvalid(value):
+            return np.nan
 
     assert 0 <= hour1 < 24 and 0 <= hour2 < 24
 
@@ -601,6 +594,7 @@ def time_difference(
     last_day = jul_day(year2, month2, day2) + hour2 / 24.0
 
     return 24.0 * (last_day - first_day)
+
 
 
 def last_month_was(year: int, month: int) -> tuple[int, int]:
@@ -734,8 +728,9 @@ def convert_date_to_hours(dates: Sequence[datetime]) -> Sequence[float]:
     array-like of float, shape (n,)
         1- dimensional array containing hours since the first element in the array.
     """
-    hours_elapsed = np.zeros(len(dates))
-    for i in range(len(dates)):
-        duration_in_seconds = (dates[i] - dates[0]).total_seconds()
+    n_dates = len(dates)
+    hours_elapsed = np.zeros(n_dates)
+    for i, date in enumerate(dates):
+        duration_in_seconds = (date - dates[0]).total_seconds()
         hours_elapsed[i] = duration_in_seconds / (60 * 60)
     return hours_elapsed

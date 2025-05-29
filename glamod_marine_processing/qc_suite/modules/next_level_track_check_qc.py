@@ -9,7 +9,7 @@ import numpy as np
 import pandas as pd
 
 from . import spherical_geometry as sg
-from . import time_control as time_control
+from . import time_control
 from . import track_check as tc
 from .auxiliary import inspect_arrays, isvalid
 from .qc import failed, passed
@@ -864,17 +864,20 @@ def find_multiple_rounded_values(
             else:
                 valcount[str(v)] = [i]
 
-    if allcount > min_count:
-        wholenums = 0
-        for key in valcount:
-            if float(key).is_integer():
-                wholenums = wholenums + len(valcount[key])
+    if allcount <= min_count:
+        return rounded
 
-        if float(wholenums) / float(allcount) >= threshold:
-            for key in valcount:
-                if float(key).is_integer():
-                    for i in valcount[key]:
-                        rounded[i] = failed
+    wholenums = 0
+    for key, indices in valcount.items():
+        if float(key).is_integer():
+            wholenums = wholenums + len(indices)
+
+    if float(wholenums) / float(allcount) < threshold:
+        return rounded
+
+    for key, indices in valcount.items():
+        if float(key).is_integer():
+            rounded[indices] = failed
 
     return rounded
 
@@ -894,9 +897,9 @@ def find_repeated_values(
     value: array-like of float, shape (n,)
         1-dimensional array.
     min_count: int, default: 20
-        ???
+        minimum number of repeated values that will trigger the test
     threshold: float, default: 0.7
-        ???
+        smallest fraction of all observations that will trigger the test
 
     Returns
     -------
@@ -921,11 +924,12 @@ def find_repeated_values(
             else:
                 valcount[str(v)] = [i]
 
-    if allcount > min_count:
-        for key in valcount:
-            if float(len(valcount[key])) / float(allcount) > threshold:
-                for i in valcount[key]:
-                    rep[i] = 1
+    if allcount <= min_count:
+        return rep
+
+    for _, indices in valcount.items():
+        if float(len(indices)) / float(allcount) > threshold:
+            rep[indices] = 1
 
     return rep
 
