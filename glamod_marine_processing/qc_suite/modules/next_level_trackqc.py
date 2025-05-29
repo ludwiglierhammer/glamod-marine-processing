@@ -383,63 +383,6 @@ class SpeedChecker:
         return
 
 
-@inspect_arrays(["lons", "lats", "dates"])
-def do_new_speed_check(
-    lons: Sequence[float],
-    lats: Sequence[float],
-    dates: Sequence[datetime],
-    speed_limit: float,
-    min_win_period: float,
-    ship_speed_limit: float,
-    delta_d: float,
-    delta_t: float,
-    n_neighbours: int,
-):
-    """
-    Perform the new speed check
-
-    Parameters
-    ----------
-    lons: array-like of float, shape (n,)
-        1-dimensional longitude array in degrees.
-    lats: array-like of float, shape (n,)
-        1-dimensional latitude array in degrees.
-    dates: array-like of datetime, shape (n,)
-        1-dimensional date array.
-    speed_limit: float
-        maximum allowable speed for an in situ drifting buoy (metres per second)
-    min_win_period: float
-        minimum period of time in days over which position is assessed for speed estimates (see description)
-    ship_speed_limit: float
-        Ship speed limit for the IQUAM track check
-    delta_d: float
-        The smallest increment in distance that can be resolved. For 0.01 degrees of lat-lon this is 1.11 km. Used
-        in the IQUAM track check
-    delta_t: float
-        The smallest increment in time that can be resolved. For hourly data expressed as a float this is 0.01 hours.
-        Used in the IQUAM track check
-    n_neighbours: int
-        Number of neighbours considered in the IQUAM track check
-
-    Returns
-    -------
-
-    """
-    checker = NewSpeedChecker(
-        lons,
-        lats,
-        dates,
-        speed_limit,
-        min_win_period,
-        ship_speed_limit,
-        delta_d,
-        delta_t,
-        n_neighbours,
-    )
-    checker._do_new_speed_check()
-    return checker.get_qc_outcomes()
-
-
 class NewSpeedChecker:
     """Check to see whether a drifter has been picked up by a ship (out of water) based on 1/100th degree
     precision positions. A flag 'drf_spd' is set for each input report: flag=1 for reports deemed picked up,
@@ -1012,7 +955,9 @@ class SSTTailChecker:
 
         # do short tail check on records that pass long tail check - whole record already failed long tail check
         if not (self.start_tail_ind >= self.end_tail_ind):
-            first_pass_ind = self.start_tail_ind + 1  # first index passing long tail check
+            first_pass_ind = (
+                self.start_tail_ind + 1
+            )  # first index passing long tail check
             last_pass_ind = self.end_tail_ind - 1  # last index passing long tail check
             self._do_short_tail_check(first_pass_ind, last_pass_ind, forward=True)
             self._do_short_tail_check(first_pass_ind, last_pass_ind, forward=False)
@@ -1023,10 +968,10 @@ class SSTTailChecker:
             self.end_tail_ind = nrep
 
         if not self.start_tail_ind == -1 and start_tail:
-            self.qc_outcomes[0: self.reps_ind[self.start_tail_ind]+1] = failed
+            self.qc_outcomes[0 : self.reps_ind[self.start_tail_ind] + 1] = failed
 
         if not self.end_tail_ind == nrep and not start_tail:
-            self.qc_outcomes[self.reps_ind[self.end_tail_ind]:] = failed
+            self.qc_outcomes[self.reps_ind[self.end_tail_ind] :] = failed
 
     @staticmethod
     def _parse_rep(lat, lon, ostia, ice, bgvar, dates) -> (float, float, float, bool):
@@ -1543,6 +1488,7 @@ class SSTBiasedNoisyChecker:
             self.qc_outcomes_short[:] = failed
 
 
+@inspect_arrays(["lons", "lats", "dates"])
 def do_speed_check(
     lons: Sequence[float],
     lats: Sequence[float],
@@ -1585,6 +1531,65 @@ def do_speed_check(
     return checker.get_qc_outcomes()
 
 
+@inspect_arrays(["lons", "lats", "dates"])
+def do_new_speed_check(
+    lons: Sequence[float],
+    lats: Sequence[float],
+    dates: Sequence[datetime],
+    speed_limit: float,
+    min_win_period: float,
+    ship_speed_limit: float,
+    delta_d: float,
+    delta_t: float,
+    n_neighbours: int,
+):
+    """
+    Perform the new speed check
+
+    Parameters
+    ----------
+    lons: array-like of float, shape (n,)
+        1-dimensional longitude array in degrees.
+    lats: array-like of float, shape (n,)
+        1-dimensional latitude array in degrees.
+    dates: array-like of datetime, shape (n,)
+        1-dimensional date array.
+    speed_limit: float
+        maximum allowable speed for an in situ drifting buoy (metres per second)
+    min_win_period: float
+        minimum period of time in days over which position is assessed for speed estimates (see description)
+    ship_speed_limit: float
+        Ship speed limit for the IQUAM track check
+    delta_d: float
+        The smallest increment in distance that can be resolved. For 0.01 degrees of lat-lon this is 1.11 km. Used
+        in the IQUAM track check
+    delta_t: float
+        The smallest increment in time that can be resolved. For hourly data expressed as a float this is 0.01 hours.
+        Used in the IQUAM track check
+    n_neighbours: int
+        Number of neighbours considered in the IQUAM track check
+
+    Returns
+    -------
+    array-like of int, shape (n,)
+        Array containing the QC outcomes for the new speed check
+    """
+    checker = NewSpeedChecker(
+        lons,
+        lats,
+        dates,
+        speed_limit,
+        min_win_period,
+        ship_speed_limit,
+        delta_d,
+        delta_t,
+        n_neighbours,
+    )
+    checker._do_new_speed_check()
+    return checker.get_qc_outcomes()
+
+
+@inspect_arrays(["lons", "lats", "dates"])
 def do_aground_check(
     lons: Sequence[float],
     lats: Sequence[float],
@@ -1626,6 +1631,7 @@ def do_aground_check(
     return checker.get_qc_outcomes()
 
 
+@inspect_arrays(["lons", "lats", "dates"])
 def do_new_aground_check(
     lons: Sequence[float],
     lats: Sequence[float],
@@ -1660,14 +1666,15 @@ def do_new_aground_check(
     return checker.get_qc_outcomes()
 
 
+@inspect_arrays(["lats", "lons", "sst", "ostia", "ice", "bgvar", "dates"])
 def do_sst_start_tail_check(
-    lat: Sequence[float],
-    lon: Sequence[float],
+    lons: Sequence[float],
+    lats: Sequence[float],
+    dates: Sequence[datetime],
     sst: Sequence[float],
     ostia: Sequence[float],
     ice: Sequence[float],
     bgvar: Sequence[float],
-    dates: Sequence[datetime],
     long_win_len: int,
     long_err_std_n: float,
     short_win_len: int,
@@ -1682,9 +1689,9 @@ def do_sst_start_tail_check(
 
     Parameters
     ----------
-    lat: array-like of float, shape (n,)
+    lats: array-like of float, shape (n,)
         1-dimensional latitude array in degrees.
-    lon: array-like of float, shape (n,)
+    lons: array-like of float, shape (n,)
         1-dimensional longitude array in degrees.
     sst: array-like of float, shape (n,)
         1-dimensional array of sea surface temperatures in K.
@@ -1723,8 +1730,8 @@ def do_sst_start_tail_check(
     1 if SST start tail check fails, 0 otherwise.
     """
     checker = SSTTailChecker(
-        lat,
-        lon,
+        lats,
+        lons,
         sst,
         ostia,
         ice,
@@ -1743,14 +1750,15 @@ def do_sst_start_tail_check(
     return checker.get_qc_outcomes()
 
 
+@inspect_arrays(["lats", "lons", "sst", "ostia", "ice", "bgvar", "dates"])
 def do_sst_end_tail_check(
-    lat: Sequence[float],
-    lon: Sequence[float],
+    lons: Sequence[float],
+    lats: Sequence[float],
+    dates: Sequence[datetime],
     sst: Sequence[float],
     ostia: Sequence[float],
     ice: Sequence[float],
     bgvar: Sequence[float],
-    dates: Sequence[datetime],
     long_win_len: int,
     long_err_std_n: float,
     short_win_len: int,
@@ -1765,9 +1773,9 @@ def do_sst_end_tail_check(
 
     Parameters
     ----------
-    lat: array-like of float, shape (n,)
+    lats: array-like of float, shape (n,)
         1-dimensional latitude array in degrees.
-    lon: array-like of float, shape (n,)
+    lons: array-like of float, shape (n,)
         1-dimensional longitude array in degrees.
     sst: array-like of float, shape (n,)
         1-dimensional array of sea surface temperatures in K.
@@ -1806,8 +1814,8 @@ def do_sst_end_tail_check(
     1 if SST start tail check fails, 0 otherwise.
     """
     checker = SSTTailChecker(
-        lat,
-        lon,
+        lats,
+        lons,
         sst,
         ostia,
         ice,
@@ -1826,14 +1834,15 @@ def do_sst_end_tail_check(
     return checker.get_qc_outcomes()
 
 
+@inspect_arrays(["lats", "lons", "dates", "sst", "ostia", "bgvar", "ice"])
 def do_sst_biased_check(
-    lat: Sequence[float],
-    lon: Sequence[float],
+    lons: Sequence[float],
+    lats: Sequence[float],
     dates: Sequence[datetime],
     sst: Sequence[float],
     ostia: Sequence[float],
-    bgvar: Sequence[float],
     ice: Sequence[float],
+    bgvar: Sequence[float],
     n_eval: int,
     bias_lim: float,
     drif_intra: float,
@@ -1847,9 +1856,9 @@ def do_sst_biased_check(
 
     Parameters
     ----------
-    lat: array-like of float, shape (n,)
+    lats: array-like of float, shape (n,)
         1-dimensional latitude array in degrees.
-    lon: array-like of float, shape (n,)
+    lons: array-like of float, shape (n,)
         1-dimensional longitude array in degrees.
     dates: array-like of datetime, shape (n,)
         1-dimensional date array.
@@ -1884,8 +1893,8 @@ def do_sst_biased_check(
         1 if SST bias check fails, 0 otherwise.
     """
     checker = SSTBiasedNoisyChecker(
-        lat,
-        lon,
+        lats,
+        lons,
         dates,
         sst,
         ostia,
@@ -1903,14 +1912,15 @@ def do_sst_biased_check(
     return checker.get_qc_outcomes_bias()
 
 
+@inspect_arrays(["lats", "lons", "dates", "sst", "ostia", "bgvar", "ice"])
 def do_sst_noisy_check(
-    lat: Sequence[float],
-    lon: Sequence[float],
+    lons: Sequence[float],
+    lats: Sequence[float],
     dates: Sequence[datetime],
     sst: Sequence[float],
     ostia: Sequence[float],
-    bgvar: Sequence[float],
     ice: Sequence[float],
+    bgvar: Sequence[float],
     n_eval: int,
     bias_lim: float,
     drif_intra: float,
@@ -1924,9 +1934,9 @@ def do_sst_noisy_check(
 
     Parameters
     ----------
-    lat: array-like of float, shape (n,)
+    lats: array-like of float, shape (n,)
         1-dimensional latitude array in degrees.
-    lon: array-like of float, shape (n,)
+    lons: array-like of float, shape (n,)
         1-dimensional longitude array in degrees.
     dates: array-like of datetime, shape (n,)
         1-dimensional date array.
@@ -1961,8 +1971,8 @@ def do_sst_noisy_check(
         1 if SST noise check fails, 0 otherwise.
     """
     checker = SSTBiasedNoisyChecker(
-        lat,
-        lon,
+        lats,
+        lons,
         dates,
         sst,
         ostia,
@@ -1980,14 +1990,15 @@ def do_sst_noisy_check(
     return checker.get_qc_outcomes_noise()
 
 
+@inspect_arrays(["lats", "lons", "dates", "sst", "ostia", "bgvar", "ice"])
 def do_sst_biased_noisy_short_check(
-    lat: Sequence[float],
-    lon: Sequence[float],
+    lons: Sequence[float],
+    lats: Sequence[float],
     dates: Sequence[datetime],
     sst: Sequence[float],
     ostia: Sequence[float],
-    bgvar: Sequence[float],
     ice: Sequence[float],
+    bgvar: Sequence[float],
     n_eval: int,
     bias_lim: float,
     drif_intra: float,
@@ -2001,9 +2012,9 @@ def do_sst_biased_noisy_short_check(
 
     Parameters
     ----------
-    lat: array-like of float, shape (n,)
+    lats: array-like of float, shape (n,)
         1-dimensional latitude array in degrees.
-    lon: array-like of float, shape (n,)
+    lons: array-like of float, shape (n,)
         1-dimensional longitude array in degrees.
     dates: array-like of datetime, shape (n,)
         1-dimensional date array.
@@ -2038,8 +2049,8 @@ def do_sst_biased_noisy_short_check(
         1 if SST short check fails, 0 otherwise.
     """
     checker = SSTBiasedNoisyChecker(
-        lat,
-        lon,
+        lats,
+        lons,
         dates,
         sst,
         ostia,

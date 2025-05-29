@@ -1374,82 +1374,26 @@ def test_generic_tailcheck(
     # First do the start tail check
     if warns:
         with pytest.warns(UserWarning):
-            qc_outcomes = tqc.do_sst_start_tail_check(
-                lat,
-                lon,
-                sst,
-                ostia,
-                ice,
-                bgvar,
-                dates,
-                long_win_len,
-                long_err_std_n,
-                short_win_len,
-                short_err_std_n,
-                short_win_n_bad,
-                drif_inter,
-                drif_intra,
-                background_err_lim,
-            )
+            qc_outcomes = tqc.do_sst_start_tail_check(lon, lat, dates, sst, ostia, ice, bgvar, long_win_len,
+                                                      long_err_std_n, short_win_len, short_err_std_n, short_win_n_bad,
+                                                      drif_inter, drif_intra, background_err_lim)
     else:
-        qc_outcomes = tqc.do_sst_start_tail_check(
-            lat,
-            lon,
-            sst,
-            ostia,
-            ice,
-            bgvar,
-            dates,
-            long_win_len,
-            long_err_std_n,
-            short_win_len,
-            short_err_std_n,
-            short_win_n_bad,
-            drif_inter,
-            drif_intra,
-            background_err_lim,
-        )
+        qc_outcomes = tqc.do_sst_start_tail_check(lon, lat, dates, sst, ostia, ice, bgvar, long_win_len, long_err_std_n,
+                                                  short_win_len, short_err_std_n, short_win_n_bad, drif_inter,
+                                                  drif_intra, background_err_lim)
     for i in range(len(qc_outcomes)):
         assert qc_outcomes[i] == expected1[i]
 
     # Then do the end tail check on the same data
     if warns:
         with pytest.warns(UserWarning):
-            qc_outcomes = tqc.do_sst_end_tail_check(
-                lat,
-                lon,
-                sst,
-                ostia,
-                ice,
-                bgvar,
-                dates,
-                long_win_len,
-                long_err_std_n,
-                short_win_len,
-                short_err_std_n,
-                short_win_n_bad,
-                drif_inter,
-                drif_intra,
-                background_err_lim,
-            )
+            qc_outcomes = tqc.do_sst_end_tail_check(lon, lat, dates, sst, ostia, ice, bgvar, long_win_len,
+                                                    long_err_std_n, short_win_len, short_err_std_n, short_win_n_bad,
+                                                    drif_inter, drif_intra, background_err_lim)
     else:
-        qc_outcomes = tqc.do_sst_end_tail_check(
-            lat,
-            lon,
-            sst,
-            ostia,
-            ice,
-            bgvar,
-            dates,
-            long_win_len,
-            long_err_std_n,
-            short_win_len,
-            short_err_std_n,
-            short_win_n_bad,
-            drif_inter,
-            drif_intra,
-            background_err_lim,
-        )
+        qc_outcomes = tqc.do_sst_end_tail_check(lon, lat, dates, sst, ostia, ice, bgvar, long_win_len, long_err_std_n,
+                                                short_win_len, short_err_std_n, short_win_n_bad, drif_inter, drif_intra,
+                                                background_err_lim)
     for i in range(len(qc_outcomes)):
         assert qc_outcomes[i] == expected2[i]
 
@@ -1868,13 +1812,13 @@ def test_sst_biased_noisy_check_generic(
     lat, lon, dates, sst, ostia, bgvar, ice = sst_biased_noisy_check_vals(selector)
 
     inputs = [
-        lat,
         lon,
+        lat,
         dates,
         sst,
         ostia,
-        bgvar,
         ice,
+        bgvar,
         n_eval,
         bias_lim,
         drif_intra,
@@ -1931,13 +1875,11 @@ def test_error_missing_matched_value():
     expected_flags1 = [untestable for x in range(9)]
     expected_flags2 = [untestable for x in range(9)]
     with pytest.warns(UserWarning):
-        qc_outcomes1 = tqc.do_sst_start_tail_check(
-            lat, lon, sst, ostia, ice, bgvar, dates, 3, 3.0, 1, 3.0, 1, 0.29, 1.0, 0.3
-        )
+        qc_outcomes1 = tqc.do_sst_start_tail_check(lon, lat, dates, sst, ostia, ice, bgvar, 3, 3.0, 1, 3.0, 1, 0.29,
+                                                   1.0, 0.3)
     with pytest.warns(UserWarning):
-        qc_outcomes2 = tqc.do_sst_end_tail_check(
-            lat, lon, sst, ostia, ice, bgvar, dates, 3, 3.0, 1, 3.0, 1, 0.29, 1.0, 0.3
-        )
+        qc_outcomes2 = tqc.do_sst_end_tail_check(lon, lat, dates, sst, ostia, ice, bgvar, 3, 3.0, 1, 3.0, 1, 0.29, 1.0,
+                                                 0.3)
 
     for i in range(len(qc_outcomes1)):
         assert qc_outcomes1[i] == expected_flags1[i]
