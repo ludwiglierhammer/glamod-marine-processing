@@ -887,7 +887,6 @@ class SSTTailChecker:
         drif_inter: float,
         drif_intra: float,
         background_err_lim: float,
-        start_tail: bool,
     ):
         """
         Create SSTTailChecker object to perform the SST Tail QC Check
@@ -939,8 +938,6 @@ class SSTTailChecker:
         self.dates = dates
         self.hrs = convert_date_to_hours(dates)
 
-        self.start_tail = start_tail
-
         self.reps_ind = None
         self.sst_anom = None
         self.bgerr = None
@@ -981,7 +978,7 @@ class SSTTailChecker:
             valid = False
         return valid
 
-    def _do_sst_tail_check(self):
+    def _do_sst_tail_check(self, start_tail: bool):
         """Perform the actual SST tail check"""
         if not self.valid_parameters():
             self.qc_outcomes[:] = untestable
@@ -1015,9 +1012,7 @@ class SSTTailChecker:
 
         # do short tail check on records that pass long tail check - whole record already failed long tail check
         if not (self.start_tail_ind >= self.end_tail_ind):
-            first_pass_ind = (
-                self.start_tail_ind + 1
-            )  # first index passing long tail check
+            first_pass_ind = self.start_tail_ind + 1  # first index passing long tail check
             last_pass_ind = self.end_tail_ind - 1  # last index passing long tail check
             self._do_short_tail_check(first_pass_ind, last_pass_ind, forward=True)
             self._do_short_tail_check(first_pass_ind, last_pass_ind, forward=False)
@@ -1027,16 +1022,11 @@ class SSTTailChecker:
             self.start_tail_ind = -1
             self.end_tail_ind = nrep
 
-        if not self.start_tail_ind == -1:
-            for ind in range(self.nreps):
-                if ind <= self.reps_ind[self.start_tail_ind]:
-                    if self.start_tail:
-                        self.qc_outcomes[ind] = failed
-        if not self.end_tail_ind == nrep:
-            for ind in range(self.nreps):
-                if ind >= self.reps_ind[self.end_tail_ind]:
-                    if not self.start_tail:
-                        self.qc_outcomes[ind] = failed
+        if not self.start_tail_ind == -1 and start_tail:
+            self.qc_outcomes[0: self.reps_ind[self.start_tail_ind]+1] = failed
+
+        if not self.end_tail_ind == nrep and not start_tail:
+            self.qc_outcomes[self.reps_ind[self.end_tail_ind]:] = failed
 
     @staticmethod
     def _parse_rep(lat, lon, ostia, ice, bgvar, dates) -> (float, float, float, bool):
@@ -1748,9 +1738,8 @@ def do_sst_start_tail_check(
         drif_inter,
         drif_intra,
         background_err_lim,
-        True,
     )
-    checker._do_sst_tail_check()
+    checker._do_sst_tail_check(True)
     return checker.get_qc_outcomes()
 
 
@@ -1832,9 +1821,8 @@ def do_sst_end_tail_check(
         drif_inter,
         drif_intra,
         background_err_lim,
-        False,
     )
-    checker._do_sst_tail_check()
+    checker._do_sst_tail_check(False)
     return checker.get_qc_outcomes()
 
 
