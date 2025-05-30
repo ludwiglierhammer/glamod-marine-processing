@@ -159,6 +159,7 @@ def test_eight_distant_near_neighbours(dummy_pentad_stdev, reps2):
     assert mn == 1.5
     assert sd == 3.5 * 1.5
 
+
 def test_eight_even_more_distant_near_neighbours(dummy_pentad_stdev, reps3):
 
     g = ex.Np_Super_Ob()
@@ -177,6 +178,7 @@ def test_eight_even_more_distant_near_neighbours(dummy_pentad_stdev, reps3):
     sd = g.get_buddy_stdev(0.5, 20.5, 1, 1)
     assert mn == 1.5
     assert sd == 4.0 * 1.5
+
 
 def test_eight_too_distant_neighbours(dummy_pentad_stdev, reps4):
 
@@ -200,13 +202,17 @@ def test_eight_too_distant_neighbours(dummy_pentad_stdev, reps4):
 
 
     # multiplier = get_threshold_multiplier(total_nobs,nob_limits,multiplier_values)
+
+
 def test_nobs_limits_not_ascending():
     with pytest.raises(AssertionError):
         multiplier = ex.get_threshold_multiplier(0, [10, 5, 0], [4, 3, 2])
 
+
 def test_lowest_nobs_limit_not_zero():
     with pytest.raises(AssertionError):
         multiplier = ex.get_threshold_multiplier(1, [1, 5, 10], [4, 3, 2])
+
 
 def test_simple():
     for n in range(1, 20):
