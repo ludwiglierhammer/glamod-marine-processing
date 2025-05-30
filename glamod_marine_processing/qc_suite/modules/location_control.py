@@ -6,32 +6,38 @@ from .auxiliary import isvalid
 from .statistics import missing_mean
 
 
-def yindex_to_lat(yindex: int, res: float = 1.0) -> float:
+def yindex_to_lat(yindex: int, res: float) -> float:
     """Convert yindex to latitude.
 
     Parameters
     ----------
     yindex: int
-    res: float, default: 1.0
+        Index of the latitude.
+    res: float
+        Resolution of grid in degrees.
 
     Returns
     -------
     float
         Latitude (degrees).
+
+    Note
+    ----
+    In previous versions, ``res`` had the default value 1.0.
     """
     assert yindex >= 0
     assert yindex < 180 / res
     return 90.0 - yindex * res - res / 2.0
 
 
-def mds_lat_to_yindex(lat: float, res: float = 1.0) -> int:
+def mds_lat_to_yindex(lat: float, res: float) -> int:
     """For a given latitude return the y-index as it was in MDS2/3 in a 1x1 global grid.
 
     Parameters
     ----------
     lat: float
         Latitude of the point.
-    res: float, default: 1.0
+    res: float
         Resolution of grid in degrees.
 
     Returns
@@ -46,6 +52,10 @@ def mds_lat_to_yindex(lat: float, res: float = 1.0) -> int:
     At 0 degrees they are pushed south.
 
     Expects that latitudes run from 90N to 90S
+
+    Note
+    ----
+    In previous versions, ``res`` had the default value 1.0.
     """
     lat_local = lat  # round(lat,1)
 
@@ -59,15 +69,15 @@ def mds_lat_to_yindex(lat: float, res: float = 1.0) -> int:
     return int(90 / res - int(lat_local / res))
 
 
-def lat_to_yindex(lat: float, res: float = 1.0) -> int:
+def lat_to_yindex(lat: float, res: float) -> int:
     """For a given latitude return the y index in a 1x1x5-day global grid.
 
     Parameters
     ----------
     lat: float
         Latitude of the point.
-    res: float, default: 1.0
-        Resolution of the grid.
+    res: float
+        Resolution of grid in degrees.
 
     Returns
     -------
@@ -79,49 +89,52 @@ def lat_to_yindex(lat: float, res: float = 1.0) -> int:
     The routine assumes that the structure of the SST array is a grid that is 360 x 180 x 73
     i.e. one year of 1degree lat x 1degree lon data split up into pentads. The west-most box is at 180degrees with
     index 0 and the northern most box also has index zero. Inputs on the border between grid cells are pushed south.
+
+    Note
+    ----
+    In previous versions, ``res`` had the default value 1.0.
     """
-    if res == 1:
-        yindex = int(90 - lat)
-        if yindex >= 180:
-            yindex = 179
-        if yindex < 0:
-            yindex = 0
-    else:
-        yindex = int((90 - lat) / res)
-        if yindex >= 180 / res:
-            yindex = int(180 / res - 1)
-        if yindex < 0:
-            yindex = 0
+    yindex = int((90 - lat) / res)
+    if yindex >= 180 / res:
+        yindex = int(180 / res - 1)
+    if yindex < 0:
+        yindex = 0
     return yindex
 
 
-def xindex_to_lon(xindex: int, res: float = 1.0) -> float:
+def xindex_to_lon(xindex: int, res: float) -> float:
     """Convert xindex to longitude.
 
     Parameters
     ----------
     xindex: int
-    res: float, default: 1.0
+        Index of the longitude
+    res: float
+        Resolution of grid in degrees.
 
     Returns
     -------
     float
         Longitude (degrees).
+
+    Note
+    ----
+    In previous versions, ``res`` had the default value 1.0.
     """
     assert xindex >= 0
     assert xindex < 360 / res
     return xindex * res - 180.0 + res / 2.0
 
 
-def mds_lon_to_xindex(lon: float, res: float = 1.0) -> int:
+def mds_lon_to_xindex(lon: float, res: float) -> int:
     """For a given longitude return the x-index as it was in MDS2/3 in a 1x1 global grid.
 
     Parameters
     ----------
     lon: float
         Longitude of the point.
-    res: float, default: 1.0
-        Resolution of the field.
+    res: float
+        Resolution of grid in degrees.
 
     Returns
     -------
@@ -133,6 +146,10 @@ def mds_lon_to_xindex(lon: float, res: float = 1.0) -> int:
     In the western hemisphere, borderline longitudes which fall on grid boundaries are pushed west, except
     -180 which goes east. In the eastern hemisphere, they are pushed east, except 180 which goes west.
     At 0 degrees they are pushed west.
+
+    Note
+    ----
+    In previous versions, ``res`` had the default value 1.0.
     """
     long_local = lon  # round(lon,1)
 
@@ -145,15 +162,15 @@ def mds_lon_to_xindex(lon: float, res: float = 1.0) -> int:
     return int(int(long_local / res) + 180 / res - 1)
 
 
-def lon_to_xindex(lon: float, res: float = 1.0) -> int:
+def lon_to_xindex(lon: float, res: float) -> int:
     """For a given longitude return the x index in a 1x1x5-day global grid.
 
     Parameters
     ----------
     lon: float
         Longitude of the point.
-    res: float, default: 1.0
-        Resolution of the grid.
+    res: float
+        Resolution of grid in degrees.
 
 
     Returns
@@ -166,25 +183,19 @@ def lon_to_xindex(lon: float, res: float = 1.0) -> int:
     The routine assumes that the structure of the SST array is a grid that is 360 x 180 x 73
     i.e. one year of 1degree lat x 1degree lon data split up into pentads. The west-most box is at 180degrees W with
     index 0 and the northern most box also has index zero. Inputs on the border between grid cells are pushed east.
+
+    Note
+    ----
+    In previous versions, ``res`` had the default value 1.0.
     """
-    if res == 1:
-        inlon = lon
-        if inlon >= 180.0:
-            inlon = -180.0 + (inlon - 180.0)
-        if inlon < -180.0:
-            inlon = inlon + 360.0
-        xindex = int(inlon + 180.0)
-        while xindex >= 360:
-            xindex -= 360
-    else:
-        inlon = lon
-        if inlon >= 180.0:
-            inlon = -180.0 + (inlon - 180.0)
-        if inlon < -180.0:
-            inlon = inlon + 360.0
-        xindex = int((inlon + 180.0) / res)
-        while xindex >= 360 / res:
-            xindex -= 360 / res
+    inlon = lon
+    if inlon >= 180.0:
+        inlon = -180.0 + (inlon - 180.0)
+    if inlon < -180.0:
+        inlon = inlon + 360.0
+    xindex = int((inlon + 180.0) / res)
+    while xindex >= 360 / res:
+        xindex -= 360 / res
     return int(xindex)
 
 
@@ -240,19 +251,21 @@ def fill_missing_vals(
 
 
 def get_four_surrounding_points(
-    lat: float, lon: float, max90: int = 1
+    lat: float, lon: float, res: int, max90: bool = True
 ) -> tuple[float, float, float, float]:
     """
     Get the four surrounding points of a specified latitude and longitude point.
 
     Parameters
     ----------
-    lat : float
+    lat: float
         Latitude of point
-    lon : float
+    lon: float
         Longitude of point
-    max90 : int, default: 1
-        If set to 1 then cap latitude at 90.0, if set to 0 then don't cap latitude.
+    res: int
+        Resolution of the grid in degrees.
+    max90: bool, default: True
+        If True then cap latitude at 90.0, otherwise don't cap latitude.
 
     Returns
     -------
@@ -263,30 +276,30 @@ def get_four_surrounding_points(
     assert -90.0 <= lat <= 90.0
     assert -180.0 <= lon <= 180.0
 
-    x2_index = lon_to_xindex(lon + 0.5)
-    x2 = xindex_to_lon(x2_index)
+    x2_index = lon_to_xindex(lon + 0.5, res=res)
+    x2 = xindex_to_lon(x2_index, res=res)
     if x2 < lon:
         x2 += 360.0
 
-    x1_index = lon_to_xindex(lon - 0.5)
-    x1 = xindex_to_lon(x1_index)
+    x1_index = lon_to_xindex(lon - 0.5, res=res)
+    x1 = xindex_to_lon(x1_index, res=res)
     if x1 > lon:
         x1 -= 360.0
 
     if lat + 0.5 <= 90:
-        y2_index = lat_to_yindex(lat + 0.5)
-        y2 = yindex_to_lat(y2_index)
+        y2_index = lat_to_yindex(lat + 0.5, res=res)
+        y2 = yindex_to_lat(y2_index, res=res)
     else:
         y2 = 89.5
-        if max90 == 0:
+        if max90 is not True:
             y2 = 90.5
 
     if lat - 0.5 >= -90:
-        y1_index = lat_to_yindex(lat - 0.5)
-        y1 = yindex_to_lat(y1_index)
+        y1_index = lat_to_yindex(lat - 0.5, res=res)
+        y1 = yindex_to_lat(y1_index, res=res)
     else:
         y1 = -89.5
-        if max90 == 0:
+        if max90 is not True:
             y1 = -90.5
 
     return x1, x2, y1, y2
