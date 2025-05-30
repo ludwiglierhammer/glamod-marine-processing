@@ -6,6 +6,7 @@ from __future__ import annotations
 
 import copy
 import math
+import warnings
 
 import numpy as np
 
@@ -78,6 +79,8 @@ def track_day_test(
     ValueError
         When input values are invalid
     """
+    warnings.warn(DeprecationWarning("This module trackqc is deprecated, use next_level_trackqc instead"))
+
     if not isvalid(year):
         raise ValueError("year is missing")
     if not isvalid(month):
@@ -138,6 +141,8 @@ def trim_mean(inarr: list, trim: int) -> float:
     float
         Trimmed mean
     """
+    warnings.warn(DeprecationWarning("This module trackqc is deprecated, use next_level_trackqc instead"))
+
     arr = np.array(inarr)  # type: np.ndarray
     if trim == 0:
         return float(np.mean(arr))
@@ -168,6 +173,8 @@ def trim_std(inarr: list, trim: int) -> float:
     float
         Returns trimmed standard deviation
     """
+    warnings.warn(DeprecationWarning("This module trackqc is deprecated, use next_level_trackqc instead"))
+
     arr = np.array(inarr)  # type: np.ndarray
     if trim == 0:
         return float(np.std(arr))
@@ -183,6 +190,7 @@ def trim_std(inarr: list, trim: int) -> float:
 
 
 def do_new_speed_check(reps, *args):
+    warnings.warn(DeprecationWarning("This module trackqc is deprecated, use next_level_trackqc instead"))
     checker = NewSpeedChecker(reps)
     if args:
         checker.set_parameters(*args)
@@ -386,6 +394,7 @@ class NewSpeedChecker:
 
 
 def do_speed_check(reps, *args):
+    warnings.warn(DeprecationWarning("This module trackqc is deprecated, use next_level_trackqc instead"))
     checker = SpeedChecker(reps)
     if args:
         checker.set_parameters(*args)
@@ -569,6 +578,7 @@ class SpeedChecker:
 
 
 def do_aground_check(reps, *args):
+    warnings.warn(DeprecationWarning("This module trackqc is deprecated, use next_level_trackqc instead"))
     checker = AgroundChecker(reps)
     if args:
         checker.set_parameters(*args)
@@ -788,6 +798,7 @@ class AgroundChecker:
 
 
 def do_new_aground_check(reps, *args):
+    warnings.warn(DeprecationWarning("This module trackqc is deprecated, use next_level_trackqc instead"))
     checker = NewAgroundChecker(reps)
     if args:
         checker.set_parameters(*args)
@@ -983,6 +994,7 @@ class NewAgroundChecker:
 
 
 def do_sst_tail_check(reps, *args):
+    warnings.warn(DeprecationWarning("This module trackqc is deprecated, use next_level_trackqc instead"))
     checker = SSTTailChecker(reps)
     if args:
         checker.set_parameters(*args)
@@ -1360,6 +1372,7 @@ class SSTTailChecker:
 
 
 def do_sst_biased_noisy_check(reps, *args):
+    warnings.warn(DeprecationWarning("This module trackqc is deprecated, use next_level_trackqc instead"))
     checker = SSTBiasedNoisyChecker(reps)
     if args:
         checker.set_parameters(*args)
