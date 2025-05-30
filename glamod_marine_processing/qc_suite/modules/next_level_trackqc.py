@@ -1441,6 +1441,13 @@ def do_speed_check(
     array-like of int, shape (n,)
         1-dimensional array containing QC flags.
         1 if speed check fails, 0 otherwise.
+
+    Note
+    ----
+    In previous versions, default values for the parameters were:
+    * speed_limit = 2.5
+    * min_win_period = 0.8
+    * max_win_perido = 1.8
     """
     checker = SpeedChecker(
         lons, lats, dates, speed_limit, min_win_period, max_win_period
@@ -1491,6 +1498,18 @@ def do_new_speed_check(
     -------
     array-like of int, shape (n,)
         Array containing the QC outcomes for the new speed check
+
+    Note
+    ----
+    In previous versions, default values for the parameters were:
+    * speed_limit = 3.0
+    * min_win_period = 0.375
+
+    And, for the IQUAM-specific parameters:
+    * ship_speed_limit = 60.0
+    * delta_d = 1.11
+    * delta_t = 0.01
+    * n_neighbours = 5
     """
     checker = NewSpeedChecker(
         lons,
@@ -1541,6 +1560,13 @@ def do_aground_check(
     array-like of int, shape (n,)
         1-dimensional array containing QC flags.
         1 if aground check fails, 0 otherwise.
+
+    Note
+    ----
+    In previous versions, default values for the parameters were:
+    * smooth_win = 41
+    * min_win_period = 8
+    * max_win_period = 10
     """
     checker = AgroundChecker(
         lons, lats, dates, smooth_win, min_win_period, max_win_period
@@ -1578,6 +1604,12 @@ def do_new_aground_check(
     array-like of int, shape (n,)
         1-dimensional array containing QC flags.
         1 if new aground check fails, 0 otherwise.
+
+    Note
+    ----
+    In previous versions, default values for the parameters were:
+    * smooth_win = 41
+    * min_win_period = 8
     """
     checker = AgroundChecker(lons, lats, dates, smooth_win, min_win_period, None)
     checker._do_aground_check()
@@ -1646,6 +1678,18 @@ def do_sst_start_tail_check(
     array-like of int, shape (n,)
     1-dimensional array containing QC flags.
     1 if SST start tail check fails, 0 otherwise.
+
+    Note
+    ----
+    In previous versions, default values for the parameters were:
+    * long_win_len = 121
+    * long_err_std_n = 3.0
+    * short_win_len = 30
+    * short_err_std_n = 3.0
+    * short_win_n_bad = 2
+    * drif_inter = 0.29
+    * drif_intra = 1.00
+    * background_err_lim = 0.3
     """
     checker = SSTTailChecker(
         lats,
@@ -1730,6 +1774,18 @@ def do_sst_end_tail_check(
     array-like of int, shape (n,)
     1-dimensional array containing QC flags.
     1 if SST start tail check fails, 0 otherwise.
+
+    Note
+    ----
+    In previous versions, default values for the parameters were:
+    * long_win_len = 121
+    * long_err_std_n = 3.0
+    * short_win_len = 30
+    * short_err_std_n = 3.0
+    * short_win_n_bad = 2
+    * drif_inter = 0.29
+    * drif_intra = 1.00
+    * background_err_lim = 0.3
     """
     checker = SSTTailChecker(
         lats,
@@ -1809,6 +1865,17 @@ def do_sst_biased_check(
     array-like of int, shape (n,)
         1-dimensional array containing QC flags.
         1 if SST bias check fails, 0 otherwise.
+
+    Note
+    ----
+    In previous versions, default values for the parameters were:
+    * n_eval = 30
+    * bias_lim = 1.10
+    * drif_intra = 1.0
+    * drif_inter = 0.29
+    * err_std_n = 3.0
+    * n_bad = 2
+    * background_err_lim = 0.3
     """
     checker = SSTBiasedNoisyChecker(
         lats,
@@ -1887,6 +1954,17 @@ def do_sst_noisy_check(
     array-like of int, shape (n,)
         1-dimensional array containing QC flags.
         1 if SST noise check fails, 0 otherwise.
+
+    Note
+    ----
+    In previous versions, default values for the parameters were:
+    * n_eval = 30
+    * bias_lim = 1.10
+    * drif_intra = 1.0
+    * drif_inter = 0.29
+    * err_std_n = 3.0
+    * n_bad = 2
+    * background_err_lim = 0.3
     """
     checker = SSTBiasedNoisyChecker(
         lats,
@@ -1965,6 +2043,17 @@ def do_sst_biased_noisy_short_check(
     array-like of int, shape (n,)
         1-dimensional array containing QC flags.
         1 if SST short check fails, 0 otherwise.
+
+    Note
+    ----
+    In previous versions, default values for the parameters were:
+    * n_eval = 30
+    * bias_lim = 1.10
+    * drif_intra = 1.0
+    * drif_inter = 0.29
+    * err_std_n = 3.0
+    * n_bad = 2
+    * background_err_lim = 0.3
     """
     checker = SSTBiasedNoisyChecker(
         lats,

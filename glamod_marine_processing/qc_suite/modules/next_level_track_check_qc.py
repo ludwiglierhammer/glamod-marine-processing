@@ -23,10 +23,10 @@ def do_spike_check(
     lat: Sequence[float],
     lon: Sequence[float],
     date: Sequence[datetime],
-    max_gradient_space: float = 0.5,
-    max_gradient_time: float = 1.0,
-    delta_t: float = 2.0,
-    n_neighbours: int = 5,
+    max_gradient_space: float,
+    max_gradient_time: float,
+    delta_t: float,
+    n_neighbours: int,
 ) -> Sequence[int]:
     """Perform IQUAM like spike check.
 
@@ -62,6 +62,14 @@ def do_spike_check(
     ------
     ValueError
         If either input is not 1-dimensional or if their lengths do not match.
+
+    Notes
+    -----
+    In previous versions, default values for the parameters were:
+    * max_gradient_space: float = 0.5
+    * max_gradient_time: float = 1.0
+    * delta_t: float = 2.0
+    * n_neighbours: int = 5
     """
     gradient_violations = []
     count_gradient_violations = []
@@ -525,10 +533,10 @@ def do_track_check(
     lat: Sequence[float],
     lon: Sequence[float],
     date: Sequence[datetime],
-    max_direction_change: float = 60.0,
-    max_speed_change: float = 10.0,
-    max_absolute_speed: float = 40.0,
-    max_midpoint_discrepancy: float = 150.0,
+    max_direction_change: float,
+    max_speed_change: float,
+    max_absolute_speed: float,
+    max_midpoint_discrepancy: float,
 ) -> Sequence[int]:
     """Perform one pass of the track check.  This is an implementation of the MDS track check code
     which was originally written in the 1990s. I don't know why this piece of historic trivia so exercises
@@ -566,9 +574,15 @@ def do_track_check(
     ValueError
         If either input is not 1-dimensional or if their lengths do not match.
 
-    Note
-    ----
+    Notes
+    -----
     If number of observations is less than three, the track check always passes.
+
+    In previous versions, the default values of the parameters were:
+    * max_direction_change = 60.0
+    * max_speed_change = 10.0
+    * max_absolute_speed =  40.0
+    * max_midpoint_discrepancy = 150.0
     """
     number_of_obs = len(lat)
 
@@ -736,8 +750,8 @@ def find_saturated_runs(
     lat: Sequence[float],
     lon: Sequence[float],
     date: Sequence[datetime],
-    min_time_threshold: float = 48.0,
-    shortest_run: int = 4,
+    min_time_threshold: float,
+    shortest_run: int,
 ) -> Sequence[int]:
     """Perform checks on persistence of 100% rh while going through the voyage.
     While going through the voyage repeated strings of 100 %rh (AT == DPT) are noted.
@@ -757,7 +771,7 @@ def find_saturated_runs(
     date: array-like of datetime, shape (n,)
         1-dimensional date array.
     min_time_threshold: float, default: 48,0
-        Minimum time thresholf in hours.
+        Minimum time threshold in hours.
     shortest_run: int, default: 4
         Shortest number of observations.
 
@@ -771,6 +785,12 @@ def find_saturated_runs(
     ------
     ValueError
         If either input is not 1-dimensional or if their lengths do not match.
+
+    Notes
+    -----
+    In previous version, default values for the parameters were:
+    * min_time_threshold =  48.0
+    * shortest_run = 4
     """
     satcount = []
 
@@ -825,7 +845,7 @@ def find_saturated_runs(
 
 @inspect_arrays(["value"])
 def find_multiple_rounded_values(
-    value: Sequence[float], min_count: int = 20, threshold: float = 0.5
+    value: Sequence[float], min_count: int, threshold: float
 ) -> Sequence[int]:
     """Find instances when more than "threshold" of the observations are
     whole numbers and set the 'round' flag. Used in the humidity QC
@@ -837,15 +857,21 @@ def find_multiple_rounded_values(
     value: array-like of float, shape (n,)
         1-dimensional array.
     min_count: int, default: 20
-        ???
+        Minimum number of rounded figures that will trigger the test
     threshold: float, default: 0.5
-        ???
+        Minimum fraction of all observations that will trigger the test
 
     Returns
     -------
     array-like of int, shape (n,)
         1-dimensional array containing rounded QC flag.
         1 if value is whole number, otherwise 0.
+
+    Notes
+    -----
+    Previous versions had default values for the parameters of
+    * min_count = 20
+    * threshold = 0.5
     """
     assert 0.0 <= threshold <= 1.0
 
@@ -884,7 +910,7 @@ def find_multiple_rounded_values(
 
 @inspect_arrays(["value"])
 def find_repeated_values(
-    value: Sequence[float], min_count: int = 20, threshold: float = 0.7
+    value: Sequence[float], min_count: int, threshold: float
 ) -> pd.DataFrame:
     """Find cases where more than a given proportion of SSTs have the same value
 
@@ -906,6 +932,12 @@ def find_repeated_values(
     array-like of int, shape (n,)
         1-dimensional array containing repeated QC flag.
         1 if value is repeated, otherwise 0.
+
+    Notes
+    -----
+    Previous versions had default values for the parameters of
+    * min_count = 20
+    * threshold = 0.7
     """
     assert 0.0 <= threshold <= 1.0
 
@@ -939,10 +971,10 @@ def do_iquam_track_check(
     lat: Sequence[float],
     lon: Sequence[float],
     date: Sequence[datetime],
-    speed_limit: float = 60.0,
-    delta_d: float = 1.11,
-    delta_t: float = 0.01,
-    n_neighbours: int = 5,
+    speed_limit: float,
+    delta_d: float,
+    delta_t: float,
+    n_neighbours: int,
 ) -> Sequence[int]:
     """Perform the IQUAM track check as detailed in Xu and Ignatov 2013
 
@@ -950,7 +982,7 @@ def do_iquam_track_check(
     counts how many exceed a threshold speed. The ob with the most
     violations of this limit is flagged as bad and removed from the
     calculation. Then the next worst is found and removed until no
-    violatios remain.
+    violations remain.
 
     Parameters
     ----------
@@ -960,14 +992,14 @@ def do_iquam_track_check(
         1-dimensional longitude array in degrees.
     date: array-like of datetime, shape (n,)
         1-dimensional date array.
-    speed_limit: float, default: 60.0
+    speed_limit: float
         Speed limit of platform in km/h.
         This should be 60.0 for ships and 15.0 for drifting buoys.
-    delta_d: float, default: 1.11
+    delta_d: float
         ??? degrees of latitude
-    delta_t: float, default: 0.01
+    delta_t: float
         ??? one hundredth of an hour
-    n_neighbours: int, default: 5
+    n_neighbours: int
         Number of neighbours.
 
     Returns
@@ -980,6 +1012,14 @@ def do_iquam_track_check(
     ------
     ValueError
         If either input is not 1-dimensional or if their lengths do not match.
+
+    Notes
+    -----
+    Previous versions had default values for the parameters of
+    * speed_limit = 60.0 for ships and 15.0 for drifting buoys
+    * delta_d = 1.11
+    * delta_t = 0.01
+    * n_neighbours = 5
     """
     number_of_obs = len(lat)
 

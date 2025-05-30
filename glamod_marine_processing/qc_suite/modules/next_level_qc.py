@@ -181,7 +181,9 @@ def do_day_check(
 
     Note
     ----
-    In previous versions, ``time_since_sun_above_horizon`` has the default value 1.0.
+    In previous versions, ``time_since_sun_above_horizon`` has the default value 1.0 as one hour is used as a
+    definition of "day" for marine air temperature QC. Solar heating biases were considered to be negligible mmore
+    than one hour after sunset and up to one hour after sunrise.
     """
     if isinstance(date, datetime):
         date_ = split_date(date)
@@ -482,6 +484,10 @@ def do_sst_freeze_check(
     -------
     int
         Return 1 if SST below freezing, 0 otherwise
+
+    Note
+    ----
+    Freezing point of sea water is typically -1.8 degC or 271.35 K
     """
     return sst_freeze_check(sst, 0.0, freezing_point, freeze_check_n_sigma)
 
