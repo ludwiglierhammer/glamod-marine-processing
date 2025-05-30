@@ -5,8 +5,6 @@ import pytest
 
 from glamod_marine_processing.qc_suite.modules.qc import (
     climatology_check,
-    climatology_plus_stdev_check,
-    climatology_plus_stdev_with_lowbar_check,
     failed,
     hard_limit_check,
     isvalid,
@@ -61,8 +59,12 @@ def test_climatology_plus_stdev_with_lowbar(
     value, climate_normal, standard_deviation, limit, lowbar, expected
 ):
     assert (
-        climatology_plus_stdev_with_lowbar_check(
-            value, climate_normal, standard_deviation, limit, lowbar
+        climatology_check(
+            value,
+            climate_normal,
+            limit,
+            standard_deviation=standard_deviation,
+            lowbar=lowbar,
         )
         == expected
     )
@@ -93,8 +95,12 @@ def test_climatology_plus_stdev_check(
     value, climate_normal, standard_deviation, stdev_limits, limit, expected
 ):
     assert (
-        climatology_plus_stdev_check(
-            value, climate_normal, standard_deviation, stdev_limits, limit
+        climatology_check(
+            value,
+            climate_normal,
+            limit,
+            standard_deviation=standard_deviation,
+            standard_deviation_limits=stdev_limits,
         )
         == expected
     )
@@ -102,9 +108,9 @@ def test_climatology_plus_stdev_check(
 
 def _test_climatology_plus_stdev_check_raises():
     with pytest.raises(ValueError):
-        climatology_plus_stdev_check(1.0, 0.0, 0.5, [1.0, 0.0], 5.0)
+        climatology_check(1.0, 0.0, 0.5, [1.0, 0.0], 5.0)
     with pytest.raises(ValueError):
-        climatology_plus_stdev_check(1.0, 0.0, 0.5, [0.0, 1.0], -1)
+        climatology_check(1.0, 0.0, 0.5, [0.0, 1.0], -1)
 
 
 @pytest.mark.parametrize(

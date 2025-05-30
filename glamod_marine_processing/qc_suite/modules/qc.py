@@ -10,153 +10,71 @@ untestable = 2
 untested = 3
 
 
-def climatology_plus_stdev_with_lowbar_check(
+def climatology_check(
     value: float,
     climate_normal: float,
-    standard_deviation: float,
-    limit: float,
-    lowbar: float,
+    maximum_anomaly: float,
+    standard_deviation: float | None = 1.0,
+    standard_deviation_limits: tuple[float, float] | None = None,
+    lowbar: float | None = None,
 ) -> int:
     """
-    Climatology check with standard deviation-based limits but with a minimum width
+    Climatology check to compare a value with a climatological average with some arbitrary limit on the difference.
+    This check can be expanded with some optional parameters.
 
     Parameters
     ----------
-    value : float
+    value: float
         Value to be compared to climatology
     climate_normal : float
         The climatological average to which it will be compared
-    standard_deviation : float
-        The standard deviation which will be used to test the anomaly
-    limit : float
-        Maximum standardised anomaly.
-    lowbar : float
+    maximum_anomaly: float
+        Largest allowed anomaly.
+        If ``standard_deviation`` is provided, this is the largest allowed standardised anomaly.
+    standard_deviation: float, default: 1.0
+        The standard deviation which will be used to standardize the anomaly
+    standard_deviation_limits: tuple of float, optional
+        A tuple of two floats representing the upper and lower limits for standard deviation used in check
+    lowbar: float, optional
         The anomaly must be greater than lowbar to fail regardless of standard deviation.
 
     Returns
     -------
     int
-        2 if limit is equal or less than 0 or if either value, climate_normal or standard_deviation is numerically invalid or None
+        2 if stdev_limits[1] is equal or less than stdev_limits[0] or
+        if limit is equal or less than 0 or
+        if either value, climate_normal or standard_deviation is numerically invalid.
         1 if the difference is outside the specified range,
         0 otherwise.
-
-    Raises
-    ------
-    ValueError
-        When limit is zero or negative
     """
     if (
         not isvalid(value)
         or not isvalid(climate_normal)
+        or not isvalid(maximum_anomaly)
         or not isvalid(standard_deviation)
     ):
         return untestable
 
-    if limit <= 0:
+    if maximum_anomaly <= 0:
         return untestable
 
-    if (
-        abs(value - climate_normal) / standard_deviation > limit
-        and abs(value - climate_normal) > lowbar
-    ):
-        return failed
+    if standard_deviation_limits is not None:
+        if standard_deviation_limits[1] <= standard_deviation_limits[0]:
+            return untestable
 
-    return passed
+        if standard_deviation < standard_deviation_limits[0]:
+            standard_deviation = standard_deviation_limits[0]
+        if standard_deviation > standard_deviation_limits[1]:
+            standard_deviation = standard_deviation_limits[1]
 
+    climate_diff = abs(value - climate_normal)
 
-def climatology_plus_stdev_check(
-    value: float,
-    climate_normal: float,
-    standard_deviation: float,
-    stdev_limits: tuple[float, float],
-    limit: float,
-) -> int:
-    """
-    Climatology check which uses standardised anomalies.
-    Lower and upper limits can be specified for the standard deviation using
-    stdev_limits. The value is converted to an anomaly by subtracting the climate normal and then standardised by
-    dividing by the standard deviation. If the standardised anomaly is larger than the specified limit the test fails.
+    if lowbar is None:
+        low_check = True
+    else:
+        low_check = climate_diff > lowbar
 
-    Parameters
-    ----------
-    value : float
-        Value to be compared to climatology
-    climate_normal : float
-        The climatological average to which the value will be compared
-    standard_deviation : float
-        The climatological standard deviation which will be used to standardise the anomaly
-    stdev_limits : tuple of float
-        A tuple of two floats representing the upper and lower limits for standard deviation used in check
-    limit : float
-        The maximum allowed normalised anomaly
-
-    Returns
-    -------
-    int
-        2 if stdev_limits[1] is equal or less than stdev_limits[0], if limit is equal or less than 0 or
-        if either value, climatE_normal or standard_deviation is numerically invalid or None,
-        1 if the difference is outside the specified limit,
-        0 otherwise (or if any input is None)
-
-    Raises
-    ------
-    ValueError
-        When stdev_limits are in wrong order or limit is zero or negative.
-    """
-    if (
-        not isvalid(value)
-        or not isvalid(climate_normal)
-        or not isvalid(standard_deviation)
-    ):
-        return untestable
-
-    if stdev_limits[1] <= stdev_limits[0]:
-        return untestable
-    if limit <= 0:
-        return untestable
-
-    if standard_deviation < stdev_limits[0]:
-        standard_deviation = stdev_limits[0]
-    if standard_deviation > stdev_limits[1]:
-        standard_deviation = stdev_limits[1]
-
-    if abs(value - climate_normal) / standard_deviation > limit:
-        return failed
-
-    return passed
-
-
-def climatology_check(value: float, climate_normal: float, limit: float) -> int:
-    """Simple function to compare a value with a climatological average with some arbitrary limit on the difference.
-    This may be the second simplest function I have ever written (see blacklist)
-
-    Parameters
-    ----------
-    value : float
-        Value to be compared to climatology
-    climate_normal : float
-        The climatological average to which the value will be compared
-    limit : float
-        The maximum allowed difference between the ``value`` and ``climate_normal``.
-
-    Returns
-    -------
-    int
-        2 if limit is equal or less than 0 or if either value or climate_normal is numerically invalid or None,
-        1 if the difference is outside the specified limit,
-        0 otherwise
-
-    Note
-    ----
-    In previous versions, ``limit`` had the default value 8.0.
-    """
-    if not isvalid(value) or not isvalid(climate_normal) or not isvalid(limit):
-        return untestable
-
-    if limit <= 0:
-        return untestable
-
-    if abs(value - climate_normal) > limit:
+    if climate_diff / standard_deviation > maximum_anomaly and low_check:
         return failed
 
     return passed

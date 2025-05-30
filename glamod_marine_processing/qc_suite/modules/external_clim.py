@@ -41,10 +41,11 @@ def inspect_climatology(*climatology_keys: str) -> Callable:
 
             for clim_key in climatology_keys:
                 if clim_key not in bound_args.arguments:
-                    raise TypeError(
-                        f"Missing expected argument '{clim_key}' in function '{func.__name__}'."
-                        "The decorator requires this argument to be present."
+                    warnings.warn(
+                        f"Argument '{clim_key}' is missing in function '{func.__name__}'. "
+                        "This may affect the behavior expected by the decorator. Skipping."
                     )
+                    continue
 
                 climatology = bound_args.arguments[clim_key]
                 if isinstance(climatology, Climatology):

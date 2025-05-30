@@ -10,8 +10,6 @@ from .auxiliary import isvalid
 from .external_clim import Climatology, inspect_climatology
 from .qc import (
     climatology_check,
-    climatology_plus_stdev_check,
-    climatology_plus_stdev_with_lowbar_check,
     failed,
     hard_limit_check,
     passed,
@@ -293,20 +291,29 @@ def do_hard_limit_check(value: float, hard_limits: list) -> int:
     Returns
     -------
     int
-        1 if air temperature is outside hard limits, 0 otherwise
+        1 if air value is outside hard limits, 0 otherwise
     """
     return hard_limit_check(value, hard_limits)
 
 
-@inspect_climatology("climatology")
+@inspect_climatology("climatology", "standard_deviation")
 def do_climatology_check(
     value: float,
     climatology: float | Climatology,
     maximum_anomaly: float,
+    standard_deviation: float | Climatology = 1.0,
+    standard_deviation_limits: list | None = None,
+    lowbar: float | None = None,
     **kwargs,
 ) -> int:
     """
     Check that the value is within the prescribed distance from climatology.
+
+    If ``standard_deviation`` is provided, the value is converted into a standardised anomlay. Optionally,
+    if ``standard deviation`` is outside the range specified by ``standard_deviation_limits`` then ``standard_deviation``
+    is set to whichever of the lower or upper limits is closest.
+    If ``lowbar`` is provided, the anomaly must be greater than ``lowbar`` to fail regardless of ``standard_deviation``.
+
 
     Parameters
     ----------
@@ -316,7 +323,16 @@ def do_climatology_check(
         Reference climatological value.
         This could be a float value or Climatology object.
     maximum_anomaly : float
-        Maximum_anomaly allowed anomaly.
+        Largest allowed anomaly.
+        If ``standard_deviation`` is provided, this is the largest allowed standardised anomaly.
+    standard_deviation : float or Climatology, default: 1.0
+        Climatological standard deviation.
+        This could be a float value or Climatology object.
+    standard_deviation_limits : list, optional
+        2-element list containing lower and upper limits for standard deviation. If the stdev is outside these
+        limits, at_stdev will be set to the nearest limit.
+    lowbar: float, optional
+        The anomaly must be greater than lowbar to fail regardless of standard deviation.
 
     Returns
     -------
@@ -327,111 +343,13 @@ def do_climatology_check(
     ----
     If ``climatology`` is a Climatology object, pass ``lon`` and ``lat`` and ``date`` or ``month`` and ``day`` as keyword-arguments!
     """
-    return climatology_check(value, climatology, maximum_anomaly)
-
-
-@inspect_climatology("climatology", "stdev")
-def do_climatology_plus_stdev_check(
-    value: float,
-    climatology: float | Climatology,
-    stdev: float | Climatology,
-    minmax_standard_deviation: list,
-    maximum_standardised_anomaly: float,
-    **kwargs,
-) -> int:
-    """Check that standardised value anomaly is within specified range.
-
-    Value is converted into a standardised anomaly by subtracting the climatological normal and dividing by
-    the climatological standard deviation. If the climatological standard deviation is outside the range specified by
-    "minmax_standard_deviation" then the standard deviation is set to whichever of the lower or upper limits is
-    closest. The test fails if the standardised anomaly is larger than the "maximum_standardised_anomaly".
-
-    Parameters
-    ----------
-    value : float
-        Value to be checked.
-    climatology : float or Climatology
-        Climatological normal.
-        This could be a float value or Climatology object.
-    stdev : float or Climatology
-        Climatological standard deviation.
-        This could be a float value or Climatology object.
-    minmax_standard_deviation : list
-        2-element list containing lower and upper limits for standard deviation. If the stdev is outside these
-        limits, at_stdev will be set to the nearest limit.
-    maximum_standardised_anomaly : float
-        Largest allowed standardised anomaly
-
-    Returns
-    -------
-    int
-        Returns 1 if standardised value anomaly is outside specified range, 0 otherwise.
-
-    Note
-    ----
-    If ``climatology`` and/or ``stdev`` is a Climatology object, pass ``lon`` and ``lat`` and ``date`` or ``month`` and ``day`` as keyword-arguments!
-    """
-    return climatology_plus_stdev_check(
+    return climatology_check(
         value,
         climatology,
-        stdev,
-        minmax_standard_deviation,
-        maximum_standardised_anomaly,
-    )
-
-
-@inspect_climatology("climatology", "stdev")
-def do_climatology_plus_stdev_with_lowbar_check(
-    value: float,
-    climatology: float | Climatology,
-    stdev: float | Climatology,
-    limit: float | str,
-    lowbar: float | str,
-    **kwargs,
-) -> int:
-    """Check that standardised value anomaly is within standard deviation-based limits but with a minimum width.
-
-    Value is converted into a standardised anomaly by subtracting the climatological normal and dividing by
-    the climatological standard deviation.
-
-
-    More Documentation.
-
-    Parameters
-    ----------
-    value : float or Climatology
-        Value or climatology to be checked.
-    climatology : float or Climatology
-        Climatological normal.
-        This could be a float value or Climatology object.
-    stdev : float or Climatology
-        Climatological standard deviation.
-        This could be a float value or Climatology object.
-    limit : float
-        Maximum standardised anomaly.
-    lowbar: float
-        The anomaly must be greater than lowbar to fail regardless of standard deviation.
-
-    Returns
-    -------
-    int
-        Returns 1 if standardised value anomaly is outside specified range, 0 otherwise.
-
-    Note
-    ----
-    If ``climatology`` and/or ``stdev`` is a Climatology object, pass ``lon`` and ``lat`` and ``date`` or ``month`` and ``day`` as keyword-arguments!
-    """
-    if isinstance(climatology, Climatology):
-        climatology = climatology.get_value(**kwargs)
-    if isinstance(stdev, Climatology):
-        stdev = stdev.get_value(**kwargs)
-
-    return climatology_plus_stdev_with_lowbar_check(
-        value,
-        climatology,
-        stdev,
-        limit,
-        lowbar,
+        maximum_anomaly=maximum_anomaly,
+        standard_deviation=standard_deviation,
+        standard_deviation_limits=standard_deviation_limits,
+        lowbar=lowbar,
     )
 
 

@@ -7,8 +7,6 @@ import pytest
 
 from glamod_marine_processing.qc_suite.modules.next_level_qc import (
     do_climatology_check,
-    do_climatology_plus_stdev_check,
-    do_climatology_plus_stdev_with_lowbar_check,
     do_date_check,
     do_day_check,
     do_hard_limit_check,
@@ -297,7 +295,10 @@ def test_do_air_temperature_missing_value_check(at, expected):
 def test_do_air_temperature_climatology_check(
     at, at_climatology, maximum_anomaly, expected
 ):
-    assert do_climatology_check(at, at_climatology, maximum_anomaly) == expected
+    assert (
+        do_climatology_check(at, at_climatology, maximum_anomaly=maximum_anomaly)
+        == expected
+    )
 
 
 @pytest.mark.parametrize(
@@ -383,12 +384,12 @@ def test_do_air_temperature_climatology_plus_stdev_check(
     expected,
 ):
     assert (
-        do_climatology_plus_stdev_check(
+        do_climatology_check(
             at,
             at_climatology,
-            at_stdev,
-            minmax_standard_deviation,
-            maximum_standardised_anomaly,
+            standard_deviation=at_stdev,
+            standard_deviation_limits=minmax_standard_deviation,
+            maximum_anomaly=maximum_standardised_anomaly,
         )
         == expected
     )
@@ -447,7 +448,7 @@ def test_do_air_temperature_climatology_plus_stdev_check(
         ),  # not sure if np.nan should trigger FAIL
     ],
 )
-def test_do_slp_climatology_plus_stdev_with_lowbar_check(
+def test_do_slp_climatology_check(
     slp,
     slp_climatology,
     slp_stdev,
@@ -456,12 +457,12 @@ def test_do_slp_climatology_plus_stdev_with_lowbar_check(
     expected,
 ):
     assert (
-        do_climatology_plus_stdev_with_lowbar_check(
+        do_climatology_check(
             slp,
             slp_climatology,
-            slp_stdev,
-            limit,
-            lowbar,
+            standard_deviation=slp_stdev,
+            maximum_anomaly=limit,
+            lowbar=lowbar,
         )
         == expected
     )
@@ -527,7 +528,7 @@ def test_do_dpt_missing_value_check(dpt, expected):
         ),
     ],
 )
-def test_do_dpt_climatology_plus_stdev_check(
+def test_do_dpt_climatology_check(
     dpt,
     dpt_climatology,
     dpt_stdev,
@@ -536,12 +537,12 @@ def test_do_dpt_climatology_plus_stdev_check(
     expected,
 ):
     assert (
-        do_climatology_plus_stdev_check(
+        do_climatology_check(
             dpt,
             dpt_climatology,
-            dpt_stdev,
-            minmax_standard_deviation,
-            maximum_standardised_anomaly,
+            standard_deviation=dpt_stdev,
+            standard_deviation_limits=minmax_standard_deviation,
+            maximum_anomaly=maximum_standardised_anomaly,
         )
         == expected
     )
