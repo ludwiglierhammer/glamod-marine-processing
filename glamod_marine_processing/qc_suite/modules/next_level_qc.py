@@ -146,7 +146,7 @@ def do_day_check(
     hour: float | None = None,
     latitude: float | None = None,
     longitude: float | None = None,
-    time_since_sun_above_horizon: float = 1.0,
+    time_since_sun_above_horizon: float | None = None,
 ) -> int:
     """Given year month day hour lat and long calculate if the sun was above the horizon an hour ago.
 
@@ -170,7 +170,7 @@ def do_day_check(
         Latitude of report in degrees
     longitude : float, optional
         Longitude of report in degrees
-    time_since_sun_above_horizon : float, default: 1.0
+    time_since_sun_above_horizon : float
         Maximum time sun can have been above horizon (or below) to still count as night. Original QC test had this set
         to 1.0 i.e. it was night between one hour after sundown and one hour after sunrise.
 
@@ -178,6 +178,10 @@ def do_day_check(
     -------
     int
         Set to 0 if it is day, 1 otherwise.
+
+    Note
+    ----
+    In previous versions, ``time_since_sun_above_horizon`` has the default value 1.0.
     """
     if isinstance(date, datetime):
         date_ = split_date(date)
@@ -204,7 +208,8 @@ def do_day_check(
     minute2 = (hour - math.floor(hour)) * 60.0
 
     # go back one hour and test if the sun was above the horizon
-    hour2 = hour2 - time_since_sun_above_horizon
+    if time_since_sun_above_horizon is not None:
+        hour2 = hour2 - time_since_sun_above_horizon
     if hour2 < 0:
         hour2 = hour2 + 24.0
         day2 = day2 - 1

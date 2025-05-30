@@ -126,7 +126,7 @@ def climatology_plus_stdev_check(
     return passed
 
 
-def climatology_check(value: float, climate_normal: float, limit: float = 8.0) -> int:
+def climatology_check(value: float, climate_normal: float, limit: float) -> int:
     """Simple function to compare a value with a climatological average with some arbitrary limit on the difference.
     This may be the second simplest function I have ever written (see blacklist)
 
@@ -136,8 +136,8 @@ def climatology_check(value: float, climate_normal: float, limit: float = 8.0) -
         Value to be compared to climatology
     climate_normal : float
         The climatological average to which the value will be compared
-    limit : float, default: 8.0
-        The maximum allowed difference between the two
+    limit : float
+        The maximum allowed difference between the ``value`` and ``climate_normal``.
 
     Returns
     -------
@@ -145,6 +145,10 @@ def climatology_check(value: float, climate_normal: float, limit: float = 8.0) -
         2 if limit is equal or less than 0 or if either value or climate_normal is numerically invalid or None,
         1 if the difference is outside the specified limit,
         0 otherwise
+
+    Note
+    ----
+    In previous versions, ``limit`` had the default value 8.0.
     """
     if not isvalid(value) or not isvalid(climate_normal) or not isvalid(limit):
         return untestable
@@ -207,9 +211,9 @@ def hard_limit_check(val: float, limits: tuple[float, float]) -> int:
 
 def sst_freeze_check(
     insst: float,
-    sst_uncertainty: float = 0.0,
-    freezing_point: float = -1.80,
-    n_sigma: float = 2.0,
+    sst_uncertainty: float,
+    freezing_point: float,
+    n_sigma: float,
 ) -> int:
     """Compare an input SST to see if it is above freezing.
 
@@ -226,12 +230,12 @@ def sst_freeze_check(
     ----------
     insst : float
         input SST to be checked
-    sst_uncertainty : float, default: 0.0
-        the uncertainty in the SST value, defaults to zero, defaults to 0.0
-    freezing_point : float, default: -1.80
-        the freezing point of the water, defaults to -1.8C
-    n_sigma : float, default: 2.0
-        number of sigma to use in the check, defaults to 2.0
+    sst_uncertainty : float
+        the uncertainty in the SST value, defaults to zero
+    freezing_point : float
+        the freezing point of the water
+    n_sigma : float
+        number of sigma to use in the check
 
     Returns
     -------
@@ -239,6 +243,14 @@ def sst_freeze_check(
         2 if either insst, sst_uncertainty, freezing_point or n_sigma is numerically invalid or None,
         1 if the insst is below freezing point by more than twice the uncertainty,
         0 otherwise
+
+    Note
+    ----
+    In previous versions, some parameters had default values:
+
+        * ``sst_uncertainty``: 0.0
+        * ``freezing_point``: -1.80
+        * ``n_sigma``: 2.0
     """
     if not isvalid(insst):
         return untestable

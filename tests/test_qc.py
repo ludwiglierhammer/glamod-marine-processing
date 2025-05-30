@@ -184,6 +184,7 @@ def _test_sst_freeze_check_raises():
 
 
 def test_sst_freeze_check_defaults():
-    assert sst_freeze_check(0.0) == passed
-    assert sst_freeze_check(-1.8) == passed
-    assert sst_freeze_check(-2.0) == failed
+    params = {"sst_uncertainty": 0, "freezing_point": -1.8, "n_sigma": 2.0}
+    assert sst_freeze_check(0.0, **params) == passed
+    assert sst_freeze_check(-1.8, **params) == passed
+    assert sst_freeze_check(-2.0, **params) == failed
