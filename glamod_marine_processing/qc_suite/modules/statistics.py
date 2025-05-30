@@ -268,6 +268,21 @@ def missing_mean(inarr: list[float]) -> float | None:
     return result / num
 
 
+def _trim_stat(inarr: Sequence[float], trim: int, stat: str) -> float:
+    """Calculate a resistant (aka robust) statistics of an input array given a trimming criteria."""
+    arr = copy.deepcopy(inarr)
+    stat_func = getattr(np, stat)
+    if trim == 0:
+        return float(stat_func(arr))
+
+    length = len(arr)
+    arr.sort()
+
+    index1 = int(length / trim)
+
+    return float(stat_func(arr[index1 : length - index1]))
+
+    
 def trim_mean(inarr: Sequence[float], trim: int) -> float:
     """Calculate a resistant (aka robust) mean of an input array given a trimming criteria.
 
@@ -284,18 +299,7 @@ def trim_mean(inarr: Sequence[float], trim: int) -> float:
     float
         Trimmed mean
     """
-    arr = copy.deepcopy(inarr)
-    if trim == 0:
-        return float(np.mean(arr))
-
-    length = len(arr)
-    arr.sort()
-
-    index1 = int(length / trim)
-
-    trim = float(np.mean(arr[index1 : length - index1]))
-
-    return trim
+    return _trim_stat(inarr, trim, "mean")
 
 
 def trim_std(inarr: Sequence[float], trim: int) -> float:
@@ -314,15 +318,4 @@ def trim_std(inarr: Sequence[float], trim: int) -> float:
     float
         Returns trimmed standard deviation
     """
-    arr = copy.deepcopy(inarr)
-    if trim == 0:
-        return float(np.std(arr))
-
-    length = len(arr)
-    arr.sort()
-
-    index1 = int(length / trim)
-
-    trim = float(np.std(arr[index1 : length - index1]))
-
-    return trim
+    return _trim_stat(inarr, trim, "std")
