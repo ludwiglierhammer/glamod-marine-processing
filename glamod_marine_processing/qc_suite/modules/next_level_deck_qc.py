@@ -2,44 +2,51 @@
 
 from __future__ import annotations
 
+import itertools
+from datetime import datetime
 from typing import Sequence
 
 import math
 import numpy as np
-import pandas as pd
-import pytest
 
 from glamod_marine_processing.qc_suite.modules.location_control import (
     mds_lon_to_xindex,
     mds_lat_to_yindex,
 )
-from glamod_marine_processing.qc_suite.modules.next_level_trackqc import is_monotonic
-from glamod_marine_processing.qc_suite.modules.statistics import p_gross
+from glamod_marine_processing.qc_suite.modules.next_level_trackqc import (
+    is_monotonic,
+)
+from glamod_marine_processing.qc_suite.modules.statistics import (
+    p_gross,
+)
 from glamod_marine_processing.qc_suite.modules.time_control import (
     which_pentad,
     pentad_to_month_day,
 )
+import glamod_marine_processing.qc_suite.modules.Climatology as clim
 
 from glamod_marine_processing.qc_suite.modules.qc import failed, passed, untestable, untested
 
 km_to_nm = 0.539957
 
 def get_threshold_multiplier(total_nobs, nob_limits, multiplier_values):
-    """
-    Find the highest value of i such that total_nobs is greater
-    than nob_limits[i] and return multiplier_values[i]
-
-    :param total_nobs: total number of neighbour observations
-    :param nob_limits: list containing the limiting numbers of observations in
-                       ascending order first element must be zero
-    :param multiplier_values: list containing the multiplier values associated.
-    :type total_nobs: integer
-    :type nob_limits: List[integer]
-    :type multiplier_values: List[float]
-    :return: the multiplier value
-    :rtype: float
+    """Find the highest value of i such that total_nobs is greater than nob_limits[i] and return multiplier_values[i]
 
     This routine is used by the buddy check. It's a bit niche.
+
+    Parameters
+    ----------
+    total_nobs: int
+        total number of neighbour observations
+    nob_limits: list[int]
+        list containing the limiting numbers of observations in ascending order first element must be zero
+    multiplier_values: list[float]
+        list containing the multiplier values associated.
+
+    Returns
+    -------
+    float
+        the multiplier value
     """
     assert len(nob_limits) == len(multiplier_values), "length of input lists are different"
     assert min(multiplier_values) > 0, "multiplier value less than zero"
@@ -51,8 +58,8 @@ def get_threshold_multiplier(total_nobs, nob_limits, multiplier_values):
     if total_nobs == 0:
         multiplier = 4.0
 
-    for i in range(0, len(nob_limits)):
-        if total_nobs > nob_limits[i]:
+    for i, limit in enumerate(nob_limits):
+        if total_nobs > limit:
             multiplier = multiplier_values[i]
 
     assert multiplier > 0, "output multiplier less than or equal to zero "
@@ -64,18 +71,38 @@ class Np_Super_Ob:
     """Class for gridding data in buddy check, based on numpy arrays."""
 
     def __init__(self):
+        """Initialise empty grid"""
         self.grid = np.zeros((360, 180, 73))
         self.buddy_mean = np.zeros((360, 180, 73))
         self.buddy_stdev = np.zeros((360, 180, 73))
         self.nobs = np.zeros((360, 180, 73))
 
-    def add_obs(self, lats, lons, dates, anoms):
+    def add_obs(
+            self,
+            lats: Sequence[float],
+            lons: Sequence[float],
+            dates: Sequence[datetime],
+            anoms: Sequence[float]
+    ) -> None:
+        """Add a series of observations to the grid and take the grid average
+
+        Parameters
+        ----------
+        lats: array-like of float, shape (n,)
+            1-dimensional latitude array.
+        lons: array-like of float, shape (n,)
+            1-dimensional longitude array.
+        dates: array-like of datetime, shape (n,)
+            1-dimensional date array.
+        anoms: array-like of float, shape (n,)
+            1-dimensional anomaly array.
+        """
         n_obs = len(lats)
         for i in range(n_obs):
-            self.add_rep(lats[i],lons[i], dates[i].year, dates[i].month, dates[i].day, anoms[i])
+            self.add_rep(lats[i], lons[i], dates[i].month, dates[i].day, anoms[i])
         self.take_average()
 
-    def add_rep(self, lat, lon, year, month, day, anom):
+    def add_rep(self, lat, lon, month, day, anom):
         """Add an anomaly to the grid from specified lat lon and date."""
         xindex = mds_lon_to_xindex(lon)
         yindex = mds_lat_to_yindex(lat)
@@ -90,21 +117,34 @@ class Np_Super_Ob:
             self.nobs[xindex][yindex][pindex] += 1
 
     def take_average(self):
-        """Take the average of a grid."""
+        """Take the average of a grid to which reps have been added using add_rep"""
         nonmiss = np.nonzero(self.nobs)
         self.grid[nonmiss] = self.grid[nonmiss] / self.nobs[nonmiss]
 
-    def get_neighbour_anomalies(self, search_radius, xindex, yindex, pindex):
-        """
-        Search within a specified search radius of the given point and extract
-        the neighbours for buddy check
+    def get_neighbour_anomalies(
+            self,
+            search_radius: list,
+            xindex: int,
+            yindex: int,
+            pindex: int
+    ) -> (list[float], list[float]):
+        """Search within a specified search radius of the given point and extract the neighbours for buddy check
 
-        :param search_radius: three element array search radius in which to look lon, lat, time
-        :param xindex: the xindex of the gridcell to start from
-        :param yindex: the yindex of the gridcell to start from
-        :param pindex: the pindex of the gridcell to start from
-        :return: anomalies and numbers of observations in two lists
-        :rtype: list of floats
+        Parameters
+        ----------
+        search_radius: list
+            three element array search radius in which to look lon, lat, time
+        xindex: int
+            the xindex of the gridcell to start from
+        yindex: int
+            the yindex of the gridcell to start from
+        pindex: int
+            the pindex of the gridcell to start from
+
+        Returns
+        -------
+        list[float]
+            anomalies and numbers of observations in two lists
         """
         assert len(search_radius) == 3, str(len(search_radius))
 
@@ -120,26 +160,48 @@ class Np_Super_Ob:
         temp_anom = []
         temp_nobs = []
 
-        for xpt in range(-1 * full_xspan, full_xspan + 1):
-            for ypt in range(-1 * yspan, yspan + 1):
-                for ppt in range(-1 * pspan, pspan + 1):
-                    if xpt == 0 and ypt == 0 and ppt == 0:
-                        continue
+        for xpt, ypt, ppt in itertools.product(
+                range(-1 * full_xspan, full_xspan + 1),
+                range(-1 * yspan, yspan + 1),
+                range(-1 * pspan, pspan + 1)
+        ):
+            if xpt == 0 and ypt == 0 and ppt == 0:
+                continue
 
-                    thisxx = (xindex + xpt) % 360
-                    thisyy = (yindex + ypt) % 180
-                    thispp = (pindex + ppt) % 73
+            thisxx = (xindex + xpt) % 360
+            thisyy = (yindex + ypt) % 180
+            thispp = (pindex + ppt) % 73
 
-                    if self.nobs[thisxx][thisyy][thispp] != 0:
-                        temp_anom.append(self.grid[thisxx][thisyy][thispp])
-                        temp_nobs.append(self.nobs[thisxx][thisyy][thispp])
+            if self.nobs[thisxx][thisyy][thispp] != 0:
+                temp_anom.append(self.grid[thisxx][thisyy][thispp])
+                temp_nobs.append(self.nobs[thisxx][thisyy][thispp])
 
         return temp_anom, temp_nobs
 
     def get_buddy_limits_with_parameters(
-        self, pentad_stdev, limits, number_of_obs_thresholds, multipliers
-    ):
-        """Get buddy limits with parameters."""
+        self,
+        pentad_stdev: np.ndarray,
+        limits: list[int],
+        number_of_obs_thresholds: list[int],
+        multipliers: list[float]
+    ) -> None:
+        """Get buddy limits with parameters.
+
+        Parameters
+        ----------
+        pentad_stdev: array-like of float, shape (360, 180, 73)
+            3-dimensional latitude array containing the standard deviations
+        limits: list[int]
+            list of the limits
+        number_of_obs_thresholds: list[int]
+            list containing the number of obs thresholds
+        multipliers: list[float]
+            list containing the multipliers to be applied
+
+        Returns
+        -------
+        None
+        """
         nonmiss = np.nonzero(self.nobs)
         for i in range(len(nonmiss[0])):
             xindex = nonmiss[0][i]
@@ -147,9 +209,7 @@ class Np_Super_Ob:
             pindex = nonmiss[2][i]
             m, d = pentad_to_month_day(pindex + 1)
 
-            stdev = pentad_stdev.get_value_mds_style(
-                89.5 - yindex, -179.5 + xindex, m, d
-            )
+            stdev = pentad_stdev.get_value_mds_style(89.5 - yindex, -179.5 + xindex, m, d)
 
             if stdev is None or stdev < 0.0:
                 stdev = 1.0
@@ -157,18 +217,14 @@ class Np_Super_Ob:
             match_not_found = True
 
             for j, limit in enumerate(limits):
-                temp_anom, temp_nobs = self.get_neighbour_anomalies(
-                    limits[j], xindex, yindex, pindex
-                )
+                temp_anom, temp_nobs = self.get_neighbour_anomalies(limit, xindex, yindex, pindex)
 
                 if len(temp_anom) > 0 and match_not_found:
                     self.buddy_mean[xindex][yindex][pindex] = np.mean(temp_anom)
-                    total_nobs = np.sum(temp_nobs)
+                    total_nobs = int(np.sum(temp_nobs))
 
                     self.buddy_stdev[xindex][yindex][pindex] = (
-                        get_threshold_multiplier(
-                            total_nobs, number_of_obs_thresholds[j], multipliers[j]
-                        )
+                        get_threshold_multiplier(total_nobs, number_of_obs_thresholds[j], multipliers[j])
                         * stdev
                     )
 
@@ -178,127 +234,39 @@ class Np_Super_Ob:
                 self.buddy_mean[xindex][yindex][pindex] = 0.0
                 self.buddy_stdev[xindex][yindex][pindex] = 500.0
 
-        return
-
-    def get_buddy_limits(self, pentad_stdev):
-        """Get buddy limits for old style buddy check."""
-        nonmiss = np.nonzero(self.nobs)
-        for i in range(len(nonmiss[0])):
-            xindex = nonmiss[0][i]
-            yindex = nonmiss[1][i]
-            pindex = nonmiss[2][i]
-            month, day = pentad_to_month_day(pindex + 1)
-
-            # bug noted here single field getsst but multiple fields passed
-            stdev = pentad_stdev.get_value_mds_style(
-                89.5 - yindex, -179.5 + xindex, month, day
-            )
-
-            if stdev is None or stdev < 0.0:
-                stdev = 1.0
-
-            match_not_found = True
-
-            # if there is neighbour in that range then calculate a mean
-            if match_not_found:
-                temp_anom, temp_nobs = self.get_neighbour_anomalies(
-                    [1, 1, 2], xindex, yindex, pindex
-                )
-
-                if len(temp_anom) > 0:
-                    self.buddy_mean[xindex][yindex][pindex] = np.mean(temp_anom)
-                    total_nobs = np.sum(temp_nobs)
-
-                    self.buddy_stdev[xindex][yindex][pindex] = (
-                        get_threshold_multiplier(
-                            total_nobs, [0, 5, 15, 100], [4.0, 3.5, 3.0, 2.5]
-                        )
-                        * stdev
-                    )
-
-                    match_not_found = False
-                    assert total_nobs != 0, "total number of obs is zero"
-
-            # otherwise move out further in space and time to 2 degrees and 2 pentads
-            if match_not_found:
-                temp_anom, temp_nobs = self.get_neighbour_anomalies(
-                    [2, 2, 2], xindex, yindex, pindex
-                )
-
-                if len(temp_anom) > 0:
-                    self.buddy_mean[xindex][yindex][pindex] = np.mean(temp_anom)
-                    total_nobs = np.sum(temp_nobs)
-
-                    self.buddy_stdev[xindex][yindex][pindex] = (
-                        get_threshold_multiplier(total_nobs, [0], [4.0]) * stdev
-                    )
-
-                    match_not_found = False
-                    assert total_nobs != 0, "total number of obs is zero"
-
-            # otherwise move out further in space and time to 2 degrees and 2 pentads
-            if match_not_found:
-                temp_anom, temp_nobs = self.get_neighbour_anomalies(
-                    [1, 1, 4], xindex, yindex, pindex
-                )
-
-                if len(temp_anom) > 0:
-                    self.buddy_mean[xindex][yindex][pindex] = np.mean(temp_anom)
-                    total_nobs = np.sum(temp_nobs)
-
-                    self.buddy_stdev[xindex][yindex][pindex] = (
-                        get_threshold_multiplier(
-                            total_nobs, [0, 5, 15, 100], [4.0, 3.5, 3.0, 2.5]
-                        )
-                        * stdev
-                    )
-
-                    match_not_found = False
-                    assert total_nobs != 0, "total number of obs is zero"
-
-            # final step out is to 2 degrees and 4 pentads
-            if match_not_found:
-                temp_anom, temp_nobs = self.get_neighbour_anomalies(
-                    [2, 2, 4], xindex, yindex, pindex
-                )
-
-                if len(temp_anom) > 0:
-                    self.buddy_mean[xindex][yindex][pindex] = np.mean(temp_anom)
-                    total_nobs = np.sum(temp_nobs)
-
-                    self.buddy_stdev[xindex][yindex][pindex] = (
-                        get_threshold_multiplier(total_nobs, [0], [4.0]) * stdev
-                    )
-
-                    match_not_found = False
-                    assert total_nobs != 0, "total number of obs is zero"
-
-            # if there are no neighbours then any observation will get a pass
-            if match_not_found:
-                self.buddy_mean[xindex][yindex][pindex] = 0.0
-                self.buddy_stdev[xindex][yindex][pindex] = 500.0
-
-        return
 
     def get_new_buddy_limits(
-        self, stdev1, stdev2, stdev3, limits=[2, 2, 4], sigma_m=1.0, noise_scaling=3.0
+        self,
+        stdev1,
+        stdev2,
+        stdev3,
+        limits=(2, 2, 4),
+        sigma_m=1.0,
+        noise_scaling=3.0
     ):
         """Get buddy limits for new bayesian buddy check.
 
-        :param stdev1: Field of standard deviations representing standard deviation of difference between target
+        Parameters
+        ----------
+        stdev1: np.ndarray
+            Field of standard deviations representing standard deviation of difference between target
             gridcell and complete neighbour average (grid area to neighbourhood difference)
-        :param stdev2: Field of standard deviations representing standard deviation of difference between a single
+        stdev2: np.ndarray
+            Field of standard deviations representing standard deviation of difference between a single
             observation and the target gridcell average (point to grid area difference)
-        :param stdev3: Field of standard deviations representing standard deviation of difference between random
+        stdev3: np.ndarray
+            Field of standard deviations representing standard deviation of difference between random
             neighbour gridcell and full neighbour average (uncertainty in neighbour average)
-        :param limits: three membered list of number of degrees in latitude and longitude and number of pentads
-        :param sigma_m: Estimated measurement error uncertainty
-        :param noise_scaling: scale noise by a factor of noise_scaling used to match observed variability
-        :type stdev1: numpy array
-        :type stdev2: numpy array
-        :type stdev3: numpy array
-        :type limits: list of floats
-        :type sigma_m: float
+        limits: list[float]
+            three membered list of number of degrees in latitude and longitude and number of pentads
+        sigma_m: float
+            Estimated measurement error uncertainty
+        noise_scaling: float
+            scale noise by a factor of noise_scaling used to match observed variability
+
+        Returns
+        -------
+
         """
         nonmiss = np.nonzero(self.nobs)
 
@@ -352,20 +320,24 @@ class Np_Super_Ob:
                 self.buddy_mean[xindex][yindex][pindex] = 0.0
                 self.buddy_stdev[xindex][yindex][pindex] = 500.0
 
-        return
-
     def get_buddy_mean(self, lat, lon, month, day):
-        """
-        Get the buddy mean from the grid for a specified time and place
+        """Get the buddy mean from the grid for a specified time and place
 
-        :param lat: latitude of the location for which the buddy mean is desired
-        :param lon: longitude of the location for which the buddy mean is desired
-        :param month: month for which the buddy mean is desired
-        :param day: day for which the buddy mean is desired
-        :type lat: float
-        :type lon: float
-        :type month: integer
-        :type day: integer
+        Parameters
+        ----------
+        lat: float
+            latitude of the location for which the buddy mean is desired
+        lon: float
+            longitude of the location for which the buddy mean is desired
+        month: int
+            month for which the buddy mean is desired
+        day: int
+            day for which the buddy mean is desired
+
+        Returns
+        -------
+        float
+            Buddy mean at the specified location
         """
         xindex = mds_lon_to_xindex(lon)
         yindex = mds_lat_to_yindex(lat)
@@ -373,17 +345,23 @@ class Np_Super_Ob:
         return self.buddy_mean[xindex][yindex][pindex]
 
     def get_buddy_stdev(self, lat, lon, month, day):
-        """
-        Get the buddy standard deviation from the grid for a specified time and place
+        """Get the buddy standard deviation from the grid for a specified time and place
 
-        :param lat: latitude of the location for which the buddy standard deviation is desired
-        :param lon: longitude of the location for which the buddy standard deviatio is desired
-        :param month: month for which the buddy standard deviatio is desired
-        :param day: day for which the buddy standard deviatio is desired
-        :type lat: float
-        :type lon: float
-        :type month: integer
-        :type day: integer
+        Parameters
+        ----------
+        lat: float
+            latitude of the location for which the buddy standard deviation is desired
+        lon: float
+            longitude of the location for which the buddy standard deviation is desired
+        month: int
+            month for which the buddy standard deviation is desired
+        day: int
+            day for which the buddy standard deviation is desired
+
+        Returns
+        -------
+        float
+            Buddy standard deviation at the specified location
         """
         xindex = mds_lon_to_xindex(lon)
         yindex = mds_lat_to_yindex(lat)
@@ -392,15 +370,28 @@ class Np_Super_Ob:
 
 
 def mds_buddy_check(lats, lons, dates, anoms, pentad_stdev, parameters):
-    """
-    Do the old style buddy check. Only those observations that pass the QC_filter
-    of the class will be buddy checked.
+    """Do the old style buddy check.
 
-    :param intype: The variable name for the variable that is to be buddy checked.
-    :param pentad_stdev: Field of standard deviations of 1x1xpentad standard deviations
-    :param parameters: list of parameters for the buddy check
-    :type intype: string
-    :type pentad_stdev: numpy array
+    Parameters
+    ----------
+    lats: array-like of float, shape (n,)
+        1-dimensional latitude array.
+    lons: array-like of float, shape (n,)
+        1-dimensional longitude array.
+    dates: array-like of datetime, shape (n,)
+        1-dimensional date array.
+    anoms: array-like of float, shape (n,)
+        1-dimensional anomaly array.
+    pentad_stdev: clim.Climatology
+        Field of standard deviations of 1x1xpentad standard deviations
+    parameters: dict
+        Dictionary of parameters for the buddy check
+
+    Returns
+    -------
+    array-like of int, shape (n,)
+        1-dimensional array containing QC flags.
+        1 if buddy check fails, 0 otherwise.
     """
     limits = parameters["limits"]
     number_of_obs_thresholds = parameters["number_of_obs_thresholds"]
@@ -434,25 +425,43 @@ def mds_buddy_check(lats, lons, dates, anoms, pentad_stdev, parameters):
 
     return qc_outcomes
 
-def bayesian_buddy_check(lats, lons, dates, anoms, stdev1, stdev2, stdev3):
-    """
-    Do the Bayesian buddy check. Only those observations that pass the QC_filter
-    of the class will be buddy checked. The bayesian buddy check assigns a
+def bayesian_buddy_check(
+        lats: Sequence[float],
+        lons: Sequence[float],
+        dates: Sequence[datetime],
+        anoms: Sequence[float],
+        stdev1: clim.Climatology,
+        stdev2: clim.Climatology,
+        stdev3: clim.Climatology
+) -> Sequence[int]:
+    """Do the Bayesian buddy check. The bayesian buddy check assigns a
     probability of gross error to each observations, which is rounded down to the
     tenth and then multiplied by 10 to yield a flag between 0 and 9.
 
-    :param intype: The variable name for the variable that is to be buddy checked.
-    :param stdev1: Field of standard deviations representing standard deviation of difference between
-      target gridcell and complete neighbour average (grid area to neighbourhood difference)
-    :param stdev2: Field of standard deviations representing standard deviation of difference between
-      a single observation and the target gridcell average (point to grid area difference)
-    :param stdev3: Field of standard deviations representing standard deviation of difference between
-      random neighbour gridcell and full neighbour average (uncertainty in neighbour average)
-    :param parameters: list of parameters
-    :type intype: string
-    :type stdev1: numpy array
-    :type stdev2: numpy array
-    :type stdev3: numpy array
+    Parameters
+    ----------
+    lats: array-like of float, shape (n,)
+        1-dimensional latitude array.
+    lons: array-like of float, shape (n,)
+        1-dimensional longitude array.
+    dates: array-like of datetime, shape (n,)
+        1-dimensional date array.
+    anoms: array-like of float, shape (n,)
+        1-dimensional anomaly array.
+    stdev1: clim.Climatology
+        Field of standard deviations representing standard deviation of difference between
+        target gridcell and complete neighbour average (grid area to neighbourhood difference)
+    stdev2: clim.Climatology
+        Field of standard deviations representing standard deviation of difference between
+        a single observation and the target gridcell average (point to grid area difference)
+    stdev3: clim.Climatology
+        Field of standard deviations representing standard deviation of difference between
+        random neighbour gridcell and full neighbour average (uncertainty in neighbour average)
+
+    Returns
+    -------
+    array-like of int, shape (n,)
+        1-dimensional array containing probability of gross error
     """
     parameters = {
         "bayesian_buddy_check": {

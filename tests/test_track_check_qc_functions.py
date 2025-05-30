@@ -150,18 +150,29 @@ def test_do_track_check_mixed(ship_frame):
             assert trk[i] == 0
 
 def test_backward_discrepancy(ship_frame):
-    result = calculate_speed_course_distance_time_difference(ship_frame)
-    result = backward_discrepancy(result)
+    result = backward_discrepancy(
+        ship_frame['lat'],
+        ship_frame['lon'],
+        ship_frame['date'],
+        ship_frame['vsi'],
+        ship_frame['dsi']
+    )
     for i in range(len(result)-1):
         assert pytest.approx(result[i],abs=0.00001) == 0.0
-    assert result[-1] is None
+    assert np.isnan(result[-1])
+
 
 def test_forward_discrepancy(ship_frame):
-    result = calculate_speed_course_distance_time_difference(ship_frame)
-    result = forward_discrepancy(result)
+    result = forward_discrepancy(
+        ship_frame['lat'],
+        ship_frame['lon'],
+        ship_frame['date'],
+        ship_frame['vsi'],
+        ship_frame['dsi']
+    )
     for i in range(1, len(result)):
         assert pytest.approx(result[i],abs=0.00001) == 0.0
-    assert result[0] is None
+    assert np.isnan(result[0])
 
 
 def test_calc_alternate_speeds(ship_frame):

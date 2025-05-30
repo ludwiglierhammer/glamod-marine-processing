@@ -355,14 +355,8 @@ def test_neighbours(reps2_):
 def test_add_one_maxes_limits(reps_, dummy_pentad_stdev_):
 
     g = Np_Super_Ob()
-    g.add_rep(
-        reps_['LAT'][0],
-        reps_['LON'][0],
-        reps_['DATE'][0].year,
-        reps_['DATE'][0].month,
-        reps_['DATE'][0].day,
-        reps_['SST'][0] - reps_['SST_CLIM'][0]
-    )
+    g.add_rep(reps_['LAT'][0], reps_['LON'][0], reps_['DATE'][0].month, reps_['DATE'][0].day,
+              reps_['SST'][0] - reps_['SST_CLIM'][0])
     g.take_average()
     g.get_new_buddy_limits(dummy_pentad_stdev_, dummy_pentad_stdev_, dummy_pentad_stdev_)
 

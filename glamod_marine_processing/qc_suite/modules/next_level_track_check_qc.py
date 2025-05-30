@@ -290,13 +290,13 @@ def calculate_speed_course_distance_time_difference(
 
 
 
-@inspect_arrays(["vsi", "dsi", "lat", "lon", "date"])
+@inspect_arrays(["lat", "lon", "date", "vsi", "dsi"])
 def forward_discrepancy(
-    vsi: Sequence[float],
-    dsi: Sequence[float],
     lat: Sequence[float],
     lon: Sequence[float],
     date: Sequence[datetime],
+    vsi: Sequence[float],
+    dsi: Sequence[float],
 ) -> Sequence[float]:
     """Calculate what the distance is between the projected position (based on the reported
     speed and heading at the current and previous time steps) and the actual position. The
@@ -309,16 +309,16 @@ def forward_discrepancy(
 
     Parameters
     ----------
-    vsi: array-like of float, shape (n,)
-        1-dimensional reported speed array in knots.
-    dsi: array-like of float, shape (n,)
-        1-dimensional reported heading array.
     lat: array-like of float, shape (n,)
         1-dimensional latitude array in degrees.
     lon: array-like of float, shape (n,)
         1-dimensional longitude array in degrees.
     date: array-like of datetime, shape (n,)
         1-dimensional date array.
+    vsi: array-like of float, shape (n,)
+        1-dimensional reported speed array in knots.
+    dsi: array-like of float, shape (n,)
+        1-dimensional reported heading array.
 
     Returns
     -------
@@ -336,8 +336,8 @@ def forward_discrepancy(
 
     for i in range(1, number_of_obs):
 
-        vsi_current = vsi[i]
-        vsi_previous = vsi[i - 1]
+        vsi_current = vsi[i] / km_to_nm
+        vsi_previous = vsi[i - 1] / km_to_nm
         dsi_current = dsi[i]
         dsi_previous = dsi[i - 1]
         tsi_current = pd.Timestamp(date[i])
@@ -438,8 +438,8 @@ def backward_discrepancy(
 
     for i in range(number_of_obs - 1, 0, -1):
 
-        vsi_current = vsi[i]
-        vsi_previous = vsi[i - 1]
+        vsi_current = vsi[i] / km_to_nm
+        vsi_previous = vsi[i - 1] / km_to_nm
         dsi_current = dsi[i]
         dsi_previous = dsi[i - 1]
         tsi_current = pd.Timestamp(date[i])
@@ -470,7 +470,7 @@ def backward_discrepancy(
             lat_current,
             lon_current,
             vsi_current,
-            dsi_current,
+            dsi_current - 180.,
             timediff,
         )
 
@@ -478,13 +478,13 @@ def backward_discrepancy(
             lat_previous,
             lon_previous,
             vsi_previous,
-            dsi_previous,
+            dsi_previous - 180.,
             timediff,
         )
 
         # apply increments to the lat and lon at i-1
         updated_latitude = lat_current + lat1 + lat2
-        updated_longitude = lon_previous + lon1 + lon2
+        updated_longitude = lon_current + lon1 + lon2
 
         # calculate distance between calculated position and the second reported position
         discrepancy = sg.sphere_distance(
