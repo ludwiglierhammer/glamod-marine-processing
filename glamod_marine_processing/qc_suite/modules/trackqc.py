@@ -1189,7 +1189,8 @@ class SSTTailChecker:
 
     @staticmethod
     def _parse_rep(rep) -> (float, float, float, bool):
-        """
+        """Process a report
+
         Parameters
         ----------
         rep: MarineReport

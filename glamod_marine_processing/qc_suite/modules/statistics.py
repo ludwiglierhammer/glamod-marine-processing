@@ -217,33 +217,6 @@ def winsorised_mean(inarr: list[float]) -> float:
     return total / length
 
 
-def trimmed_mean(inarr: list[float], trim: int) -> float:
-    """Calculate a resistant (aka robust) mean of an input array given a trimming criteria.
-
-    Parameters
-    ----------
-    inarr: list of float
-        List of numbers.
-    trim: int
-        Trimming criteria. A value of 10 trims one tenth of the values off each end of the sorted array before calculating the mean.
-
-    Returns
-    -------
-    float
-        Trimmed mean.
-    """
-    return trim_mean(inarr, trim)
-    # if trim == 0:
-    #     return np.mean(inarr)
-    #
-    # length = len(inarr)
-    # inarr.sort()
-    #
-    # index1 = int(length / trim)
-    #
-    # return np.mean(inarr[index1 : length - index1])
-
-
 def missing_mean(inarr: list[float]) -> float | None:
     """Return mean of input array
 
@@ -282,7 +255,7 @@ def _trim_stat(inarr: Sequence[float], trim: int, stat: str) -> float:
 
     return float(stat_func(arr[index1 : length - index1]))
 
-    
+
 def trim_mean(inarr: Sequence[float], trim: int) -> float:
     """Calculate a resistant (aka robust) mean of an input array given a trimming criteria.
 

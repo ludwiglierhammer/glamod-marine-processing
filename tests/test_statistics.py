@@ -1,5 +1,8 @@
 from __future__ import annotations
 
+import copy
+
+import numpy as np
 import pytest  # noqa
 
 from glamod_marine_processing.qc_suite.modules.statistics import (
@@ -7,7 +10,8 @@ from glamod_marine_processing.qc_suite.modules.statistics import (
     p_data_given_good,
     p_data_given_gross,
     p_gross,
-    trimmed_mean,
+    trim_mean,
+    trim_std,
     winsorised_mean,
 )
 
@@ -27,11 +31,28 @@ from glamod_marine_processing.qc_suite.modules.statistics import (
             1.0,
         ),  # test_all_zeroes_one_outlier_not_trimmed
         ([1.3, 0.7, 4.0], 0, 2.0),  # test_trim_zero
+        ([10.0, 4.0, 3.0, 2.0, 1.0], 0, 4.0),
+        ([10.0, 4.0, 3.0, 2.0, 1.0], 5, 3.0),
     ],
 )
 def test_trimmed_mean(inarr, trim, expected):
-    assert trimmed_mean(inarr, trim) == expected
+    original_array = copy.deepcopy(inarr)
+    assert trim_mean(inarr, trim) == expected
+    # This checks the array is not modifed by the function
+    assert np.all(inarr == original_array)
 
+@pytest.mark.parametrize(
+    "inarr, trimming, expected",
+    [
+        ([6.0, 1.0, 1.0, 1.0, 1.0], 0, 2.0),
+        ([6.0, 1.0, 1.0, 1.0, 1.0], 5, 0.0),
+    ],
+)
+def test_trim_std(inarr, trimming, expected):
+    original_array = copy.deepcopy(inarr)
+    assert trim_std(inarr, trimming) == expected
+    # This checks the array is not modifed by the function
+    assert np.all(inarr == original_array)
 
 @pytest.mark.parametrize(
     "inarr, expected",

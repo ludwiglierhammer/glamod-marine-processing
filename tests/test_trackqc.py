@@ -2,19 +2,13 @@
 
 from __future__ import annotations
 
-import copy
 from datetime import datetime
 
 import numpy as np
 import pytest
 
 import glamod_marine_processing.qc_suite.modules.next_level_trackqc as tqc
-import glamod_marine_processing.qc_suite.modules.statistics
 from glamod_marine_processing.qc_suite.modules.qc import untestable
-
-# from glamod_marine_processing.qc_suite.modules.next_level_track_check_qc import (
-#    calculate_speed_course_distance_time_difference,
-# )
 
 
 @pytest.mark.parametrize(
@@ -51,38 +45,6 @@ def test_daytime(year, month, day, hour, lat, lon, elevdlim, expected):
 def test_daytime_error_invalid_parameter(year, month, day, hour, lat, lon):
     with pytest.raises(ValueError):
         assert tqc.track_day_test(year, month, day, hour, lat, lon, elevdlim=-2.5)
-
-
-@pytest.mark.parametrize(
-    "inarr, trimming, expected",
-    [
-        ([10.0, 4.0, 3.0, 2.0, 1.0], 0, 4.0),
-        ([10.0, 4.0, 3.0, 2.0, 1.0], 5, 3.0),
-    ],
-)
-def test_trim_mean(inarr, trimming, expected):
-    original_array = copy.deepcopy(inarr)
-    trim = glamod_marine_processing.qc_suite.modules.statistics.trim_mean(inarr, trimming)
-    assert trim == expected
-    assert np.all(
-        inarr == original_array
-    )  # This checks the array is not modifed by the function
-
-
-@pytest.mark.parametrize(
-    "inarr, trimming, expected",
-    [
-        ([6.0, 1.0, 1.0, 1.0, 1.0], 0, 2.0),
-        ([6.0, 1.0, 1.0, 1.0, 1.0], 5, 0.0),
-    ],
-)
-def test_trim_std(inarr, trimming, expected):
-    original_array = copy.deepcopy(inarr)
-    trim = glamod_marine_processing.qc_suite.modules.statistics.trim_std(inarr, trimming)
-    assert trim == expected
-    assert np.all(
-        inarr == original_array
-    )  # This checks the array is not modifed by the function
 
 
 @pytest.mark.parametrize(

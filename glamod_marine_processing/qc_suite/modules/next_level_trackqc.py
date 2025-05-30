@@ -892,7 +892,8 @@ class SSTTailChecker:
 
     @staticmethod
     def _parse_rep(lat, lon, ostia, ice, bgvar, dates) -> (float, float, float, bool):
-        """
+        """Process a report
+
         Parameters
         ----------
         lat: float
