@@ -17,7 +17,7 @@ import numpy as np
 
 from . import CalcHums
 from . import icoads_identify as ii
-from . import qc
+from . import next_level_qc as qc
 from . import spherical_geometry as sph
 from . import time_control
 from . import track_check as tc

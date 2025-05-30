@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import pytest
 
+from glamod_marine_processing.qc_suite.modules.auxiliary import failed, passed
 from glamod_marine_processing.qc_suite.modules.icoads_identify import (
     id_is_generic,
     is_buoy,
@@ -10,7 +11,6 @@ from glamod_marine_processing.qc_suite.modules.icoads_identify import (
     is_in_valid_list,
     is_ship,
 )
-from glamod_marine_processing.qc_suite.modules.qc import failed, passed
 
 
 @pytest.mark.parametrize(

@@ -11,8 +11,7 @@ import pandas as pd
 from . import spherical_geometry as sg
 from . import time_control as time_control
 from . import track_check as tc
-from .auxiliary import inspect_arrays, isvalid
-from .qc import failed, passed
+from .auxiliary import failed, inspect_arrays, isvalid, passed
 
 km_to_nm = 0.539957
 

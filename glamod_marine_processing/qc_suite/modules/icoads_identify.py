@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from .qc import failed, passed
+from .auxiliary import failed, passed
 
 
 def is_in_valid_list(

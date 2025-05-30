@@ -6,6 +6,7 @@ import inspect
 
 import pandas as pd
 
+from .auxiliary import failed
 from .external_clim import get_climatological_value  # noqa
 from .next_level_qc import (  # noqa
     do_climatology_check,
@@ -20,7 +21,6 @@ from .next_level_qc import (  # noqa
     do_time_check,
     do_wind_consistency_check,
 )
-from .qc import failed
 
 
 def _get_function(name):

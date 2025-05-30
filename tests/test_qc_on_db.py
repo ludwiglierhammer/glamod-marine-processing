@@ -6,6 +6,11 @@ from _settings import get_settings
 from cdm_reader_mapper import DataBundle, read_tables
 from cdm_reader_mapper.common.getting_files import load_file
 
+from glamod_marine_processing.qc_suite.modules.auxiliary import (
+    failed,
+    passed,
+    untestable,
+)
 from glamod_marine_processing.qc_suite.modules.external_clim import Climatology
 from glamod_marine_processing.qc_suite.modules.icoads_identify import (
     is_buoy,
@@ -36,7 +41,6 @@ from glamod_marine_processing.qc_suite.modules.next_level_track_check_qc import 
     do_track_check,
     find_repeated_values,
 )
-from glamod_marine_processing.qc_suite.modules.qc import failed, passed, untestable
 
 
 @pytest.fixture(scope="session")
