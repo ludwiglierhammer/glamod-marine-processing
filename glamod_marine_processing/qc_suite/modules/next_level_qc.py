@@ -15,7 +15,7 @@ def climatology_check(
     value: float,
     climate_normal: float,
     maximum_anomaly: float,
-    standard_deviation: float | None = 1.0,
+    standard_deviation: float | None = "default",
     standard_deviation_limits: tuple[float, float] | None = None,
     lowbar: float | None = None,
 ) -> int:
@@ -32,8 +32,9 @@ def climatology_check(
     maximum_anomaly: float
         Largest allowed anomaly.
         If ``standard_deviation`` is provided, this is the largest allowed standardised anomaly.
-    standard_deviation: float, default: 1.0
+    standard_deviation: float, default: "default"
         The standard deviation which will be used to standardize the anomaly
+        If standard_deviation is "default", set standard_deviation to 1.0.
     standard_deviation_limits: tuple of float, optional
         A tuple of two floats representing the upper and lower limits for standard deviation used in check
     lowbar: float, optional
@@ -56,23 +57,29 @@ def climatology_check(
     ):
         return untestable
 
+    if standard_deviation != "default":
+        if not isvalid(standard_deviation):
+            return untestable
+    else:
+        standard_deviation = 1.0
+
     if maximum_anomaly <= 0:
         return untestable
+
+    if standard_deviation is None:
+        standard_deviation = 1.0
 
     if standard_deviation_limits is not None:
         if standard_deviation_limits[1] <= standard_deviation_limits[0]:
             return untestable
 
-        if standard_deviation < standard_deviation_limits[0]:
-            standard_deviation = standard_deviation_limits[0]
-        if standard_deviation > standard_deviation_limits[1]:
-            standard_deviation = standard_deviation_limits[1]
+        standard_deviation = max(standard_deviation, standard_deviation_limits[0])
+        standard_deviation = min(standard_deviation, standard_deviation_limits[1])
 
     climate_diff = abs(value - climate_normal)
 
-    if lowbar is None:
-        low_check = True
-    else:
+    low_check = True
+    if lowbar is not None:
         low_check = climate_diff > lowbar
 
     if climate_diff / standard_deviation > maximum_anomaly and low_check:
@@ -458,17 +465,17 @@ def do_hard_limit_check(value: float, hard_limits: list) -> int:
     Returns
     -------
     int
-        1 if air value is outside hard limits, 0 otherwise
+        1 if value is outside hard limits, 0 otherwise
     """
     return hard_limit_check(value, hard_limits)
 
 
-@inspect_climatology("climatology", "standard_deviation")
+@inspect_climatology("climatology", optional="standard_deviation")
 def do_climatology_check(
     value: float,
     climatology: float | Climatology,
     maximum_anomaly: float,
-    standard_deviation: float | Climatology = 1.0,
+    standard_deviation: float | Climatology | None = "default",
     standard_deviation_limits: list | None = None,
     lowbar: float | None = None,
     **kwargs,
@@ -476,7 +483,7 @@ def do_climatology_check(
     """
     Check that the value is within the prescribed distance from climatology.
 
-    If ``standard_deviation`` is provided, the value is converted into a standardised anomlay. Optionally,
+    If ``standard_deviation`` is provided, the value is converted into a standardised anomaly. Optionally,
     if ``standard deviation`` is outside the range specified by ``standard_deviation_limits`` then ``standard_deviation``
     is set to whichever of the lower or upper limits is closest.
     If ``lowbar`` is provided, the anomaly must be greater than ``lowbar`` to fail regardless of ``standard_deviation``.
@@ -489,12 +496,14 @@ def do_climatology_check(
     climatology: float or Climatology
         Reference climatological value.
         This could be a float value or Climatology object.
+        If it is a Climatology object, pass ``lon`` and ``lat`` and ``date`` or ``month`` and ``day`` as keyword-arguments!
     maximum_anomaly : float
         Largest allowed anomaly.
         If ``standard_deviation`` is provided, this is the largest allowed standardised anomaly.
-    standard_deviation : float or Climatology, default: 1.0
+    standard_deviation : float or Climatology, default: "default"
         Climatological standard deviation.
         This could be a float value or Climatology object.
+        If it is a Climatology object, pass ``lon`` and ``lat`` and ``date`` or ``month`` and ``day`` as keyword-arguments!
     standard_deviation_limits : list, optional
         2-element list containing lower and upper limits for standard deviation. If the stdev is outside these
         limits, at_stdev will be set to the nearest limit.
@@ -504,11 +513,14 @@ def do_climatology_check(
     Returns
     -------
     int
-        1 if value anomaly is outside allowed bounds, 0 otherwise
+        2 if either value, climatology, maximum_anomaly or standard_deviation is numerically invalid or None.
+        1 if value anomaly is outside allowed bounds
+        0 otherwise
 
     Note
     ----
-    If ``climatology`` is a Climatology object, pass ``lon`` and ``lat`` and ``date`` or ``month`` and ``day`` as keyword-arguments!
+    If either ``climatology`` or ``standard_deviation`` is a Climatology object,
+    pass ``lon`` and ``lat`` and ``date`` or ``month`` and ``day`` as keyword-arguments!
     """
     return climatology_check(
         value,
