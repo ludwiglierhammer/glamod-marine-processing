@@ -57,7 +57,7 @@ def inspect_climatology(
     def handler(arguments: dict):
         active_keys = list(climatology_keys)
         for opt in optional:
-            if opt in bound_args.arguments:
+            if opt in arguments:
                 active_keys.append(opt)
         for clim_key in active_keys:
             if clim_key not in arguments:
