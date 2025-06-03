@@ -3,11 +3,13 @@
 from __future__ import annotations
 
 import inspect
+import warnings
 from collections.abc import Callable
 from functools import wraps
 
 import numpy as np
 import pandas as pd
+from xclim.core.units import convert_units_to, units
 
 passed = 0
 failed = 1
@@ -51,12 +53,17 @@ def generic_decorator(handler: Callable[[dict], None]) -> Callable:
     def decorator(func):
         @wraps(func)
         def wrapper(*args, **kwargs):
+            reserved_keys = getattr(handler, "_decorator_kwargs", set())
+            meta_kwargs = {k: kwargs.pop(k) for k in reserved_keys if k in kwargs}
+
             sig = inspect.signature(func)
             bound_args = sig.bind(*args, **kwargs)
             bound_args.apply_defaults()
 
             handler.__funcname__ = func.__name__
-            handler(bound_args.arguments)  # Perform specific inspection/modification
+            handler(
+                bound_args.arguments, **meta_kwargs
+            )  # Perform specific inspection/modification
 
             return func(*bound_args.args, **bound_args.kwargs)
 
@@ -79,7 +86,7 @@ def inspect_arrays(params: list[str]) -> Callable:
         The decorator function
     """
 
-    def handler(arguments: dict):
+    def handler(arguments: dict, **meta_kwargs):
         arrays = []
         for name in params:
             if name not in arguments:
@@ -94,5 +101,44 @@ def inspect_arrays(params: list[str]) -> Callable:
         lengths = [len(arr) for arr in arrays]
         if any(length != lengths[0] for length in lengths):
             raise ValueError(f"Input {params} must all have the same length.")
+
+    return generic_decorator(handler)
+
+
+def convert_units(*params) -> Callable:
+    """Create a decorator to automatically convert source units to target units.
+
+    Parameters
+    ----------
+    params: str
+        Parameter name to convert units.
+
+    Returns
+    -------
+    Callable
+        The decorator function
+    """
+
+    def handler(arguments: dict, **meta_kwargs):
+        target_units = meta_kwargs.get("target_units")
+        source_units = meta_kwargs.get("source_units")
+
+        if not target_units:
+            warnings.warn("No 'target_units' specified. Skipping unit conversion.")
+            return
+
+        for param in params:
+            if param not in arguments:
+                raise ValueError(
+                    f"Parameter '{param}' not found in function arguments."
+                )
+
+            value = arguments[param]
+            quantity = value * units(source_units)
+            converted = convert_units_to(quantity, target_units)
+
+            arguments[param] = converted
+
+    handler._decorator_kwargs = {"target_units", "source_units"}
 
     return generic_decorator(handler)
