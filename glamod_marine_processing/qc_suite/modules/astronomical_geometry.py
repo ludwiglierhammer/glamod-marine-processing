@@ -256,10 +256,8 @@ def sin_of_elevation(phi: float, declination: float, hour_angle: float) -> float
     sin_elevation = math.sin(phi) * math.sin(declination) + math.cos(phi) * math.cos(
         declination
     ) * math.cos(hour_angle)
-    if sin_elevation > 1.0:
-        sin_elevation = 1.0
-    if sin_elevation < -1.0:
-        sin_elevation = -1.0
+    sin_elevation = min(sin_elevation, 1.0)
+    sin_elevation = max(sin_elevation, -1.0)
     return sin_elevation
 
 
@@ -316,10 +314,8 @@ def calculate_azimuth(
         Azimuth.
     """
     val_to_asin = math.cos(declination) * math.sin(hour_angle) / math.cos(elevation)
-    if val_to_asin > 1.0:
-        val_to_asin = 1.0
-    if val_to_asin < -1.0:
-        val_to_asin = -1.0
+    val_to_asin = min(val_to_asin, 1.0)
+    val_to_asin = max(val_to_asin, -1.0)
     azimuth = math.asin(val_to_asin) / degrad
     if math.sin(elevation) < math.sin(declination) / math.sin(phi):
         azimuth = convert_degrees(azimuth)

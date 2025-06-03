@@ -2,7 +2,9 @@
 
 from __future__ import annotations
 
+import copy
 import math
+from typing import Sequence
 
 import numpy as np
 
@@ -215,32 +217,6 @@ def winsorised_mean(inarr: list[float]) -> float:
     return total / length
 
 
-def trimmed_mean(inarr: list[float], trim: int) -> float:
-    """Calculate a resistant (aka robust) mean of an input array given a trimming criteria.
-
-    Parameters
-    ----------
-    inarr: list of float
-        List of numbers.
-    trim: int
-        Trimming criteria. A value of 10 trims one tenth of the values off each end of the sorted array before calculating the mean.
-
-    Returns
-    -------
-    float
-        Trimmed mean.
-    """
-    if trim == 0:
-        return np.mean(inarr)
-
-    length = len(inarr)
-    inarr.sort()
-
-    index1 = int(length / trim)
-
-    return np.mean(inarr[index1 : length - index1])
-
-
 def missing_mean(inarr: list[float]) -> float | None:
     """Return mean of input array
 
@@ -263,3 +239,56 @@ def missing_mean(inarr: list[float]) -> float | None:
     if num == 0.0:
         return None
     return result / num
+
+
+def _trim_stat(inarr: Sequence[float], trim: int, stat: str) -> float:
+    """Calculate a resistant (aka robust) statistics of an input array given a trimming criteria."""
+    arr = copy.deepcopy(inarr)
+    stat_func = getattr(np, stat)
+    if trim == 0:
+        return float(stat_func(arr))
+
+    length = len(arr)
+    arr.sort()
+
+    index1 = int(length / trim)
+
+    return float(stat_func(arr[index1 : length - index1]))
+
+
+def trim_mean(inarr: Sequence[float], trim: int) -> float:
+    """Calculate a resistant (aka robust) mean of an input array given a trimming criteria.
+
+    Parameters
+    ----------
+    inarr: array-like of float, shape (n,)
+        1-dimensional value array.
+    trim: int
+        trimming criteria. A value of 10 trims one tenth of the values off each end of the sorted array
+        before calculating the mean.
+
+    Returns
+    -------
+    float
+        Trimmed mean
+    """
+    return _trim_stat(inarr, trim, "mean")
+
+
+def trim_std(inarr: Sequence[float], trim: int) -> float:
+    """Calculate a resistant (aka robust) standard deviation of an input array given a trimming criteria.
+
+    Parameters
+    ----------
+    inarr: array-like of float, shape (n,)
+        1-dimensional value array.
+    trim: int
+        trimming criteria. A value of 10 trims one tenth of the values off each end of the sorted array before
+        calculating the standard deviation.
+
+    Returns
+    -------
+    float
+        Returns trimmed standard deviation
+    """
+    return _trim_stat(inarr, trim, "std")
