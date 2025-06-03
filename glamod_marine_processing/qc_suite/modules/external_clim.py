@@ -54,7 +54,7 @@ def inspect_climatology(
     elif optional is None:
         optional = []
 
-    def handler(arguments: dict):
+    def handler(arguments: dict, **meta_kwargs):
         active_keys = list(climatology_keys)
         for opt in optional:
             if opt in arguments:
