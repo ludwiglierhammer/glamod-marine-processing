@@ -295,6 +295,16 @@ def test_do_time_check(hour, expected):
 
 
 @pytest.mark.parametrize(
+    "date, expected",
+    [
+        (datetime(2005, 7, 19, 3, 52), passed),
+    ],
+)
+def test_do_time_check_datetime(date, expected):
+    assert do_time_check(date=date) == expected
+
+
+@pytest.mark.parametrize(
     "year, month, day, hour, latitude, longitude, time, expected",
     [
         (

@@ -6,6 +6,7 @@ import numpy as np
 import pytest
 
 from glamod_marine_processing.qc_suite.modules.time_control import (
+    convert_date_to_hours,
     day_in_year,
     last_month_was,
     leap_year_correction,
@@ -153,9 +154,9 @@ def test_day_in_year_leap_year_test():
 
 
 def test_leap_year_correction():
-    assert leap_year_correction(24.0, 1, 0) == 0
-    assert leap_year_correction(24.0, 1, 4) == 1461
-    assert leap_year_correction(24.0, 1, -3) == -1096
+    assert leap_year_correction(24, 1, 0) == 0
+    assert leap_year_correction(24, 1, 4) == 1461
+    assert leap_year_correction(24, 1, -3) == -1096
 
 
 def test_year_month_gen():
@@ -204,3 +205,14 @@ def test_last_month_was(year, month, expected):
 )
 def test_next_month_is(year, month, expected):
     assert next_month_is(year, month) == expected
+
+
+@pytest.mark.parametrize(
+    "dates, expected",
+    [
+        ([datetime(2000, 1, 1, 0, 0), datetime(2000, 1, 1, 1, 0)], [0, 1]),
+        ([datetime(1999, 12, 31, 23, 0), datetime(2000, 1, 1, 1, 0)], [0, 2]),
+    ],
+)
+def test_convert_date_to_hour(dates, expected):
+    assert (convert_date_to_hours(dates) == expected).all()

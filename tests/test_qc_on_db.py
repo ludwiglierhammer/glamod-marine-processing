@@ -1087,6 +1087,10 @@ def test_do_spike_check(testdata_track):
             lat=track[("observations-at", "latitude")],
             lon=track[("observations-at", "longitude")],
             date=track[("observations-at", "date_time")],
+            max_gradient_space=0.5,
+            max_gradient_time=1.0,
+            delta_t=1.0,
+            n_neighbours=5,
         ),
         include_groups=False,
     )
@@ -1121,6 +1125,10 @@ def test_do_track_check(testdata_track):
             lat=track[("header", "latitude")],
             lon=track[("header", "longitude")],
             date=track[("header", "report_timestamp")],
+            max_direction_change=60.0,
+            max_speed_change=10.0,
+            max_absolute_speed=40.0,
+            max_midpoint_discrepancy=150.0,
         ),
         include_groups=False,
     )
@@ -1203,6 +1211,10 @@ def test_do_iquam_track_check(testdata_track):
             lat=track[("header", "latitude")],
             lon=track[("header", "longitude")],
             date=track[("header", "report_timestamp")],
+            speed_limit=15.0,
+            delta_d=1.11,
+            delta_t=0.01,
+            n_neighbours=5,
         ),
         include_groups=False,
     )
@@ -1233,6 +1245,8 @@ def test_find_repeated_values(testdata_track):
     results = groups.apply(
         lambda track: find_repeated_values(
             value=track[("observations-at", "observation_value")],
+            min_count=20,
+            threshold=0.7,
         ),
         include_groups=False,
     )
