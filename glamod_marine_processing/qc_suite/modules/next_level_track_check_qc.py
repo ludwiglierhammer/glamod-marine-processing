@@ -430,7 +430,7 @@ def backward_discrepancy(
             lat_current,
             lon_current,
             vsi_current / km_to_nm,
-            dsi_current-180.,
+            dsi_current - 180.0,
             timediff,
         )
 
@@ -438,7 +438,7 @@ def backward_discrepancy(
             lat_previous,
             lon_previous,
             vsi_previous / km_to_nm,
-            dsi_previous-180.,
+            dsi_previous - 180.0,
             timediff,
         )
 

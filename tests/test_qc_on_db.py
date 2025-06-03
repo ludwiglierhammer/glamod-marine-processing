@@ -1088,7 +1088,7 @@ def test_do_spike_check(testdata_track):
             max_gradient_space=0.5,
             max_gradient_time=1.0,
             delta_t=1.0,
-            n_neighbours=5
+            n_neighbours=5,
         ),
         include_groups=False,
     )
@@ -1242,7 +1242,9 @@ def test_find_repeated_values(testdata_track):
     groups = db_.groupby([("header", "primary_station_id")], group_keys=False)
     results = groups.apply(
         lambda track: find_repeated_values(
-            value=track[("observations-at", "observation_value")], min_count=20, threshold=0.7
+            value=track[("observations-at", "observation_value")],
+            min_count=20,
+            threshold=0.7,
         ),
         include_groups=False,
     )

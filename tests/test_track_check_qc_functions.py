@@ -78,7 +78,7 @@ def test_do_spike_check(ship_frame, buoy_frame):
             max_gradient_space=0.5,
             max_gradient_time=1.0,
             delta_t=frame.attrs["delta_t"],
-            n_neighbours=5
+            n_neighbours=5,
         )
         for i in range(30):
             row = result[i]
@@ -167,6 +167,7 @@ def test_do_track_check_mixed(ship_frame):
             assert trk[i] == failed
         else:
             assert trk[i] == passed
+
 
 @pytest.mark.skip
 def test_do_track_check_testdata():
@@ -287,7 +288,7 @@ def test_do_track_check_raises(ship_frame, key):
             max_speed_change=10.0,
             max_absolute_speed=40.0,
             max_midpoint_discrepancy=150.0,
-            **kwargs
+            **kwargs,
         )
 
 
@@ -531,12 +532,12 @@ def almost_repeated_data():
 
 
 def test_find_repeated_values(repeated_data, almost_repeated_data):
-    repeated = find_repeated_values(repeated_data["at"], 20 , 0.7)
+    repeated = find_repeated_values(repeated_data["at"], 20, 0.7)
     for i in range(len(repeated) - 1):
         assert repeated[i] == failed
     assert repeated[49] == passed
 
-    repeated = find_repeated_values(almost_repeated_data["at"], 20 , 0.7)
+    repeated = find_repeated_values(almost_repeated_data["at"], 20, 0.7)
     for i in range(len(repeated)):
         assert repeated[i] == passed
 

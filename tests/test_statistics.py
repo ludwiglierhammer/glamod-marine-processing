@@ -41,6 +41,7 @@ def test_trimmed_mean(inarr, trim, expected):
     # This checks the array is not modifed by the function
     assert np.all(inarr == original_array)
 
+
 @pytest.mark.parametrize(
     "inarr, trimming, expected",
     [
@@ -53,6 +54,7 @@ def test_trim_std(inarr, trimming, expected):
     assert trim_std(inarr, trimming) == expected
     # This checks the array is not modifed by the function
     assert np.all(inarr == original_array)
+
 
 @pytest.mark.parametrize(
     "inarr, expected",

@@ -17,7 +17,7 @@ from .next_level_track_check_qc import do_iquam_track_check, inspect_arrays
 from .qc import failed, passed, untestable, untested
 from .spherical_geometry import sphere_distance
 from .statistics import trim_mean, trim_std
-from .time_control import dayinyear, convert_date_to_hours
+from .time_control import convert_date_to_hours, dayinyear
 
 """
 The trackqc module contains a set of functions for performing the tracking QC
