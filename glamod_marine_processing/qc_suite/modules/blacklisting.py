@@ -2,8 +2,7 @@
 
 from __future__ import annotations
 
-from .auxiliary import isvalid
-from .qc import failed, passed
+from .auxiliary import failed, isvalid, passed
 
 
 def do_blacklist(

@@ -6,20 +6,192 @@ import math
 from datetime import datetime
 
 from .astronomical_geometry import sunangle
-from .auxiliary import isvalid
+from .auxiliary import failed, isvalid, passed, untestable
 from .external_clim import Climatology, inspect_climatology
-from .qc import (
-    climatology_check,
-    climatology_plus_stdev_check,
-    climatology_plus_stdev_with_lowbar_check,
-    failed,
-    hard_limit_check,
-    passed,
-    sst_freeze_check,
-    untestable,
-    value_check,
-)
 from .time_control import dayinyear, get_month_lengths, split_date
+
+
+def climatology_check(
+    value: float,
+    climate_normal: float,
+    maximum_anomaly: float,
+    standard_deviation: float | None = "default",
+    standard_deviation_limits: tuple[float, float] | None = None,
+    lowbar: float | None = None,
+) -> int:
+    """
+    Climatology check to compare a value with a climatological average with some arbitrary limit on the difference.
+    This check can be expanded with some optional parameters.
+
+    Parameters
+    ----------
+    value: float
+        Value to be compared to climatology
+    climate_normal : float
+        The climatological average to which it will be compared
+    maximum_anomaly: float
+        Largest allowed anomaly.
+        If ``standard_deviation`` is provided, this is the largest allowed standardised anomaly.
+    standard_deviation: float, default: "default"
+        The standard deviation which will be used to standardize the anomaly
+        If standard_deviation is "default", set standard_deviation to 1.0.
+    standard_deviation_limits: tuple of float, optional
+        A tuple of two floats representing the upper and lower limits for standard deviation used in check
+    lowbar: float, optional
+        The anomaly must be greater than lowbar to fail regardless of standard deviation.
+
+    Returns
+    -------
+    int
+        2 if stdev_limits[1] is equal or less than stdev_limits[0] or
+        if limit is equal or less than 0 or
+        if either value, climate_normal or standard_deviation is numerically invalid.
+        1 if the difference is outside the specified range,
+        0 otherwise.
+    """
+    if (
+        not isvalid(value)
+        or not isvalid(climate_normal)
+        or not isvalid(maximum_anomaly)
+        or not isvalid(standard_deviation)
+    ):
+        return untestable
+
+    if standard_deviation != "default":
+        if not isvalid(standard_deviation):
+            return untestable
+    else:
+        standard_deviation = 1.0
+
+    if maximum_anomaly <= 0:
+        return untestable
+
+    if standard_deviation is None:
+        standard_deviation = 1.0
+
+    if standard_deviation_limits is not None:
+        if standard_deviation_limits[1] <= standard_deviation_limits[0]:
+            return untestable
+
+        standard_deviation = max(standard_deviation, standard_deviation_limits[0])
+        standard_deviation = min(standard_deviation, standard_deviation_limits[1])
+
+    climate_diff = abs(value - climate_normal)
+
+    low_check = True
+    if lowbar is not None:
+        low_check = climate_diff > lowbar
+
+    if climate_diff / standard_deviation > maximum_anomaly and low_check:
+        return failed
+
+    return passed
+
+
+def value_check(inval: float | None) -> int:
+    """Check if a value is equal to None
+
+    Parameters
+    ----------
+    inval : float or None
+        The input value to be tested
+
+    Returns
+    -------
+    int
+        Returns 1 if the input value is numerically invalid or None, 0 otherwise
+    """
+    if isvalid(inval):
+        return passed
+    return failed
+
+
+def hard_limit_check(val: float, limits: tuple[float, float]) -> int:
+    """Check if a value is outside specified limits.
+
+    Parameters
+    ----------
+    val: float
+        Value to be tested.
+    limits: tuple of float
+        A tuple of two floats representing the lower and upper limit.
+
+    Returns
+    -------
+    int
+        2 if limits[1] is equal or less than limits[0] of if val is numerically invalid or None,
+        1 if val is outside the limits,
+        0 otherwise
+    """
+    if limits[1] <= limits[0]:
+        return untestable
+
+    if not isvalid(val):
+        return untestable
+
+    if limits[0] <= val <= limits[1]:
+        return passed
+
+    return failed
+
+
+def sst_freeze_check(
+    insst: float,
+    sst_uncertainty: float,
+    freezing_point: float,
+    n_sigma: float,
+) -> int:
+    """Compare an input SST to see if it is above freezing.
+
+    This is a simple freezing point check made slightly more complex. We want to check if a
+    measurement of SST is above freezing, but there are two problems. First, the freezing point
+    can vary from place to place depending on the salinity of the water. Second, there is uncertainty
+    in SST measurements. If we place a hard cut-off at -1.8, then we are likely to bias the average
+    of many measurements too high when they are near the freezing point - observational error will
+    push the measurements randomly higher and lower, and this test will trim out the lower tail, thus
+    biasing the result. The inclusion of an SST uncertainty parameter *might* mitigate that and we allow
+    that possibility here.
+
+    Parameters
+    ----------
+    insst : float
+        input SST to be checked
+    sst_uncertainty : float
+        the uncertainty in the SST value, defaults to zero
+    freezing_point : float
+        the freezing point of the water
+    n_sigma : float
+        number of sigma to use in the check
+
+    Returns
+    -------
+    int
+        2 if either insst, sst_uncertainty, freezing_point or n_sigma is numerically invalid or None,
+        1 if the insst is below freezing point by more than twice the uncertainty,
+        0 otherwise
+
+    Note
+    ----
+    In previous versions, some parameters had default values:
+
+        * ``sst_uncertainty``: 0.0
+        * ``freezing_point``: -1.80
+        * ``n_sigma``: 2.0
+    """
+    if not isvalid(insst):
+        return untestable
+    if not isvalid(sst_uncertainty):
+        return untestable
+    if not isvalid(freezing_point):
+        return untestable
+    if not isvalid(n_sigma):
+        return untestable
+
+    # fail if SST below the freezing point by more than twice the uncertainty
+    if insst < (freezing_point - n_sigma * sst_uncertainty):
+        return failed
+
+    return passed
 
 
 def do_position_check(latitude: float, longitude: float) -> int:
@@ -181,7 +353,9 @@ def do_day_check(
 
     Note
     ----
-    In previous versions, ``time_since_sun_above_horizon`` has the default value 1.0.
+    In previous versions, ``time_since_sun_above_horizon`` has the default value 1.0 as one hour is used as a
+    definition of "day" for marine air temperature QC. Solar heating biases were considered to be negligible mmore
+    than one hour after sunset and up to one hour after sunrise.
     """
     if isinstance(date, datetime):
         date_ = split_date(date)
@@ -195,11 +369,11 @@ def do_day_check(
     t_check = do_time_check(hour=hour)
 
     # Defaults to FAIL if the location, date or time are bad
-    if p_check == failed or d_check == failed or t_check == failed:
+    if failed in [p_check, d_check, t_check]:
         return failed
 
     # Defaults to FAIL if the location, date or time are bad
-    if p_check == untestable or d_check == untestable or t_check == untestable:
+    if untestable in [p_check, d_check, t_check]:
         return untestable
 
     year2 = year
@@ -293,20 +467,29 @@ def do_hard_limit_check(value: float, hard_limits: list) -> int:
     Returns
     -------
     int
-        1 if air temperature is outside hard limits, 0 otherwise
+        1 if value is outside hard limits, 0 otherwise
     """
     return hard_limit_check(value, hard_limits)
 
 
-@inspect_climatology("climatology")
+@inspect_climatology("climatology", optional="standard_deviation")
 def do_climatology_check(
     value: float,
     climatology: float | Climatology,
     maximum_anomaly: float,
+    standard_deviation: float | Climatology | None = "default",
+    standard_deviation_limits: list | None = None,
+    lowbar: float | None = None,
     **kwargs,
 ) -> int:
     """
     Check that the value is within the prescribed distance from climatology.
+
+    If ``standard_deviation`` is provided, the value is converted into a standardised anomaly. Optionally,
+    if ``standard deviation`` is outside the range specified by ``standard_deviation_limits`` then ``standard_deviation``
+    is set to whichever of the lower or upper limits is closest.
+    If ``lowbar`` is provided, the anomaly must be greater than ``lowbar`` to fail regardless of ``standard_deviation``.
+
 
     Parameters
     ----------
@@ -315,123 +498,39 @@ def do_climatology_check(
     climatology: float or Climatology
         Reference climatological value.
         This could be a float value or Climatology object.
+        If it is a Climatology object, pass ``lon`` and ``lat`` and ``date`` or ``month`` and ``day`` as keyword-arguments!
     maximum_anomaly : float
-        Maximum_anomaly allowed anomaly.
-
-    Returns
-    -------
-    int
-        1 if value anomaly is outside allowed bounds, 0 otherwise
-
-    Note
-    ----
-    If ``climatology`` is a Climatology object, pass ``lon`` and ``lat`` and ``date`` or ``month`` and ``day`` as keyword-arguments!
-    """
-    return climatology_check(value, climatology, maximum_anomaly)
-
-
-@inspect_climatology("climatology", "stdev")
-def do_climatology_plus_stdev_check(
-    value: float,
-    climatology: float | Climatology,
-    stdev: float | Climatology,
-    minmax_standard_deviation: list,
-    maximum_standardised_anomaly: float,
-    **kwargs,
-) -> int:
-    """Check that standardised value anomaly is within specified range.
-
-    Value is converted into a standardised anomaly by subtracting the climatological normal and dividing by
-    the climatological standard deviation. If the climatological standard deviation is outside the range specified by
-    "minmax_standard_deviation" then the standard deviation is set to whichever of the lower or upper limits is
-    closest. The test fails if the standardised anomaly is larger than the "maximum_standardised_anomaly".
-
-    Parameters
-    ----------
-    value : float
-        Value to be checked.
-    climatology : float or Climatology
-        Climatological normal.
-        This could be a float value or Climatology object.
-    stdev : float or Climatology
+        Largest allowed anomaly.
+        If ``standard_deviation`` is provided, this is the largest allowed standardised anomaly.
+    standard_deviation : float or Climatology, default: "default"
         Climatological standard deviation.
         This could be a float value or Climatology object.
-    minmax_standard_deviation : list
+        If it is a Climatology object, pass ``lon`` and ``lat`` and ``date`` or ``month`` and ``day`` as keyword-arguments!
+    standard_deviation_limits : list, optional
         2-element list containing lower and upper limits for standard deviation. If the stdev is outside these
         limits, at_stdev will be set to the nearest limit.
-    maximum_standardised_anomaly : float
-        Largest allowed standardised anomaly
-
-    Returns
-    -------
-    int
-        Returns 1 if standardised value anomaly is outside specified range, 0 otherwise.
-
-    Note
-    ----
-    If ``climatology`` and/or ``stdev`` is a Climatology object, pass ``lon`` and ``lat`` and ``date`` or ``month`` and ``day`` as keyword-arguments!
-    """
-    return climatology_plus_stdev_check(
-        value,
-        climatology,
-        stdev,
-        minmax_standard_deviation,
-        maximum_standardised_anomaly,
-    )
-
-
-@inspect_climatology("climatology", "stdev")
-def do_climatology_plus_stdev_with_lowbar_check(
-    value: float,
-    climatology: float | Climatology,
-    stdev: float | Climatology,
-    limit: float | str,
-    lowbar: float | str,
-    **kwargs,
-) -> int:
-    """Check that standardised value anomaly is within standard deviation-based limits but with a minimum width.
-
-    Value is converted into a standardised anomaly by subtracting the climatological normal and dividing by
-    the climatological standard deviation.
-
-
-    More Documentation.
-
-    Parameters
-    ----------
-    value : float or Climatology
-        Value or climatology to be checked.
-    climatology : float or Climatology
-        Climatological normal.
-        This could be a float value or Climatology object.
-    stdev : float or Climatology
-        Climatological standard deviation.
-        This could be a float value or Climatology object.
-    limit : float
-        Maximum standardised anomaly.
-    lowbar: float
+    lowbar: float, optional
         The anomaly must be greater than lowbar to fail regardless of standard deviation.
 
     Returns
     -------
     int
-        Returns 1 if standardised value anomaly is outside specified range, 0 otherwise.
+        2 if either value, climatology, maximum_anomaly or standard_deviation is numerically invalid or None.
+        1 if value anomaly is outside allowed bounds
+        0 otherwise
 
     Note
     ----
-    If ``climatology`` and/or ``stdev`` is a Climatology object, pass ``lon`` and ``lat`` and ``date`` or ``month`` and ``day`` as keyword-arguments!
+    If either ``climatology`` or ``standard_deviation`` is a Climatology object,
+    pass ``lon`` and ``lat`` and ``date`` or ``month`` and ``day`` as keyword-arguments!
     """
-    if isinstance(climatology, Climatology):
-        climatology = climatology.get_value(**kwargs)
-    if isinstance(stdev, Climatology):
-        stdev = stdev.get_value(**kwargs)
-
-    return climatology_plus_stdev_with_lowbar_check(
+    return climatology_check(
         value,
         climatology,
-        stdev,
-        limit,
-        lowbar,
+        maximum_anomaly=maximum_anomaly,
+        standard_deviation=standard_deviation,
+        standard_deviation_limits=standard_deviation_limits,
+        lowbar=lowbar,
     )
 
 
@@ -455,7 +554,8 @@ def do_supersaturation_check(dpt: float, at2: float) -> int:
     """
     if not isvalid(dpt) or not isvalid(at2):
         return untestable
-    elif dpt > at2:
+
+    if dpt > at2:
         return failed
 
     return passed
@@ -481,6 +581,10 @@ def do_sst_freeze_check(
     -------
     int
         Return 1 if SST below freezing, 0 otherwise
+
+    Note
+    ----
+    Freezing point of sea water is typically -1.8 degC or 271.35 K
     """
     return sst_freeze_check(sst, 0.0, freezing_point, freeze_check_n_sigma)
 

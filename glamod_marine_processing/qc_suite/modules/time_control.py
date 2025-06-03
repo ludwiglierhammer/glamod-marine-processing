@@ -5,6 +5,7 @@ from __future__ import annotations
 import calendar
 import math
 from datetime import datetime, timedelta
+from typing import Sequence
 
 import numpy as np
 
@@ -571,18 +572,11 @@ def time_difference(
     float
         Difference in hours between the two times.
     """
-    # return time difference in hours
-    if (
-        not isvalid(year1)
-        or not isvalid(year2)
-        or not isvalid(month1)
-        or not isvalid(month2)
-        or not isvalid(day1)
-        or not isvalid(day2)
-        or not isvalid(hour1)
-        or not isvalid(hour2)
-    ):
-        return np.nan
+    # First check if any of the input parameters are invalid
+    args = locals()
+    for _, value in args.items():
+        if not isvalid(value):
+            return np.nan
 
     assert 0 <= hour1 < 24 and 0 <= hour2 < 24
 
@@ -717,3 +711,25 @@ def get_month_lengths(year: int) -> list[int]:
         month_lengths = [31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31]
 
     return month_lengths
+
+
+def convert_date_to_hours(dates: Sequence[datetime]) -> Sequence[float]:
+    """
+    Convert an array of datetimes to an array of hours since the first element.
+
+    Parameters
+    ----------
+    dates: array-like of datetime, shape (n,)
+        1-dimensional date array.
+
+    Returns
+    -------
+    array-like of float, shape (n,)
+        1- dimensional array containing hours since the first element in the array.
+    """
+    n_dates = len(dates)
+    hours_elapsed = np.zeros(n_dates)
+    for i, date in enumerate(dates):
+        duration_in_seconds = (date - dates[0]).total_seconds()
+        hours_elapsed[i] = duration_in_seconds / (60 * 60)
+    return hours_elapsed

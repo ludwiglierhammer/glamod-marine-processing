@@ -2,13 +2,13 @@ from __future__ import annotations
 
 import pytest
 
+from glamod_marine_processing.qc_suite.modules.auxiliary import failed, passed
 from glamod_marine_processing.qc_suite.modules.blacklisting import (
     do_blacklist,
     do_humidity_blacklist,
     do_mat_blacklist,
     do_wind_blacklist,
 )
-from glamod_marine_processing.qc_suite.modules.qc import failed, passed
 
 
 @pytest.mark.parametrize(

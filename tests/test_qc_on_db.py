@@ -6,6 +6,11 @@ from _settings import get_settings
 from cdm_reader_mapper import DataBundle, read_tables
 from cdm_reader_mapper.common.getting_files import load_file
 
+from glamod_marine_processing.qc_suite.modules.auxiliary import (
+    failed,
+    passed,
+    untestable,
+)
 from glamod_marine_processing.qc_suite.modules.external_clim import Climatology
 from glamod_marine_processing.qc_suite.modules.icoads_identify import (
     is_buoy,
@@ -18,8 +23,6 @@ from glamod_marine_processing.qc_suite.modules.multiple_row_checks import (
 )
 from glamod_marine_processing.qc_suite.modules.next_level_qc import (
     do_climatology_check,
-    do_climatology_plus_stdev_check,
-    do_climatology_plus_stdev_with_lowbar_check,
     do_date_check,
     do_day_check,
     do_hard_limit_check,
@@ -38,7 +41,6 @@ from glamod_marine_processing.qc_suite.modules.next_level_track_check_qc import 
     do_track_check,
     find_repeated_values,
 )
-from glamod_marine_processing.qc_suite.modules.qc import failed, passed, untestable
 
 
 @pytest.fixture(scope="session")
@@ -457,12 +459,12 @@ def test_do_at_climatology_plus_stdev_check(testdata, climdata):
         time_axis="pentad_time",
     )
     results = db_.apply(
-        lambda row: do_climatology_plus_stdev_check(
+        lambda row: do_climatology_check(
             value=row["observation_value"],
             climatology=climatology,
-            stdev=stdev,
-            minmax_standard_deviation=[1.0, 4.0],  # K
-            maximum_standardised_anomaly=5.5,  # K
+            standard_deviation=stdev,
+            standard_deviation_limits=[1.0, 4.0],  # K
+            maximum_anomaly=5.5,  # K
             lat=row["latitude"],
             lon=row["longitude"],
             date=row["date_time"],
@@ -562,11 +564,11 @@ def test_do_slp_climatology_plus_stdev_with_lowbar_check(testdata, climdata):
         source_units="hPa",
     )
     results = db_.apply(
-        lambda row: do_climatology_plus_stdev_with_lowbar_check(
+        lambda row: do_climatology_check(
             value=row["observation_value"],
             climatology=climatology,
-            stdev=stdev,
-            limit=300,  # Pa
+            standard_deviation=stdev,
+            maximum_anomaly=300,  # Pa
             lowbar=1000,  # Pa
             lat=row["latitude"],
             lon=row["longitude"],
@@ -701,12 +703,12 @@ def test_do_dpt_climatology_plus_stdev_check(testdata, climdata):
     )
 
     results = db_.apply(
-        lambda row: do_climatology_plus_stdev_check(
+        lambda row: do_climatology_check(
             value=row["observation_value"],
             climatology=climatology,
-            stdev=stdev,
-            minmax_standard_deviation=[1.0, 4.0],  # K
-            maximum_standardised_anomaly=5.5,  # K
+            standard_deviation=stdev,
+            standard_deviation_limits=[1.0, 4.0],  # K
+            maximum_anomaly=5.5,  # K
             lat=row["latitude"],
             lon=row["longitude"],
             date=row["date_time"],
@@ -1085,6 +1087,10 @@ def test_do_spike_check(testdata_track):
             lat=track[("observations-at", "latitude")],
             lon=track[("observations-at", "longitude")],
             date=track[("observations-at", "date_time")],
+            max_gradient_space=0.5,
+            max_gradient_time=1.0,
+            delta_t=1.0,
+            n_neighbours=5,
         ),
         include_groups=False,
     )
@@ -1119,6 +1125,10 @@ def test_do_track_check(testdata_track):
             lat=track[("header", "latitude")],
             lon=track[("header", "longitude")],
             date=track[("header", "report_timestamp")],
+            max_direction_change=60.0,
+            max_speed_change=10.0,
+            max_absolute_speed=40.0,
+            max_midpoint_discrepancy=150.0,
         ),
         include_groups=False,
     )
@@ -1201,6 +1211,10 @@ def test_do_iquam_track_check(testdata_track):
             lat=track[("header", "latitude")],
             lon=track[("header", "longitude")],
             date=track[("header", "report_timestamp")],
+            speed_limit=15.0,
+            delta_d=1.11,
+            delta_t=0.01,
+            n_neighbours=5,
         ),
         include_groups=False,
     )
@@ -1231,6 +1245,8 @@ def test_find_repeated_values(testdata_track):
     results = groups.apply(
         lambda track: find_repeated_values(
             value=track[("observations-at", "observation_value")],
+            min_count=20,
+            threshold=0.7,
         ),
         include_groups=False,
     )
@@ -1283,7 +1299,7 @@ def test_multiple_row_check(testdata, climdata):
             },
             "inputs": climatology,
         },
-        "stdev": {
+        "standard_deviation": {
             "func": "get_climatological_value",
             "names": {
                 "lat": "latitude",
@@ -1294,15 +1310,21 @@ def test_multiple_row_check(testdata, climdata):
         },
     }
     qc_dict = {
-        "do_missing_value_check": {"names": {"value": "observation_value"}},
-        "do_missing_value_clim_check": {
+        "MISSVAL": {
+            "func": "do_missing_value_check",
+            "names": {"value": "observation_value"},
+        },
+        "MISSCLIM": {
+            "func": "do_missing_value_clim_check",
             "arguments": {"climatology": "__preprocessed__"},
         },
-        "do_hard_limit_check": {
+        "HLIMITS": {
+            "func": "do_hard_limit_check",
             "names": {"value": "observation_value"},
             "arguments": {"hard_limits": [193.15, 338.15]},  # K
         },
-        "do_climatology_check": {
+        "CLIM1": {
+            "func": "do_climatology_check",
             "names": {
                 "value": "observation_value",
             },
@@ -1311,15 +1333,16 @@ def test_multiple_row_check(testdata, climdata):
                 "maximum_anomaly": 10.0,  # K
             },
         },
-        "do_climatology_plus_stdev_check": {
+        "CLIM2": {
+            "func": "do_climatology_check",
             "names": {
                 "value": "observation_value",
             },
             "arguments": {
                 "climatology": "__preprocessed__",
-                "stdev": "__preprocessed__",
-                "minmax_standard_deviation": [1.0, 4.0],  # K
-                "maximum_standardised_anomaly": 5.5,  # K
+                "standard_deviation": "__preprocessed__",
+                "standard_deviation_limits": [1.0, 4.0],  # K
+                "maximum_anomaly": 5.5,  # K
             },
         },
     }
