@@ -4,6 +4,7 @@ import numpy as np
 import pandas as pd
 import pytest
 
+from glamod_marine_processing.qc_suite.modules.auxiliary import failed, passed
 from glamod_marine_processing.qc_suite.modules.next_level_track_check_qc import (
     backward_discrepancy,
     calculate_course_parameters,
@@ -18,7 +19,6 @@ from glamod_marine_processing.qc_suite.modules.next_level_track_check_qc import 
     forward_discrepancy,
     km_to_nm,
 )
-from glamod_marine_processing.qc_suite.modules.qc import failed, passed
 
 
 def generic_frame(in_pt):

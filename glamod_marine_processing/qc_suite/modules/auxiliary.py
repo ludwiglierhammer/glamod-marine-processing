@@ -9,6 +9,11 @@ from functools import wraps
 import numpy as np
 import pandas as pd
 
+passed = 0
+failed = 1
+untestable = 2
+untested = 3
+
 
 def isvalid(inval: float | None) -> bool:
     """Check if a value is numerically valid.

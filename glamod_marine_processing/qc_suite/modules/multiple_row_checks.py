@@ -6,10 +6,10 @@ import inspect
 
 import pandas as pd
 
+from .auxiliary import failed
 from .external_clim import get_climatological_value  # noqa
 from .next_level_qc import (  # noqa
     do_climatology_check,
-    do_climatology_plus_stdev_check,
     do_date_check,
     do_day_check,
     do_hard_limit_check,
@@ -21,7 +21,6 @@ from .next_level_qc import (  # noqa
     do_time_check,
     do_wind_consistency_check,
 )
-from .qc import failed
 
 
 def _get_function(name):
@@ -68,9 +67,10 @@ def do_multiple_row_check(
         Hashable input data.
     qc_dict : dict, optional
         Nested QC dictionary.
-        Keys represent QC function names.
-        The values are dictionaries which contain the keys "names" (input data names as keyword arguments,
-        that will be retrieved from `data`) and, if necessary, "arguments" (the corresponding keyword arguments).
+        Keys represent arbitrary names of the check.
+        The values are dictionaries which contain the keys "func" (name of the QC function),
+        "names" (input data names as keyword arguments, that will be retrieved from `data`) and,
+        if necessary, "arguments" (the corresponding keyword arguments).
         For more information see Examples.
     preproc_dict : dict, optional
         Nested pre-processing dictionary.
@@ -107,7 +107,8 @@ def do_multiple_row_check(
     .. code-block:: python
 
         qc_dict = {
-            "do_air_temperature_hard_limit_check": {
+            "hard_limits_check": {
+                "func": "do_air_temperature_hard_limit_check",
                 "names": "ATEMP",
                 "arguments": {"hard_limits": [193.15, 338.15]},
             }
@@ -118,7 +119,8 @@ def do_multiple_row_check(
     .. code-block:: python
 
         qc_dict = {
-            "do_anomaly_check": {
+            "climatology_check": {
+                "func": "do_climatology_check",
                 "names": {
                     "value": "observation_value",
                     "lat": "latitude",
@@ -161,7 +163,8 @@ def do_multiple_row_check(
         }
 
         qc_dict = {
-            "do_anomaly_check": {
+            "climatology_check": {
+                "func": "do_climatology_check",
                 "names": {
                     "value": "observation_value",
                 },
@@ -198,25 +201,25 @@ def do_multiple_row_check(
         preprocessed[var_name] = func(*inputs, **requests)
 
     qc_inputs = {}
-    for qc_function, qc_params in qc_dict.items():
-        func = _get_function(qc_function)
+    for qc_name, qc_params in qc_dict.items():
+        func_name = qc_params.get("func")
+        func = _get_function(func_name)
         requests = _get_requests_from_params(qc_params.get("names"), func, data)
 
-        qc_inputs[qc_function] = {}
-        qc_inputs[qc_function]["function"] = func
-        qc_inputs[qc_function]["requests"] = requests
-        qc_inputs[qc_function]["kwargs"] = {}
+        qc_inputs[qc_name] = {}
+        qc_inputs[qc_name]["function"] = func
+        qc_inputs[qc_name]["requests"] = requests
+        qc_inputs[qc_name]["kwargs"] = {}
         if "arguments" in qc_params.keys():
             arguments = {}
             for k, v in qc_params["arguments"].items():
                 if v == "__preprocessed__":
                     v = preprocessed[k]
                 arguments[k] = v
-            qc_inputs[qc_function]["kwargs"] = arguments
+            qc_inputs[qc_name]["kwargs"] = arguments
 
-    for qc_function, qc_params in qc_inputs.items():
+    for qc_name, qc_params in qc_inputs.items():
         qc_flag = qc_params["function"](**qc_params["requests"], **qc_params["kwargs"])
         if qc_flag == failed:
             return qc_flag
-
     return qc_flag

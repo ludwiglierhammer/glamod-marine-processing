@@ -12,9 +12,8 @@ from typing import Sequence
 import numpy as np
 
 from .astronomical_geometry import sunangle
-from .auxiliary import isvalid
+from .auxiliary import failed, isvalid, passed, untestable, untested
 from .next_level_track_check_qc import do_iquam_track_check, inspect_arrays
-from .qc import failed, passed, untestable, untested
 from .spherical_geometry import sphere_distance
 from .statistics import trim_mean, trim_std
 from .time_control import convert_date_to_hours, dayinyear
