@@ -182,6 +182,22 @@ def test_hard_limit_check(value, limits, expected):
 
 
 @pytest.mark.parametrize(
+    "value, limits, expected",
+    [
+        (5.0, [-20.0, 20.0], passed),
+        (25.0, [-20.0, 20.0], failed),
+        (-10.0, [-30, 15.0], passed),
+    ],
+)
+def test_hard_limit_check_convert(value, limits, expected):
+    value = value + 273.15
+    assert (
+        hard_limit_check(value, limits, target_units="K", source_units="degC")
+        == expected
+    )
+
+
+@pytest.mark.parametrize(
     "sst, sst_uncertainty, freezing_point, n_sigma, expected",
     [
         (15.0, 0.0, -1.8, 2.0, passed),
