@@ -6,7 +6,7 @@ import math
 from datetime import datetime
 
 from .astronomical_geometry import sunangle
-from .auxiliary import failed, isvalid, passed, untestable
+from .auxiliary import convert_units, failed, isvalid, passed, untestable
 from .external_clim import Climatology, inspect_climatology
 from .time_control import dayinyear, get_month_lengths, split_date
 
@@ -106,6 +106,7 @@ def value_check(inval: float | None) -> int:
     return failed
 
 
+@convert_units("limits")
 def hard_limit_check(val: float, limits: tuple[float, float]) -> int:
     """Check if a value is outside specified limits.
 
