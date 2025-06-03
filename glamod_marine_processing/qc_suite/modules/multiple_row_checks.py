@@ -82,16 +82,18 @@ def do_multiple_row_check(
         (list of input-given variables).
         For more information see Examples.
     return_method: {"all", "passed", "failed"}, default: "all"
-        If "all", return QC dictionary containing all requested QC checks.
-        If "passed": return QC dictionary containing all requested QC checks until the first check passes.
-        If "failed": return QC dictionary containing all requested QC checks until the first check fails.
+        If "all", return QC dictionary containing all requested QC check flags.
+        If "passed": return QC dictionary containing all requested QC check flags until the first check passes.
+        Other QC checks are flagged as unstested (3).
+        If "failed": return QC dictionary containing all requested QC check flags until the first check fails.
+        Other QC checks are flagged as unstested (3).
 
     Returns
     -------
     pd.Series
         Columns represent arbitrary names of the check (taken from `qc_dict.keys()`).
         Values representing corresponding QC flags.
-        1 if QC fails, otherwise 0.
+        For information to QC flags see QC functions.
 
     Raises
     ------
