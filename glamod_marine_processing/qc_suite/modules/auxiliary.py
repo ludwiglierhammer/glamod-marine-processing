@@ -3,7 +3,6 @@
 from __future__ import annotations
 
 import inspect
-import warnings
 from collections.abc import Callable
 from functools import wraps
 
@@ -105,7 +104,7 @@ def inspect_arrays(params: list[str]) -> Callable:
     return generic_decorator(handler)
 
 
-def convert_units(*params) -> Callable:
+def convert_units() -> Callable:
     """Create a decorator to automatically convert source units to target units.
 
     Parameters
@@ -120,14 +119,11 @@ def convert_units(*params) -> Callable:
     """
 
     def handler(arguments: dict, **meta_kwargs):
-        target_units = meta_kwargs.get("target_units")
-        source_units = meta_kwargs.get("source_units")
-
-        if not target_units:
-            warnings.warn("No 'target_units' specified. Skipping unit conversion.")
+        converter_dict = meta_kwargs.get("converter_dict")
+        if converter_dict is None:
             return
 
-        for param in params:
+        for param, convert_units in converter_dict.items():
             if param not in arguments:
                 raise ValueError(
                     f"Parameter '{param}' not found in function arguments."
@@ -137,11 +133,15 @@ def convert_units(*params) -> Callable:
             if value is None:
                 continue
 
+            source_units = convert_units[0]
+            target_units = convert_units[1]
+
             quantity = value * units(source_units)
             converted = convert_units_to(quantity, target_units)
 
             arguments[param] = converted
 
-    handler._decorator_kwargs = {"target_units", "source_units"}
+    # handler._decorator_kwargs = {"target_units", "source_units"}
+    handler._decorator_kwargs = {"converter_dict"}
 
     return generic_decorator(handler)

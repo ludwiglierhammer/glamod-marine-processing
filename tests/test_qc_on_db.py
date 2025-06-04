@@ -344,7 +344,8 @@ def test_do_at_hard_limit_check(testdata):
     results = db_.apply(
         lambda row: do_hard_limit_check(
             value=row["observation_value"],
-            hard_limits=[193.15, 338.15],  # K
+            hard_limits=[-80, 65],  # K
+            converter_dict={"hard_limits": ("degC", "K")},
         ),
         axis=1,
     )
@@ -627,7 +628,8 @@ def test_do_dpt_hard_limit_check(testdata):
     results = db_.apply(
         lambda row: do_hard_limit_check(
             value=row["observation_value"],
-            hard_limits=[193.15, 338.15],  # K
+            hard_limits=[-80, 65],  # K
+            converter_dict={"hard_limits": ("degC", "K")},
         ),
         axis=1,
     )
@@ -798,8 +800,9 @@ def test_do_sst_freeze_check(testdata):
     results = db_.apply(
         lambda row: do_sst_freeze_check(
             sst=row["observation_value"],
-            freezing_point=271.35,
+            freezing_point=-1.8,
             freeze_check_n_sigma=2.0,
+            converter_dict={"freezing_point": ("degC", "K")},
         ),
         axis=1,
     )
@@ -828,7 +831,8 @@ def test_do_sst_hard_limit_check(testdata):
     results = db_.apply(
         lambda row: do_hard_limit_check(
             value=row["observation_value"],
-            hard_limits=[268.15, 318.15],
+            hard_limits=[-5, 45],
+            converter_dict={"hard_limits": ("degC", "K")},
         ),
         axis=1,
     )
@@ -1321,7 +1325,10 @@ def test_multiple_row_check(testdata, climdata):
         "HLIMITS": {
             "func": "do_hard_limit_check",
             "names": {"value": "observation_value"},
-            "arguments": {"hard_limits": [193.15, 338.15]},  # K
+            "arguments": {
+                "hard_limits": [-80, 65],
+                "converter_dict": {"hard_limits": ("degC", "K")},
+            },  # K
         },
         "CLIM1": {
             "func": "do_climatology_check",

@@ -93,30 +93,15 @@ def test_value_check(value, expected):
     ],
 )
 def test_do_position_check(latitude, longitude, expected):
-    result = do_position_check(latitude, longitude)
-    assert result == expected
+    assert do_position_check(latitude, longitude) == expected
 
-
-@pytest.mark.parametrize(
-    "latitude, longitude, expected",
-    [
-        [0.0, 0.0, passed],
-        [45.0, 125.0, passed],
-        [91.0, 0.0, failed],
-        [-91.0, 0.0, failed],
-        [0.0, -180.1, failed],
-        [0.0, 360.1, failed],
-        [None, 0.0, untestable],
-        [0.0, None, untestable],
-    ],
-)
-def test_do_position_check_convert(latitude, longitude, expected):
     latitude = _convert_degrees_to_rad(latitude)
     longitude = _convert_degrees_to_rad(longitude)
-    result = do_position_check(
-        latitude, longitude, target_units="degrees", source_units="rad"
+    converter_dict = {"latitude": ("rad", "degrees"), "longitude": ("rad", "degrees")}
+    assert (
+        do_position_check(latitude, longitude, converter_dict=converter_dict)
+        == expected
     )
-    assert result == expected
 
 
 def _test_do_position_check_raises_value_error():
@@ -295,6 +280,10 @@ def test_do_day_check(year, month, day, hour, latitude, longitude, time, expecte
 
     latitude = _convert_degrees_to_rad(latitude)
     longitude = _convert_degrees_to_rad(longitude)
+    converter_dict = {
+        "latitude": ("rad", "degrees"),
+        "longitude": ("rad", "degrees"),
+    }
     result = do_day_check(
         year=year,
         month=month,
@@ -303,8 +292,7 @@ def test_do_day_check(year, month, day, hour, latitude, longitude, time, expecte
         latitude=latitude,
         longitude=longitude,
         time_since_sun_above_horizon=time,
-        target_units="degrees",
-        source_units="rad",
+        converter_dict=converter_dict,
     )
     assert result == expected
 
@@ -498,10 +486,8 @@ def test_do_hard_limit_check(value, limits, expected):
     assert do_hard_limit_check(value, limits) == expected
 
     value = _convert_degC_to_K(value)
-    assert (
-        do_hard_limit_check(value, limits, target_units="K", source_units="degC")
-        == expected
-    )
+    converter_dict = {"hard_limits": ("degC", "K")}
+    assert do_hard_limit_check(value, limits, converter_dict=converter_dict) == expected
 
 
 @pytest.mark.parametrize(
@@ -527,14 +513,14 @@ def test_do_sst_freeze_check(sst, sst_uncertainty, freezing_point, n_sigma, expe
         == expected
     )
     sst = _convert_degC_to_K(sst)
+    converter_dict = {"freezing_point": ("degC", "K")}
     assert (
         do_sst_freeze_check(
             sst,
             freezing_point,
             freeze_check_n_sigma=n_sigma,
             sst_uncertainty=sst_uncertainty,
-            target_units="K",
-            source_units="degC",
+            converter_dict=converter_dict,
         )
         == expected
     )
