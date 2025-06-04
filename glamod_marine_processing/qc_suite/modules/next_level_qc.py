@@ -11,6 +11,7 @@ from .external_clim import Climatology, inspect_climatology
 from .time_control import dayinyear, get_month_lengths, split_date
 
 
+@convert_units("maximum_anomaly")
 def climatology_check(
     value: float,
     climate_normal: float,
@@ -136,6 +137,7 @@ def hard_limit_check(val: float, limits: tuple[float, float]) -> int:
     return failed
 
 
+@convert_units("freezing_point")
 def sst_freeze_check(
     insst: float,
     sst_uncertainty: float,
@@ -195,6 +197,7 @@ def sst_freeze_check(
     return passed
 
 
+@convert_units("latitude", "longitude")
 def do_position_check(latitude: float, longitude: float) -> int:
     """
     Perform the positional QC check on the report. Simple check to make sure that the latitude and longitude are
@@ -311,6 +314,7 @@ def do_time_check(date: datetime | None = None, hour: float | None = None) -> in
     return passed
 
 
+@convert_units("latitude", "longitude")
 def do_day_check(
     date: datetime | None = None,
     year: int | None = None,
@@ -365,7 +369,7 @@ def do_day_check(
         day = date_["day"]
         hour = date_["hour"]
 
-    p_check = do_position_check(latitude, longitude)
+    p_check = do_position_check.__wrapped__(latitude, longitude)
     d_check = do_date_check(year=year, month=month, day=day)
     t_check = do_time_check(hour=hour)
 
