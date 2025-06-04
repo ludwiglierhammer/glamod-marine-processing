@@ -25,7 +25,7 @@ from glamod_marine_processing.qc_suite.modules.time_control import (
 )
 import glamod_marine_processing.qc_suite.modules.Climatology as clim
 
-from glamod_marine_processing.qc_suite.modules.auxiliary import failed, passed, untested
+from glamod_marine_processing.qc_suite.modules.auxiliary import failed, passed, untested, inspect_arrays
 
 km_to_nm = 0.539957
 
@@ -77,6 +77,7 @@ class Np_Super_Ob:
         self.buddy_stdev = np.zeros((360, 180, 73))
         self.nobs = np.zeros((360, 180, 73))
 
+    @inspect_arrays(["lats", "lons", "dates", "anoms"])
     def add_obs(
             self,
             lats: Sequence[float],
@@ -369,6 +370,7 @@ class Np_Super_Ob:
         return self.buddy_stdev[xindex][yindex][pindex]
 
 
+@inspect_arrays(["lats", "lons", "dates", "anoms"])
 def mds_buddy_check(lats, lons, dates, anoms, pentad_stdev, parameters):
     """Do the old style buddy check.
 
@@ -425,6 +427,7 @@ def mds_buddy_check(lats, lons, dates, anoms, pentad_stdev, parameters):
 
     return qc_outcomes
 
+@inspect_arrays(["lats", "lons", "dates", "anoms"])
 def bayesian_buddy_check(
         lats: Sequence[float],
         lons: Sequence[float],

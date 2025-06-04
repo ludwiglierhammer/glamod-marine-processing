@@ -1390,8 +1390,6 @@ class MarineReportQC(MarineReport):
                 parameters["lowbar"],
             ),
         )
-        #        self.set_qc('SLP', 'clim', qc.climatology_check(self.getvar('SLP'), self.getnorm('SLP'),
-        #                                                        parameters['maximum_anomaly']))
         self.set_qc("SLP", "nonorm", qc.no_normal_check(self.getnorm("SLP")))
 
     def do_base_sst_qc(self, parameters):
