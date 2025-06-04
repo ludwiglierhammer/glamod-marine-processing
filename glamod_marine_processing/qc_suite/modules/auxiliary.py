@@ -134,6 +134,9 @@ def convert_units(*params) -> Callable:
                 )
 
             value = arguments[param]
+            if value is None:
+                continue
+
             quantity = value * units(source_units)
             converted = convert_units_to(quantity, target_units)
 
