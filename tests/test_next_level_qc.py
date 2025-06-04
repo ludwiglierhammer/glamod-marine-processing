@@ -30,6 +30,34 @@ from glamod_marine_processing.qc_suite.modules.next_level_qc import (
 )
 
 
+def _convert_degC_to_K(value):
+    try:
+        return value + 273.15
+    except TypeError:
+        return value
+
+
+def _convert_K_to_degC(value):
+    try:
+        return value - 273.15
+    except TypeError:
+        return value
+
+
+def _convert_degrees_to_rad(value):
+    try:
+        return value * np.pi / 180.0
+    except TypeError:
+        return value
+
+
+def _convert_rad_to_degrees(value):
+    try:
+        return value * 180.0 / np.pi
+    except TypeError:
+        return value
+
+
 @pytest.mark.parametrize(
     "value, climate_normal, standard_deviation, limit, lowbar, expected",
     [
@@ -80,6 +108,65 @@ def test_climatology_plus_stdev_with_lowbar(
             limit,
             standard_deviation=standard_deviation,
             lowbar=lowbar,
+        )
+        == expected
+    )
+
+
+@pytest.mark.parametrize(
+    "value, climate_normal, standard_deviation, limit, lowbar, expected",
+    [
+        (None, 0.0, 1.0, 3.0, 0.5, untestable),  # check None returns untestable
+        (1.0, None, 1.0, 3.0, 0.5, untestable),
+        (1.0, 0.0, None, 3.0, 0.5, untestable),
+        (
+            1.0,
+            0.0,
+            2.0,
+            3.0,
+            0.1,
+            passed,
+        ),  # Check simple pass 1.0 anomaly with 6.0 limits
+        (
+            7.0,
+            0.0,
+            2.0,
+            3.0,
+            0.1,
+            failed,
+        ),  # Check fail with 7.0 anomaly and 6.0 limits
+        (
+            0.4,
+            0.0,
+            0.1,
+            3.0,
+            0.5,
+            passed,
+        ),  # Anomaly outside std limits but < lowbar
+        (
+            0.4,
+            0.0,
+            0.1,
+            -3.0,
+            0.5,
+            untestable,
+        ),  # Anomaly outside std limits but < lowbar
+    ],
+)
+def test_climatology_plus_stdev_with_lowbar_convert(
+    value, climate_normal, standard_deviation, limit, lowbar, expected
+):
+    value = _convert_degC_to_K(value)
+    climate_normal = _convert_degC_to_K(climate_normal)
+    assert (
+        climatology_check(
+            value,
+            climate_normal,
+            limit,
+            standard_deviation=standard_deviation,
+            lowbar=lowbar,
+            target_units="K",
+            source_units="degC",
         )
         == expected
     )
@@ -190,7 +277,7 @@ def test_hard_limit_check(value, limits, expected):
     ],
 )
 def test_hard_limit_check_convert(value, limits, expected):
-    value = value + 273.15
+    value = _convert_degC_to_K(value)
     assert (
         hard_limit_check(value, limits, target_units="K", source_units="degC")
         == expected
@@ -213,6 +300,35 @@ def test_sst_freeze_check(sst, sst_uncertainty, freezing_point, n_sigma, expecte
     assert sst_freeze_check(sst, sst_uncertainty, freezing_point, n_sigma) == expected
 
 
+@pytest.mark.parametrize(
+    "sst, sst_uncertainty, freezing_point, n_sigma, expected",
+    [
+        (15.0, 0.0, -1.8, 2.0, passed),
+        (-15.0, 0.0, -1.8, 2.0, failed),
+        (-2.0, 0.0, -2.0, 2.0, passed),
+        (-2.0, 0.5, -1.8, 2.0, passed),
+        (-5.0, 0.5, -1.8, 2.0, failed),
+        (0.0, None, -1.8, 2.0, untestable),
+        (0.0, 0.0, None, 2.0, untestable),
+    ],
+)
+def test_sst_freeze_check_convert(
+    sst, sst_uncertainty, freezing_point, n_sigma, expected
+):
+    sst = _convert_degC_to_K(sst)
+    assert (
+        sst_freeze_check(
+            sst,
+            sst_uncertainty,
+            freezing_point,
+            n_sigma,
+            target_units="K",
+            source_units="degC",
+        )
+        == expected
+    )
+
+
 def _test_sst_freeze_check_raises():
     with pytest.raises(ValueError):
         sst_freeze_check(0.0, None, -1.8, 2.0)
@@ -231,6 +347,7 @@ def test_sst_freeze_check_defaults():
     "latitude, longitude, expected",
     [
         [0.0, 0.0, passed],
+        [45.0, 125.0, passed],
         [91.0, 0.0, failed],
         [-91.0, 0.0, failed],
         [0.0, -180.1, failed],
@@ -241,6 +358,28 @@ def test_sst_freeze_check_defaults():
 )
 def test_do_position_check(latitude, longitude, expected):
     result = do_position_check(latitude, longitude)
+    assert result == expected
+
+
+@pytest.mark.parametrize(
+    "latitude, longitude, expected",
+    [
+        [0.0, 0.0, passed],
+        [45.0, 125.0, passed],
+        [91.0, 0.0, failed],
+        [-91.0, 0.0, failed],
+        [0.0, -180.1, failed],
+        [0.0, 360.1, failed],
+        [None, 0.0, untestable],
+        [0.0, None, untestable],
+    ],
+)
+def test_do_position_check_convert(latitude, longitude, expected):
+    latitude = _convert_degrees_to_rad(latitude)
+    longitude = _convert_degrees_to_rad(longitude)
+    result = do_position_check(
+        latitude, longitude, target_units="degrees", source_units="rad"
+    )
     assert result == expected
 
 
@@ -406,7 +545,114 @@ def test_do_time_check_datetime(date, expected):
         (2015, 1, 1, None, 0.0, 0.0, 1, untestable),  # missing hour should trigger fail
     ],
 )
+def test_do_day_check_convert(
+    year, month, day, hour, latitude, longitude, time, expected
+):
+    latitude = _convert_degrees_to_rad(latitude)
+    longitude = _convert_degrees_to_rad(longitude)
+    result = do_day_check(
+        year=year,
+        month=month,
+        day=day,
+        hour=hour,
+        latitude=latitude,
+        longitude=longitude,
+        time_since_sun_above_horizon=time,
+        target_units="degrees",
+        source_units="rad",
+    )
+    assert result == expected
+
+
+@pytest.mark.parametrize(
+    "year, month, day, hour, latitude, longitude, time, expected",
+    [
+        (
+            2015,
+            10,
+            15,
+            7.8000,
+            50.7365,
+            -3.5344,
+            1.0,
+            passed,
+        ),  # Known values from direct observation (day); should trigger pass
+        (
+            2018,
+            9,
+            25,
+            11.5000,
+            50.7365,
+            -3.5344,
+            1.0,
+            passed,
+        ),  # Known values from direct observation (day); should trigger pass
+        (
+            2015,
+            10,
+            15,
+            7.5000,
+            50.7365,
+            -3.5344,
+            1.0,
+            failed,
+        ),  # Known values from direct observation (night); should trigger fail
+        (
+            2025,
+            4,
+            17,
+            16.04,
+            49.160383,
+            5.383146,
+            1.0,
+            passed,
+        ),  # Known values from direct observation: should trigger pass
+        (
+            2015,
+            0,
+            15,
+            7.5000,
+            50.7365,
+            -3.5344,
+            1.0,
+            failed,
+        ),  # bad month value should trigger fail
+        (
+            2015,
+            10,
+            0,
+            7.5000,
+            50.7365,
+            -3.5344,
+            1.0,
+            failed,
+        ),  # bad day value should trigger fail
+        (
+            2015,
+            10,
+            15,
+            -7.5000,
+            50.7365,
+            -3.5344,
+            1.0,
+            failed,
+        ),  # bad hour value should trigger fail
+        (
+            2015,
+            1,
+            1,
+            0.5,
+            0.0,
+            0.0,
+            1,
+            failed,
+        ),  # 0 lat 0 lon near midnight should trigger fail
+        (2015, 1, 1, None, 0.0, 0.0, 1, untestable),  # missing hour should trigger fail
+    ],
+)
 def test_do_day_check(year, month, day, hour, latitude, longitude, time, expected):
+    latitude = _convert_degrees_to_rad(latitude)
+    longitude = _convert_degrees_to_rad(longitude)
     result = do_day_check(
         year=year,
         month=month,
