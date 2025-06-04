@@ -35,12 +35,12 @@ def modesp(awork: list) -> float:
     Parameters
     ----------
     awork : list
-        List of input speeds in km/hr
+        List of input speeds in km/h
 
     Returns
     -------
     float
-        Bin-centre speed (expressed in km/ht) for the 3 knot bin which contains most speeds in
+        Bin-centre speed (expressed in km/h) for the 3 knot bin which contains most speeds in
         input array, or 8.5, whichever is higher
     """
     # if there is one or no observations then return None
@@ -90,7 +90,7 @@ def set_speed_limits(amode: float) -> (float, float, float):
     Parameters
     ----------
     amode : float
-        modal speed
+        modal speed in kmk/h
 
     Returns
     -------
@@ -99,19 +99,14 @@ def set_speed_limits(amode: float) -> (float, float, float):
     """
     amax = 15.00 / km_to_nm
     amaxx = 20.00 / km_to_nm
-    amin = 0.00 / km_to_nm
+    amin = 0.00
 
-    if isvalid(amode):
-        if amode <= 8.51 / km_to_nm:
-            amax = 15.00 / km_to_nm
-            amaxx = 20.00 / km_to_nm
-            amin = 0.00 / km_to_nm
-        else:
-            amax = amode * 1.25
-            amaxx = 30.00 / km_to_nm
-            amin = amode * 0.75
+    if not isvalid(amode):
+        return amax, amaxx, amin
+    if amode <= 8.51 / km_to_nm:
+        return amax, amaxx, amin
 
-    return amax, amaxx, amin
+    return amode * 1.25, 30.00 / km_to_nm, amode * 0.75
 
 
 def increment_position(
@@ -123,11 +118,11 @@ def increment_position(
     Parameters
     ----------
     alat1 : float
-        Latitude at starting point
+        Latitude at starting point in degrees
     alon1 : float
-        Longitude at starting point
+        Longitude at starting point in degrees
     avs : float
-        speed of ship in km/hr
+        speed of ship in km/h
     ads : float
         heading of ship in degrees
     timdif : float
@@ -415,13 +410,13 @@ def speed_continuity(
     Parameters
     ----------
     vsi : float
-        Reported speed in knots at current time step
+        Reported speed in km/h at current time step
     vsi_previous : float
-        Reported speed in knots at previous time step
+        Reported speed in km/h at previous time step
     speeds : float
-        Speed of ship calculated from locations at current and previous time steps in km/hr
+        Speed of ship calculated from locations at current and previous time steps in km/h
     max_speed_change : float
-        largest change of speed that will not raise flag, default 10
+        largest change of speed that will not raise flag in km/h, default 10
 
     Returns
     -------
@@ -433,8 +428,8 @@ def speed_continuity(
         return result
 
     if (
-        abs(vsi / km_to_nm - speeds) > max_speed_change / km_to_nm
-        and abs(vsi_previous / km_to_nm - speeds) > max_speed_change / km_to_nm
+        abs(vsi - speeds) > max_speed_change
+        and abs(vsi_previous - speeds) > max_speed_change
     ):
         result = 10.0
 
@@ -454,9 +449,9 @@ def check_distance_from_estimate(
     Parameters
     ----------
     vsi : float
-        reported speed in knots at current time step
+        reported speed in km/h at current time step
     vsi_previous : float
-        reported speed in knots at previous time step
+        reported speed in km/h at previous time step
     time_differences : float
         calculated time differences between reports in hours
     fwd_diff_from_estimated : float
@@ -483,7 +478,7 @@ def check_distance_from_estimate(
         return result
 
     if vsi > 0 and vsi_previous > 0 and time_differences > 0:
-        alwdis = time_differences * ((vsi + vsi_previous) / 2.0) / km_to_nm
+        alwdis = time_differences * ((vsi + vsi_previous) / 2.0)
 
         if fwd_diff_from_estimated > alwdis and rev_diff_from_estimated > alwdis:
             result = 10.0

@@ -266,10 +266,10 @@ def test_direction_continuity():
 @pytest.mark.parametrize(
     "vsi, vsi_previous, max_speed_change, expected",
     [
-        (12, 12, 12 / km_to_nm, 0),
-        (12, 12, (12 + 10.01) / km_to_nm, 10),
-        (12, 12, (12 + 9.99) / km_to_nm, 0),
-        (12, 12, None, 0),
+        (12 / km_to_nm, 12 / km_to_nm, 12 / km_to_nm, 0),
+        (12 / km_to_nm, 12 / km_to_nm, (12 + 10.01) / km_to_nm, 10),
+        (12 / km_to_nm, 12 / km_to_nm, (12 + 9.99) / km_to_nm, 0),
+        (12 / km_to_nm, 12 / km_to_nm, None, 0),
     ],
 )
 def test_speed_continuity(vsi, vsi_previous, max_speed_change, expected):
