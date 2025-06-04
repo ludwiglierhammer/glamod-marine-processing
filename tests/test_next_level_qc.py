@@ -114,65 +114,6 @@ def test_climatology_plus_stdev_with_lowbar(
 
 
 @pytest.mark.parametrize(
-    "value, climate_normal, standard_deviation, limit, lowbar, expected",
-    [
-        (None, 0.0, 1.0, 3.0, 0.5, untestable),  # check None returns untestable
-        (1.0, None, 1.0, 3.0, 0.5, untestable),
-        (1.0, 0.0, None, 3.0, 0.5, untestable),
-        (
-            1.0,
-            0.0,
-            2.0,
-            3.0,
-            0.1,
-            passed,
-        ),  # Check simple pass 1.0 anomaly with 6.0 limits
-        (
-            7.0,
-            0.0,
-            2.0,
-            3.0,
-            0.1,
-            failed,
-        ),  # Check fail with 7.0 anomaly and 6.0 limits
-        (
-            0.4,
-            0.0,
-            0.1,
-            3.0,
-            0.5,
-            passed,
-        ),  # Anomaly outside std limits but < lowbar
-        (
-            0.4,
-            0.0,
-            0.1,
-            -3.0,
-            0.5,
-            untestable,
-        ),  # Anomaly outside std limits but < lowbar
-    ],
-)
-def test_climatology_plus_stdev_with_lowbar_convert(
-    value, climate_normal, standard_deviation, limit, lowbar, expected
-):
-    value = _convert_degC_to_K(value)
-    climate_normal = _convert_degC_to_K(climate_normal)
-    assert (
-        climatology_check(
-            value,
-            climate_normal,
-            limit,
-            standard_deviation=standard_deviation,
-            lowbar=lowbar,
-            target_units="K",
-            source_units="degC",
-        )
-        == expected
-    )
-
-
-@pytest.mark.parametrize(
     "value, climate_normal, standard_deviation, stdev_limits, limit, expected",
     [
         (None, 0.0, 0.5, [0.0, 1.0], 5.0, untestable),  # untestable with None

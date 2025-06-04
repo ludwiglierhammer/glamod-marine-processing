@@ -11,7 +11,6 @@ from .external_clim import Climatology, inspect_climatology
 from .time_control import dayinyear, get_month_lengths, split_date
 
 
-@convert_units("maximum_anomaly")
 def climatology_check(
     value: float,
     climate_normal: float,
