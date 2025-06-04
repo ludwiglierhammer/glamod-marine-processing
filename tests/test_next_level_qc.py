@@ -5,10 +5,14 @@ from datetime import datetime
 import numpy as np
 import pytest
 
+from glamod_marine_processing.qc_suite.modules.auxiliary import (
+    failed,
+    passed,
+    untestable,
+)
 from glamod_marine_processing.qc_suite.modules.next_level_qc import (
+    climatology_check,
     do_climatology_check,
-    do_climatology_plus_stdev_check,
-    do_climatology_plus_stdev_with_lowbar_check,
     do_date_check,
     do_day_check,
     do_hard_limit_check,
@@ -19,8 +23,192 @@ from glamod_marine_processing.qc_suite.modules.next_level_qc import (
     do_supersaturation_check,
     do_time_check,
     do_wind_consistency_check,
+    hard_limit_check,
+    isvalid,
+    sst_freeze_check,
+    value_check,
 )
-from glamod_marine_processing.qc_suite.modules.qc import failed, passed, untestable
+
+
+@pytest.mark.parametrize(
+    "value, climate_normal, standard_deviation, limit, lowbar, expected",
+    [
+        (None, 0.0, 1.0, 3.0, 0.5, untestable),  # check None returns untestable
+        (1.0, None, 1.0, 3.0, 0.5, untestable),
+        (1.0, 0.0, None, 3.0, 0.5, untestable),
+        (
+            1.0,
+            0.0,
+            2.0,
+            3.0,
+            0.1,
+            passed,
+        ),  # Check simple pass 1.0 anomaly with 6.0 limits
+        (
+            7.0,
+            0.0,
+            2.0,
+            3.0,
+            0.1,
+            failed,
+        ),  # Check fail with 7.0 anomaly and 6.0 limits
+        (
+            0.4,
+            0.0,
+            0.1,
+            3.0,
+            0.5,
+            passed,
+        ),  # Anomaly outside std limits but < lowbar
+        (
+            0.4,
+            0.0,
+            0.1,
+            -3.0,
+            0.5,
+            untestable,
+        ),  # Anomaly outside std limits but < lowbar
+    ],
+)
+def test_climatology_plus_stdev_with_lowbar(
+    value, climate_normal, standard_deviation, limit, lowbar, expected
+):
+    assert (
+        climatology_check(
+            value,
+            climate_normal,
+            limit,
+            standard_deviation=standard_deviation,
+            lowbar=lowbar,
+        )
+        == expected
+    )
+
+
+@pytest.mark.parametrize(
+    "value, climate_normal, standard_deviation, stdev_limits, limit, expected",
+    [
+        (None, 0.0, 0.5, [0.0, 1.0], 5.0, untestable),  # untestable with None
+        (2.0, None, 0.5, [0.0, 1.0], 5.0, untestable),  # untestable with None
+        (2.0, 0.0, None, [0.0, 1.0], 5.0, untestable),  # untestable with None
+        (2.0, 0.0, 0.5, [0.0, 1.0], 5.0, passed),  # simple pass
+        (2.0, 0.0, 0.5, [0.0, 1.0], 3.0, failed),  # simple fail
+        (3.0, 0.0, 1.5, [0.0, 1.0], 2.0, failed),  # fail with limited stdev
+        (1.0, 0.0, 0.1, [0.5, 1.0], 5.0, passed),  # pass with limited stdev
+        (
+            1.0,
+            0.0,
+            0.5,
+            [1.0, 0.0],
+            5.0,
+            untestable,
+        ),  # untestable with limited stdev
+        (1.0, 0.0, 0.5, [0.0, 1.0], -1, untestable),  # untestable with limited stdev
+    ],
+)
+def test_climatology_plus_stdev_check(
+    value, climate_normal, standard_deviation, stdev_limits, limit, expected
+):
+    assert (
+        climatology_check(
+            value,
+            climate_normal,
+            limit,
+            standard_deviation=standard_deviation,
+            standard_deviation_limits=stdev_limits,
+        )
+        == expected
+    )
+
+
+def _test_climatology_plus_stdev_check_raises():
+    with pytest.raises(ValueError):
+        climatology_check(1.0, 0.0, 0.5, [1.0, 0.0], 5.0)
+    with pytest.raises(ValueError):
+        climatology_check(1.0, 0.0, 0.5, [0.0, 1.0], -1)
+
+
+@pytest.mark.parametrize(
+    "value, climate_normal, limit, expected",
+    [
+        (8.0, 0.0, 8.0, passed),  # pass at limit
+        (9.0, 0.0, 8.0, failed),  # fail with anomaly exceeding limit
+        (0.0, 9.0, 8.0, failed),  # fail with same anomaly but negative
+        (9.0, 0.0, 11.0, passed),  # pass with higher limit
+        (0.0, 9.0, 11.0, passed),  # same with negative anomaly
+        (None, 0.0, 8.0, untestable),  # untestable with Nones as inputs
+        (9.0, None, 8.0, untestable),  # untestable with Nones as inputs
+        (9.0, 0.0, None, untestable),  # untestable with Nones as inputs
+    ],
+)
+def test_climatology_check(value, climate_normal, limit, expected):
+    assert climatology_check(value, climate_normal, limit) == expected
+
+
+@pytest.mark.parametrize(
+    "value, expected",
+    [
+        (None, False),
+        (5.7, True),
+        (np.nan, False),
+    ],
+)
+def test_isvalid_check(value, expected):
+    assert isvalid(value) == expected
+
+
+@pytest.mark.parametrize(
+    "value, expected",
+    [
+        (None, failed),
+        (5.7, passed),
+        (np.nan, failed),
+    ],
+)
+def test_value_check(value, expected):
+    assert value_check(value) == expected
+
+
+@pytest.mark.parametrize(
+    "value, limits, expected",
+    [
+        (5.0, [-20.0, 20.0], passed),
+        (25.0, [-20.0, 20.0], failed),
+        (-10.0, [-30, 15.0], passed),
+    ],
+)
+def test_hard_limit_check(value, limits, expected):
+    assert hard_limit_check(value, limits) == expected
+
+
+@pytest.mark.parametrize(
+    "sst, sst_uncertainty, freezing_point, n_sigma, expected",
+    [
+        (15.0, 0.0, -1.8, 2.0, passed),
+        (-15.0, 0.0, -1.8, 2.0, failed),
+        (-2.0, 0.0, -2.0, 2.0, passed),
+        (-2.0, 0.5, -1.8, 2.0, passed),
+        (-5.0, 0.5, -1.8, 2.0, failed),
+        (0.0, None, -1.8, 2.0, untestable),
+        (0.0, 0.0, None, 2.0, untestable),
+    ],
+)
+def test_sst_freeze_check(sst, sst_uncertainty, freezing_point, n_sigma, expected):
+    assert sst_freeze_check(sst, sst_uncertainty, freezing_point, n_sigma) == expected
+
+
+def _test_sst_freeze_check_raises():
+    with pytest.raises(ValueError):
+        sst_freeze_check(0.0, None, -1.8, 2.0)
+    with pytest.raises(ValueError):
+        sst_freeze_check(0.0, 0.0, None, 2.0)
+
+
+def test_sst_freeze_check_defaults():
+    params = {"sst_uncertainty": 0, "freezing_point": -1.8, "n_sigma": 2.0}
+    assert sst_freeze_check(0.0, **params) == passed
+    assert sst_freeze_check(-1.8, **params) == passed
+    assert sst_freeze_check(-2.0, **params) == failed
 
 
 @pytest.mark.parametrize(
@@ -99,7 +287,7 @@ def _test_do_date_check_raises_value_error():
         (24.0, failed),  # 24 hours not allowed
         (29.2, failed),  # nothing over 24 either
         (6.34451, passed),  # check floats
-        (None, failed),
+        (None, untestable),
     ],
 )
 def test_do_time_check(hour, expected):
@@ -199,7 +387,7 @@ def test_do_time_check_datetime(date, expected):
             1,
             failed,
         ),  # 0 lat 0 lon near midnight should trigger fail
-        (2015, 1, 1, None, 0.0, 0.0, 1, failed),  # missing hour should trigger fail
+        (2015, 1, 1, None, 0.0, 0.0, 1, untestable),  # missing hour should trigger fail
     ],
 )
 def test_do_day_check(year, month, day, hour, latitude, longitude, time, expected):
@@ -300,14 +488,17 @@ def test_do_air_temperature_missing_value_check(at, expected):
     "at, at_climatology, maximum_anomaly, expected",
     [
         (5.6, 2.2, 10.0, passed),
-        (None, 2.2, 10.0, failed),
-        (np.nan, 2.2, 10.0, failed),  # not sure if np.nan should trigger FAIL
+        (None, 2.2, 10.0, untestable),
+        (np.nan, 2.2, 10.0, untestable),  # not sure if np.nan should trigger FAIL
     ],
 )
 def test_do_air_temperature_climatology_check(
     at, at_climatology, maximum_anomaly, expected
 ):
-    assert do_climatology_check(at, at_climatology, maximum_anomaly) == expected
+    assert (
+        do_climatology_check(at, at_climatology, maximum_anomaly=maximum_anomaly)
+        == expected
+    )
 
 
 @pytest.mark.parametrize(
@@ -323,8 +514,8 @@ def test_do_air_temperature_missing_value_clim_check(at_climatology, expected):
     [
         (5.6, [-10.0, 10.0], passed),
         (15.6, [-10.0, 10.0], failed),
-        (None, [-10.0, 10.0], failed),
-        (np.nan, [-10.0, 10.0], failed),
+        (None, [-10.0, 10.0], untestable),
+        (np.nan, [-10.0, 10.0], untestable),
     ],
 )
 def test_do_air_temperature_hard_limit_check(at, hard_limits, expected):
@@ -372,7 +563,7 @@ def test_do_air_temperature_hard_limit_check(at, hard_limits, expected):
             3.3,
             [1.0, 10.0],
             2.0,
-            failed,
+            untestable,
         ),
         (
             np.nan,
@@ -380,7 +571,7 @@ def test_do_air_temperature_hard_limit_check(at, hard_limits, expected):
             3.3,
             [1.0, 10.0],
             2.0,
-            failed,  # not sure if np.nan should trigger FAIL
+            untestable,  # not sure if np.nan should trigger FAIL
         ),
     ],
 )
@@ -393,12 +584,12 @@ def test_do_air_temperature_climatology_plus_stdev_check(
     expected,
 ):
     assert (
-        do_climatology_plus_stdev_check(
+        do_climatology_check(
             at,
             at_climatology,
-            at_stdev,
-            minmax_standard_deviation,
-            maximum_standardised_anomaly,
+            standard_deviation=at_stdev,
+            standard_deviation_limits=minmax_standard_deviation,
+            maximum_anomaly=maximum_standardised_anomaly,
         )
         == expected
     )
@@ -445,12 +636,19 @@ def test_do_air_temperature_climatology_plus_stdev_check(
             3.3,
             1.0,
             2.0,
-            failed,
+            untestable,
         ),  # None causes failed
-        (np.nan, 2.2, 3.3, 1.0, 2.0, failed),  # not sure if np.nan should trigger FAIL
+        (
+            np.nan,
+            2.2,
+            3.3,
+            1.0,
+            2.0,
+            untestable,
+        ),  # not sure if np.nan should trigger FAIL
     ],
 )
-def test_do_slp_climatology_plus_stdev_with_lowbar_check(
+def test_do_slp_climatology_check(
     slp,
     slp_climatology,
     slp_stdev,
@@ -459,12 +657,12 @@ def test_do_slp_climatology_plus_stdev_with_lowbar_check(
     expected,
 ):
     assert (
-        do_climatology_plus_stdev_with_lowbar_check(
+        do_climatology_check(
             slp,
             slp_climatology,
-            slp_stdev,
-            limit,
-            lowbar,
+            standard_deviation=slp_stdev,
+            maximum_anomaly=limit,
+            lowbar=lowbar,
         )
         == expected
     )
@@ -518,7 +716,7 @@ def test_do_dpt_missing_value_check(dpt, expected):
             3.3,
             [1.0, 10.0],
             2.0,
-            failed,
+            untestable,
         ),
         (
             np.nan,
@@ -526,11 +724,11 @@ def test_do_dpt_missing_value_check(dpt, expected):
             3.3,
             [1.0, 10.0],
             2.0,
-            failed,  # not sure if np.nan should trigger FAIL
+            untestable,  # not sure if np.nan should trigger FAIL
         ),
     ],
 )
-def test_do_dpt_climatology_plus_stdev_check(
+def test_do_dpt_climatology_check(
     dpt,
     dpt_climatology,
     dpt_stdev,
@@ -539,12 +737,12 @@ def test_do_dpt_climatology_plus_stdev_check(
     expected,
 ):
     assert (
-        do_climatology_plus_stdev_check(
+        do_climatology_check(
             dpt,
             dpt_climatology,
-            dpt_stdev,
-            minmax_standard_deviation,
-            maximum_standardised_anomaly,
+            standard_deviation=dpt_stdev,
+            standard_deviation_limits=minmax_standard_deviation,
+            maximum_anomaly=maximum_standardised_anomaly,
         )
         == expected
     )
@@ -568,8 +766,8 @@ def test_do_dpt_temperature_missing_value_clim_check(dpt_climatology, expected):
         (3.6, 5.6, passed),  # clearly unsaturated
         (5.6, 5.6, passed),  # 100% saturation
         (15.6, 13.6, failed),  # clearly supersaturated
-        (None, 12.0, failed),  # missing dpt FAIL
-        (12.0, None, failed),  # missing at FAIL
+        (None, 12.0, untestable),  # missing dpt FAIL
+        (12.0, None, untestable),  # missing at FAIL
     ],
 )
 def test_do_supersaturation_check(dpt, at, expected):
@@ -587,8 +785,8 @@ def test_do_sst_missing_value_check(sst, expected):
     "sst, sst_climatology, maximum_anomaly, expected",
     [
         (5.6, 2.2, 10.0, passed),
-        (None, 2.2, 10.0, failed),
-        (np.nan, 2.2, 10.0, failed),  # not sure if np.nan should trigger FAIL
+        (None, 2.2, 10.0, untestable),
+        (np.nan, 2.2, 10.0, untestable),  # not sure if np.nan should trigger FAIL
     ],
 )
 def test_do_sst_climatology_check(sst, sst_climatology, maximum_anomaly, expected):
@@ -632,8 +830,8 @@ def test_do_wind_speed_missing_value_check(ws, expected):
     [
         (5.6, [-10.0, 10.0], passed),
         (15.6, [-10.0, 10.0], failed),
-        (None, [-10.0, 10.0], failed),
-        (np.nan, [-10.0, 10.0], failed),
+        (None, [-10.0, 10.0], untestable),
+        (np.nan, [-10.0, 10.0], untestable),
     ],
 )
 def test_do_wind_speed_hard_limit_check(ws, hard_limits, expected):
@@ -652,8 +850,8 @@ def test_do_wind_direction_missing_value_check(wd, expected):
     [
         (56, [-100, 100], passed),
         (156, [-100, 100], failed),
-        (None, [-100, 100], failed),
-        (np.nan, [-100, 100], failed),
+        (None, [-100, 100], untestable),
+        (np.nan, [-100, 100], untestable),
     ],
 )
 def test_do_wind_direction_hard_limit_check(wd, hard_limits, expected):
@@ -663,8 +861,8 @@ def test_do_wind_direction_hard_limit_check(wd, hard_limits, expected):
 @pytest.mark.parametrize(
     "wind_speed, wind_direction, expected",
     [
-        (None, 4, failed),  # missing wind speed; failed
-        (4, None, failed),  # missing wind directory; failed
+        (None, 4, untestable),  # missing wind speed; failed
+        (4, None, untestable),  # missing wind directory; failed
         (0, 0, passed),
         (0, 120, failed),
         (5.0, 0, failed),

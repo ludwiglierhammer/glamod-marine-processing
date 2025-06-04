@@ -17,19 +17,19 @@ from glamod_marine_processing.qc_suite.modules.location_control import (
 
 
 def test_0_is_89point5():
-    assert yindex_to_lat(0, 1) == 89.5
+    assert yindex_to_lat(0, res=1) == 89.5
 
 
 def test_179_is_minus89point5():
-    assert yindex_to_lat(179, 1) == -89.5
+    assert yindex_to_lat(179, res=1) == -89.5
 
 
 def test_35_is_minus87point5_atresof5():
-    assert yindex_to_lat(35, 5) == -87.5
+    assert yindex_to_lat(35, res=5) == -87.5
 
 
 def test_0_is_87point5_atresof5():
-    assert yindex_to_lat(0, 5) == 87.5
+    assert yindex_to_lat(0, res=5) == 87.5
 
 
 @pytest.mark.parametrize(
@@ -45,11 +45,11 @@ def test_0_is_87point5_atresof5():
     ],
 )
 def test_lats_with_res(lat, res, expected):
-    assert mds_lat_to_yindex(lat, res) == expected
+    assert mds_lat_to_yindex(lat, res=res) == expected
 
 
 @pytest.mark.parametrize(
-    "long, res, expected",
+    "lon, res, expected",
     [
         (-180.0, 5.0, 0),
         (-178.0, 5.0, 0),
@@ -60,8 +60,8 @@ def test_lats_with_res(lat, res, expected):
         (0.0, 5.0, 35),
     ],
 )
-def test_lons_with_res(long, res, expected):
-    assert mds_lon_to_xindex(long, res) == expected
+def test_lons_with_res(lon, res, expected):
+    assert mds_lon_to_xindex(lon, res=res) == expected
 
 
 @pytest.mark.parametrize(
@@ -85,7 +85,7 @@ def test_lons_with_res(long, res, expected):
     ],
 )
 def test_lats(lat, expected):
-    assert mds_lat_to_yindex(lat) == expected
+    assert mds_lat_to_yindex(lat, res=1) == expected
 
 
 @pytest.mark.parametrize(
@@ -103,45 +103,43 @@ def test_lats(lat, expected):
     ],
 )
 def test_lons(lon, expected):
-    assert mds_lon_to_xindex(lon) == expected
+    assert mds_lon_to_xindex(lon, res=1) == expected
 
 
 @pytest.mark.parametrize(
     "lon, res, expected",
     [
-        (-180, None, 0),
-        (180, None, 0),
-        (-180.5, None, 359),
-        (-181.5, None, 358),
-        (-74.0, None, 106),
-        (-179.5, None, 0),
-        (180.5, None, 0),
-        (359.5, None, 179),
+        (-180, 1, 0),
+        (180, 1, 0),
+        (-180.5, 1, 359),
+        (-181.5, 1, 358),
+        (-74.0, 1, 106),
+        (-179.5, 1, 0),
+        (180.5, 1, 0),
+        (359.5, 1, 179),
         (179.5, 5, 71),
         (179.9, 0.25, 1439),
         (-179.9 + 0.25, 0.25, 1),
-        (720.0, None, 180),
+        (720.0, 1, 180),
         (720.0, 5, 36),
-        (-360.0, None, 180),
+        (-360.0, 1, 180),
         (-360.0, 5, 36),
     ],
 )
 def test_lon_to_xindex(lon, res, expected):
-    if res is None:
-        assert lon_to_xindex(lon) == expected
-    else:
-        assert lon_to_xindex(lon, res) == expected
+    assert lon_to_xindex(lon, res=res) == expected
 
 
 def test_lons_ge_180():
     """Test to make sure wrapping works"""
-    assert 180 == lon_to_xindex(360.0)
-    assert 5 == lon_to_xindex(185.1)
+    res = 1
+    assert 180 == lon_to_xindex(360.0, res=res)
+    assert 5 == lon_to_xindex(185.1, res=res)
     for i in range(0, 520):
-        assert math.fmod(i, 360) == lon_to_xindex(-179.5 + float(i))
+        assert math.fmod(i, 360) == lon_to_xindex(-179.5 + float(i), res=res)
     # And at different resolutions
     for i in range(0, 520):
-        assert math.fmod(int(i / 5), 72) == lon_to_xindex(-179.5 + float(i), 5.0)
+        assert math.fmod(int(i / 5), 72) == lon_to_xindex(-179.5 + float(i), res=5.0)
 
 
 @pytest.mark.parametrize(
@@ -149,10 +147,10 @@ def test_lons_ge_180():
     [
         (99.2, 5, 0),
         (-99.2, 5, 35),
-        (99.2, None, 0),
-        (37.0, None, 53),
+        (99.2, 1, 0),
+        (37.0, 1, 53),
         (35.0, 5, 11),
-        (-199.3, None, 179),
+        (-199.3, 1, 179),
         (87.52, 0.25, 9),
         (-2.5, 5, 18),
         (89.9, 0.25, 0),
@@ -168,20 +166,17 @@ def test_lons_ge_180():
     ],
 )
 def test_lat_to_yindex(lat, res, expected):
-    if res is None:
-        assert lat_to_yindex(lat) == expected
-    else:
-        assert lat_to_yindex(lat, res) == expected
+    assert lat_to_yindex(lat, res=res) == expected
 
 
 def test_borderline():
     for i in range(0, 180):
-        assert i == lat_to_yindex(90 - i)
+        assert i == lat_to_yindex(90 - i, res=1)
 
 
 def test_gridcentres():
     for i in range(0, 180):
-        assert i == lat_to_yindex(90 - i - 0.5)
+        assert i == lat_to_yindex(90 - i - 0.5, res=1)
 
 
 @pytest.mark.parametrize(
@@ -198,33 +193,36 @@ def test_xindex_to_lon(xindex, res, lon):
 
 
 @pytest.mark.parametrize(
-    "in11, in12, in21, in22, ex11, ex12, ex21, ex22",
+    "q11, q12, q21, q22, expected",
     [
-        (None, None, None, None, None, None, None, None),
-        (1.0, 2.0, 3.0, None, 1.0, 2.0, 3.0, 2.5),
-        (None, 2.0, 3.0, None, 2.5, 2.0, 3.0, 2.5),
-        (None, None, 3.0, None, 3.0, 3.0, 3.0, 3.0),
+        (None, None, None, None, (None, None, None, None)),
+        (1.0, 2.0, 3.0, None, (1.0, 2.0, 3.0, 2.5)),
+        (None, 2.0, 3.0, None, (2.5, 2.0, 3.0, 2.5)),
+        (None, None, 3.0, None, (3.0, 3.0, 3.0, 3.0)),
     ],
 )
-def test_fill_missing_vals(in11, in12, in21, in22, ex11, ex12, ex21, ex22):
-    assert fill_missing_vals(in11, in12, in21, in22) == (ex11, ex12, ex21, ex22)
+def test_fill_missing_values(q11, q12, q21, q22, expected):
+    assert fill_missing_vals(q11, q12, q21, q22) == expected
 
 
 @pytest.mark.parametrize(
-    "lat, lon, max90, x1, x2, y1, y2",
+    "lat, lon, max90, expected",
     [
-        (0.4, 322.2 - 360, 1, -38.5, -37.5, -0.5, 0.5),
-        (89.9, 0.1, 1, -0.5, 0.5, 89.5, 89.5),
-        (0.1, 0.1, None, -0.5, 0.5, -0.5, 0.5),
-        (0.0, 0.0, None, -0.5, 0.5, -0.5, 0.5),
-        (0.0, 179.9, None, 179.5, 180.5, -0.5, 0.5),
-        (0.0, -179.9, None, -180.5, -179.5, -0.5, 0.5),
-        (-89.9, 0.1, 1, -0.5, 0.5, -89.5, -89.5),
-        (-89.9, 0.1, 0, -0.5, 0.5, -90.5, -89.5),
+        (0.4, 322.2 - 360, True, (-38.5, -37.5, -0.5, 0.5)),
+        (89.9, 0.1, True, (-0.5, 0.5, 89.5, 89.5)),
+        (89.9, 0.1, False, (-0.5, 0.5, 89.5, 90.5)),
+        (0.1, 0.1, True, (-0.5, 0.5, -0.5, 0.5)),
+        (0.1, 0.1, None, (-0.5, 0.5, -0.5, 0.5)),
+        (0.0, 0.0, True, (-0.5, 0.5, -0.5, 0.5)),
+        (0.0, 0.0, None, (-0.5, 0.5, -0.5, 0.5)),
+        (0.0, 179.9, True, (179.5, 180.5, -0.5, 0.5)),
+        (0.0, 179.9, None, (179.5, 180.5, -0.5, 0.5)),
+        (0.0, -179.9, True, (-180.5, -179.5, -0.5, 0.5)),
+        (0.0, -179.9, None, (-180.5, -179.5, -0.5, 0.5)),
+        (-89.9, 0.1, True, (-0.5, 0.5, -89.5, -89.5)),
+        (-89.9, 0.1, False, (-0.5, 0.5, -90.5, -89.5)),
+        (-89.9, 0.1, None, (-0.5, 0.5, -90.5, -89.5)),
     ],
 )
-def test_get_four_surrounding_points(lat, lon, max90, x1, x2, y1, y2):
-    if max90 is None:
-        assert get_four_surrounding_points(lat, lon) == (x1, x2, y1, y2)
-    else:
-        assert get_four_surrounding_points(lat, lon, max90) == (x1, x2, y1, y2)
+def test_get_four_surrounding_points(lat, lon, max90, expected):
+    assert get_four_surrounding_points(lat, lon, res=1.0, max90=max90) == expected

@@ -17,7 +17,7 @@ from .time_control import day_in_year, get_month_lengths, which_pentad
 
 
 def get_hires_sst(
-    lat: float, lon: float, month: int, day: int, hires_field
+    lat: float, lon: float, month: int, day: int, hires_field: np.ndarray, res: float
 ) -> float | None:
     """Get a value from a high resolution ie 0.25 degree daily SST field
 
@@ -33,6 +33,8 @@ def get_hires_sst(
         Day in month of point to extract
     hires_field : ndarray(dtype=float, ndim=3)
         The field from which to extract the point
+    res: float
+        Resolution of grid in degrees.
 
     Returns
     -------
@@ -44,6 +46,10 @@ def get_hires_sst(
     ValueError
         When latitude outside range -90 to 90, longitude is outside range -180 to 360, month is outside
         range 1-12 or day is outside range 1-number of days in month
+
+    Note
+    ----
+    In previous versions, ``res`` had the default value 0.25.
     """
     if lat < -90.0 or lat > 90.0:
         raise ValueError(f"Latitude {lat} outside range -90 to 90")
@@ -57,8 +63,8 @@ def get_hires_sst(
         raise ValueError(f"Day ({day}) outside range 1-{month_lengths[month - 1]}")
 
     dindex = day_in_year(month, day) - 1
-    yindex = lat_to_yindex(lat, 0.25)
-    xindex = lon_to_xindex(lon, 0.25)
+    yindex = lat_to_yindex(lat, res=res)
+    xindex = lon_to_xindex(lon, res=res)
 
     result = hires_field[dindex, 0, yindex, xindex]
 
@@ -69,7 +75,7 @@ def get_hires_sst(
 
 
 def get_sst_daily(
-    lat: float, lon: float, month: int, day: int, sst: np.ndarray
+    lat: float, lon: float, month: int, day: int, sst: np.ndarray, res: float
 ) -> float | None:
     """Get SST from pentad climatology interpolated to day.
 
@@ -109,8 +115,8 @@ def get_sst_daily(
         raise ValueError(f"Day ({day}) outside range 1-{month_lengths[month - 1]}")
 
     dindex = day_in_year(month, day) - 1
-    yindex = mds_lat_to_yindex(lat)
-    xindex = mds_lon_to_xindex(lon)
+    yindex = mds_lat_to_yindex(lat, res=res)
+    xindex = mds_lon_to_xindex(lon, res=res)
 
     result = sst[dindex, yindex, xindex]
 
@@ -126,7 +132,7 @@ def get_sst_daily(
 
 
 def get_sst(
-    lat: float, lon: float, month: int, day: int, sst: np.ndarray
+    lat: float, lon: float, month: int, day: int, sst: np.ndarray, res: float
 ) -> float | None:
     """
     when given an array (sst) of appropriate type, extracts the value associated with that pentad,
@@ -148,6 +154,8 @@ def get_sst(
         Day of the point
     sst : ndarray(dtype=float, ndim=3)
         An array holding the 1x1x5-day gridded values
+    res: float
+        Resolution of grid in degrees.
 
     Returns
     -------
@@ -171,12 +179,12 @@ def get_sst(
         raise ValueError(f"Day ({day}) outside range 1-{month_lengths[month - 1]}")
 
     if len(sst[:, 0, 0]) == 1:
-        result = get_sst_single_field(lat, lon, sst)
+        result = get_sst_single_field(lat, lon, sst, res=res)
     else:
         # read sst from grid
         pentad = which_pentad(month, day)
-        yindex = lat_to_yindex(lat)
-        xindex = lon_to_xindex(lon)
+        yindex = lat_to_yindex(lat, res=res)
+        xindex = lon_to_xindex(lon, res=res)
 
         result = sst[pentad - 1, yindex, xindex]
 
@@ -195,7 +203,7 @@ def get_sst(
 
 
 def get_hires_clim(
-    lat: float, lon: float, month: int, day: int, clim: np.ndarray
+    lat: float, lon: float, month: int, day: int, clim: np.ndarray, res: float
 ) -> float | None:
     """Get the climatological value for this particular observation.
 
@@ -211,6 +219,8 @@ def get_hires_clim(
         Day of the point.
     clim: np.ndarray
         A masked array containing the climatological averages.
+    res: float
+        Resolution of grid in degrees.
 
     Returns
     -------
@@ -218,14 +228,14 @@ def get_hires_clim(
         Climatological value for a particular observation.
     """
     try:
-        rep_clim = get_hires_sst(lat, lon, month, day, clim)
+        rep_clim = get_hires_sst(lat, lon, month, day, clim, res)
         return float(rep_clim)
     except Exception:
         return None
 
 
 def get_clim(
-    lat: float, lon: float, month: int, day: int, clim: np.ndarray
+    lat: float, lon: float, month: int, day: int, clim: np.ndarray, res: float
 ) -> float | None:
     """Get the climatological value for this particular observation.
 
@@ -241,19 +251,23 @@ def get_clim(
         Day of the point.
     clim: np.ndarray
         A masked array containing the climatological averages.
+    res: float
+        Resolution of grid in degrees.
 
     Returns
     -------
     float or None
     """
     try:
-        rep_clim = get_sst(lat, lon, month, day, clim)
+        rep_clim = get_sst(lat, lon, month, day, clim, res)
         return float(rep_clim)
     except Exception:
         return
 
 
-def get_sst_single_field(lat: float, lon: float, sst: np.ndarray) -> float | None:
+def get_sst_single_field(
+    lat: float, lon: float, sst: np.ndarray, res: float
+) -> float | None:
     """When given an array (sst) of appropriate type, extracts the value associated with that pentad, latitude and longitude.
 
     The structure of the SST array has to be quite specific it assumes a grid that is 360 x 180 x 73
@@ -268,6 +282,8 @@ def get_sst_single_field(lat: float, lon: float, sst: np.ndarray) -> float | Non
         Longitude of the point
     sst : ndarray
         An array holding the 1x1x5-day gridded values
+    res: float
+        Resolution of grid in degrees.
 
     Returns
     -------
@@ -280,8 +296,8 @@ def get_sst_single_field(lat: float, lon: float, sst: np.ndarray) -> float | Non
     assert lon <= 360.00
 
     # read sst from grid
-    yindex = lat_to_yindex(lat)
-    xindex = lon_to_xindex(lon)
+    yindex = lat_to_yindex(lat, res=res)
+    xindex = lon_to_xindex(lon, res=res)
 
     result = sst[0, yindex, xindex]
 
@@ -303,7 +319,7 @@ def get_sst_single_field(lat: float, lon: float, sst: np.ndarray) -> float | Non
 
 
 def get_clim_interpolated(
-    lat: float, lon: float, month: int, day: int, clim: np.ndarray
+    lat: float, lon: float, month: int, day: int, clim: np.ndarray, res: float
 ) -> float | None:
     """Get climatological interpolation.
 
@@ -319,25 +335,27 @@ def get_clim_interpolated(
         Day of the point.
     clim: np.ndarray
         A masked array containing the climatological averages.
+    res: float
+        Resolution of grid in degrees.
 
     Returns
     -------
     int or float
     """
     try:
-        pert1 = get_sst(lat + 0.001, lon + 0.001, month, day, clim)
+        pert1 = get_sst(lat + 0.001, lon + 0.001, month, day, clim, res)
     except Exception:
         pert1 = None
     try:
-        pert2 = get_sst(lat + 0.001, lon - 0.001, month, day, clim)
+        pert2 = get_sst(lat + 0.001, lon - 0.001, month, day, clim, res)
     except Exception:
         pert2 = None
     try:
-        pert3 = get_sst(lat - 0.001, lon + 0.001, month, day, clim)
+        pert3 = get_sst(lat - 0.001, lon + 0.001, month, day, clim, res)
     except Exception:
         pert3 = None
     try:
-        pert4 = get_sst(lat - 0.001, lon - 0.001, month, day, clim)
+        pert4 = get_sst(lat - 0.001, lon - 0.001, month, day, clim, res)
     except Exception:
         pert4 = None
     if pert1 is None and pert2 is None and pert3 is None and pert4 is None:
@@ -346,28 +364,28 @@ def get_clim_interpolated(
     x1, x2, y1, y2 = get_four_surrounding_points(lat, lon, 1)
 
     try:
-        q11 = get_sst(y1, x1, month, day, clim)
+        q11 = get_sst(y1, x1, month, day, clim, res)
     except Exception:
         q11 = None
     if q11 is not None:
         q11 = float(q11)
 
     try:
-        q22 = get_sst(y2, x2, month, day, clim)
+        q22 = get_sst(y2, x2, month, day, clim, res)
     except Exception:
         q22 = None
     if q22 is not None:
         q22 = float(q22)
 
     try:
-        q12 = get_sst(y2, x1, month, day, clim)
+        q12 = get_sst(y2, x1, month, day, clim, res)
     except Exception:
         q12 = None
     if q12 is not None:
         q12 = float(q12)
 
     try:
-        q21 = get_sst(y1, x2, month, day, clim)
+        q21 = get_sst(y1, x2, month, day, clim, res)
     except Exception:
         q21 = None
     if q21 is not None:

@@ -1,7 +1,5 @@
 from datetime import datetime
 
-import py
-
 import numpy as np
 import math
 
@@ -15,7 +13,8 @@ from glamod_marine_processing.qc_suite.modules.next_level_deck_qc import (
     mds_buddy_check,
     bayesian_buddy_check,
 )
-from glamod_marine_processing.qc_suite.modules.qc import failed, passed, untested
+from glamod_marine_processing.qc_suite.modules.auxiliary import passed
+
 
 class IMMA:
     def __init__(self):  # Standard instance object
@@ -61,15 +60,17 @@ def reps():
 @pytest.fixture
 def reps2():
 
-    vals = [{'ID': 'AAAAAAAAA', 'YR': 2003, 'MO': 1, 'DY': 1, 'HR': 2, 'LAT': 0.5, 'LON': 20.5, 'SST': 5.0},
-             {'ID': 'BBBBBBBBB', 'YR': 2002, 'MO': 12, 'DY': 21, 'HR': 2, 'LAT': 1.5, 'LON': 20.5, 'SST': 2.0},
-             {'ID': 'BBBBBBBBB', 'YR': 2002, 'MO': 12, 'DY': 20, 'HR': 2, 'LAT': 1.5, 'LON': 21.5, 'SST': 2.0},
-             {'ID': 'BBBBBBBBB', 'YR': 2002, 'MO': 12, 'DY': 19, 'HR': 2, 'LAT': 1.5, 'LON': 19.5, 'SST': 2.0},
-             {'ID': 'BBBBBBBBB', 'YR': 2002, 'MO': 12, 'DY': 18, 'HR': 2, 'LAT': 0.5, 'LON': 19.5, 'SST': 2.0},
-             {'ID': 'BBBBBBBBB', 'YR': 2003, 'MO': 1, 'DY': 16, 'HR': 2, 'LAT': 0.5, 'LON': 21.5, 'SST': 2.0},
-             {'ID': 'BBBBBBBBB', 'YR': 2003, 'MO': 1, 'DY': 17, 'HR': 2, 'LAT': -0.5, 'LON': 20.5, 'SST': 2.0},
-             {'ID': 'BBBBBBBBB', 'YR': 2003, 'MO': 1, 'DY': 18, 'HR': 2, 'LAT': -0.5, 'LON': 21.5, 'SST': 2.0},
-             {'ID': 'BBBBBBBBB', 'YR': 2003, 'MO': 1, 'DY': 19, 'HR': 2, 'LAT': -0.5, 'LON': 19.5, 'SST': 2.0}]
+    vals = [
+        {'ID': 'AAAAAAAAA', 'YR': 2003, 'MO': 1, 'DY': 1, 'HR': 2, 'LAT': 0.5, 'LON': 20.5, 'SST': 5.0},
+        {'ID': 'BBBBBBBBB', 'YR': 2002, 'MO': 12, 'DY': 21, 'HR': 2, 'LAT': 1.5, 'LON': 20.5, 'SST': 2.0},
+        {'ID': 'BBBBBBBBB', 'YR': 2002, 'MO': 12, 'DY': 20, 'HR': 2, 'LAT': 1.5, 'LON': 21.5, 'SST': 2.0},
+        {'ID': 'BBBBBBBBB', 'YR': 2002, 'MO': 12, 'DY': 19, 'HR': 2, 'LAT': 1.5, 'LON': 19.5, 'SST': 2.0},
+        {'ID': 'BBBBBBBBB', 'YR': 2002, 'MO': 12, 'DY': 18, 'HR': 2, 'LAT': 0.5, 'LON': 19.5, 'SST': 2.0},
+        {'ID': 'BBBBBBBBB', 'YR': 2003, 'MO': 1, 'DY': 16, 'HR': 2, 'LAT': 0.5, 'LON': 21.5, 'SST': 2.0},
+        {'ID': 'BBBBBBBBB', 'YR': 2003, 'MO': 1, 'DY': 17, 'HR': 2, 'LAT': -0.5, 'LON': 20.5, 'SST': 2.0},
+        {'ID': 'BBBBBBBBB', 'YR': 2003, 'MO': 1, 'DY': 18, 'HR': 2, 'LAT': -0.5, 'LON': 21.5, 'SST': 2.0},
+        {'ID': 'BBBBBBBBB', 'YR': 2003, 'MO': 1, 'DY': 19, 'HR': 2, 'LAT': -0.5, 'LON': 19.5, 'SST': 2.0}
+    ]
 
     reps = {}
     for key in vals[0]:
@@ -92,19 +93,22 @@ def reps2():
         reps[key] = np.array(reps[key])
 
     return reps
+
 
 @pytest.fixture
 def reps3():
 
-    vals = [{'ID': 'AAAAAAAAA', 'YR': 2003, 'MO': 1, 'DY': 1, 'HR': 2, 'LAT': 0.5, 'LON': 20.5, 'SST': 5.0},
-             {'ID': 'BBBBBBBBB', 'YR': 2002, 'MO': 12, 'DY': 21, 'HR': 2, 'LAT': 2.5, 'LON': 20.5, 'SST': 2.0},
-             {'ID': 'BBBBBBBBB', 'YR': 2002, 'MO': 12, 'DY': 20, 'HR': 2, 'LAT': 2.5, 'LON': 22.5, 'SST': 2.0},
-             {'ID': 'BBBBBBBBB', 'YR': 2002, 'MO': 12, 'DY': 19, 'HR': 2, 'LAT': 2.5, 'LON': 18.5, 'SST': 2.0},
-             {'ID': 'BBBBBBBBB', 'YR': 2002, 'MO': 12, 'DY': 18, 'HR': 2, 'LAT': 0.5, 'LON': 18.5, 'SST': 2.0},
-             {'ID': 'BBBBBBBBB', 'YR': 2003, 'MO': 1, 'DY': 16, 'HR': 2, 'LAT': 0.5, 'LON': 22.5, 'SST': 2.0},
-             {'ID': 'BBBBBBBBB', 'YR': 2003, 'MO': 1, 'DY': 17, 'HR': 2, 'LAT': -1.5, 'LON': 20.5, 'SST': 2.0},
-             {'ID': 'BBBBBBBBB', 'YR': 2003, 'MO': 1, 'DY': 18, 'HR': 2, 'LAT': -1.5, 'LON': 22.5, 'SST': 2.0},
-             {'ID': 'BBBBBBBBB', 'YR': 2003, 'MO': 1, 'DY': 19, 'HR': 2, 'LAT': -1.5, 'LON': 18.5, 'SST': 2.0}]
+    vals = [
+        {'ID': 'AAAAAAAAA', 'YR': 2003, 'MO': 1, 'DY': 1, 'HR': 2, 'LAT': 0.5, 'LON': 20.5, 'SST': 5.0},
+        {'ID': 'BBBBBBBBB', 'YR': 2002, 'MO': 12, 'DY': 21, 'HR': 2, 'LAT': 2.5, 'LON': 20.5, 'SST': 2.0},
+        {'ID': 'BBBBBBBBB', 'YR': 2002, 'MO': 12, 'DY': 20, 'HR': 2, 'LAT': 2.5, 'LON': 22.5, 'SST': 2.0},
+        {'ID': 'BBBBBBBBB', 'YR': 2002, 'MO': 12, 'DY': 19, 'HR': 2, 'LAT': 2.5, 'LON': 18.5, 'SST': 2.0},
+        {'ID': 'BBBBBBBBB', 'YR': 2002, 'MO': 12, 'DY': 18, 'HR': 2, 'LAT': 0.5, 'LON': 18.5, 'SST': 2.0},
+        {'ID': 'BBBBBBBBB', 'YR': 2003, 'MO': 1, 'DY': 16, 'HR': 2, 'LAT': 0.5, 'LON': 22.5, 'SST': 2.0},
+        {'ID': 'BBBBBBBBB', 'YR': 2003, 'MO': 1, 'DY': 17, 'HR': 2, 'LAT': -1.5, 'LON': 20.5, 'SST': 2.0},
+        {'ID': 'BBBBBBBBB', 'YR': 2003, 'MO': 1, 'DY': 18, 'HR': 2, 'LAT': -1.5, 'LON': 22.5, 'SST': 2.0},
+        {'ID': 'BBBBBBBBB', 'YR': 2003, 'MO': 1, 'DY': 19, 'HR': 2, 'LAT': -1.5, 'LON': 18.5, 'SST': 2.0}
+    ]
 
     reps = {}
     for key in vals[0]:
@@ -127,23 +131,27 @@ def reps3():
         reps[key] = np.array(reps[key])
 
     return reps
+
 
 @pytest.fixture
 def dummy_pentad_stdev():
     return clim.Climatology(np.full([73, 180, 360], 1.5))
 
+
 @pytest.fixture
 def reps4():
 
-    vals = [{'ID': 'AAAAAAAAA', 'YR': 2003, 'MO': 1, 'DY': 1, 'HR': 2, 'LAT': 0.5, 'LON': 20.5, 'SST': 5.0},
-             {'ID': 'BBBBBBBBB', 'YR': 2002, 'MO': 12, 'DY': 21, 'HR': 2, 'LAT': 3.5, 'LON': 20.5, 'SST': 1.9},
-             {'ID': 'BBBBBBBBB', 'YR': 2002, 'MO': 12, 'DY': 20, 'HR': 2, 'LAT': 3.5, 'LON': 23.5, 'SST': 1.7},
-             {'ID': 'BBBBBBBBB', 'YR': 2002, 'MO': 12, 'DY': 19, 'HR': 2, 'LAT': 3.5, 'LON': 17.5, 'SST': 2.0},
-             {'ID': 'BBBBBBBBB', 'YR': 2002, 'MO': 12, 'DY': 18, 'HR': 2, 'LAT': 0.5, 'LON': 17.5, 'SST': 2.0},
-             {'ID': 'BBBBBBBBB', 'YR': 2003, 'MO': 1, 'DY': 16, 'HR': 2, 'LAT': 0.5, 'LON': 23.5, 'SST': 2.0},
-             {'ID': 'BBBBBBBBB', 'YR': 2003, 'MO': 1, 'DY': 17, 'HR': 2, 'LAT': -2.5, 'LON': 20.5, 'SST': 2.0},
-             {'ID': 'BBBBBBBBB', 'YR': 2003, 'MO': 1, 'DY': 18, 'HR': 2, 'LAT': -2.5, 'LON': 23.5, 'SST': 2.3},
-             {'ID': 'BBBBBBBBB', 'YR': 2003, 'MO': 1, 'DY': 19, 'HR': 2, 'LAT': -2.5, 'LON': 17.5, 'SST': 2.1}]
+    vals = [
+        {'ID': 'AAAAAAAAA', 'YR': 2003, 'MO': 1, 'DY': 1, 'HR': 2, 'LAT': 0.5, 'LON': 20.5, 'SST': 5.0},
+        {'ID': 'BBBBBBBBB', 'YR': 2002, 'MO': 12, 'DY': 21, 'HR': 2, 'LAT': 3.5, 'LON': 20.5, 'SST': 1.9},
+        {'ID': 'BBBBBBBBB', 'YR': 2002, 'MO': 12, 'DY': 20, 'HR': 2, 'LAT': 3.5, 'LON': 23.5, 'SST': 1.7},
+        {'ID': 'BBBBBBBBB', 'YR': 2002, 'MO': 12, 'DY': 19, 'HR': 2, 'LAT': 3.5, 'LON': 17.5, 'SST': 2.0},
+        {'ID': 'BBBBBBBBB', 'YR': 2002, 'MO': 12, 'DY': 18, 'HR': 2, 'LAT': 0.5, 'LON': 17.5, 'SST': 2.0},
+        {'ID': 'BBBBBBBBB', 'YR': 2003, 'MO': 1, 'DY': 16, 'HR': 2, 'LAT': 0.5, 'LON': 23.5, 'SST': 2.0},
+        {'ID': 'BBBBBBBBB', 'YR': 2003, 'MO': 1, 'DY': 17, 'HR': 2, 'LAT': -2.5, 'LON': 20.5, 'SST': 2.0},
+        {'ID': 'BBBBBBBBB', 'YR': 2003, 'MO': 1, 'DY': 18, 'HR': 2, 'LAT': -2.5, 'LON': 23.5, 'SST': 2.3},
+        {'ID': 'BBBBBBBBB', 'YR': 2003, 'MO': 1, 'DY': 19, 'HR': 2, 'LAT': -2.5, 'LON': 17.5, 'SST': 2.1}
+    ]
 
     reps = {}
     for key in vals[0]:
@@ -163,7 +171,7 @@ def reps4():
         reps["SST_CLIM"].append(0.5)
 
     for key in reps:
-        reps[key] = np.array(reps[key])
+        reps[key] = np.array(reps[key]) # type: np.ndarray
 
     return reps
 
@@ -226,15 +234,14 @@ def test_eight_too_distant_neighbours(dummy_pentad_stdev, reps4):
     assert sd == 500.0
 
 
-
 def test_nobs_limits_not_ascending():
     with pytest.raises(AssertionError):
-        multiplier = get_threshold_multiplier(0, [10, 5, 0], [4, 3, 2])
+        _ = get_threshold_multiplier(0, [10, 5, 0], [4, 3, 2])
 
 
 def test_lowest_nobs_limit_not_zero():
     with pytest.raises(AssertionError):
-        multiplier = get_threshold_multiplier(1, [1, 5, 10], [4, 3, 2])
+        _ = get_threshold_multiplier(1, [1, 5, 10], [4, 3, 2])
 
 
 def test_simple():
@@ -253,13 +260,15 @@ def test_that_basic_initialisation_works():
 
     assert c.getclim() == 0.0
     assert c.getclim('clim') == 0.0
-    assert c.getclim('stdev') == None
+    assert c.getclim('stdev') is None
+
 
 def test_that_initialisation_with_clim_and_stdev_works():
     c = ex.ClimVariable(0.023, 1.1110)
     assert c.getclim() == 0.023
     assert c.getclim('clim') == 0.023
     assert c.getclim('stdev') == 1.1110
+
 
 def test_setting_variables():
     c = ex.ClimVariable(3.2)
@@ -339,6 +348,7 @@ def reps2_():
 def dummy_pentad_stdev_():
     return clim.Climatology(np.full([73, 180, 360], 1.0))
 
+
 def test_neighbours(reps2_):
     g = Np_Super_Ob()
     g.add_obs(reps2_["LAT"], reps2_["LON"], reps2_["DATE"], reps2_["SST"] - reps2_["SST_CLIM"])
@@ -352,6 +362,7 @@ def test_neighbours(reps2_):
 
     assert temp_nobs[0] == 1
     assert temp_nobs[1] == 1
+
 
 def test_add_one_maxes_limits(reps_, dummy_pentad_stdev_):
 
@@ -377,6 +388,7 @@ def test_add_one_maxes_limits(reps_, dummy_pentad_stdev_):
     assert pytest.approx(sd, 0.0001) == 500
     assert mn == 0.0
 
+
 def test_add_multiple(reps_, dummy_pentad_stdev_):
     g = Np_Super_Ob()
     g.add_obs(reps_["LAT"], reps_["LON"], reps_["DATE"], reps_["SST"] - reps_["SST_CLIM"])
@@ -398,17 +410,19 @@ def test_add_multiple(reps_, dummy_pentad_stdev_):
     assert pytest.approx(sd, 0.0001) == math.sqrt(10.)
     assert mn == 4.5
 
+
 def test_creation():
     grid = Np_Super_Ob()
     assert isinstance(grid, Np_Super_Ob)
 
+
 def test_buddy_check(reps_, dummy_pentad_stdev_):
 
-    parameters = {
-        "limits": [[1, 1, 2], [2, 2, 2], [1, 1, 4], [2, 2, 4]],
-        "number_of_obs_thresholds": [[0, 5, 15, 100], [0], [0, 5, 15, 100], [0]],
-        "multipliers": [[4.0, 3.5, 3.0, 2.5],[4.0], [4.0, 3.5, 3.0, 2.5], [4.0]]
-    }
+    parameters = dict(
+        limits=[[1, 1, 2], [2, 2, 2], [1, 1, 4], [2, 2, 4]],
+        number_of_obs_thresholds=[[0, 5, 15, 100], [0], [0, 5, 15, 100], [0]],
+        multipliers=[[4.0, 3.5, 3.0, 2.5], [4.0], [4.0, 3.5, 3.0, 2.5], [4.0]]
+    )
 
     result = mds_buddy_check(
         reps_["LAT"],
@@ -420,6 +434,7 @@ def test_buddy_check(reps_, dummy_pentad_stdev_):
     )
 
     assert np.all(result == [passed, passed, passed, passed])
+
 
 def test_bayesian_buddy_check(reps_, dummy_pentad_stdev_):
 

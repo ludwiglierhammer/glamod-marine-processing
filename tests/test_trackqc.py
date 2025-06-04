@@ -2,21 +2,13 @@
 
 from __future__ import annotations
 
-import copy
+from datetime import datetime
 
 import numpy as np
 import pytest
 
-from datetime import datetime
-
-from glamod_marine_processing.qc_suite.modules.qc import (
-    passed,
-    failed,
-    untestable,
-    untested,
-)
-
 import glamod_marine_processing.qc_suite.modules.next_level_trackqc as tqc
+from glamod_marine_processing.qc_suite.modules.auxiliary import untestable
 
 
 @pytest.mark.parametrize(
@@ -53,38 +45,6 @@ def test_daytime(year, month, day, hour, lat, lon, elevdlim, expected):
 def test_daytime_error_invalid_parameter(year, month, day, hour, lat, lon):
     with pytest.raises(ValueError):
         assert tqc.track_day_test(year, month, day, hour, lat, lon, elevdlim=-2.5)
-
-
-@pytest.mark.parametrize(
-    "inarr, trimming, expected",
-    [
-        ([10.0, 4.0, 3.0, 2.0, 1.0], 0, 4.0),
-        ([10.0, 4.0, 3.0, 2.0, 1.0], 5, 3.0),
-    ],
-)
-def test_trim_mean(inarr, trimming, expected):
-    original_array = copy.deepcopy(inarr)
-    trim = tqc.trim_mean(inarr, trimming)
-    assert trim == expected
-    assert np.all(
-        inarr == original_array
-    )  # This checks the array is not modifed by the function
-
-
-@pytest.mark.parametrize(
-    "inarr, trimming, expected",
-    [
-        ([6.0, 1.0, 1.0, 1.0, 1.0], 0, 2.0),
-        ([6.0, 1.0, 1.0, 1.0, 1.0], 5, 0.0),
-    ],
-)
-def test_trim_std(inarr, trimming, expected):
-    original_array = copy.deepcopy(inarr)
-    trim = tqc.trim_std(inarr, trimming)
-    assert trim == expected
-    assert np.all(
-        inarr == original_array
-    )  # This checks the array is not modifed by the function
 
 
 @pytest.mark.parametrize(
@@ -344,30 +304,91 @@ def test_generic_aground(
         assert qc_outcomes[i] == expected[i]
 
 
-@pytest.mark.parametrize(
-    # fmt: off
+@pytest.mark.parametrize(  # fmt: off
     "selector, smooth_win, min_win_period, max_win_period, expected, warns",
     [
         (1, 3, 1, 2, [1, 1, 1, 1, 1, 1, 1], False),  # test_stationary
         (2, 3, 1, 2, [1, 1, 1, 1, 1, 1, 1], False),  # test_stationary jitter spikes
-        (3, 3, 1, 2, [0, 0, 0, 0, 1, 1, 1], False),  # test stationary big remaining jitter
-        (4, 3, 1, 2, [1, 1, 1, 1, 1, 1, 1], False),  # test_stationary_small_remaining_jitter
+        (
+            3,
+            3,
+            1,
+            2,
+            [0, 0, 0, 0, 1, 1, 1],
+            False,
+        ),  # test stationary big remaining jitter
+        (
+            4,
+            3,
+            1,
+            2,
+            [1, 1, 1, 1, 1, 1, 1],
+            False,
+        ),  # test_stationary_small_remaining_jitter
         (5, 3, 1, 2, [0, 0, 0, 0, 0, 0, 0], False),  # test_moving_west
         (6, 3, 1, 2, [0, 0, 0, 0, 0, 0, 0], False),  # test_moving_north
         (7, 3, 1, 2, [0, 0, 0, 0, 1, 1, 1], False),  # test_moving_north_then_stop
-        (8, 3, 1, 2, [0, 0, 0, 0, 0, 0, 0], False),  # test_stationary_high_freq_sampling
+        (
+            8,
+            3,
+            1,
+            2,
+            [0, 0, 0, 0, 0, 0, 0],
+            False,
+        ),  # test_stationary_high_freq_sampling
         (9, 3, 1, 2, [1, 1, 1, 1, 1, 1, 1], False),  # test_stationary_low_freq_sampling
-        (10, 3, 1, 2, [1, 1, 1, 1, 1, 1, 1], False),  # test_stationary_mid_freq_sampling
-        (11, 3, 1, 2, [1, 1, 1, 1, 1, 1, 1], False),  # test_stationary_low_to_mid_freq_sampling
+        (
+            10,
+            3,
+            1,
+            2,
+            [1, 1, 1, 1, 1, 1, 1],
+            False,
+        ),  # test_stationary_mid_freq_sampling
+        (
+            11,
+            3,
+            1,
+            2,
+            [1, 1, 1, 1, 1, 1, 1],
+            False,
+        ),  # test_stationary_low_to_mid_freq_sampling
         (12, 3, 1, 2, [0, 0, 0, 1, 1, 1, 1], False),  # test_moving_slowly_northwest
-        (13, 3, 1, 2, [1, 1, 1, 1, 1, 1, 1], False),  # test_moving_slowly_west_in_arctic
+        (
+            13,
+            3,
+            1,
+            2,
+            [1, 1, 1, 1, 1, 1, 1],
+            False,
+        ),  # test_moving_slowly_west_in_arctic
         (14, 3, 1, 2, [0, 0, 0, 0, 0, 0, 0], False),  # test_stop_then_moving_north
         (15, 3, 1, 2, [0, 0], False),  # test_too_short_for_qc
-        (16, 0, 1, 2, [untestable for x in range(7)], True),  # test_error_bad_input_parameter
-        (17, 3, 1, 2, [untestable for x in range(7)], True),  # test_error_missing_observation
-        (18, 3, 1, 2, [untestable for x in range(7)], True),  # test_error_not_time_sorted
-    ]
-    # fmt: off
+        (
+            16,
+            0,
+            1,
+            2,
+            [untestable for x in range(7)],
+            True,
+        ),  # test_error_bad_input_parameter
+        (
+            17,
+            3,
+            1,
+            2,
+            [untestable for x in range(7)],
+            True,
+        ),  # test_error_missing_observation
+        (
+            18,
+            3,
+            1,
+            2,
+            [untestable for x in range(7)],
+            True,
+        ),  # test_error_not_time_sorted
+    ],  # fmt: off
 )
 def test_new_generic_aground(
     selector, smooth_win, min_win_period, max_win_period, expected, warns
@@ -560,26 +581,59 @@ def speed_check_data(selector):
     return reps["LAT"], reps["LON"], reps["DATE"]
 
 
-@pytest.mark.parametrize(
-    # fmt: off
+@pytest.mark.parametrize(  # fmt: off
     "selector, speed_limit, min_win_period, max_win_period, expected, warns",
     [
-        (1, 2.5, 0.5, 1.0, [0, 0, 0, 0, 0, 0, 0], False), # test stationary
-        (2, 2.5, 0.5, 1.0, [1, 1, 1, 1, 1, 1, 1], False), # test_fast_drifter
-        (3, 2.5, 0.5, 1.0, [0, 0, 0, 0, 0, 0, 0], False), # test_slow_drifter
-        (4, 2.5, 0.5, 1.0, [0, 0, 1, 1, 1, 0, 0], False), # test_slow_fast_slow_drifter
-        (5, 2.5, 0.5, 1.0, [0, 0, 0, 0, 0, 0, 0], False), # test_high_freqency_sampling
-        (6, 2.5, 0.5, 1.0, [0, 0, 0, 0, 0, 0, 0], False), # test_low_freqency_sampling
-        (7, 2.5, 0.5, 1.0, [0, 1, 1, 1, 1, 1, 0], False), # test_slow_fast_slow_mid_freqency_sampling
-        (8, 2.5, 0.5, 1.0, [1, 1, 0, 0, 0, 1, 1], False), # test_irregular_sampling
-        (9, 2.5, 0.5, 1.0, [1, 1, 1, 1, 1, 1, 1], False), # test_fast_arctic_drifter
-        (10, 2.5, 0.5, 1.0, [0, 1, 1, 1, 1, 1, 1], False), # test_stationary_gross_error
-        (11, 2.5, 0.5, 1.0, [0, 0], False), # test_too_short_for_qc_a
-        (12, -2.5, 0.5, 1.0, [untestable for x in range(7)], True), # test_error_bad_input_parameter_a
-        (13, 2.5, 0.5, 1.0, [untestable for x in range(7)], True), # test_error_missing_observation_a
-        (14, 2.5 ,0.5, 1.0, [untestable for x in range(7)], True), # test_error_not_time_sorted_a
-    ]
-    # fmt: off
+        (1, 2.5, 0.5, 1.0, [0, 0, 0, 0, 0, 0, 0], False),  # test stationary
+        (2, 2.5, 0.5, 1.0, [1, 1, 1, 1, 1, 1, 1], False),  # test_fast_drifter
+        (3, 2.5, 0.5, 1.0, [0, 0, 0, 0, 0, 0, 0], False),  # test_slow_drifter
+        (4, 2.5, 0.5, 1.0, [0, 0, 1, 1, 1, 0, 0], False),  # test_slow_fast_slow_drifter
+        (5, 2.5, 0.5, 1.0, [0, 0, 0, 0, 0, 0, 0], False),  # test_high_freqency_sampling
+        (6, 2.5, 0.5, 1.0, [0, 0, 0, 0, 0, 0, 0], False),  # test_low_freqency_sampling
+        (
+            7,
+            2.5,
+            0.5,
+            1.0,
+            [0, 1, 1, 1, 1, 1, 0],
+            False,
+        ),  # test_slow_fast_slow_mid_freqency_sampling
+        (8, 2.5, 0.5, 1.0, [1, 1, 0, 0, 0, 1, 1], False),  # test_irregular_sampling
+        (9, 2.5, 0.5, 1.0, [1, 1, 1, 1, 1, 1, 1], False),  # test_fast_arctic_drifter
+        (
+            10,
+            2.5,
+            0.5,
+            1.0,
+            [0, 1, 1, 1, 1, 1, 1],
+            False,
+        ),  # test_stationary_gross_error
+        (11, 2.5, 0.5, 1.0, [0, 0], False),  # test_too_short_for_qc_a
+        (
+            12,
+            -2.5,
+            0.5,
+            1.0,
+            [untestable for x in range(7)],
+            True,
+        ),  # test_error_bad_input_parameter_a
+        (
+            13,
+            2.5,
+            0.5,
+            1.0,
+            [untestable for x in range(7)],
+            True,
+        ),  # test_error_missing_observation_a
+        (
+            14,
+            2.5,
+            0.5,
+            1.0,
+            [untestable for x in range(7)],
+            True,
+        ),  # test_error_not_time_sorted_a
+    ],  # fmt: off
 )
 def test_generic_speed_tests(
     selector, speed_limit, min_win_period, max_win_period, expected, warns
@@ -1251,7 +1305,7 @@ def tailcheck_vals(selector):
         (26, 3, 3.0, 1, 1.0, 1, 0.29, 1.0, 0.3, [1, 1, 0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0, 0, 1], False),  # test_one_long_and_one_short_tail
         (27, 3, 3.0, 3, 0.5, 1, 0.29, 1.0, 0.3, [1, 1, 1, 1, 1, 1, 1, 0, 0], [0, 0, 0, 0, 0, 0, 0, 0, 0], False),  # test_too_short_for_short_tail
         (28, 3, 3.0, 1, 0.25, 1, 0.29, 1.0, 0.3, [0, 0, 0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0, 0, 0], False),  # test_long_and_short_all_fail
-        (29, 3, 3.0, 1, 1.0, 1, 0.29, 1.0, 0.3, [1, 1, 1, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0, 0, 0], False),  #  test_long_and_short_start_tail_with_bgvar
+        (29, 3, 3.0, 1, 1.0, 1, 0.29, 1.0, 0.3, [1, 1, 1, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0, 0, 0], False),  # test_long_and_short_start_tail_with_bgvar
         (30, 3, 3.0, 1, 0.25, 1, 0.29, 1.0, 0.3, [1, 1, 1, 1, 1, 1, 1, 1, 0], [0, 0, 0, 0, 0, 0, 0, 0, 0], False),  # test_long_and_short_all_fail_with_bgvar
         (31, 3, 3.0, 1, 3.0, 1, 0.29, 1.0, 0.3, [0, 0, 0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0, 0, 0], False),  # test_good_data
         (32, 3, 3.0, 1, 1.0, 1, 0.29, 1.0, 0.3, [0, 0, 0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0, 0, 0], False),  # test_long_and_short_start_tail_big_bgvar
@@ -1284,13 +1338,13 @@ def test_generic_tailcheck(
     if warns:
         with pytest.warns(UserWarning):
             qc_outcomes = tqc.do_sst_start_tail_check(
-                lat,
                 lon,
+                lat,
+                dates,
                 sst,
                 ostia,
                 ice,
                 bgvar,
-                dates,
                 long_win_len,
                 long_err_std_n,
                 short_win_len,
@@ -1302,13 +1356,13 @@ def test_generic_tailcheck(
             )
     else:
         qc_outcomes = tqc.do_sst_start_tail_check(
-            lat,
             lon,
+            lat,
+            dates,
             sst,
             ostia,
             ice,
             bgvar,
-            dates,
             long_win_len,
             long_err_std_n,
             short_win_len,
@@ -1325,13 +1379,13 @@ def test_generic_tailcheck(
     if warns:
         with pytest.warns(UserWarning):
             qc_outcomes = tqc.do_sst_end_tail_check(
-                lat,
                 lon,
+                lat,
+                dates,
                 sst,
                 ostia,
                 ice,
                 bgvar,
-                dates,
                 long_win_len,
                 long_err_std_n,
                 short_win_len,
@@ -1343,13 +1397,13 @@ def test_generic_tailcheck(
             )
     else:
         qc_outcomes = tqc.do_sst_end_tail_check(
-            lat,
             lon,
+            lat,
+            dates,
             sst,
             ostia,
             ice,
             bgvar,
-            dates,
             long_win_len,
             long_err_std_n,
             short_win_len,
@@ -1740,15 +1794,15 @@ def sst_biased_noisy_check_vals(selector):
         (7, 9, 1.10, 1.0, 0.29, 3.0, 2, 0.3, [0, 0, 0, 0, 0, 0, 0, 0, 0], [1, 1, 1, 1, 1, 1, 1, 1, 1], [0, 0, 0, 0, 0, 0, 0, 0, 0], False),  # test_noisy_bnc
         (8, 9, 1.10, 1.0, 0.29, 3.0, 2, 0.3, [1, 1, 1, 1, 1, 1, 1, 1, 1], [1, 1, 1, 1, 1, 1, 1, 1, 1], [0, 0, 0, 0, 0, 0, 0, 0, 0], False),  # test_biased_and_noisy_bnc
         (9, 5, 1.10, 1.0, 0.29, 3.0, 2, 0.3, [1, 1, 1, 1, 1, 1, 1, 1, 1], [0, 0, 0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0, 0, 0], False),  # test_biased_warm_obs_missing_bnc
-        (10, 9, 1.10, 1.0, 0.29, 3.0, 2, 0.3, [0, 0, 0, 0, 0],[0, 0, 0, 0, 0],[0, 0, 0, 0, 0], False),  # test_short_record_one_bad_bnc
-        (11, 9, 1.10, 1.0, 0.29, 3.0, 2, 0.3,[0, 0, 0, 0, 0],[0, 0, 0, 0, 0], [1, 1, 1, 1, 1], False),  # test_short_record_two_bad_bnc
-        (12, 9, 1.10, 1.0, 0.29, 3.0, 2, 0.3, [0, 0, 0, 0, 0, 0, 0, 0, 0],[0, 0, 0, 0, 0, 0, 0, 0, 0],[1, 1, 1, 1, 1, 1, 1, 1, 1],False),  # test_short_record_two_bad_obs_missing_bnc
-        (13, 9, 1.10, 1.0, 0.29, 3.0, 2, 0.3, [0, 0, 0, 0, 0, 0, 0, 0, 0],[0, 0, 0, 0, 0, 0, 0, 0, 0],[0, 0, 0, 0, 0, 0, 0, 0, 0],False),  # test_short_record_two_bad_obs_missing_with_bgvar_bnc
-        (14, 9, 1.10, 1.0, 0.29, 3.0, 2, 0.3, [0, 0, 0, 0, 0, 0, 0, 0, 0],[0, 0, 0, 0, 0, 0, 0, 0, 0],[0, 0, 0, 0, 0, 0, 0, 0, 0],False),  # test_good_data_bnc_14
-        (15, 9, 1.10, 1.0, 0.29, 3.0, 2, 0.3, [0, 0, 0, 0, 0],[0, 0, 0, 0, 0],[0, 0, 0, 0, 0],False),  # test_short_record_good_data_bnc
-        (16, 9, 1.10, 1.0, 0.29, 3.0, 2, 0.3, [0, 0, 0, 0, 0, 0, 0, 0, 0],[0, 0, 0, 0, 0, 0, 0, 0, 0],[0, 0, 0, 0, 0, 0, 0, 0, 0],False),  # test_short_record_obs_missing_good_data_bnc
-        (17, 9, 1.10, 1.0, 0.29, 3.0, 2, 4.0, [0, 0, 0, 0, 0, 0, 0, 0, 0],[0, 0, 0, 0, 0, 0, 0, 0, 0],[0, 0, 0, 0, 0, 0, 0, 0, 0],False),  # test_noisy_big_bgvar_bnc
-        (18, 9, 1.10, 1.0, 0.29, 3.0, 2, 4.0, [0, 0, 0, 0, 0, 0, 0, 0, 0],[0, 0, 0, 0, 0, 0, 0, 0, 0],[0, 0, 0, 0, 0, 0, 0, 0, 0],False),  # test_short_record_two_bad_obs_missing_big_bgvar_bnc
+        (10, 9, 1.10, 1.0, 0.29, 3.0, 2, 0.3, [0, 0, 0, 0, 0], [0, 0, 0, 0, 0], [0, 0, 0, 0, 0], False),  # test_short_record_one_bad_bnc
+        (11, 9, 1.10, 1.0, 0.29, 3.0, 2, 0.3, [0, 0, 0, 0, 0], [0, 0, 0, 0, 0], [1, 1, 1, 1, 1], False),  # test_short_record_two_bad_bnc
+        (12, 9, 1.10, 1.0, 0.29, 3.0, 2, 0.3, [0, 0, 0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0, 0, 0], [1, 1, 1, 1, 1, 1, 1, 1, 1], False),  # test_short_record_two_bad_obs_missing_bnc
+        (13, 9, 1.10, 1.0, 0.29, 3.0, 2, 0.3, [0, 0, 0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0, 0, 0], False),  # test_short_record_two_bad_obs_missing_with_bgvar_bnc
+        (14, 9, 1.10, 1.0, 0.29, 3.0, 2, 0.3, [0, 0, 0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0, 0, 0], False),  # test_good_data_bnc_14
+        (15, 9, 1.10, 1.0, 0.29, 3.0, 2, 0.3, [0, 0, 0, 0, 0], [0, 0, 0, 0, 0], [0, 0, 0, 0, 0], False),  # test_short_record_good_data_bnc
+        (16, 9, 1.10, 1.0, 0.29, 3.0, 2, 0.3, [0, 0, 0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0, 0, 0], False),  # test_short_record_obs_missing_good_data_bnc
+        (17, 9, 1.10, 1.0, 0.29, 3.0, 2, 4.0, [0, 0, 0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0, 0, 0], False),  # test_noisy_big_bgvar_bnc
+        (18, 9, 1.10, 1.0, 0.29, 3.0, 2, 4.0, [0, 0, 0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0, 0, 0], False),  # test_short_record_two_bad_obs_missing_big_bgvar_bnc
         (19, 9, 1.10, 1.0, 0.29, 3.0, 2, 0.3, [0, 0, 0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0, 0, 0], False),  # test_good_data_bnc_19
         (20, 0, 1.10, 1.0, 0.29, 3.0, 2, 0.3, [untestable for _ in range(9)], [untestable for _ in range(9)], [untestable for _ in range(9)], True),  # test_error_bad_input_parameter_bnc
         # Mising on purpose - test is no longer relevant after refactoring
@@ -1775,43 +1829,40 @@ def test_sst_biased_noisy_check_generic(
     warns,
 ):
     lat, lon, dates, sst, ostia, bgvar, ice = sst_biased_noisy_check_vals(selector)
+
+    inputs = [
+        lon,
+        lat,
+        dates,
+        sst,
+        ostia,
+        ice,
+        bgvar,
+        n_eval,
+        bias_lim,
+        drif_intra,
+        drif_inter,
+        err_std_n,
+        n_bad,
+        background_err_lim,
+    ]
+
     if warns:
         with pytest.warns(UserWarning):
-            qc_outcomes = tqc.do_sst_biased_check(
-                lat,
-                lon,
-                dates,
-                sst,
-                ostia,
-                bgvar,
-                ice,
-                n_eval,
-                bias_lim,
-                drif_intra,
-                drif_inter,
-                err_std_n,
-                n_bad,
-                background_err_lim,
-            )
+            bias_qc_outcomes = tqc.do_sst_biased_check(*inputs)
+        with pytest.warns(UserWarning):
+            noise_qc_outcomes = tqc.do_sst_noisy_check(*inputs)
+        with pytest.warns(UserWarning):
+            short_qc_outcomes = tqc.do_sst_biased_noisy_short_check(*inputs)
     else:
-        qc_outcomes = tqc.do_sst_biased_check(
-            lat,
-            lon,
-            dates,
-            sst,
-            ostia,
-            bgvar,
-            ice,
-            n_eval,
-            bias_lim,
-            drif_intra,
-            drif_inter,
-            err_std_n,
-            n_bad,
-            background_err_lim,
-        )
-    for i in range(len(qc_outcomes)):
-        assert qc_outcomes[i] == expected_bias[i]
+        bias_qc_outcomes = tqc.do_sst_biased_check(*inputs)
+        noise_qc_outcomes = tqc.do_sst_noisy_check(*inputs)
+        short_qc_outcomes = tqc.do_sst_biased_noisy_short_check(*inputs)
+
+    for i in range(len(bias_qc_outcomes)):
+        assert bias_qc_outcomes[i] == expected_bias[i]
+        assert noise_qc_outcomes[i] == expected_noisy[i]
+        assert short_qc_outcomes[i] == expected_short[i]
 
 
 # no longer appropriate now we pass arrays to the functions
@@ -1844,11 +1895,11 @@ def test_error_missing_matched_value():
     expected_flags2 = [untestable for x in range(9)]
     with pytest.warns(UserWarning):
         qc_outcomes1 = tqc.do_sst_start_tail_check(
-            lat, lon, sst, ostia, ice, bgvar, dates, 3, 3.0, 1, 3.0, 1, 0.29, 1.0, 0.3
+            lon, lat, dates, sst, ostia, ice, bgvar, 3, 3.0, 1, 3.0, 1, 0.29, 1.0, 0.3
         )
     with pytest.warns(UserWarning):
         qc_outcomes2 = tqc.do_sst_end_tail_check(
-            lat, lon, sst, ostia, ice, bgvar, dates, 3, 3.0, 1, 3.0, 1, 0.29, 1.0, 0.3
+            lon, lat, dates, sst, ostia, ice, bgvar, 3, 3.0, 1, 3.0, 1, 0.29, 1.0, 0.3
         )
 
     for i in range(len(qc_outcomes1)):

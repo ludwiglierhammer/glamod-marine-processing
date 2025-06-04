@@ -6,11 +6,13 @@ from __future__ import annotations
 
 import copy
 import math
+import warnings
 
 import numpy as np
 
 from . import Extended_IMMA as ex
 from .astronomical_geometry import sunangle
+from .auxiliary import isvalid
 from .spherical_geometry import sphere_distance
 from .time_control import dayinyear
 
@@ -77,17 +79,23 @@ def track_day_test(
     ValueError
         When input values are invalid
     """
-    if year is None:
+    warnings.warn(
+        DeprecationWarning(
+            "This module trackqc is deprecated, use next_level_trackqc instead"
+        )
+    )
+
+    if not isvalid(year):
         raise ValueError("year is missing")
-    if month is None:
+    if not isvalid(month):
         raise ValueError("month is missing")
-    if day is None:
+    if not isvalid(day):
         raise ValueError("day is missing")
-    if hour is None:
+    if not isvalid(hour):
         raise ValueError("hour is missing")
-    if lat is None:
+    if not isvalid(lat):
         raise ValueError("lat is missing")
-    if lon is None:
+    if not isvalid(lon):
         raise ValueError("lon is missing")
     if not (1 <= month <= 12):
         raise ValueError("Month not in range 1-12")
@@ -120,6 +128,7 @@ def track_day_test(
 
     return daytime
 
+
 def trim_mean(inarr: list, trim: int) -> float:
     """Calculate a resistant (aka robust) mean of an input array given a trimming criteria.
 
@@ -136,6 +145,12 @@ def trim_mean(inarr: list, trim: int) -> float:
     float
         Trimmed mean
     """
+    warnings.warn(
+        DeprecationWarning(
+            "This module trackqc is deprecated, use next_level_trackqc instead"
+        )
+    )
+
     arr = np.array(inarr)  # type: np.ndarray
     if trim == 0:
         return float(np.mean(arr))
@@ -148,6 +163,7 @@ def trim_mean(inarr: list, trim: int) -> float:
     trim = float(np.mean(arr[index1 : length - index1]))
 
     return trim
+
 
 def trim_std(inarr: list, trim: int) -> float:
     """Calculate a resistant (aka robust) standard deviation of an input array given a trimming criteria.
@@ -165,6 +181,12 @@ def trim_std(inarr: list, trim: int) -> float:
     float
         Returns trimmed standard deviation
     """
+    warnings.warn(
+        DeprecationWarning(
+            "This module trackqc is deprecated, use next_level_trackqc instead"
+        )
+    )
+
     arr = np.array(inarr)  # type: np.ndarray
     if trim == 0:
         return float(np.std(arr))
@@ -180,6 +202,11 @@ def trim_std(inarr: list, trim: int) -> float:
 
 
 def do_new_speed_check(reps, *args):
+    warnings.warn(
+        DeprecationWarning(
+            "This module trackqc is deprecated, use next_level_trackqc instead"
+        )
+    )
     checker = NewSpeedChecker(reps)
     if args:
         checker.set_parameters(*args)
@@ -205,7 +232,7 @@ class NewSpeedChecker:
     For each report, speed is assessed over the shortest available period that exceeds 'min_win_period'.
 
     Prior to assessment the drifter record is screened for positional errors using the iQuam track check
-    method (from :class:`.Voyage`). When running the iQuam check the record is treated as a ship (not a
+    method (from :py:class:`ex.Voyage`). When running the iQuam check the record is treated as a ship (not a
     drifter) so as to avoid accidentally filtering out observations made aboard a ship (which is what we
     are trying to detect). This iQuam track check does not overwrite any existing iQuam track check flags.
 
@@ -348,7 +375,7 @@ class NewSpeedChecker:
         min_win_period_hours = NewSpeedChecker.min_win_period * 24.0
 
         # loop through timeseries to see if drifter is moving too fast and flag any occurrences
-        index_arr = np.array(range(0, nrep)) # type: np.ndarray
+        index_arr = np.array(range(0, nrep))  # type: np.ndarray
         i = 0
         time_to_end = self.hrs[-1] - self.hrs[i]
         while time_to_end >= min_win_period_hours:
@@ -383,6 +410,11 @@ class NewSpeedChecker:
 
 
 def do_speed_check(reps, *args):
+    warnings.warn(
+        DeprecationWarning(
+            "This module trackqc is deprecated, use next_level_trackqc instead"
+        )
+    )
     checker = SpeedChecker(reps)
     if args:
         checker.set_parameters(*args)
@@ -405,7 +437,7 @@ class SpeedChecker:
     which seems reasonable. Conversley, the period of time chosen should not be too long so as to resolve
     short-lived burst of speed on manouvering ships. Larger positional errors may also trigger the check.
     Because temporal sampling can be erratic the time period over which this assessment is made is specified
-    as a range (bound by 'min_win_period' and 'max_win_period') - assesment uses the longest time separation
+    as a range (bound by 'min_win_period' and 'max_win_period') - assessment uses the longest time separation
     available within this range.
 
     IMPORTANT - for optimal performance, drifter records with observations failing this check should be
@@ -415,11 +447,10 @@ class SpeedChecker:
     fails caused by positional errors (particularly in fast ocean currents) will also need reinstating.
 
     speed_limit: maximum allowable speed for an in situ drifting buoy (metres per second)
-    min_win_period: minimum period of time in days over which position is assessed for speed estimates (see
-      description)
+    min_win_period: minimum period of time in days over which position is assessed for speed estimates (see description)
     max_win_period: maximum period of time in days over which position is assessed for speed estimates
-      (this should be greater than min_win_period and allow for some erratic temporal sampling e.g. min_win_period+0.2
-      to allow for gaps of up to 0.2-days in sampling).
+    (this should be greater than min_win_period and allow for some erratic temporal sampling e.g. min_win_period+0.2
+    to allow for gaps of up to 0.2-days in sampling).
     """
 
     speed_limit = 2.5
@@ -537,8 +568,8 @@ class SpeedChecker:
         max_win_period_hours = SpeedChecker.max_win_period * 24.0
 
         # loop through timeseries to see if drifter is moving too fast
-        # and flag any occurences
-        index_arr = np.array(range(0, nrep)) # type: np.ndarray
+        # and flag any occurrences
+        index_arr = np.array(range(0, nrep))  # type: np.ndarray
         i = 0
         time_to_end = self.hrs[-1] - self.hrs[i]
         while time_to_end >= min_win_period_hours:
@@ -567,6 +598,11 @@ class SpeedChecker:
 
 
 def do_aground_check(reps, *args):
+    warnings.warn(
+        DeprecationWarning(
+            "This module trackqc is deprecated, use next_level_trackqc instead"
+        )
+    )
     checker = AgroundChecker(reps)
     if args:
         checker.set_parameters(*args)
@@ -591,7 +627,7 @@ class AgroundChecker:
     than necessary as buoys that run aground for less than min_win_period will not be detected.
 
     Because temporal sampling can be erratic the time period over which an assessment is made is specified
-    as a range (bound by 'min_win_period' and 'max_win_period') - assesment uses the longest time separation
+    as a range (bound by 'min_win_period' and 'max_win_period') - assessSment uses the longest time separation
     available within this range. If a drifter is deemed aground and subsequently starts moving (e.g. if a drifter
     has moved very slowly for a prolonged period) incorrectly flagged reports will be reinstated.
 
@@ -763,7 +799,7 @@ class AgroundChecker:
                 self.lon_smooth[f_win][-1],
             )
             if displace <= AgroundChecker.tolerance:
-                if not(is_aground):
+                if not (is_aground):
                     is_aground = True
                     i_aground = i
             else:
@@ -786,6 +822,11 @@ class AgroundChecker:
 
 
 def do_new_aground_check(reps, *args):
+    warnings.warn(
+        DeprecationWarning(
+            "This module trackqc is deprecated, use next_level_trackqc instead"
+        )
+    )
     checker = NewAgroundChecker(reps)
     if args:
         checker.set_parameters(*args)
@@ -981,6 +1022,11 @@ class NewAgroundChecker:
 
 
 def do_sst_tail_check(reps, *args):
+    warnings.warn(
+        DeprecationWarning(
+            "This module trackqc is deprecated, use next_level_trackqc instead"
+        )
+    )
     checker = SSTTailChecker(reps)
     if args:
         checker.set_parameters(*args)
@@ -1094,7 +1140,6 @@ class SSTTailChecker:
         AssertionError
             When any of the input values are invalid.
         """
-
         try:
             long_win_len = int(long_win_len)
             long_err_std_n = float(long_err_std_n)
@@ -1143,7 +1188,9 @@ class SSTTailChecker:
 
         # do short tail check on records that pass long tail check - whole record already failed long tail check
         if not (self.start_tail_ind >= self.end_tail_ind):
-            first_pass_ind = self.start_tail_ind + 1  # first index passing long tail check
+            first_pass_ind = (
+                self.start_tail_ind + 1
+            )  # first index passing long tail check
             last_pass_ind = self.end_tail_ind - 1  # last index passing long tail check
             self._do_short_tail_check(first_pass_ind, last_pass_ind, forward=True)
             self._do_short_tail_check(first_pass_ind, last_pass_ind, forward=False)
@@ -1174,7 +1221,7 @@ class SSTTailChecker:
 
     @staticmethod
     def _parse_rep(rep) -> (float, float, float, bool):
-        """
+        """Process a report
 
         Parameters
         ----------
@@ -1358,6 +1405,11 @@ class SSTTailChecker:
 
 
 def do_sst_biased_noisy_check(reps, *args):
+    warnings.warn(
+        DeprecationWarning(
+            "This module trackqc is deprecated, use next_level_trackqc instead"
+        )
+    )
     checker = SSTBiasedNoisyChecker(reps)
     if args:
         checker.set_parameters(*args)
@@ -1557,8 +1609,10 @@ class SSTBiasedNoisyChecker:
         return bg_val, ice_val, bgvar_val, good_match, bgvar_mask
 
     def _preprocess_reps(self) -> None:
-        """Fill SST anomalies and background errors used in the QC checks, as well as a flag
-        indicating missing or invalid background values."""
+        """
+        Fill SST anomalies and background errors used in the QC checks, as well as a flag
+        indicating missing or invalid background values.
+        """
         # test and filter out obs with unsuitable background matches
         sst_anom = []
         bgvar = []

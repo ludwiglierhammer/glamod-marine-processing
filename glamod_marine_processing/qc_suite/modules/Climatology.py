@@ -5,7 +5,6 @@ from __future__ import annotations
 import numpy as np
 from netCDF4 import Dataset
 
-from . import qc
 from . location_control import mds_lat_to_yindex, mds_lon_to_xindex, lat_to_yindex, lon_to_xindex
 from . time_control import which_pentad, pentad_to_month_day, get_month_lengths, day_in_year
 
@@ -118,8 +117,8 @@ class Climatology:
         :type lon: float
         :rtype: float
         """
-        yindex = qc.mds_lat_to_yindex(lat, res=0.05)
-        xindex = qc.mds_lon_to_xindex(lon, res=0.05)
+        yindex = mds_lat_to_yindex(lat, res=0.05)
+        xindex = mds_lon_to_xindex(lon, res=0.05)
         tindex = 0
 
         result = self.field[tindex, yindex, xindex]
@@ -160,8 +159,8 @@ class Climatology:
         if day < 1 or day > ml[month - 1]:
             return
 
-        yindex = mds_lat_to_yindex(lat)
-        xindex = mds_lon_to_xindex(lon)
+        yindex = mds_lat_to_yindex(lat, res=1.0)
+        xindex = mds_lon_to_xindex(lon, res=1.0)
         tindex = self.get_tindex(month, day)
 
         result = self.field[tindex, yindex, xindex]
@@ -251,7 +250,7 @@ class Climatology:
         if pert1 is None and pert2 is None and pert3 is None and pert4 is None:
             return None
 
-        x1, x2, y1, y2 = qc.get_four_surrounding_points(lat, lon, 1)
+        x1, x2, y1, y2 = get_four_surrounding_points(lat, lon, 1)
 
         try:
             q11 = self.get_value(y1, x1, mo, dy)
@@ -281,8 +280,8 @@ class Climatology:
         if q21 is not None:
             q21 = float(q21)
 
-        q11, q12, q21, q22 = qc.fill_missing_vals(q11, q12, q21, q22)
+        q11, q12, q21, q22 = fill_missing_vals(q11, q12, q21, q22)
 
-        x1, x2, y1, y2 = qc.get_four_surrounding_points(lat, lon, 0)
+        x1, x2, y1, y2 = get_four_surrounding_points(lat, lon, 0)
 
-        return qc.bilinear_interp(x1, x2, y1, y2, lon, lat, q11, q12, q21, q22)
+        return bilinear_interp(x1, x2, y1, y2, lon, lat, q11, q12, q21, q22)

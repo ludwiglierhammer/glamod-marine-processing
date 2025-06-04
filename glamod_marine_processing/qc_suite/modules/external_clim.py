@@ -2,15 +2,114 @@
 
 from __future__ import annotations
 
+import inspect
+import warnings
+from collections.abc import Callable
 from datetime import datetime
-from typing import Literal
+from functools import wraps
+from typing import Literal, Sequence
 
 import cf_xarray  # noqa
+import numpy as np
 import xarray as xr
 from numpy import ndarray
 from xclim.core.units import convert_units_to
 
 from .time_control import day_in_year, split_date, which_pentad
+
+
+def inspect_climatology(
+    *climatology_keys: str, optional: str | Sequence[str] = None
+) -> Callable:
+    """
+    A decorator factory to preprocess function arguments that may be Climatology objects.
+
+    This decorator inspects the specified function arguments and, if any are instances of
+    `Climatology`, attempts to resolve them to concrete values using their `.get_value(**kwargs)` method.
+
+    Parameters
+    ----------
+    climatology_keys : str
+        Names of required function arguments to be inspected. These should be arguments that may be
+        either a float or a `Climatology` object. If a `Climatology` object is detected, it will be
+        replaced with the resolved value.
+
+    optional : str or sequence of str, optional
+        Argument names that should be treated as optional. If they are explicitly passed when the
+        decorated function is called, they will be treated the same way as `climatology_keys`.
+
+    Returns
+    -------
+    Callable
+        A decorator that wraps the target function, processing specified arguments before the function is called.
+
+    Notes
+    -----
+    - If a `Climatology` object is found, it will be resolved using its `.get_value(**kwargs)` method.
+    - If required keys for `.get_value()` are missing from the function's `**kwargs`, a warning will be issued.
+    - If resolution fails, the value will be replaced with `np.nan`.
+    """
+    if isinstance(optional, str):
+        optional = [optional]
+    elif optional is None:
+        optional = []
+
+    def decorator(func):
+        @wraps(func)
+        def wrapper(*args, **kwargs):
+            sig = inspect.signature(func)
+            bound_args = sig.bind(*args, **kwargs)
+            active_keys = list(climatology_keys)
+            for opt in optional:
+                if opt in bound_args.arguments:
+                    active_keys.append(opt)
+            for clim_key in active_keys:
+                if clim_key not in bound_args.arguments:
+                    warnings.warn(
+                        f"Argument '{clim_key}' is missing in function '{func.__name__}'. "
+                        "This may affect the behavior expected by the decorator. Skipping."
+                    )
+                    continue
+
+                climatology = bound_args.arguments[clim_key]
+                if isinstance(climatology, Climatology):
+                    if "kwargs" not in bound_args.arguments:
+                        warnings.warn(
+                            f"'kwargs' not found in bound arguments for function '{func.__name__}'. "
+                            "Climatology.get_value(**kwargs) may fail."
+                        )
+                        func_kwargs = {}
+                    else:
+                        func_kwargs = bound_args.arguments["kwargs"]
+                    get_value_sig = inspect.signature(climatology.get_value)
+                    required_keys = {
+                        name
+                        for name, param in get_value_sig.parameters.items()
+                        if param.default is param.empty
+                        and param.kind
+                        in (param.POSITIONAL_OR_KEYWORD, param.KEYWORD_ONLY)
+                    }
+                    missing_in_kwargs = required_keys - func_kwargs.keys()
+                    if missing_in_kwargs:
+                        warnings.warn(
+                            f"The following required arguments for '{type(clim_key).__name__}.get_value' are missing from **kwargs "
+                            f"in function '{func.__name__}': {missing_in_kwargs}. "
+                            f"Ensure all required arguments are passed via **kwargs."
+                        )
+                    try:
+                        climatology = climatology.get_value(**func_kwargs)
+                    except ValueError:
+                        climatology = np.nan
+                    except TypeError:
+                        climatology = np.nan
+
+                bound_args.arguments[clim_key] = climatology
+
+            return func(*bound_args.args, **bound_args.kwargs)
+
+        return wrapper
+
+    return decorator
 
 
 def open_xrdataset(
@@ -250,6 +349,7 @@ class Climatology:
         return day_in_year(month, day) - 1
 
 
+@inspect_climatology("climatology")
 def get_climatological_value(climatology: Climatology, **kwargs) -> ndarray:
     """Get the value from a climatology.
 
@@ -265,4 +365,4 @@ def get_climatological_value(climatology: Climatology, **kwargs) -> ndarray:
     ndarray
             Climatology value at specified location and time.
     """
-    return climatology.get_value(**kwargs)
+    return climatology

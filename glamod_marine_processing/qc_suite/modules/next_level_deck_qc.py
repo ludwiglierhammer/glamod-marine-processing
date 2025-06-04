@@ -25,7 +25,7 @@ from glamod_marine_processing.qc_suite.modules.time_control import (
 )
 import glamod_marine_processing.qc_suite.modules.Climatology as clim
 
-from glamod_marine_processing.qc_suite.modules.qc import failed, passed, untested
+from glamod_marine_processing.qc_suite.modules.auxiliary import failed, passed, untested
 
 km_to_nm = 0.539957
 
@@ -104,8 +104,8 @@ class Np_Super_Ob:
 
     def add_rep(self, lat, lon, month, day, anom):
         """Add an anomaly to the grid from specified lat lon and date."""
-        xindex = mds_lon_to_xindex(lon)
-        yindex = mds_lat_to_yindex(lat)
+        xindex = mds_lon_to_xindex(lon, res=1.0)
+        yindex = mds_lat_to_yindex(lat, res=1.0)
         pindex = which_pentad(month, day) - 1
 
         assert 0 <= xindex < 360, "bad lon" + str(lon)
@@ -339,8 +339,8 @@ class Np_Super_Ob:
         float
             Buddy mean at the specified location
         """
-        xindex = mds_lon_to_xindex(lon)
-        yindex = mds_lat_to_yindex(lat)
+        xindex = mds_lon_to_xindex(lon, res=1.0)
+        yindex = mds_lat_to_yindex(lat, res=1.0)
         pindex = which_pentad(month, day) - 1
         return self.buddy_mean[xindex][yindex][pindex]
 
@@ -363,8 +363,8 @@ class Np_Super_Ob:
         float
             Buddy standard deviation at the specified location
         """
-        xindex = mds_lon_to_xindex(lon)
-        yindex = mds_lat_to_yindex(lat)
+        xindex = mds_lon_to_xindex(lon, res=1.0)
+        yindex = mds_lat_to_yindex(lat, res=1.0)
         pindex = which_pentad(month, day) - 1
         return self.buddy_stdev[xindex][yindex][pindex]
 
