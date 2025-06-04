@@ -15,6 +15,7 @@ from glamod_marine_processing.qc_suite.modules.next_level_deck_qc import (
     mds_buddy_check,
     bayesian_buddy_check,
 )
+from glamod_marine_processing.qc_suite.modules.qc import failed, passed, untested
 
 class IMMA:
     def __init__(self):  # Standard instance object
@@ -417,7 +418,8 @@ def test_buddy_check(reps_, dummy_pentad_stdev_):
         dummy_pentad_stdev_,
         parameters
     )
-    print(result)
+
+    assert np.all(result == [passed, passed, passed, passed])
 
 def test_bayesian_buddy_check(reps_, dummy_pentad_stdev_):
 
@@ -431,4 +433,4 @@ def test_bayesian_buddy_check(reps_, dummy_pentad_stdev_):
         dummy_pentad_stdev_,
     )
 
-    print(result)
+    assert np.all(result == [passed, passed, passed, passed])

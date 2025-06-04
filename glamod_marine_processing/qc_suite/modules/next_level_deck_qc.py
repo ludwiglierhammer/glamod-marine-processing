@@ -25,7 +25,7 @@ from glamod_marine_processing.qc_suite.modules.time_control import (
 )
 import glamod_marine_processing.qc_suite.modules.Climatology as clim
 
-from glamod_marine_processing.qc_suite.modules.qc import failed, passed, untestable, untested
+from glamod_marine_processing.qc_suite.modules.qc import failed, passed, untested
 
 km_to_nm = 0.539957
 
