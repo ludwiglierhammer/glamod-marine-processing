@@ -8,7 +8,7 @@ import pytest
 import glamod_marine_processing.qc_suite.modules.Climatology as clim
 import glamod_marine_processing.qc_suite.modules.Extended_IMMA as ex
 from glamod_marine_processing.qc_suite.modules.next_level_deck_qc import (
-    Np_Super_Ob,
+    SuperObsGrid,
     get_threshold_multiplier,
     mds_buddy_check,
     bayesian_buddy_check,
@@ -178,8 +178,8 @@ def reps4():
 
 def test_eight_near_neighbours(dummy_pentad_stdev, reps):
 
-    g = Np_Super_Ob()
-    g.add_obs(reps['LAT'], reps['LON'], reps['DATE'], reps['SST']-reps["SST_CLIM"])
+    g = SuperObsGrid()
+    g.add_multiple_observations(reps['LAT'], reps['LON'], reps['DATE'], reps['SST'] - reps["SST_CLIM"])
     g.get_buddy_limits_with_parameters(
         dummy_pentad_stdev,
         [[1, 1, 2], [2, 2, 2], [1, 1, 4], [2, 2, 4]],
@@ -195,8 +195,8 @@ def test_eight_near_neighbours(dummy_pentad_stdev, reps):
 
 def test_eight_distant_near_neighbours(dummy_pentad_stdev, reps2):
 
-    g = Np_Super_Ob()
-    g.add_obs(reps2["LAT"], reps2["LON"], reps2["DATE"], reps2["SST"]-reps2["SST_CLIM"])
+    g = SuperObsGrid()
+    g.add_multiple_observations(reps2["LAT"], reps2["LON"], reps2["DATE"], reps2["SST"] - reps2["SST_CLIM"])
     g.get_buddy_limits_with_parameters(dummy_pentad_stdev, [[1, 1, 2], [2, 2, 2], [1, 1, 4], [2, 2, 4]],
                                        [[0, 5, 15, 100], [0], [0, 5, 15, 100], [0]],
                                        [[4.0, 3.5, 3.0, 2.5], [4.0], [4.0, 3.5, 3.0, 2.5], [4.0]])
@@ -209,8 +209,8 @@ def test_eight_distant_near_neighbours(dummy_pentad_stdev, reps2):
 
 def test_eight_even_more_distant_near_neighbours(dummy_pentad_stdev, reps3):
 
-    g = Np_Super_Ob()
-    g.add_obs(reps3["LAT"], reps3["LON"], reps3["DATE"], reps3["SST"]-reps3["SST_CLIM"])
+    g = SuperObsGrid()
+    g.add_multiple_observations(reps3["LAT"], reps3["LON"], reps3["DATE"], reps3["SST"] - reps3["SST_CLIM"])
     g.get_buddy_limits_with_parameters(dummy_pentad_stdev, [[1, 1, 2], [2, 2, 2], [1, 1, 4], [2, 2, 4]],
                                        [[0, 5, 15, 100], [0], [0, 5, 15, 100], [0]],
                                        [[4.0, 3.5, 3.0, 2.5], [4.0], [4.0, 3.5, 3.0, 2.5], [4.0]])
@@ -222,8 +222,8 @@ def test_eight_even_more_distant_near_neighbours(dummy_pentad_stdev, reps3):
 
 def test_eight_too_distant_neighbours(dummy_pentad_stdev, reps4):
 
-    g = Np_Super_Ob()
-    g.add_obs(reps4["LAT"], reps4["LON"], reps4["DATE"], reps4["SST"] - reps4["SST_CLIM"])
+    g = SuperObsGrid()
+    g.add_multiple_observations(reps4["LAT"], reps4["LON"], reps4["DATE"], reps4["SST"] - reps4["SST_CLIM"])
     g.get_buddy_limits_with_parameters(dummy_pentad_stdev,
                                        [[1, 1, 2], [2, 2, 2], [1, 1, 4], [2, 2, 4]],
                                        [[0, 5, 15, 100], [0], [0, 5, 15, 100], [0]],
@@ -350,8 +350,8 @@ def dummy_pentad_stdev_():
 
 
 def test_neighbours(reps2_):
-    g = Np_Super_Ob()
-    g.add_obs(reps2_["LAT"], reps2_["LON"], reps2_["DATE"], reps2_["SST"] - reps2_["SST_CLIM"])
+    g = SuperObsGrid()
+    g.add_multiple_observations(reps2_["LAT"], reps2_["LON"], reps2_["DATE"], reps2_["SST"] - reps2_["SST_CLIM"])
     temp_anom, temp_nobs = g.get_neighbour_anomalies([2, 2, 2], 180, 89, 0)
 
     assert len(temp_anom) == 2
@@ -366,9 +366,9 @@ def test_neighbours(reps2_):
 
 def test_add_one_maxes_limits(reps_, dummy_pentad_stdev_):
 
-    g = Np_Super_Ob()
-    g.add_rep(reps_['LAT'][0], reps_['LON'][0], reps_['DATE'][0].month, reps_['DATE'][0].day,
-              reps_['SST'][0] - reps_['SST_CLIM'][0])
+    g = SuperObsGrid()
+    g.add_single_observation(reps_['LAT'][0], reps_['LON'][0], reps_['DATE'][0].month, reps_['DATE'][0].day,
+                             reps_['SST'][0] - reps_['SST_CLIM'][0])
     g.take_average()
     g.get_new_buddy_limits(dummy_pentad_stdev_, dummy_pentad_stdev_, dummy_pentad_stdev_)
 
@@ -390,8 +390,8 @@ def test_add_one_maxes_limits(reps_, dummy_pentad_stdev_):
 
 
 def test_add_multiple(reps_, dummy_pentad_stdev_):
-    g = Np_Super_Ob()
-    g.add_obs(reps_["LAT"], reps_["LON"], reps_["DATE"], reps_["SST"] - reps_["SST_CLIM"])
+    g = SuperObsGrid()
+    g.add_multiple_observations(reps_["LAT"], reps_["LON"], reps_["DATE"], reps_["SST"] - reps_["SST_CLIM"])
     g.get_new_buddy_limits(dummy_pentad_stdev_, dummy_pentad_stdev_, dummy_pentad_stdev_)
 
     mn = g.get_buddy_mean(
@@ -412,8 +412,8 @@ def test_add_multiple(reps_, dummy_pentad_stdev_):
 
 
 def test_creation():
-    grid = Np_Super_Ob()
-    assert isinstance(grid, Np_Super_Ob)
+    grid = SuperObsGrid()
+    assert isinstance(grid, SuperObsGrid)
 
 
 def test_buddy_check(reps_, dummy_pentad_stdev_):
