@@ -6,6 +6,7 @@ import numpy as np
 import pytest
 
 from glamod_marine_processing.qc_suite.modules.auxiliary import (
+    convert_to,
     failed,
     isvalid,
     passed,
@@ -25,34 +26,6 @@ from glamod_marine_processing.qc_suite.modules.next_level_qc import (
     do_wind_consistency_check,
     value_check,
 )
-
-
-def _convert_degC_to_K(value):
-    try:
-        return value + 273.15
-    except TypeError:
-        return value
-
-
-def _convert_K_to_degC(value):
-    try:
-        return value - 273.15
-    except TypeError:
-        return value
-
-
-def _convert_degrees_to_rad(value):
-    try:
-        return value * np.pi / 180.0
-    except TypeError:
-        return value
-
-
-def _convert_rad_to_degrees(value):
-    try:
-        return value * 180.0 / np.pi
-    except TypeError:
-        return value
 
 
 @pytest.mark.parametrize(
@@ -95,8 +68,8 @@ def test_value_check(value, expected):
 def test_do_position_check(latitude, longitude, expected):
     assert do_position_check(latitude, longitude) == expected
 
-    latitude = _convert_degrees_to_rad(latitude)
-    longitude = _convert_degrees_to_rad(longitude)
+    latitude = convert_to(latitude, "degrees", "rad")
+    longitude = convert_to(longitude, "degrees", "rad")
     converter_dict = {"latitude": ("rad", "degrees"), "longitude": ("rad", "degrees")}
     assert (
         do_position_check(latitude, longitude, converter_dict=converter_dict)
@@ -278,8 +251,8 @@ def test_do_day_check(year, month, day, hour, latitude, longitude, time, expecte
     )
     assert result == expected
 
-    latitude = _convert_degrees_to_rad(latitude)
-    longitude = _convert_degrees_to_rad(longitude)
+    latitude = convert_to(latitude, "degrees", "rad")
+    longitude = convert_to(longitude, "degrees", "rad")
     converter_dict = {
         "latitude": ("rad", "degrees"),
         "longitude": ("rad", "degrees"),
@@ -485,7 +458,7 @@ def _test_climatology_plus_stdev_check_raises():
 def test_do_hard_limit_check(value, limits, expected):
     assert do_hard_limit_check(value, limits) == expected
 
-    value = _convert_degC_to_K(value)
+    value = convert_to(value, "degC", "K")
     converter_dict = {"hard_limits": ("degC", "K")}
     assert do_hard_limit_check(value, limits, converter_dict=converter_dict) == expected
 
@@ -512,7 +485,7 @@ def test_do_sst_freeze_check(sst, sst_uncertainty, freezing_point, n_sigma, expe
         )
         == expected
     )
-    sst = _convert_degC_to_K(sst)
+    sst = convert_to(sst, "degC", "K")
     converter_dict = {"freezing_point": ("degC", "K")}
     assert (
         do_sst_freeze_check(
