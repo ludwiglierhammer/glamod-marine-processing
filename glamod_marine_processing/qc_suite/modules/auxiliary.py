@@ -154,6 +154,21 @@ def inspect_arrays(params: list[str]) -> Callable:
         arguments.
         If any of the specified parameters is not one-dimensional.
         If the lengths of the specified arrays do not all match.
+
+    Examples
+    --------
+    >>> @inspect_arrays(["a", "b"])
+    ... def add_arrays(a, b):
+    ...     return a + b
+    ...
+
+    >>> add_arrays([1, 2, 3], [4, 5, 6])
+    array([5, 7, 9])
+
+    >>> add_arrays([1, 2], [3, 4, 5])
+    Traceback (most recent call last):
+        ...
+    ValueError: Input ['a', 'b'] must all have the same length.
     """
 
     def handler(arguments: dict, **meta_kwargs):
@@ -202,6 +217,16 @@ def convert_units() -> Callable:
     - Parameters not present in the function arguments or with a value of None are
       skipped.
     - Uses the `convert_to` function to perform the actual unit conversion.
+
+    Examples
+    --------
+    >>> @convert_units()
+    ... def temperature_in_K(temp):
+    ...     print(f"Temperature in Kelvin: {temp}")
+    ...
+
+    >>> temperature_in_K(25.0, converter_dict={"temp": ("degC", "K")})
+    Temperature in Kelvin: 298.15
     """
 
     def handler(arguments: dict, **meta_kwargs):
