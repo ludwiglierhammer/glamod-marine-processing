@@ -41,17 +41,20 @@ def convert_to(
 
     Parameters
     ----------
-    value: float
-        Float value
+    value: float or None or array-like of float or None
+        A single float value, None, or a sequence (e.g., list, tuple, array-like)
+        containing floats and/or None values. `None` values will be ignored or passed
+        through unchanged.
     source_units: str
-        Units of ``value``.
+        The units of the input value(s) (e.g., 'degC', 'm/s').
     target_units: str
-        Units to be converted to.
+        The units to convert to (e.g., 'K', 'km/h').
 
     Returns
     -------
-    float:
-        Float value converted from ``source_units`` to ``target_uits``.
+    float or None or array-like of float or None
+        Converted value(s) with the same structure as input,
+        where floats are converted and None values are preserved.
     """
 
     def _convert_to(value):
@@ -69,17 +72,34 @@ def convert_to(
 
 def generic_decorator(handler: Callable[[dict], None]) -> Callable:
     """
-    Base decorator that handles argument binding and applies a custom handler.
+    Creates a decorator that binds function arguments, allows inspection or modification
+    of those arguments via a custom handler function, and then calls the original function.
+
+    This base decorator manages argument binding and supports passing additional reserved
+    keyword arguments to the handler through the decorated function's kwargs.
 
     Parameters
     ----------
     handler : Callable[[dict], None]
-        A function that receives bound_args.arguments and can mutate/validate them.
+        A function that takes a dictionary of bound arguments (`bound_args.arguments`)
+        and optionally other keyword arguments, to inspect, mutate, or validate these
+        arguments before the decorated function executes.
+        The handler should accept the signature:
+        `handler(arguments: dict, **meta_kwargs) -> None`
 
     Returns
     -------
     Callable
-        A decorator.
+        A decorator that can be applied to any function. The decorated function will
+        have its arguments bound and passed to the handler before execution.
+
+    Notes
+    -----
+    - The handler can specify a `_decorator_kwargs` attribute (a set of reserved keyword
+      argument names). These reserved kwargs will be extracted from the decorated function's
+      call kwargs and passed to the handler, then removed before calling the original function.
+    - The original function is called with the possibly modified bound arguments after
+      handler processing.
     """
 
     def decorator(func):
@@ -105,17 +125,35 @@ def generic_decorator(handler: Callable[[dict], None]) -> Callable:
 
 
 def inspect_arrays(params: list[str]) -> Callable:
-    """Create a decorator to inspect input sequences and convert them to numpy arrays.
+    """
+    Create a decorator that inspects specified input parameters of a function,
+    converts them to one-dimensional NumPy arrays, and validates their lengths.
+
+    This decorator is useful to enforce that certain input arguments are sequence-like,
+    convert them to NumPy arrays for consistent processing, and ensure they all have
+    the same length.
 
     Parameters
     ----------
-    params: list of str
-        List of parameter names to be inspected.
+    params : list of str
+        A list of parameter names to inspect in the decorated function's arguments.
+        Each named parameter will be converted to a NumPy array and validated.
 
     Returns
     -------
     Callable
-        The decorator function
+        A decorator function that can be applied to other functions. When applied,
+        the specified parameters will be converted to 1D NumPy arrays, validated
+        to ensure they exist and have matching lengths, and then passed to the
+        decorated function.
+
+    Raises
+    ------
+    ValueError
+        If any specified parameter name is not found in the decorated function's
+        arguments.
+        If any of the specified parameters is not one-dimensional.
+        If the lengths of the specified arrays do not all match.
     """
 
     def handler(arguments: dict, **meta_kwargs):
@@ -138,17 +176,32 @@ def inspect_arrays(params: list[str]) -> Callable:
 
 
 def convert_units() -> Callable:
-    """Create a decorator to automatically convert source units to target units.
+    """
+    Create a decorator to automatically convert units of specified function parameters.
+
+    This decorator uses a `converter_dict` keyword argument to specify which parameters
+    should be converted, along with their source and target units. Before the decorated
+    function runs, the specified parameters are converted using the `convert_to` function.
 
     Parameters
     ----------
-    params: str
-        Parameter name to convert units.
+    None
 
     Returns
     -------
     Callable
-        The decorator function
+        A decorator function that, when applied to another function, automatically
+        converts the units of specified parameters according to the provided
+        `converter_dict`.
+
+    Notes
+    -----
+    - The decorator expects the decorated function to be called with a keyword argument
+      `converter_dict`, which is a dictionary mapping parameter names (str) to tuples
+      of `(source_units: str, target_units: str)`.
+    - Parameters not present in the function arguments or with a value of None are
+      skipped.
+    - Uses the `convert_to` function to perform the actual unit conversion.
     """
 
     def handler(arguments: dict, **meta_kwargs):
