@@ -15,9 +15,7 @@ import numpy as np
 
 from . import Extended_IMMA as ex
 from . import spherical_geometry as sph
-from .auxiliary import isvalid
-
-km_to_nm = 0.539957
+from .auxiliary import convert_to, isvalid
 
 
 def modesp(awork: list) -> float:
@@ -58,10 +56,11 @@ def modesp(awork: list) -> float:
     atmode = 0
     icmode = 0
     amode = np.nan
+    awork = convert_to(awork, "km/h", "knots")
     if ntime > 1:
         for i in range(1, ntime):
             # fixed so that indexing starts at zero
-            index = int(math.floor(km_to_nm * awork[i] / 3.0))
+            index = int(math.floor(awork[i] / 3.0))
             if index < 0:
                 index = 0
             elif index > 11:
@@ -78,10 +77,7 @@ def modesp(awork: list) -> float:
         if amode <= 8.50:
             amode = 8.50
 
-    if isvalid(amode):
-        amode /= km_to_nm
-
-    return amode
+    return convert_to(amode, "knots", "km/h")
 
 
 def set_speed_limits(amode: float) -> (float, float, float):
@@ -97,16 +93,16 @@ def set_speed_limits(amode: float) -> (float, float, float):
     (float, float, float)
         max speed, max max speed and min speed
     """
-    amax = 15.00 / km_to_nm
-    amaxx = 20.00 / km_to_nm
+    amax = convert_to(15.0, "knots", "km/h")
+    amaxx = convert_to(20.0, "knots", "km/h")
     amin = 0.00
 
     if not isvalid(amode):
         return amax, amaxx, amin
-    if amode <= 8.51 / km_to_nm:
+    if amode <= convert_to(8.51, "knots", "km/h"):
         return amax, amaxx, amin
 
-    return amode * 1.25, 30.00 / km_to_nm, amode * 0.75
+    return amode * 1.25, convert_to(30.0, "knots", "km/h"), amode * 0.75
 
 
 def increment_position(
@@ -182,7 +178,7 @@ def distr1(invoyage: ex.Voyage) -> list:
             lat1, lon1 = increment_position(
                 invoyage.getvar(i - 1, "LAT"),
                 invoyage.getvar(i - 1, "LON"),
-                invoyage.getvar(i - 1, "vsi") / km_to_nm,
+                convert_to(invoyage.getvar(i - 1, "vsi"), "knots", "km/h"),
                 invoyage.getvar(i - 1, "dsi"),
                 invoyage.getvar(i, "time_diff"),
             )
@@ -190,7 +186,7 @@ def distr1(invoyage: ex.Voyage) -> list:
             lat2, lon2 = increment_position(
                 invoyage.getvar(i, "LAT"),
                 invoyage.getvar(i, "LON"),
-                invoyage.getvar(i, "vsi") / km_to_nm,
+                convert_to(invoyage.getvar(i, "vsi"), "knots", "km/h"),
                 invoyage.getvar(i, "dsi"),
                 invoyage.getvar(i, "time_diff"),
             )
@@ -251,7 +247,7 @@ def distr2(invoyage: ex.Voyage) -> list:
             lat1, lon1 = increment_position(
                 invoyage.getvar(i, "LAT"),
                 invoyage.getvar(i, "LON"),
-                invoyage.getvar(i, "vsi") / km_to_nm,
+                convert_to(invoyage.getvar(i, "vsi"), "knots", "km/h"),
                 invoyage.getvar(i, "dsi") - 180.0,
                 invoyage.getvar(i, "time_diff"),
             )
@@ -259,7 +255,7 @@ def distr2(invoyage: ex.Voyage) -> list:
             lat2, lon2 = increment_position(
                 invoyage.getvar(i - 1, "LAT"),
                 invoyage.getvar(i - 1, "LON"),
-                invoyage.getvar(i - 1, "vsi") / km_to_nm,
+                convert_to(invoyage.getvar(i - 1, "vsi"), "knots", "km/h"),
                 invoyage.getvar(i - 1, "dsi") - 180.0,
                 invoyage.getvar(i, "time_diff"),
             )
@@ -368,7 +364,7 @@ def direction_continuity(
     ship_directions : float
         calculated ship direction from reported positions in degrees
     max_direction_change : float
-        largest deviations that will not be flagged
+        largest deviations that will not be flagged in degrees
 
     Returns
     -------

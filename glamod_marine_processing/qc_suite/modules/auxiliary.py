@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 import inspect
-from collections.abc import Callable
+from collections.abc import Callable, Sequence
 from functools import wraps
 
 import numpy as np
@@ -32,6 +32,39 @@ def isvalid(inval: float | None) -> bool:
     if pd.isna(inval):
         return False
     return True
+
+
+def convert_to(
+    value: float | None | Sequence[float | None], source_units: str, target_units: str
+):
+    """Convert a float with source units into target units.
+
+    Parameters
+    ----------
+    value: float
+        Float value
+    source_units: str
+        Units of ``value``.
+    target_units: str
+        Units to be converted to.
+
+    Returns
+    -------
+    float:
+        Float value converted from ``source_units`` to ``target_uits``.
+    """
+
+    def _convert_to(value):
+        if not isvalid(value):
+            return value
+        return convert_units_to(value * registry, target_units)
+
+    registry = units(source_units)
+    if isinstance(value, np.ndarray):
+        return np.array([_convert_to(v) for v in value])
+    if isinstance(value, Sequence):
+        return type(value)(_convert_to(v) for v in value)
+    return _convert_to(value)
 
 
 def generic_decorator(handler: Callable[[dict], None]) -> Callable:
@@ -136,12 +169,10 @@ def convert_units() -> Callable:
             source_units = convert_units[0]
             target_units = convert_units[1]
 
-            quantity = value * units(source_units)
-            converted = convert_units_to(quantity, target_units)
+            converted = convert_to(value, source_units, target_units)
 
             arguments[param] = converted
 
-    # handler._decorator_kwargs = {"target_units", "source_units"}
     handler._decorator_kwargs = {"converter_dict"}
 
     return generic_decorator(handler)
