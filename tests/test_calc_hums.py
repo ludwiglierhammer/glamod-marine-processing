@@ -3,7 +3,7 @@ from __future__ import annotations
 import numpy as np
 import pytest  # noqa
 
-import glamod_marine_processing.qc_suite.modules.CalcHums as ch
+import glamod_marine_processing.qc_suite.modules.calculate_humidity as ch
 
 
 def test_vap_from_example():

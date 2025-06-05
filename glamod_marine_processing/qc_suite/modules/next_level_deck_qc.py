@@ -473,7 +473,7 @@ def bayesian_buddy_check(
     stdev3: clim.Climatology,
 ) -> Sequence[int]:
     """Do the Bayesian buddy check. The bayesian buddy check assigns a
-    probability of gross error to each observations, which is rounded down to the
+    probability of gross error to each observation, which is rounded down to the
     tenth and then multiplied by 10 to yield a flag between 0 and 9.
 
     Parameters
@@ -539,7 +539,7 @@ def bayesian_buddy_check(
         mon = dates[i].month
         day = dates[i].day
 
-        # Calculate the probability of gross error given the set up
+        # Calculate the probability of gross error given the set-up
         ppp = p_gross(
             p0,
             q,
