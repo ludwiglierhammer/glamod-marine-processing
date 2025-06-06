@@ -566,13 +566,30 @@ def do_supersaturation_check(dpt: float, at2: float) -> int:
         1 if supersaturation is detected,
         0 otherwise
     """
-    if not isvalid(dpt) or not isvalid(at2):
-        return untestable
+    dpt_arr = np.asarray(dpt, dtype=float)
+    at2_arr = np.asarray(at2, dtype=float)
 
-    if dpt > at2:
-        return failed
+    result = np.full(dpt_arr.shape, untestable, dtype=int)
 
-    return passed
+    valid_dpt = isvalid(dpt)
+    valid_at2 = isvalid(at2)
+    valid_indices = valid_dpt & valid_at2
+
+    cond_failed = dpt_arr > at2_arr
+
+    result[valid_indices & cond_failed] = failed
+    result[valid_indices & ~cond_failed] = passed
+
+    if np.isscalar(dpt) and np.isscalar(at2):
+        return int(result)
+
+    if isinstance(dpt, pd.Series):
+        return pd.Series(result, index=dpt.index)
+
+    if isinstance(at2, pd.Series):
+        return pd.Series(result, index=at2.index)
+
+    return result
 
 
 def do_sst_freeze_check(
@@ -627,14 +644,13 @@ def do_wind_consistency_check(
         0 otherwise
         Returns a integer scalar if input is scalar, else a integer array.
     """
-    valid_speed = isvalid(wind_speed)
-    valid_direction = isvalid(wind_direction)
-
-    wind_speed_arr = np.asarray(wind_speed)
-    wind_direction_arr = np.asarray(wind_direction)
+    wind_speed_arr = np.asarray(wind_speed, dtype=float)
+    wind_direction_arr = np.asarray(wind_direction, dtype=float)
 
     result = np.full(wind_speed_arr.shape, untestable, dtype=int)
 
+    valid_speed = isvalid(wind_speed)
+    valid_direction = isvalid(wind_direction)
     valid_indices = valid_speed & valid_direction
 
     cond_failed = ((wind_speed_arr == 0) & (wind_direction_arr != 0)) | (

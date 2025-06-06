@@ -735,7 +735,7 @@ def test_do_dpt_climatology_plus_stdev_check(testdata, climdata):
     pd.testing.assert_series_equal(results, expected)
 
 
-def test_do_supersaturation_check(testdata):
+def test_do_supersaturation_check_apply(testdata):
     db_ = testdata["observations-at"].copy()
     db2_ = testdata["observations-dpt"].copy()
     db_.data["observation_value_dpt"] = db2_["observation_value"]
@@ -746,6 +746,33 @@ def test_do_supersaturation_check(testdata):
             at2=row["observation_value"],
         ),
         axis=1,
+    )
+    expected = pd.Series(
+        [
+            untestable,
+            passed,
+            untestable,
+            passed,
+            untestable,
+            passed,
+            passed,
+            passed,
+            passed,
+            passed,
+            passed,
+            passed,
+            passed,
+        ]
+    )
+    pd.testing.assert_series_equal(results, expected)
+
+
+def test_do_supersaturation_check(testdata):
+    db_ = testdata["observations-at"].copy()
+    db2_ = testdata["observations-dpt"].copy()
+    results = do_supersaturation_check(
+        dpt=db2_["observation_value"],
+        at2=db_["observation_value"],
     )
     expected = pd.Series(
         [

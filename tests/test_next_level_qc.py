@@ -783,6 +783,14 @@ def test_do_supersaturation_check(dpt, at, expected):
     assert do_supersaturation_check(dpt, at) == expected
 
 
+def test_do_supersaturation_check_array():
+    dpt = [3.6, 5.6, 15.6, None, 12.0]
+    at2 = [5.56, 5.6, 13.6, 12.0, np.nan]
+    expected = [passed, passed, failed, untestable, untestable]
+    results = do_supersaturation_check(dpt, at2)
+    np.testing.assert_array_equal(results, expected)
+
+
 @pytest.mark.parametrize(
     "sst, expected", [(5.6, passed), (None, failed), (np.nan, failed)]
 )  # not sure if np.nan should trigger FAIL
