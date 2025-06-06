@@ -11,10 +11,12 @@ from typing import Literal, Sequence
 
 import cf_xarray  # noqa
 import numpy as np
+import pandas as pd
 import xarray as xr
 from numpy import ndarray
 from xclim.core.units import convert_units_to
 
+from .auxiliary import isvalid
 from .time_control import day_in_year, split_date, which_pentad
 
 
@@ -96,12 +98,13 @@ def inspect_climatology(
                             f"in function '{func.__name__}': {missing_in_kwargs}. "
                             f"Ensure all required arguments are passed via **kwargs."
                         )
-                    try:
-                        climatology = climatology.get_value(**func_kwargs)
-                    except ValueError:
-                        climatology = np.nan
-                    except TypeError:
-                        climatology = np.nan
+                    # try:
+                    #    climatology = climatology.get_value(**func_kwargs)
+                    # except ValueError:
+                    #    climatology = np.nan
+                    # except TypeError:
+                    #    climatology = np.nan
+                    climatology = climatology.get_value(**func_kwargs)
 
                 bound_args.arguments[clim_key] = climatology
 
@@ -281,11 +284,11 @@ class Climatology:
 
     def get_value(
         self,
-        lat: float | None = None,
-        lon: float | None = None,
-        date: datetime | None = None,
-        month: int | None = None,
-        day: int | None = None,
+        lat: float | None | Sequence[float | None] | np.ndarray = None,
+        lon: float | None | Sequence[float | None] | np.ndarray = None,
+        date: datetime | None | Sequence[datetime | None] | np.ndarray = None,
+        month: int | None | Sequence[int | None] | np.ndarray = None,
+        day: int | None | Sequence[int | None] | np.ndarray = None,
     ) -> ndarray:
         """Get the value from a climatology at the give position and time.
 
@@ -311,21 +314,63 @@ class Climatology:
         ----
         Use only exact matches for selecting time and nearest valid index value for selecting location.
         """
-        data = self.data.copy()
-        if isinstance(date, datetime):
-            date_ = split_date(date)
-            if date_ is None:
-                return
-            month = date_["month"]
-            day = date_["day"]
-        if month is not None or day is not None:
-            tindex = self.get_tindex(month, day)
-            data = data.isel(**{self.time_axis: tindex})
-        if lat is not None:
-            data = data.sel(**{self.lat_axis: lat}, method="nearest")
-        if lon is not None:
-            data = data.sel(**{self.lon_axis: lon}, method="nearest")
-        return data.values
+        # data = self.data.copy()
+        lat_arr = np.atleast_1d(lat)
+        lon_arr = np.atleast_1d(lon)
+        date_arr = pd.to_datetime(np.atleast_1d(date))
+        if date is None:
+            month_arr = np.atleast_1d(month)
+            day_arr = np.atleast_1d(day)
+        else:
+            month_arr = np.full(date.shape, 0, dtype=int)
+            day_arr = np.full(date.shape, 0, dtype=int)
+
+        result = np.full(lat_arr.shape, None, dtype=float)
+        for i in range(np.size(result)):
+            data = self.data.copy()
+            if isinstance(date_arr[i], datetime):
+                date_ = split_date(date_arr[i])
+                if not isvalid(date_):
+                    print("continue")
+                    continue
+                if not isvalid(date_["month"]):
+                    continue
+                if not isvalid(date_["day"]):
+                    continue
+                month_arr[i] = date_["month"]
+                day_arr[i] = date_["day"]
+
+            if isvalid(month_arr[i]) and isvalid(day_arr[i]):
+                tindex = self.get_tindex(month_arr[i], day_arr[i])
+                data = data.isel(**{self.time_axis: tindex})
+            if isvalid(lat_arr[i]):
+                data = data.sel(**{self.lat_axis: lat_arr[i]}, method="nearest")
+            if isvalid(lon_arr[i]):
+                data = data.sel(**{self.lon_axis: lon_arr[i]}, method="nearest")
+            result[i] = data.values
+
+        if np.isscalar(lat):
+            return int(result)
+
+        if isinstance(lat, pd.Series):
+            return pd.Series(result, index=lat.index)
+
+        return result
+
+        # if isinstance(date, datetime):
+        #    date_ = split_date(date)
+        #    if date_ is None:
+        #        return
+        #    month = date_["month"]
+        #    day = date_["day"]
+        # if month is not None or day is not None:
+        #    tindex = self.get_tindex(month, day)
+        #    data = data.isel(**{self.time_axis: tindex})
+        # if lat is not None:
+        #    data = data.sel(**{self.lat_axis: lat}, method="nearest")
+        # if lon is not None:
+        #    data = data.sel(**{self.lon_axis: lon}, method="nearest")
+        # return data.values
 
     def get_tindex(self, month: int, day: int) -> int:
         """Get the time index of the input month and day.

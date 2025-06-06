@@ -413,6 +413,43 @@ def test_do_at_climatology_check(testdata, climdata):
         target_units="K",
         source_units="degC",
     )
+    results = do_climatology_check(
+        value=db_["observation_value"],
+        climatology=climatology,
+        maximum_anomaly=10.0,
+        lat=db_["latitude"],
+        lon=db_["longitude"],
+        date=db_["date_time"],
+    )
+    expected = pd.Series(
+        [
+            untestable,
+            failed,
+            untestable,
+            passed,
+            untestable,
+            passed,
+            passed,
+            passed,
+            passed,
+            passed,
+            passed,
+            passed,
+            passed,
+        ]
+    )
+    pd.testing.assert_series_equal(results, expected)
+
+
+def test_do_at_climatology_check_apply(testdata, climdata):
+    db_ = testdata["observations-at"].copy()
+    climatology = Climatology.open_netcdf_file(
+        climdata["AT"]["mean"],
+        "at",
+        time_axis="pentad_time",
+        target_units="K",
+        source_units="degC",
+    )
     results = db_.apply(
         lambda row: do_climatology_check(
             value=row["observation_value"],

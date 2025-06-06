@@ -16,10 +16,10 @@ from .time_control import dayinyear, get_month_lengths, split_date
 
 
 def climatology_check(
-    value: float,
-    climate_normal: float,
+    value: float | None | Sequence[float | None] | np.ndarray,
+    climate_normal: float | None | Sequence[float | None] | np.ndarray,
     maximum_anomaly: float,
-    standard_deviation: float | None = "default",
+    standard_deviation: float | None | Sequence[float | None] | np.ndarray = "default",
     standard_deviation_limits: tuple[float, float] | None = None,
     lowbar: float | None = None,
 ) -> int:
@@ -53,43 +53,69 @@ def climatology_check(
         1 if the difference is outside the specified range,
         0 otherwise.
     """
-    if (
-        not isvalid(value)
-        or not isvalid(climate_normal)
-        or not isvalid(maximum_anomaly)
-        or not isvalid(standard_deviation)
-    ):
-        return untestable
+    value_arr = np.asarray(value, dtype=float)
+    climate_normal_arr = np.asarray(climate_normal, dtype=float)
 
-    if standard_deviation != "default":
-        if not isvalid(standard_deviation):
-            return untestable
-    else:
-        standard_deviation = 1.0
+    if climate_normal_arr.ndim == 0:
+        climate_normal_arr = np.full_like(value_arr, climate_normal_arr)
 
-    if maximum_anomaly <= 0:
-        return untestable
+    if standard_deviation == "default":
+        standard_deviation = [1.0] * len(value_arr)
+    standard_deviation_arr = np.asarray(standard_deviation, dtype=float)
+
+    result = np.full(value_arr.shape, untestable, dtype=int)
+
+    if maximum_anomaly is None or maximum_anomaly <= 0:
+        return result
 
     if standard_deviation is None:
-        standard_deviation = 1.0
+        standard_deviation_arr = np.full(value_arr.shape, 1.0)
 
-    if standard_deviation_limits is not None:
-        if standard_deviation_limits[1] <= standard_deviation_limits[0]:
-            return untestable
+    if standard_deviation_limits is None:
+        standard_deviation_limits = (0, np.inf)
+    elif standard_deviation_limits[1] <= standard_deviation_limits[0]:
+        return result
 
-        standard_deviation = max(standard_deviation, standard_deviation_limits[0])
-        standard_deviation = min(standard_deviation, standard_deviation_limits[1])
+    valid_indices = (
+        isvalid(value)
+        & isvalid(climate_normal)
+        & isvalid(maximum_anomaly)
+        & isvalid(standard_deviation)
+    )
 
-    climate_diff = abs(value - climate_normal)
+    standard_deviation_arr = np.clip(
+        standard_deviation_arr,
+        standard_deviation_limits[0],
+        standard_deviation_limits[1],
+    )
 
-    low_check = True
-    if lowbar is not None:
+    climate_diff = np.zeros_like(value_arr)
+
+    climate_diff[valid_indices] = np.abs(
+        value_arr[valid_indices] - climate_normal_arr[valid_indices]
+    )
+
+    if lowbar is None:
+        low_check = np.ones(value_arr.shape, dtype=bool)
+    else:
         low_check = climate_diff > lowbar
 
-    if climate_diff / standard_deviation > maximum_anomaly and low_check:
-        return failed
+    cond_failed = np.full(value_arr.shape, False, dtype=bool)
+    cond_failed[valid_indices] = (
+        climate_diff[valid_indices] / standard_deviation_arr[valid_indices]
+        > maximum_anomaly
+    ) & low_check[valid_indices]
 
-    return passed
+    result[valid_indices & cond_failed] = failed
+    result[valid_indices & ~cond_failed] = passed
+
+    if np.isscalar(value):
+        return int(result)
+
+    if isinstance(value, pd.Series):
+        return pd.Series(result, index=value.index)
+
+    return result
 
 
 def value_check(inval: float | None) -> int:
@@ -182,7 +208,7 @@ def sst_freeze_check(
         * ``freezing_point``: -1.80
         * ``n_sigma``: 2.0
     """
-    insst_arr = np.asarray(insst)
+    insst_arr = np.asarray(insst, dtype=float)
     result = np.full(insst_arr.shape, untestable, dtype=int)
 
     if (
@@ -200,7 +226,7 @@ def sst_freeze_check(
     result[valid_sst & ~cond_failed] = passed
 
     if np.isscalar(insst):
-        result = int(result)
+        return int(result)
 
     if isinstance(insst, pd.Series):
         return pd.Series(result, index=insst.index)
@@ -488,14 +514,16 @@ def do_hard_limit_check(value: float, hard_limits: list) -> int:
 
 @inspect_climatology("climatology", optional="standard_deviation")
 def do_climatology_check(
-    value: float,
-    climatology: float | Climatology,
+    value: float | None | Sequence[float | None] | np.ndarray,
+    climatology: float | None | Sequence[float | None] | np.ndarray | Climatology,
     maximum_anomaly: float,
-    standard_deviation: float | Climatology | None = "default",
+    standard_deviation: (
+        float | None | Sequence[float | None] | np.ndarray | Climatology
+    ) = "default",
     standard_deviation_limits: list | None = None,
     lowbar: float | None = None,
     **kwargs,
-) -> int:
+) -> int | np.ndarray:
     """
     Check that the value is within the prescribed distance from climatology.
 
@@ -548,7 +576,10 @@ def do_climatology_check(
     )
 
 
-def do_supersaturation_check(dpt: float, at2: float) -> int:
+def do_supersaturation_check(
+    dpt: float | None | Sequence[float | None] | np.ndarray,
+    at2: float | None | Sequence[float | None] | np.ndarray,
+) -> int | np.ndarray:
     """
     Perform the super saturation check. Check if a valid dewpoint temperature is greater than a valid air temperature
 
@@ -571,9 +602,7 @@ def do_supersaturation_check(dpt: float, at2: float) -> int:
 
     result = np.full(dpt_arr.shape, untestable, dtype=int)
 
-    valid_dpt = isvalid(dpt)
-    valid_at2 = isvalid(at2)
-    valid_indices = valid_dpt & valid_at2
+    valid_indices = isvalid(dpt) & isvalid(at2)
 
     cond_failed = dpt_arr > at2_arr
 
@@ -596,7 +625,7 @@ def do_sst_freeze_check(
     sst: float | None | Sequence[float | None] | np.ndarray,
     freezing_point: float,
     freeze_check_n_sigma: float,
-) -> int:
+) -> int | np.ndarray:
     """
     Check that sea surface temperature is above freezing
 
@@ -649,9 +678,7 @@ def do_wind_consistency_check(
 
     result = np.full(wind_speed_arr.shape, untestable, dtype=int)
 
-    valid_speed = isvalid(wind_speed)
-    valid_direction = isvalid(wind_direction)
-    valid_indices = valid_speed & valid_direction
+    valid_indices = isvalid(wind_speed) & isvalid(wind_direction)
 
     cond_failed = ((wind_speed_arr == 0) & (wind_direction_arr != 0)) | (
         (wind_speed_arr != 0) & (wind_direction_arr == 0)

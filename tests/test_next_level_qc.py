@@ -85,6 +85,23 @@ def test_climatology_plus_stdev_with_lowbar(
     )
 
 
+def test_climatology_plus_stdev_with_lowbar_array():
+    value = [None, 1.0, 1.0, 1.0, 7.0, 0.4, 0.4]
+    climate_normal = [0.0, None, 0.0, 0.0, 0.0, 0.0, 0.0]
+    standard_deviation = [1.0, 1.0, None, 2.0, 2.0, 0.1, 0.1]
+    limit = 3.0
+    lowbar = 0.5
+    expected = [untestable, untestable, untestable, passed, failed, passed, passed]
+    results = climatology_check(
+        value,
+        climate_normal,
+        limit,
+        standard_deviation=standard_deviation,
+        lowbar=lowbar,
+    )
+    np.testing.assert_array_equal(results, expected)
+
+
 @pytest.mark.parametrize(
     "value, climate_normal, standard_deviation, stdev_limits, limit, expected",
     [
@@ -154,7 +171,6 @@ def test_climatology_check(value, climate_normal, limit, expected):
     ],
 )
 def test_isvalid_check(value, expected):
-    print(isvalid)
     assert isvalid(value) == expected
 
 
@@ -508,6 +524,13 @@ def test_do_air_temperature_climatology_check(
         do_climatology_check(at, at_climatology, maximum_anomaly=maximum_anomaly)
         == expected
     )
+
+
+def test_do_air_temperature_climatology_check_array():
+    at = [5.6, None, np.nan]
+    results = do_climatology_check(at, 2.2, maximum_anomaly=10.0)
+    expected = [passed, untestable, untestable]
+    np.testing.assert_array_equal(results, expected)
 
 
 @pytest.mark.parametrize(
