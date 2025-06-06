@@ -9,18 +9,17 @@ from typing import Sequence
 import math
 import numpy as np
 
+from glamod_marine_processing.qc_suite.modules.external_clim import Climatology
+from glamod_marine_processing.qc_suite.modules.next_level_trackqc import is_monotonic
+from glamod_marine_processing.qc_suite.modules.statistics import p_gross
 from glamod_marine_processing.qc_suite.modules.location_control import (
     mds_lon_to_xindex,
     mds_lat_to_yindex,
 )
-from glamod_marine_processing.qc_suite.modules.next_level_trackqc import is_monotonic
-from glamod_marine_processing.qc_suite.modules.statistics import p_gross
 from glamod_marine_processing.qc_suite.modules.time_control import (
     which_pentad,
     pentad_to_month_day,
 )
-import glamod_marine_processing.qc_suite.modules.Climatology as clim
-from glamod_marine_processing.qc_suite.modules.Climatology import Climatology
 from glamod_marine_processing.qc_suite.modules.auxiliary import (
     failed,
     passed,
@@ -468,9 +467,9 @@ def bayesian_buddy_check(
     lons: Sequence[float],
     dates: Sequence[datetime],
     anoms: Sequence[float],
-    stdev1: clim.Climatology,
-    stdev2: clim.Climatology,
-    stdev3: clim.Climatology,
+    stdev1: Climatology,
+    stdev2: Climatology,
+    stdev3: Climatology,
 ) -> Sequence[int]:
     """Do the Bayesian buddy check. The bayesian buddy check assigns a
     probability of gross error to each observation, which is rounded down to the
@@ -486,13 +485,13 @@ def bayesian_buddy_check(
         1-dimensional date array.
     anoms: array-like of float, shape (n,)
         1-dimensional anomaly array.
-    stdev1: clim.Climatology
+    stdev1: Climatology
         Field of standard deviations representing standard deviation of difference between
         target gridcell and complete neighbour average (grid area to neighbourhood difference)
-    stdev2: clim.Climatology
+    stdev2: Climatology
         Field of standard deviations representing standard deviation of difference between
         a single observation and the target gridcell average (point to grid area difference)
-    stdev3: clim.Climatology
+    stdev3: Climatology
         Field of standard deviations representing standard deviation of difference between
         random neighbour gridcell and full neighbour average (uncertainty in neighbour average)
 
