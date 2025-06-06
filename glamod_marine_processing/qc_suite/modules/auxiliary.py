@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 import inspect
-from collections.abc import Callable
+from collections.abc import Callable, Sequence
 from functools import wraps
 
 import numpy as np
@@ -15,22 +15,26 @@ untestable = 2
 untested = 3
 
 
-def isvalid(inval: float | None) -> bool:
-    """Check if a value is numerically valid.
+def isvalid(
+    inval: float | None | Sequence[float | None] | np.ndarray,
+) -> bool | np.ndarray:
+    """Check if a value(s) are numerically valid (not None or NaN).
 
     Parameters
     ----------
-    inval : float or None
-        The input value to be tested
+    inval : float, None, array-like of float or None
+        Input value(s) to be tested
 
     Returns
     -------
-    booll
-        Returns False if the input value is numerically invalid or None, True otherwise
+    bool or np.ndarray of bool
+        Returns False where the input is None or NaN, True otherwise.
+        Returns a boolean scalar if input is scalar, else a boolean array.
     """
-    if pd.isna(inval):
-        return False
-    return True
+    result = np.logical_not(pd.isna(inval))
+    if np.isscalar(inval):
+        return bool(result)
+    return result
 
 
 def inspect_arrays(params: list[str]) -> Callable:

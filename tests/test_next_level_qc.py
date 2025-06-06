@@ -7,6 +7,7 @@ import pytest
 
 from glamod_marine_processing.qc_suite.modules.auxiliary import (
     failed,
+    isvalid,
     passed,
     untestable,
 )
@@ -24,7 +25,6 @@ from glamod_marine_processing.qc_suite.modules.next_level_qc import (
     do_time_check,
     do_wind_consistency_check,
     hard_limit_check,
-    isvalid,
     sst_freeze_check,
     value_check,
 )
@@ -154,6 +154,7 @@ def test_climatology_check(value, climate_normal, limit, expected):
     ],
 )
 def test_isvalid_check(value, expected):
+    print(isvalid)
     assert isvalid(value) == expected
 
 
@@ -880,3 +881,24 @@ def test_do_wind_consistency_check(wind_speed, wind_direction, expected):
         )
         == expected
     )
+
+
+def test_do_wind_consistency_check_array():
+    wind_speed = [None, 4, 0, 0, 5.0, 5, 12.0, 5, 12.0]
+    wind_direction = [4, None, 0, 120, 0, 361, 362, 165, 73]
+    expected = [
+        untestable,
+        untestable,
+        passed,
+        failed,
+        failed,
+        passed,
+        passed,
+        passed,
+        passed,
+    ]
+    results = do_wind_consistency_check(
+        wind_speed,
+        wind_direction,
+    )
+    np.testing.assert_array_equal(results, expected)

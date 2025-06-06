@@ -4,6 +4,9 @@ from __future__ import annotations
 
 import math
 from datetime import datetime
+from typing import Sequence
+
+import numpy as np
 
 from .astronomical_geometry import sunangle
 from .auxiliary import failed, isvalid, passed, untestable
@@ -590,32 +593,45 @@ def do_sst_freeze_check(
 
 
 def do_wind_consistency_check(
-    wind_speed: float | None,
-    wind_direction: int | None,
-) -> int:
+    wind_speed: float | None | Sequence[float | None] | np.ndarray,
+    wind_direction: float | None | Sequence[float | None] | np.ndarray,
+) -> int | np.ndarray:
     """
     Test to compare windspeed to winddirection.
 
     Parameters
     ----------
-    wind_speed : float, optional
-        Wind speed
-    wind_direction : int, optional
-        Wind direction
+    wind_speed : float, None, array-like of float or None
+        Wind speed values to be tested
+    wind_direction : float, None, array-like of float or None
+        Wind direction values to be tested
 
     Returns
     -------
-    int
+    int or np.ndarray of int
         2 if either wind_speed or wind_direction is numerically invalid or None,
         1 if windspeed and direction are inconsistent,
         0 otherwise
+        Returns a integer scalar if input is scalar, else a integer array.
     """
-    if not isvalid(wind_speed) or not isvalid(wind_direction):
-        return untestable
-    if wind_speed == 0.0 and wind_direction != 0:
-        return failed
+    valid_speed = isvalid(wind_speed)
+    valid_direction = isvalid(wind_direction)
 
-    if wind_speed != 0.0 and wind_direction == 0:
-        return failed
+    wind_speed_arr = np.asarray(wind_speed)
+    wind_direction_arr = np.asarray(wind_direction)
 
-    return passed
+    result = np.full(wind_speed_arr.shape, untestable, dtype=int)
+
+    valid_indices = valid_speed & valid_direction
+
+    cond_failed = ((wind_speed_arr == 0) & (wind_direction_arr != 0)) | (
+        (wind_speed_arr != 0) & (wind_direction_arr == 0)
+    )
+
+    result[valid_indices & cond_failed] = failed
+    result[valid_indices & ~cond_failed] = passed
+
+    if np.isscalar(wind_speed) and np.isscalar(wind_direction):
+        result = int(result)
+
+    return result
