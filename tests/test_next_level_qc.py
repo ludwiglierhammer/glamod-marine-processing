@@ -212,6 +212,14 @@ def test_sst_freeze_check_defaults():
     assert sst_freeze_check(-2.0, **params) == failed
 
 
+def test_sst_freeze_check_array():
+    params = {"sst_uncertainty": 0, "freezing_point": -1.8, "n_sigma": 2.0}
+    sst = [0.0, -1.8, -2.0]
+    results = sst_freeze_check(sst, **params)
+    expected = [passed, passed, failed]
+    np.testing.assert_array_equal(results, expected)
+
+
 @pytest.mark.parametrize(
     "latitude, longitude, expected",
     [
@@ -817,6 +825,13 @@ def test_do_sst_missing_value_clim_check(sst_climatology, expected):
 )
 def test_do_sst_freeze_check(sst, freezing_point, freeze_check_n_sigma, expected):
     assert do_sst_freeze_check(sst, freezing_point, freeze_check_n_sigma) == expected
+
+
+def test_do_sst_freeze_check_array():
+    sst = [5.6, -5.6, 0.0]
+    expected = [passed, failed, passed]
+    results = do_sst_freeze_check(sst, -1.8, 2.0)
+    np.testing.assert_array_equal(results, expected)
 
 
 @pytest.mark.parametrize(

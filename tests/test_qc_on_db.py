@@ -795,6 +795,33 @@ def test_do_sst_missing_value_check(testdata):
 
 def test_do_sst_freeze_check(testdata):
     db_ = testdata["observations-sst"].copy()
+    results = do_sst_freeze_check(
+        sst=db_["observation_value"],
+        freezing_point=271.35,
+        freeze_check_n_sigma=2.0,
+    )
+    expected = pd.Series(
+        [
+            passed,
+            passed,
+            untestable,
+            untestable,
+            untestable,
+            untestable,
+            untestable,
+            untestable,
+            untestable,
+            untestable,
+            untestable,
+            untestable,
+            untestable,
+        ]
+    )
+    pd.testing.assert_series_equal(results, expected)
+
+
+def test_do_sst_freeze_check_apply(testdata):
+    db_ = testdata["observations-sst"].copy()
     results = db_.apply(
         lambda row: do_sst_freeze_check(
             sst=row["observation_value"],
@@ -1036,6 +1063,33 @@ def test_do_wind_direction_hard_limit_check(testdata):
 
 
 def test_do_wind_consistency_check(testdata):
+    db_ = testdata["observations-ws"].copy()
+    db2_ = testdata["observations-wd"].copy()
+    results = do_wind_consistency_check(
+        db_["observation_value"],
+        db2_["observation_value"],
+    )
+    expected = pd.Series(
+        [
+            passed,
+            passed,
+            untestable,
+            passed,
+            untestable,
+            passed,
+            passed,
+            passed,
+            failed,
+            failed,
+            failed,
+            failed,
+            failed,
+        ]
+    )
+    pd.testing.assert_series_equal(results, expected)
+
+
+def test_do_wind_consistency_check_apply(testdata):
     db_ = testdata["observations-ws"].copy()
     db2_ = testdata["observations-wd"].copy()
     db_.data["observation_value_wd"] = db2_["observation_value"]

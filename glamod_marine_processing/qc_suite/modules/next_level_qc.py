@@ -7,6 +7,7 @@ from datetime import datetime
 from typing import Sequence
 
 import numpy as np
+import pandas as pd
 
 from .astronomical_geometry import sunangle
 from .auxiliary import failed, isvalid, passed, untestable
@@ -139,7 +140,7 @@ def hard_limit_check(val: float, limits: tuple[float, float]) -> int:
 
 
 def sst_freeze_check(
-    insst: float,
+    insst: float | None | Sequence[float | None] | np.ndarray,
     sst_uncertainty: float,
     freezing_point: float,
     n_sigma: float,
@@ -181,20 +182,30 @@ def sst_freeze_check(
         * ``freezing_point``: -1.80
         * ``n_sigma``: 2.0
     """
-    if not isvalid(insst):
-        return untestable
-    if not isvalid(sst_uncertainty):
-        return untestable
-    if not isvalid(freezing_point):
-        return untestable
-    if not isvalid(n_sigma):
-        return untestable
+    insst_arr = np.asarray(insst)
+    result = np.full(insst_arr.shape, untestable, dtype=int)
 
-    # fail if SST below the freezing point by more than twice the uncertainty
-    if insst < (freezing_point - n_sigma * sst_uncertainty):
-        return failed
+    if (
+        not isvalid(sst_uncertainty)
+        or not isvalid(freezing_point)
+        or not isvalid(n_sigma)
+    ):
+        return result
 
-    return passed
+    valid_sst = isvalid(insst)
+
+    cond_failed = insst_arr < (freezing_point - n_sigma * sst_uncertainty)
+
+    result[valid_sst & cond_failed] = failed
+    result[valid_sst & ~cond_failed] = passed
+
+    if np.isscalar(insst):
+        result = int(result)
+
+    if isinstance(insst, pd.Series):
+        return pd.Series(result, index=insst.index)
+
+    return result
 
 
 def do_position_check(latitude: float, longitude: float) -> int:
@@ -565,7 +576,9 @@ def do_supersaturation_check(dpt: float, at2: float) -> int:
 
 
 def do_sst_freeze_check(
-    sst: float, freezing_point: float, freeze_check_n_sigma: float
+    sst: float | None | Sequence[float | None] | np.ndarray,
+    freezing_point: float,
+    freeze_check_n_sigma: float,
 ) -> int:
     """
     Check that sea surface temperature is above freezing
@@ -632,6 +645,12 @@ def do_wind_consistency_check(
     result[valid_indices & ~cond_failed] = passed
 
     if np.isscalar(wind_speed) and np.isscalar(wind_direction):
-        result = int(result)
+        return int(result)
+
+    if isinstance(wind_speed, pd.Series):
+        return pd.Series(result, index=wind_speed.index)
+
+    if isinstance(wind_direction, pd.Series):
+        return pd.Series(result, index=wind_speed.index)
 
     return result
