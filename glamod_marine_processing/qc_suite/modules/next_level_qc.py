@@ -53,17 +53,17 @@ def climatology_check(
         1 if the difference is outside the specified range,
         0 otherwise.
     """
-    value_arr = np.asarray(value, dtype=float)
-    climate_normal_arr = np.asarray(climate_normal, dtype=float)
+    value_arr = np.asarray(value, dtype=float)  # type: np.ndarray
+    climate_normal_arr = np.asarray(climate_normal, dtype=float)  # type: np.ndarray
 
     if climate_normal_arr.ndim == 0:
-        climate_normal_arr = np.full_like(value_arr, climate_normal_arr)
+        climate_normal_arr = np.full_like(value_arr, climate_normal_arr)  # type: np.ndarray
 
     if standard_deviation == "default":
         standard_deviation = [1.0] * len(value_arr)
-    standard_deviation_arr = np.asarray(standard_deviation, dtype=float)
+    standard_deviation_arr = np.asarray(standard_deviation, dtype=float)  # type: np.ndarray
 
-    result = np.full(value_arr.shape, untestable, dtype=int)
+    result = np.full(value_arr.shape, untestable, dtype=int)  # type: np.ndarray
 
     if maximum_anomaly is None or maximum_anomaly <= 0:
         return result
@@ -89,7 +89,7 @@ def climatology_check(
         standard_deviation_limits[1],
     )
 
-    climate_diff = np.zeros_like(value_arr)
+    climate_diff = np.zeros_like(value_arr)  # type: np.ndarray
 
     climate_diff[valid_indices] = np.abs(
         value_arr[valid_indices] - climate_normal_arr[valid_indices]
@@ -208,8 +208,8 @@ def sst_freeze_check(
         * ``freezing_point``: -1.80
         * ``n_sigma``: 2.0
     """
-    insst_arr = np.asarray(insst, dtype=float)
-    result = np.full(insst_arr.shape, untestable, dtype=int)
+    insst_arr = np.asarray(insst, dtype=float)  # type: np.ndarray
+    result = np.full(insst_arr.shape, untestable, dtype=int)  # type: np.ndarray
 
     if (
         not isvalid(sst_uncertainty)
@@ -597,10 +597,10 @@ def do_supersaturation_check(
         1 if supersaturation is detected,
         0 otherwise
     """
-    dpt_arr = np.asarray(dpt, dtype=float)
-    at2_arr = np.asarray(at2, dtype=float)
+    dpt_arr = np.asarray(dpt, dtype=float)  # type: np.ndarray
+    at2_arr = np.asarray(at2, dtype=float)  # type: np.ndarray
 
-    result = np.full(dpt_arr.shape, untestable, dtype=int)
+    result = np.full(dpt_arr.shape, untestable, dtype=int)  # type: np.ndarray
 
     valid_indices = isvalid(dpt) & isvalid(at2)
 
@@ -673,10 +673,10 @@ def do_wind_consistency_check(
         0 otherwise
         Returns a integer scalar if input is scalar, else a integer array.
     """
-    wind_speed_arr = np.asarray(wind_speed, dtype=float)
-    wind_direction_arr = np.asarray(wind_direction, dtype=float)
+    wind_speed_arr = np.asarray(wind_speed, dtype=float)  # type: np.ndarray
+    wind_direction_arr = np.asarray(wind_direction, dtype=float)  # type: np.ndarray
 
-    result = np.full(wind_speed_arr.shape, untestable, dtype=int)
+    result = np.full(wind_speed_arr.shape, untestable, dtype=int)  # type: np.ndarray
 
     valid_indices = isvalid(wind_speed) & isvalid(wind_direction)
 
