@@ -57,11 +57,15 @@ def climatology_check(
     climate_normal_arr = np.asarray(climate_normal, dtype=float)  # type: np.ndarray
 
     if climate_normal_arr.ndim == 0:
-        climate_normal_arr = np.full_like(value_arr, climate_normal_arr)  # type: np.ndarray
+        climate_normal_arr = np.full_like(
+            value_arr, climate_normal_arr
+        )  # type: np.ndarray
 
-    if standard_deviation == "default":
-        standard_deviation = [1.0] * len(value_arr)
-    standard_deviation_arr = np.asarray(standard_deviation, dtype=float)  # type: np.ndarray
+    if isinstance(standard_deviation, str) and standard_deviation == "default":
+        standard_deviation = np.full(value_arr.shape, 1.0, dtype=float)
+    standard_deviation_arr = np.asarray(
+        standard_deviation, dtype=float
+    )  # type: np.ndarray
 
     result = np.full(value_arr.shape, untestable, dtype=int)  # type: np.ndarray
 

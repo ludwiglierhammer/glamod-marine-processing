@@ -98,13 +98,12 @@ def inspect_climatology(
                             f"in function '{func.__name__}': {missing_in_kwargs}. "
                             f"Ensure all required arguments are passed via **kwargs."
                         )
-                    # try:
-                    #    climatology = climatology.get_value(**func_kwargs)
-                    # except ValueError:
-                    #    climatology = np.nan
-                    # except TypeError:
-                    #    climatology = np.nan
-                    climatology = climatology.get_value(**func_kwargs)
+                    try:
+                        climatology = climatology.get_value(**func_kwargs)
+                    except ValueError:
+                        climatology = np.nan
+                    except TypeError:
+                        climatology = np.nan
 
                 bound_args.arguments[clim_key] = climatology
 
@@ -314,63 +313,34 @@ class Climatology:
         ----
         Use only exact matches for selecting time and nearest valid index value for selecting location.
         """
-        # data = self.data.copy()
         lat_arr = np.atleast_1d(lat)
         lon_arr = np.atleast_1d(lon)
         date_arr = pd.to_datetime(np.atleast_1d(date))
-        if date is None:
-            month_arr = np.atleast_1d(month)
-            day_arr = np.atleast_1d(day)
-        else:
-            month_arr = np.full(date.shape, 0, dtype=int)
-            day_arr = np.full(date.shape, 0, dtype=int)
+        if date is not None:
+            date_ = [split_date(date_i) for date_i in date_arr]
+            month = [date_i["month"] for date_i in date_]
+            day = [date_i["day"] for date_i in date_]
+        month_arr = np.atleast_1d(month)
+        day_arr = np.atleast_1d(day)
+        valid_indices = isvalid(lat) & isvalid(lon) & isvalid(month) & isvalid(day)
+        result = np.full(lat_arr.shape, None, dtype=float)  # type: np.ndarray
 
-        result = np.full(lat_arr.shape, None, dtype=float)
         for i in range(np.size(result)):
-            data = self.data.copy()
-            if isinstance(date_arr[i], datetime):
-                date_ = split_date(date_arr[i])
-                if not isvalid(date_):
-                    print("continue")
-                    continue
-                if not isvalid(date_["month"]):
-                    continue
-                if not isvalid(date_["day"]):
-                    continue
-                month_arr[i] = date_["month"]
-                day_arr[i] = date_["day"]
-
-            if isvalid(month_arr[i]) and isvalid(day_arr[i]):
-                tindex = self.get_tindex(month_arr[i], day_arr[i])
-                data = data.isel(**{self.time_axis: tindex})
-            if isvalid(lat_arr[i]):
-                data = data.sel(**{self.lat_axis: lat_arr[i]}, method="nearest")
-            if isvalid(lon_arr[i]):
-                data = data.sel(**{self.lon_axis: lon_arr[i]}, method="nearest")
+            if not valid_indices[i]:
+                continue
+            tindex = self.get_tindex(int(month_arr[i]), int(day_arr[i]))
+            data = self.data.isel(**{self.time_axis: tindex})
+            data = data.sel(**{self.lat_axis: lat_arr[i]}, method="nearest")
+            data = data.sel(**{self.lon_axis: lon_arr[i]}, method="nearest")
             result[i] = data.values
 
         if np.isscalar(lat):
-            return int(result)
+            return result[0]
 
         if isinstance(lat, pd.Series):
             return pd.Series(result, index=lat.index)
 
         return result
-
-        # if isinstance(date, datetime):
-        #    date_ = split_date(date)
-        #    if date_ is None:
-        #        return
-        #    month = date_["month"]
-        #    day = date_["day"]
-        # if month is not None or day is not None:
-        #    tindex = self.get_tindex(month, day)
-        #    data = data.isel(**{self.time_axis: tindex})
-        # if lat is not None:
-        #    data = data.sel(**{self.lat_axis: lat}, method="nearest")
-        # if lon is not None:
-        #    data = data.sel(**{self.lon_axis: lon}, method="nearest")
-        # return data.values
 
     def get_tindex(self, month: int, day: int) -> int:
         """Get the time index of the input month and day.
@@ -389,7 +359,7 @@ class Climatology:
         """
         if self.ntime == 1:
             return 0
-        elif self.ntime == 73:
+        if self.ntime == 73:
             return which_pentad(month, day) - 1
         return day_in_year(month, day) - 1
 
