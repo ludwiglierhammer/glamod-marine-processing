@@ -404,7 +404,8 @@ def test_do_at_missing_value_clim_check(testdata, climdata):
     pd.testing.assert_series_equal(results, expected)
 
 
-def test_do_at_climatology_check(testdata, climdata):
+@pytest.mark.parametrize("apply_func", [False, True])
+def test_do_at_climatology_check(testdata, climdata, apply_func):
     db_ = testdata["observations-at"].copy()
     climatology = Climatology.open_netcdf_file(
         climdata["AT"]["mean"],
@@ -413,54 +414,27 @@ def test_do_at_climatology_check(testdata, climdata):
         target_units="K",
         source_units="degC",
     )
-    results = do_climatology_check(
-        value=db_["observation_value"],
-        climatology=climatology,
-        maximum_anomaly=10.0,
-        lat=db_["latitude"],
-        lon=db_["longitude"],
-        date=db_["date_time"],
-    )
-    expected = pd.Series(
-        [
-            untestable,
-            failed,
-            untestable,
-            passed,
-            untestable,
-            passed,
-            passed,
-            passed,
-            passed,
-            passed,
-            passed,
-            passed,
-            passed,
-        ]
-    )
-    pd.testing.assert_series_equal(results, expected)
-
-
-def test_do_at_climatology_check_apply(testdata, climdata):
-    db_ = testdata["observations-at"].copy()
-    climatology = Climatology.open_netcdf_file(
-        climdata["AT"]["mean"],
-        "at",
-        time_axis="pentad_time",
-        target_units="K",
-        source_units="degC",
-    )
-    results = db_.apply(
-        lambda row: do_climatology_check(
-            value=row["observation_value"],
+    if apply_func is True:
+        results = db_.apply(
+            lambda row: do_climatology_check(
+                value=row["observation_value"],
+                climatology=climatology,
+                maximum_anomaly=10.0,  # K
+                lat=row["latitude"],
+                lon=row["longitude"],
+                date=row["date_time"],
+            ),
+            axis=1,
+        )
+    else:
+        results = do_climatology_check(
+            value=db_["observation_value"],
             climatology=climatology,
-            maximum_anomaly=10.0,  # K
-            lat=row["latitude"],
-            lon=row["longitude"],
-            date=row["date_time"],
-        ),
-        axis=1,
-    )
+            maximum_anomaly=10.0,
+            lat=db_["latitude"],
+            lon=db_["longitude"],
+            date=db_["date_time"],
+        )
     expected = pd.Series(
         [
             untestable,
@@ -481,7 +455,8 @@ def test_do_at_climatology_check_apply(testdata, climdata):
     pd.testing.assert_series_equal(results, expected)
 
 
-def test_do_at_climatology_plus_stdev_check(testdata, climdata):
+@pytest.mark.parametrize("apply_func", [False, True])
+def test_do_at_climatology_plus_stdev_check(testdata, climdata, apply_func):
     db_ = testdata["observations-at"].copy()
     climatology = Climatology.open_netcdf_file(
         climdata["AT"]["mean"],
@@ -495,19 +470,31 @@ def test_do_at_climatology_plus_stdev_check(testdata, climdata):
         "at",
         time_axis="pentad_time",
     )
-    results = db_.apply(
-        lambda row: do_climatology_check(
-            value=row["observation_value"],
+    if apply_func is True:
+        results = db_.apply(
+            lambda row: do_climatology_check(
+                value=row["observation_value"],
+                climatology=climatology,
+                standard_deviation=stdev,
+                standard_deviation_limits=[1.0, 4.0],  # K
+                maximum_anomaly=5.5,  # K
+                lat=row["latitude"],
+                lon=row["longitude"],
+                date=row["date_time"],
+            ),
+            axis=1,
+        )
+    else:
+        results = do_climatology_check(
+            value=db_["observation_value"],
             climatology=climatology,
             standard_deviation=stdev,
             standard_deviation_limits=[1.0, 4.0],  # K
             maximum_anomaly=5.5,  # K
-            lat=row["latitude"],
-            lon=row["longitude"],
-            date=row["date_time"],
-        ),
-        axis=1,
-    )
+            lat=db_["latitude"],
+            lon=db_["longitude"],
+            date=db_["date_time"],
+        )
     expected = pd.Series(
         [
             untestable,
@@ -586,7 +573,10 @@ def test_do_slp_missing_value_clim_check(testdata, climdata):
     pd.testing.assert_series_equal(results, expected)
 
 
-def test_do_slp_climatology_plus_stdev_with_lowbar_check(testdata, climdata):
+@pytest.mark.parametrize("apply_func", [False, True])
+def test_do_slp_climatology_plus_stdev_with_lowbar_check(
+    testdata, climdata, apply_func
+):
     db_ = testdata["observations-slp"].copy()
     climatology = Climatology.open_netcdf_file(
         climdata["SLP"]["mean"],
@@ -600,19 +590,31 @@ def test_do_slp_climatology_plus_stdev_with_lowbar_check(testdata, climdata):
         target_units="Pa",
         source_units="hPa",
     )
-    results = db_.apply(
-        lambda row: do_climatology_check(
-            value=row["observation_value"],
+    if apply_func is True:
+        results = db_.apply(
+            lambda row: do_climatology_check(
+                value=row["observation_value"],
+                climatology=climatology,
+                standard_deviation=stdev,
+                maximum_anomaly=300,  # Pa
+                lowbar=1000,  # Pa
+                lat=row["latitude"],
+                lon=row["longitude"],
+                date=row["date_time"],
+            ),
+            axis=1,
+        )
+    else:
+        results = do_climatology_check(
+            value=db_["observation_value"],
             climatology=climatology,
             standard_deviation=stdev,
             maximum_anomaly=300,  # Pa
             lowbar=1000,  # Pa
-            lat=row["latitude"],
-            lon=row["longitude"],
-            date=row["date_time"],
-        ),
-        axis=1,
-    )
+            lat=db_["latitude"],
+            lon=db_["longitude"],
+            date=db_["date_time"],
+        )
     expected = pd.Series(
         [
             untestable,
@@ -724,7 +726,8 @@ def test_do_dpt_missing_value_clim_check(testdata, climdata):
     pd.testing.assert_series_equal(results, expected)
 
 
-def test_do_dpt_climatology_plus_stdev_check(testdata, climdata):
+@pytest.mark.parametrize("apply_func", [False, True])
+def test_do_dpt_climatology_plus_stdev_check(testdata, climdata, apply_func):
     db_ = testdata["observations-dpt"].copy()
     climatology = Climatology.open_netcdf_file(
         climdata["DPT"]["mean"],
@@ -738,20 +741,31 @@ def test_do_dpt_climatology_plus_stdev_check(testdata, climdata):
         "dpt",
         time_axis="pentad_time",
     )
-
-    results = db_.apply(
-        lambda row: do_climatology_check(
-            value=row["observation_value"],
+    if apply_func is True:
+        results = db_.apply(
+            lambda row: do_climatology_check(
+                value=row["observation_value"],
+                climatology=climatology,
+                standard_deviation=stdev,
+                standard_deviation_limits=[1.0, 4.0],  # K
+                maximum_anomaly=5.5,  # K
+                lat=row["latitude"],
+                lon=row["longitude"],
+                date=row["date_time"],
+            ),
+            axis=1,
+        )
+    else:
+        results = do_climatology_check(
+            value=db_["observation_value"],
             climatology=climatology,
             standard_deviation=stdev,
             standard_deviation_limits=[1.0, 4.0],  # K
             maximum_anomaly=5.5,  # K
-            lat=row["latitude"],
-            lon=row["longitude"],
-            date=row["date_time"],
-        ),
-        axis=1,
-    )
+            lat=db_["latitude"],
+            lon=db_["longitude"],
+            date=db_["date_time"],
+        )
     expected = pd.Series(
         [
             untestable,
@@ -772,45 +786,24 @@ def test_do_dpt_climatology_plus_stdev_check(testdata, climdata):
     pd.testing.assert_series_equal(results, expected)
 
 
-def test_do_supersaturation_check_apply(testdata):
+@pytest.mark.parametrize("apply_func", [False, True])
+def test_do_supersaturation_check(testdata, apply_func):
     db_ = testdata["observations-at"].copy()
     db2_ = testdata["observations-dpt"].copy()
-    db_.data["observation_value_dpt"] = db2_["observation_value"]
-
-    results = db_.apply(
-        lambda row: do_supersaturation_check(
-            dpt=row["observation_value_dpt"],
-            at2=row["observation_value"],
-        ),
-        axis=1,
-    )
-    expected = pd.Series(
-        [
-            untestable,
-            passed,
-            untestable,
-            passed,
-            untestable,
-            passed,
-            passed,
-            passed,
-            passed,
-            passed,
-            passed,
-            passed,
-            passed,
-        ]
-    )
-    pd.testing.assert_series_equal(results, expected)
-
-
-def test_do_supersaturation_check(testdata):
-    db_ = testdata["observations-at"].copy()
-    db2_ = testdata["observations-dpt"].copy()
-    results = do_supersaturation_check(
-        dpt=db2_["observation_value"],
-        at2=db_["observation_value"],
-    )
+    if apply_func is True:
+        db_.data["observation_value_dpt"] = db2_["observation_value"]
+        results = db_.apply(
+            lambda row: do_supersaturation_check(
+                dpt=row["observation_value_dpt"],
+                at2=row["observation_value"],
+            ),
+            axis=1,
+        )
+    else:
+        results = do_supersaturation_check(
+            dpt=db2_["observation_value"],
+            at2=db_["observation_value"],
+        )
     expected = pd.Series(
         [
             untestable,
@@ -857,43 +850,24 @@ def test_do_sst_missing_value_check(testdata):
     pd.testing.assert_series_equal(results, expected)
 
 
-def test_do_sst_freeze_check(testdata):
+@pytest.mark.parametrize("apply_func", [False, True])
+def test_do_sst_freeze_check(testdata, apply_func):
     db_ = testdata["observations-sst"].copy()
-    results = do_sst_freeze_check(
-        sst=db_["observation_value"],
-        freezing_point=271.35,
-        freeze_check_n_sigma=2.0,
-    )
-    expected = pd.Series(
-        [
-            passed,
-            passed,
-            untestable,
-            untestable,
-            untestable,
-            untestable,
-            untestable,
-            untestable,
-            untestable,
-            untestable,
-            untestable,
-            untestable,
-            untestable,
-        ]
-    )
-    pd.testing.assert_series_equal(results, expected)
-
-
-def test_do_sst_freeze_check_apply(testdata):
-    db_ = testdata["observations-sst"].copy()
-    results = db_.apply(
-        lambda row: do_sst_freeze_check(
-            sst=row["observation_value"],
+    if apply_func is True:
+        results = db_.apply(
+            lambda row: do_sst_freeze_check(
+                sst=row["observation_value"],
+                freezing_point=271.35,
+                freeze_check_n_sigma=2.0,
+            ),
+            axis=1,
+        )
+    else:
+        results = do_sst_freeze_check(
+            sst=db_["observation_value"],
             freezing_point=271.35,
             freeze_check_n_sigma=2.0,
-        ),
-        axis=1,
-    )
+        )
     expected = pd.Series(
         [
             passed,
@@ -979,24 +953,35 @@ def test_do_sst_missing_value_clim_check(testdata, climdata):
     pd.testing.assert_series_equal(results, expected)
 
 
-def test_do_sst_climatology_check(testdata, climdata):
+@pytest.mark.parametrize("apply_func", [False, True])
+def test_do_sst_climatology_check(testdata, climdata, apply_func):
     db_ = testdata["observations-sst"].copy()
     climatology = Climatology.open_netcdf_file(
         climdata["SST"]["mean"],
         "sst",
         valid_ntime=31,
     )
-    results = db_.apply(
-        lambda row: do_climatology_check(
-            value=row["observation_value"],
+    if apply_func is True:
+        results = db_.apply(
+            lambda row: do_climatology_check(
+                value=row["observation_value"],
+                climatology=climatology,
+                maximum_anomaly=1.0,
+                lat=row["latitude"],
+                lon=row["longitude"],
+                date=row["date_time"],
+            ),
+            axis=1,
+        )
+    else:
+        results = do_climatology_check(
+            value=db_["observation_value"],
             climatology=climatology,
             maximum_anomaly=1.0,
-            lat=row["latitude"],
-            lon=row["longitude"],
-            date=row["date_time"],
-        ),
-        axis=1,
-    )
+            lat=db_["latitude"],
+            lon=db_["longitude"],
+            date=db_["date_time"],
+        )
     expected = pd.Series(
         [
             untestable,
@@ -1126,44 +1111,24 @@ def test_do_wind_direction_hard_limit_check(testdata):
     pd.testing.assert_series_equal(results, expected)
 
 
-def test_do_wind_consistency_check(testdata):
+@pytest.mark.parametrize("apply_func", [False, True])
+def test_do_wind_consistency_check(testdata, apply_func):
     db_ = testdata["observations-ws"].copy()
     db2_ = testdata["observations-wd"].copy()
-    results = do_wind_consistency_check(
-        db_["observation_value"],
-        db2_["observation_value"],
-    )
-    expected = pd.Series(
-        [
-            passed,
-            passed,
-            untestable,
-            passed,
-            untestable,
-            passed,
-            passed,
-            passed,
-            failed,
-            failed,
-            failed,
-            failed,
-            failed,
-        ]
-    )
-    pd.testing.assert_series_equal(results, expected)
-
-
-def test_do_wind_consistency_check_apply(testdata):
-    db_ = testdata["observations-ws"].copy()
-    db2_ = testdata["observations-wd"].copy()
-    db_.data["observation_value_wd"] = db2_["observation_value"]
-    results = db_.apply(
-        lambda row: do_wind_consistency_check(
-            wind_speed=row["observation_value"],
-            wind_direction=row["observation_value_wd"],
-        ),
-        axis=1,
-    )
+    if apply_func is True:
+        db_.data["observation_value_wd"] = db2_["observation_value"]
+        results = db_.apply(
+            lambda row: do_wind_consistency_check(
+                wind_speed=row["observation_value"],
+                wind_direction=row["observation_value_wd"],
+            ),
+            axis=1,
+        )
+    else:
+        results = do_wind_consistency_check(
+            db_["observation_value"],
+            db2_["observation_value"],
+        )
     expected = pd.Series(
         [
             passed,
