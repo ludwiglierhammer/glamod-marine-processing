@@ -259,16 +259,12 @@ def test_is_ship(testdata):
 def test_do_position_check(testdata, apply_func):
     db_ = testdata["header"].copy()
     if apply_func is True:
-      results = db_.apply(
-        lambda row: do_position_check(
-            lat=row["latitude"], lon=row["longitude"]
-        ),
-        axis=1,
-      )
-    else:
-      results = do_position_check(
-            lat=db_["latitude"], lon=db_["longitude"]
+        results = db_.apply(
+            lambda row: do_position_check(lat=row["latitude"], lon=row["longitude"]),
+            axis=1,
         )
+    else:
+        results = do_position_check(lat=db_["latitude"], lon=db_["longitude"])
     expected = pd.Series([passed] * 13)  # all positions are valid
     pd.testing.assert_series_equal(results, expected)
 
@@ -277,7 +273,9 @@ def test_do_position_check(testdata, apply_func):
 def test_do_date_check(testdata, apply_func):
     db_ = testdata["header"].copy()
     if apply_func is True:
-        results = db_.apply(lambda row: do_date_check(date=row["report_timestamp"]), axis=1)
+        results = db_.apply(
+            lambda row: do_date_check(date=row["report_timestamp"]), axis=1
+        )
     else:
         results = do_date_check(date=db_["report_timestamp"])
     expected = pd.Series(
@@ -304,25 +302,33 @@ def test_do_date_check(testdata, apply_func):
 def test_do_time_check(testdata, apply_func):
     db_ = testdata["header"].copy()
     if apply_func is True:
-      results = db_.apply(
-        lambda row: do_time_check(hour=row["report_timestamp"].hour), axis=1
-      )
+        results = db_.apply(
+            lambda row: do_time_check(hour=row["report_timestamp"].hour), axis=1
+        )
     else:
-      results = do_time_check(date=db_["report_timestamp"])
+        results = do_time_check(date=db_["report_timestamp"])
     expected = pd.Series([untestable] + [passed] * 12)  # first entry is null
     pd.testing.assert_series_equal(results, expected)
 
 
-def test_do_day_check(testdata):
+@pytest.mark.parametrize("apply_func", [False, True])
+def test_do_day_check(testdata, apply_func):
     db_ = testdata["header"].copy()
-    results = db_.apply(
-        lambda row: do_day_check(
-            date=row["report_timestamp"],
-            latitude=row["latitude"],
-            longitude=row["longitude"],
-        ),
-        axis=1,
-    )
+    if apply_func is True:
+        results = db_.apply(
+            lambda row: do_day_check(
+                date=row["report_timestamp"],
+                lat=row["latitude"],
+                lon=row["longitude"],
+            ),
+            axis=1,
+        )
+    else:
+        results = do_day_check(
+            date=db_["report_timestamp"],
+            lat=db_["latitude"],
+            lon=db_["longitude"],
+        )
     expected = pd.Series([untestable] + [failed] * 12)  # observations are at night
     pd.testing.assert_series_equal(results, expected)
 
@@ -356,22 +362,23 @@ def test_do_at_missing_value_check(testdata, apply_func):
     )
     pd.testing.assert_series_equal(results, expected)
 
+
 @pytest.mark.parametrize("apply_func", [False, True])
 def test_do_at_hard_limit_check(testdata, apply_func):
     db_ = testdata["observations-at"].copy()
     if apply_func is True:
-      results = db_.apply(
-        lambda row: do_hard_limit_check(
-            value=row["observation_value"],
-            hard_limits=[193.15, 338.15],  # K
-        ),
-        axis=1,
-      )
+        results = db_.apply(
+            lambda row: do_hard_limit_check(
+                value=row["observation_value"],
+                hard_limits=[193.15, 338.15],  # K
+            ),
+            axis=1,
+        )
     else:
-      results = do_hard_limit_check(
+        results = do_hard_limit_check(
             value=db_["observation_value"],
             hard_limits=[193.15, 338.15],  # K
-      )
+        )
     expected = pd.Series(
         [
             passed,
@@ -715,18 +722,18 @@ def test_do_dpt_missing_value_check(testdata, apply_func):
 def test_do_dpt_hard_limit_check(testdata, apply_func):
     db_ = testdata["observations-dpt"].copy()
     if apply_func is True:
-      results = db_.apply(
-        lambda row: do_hard_limit_check(
-            value=row["observation_value"],
-            hard_limits=[193.15, 338.15],  # K
-        ),
-        axis=1,
-      )
+        results = db_.apply(
+            lambda row: do_hard_limit_check(
+                value=row["observation_value"],
+                hard_limits=[193.15, 338.15],  # K
+            ),
+            axis=1,
+        )
     else:
-      results = do_hard_limit_check(
+        results = do_hard_limit_check(
             value=db_["observation_value"],
             hard_limits=[193.15, 338.15],  # K
-      )
+        )
     expected = pd.Series(
         [
             untestable,
@@ -963,18 +970,18 @@ def test_do_sst_freeze_check(testdata, apply_func):
 def test_do_sst_hard_limit_check(testdata, apply_func):
     db_ = testdata["observations-sst"].copy()
     if apply_func is True:
-      results = db_.apply(
-        lambda row: do_hard_limit_check(
-            value=row["observation_value"],
-            hard_limits=[268.15, 318.15],
-        ),
-        axis=1,
-      )
+        results = db_.apply(
+            lambda row: do_hard_limit_check(
+                value=row["observation_value"],
+                hard_limits=[268.15, 318.15],
+            ),
+            axis=1,
+        )
     else:
-      results = do_hard_limit_check(
+        results = do_hard_limit_check(
             value=db_["observation_value"],
             hard_limits=[268.15, 318.15],
-      )
+        )
     expected = pd.Series(
         [
             passed,
@@ -1123,18 +1130,18 @@ def test_do_wind_speed_missing_value_check(testdata, apply_func):
 def test_do_wind_speed_hard_limit_check(testdata, apply_func):
     db_ = testdata["observations-ws"].copy()
     if apply_func is True:
-      results = db_.apply(
-        lambda row: do_hard_limit_check(
-            value=row["observation_value"],
-            hard_limits=[0, 13],
-        ),
-        axis=1,
-      )
+        results = db_.apply(
+            lambda row: do_hard_limit_check(
+                value=row["observation_value"],
+                hard_limits=[0, 13],
+            ),
+            axis=1,
+        )
     else:
-      results = do_hard_limit_check(
+        results = do_hard_limit_check(
             value=db_["observation_value"],
             hard_limits=[0, 13],
-      )
+        )
     expected = pd.Series(
         [
             passed,
@@ -1189,14 +1196,14 @@ def test_do_wind_direction_missing_value_check(testdata, apply_func):
 def test_do_wind_direction_hard_limit_check(testdata, apply_func):
     db_ = testdata["observations-wd"].copy()
     if apply_func is True:
-      results = db_.apply(
-        lambda row: do_hard_limit_check(
-            value=row["observation_value"], hard_limits=[0, 360]
-        ),
-        axis=1,
-      )
+        results = db_.apply(
+            lambda row: do_hard_limit_check(
+                value=row["observation_value"], hard_limits=[0, 360]
+            ),
+            axis=1,
+        )
     else:
-      results = do_hard_limit_check(
+        results = do_hard_limit_check(
             value=db_["observation_value"], hard_limits=[0, 360]
         )
     expected = pd.Series(

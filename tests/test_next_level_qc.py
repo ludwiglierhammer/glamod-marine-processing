@@ -421,8 +421,8 @@ def test_do_day_check(year, month, day, hour, latitude, longitude, time, expecte
         month=month,
         day=day,
         hour=hour,
-        latitude=latitude,
-        longitude=longitude,
+        lat=latitude,
+        lon=longitude,
         time_since_sun_above_horizon=time,
     )
     assert result == expected
@@ -495,8 +495,8 @@ def test_do_day_check_using_date(
 
     result = do_day_check(
         date=datetime(year, month, day, truncated_hour, minute),
-        latitude=latitude,
-        longitude=longitude,
+        lat=latitude,
+        lon=longitude,
         time_since_sun_above_horizon=time,
     )
     assert result == expected

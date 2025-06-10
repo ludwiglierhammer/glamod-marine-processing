@@ -149,7 +149,10 @@ def value_check(
     return result
 
 
-def hard_limit_check(value: float | None | Sequence[float | None] | np.ndarray, limits: tuple[float, float]) -> int:
+def hard_limit_check(
+    value: float | None | Sequence[float | None] | np.ndarray,
+    limits: tuple[float, float],
+) -> int:
     """Check if a value is outside specified limits.
 
     Parameters
@@ -167,20 +170,22 @@ def hard_limit_check(value: float | None | Sequence[float | None] | np.ndarray, 
         0 otherwise
     """
     value_arr = np.asarray(value, dtype=float)
-    
+
     result = np.full(value_arr.shape, untestable, dtype=int)
-    
+
     if limits[1] <= limits[0]:
         return result
-        
+
     valid_indices = isvalid(value)
-    
+
     cond_passed = np.full(value_arr.shape, True, dtype=bool)
-    cond_passed[valid_indices] = (limits[0] <= value_arr[valid_indices]) & (value_arr[valid_indices] <= limits[1])
-    
+    cond_passed[valid_indices] = (limits[0] <= value_arr[valid_indices]) & (
+        value_arr[valid_indices] <= limits[1]
+    )
+
     result[valid_indices & cond_passed] = passed
     result[valid_indices & ~cond_passed] = failed
-    
+
     if np.isscalar(value):
         return int(result)
 
@@ -246,7 +251,9 @@ def sst_freeze_check(
     valid_sst = isvalid(insst)
 
     cond_failed = np.full(insst_arr.shape, True, dtype=bool)
-    cond_failed[valid_sst] = insst_arr[valid_sst] < (freezing_point - n_sigma * sst_uncertainty)
+    cond_failed[valid_sst] = insst_arr[valid_sst] < (
+        freezing_point - n_sigma * sst_uncertainty
+    )
 
     result[valid_sst & cond_failed] = failed
     result[valid_sst & ~cond_failed] = passed
@@ -260,7 +267,10 @@ def sst_freeze_check(
     return result
 
 
-def do_position_check(lat: float | None | Sequence[float | None] | np.ndarray, lon: float | None | Sequence[float | None] | np.ndarray) -> int:
+def do_position_check(
+    lat: float | None | Sequence[float | None] | np.ndarray,
+    lon: float | None | Sequence[float | None] | np.ndarray,
+) -> int:
     """
     Perform the positional QC check on the report. Simple check to make sure that the latitude and longitude are
     within the bounds specified by the ICOADS documentation. Latitude is between -90 and 90. Longitude is between
@@ -282,14 +292,19 @@ def do_position_check(lat: float | None | Sequence[float | None] | np.ndarray, l
     """
     lat_arr = np.asarray(lat, dtype=float)
     lon_arr = np.asarray(lon, dtype=float)
-    
+
     result = np.full(lat_arr.shape, untestable, dtype=int)  # type: np.ndarray
-    
+
     valid_indices = isvalid(lat) & isvalid(lon)
-     
+
     cond_failed = np.full(lat_arr.shape, True, dtype=bool)
-    cond_failed[valid_indices] = (lat_arr[valid_indices] < -90) | (lat_arr[valid_indices] > 90) | (lon_arr[valid_indices] < -180) | (lon_arr[valid_indices] > 360)
-    
+    cond_failed[valid_indices] = (
+        (lat_arr[valid_indices] < -90)
+        | (lat_arr[valid_indices] > 90)
+        | (lon_arr[valid_indices] < -180)
+        | (lon_arr[valid_indices] > 360)
+    )
+
     result[valid_indices & cond_failed] = failed
     result[valid_indices & ~cond_failed] = passed
 
@@ -338,11 +353,11 @@ def do_date_check(
     year_arr = np.atleast_1d(year)
     month_arr = np.atleast_1d(month)
     day_arr = np.atleast_1d(day)
-    
+
     result = np.full(year_arr.shape, untestable, dtype=int)
-    
+
     valid_indices = isvalid(year_arr) & isvalid(month_arr) & isvalid(day_arr)
-    
+
     for i in range(len(result)):
         if not valid_indices[i]:
             continue
@@ -350,19 +365,19 @@ def do_date_check(
         y_ = int(year_arr[i])
         m_ = int(month_arr[i])
         d_ = int(day_arr[i])
-        
+
         month_lengths = get_month_lengths(y_)
 
         if (
             (y_ > 2025)
-            | (y_ < 1850) 
-            | (m_ < 1) 
-            | (m_ > 12) 
-            | (d_ < 1) 
+            | (y_ < 1850)
+            | (m_ < 1)
+            | (m_ > 12)
+            | (d_ < 1)
             | (d_ > month_lengths[m_ - 1])
         ):
-          result[i] = failed
-          continue
+            result[i] = failed
+            continue
         result[i] = passed
 
     if len(year_arr) == 1:
@@ -370,13 +385,13 @@ def do_date_check(
 
     if isinstance(date, pd.Series):
         return pd.Series(result, index=date.index)
-        
+
     if isinstance(year, pd.Series):
         return pd.Series(result, index=year.index)
-        
+
     if isinstance(month, pd.Series):
         return pd.Series(result, index=month.index)
-        
+
     if isinstance(day, pd.Series):
         return pd.Series(result, index=day.index)
 
@@ -406,27 +421,27 @@ def do_time_check(date: datetime | None = None, hour: float | None = None) -> in
         date_ = [split_date(date_i) for date_i in date_arr]
         hour = [date_i["hour"] for date_i in date_]
     hour_arr = np.atleast_1d(hour)
-    
+
     result = np.full(hour_arr.shape, untestable, dtype=int)
-    
+
     valid_indices = isvalid(hour)
-    
+
     cond_failed = np.full(hour_arr.shape, True, dtype=bool)
-    cond_failed[valid_indices] = (
-        (hour_arr[valid_indices] >= 24) | (hour_arr[valid_indices] < 0)
+    cond_failed[valid_indices] = (hour_arr[valid_indices] >= 24) | (
+        hour_arr[valid_indices] < 0
     )
-    
+
     result[valid_indices & cond_failed] = failed
-    result[valid_indices & ~cond_failed] = passed    
-    
+    result[valid_indices & ~cond_failed] = passed
+
     if len(hour_arr) == 1:
         return int(result)
 
     if isinstance(date, pd.Series):
         return pd.Series(result, index=date.index)
-        
+
     if isinstance(hour, pd.Series):
-        return pd.Series(result, index=hour.index)    
+        return pd.Series(result, index=hour.index)
 
     return result
 
@@ -437,8 +452,8 @@ def do_day_check(
     month: int | None = None,
     day: int | None = None,
     hour: float | None = None,
-    latitude: float | None = None,
-    longitude: float | None = None,
+    lat: float | None = None,
+    lon: float | None = None,
     time_since_sun_above_horizon: float | None = None,
 ) -> int:
     """Given year month day hour lat and long calculate if the sun was above the horizon an hour ago.
@@ -459,9 +474,9 @@ def do_day_check(
         Day of report
     hour : float, optional
         Hour of report with minutes as decimal part of hour
-    latitude : float, optional
+    lat : float, optional
         Latitude of report in degrees
-    longitude : float, optional
+    lon : float, optional
         Longitude of report in degrees
     time_since_sun_above_horizon : float
         Maximum time sun can have been above horizon (or below) to still count as night. Original QC test had this set
@@ -478,60 +493,98 @@ def do_day_check(
     definition of "day" for marine air temperature QC. Solar heating biases were considered to be negligible mmore
     than one hour after sunset and up to one hour after sunrise.
     """
-    if isinstance(date, datetime):
-        date_ = split_date(date)
-        year = date_["year"]
-        month = date_["month"]
-        day = date_["day"]
-        hour = date_["hour"]
+    lat_arr = np.atleast_1d(lat)
+    lon_arr = np.atleast_1d(lon)
+    if date is not None:
+        date_arr = pd.to_datetime(np.atleast_1d(date))
+        date_ = [split_date(date_i) for date_i in date_arr]
+        year = [date_i["year"] for date_i in date_]
+        month = [date_i["month"] for date_i in date_]
+        day = [date_i["day"] for date_i in date_]
+        hour = [date_i["hour"] for date_i in date_]
+    year_arr = np.atleast_1d(year)
+    month_arr = np.atleast_1d(month)
+    day_arr = np.atleast_1d(day)
+    hour_arr = np.atleast_1d(hour)
 
-    p_check = do_position_check(latitude, longitude)
+    p_check = do_position_check(lat, lon)
+    p_check = np.atleast_1d(p_check)
     d_check = do_date_check(year=year, month=month, day=day)
+    d_check = np.atleast_1d(d_check)
     t_check = do_time_check(hour=hour)
+    t_check = np.atleast_1d(t_check)
 
-    # Defaults to FAIL if the location, date or time are bad
-    if failed in [p_check, d_check, t_check]:
-        return failed
+    result = np.full(year_arr.shape, untestable, dtype=int)
 
-    # Defaults to FAIL if the location, date or time are bad
-    if untestable in [p_check, d_check, t_check]:
-        return untestable
+    for i in range(len(year_arr)):
+        if (p_check[i] == failed) or (d_check[i] == failed) or (t_check[i] == failed):
+            result[i] = failed
+            continue
+        if (
+            (p_check[i] == untestable)
+            or (d_check[i] == untestable)
+            or (t_check[i] == untestable)
+        ):
+            continue
 
-    year2 = year
-    day2 = dayinyear(year, month, day)
-    hour2 = math.floor(hour)
-    minute2 = (hour - math.floor(hour)) * 60.0
+        lat_ = lat_arr[i]
+        lon_ = lon_arr[i]
+        y_ = int(year_arr[i])
+        m_ = int(month_arr[i])
+        d_ = int(day_arr[i])
+        h_ = int(hour_arr[i])
 
-    # go back one hour and test if the sun was above the horizon
-    if time_since_sun_above_horizon is not None:
-        hour2 = hour2 - time_since_sun_above_horizon
-    if hour2 < 0:
-        hour2 = hour2 + 24.0
-        day2 = day2 - 1
-        if day2 <= 0:
-            year2 = year2 - 1
-            day2 = dayinyear(year2, 12, 31)
+        y2_ = y_
+        d2_ = dayinyear(y_, m_, d_)
+        h2_ = math.floor(h_)
+        m2_ = (h_ - math.floor(h_)) * 60.0
 
-    lat2 = latitude
-    lon2 = longitude
-    if latitude == 0:
-        lat2 = 0.0001
-    if longitude == 0:
-        lon2 = 0.0001
+        # go back one hour and test if the sun was above the horizon
+        if time_since_sun_above_horizon is not None:
+            h2_ = h2_ - time_since_sun_above_horizon
+        if h2_ < 0:
+            h2_ = h2_ + 24.0
+            d2_ = d2_ - 1
+            if d2_ <= 0:
+                y2_ = y2_ - 1
+                d2_ = dayinyear(y2_, 12, 31)
 
-    azimuth, elevation, rta, hra, sid, dec = sunangle(
-        year2, day2, hour2, minute2, 0, 0, 0, lat2, lon2
-    )
-    del azimuth
-    del rta
-    del hra
-    del sid
-    del dec
+        lat2_ = lat_
+        lon2_ = lon_
+        if lat_ == 0:
+            lat2_ = 0.0001
+        if lon_ == 0:
+            lon2_ = 0.0001
 
-    if elevation > 0:
-        return passed
+        _azimuth, elevation, _rta, _hra, _sid, _dec = sunangle(
+            y2_, d2_, h2_, m2_, 0, 0, 0, lat2_, lon2_
+        )
 
-    return failed
+        if elevation > 0:
+            result[i] = passed
+            continue
+
+        result[i] = failed
+
+    if len(year_arr) == 1:
+        return int(result[0])
+
+    if isinstance(date, pd.Series):
+        return pd.Series(result, index=date.index)
+
+    if isinstance(year, pd.Series):
+        return pd.Series(result, index=year.index)
+
+    if isinstance(month, pd.Series):
+        return pd.Series(result, index=month.index)
+
+    if isinstance(day, pd.Series):
+        return pd.Series(result, index=day.index)
+
+    if isinstance(hour, pd.Series):
+        return pd.Series(result, index=hour.index)
+
+    return result
 
 
 def do_missing_value_check(
@@ -586,7 +639,9 @@ def do_missing_value_clim_check(
     return value_check(climatology)
 
 
-def do_hard_limit_check(value: float | None | Sequence[float | None] | np.ndarray, hard_limits: list) -> int:
+def do_hard_limit_check(
+    value: float | None | Sequence[float | None] | np.ndarray, hard_limits: list
+) -> int:
     """
     Check that value is within hard limits specified by "hard_limits".
 
@@ -775,7 +830,9 @@ def do_wind_consistency_check(
     valid_indices = isvalid(wind_speed) & isvalid(wind_direction)
 
     cond_failed = np.full(wind_speed_arr.shape, True, dtype=bool)
-    cond_failed[valid_indices] = ((wind_speed_arr[valid_indices] == 0) & (wind_direction_arr[valid_indices] != 0)) | (
+    cond_failed[valid_indices] = (
+        (wind_speed_arr[valid_indices] == 0) & (wind_direction_arr[valid_indices] != 0)
+    ) | (
         (wind_speed_arr[valid_indices] != 0) & (wind_direction_arr[valid_indices] == 0)
     )
 
