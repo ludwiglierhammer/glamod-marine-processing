@@ -684,9 +684,11 @@ def do_wind_consistency_check(
 
     valid_indices = isvalid(wind_speed) & isvalid(wind_direction)
 
-    cond_failed = ((wind_speed_arr == 0) & (wind_direction_arr != 0)) | (
-        (wind_speed_arr != 0) & (wind_direction_arr == 0)
+    cond_failed = (
+            ((wind_speed_arr == 0) & (wind_direction_arr != 0)) |
+            ((wind_speed_arr != 0) & (wind_direction_arr == 0))
     )
+
 
     result[valid_indices & cond_failed] = failed
     result[valid_indices & ~cond_failed] = passed
