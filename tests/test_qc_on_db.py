@@ -342,16 +342,22 @@ def test_do_at_missing_value_check(testdata, apply_func):
     )
     pd.testing.assert_series_equal(results, expected)
 
-
-def test_do_at_hard_limit_check(testdata):
+@pytest.mark.parametrize("apply_func", [False, True])
+def test_do_at_hard_limit_check(testdata, apply_func):
     db_ = testdata["observations-at"].copy()
-    results = db_.apply(
+    if apply_func is True:
+      results = db_.apply(
         lambda row: do_hard_limit_check(
             value=row["observation_value"],
             hard_limits=[193.15, 338.15],  # K
         ),
         axis=1,
-    )
+      )
+    else:
+      results = do_hard_limit_check(
+            value=db_["observation_value"],
+            hard_limits=[193.15, 338.15],  # K
+      )
     expected = pd.Series(
         [
             passed,
@@ -691,15 +697,22 @@ def test_do_dpt_missing_value_check(testdata, apply_func):
     pd.testing.assert_series_equal(results, expected)
 
 
-def test_do_dpt_hard_limit_check(testdata):
+@pytest.mark.parametrize("apply_func", [False, True])
+def test_do_dpt_hard_limit_check(testdata, apply_func):
     db_ = testdata["observations-dpt"].copy()
-    results = db_.apply(
+    if apply_func is True:
+      results = db_.apply(
         lambda row: do_hard_limit_check(
             value=row["observation_value"],
             hard_limits=[193.15, 338.15],  # K
         ),
         axis=1,
-    )
+      )
+    else:
+      results = do_hard_limit_check(
+            value=db_["observation_value"],
+            hard_limits=[193.15, 338.15],  # K
+      )
     expected = pd.Series(
         [
             untestable,
@@ -932,15 +945,22 @@ def test_do_sst_freeze_check(testdata, apply_func):
     pd.testing.assert_series_equal(results, expected)
 
 
-def test_do_sst_hard_limit_check(testdata):
+@pytest.mark.parametrize("apply_func", [False, True])
+def test_do_sst_hard_limit_check(testdata, apply_func):
     db_ = testdata["observations-sst"].copy()
-    results = db_.apply(
+    if apply_func is True:
+      results = db_.apply(
         lambda row: do_hard_limit_check(
             value=row["observation_value"],
             hard_limits=[268.15, 318.15],
         ),
         axis=1,
-    )
+      )
+    else:
+      results = do_hard_limit_check(
+            value=db_["observation_value"],
+            hard_limits=[268.15, 318.15],
+      )
     expected = pd.Series(
         [
             passed,
@@ -1085,15 +1105,22 @@ def test_do_wind_speed_missing_value_check(testdata, apply_func):
     pd.testing.assert_series_equal(results, expected)
 
 
-def test_do_wind_speed_hard_limit_check(testdata):
+@pytest.mark.parametrize("apply_func", [False, True])
+def test_do_wind_speed_hard_limit_check(testdata, apply_func):
     db_ = testdata["observations-ws"].copy()
-    results = db_.apply(
+    if apply_func is True:
+      results = db_.apply(
         lambda row: do_hard_limit_check(
             value=row["observation_value"],
             hard_limits=[0, 13],
         ),
         axis=1,
-    )
+      )
+    else:
+      results = do_hard_limit_check(
+            value=db_["observation_value"],
+            hard_limits=[0, 13],
+      )
     expected = pd.Series(
         [
             passed,
@@ -1144,14 +1171,20 @@ def test_do_wind_direction_missing_value_check(testdata, apply_func):
     pd.testing.assert_series_equal(results, expected)
 
 
-def test_do_wind_direction_hard_limit_check(testdata):
+@pytest.mark.parametrize("apply_func", [False, True])
+def test_do_wind_direction_hard_limit_check(testdata, apply_func):
     db_ = testdata["observations-wd"].copy()
-    results = db_.apply(
+    if apply_func is True:
+      results = db_.apply(
         lambda row: do_hard_limit_check(
             value=row["observation_value"], hard_limits=[0, 360]
         ),
         axis=1,
-    )
+      )
+    else:
+      results = do_hard_limit_check(
+            value=db_["observation_value"], hard_limits=[0, 360]
+        )
     expected = pd.Series(
         [
             passed,

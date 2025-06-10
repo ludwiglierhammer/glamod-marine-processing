@@ -149,7 +149,7 @@ def value_check(
     return result
 
 
-def hard_limit_check(val: float, limits: tuple[float, float]) -> int:
+def hard_limit_check(value: float | None | Sequence[float | None] | np.ndarray, limits: tuple[float, float]) -> int:
     """Check if a value is outside specified limits.
 
     Parameters
@@ -166,16 +166,28 @@ def hard_limit_check(val: float, limits: tuple[float, float]) -> int:
         1 if val is outside the limits,
         0 otherwise
     """
+    value_arr = np.asarray(value, dtype=float)
+    
+    result = np.full(value_arr.shape, untestable, dtype=int)
+    
     if limits[1] <= limits[0]:
-        return untestable
+        return result
+        
+    valid_indices = isvalid(value)
+    
+    cond_passed = np.full(value_arr.shape, True, dtype=bool)
+    cond_passed[valid_indices] = (limits[0] <= value_arr[valid_indices]) & (value_arr[valid_indices] <= limits[1])
+    
+    result[valid_indices & cond_passed] = passed
+    result[valid_indices & ~cond_passed] = failed
+    
+    if np.isscalar(value):
+        return int(result)
 
-    if not isvalid(val):
-        return untestable
+    if isinstance(value, pd.Series):
+        return pd.Series(result, index=value.index)
 
-    if limits[0] <= val <= limits[1]:
-        return passed
-
-    return failed
+    return result
 
 
 def sst_freeze_check(
@@ -518,7 +530,7 @@ def do_missing_value_clim_check(
     return value_check(climatology)
 
 
-def do_hard_limit_check(value: float, hard_limits: list) -> int:
+def do_hard_limit_check(value: float | None | Sequence[float | None] | np.ndarray, hard_limits: list) -> int:
     """
     Check that value is within hard limits specified by "hard_limits".
 
