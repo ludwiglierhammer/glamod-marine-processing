@@ -245,7 +245,8 @@ def sst_freeze_check(
 
     valid_sst = isvalid(insst)
 
-    cond_failed = insst_arr < (freezing_point - n_sigma * sst_uncertainty)
+    cond_failed = np.full(insst_arr.shape, True, dtype=bool)
+    cond_failed[valid_sst] = insst_arr[valid_sst] < (freezing_point - n_sigma * sst_uncertainty)
 
     result[valid_sst & cond_failed] = failed
     result[valid_sst & ~cond_failed] = passed
@@ -286,7 +287,8 @@ def do_position_check(lat: float | None | Sequence[float | None] | np.ndarray, l
     
     valid_indices = isvalid(lat) & isvalid(lon)
      
-    cond_failed = (lat_arr < -90) | (lat_arr > 90) | (lon_arr < -180) | (lon_arr > 360)
+    cond_failed = np.full(lat_arr.shape, True, dtype=bool)
+    cond_failed[valid_indices] = (lat_arr[valid_indices] < -90) | (lat_arr[valid_indices] > 90) | (lon_arr[valid_indices] < -180) | (lon_arr[valid_indices] > 360)
     
     result[valid_indices & cond_failed] = failed
     result[valid_indices & ~cond_failed] = passed
@@ -399,16 +401,34 @@ def do_time_check(date: datetime | None = None, hour: float | None = None) -> in
         1 if hour is not a valid hour,
         0 otherwise
     """
-    if isinstance(date, datetime):
-        date_ = split_date(date)
-        hour = date_["hour"]
-    if not isvalid(hour):
-        return untestable
+    if date is not None:
+        date_arr = pd.to_datetime(np.atleast_1d(date))
+        date_ = [split_date(date_i) for date_i in date_arr]
+        hour = [date_i["hour"] for date_i in date_]
+    hour_arr = np.atleast_1d(hour)
+    
+    result = np.full(hour_arr.shape, untestable, dtype=int)
+    
+    valid_indices = isvalid(hour)
+    
+    cond_failed = np.full(hour_arr.shape, True, dtype=bool)
+    cond_failed[valid_indices] = (
+        (hour_arr[valid_indices] >= 24) | (hour_arr[valid_indices] < 0)
+    )
+    
+    result[valid_indices & cond_failed] = failed
+    result[valid_indices & ~cond_failed] = passed    
+    
+    if len(hour_arr) == 1:
+        return int(result)
 
-    if hour >= 24 or hour < 0:
-        return failed
+    if isinstance(date, pd.Series):
+        return pd.Series(result, index=date.index)
+        
+    if isinstance(hour, pd.Series):
+        return pd.Series(result, index=hour.index)    
 
-    return passed
+    return result
 
 
 def do_day_check(
@@ -677,7 +697,8 @@ def do_supersaturation_check(
 
     valid_indices = isvalid(dpt) & isvalid(at2)
 
-    cond_failed = dpt_arr > at2_arr
+    cond_failed = np.full(dpt_arr.shape, True, dtype=bool)
+    cond_failed[valid_indices] = dpt_arr[valid_indices] > at2_arr[valid_indices]
 
     result[valid_indices & cond_failed] = failed
     result[valid_indices & ~cond_failed] = passed
@@ -753,8 +774,9 @@ def do_wind_consistency_check(
 
     valid_indices = isvalid(wind_speed) & isvalid(wind_direction)
 
-    cond_failed = ((wind_speed_arr == 0) & (wind_direction_arr != 0)) | (
-        (wind_speed_arr != 0) & (wind_direction_arr == 0)
+    cond_failed = np.full(wind_speed_arr.shape, True, dtype=bool)
+    cond_failed[valid_indices] = ((wind_speed_arr[valid_indices] == 0) & (wind_direction_arr[valid_indices] != 0)) | (
+        (wind_speed_arr[valid_indices] != 0) & (wind_direction_arr[valid_indices] == 0)
     )
 
     result[valid_indices & cond_failed] = failed

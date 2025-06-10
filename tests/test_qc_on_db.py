@@ -300,11 +300,15 @@ def test_do_date_check(testdata, apply_func):
     pd.testing.assert_series_equal(results, expected)
 
 
-def test_do_time_check(testdata):
+@pytest.mark.parametrize("apply_func", [False, True])
+def test_do_time_check(testdata, apply_func):
     db_ = testdata["header"].copy()
-    results = db_.apply(
+    if apply_func is True:
+      results = db_.apply(
         lambda row: do_time_check(hour=row["report_timestamp"].hour), axis=1
-    )
+      )
+    else:
+      results = do_time_check(date=db_["report_timestamp"])
     expected = pd.Series([untestable] + [passed] * 12)  # first entry is null
     pd.testing.assert_series_equal(results, expected)
 
