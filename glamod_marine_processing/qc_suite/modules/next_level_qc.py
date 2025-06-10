@@ -122,7 +122,9 @@ def climatology_check(
     return result
 
 
-def value_check(inval: float | None) -> int:
+def value_check(
+    value: float | None | Sequence[float | None] | np.ndarray,
+) -> int | np.ndarray:
     """Check if a value is equal to None
 
     Parameters
@@ -135,9 +137,16 @@ def value_check(inval: float | None) -> int:
     int
         Returns 1 if the input value is numerically invalid or None, 0 otherwise
     """
-    if isvalid(inval):
-        return passed
-    return failed
+    valid_mask = isvalid(value)
+    result = np.where(valid_mask, passed, failed)
+
+    if np.isscalar(value):
+        return int(result)
+
+    if isinstance(value, pd.Series):
+        return pd.Series(result, index=value.index)
+
+    return result
 
 
 def hard_limit_check(val: float, limits: tuple[float, float]) -> int:
@@ -457,7 +466,9 @@ def do_day_check(
     return failed
 
 
-def do_missing_value_check(value: float) -> int:
+def do_missing_value_check(
+    value: float | None | Sequence[float | None] | np.ndarray,
+) -> int:
     """
     Check that value is not None or NaN.
 
@@ -475,7 +486,17 @@ def do_missing_value_check(value: float) -> int:
 
 
 @inspect_climatology("climatology")
-def do_missing_value_clim_check(climatology: float | Climatology, **kwargs) -> int:
+def do_missing_value_clim_check(
+    climatology: (
+        float
+        | Climatology
+        | None
+        | Sequence[float | Climatology | None]
+        | np.ndarray
+        | Climatology
+    ),
+    **kwargs,
+) -> int:
     """
     Check that climatological value is present
 

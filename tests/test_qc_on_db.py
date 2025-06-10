@@ -313,12 +313,16 @@ def test_do_day_check(testdata):
     pd.testing.assert_series_equal(results, expected)
 
 
-def test_do_at_missing_value_check(testdata):
+@pytest.mark.parametrize("apply_func", [False, True])
+def test_do_at_missing_value_check(testdata, apply_func):
     db_ = testdata["observations-at"].copy()
-    results = db_.apply(
-        lambda row: do_missing_value_check(value=row["observation_value"]),
-        axis=1,
-    )
+    if apply_func is True:
+        results = db_.apply(
+            lambda row: do_missing_value_check(value=row["observation_value"]),
+            axis=1,
+        )
+    else:
+        results = do_missing_value_check(value=db_["observation_value"])
     expected = pd.Series(
         [
             passed,
@@ -368,22 +372,31 @@ def test_do_at_hard_limit_check(testdata):
     pd.testing.assert_series_equal(results, expected)
 
 
-def test_do_at_missing_value_clim_check(testdata, climdata):
+@pytest.mark.parametrize("apply_func", [False, True])
+def test_do_at_missing_value_clim_check(testdata, climdata, apply_func):
     db_ = testdata["observations-at"].copy()
     climatology = Climatology.open_netcdf_file(
         climdata["AT"]["mean"],
         "at",
         time_axis="pentad_time",
     )
-    results = db_.apply(
-        lambda row: do_missing_value_clim_check(
+    if apply_func is True:
+        results = db_.apply(
+            lambda row: do_missing_value_clim_check(
+                climatology=climatology,
+                lat=row["latitude"],
+                lon=row["longitude"],
+                date=row["date_time"],
+            ),
+            axis=1,
+        )
+    else:
+        results = do_missing_value_clim_check(
             climatology=climatology,
-            lat=row["latitude"],
-            lon=row["longitude"],
-            date=row["date_time"],
-        ),
-        axis=1,
-    )
+            lat=db_["latitude"],
+            lon=db_["longitude"],
+            date=db_["date_time"],
+        )
     expected = pd.Series(
         [
             failed,
@@ -515,12 +528,16 @@ def test_do_at_climatology_plus_stdev_check(testdata, climdata, apply_func):
     pd.testing.assert_series_equal(results, expected)
 
 
-def test_do_slp_missing_value_check(testdata):
+@pytest.mark.parametrize("apply_func", [False, True])
+def test_do_slp_missing_value_check(testdata, apply_func):
     db_ = testdata["observations-slp"].copy()
-    results = db_.apply(
-        lambda row: do_missing_value_check(value=row["observation_value"]),
-        axis=1,
-    )
+    if apply_func is True:
+        results = db_.apply(
+            lambda row: do_missing_value_check(value=row["observation_value"]),
+            axis=1,
+        )
+    else:
+        results = do_missing_value_check(value=db_["observation_value"])
     expected = pd.Series(
         [
             passed,
@@ -541,18 +558,27 @@ def test_do_slp_missing_value_check(testdata):
     pd.testing.assert_series_equal(results, expected)
 
 
-def test_do_slp_missing_value_clim_check(testdata, climdata):
+@pytest.mark.parametrize("apply_func", [False, True])
+def test_do_slp_missing_value_clim_check(testdata, climdata, apply_func):
     db_ = testdata["observations-slp"].copy()
     climatology = Climatology.open_netcdf_file(climdata["SLP"]["mean"], "slp")
-    results = db_.apply(
-        lambda row: do_missing_value_clim_check(
+    if apply_func is True:
+        results = db_.apply(
+            lambda row: do_missing_value_clim_check(
+                climatology=climatology,
+                lat=row["latitude"],
+                lon=row["longitude"],
+                date=row["date_time"],
+            ),
+            axis=1,
+        )
+    else:
+        results = do_missing_value_clim_check(
             climatology=climatology,
-            lat=row["latitude"],
-            lon=row["longitude"],
-            date=row["date_time"],
-        ),
-        axis=1,
-    )
+            lat=db_["latitude"],
+            lon=db_["longitude"],
+            date=db_["date_time"],
+        )
     expected = pd.Series(
         [
             failed,
@@ -635,12 +661,16 @@ def test_do_slp_climatology_plus_stdev_with_lowbar_check(
     pd.testing.assert_series_equal(results, expected)
 
 
-def test_do_dpt_missing_value_check(testdata):
+@pytest.mark.parametrize("apply_func", [False, True])
+def test_do_dpt_missing_value_check(testdata, apply_func):
     db_ = testdata["observations-dpt"].copy()
-    results = db_.apply(
-        lambda row: do_missing_value_check(value=row["observation_value"]),
-        axis=1,
-    )
+    if apply_func is True:
+        results = db_.apply(
+            lambda row: do_missing_value_check(value=row["observation_value"]),
+            axis=1,
+        )
+    else:
+        results = do_missing_value_check(value=db_["observation_value"])
     expected = pd.Series(
         [
             failed,
@@ -690,22 +720,32 @@ def test_do_dpt_hard_limit_check(testdata):
     pd.testing.assert_series_equal(results, expected)
 
 
-def test_do_dpt_missing_value_clim_check(testdata, climdata):
+@pytest.mark.parametrize("apply_func", [False, True])
+def test_do_dpt_missing_value_clim_check(testdata, climdata, apply_func):
     db_ = testdata["observations-dpt"].copy()
     climatology = Climatology.open_netcdf_file(
         climdata["DPT"]["mean"],
         "dpt",
         time_axis="pentad_time",
     )
-    results = db_.apply(
-        lambda row: do_missing_value_clim_check(
+    if apply_func is True:
+        results = db_.apply(
+            lambda row: do_missing_value_clim_check(
+                climatology=climatology,
+                lat=row["latitude"],
+                lon=row["longitude"],
+                date=row["date_time"],
+            ),
+            axis=1,
+        )
+    else:
+        results = do_missing_value_clim_check(
             climatology=climatology,
-            lat=row["latitude"],
-            lon=row["longitude"],
-            date=row["date_time"],
-        ),
-        axis=1,
-    )
+            lat=db_["latitude"],
+            lon=db_["longitude"],
+            date=db_["date_time"],
+        )
+
     expected = pd.Series(
         [
             failed,  # This should be untesable since lat is not avaiable
@@ -824,12 +864,16 @@ def test_do_supersaturation_check(testdata, apply_func):
     pd.testing.assert_series_equal(results, expected)
 
 
-def test_do_sst_missing_value_check(testdata):
+@pytest.mark.parametrize("apply_func", [False, True])
+def test_do_sst_missing_value_check(testdata, apply_func):
     db_ = testdata["observations-sst"].copy()
-    results = db_.apply(
-        lambda row: do_missing_value_check(value=row["observation_value"]),
-        axis=1,
-    )
+    if apply_func is True:
+        results = db_.apply(
+            lambda row: do_missing_value_check(value=row["observation_value"]),
+            axis=1,
+        )
+    else:
+        results = do_missing_value_check(value=db_["observation_value"])
     expected = pd.Series(
         [
             passed,
@@ -917,22 +961,31 @@ def test_do_sst_hard_limit_check(testdata):
     pd.testing.assert_series_equal(results, expected)
 
 
-def test_do_sst_missing_value_clim_check(testdata, climdata):
+@pytest.mark.parametrize("apply_func", [False, True])
+def test_do_sst_missing_value_clim_check(testdata, climdata, apply_func):
     db_ = testdata["observations-sst"].copy()
     climatology = Climatology.open_netcdf_file(
         climdata["SST"]["mean"],
         "sst",
         valid_ntime=31,
     )
-    results = db_.apply(
-        lambda row: do_missing_value_clim_check(
+    if apply_func is True:
+        results = db_.apply(
+            lambda row: do_missing_value_clim_check(
+                climatology=climatology,
+                lat=row["latitude"],
+                lon=row["longitude"],
+                date=row["date_time"],
+            ),
+            axis=1,
+        )
+    else:
+        results = do_missing_value_clim_check(
             climatology=climatology,
-            lat=row["latitude"],
-            lon=row["longitude"],
-            date=row["date_time"],
-        ),
-        axis=1,
-    )
+            lat=db_["latitude"],
+            lon=db_["longitude"],
+            date=db_["date_time"],
+        )
     expected = pd.Series(
         [
             failed,
@@ -1002,12 +1055,16 @@ def test_do_sst_climatology_check(testdata, climdata, apply_func):
     pd.testing.assert_series_equal(results, expected)
 
 
-def test_do_wind_speed_missing_value_check(testdata):
+@pytest.mark.parametrize("apply_func", [False, True])
+def test_do_wind_speed_missing_value_check(testdata, apply_func):
     db_ = testdata["observations-ws"].copy()
-    results = db_.apply(
-        lambda row: do_missing_value_check(value=row["observation_value"]),
-        axis=1,
-    )
+    if apply_func is True:
+        results = db_.apply(
+            lambda row: do_missing_value_check(value=row["observation_value"]),
+            axis=1,
+        )
+    else:
+        results = do_missing_value_check(value=db_["observation_value"])
     expected = pd.Series(
         [
             passed,
@@ -1057,12 +1114,16 @@ def test_do_wind_speed_hard_limit_check(testdata):
     pd.testing.assert_series_equal(results, expected)
 
 
-def test_do_wind_direction_missing_value_check(testdata):
+@pytest.mark.parametrize("apply_func", [False, True])
+def test_do_wind_direction_missing_value_check(testdata, apply_func):
     db_ = testdata["observations-wd"].copy()
-    results = db_.apply(
-        lambda row: do_missing_value_check(value=row["observation_value"]),
-        axis=1,
-    )
+    if apply_func is True:
+        results = db_.apply(
+            lambda row: do_missing_value_check(value=row["observation_value"]),
+            axis=1,
+        )
+    else:
+        results = do_missing_value_check(value=db_["observation_value"])
     expected = pd.Series(
         [
             passed,
