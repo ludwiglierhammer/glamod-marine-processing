@@ -255,14 +255,20 @@ def test_is_ship(testdata):
     pd.testing.assert_series_equal(results, expected)
 
 
-def test_do_position_check(testdata):
+@pytest.mark.parametrize("apply_func", [False, True])
+def test_do_position_check(testdata, apply_func):
     db_ = testdata["header"].copy()
-    results = db_.apply(
+    if apply_func is True:
+      results = db_.apply(
         lambda row: do_position_check(
-            latitude=row["latitude"], longitude=row["longitude"]
+            lat=row["latitude"], lon=row["longitude"]
         ),
         axis=1,
-    )
+      )
+    else:
+      results = do_position_check(
+            lat=db_["latitude"], lon=db_["longitude"]
+        )
     expected = pd.Series([passed] * 13)  # all positions are valid
     pd.testing.assert_series_equal(results, expected)
 

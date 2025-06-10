@@ -259,7 +259,7 @@ def sst_freeze_check(
     return result
 
 
-def do_position_check(latitude: float, longitude: float) -> int:
+def do_position_check(lat: float | None | Sequence[float | None] | np.ndarray, lon: float | None | Sequence[float | None] | np.ndarray) -> int:
     """
     Perform the positional QC check on the report. Simple check to make sure that the latitude and longitude are
     within the bounds specified by the ICOADS documentation. Latitude is between -90 and 90. Longitude is between
@@ -279,17 +279,25 @@ def do_position_check(latitude: float, longitude: float) -> int:
         1 if either latitude or longitude is not in valid range,
         0 otherwise
     """
-    if not isvalid(latitude):
-        return untestable
-    if not isvalid(longitude):
-        return untestable
+    lat_arr = np.asarray(lat, dtype=float)
+    lon_arr = np.asarray(lon, dtype=float)
+    
+    result = np.full(lat_arr.shape, untestable, dtype=int)  # type: np.ndarray
+    
+    valid_indices = isvalid(lat) & isvalid(lon)
+     
+    cond_failed = (lat_arr < -90) | (lat_arr > 90) | (lon_arr < -180) | (lon_arr > 360)
+    
+    result[valid_indices & cond_failed] = failed
+    result[valid_indices & ~cond_failed] = passed
 
-    if latitude < -90 or latitude > 90:
-        return failed
-    if longitude < -180 or longitude > 360:
-        return failed
+    if np.isscalar(lat):
+        return int(result)
 
-    return passed
+    if isinstance(lat, pd.Series):
+        return pd.Series(result, index=lat.index)
+
+    return result
 
 
 def do_date_check(
