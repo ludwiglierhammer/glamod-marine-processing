@@ -273,9 +273,13 @@ def test_do_position_check(testdata, apply_func):
     pd.testing.assert_series_equal(results, expected)
 
 
-def test_do_date_check(testdata):
+@pytest.mark.parametrize("apply_func", [False, True])
+def test_do_date_check(testdata, apply_func):
     db_ = testdata["header"].copy()
-    results = db_.apply(lambda row: do_date_check(date=row["report_timestamp"]), axis=1)
+    if apply_func is True:
+        results = db_.apply(lambda row: do_date_check(date=row["report_timestamp"]), axis=1)
+    else:
+        results = do_date_check(date=db_["report_timestamp"])
     expected = pd.Series(
         [
             untestable,

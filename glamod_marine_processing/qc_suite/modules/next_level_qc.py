@@ -301,10 +301,10 @@ def do_position_check(lat: float | None | Sequence[float | None] | np.ndarray, l
 
 
 def do_date_check(
-    date: datetime | None = None,
-    year: int | None = None,
-    month: int | None = None,
-    day: int | None = None,
+    date: datetime | None | Sequence[datetime | None] | np.ndarray = None,
+    year: int | None | Sequence[int | None] | np.nsarray = None,
+    month: int | None | Sequence[int | None] | np.ndarray = None,
+    day: int | None | Sequence[int | None] | np.ndarray = None,
 ) -> int:
     """
     Perform the date QC check on the report. Check that the date is valid.
@@ -327,30 +327,58 @@ def do_date_check(
         1 if the date is not a valid date,
         0 otherwise
     """
-    if isinstance(date, datetime):
-        date_ = split_date(date)
-        year = date_["year"]
-        month = date_["month"]
-        day = date_["day"]
-    if not isvalid(year):
-        return untestable
-    if not isvalid(month):
-        return untestable
-    if not isvalid(day):
-        return untestable
+    if date is not None:
+        date_arr = pd.to_datetime(np.atleast_1d(date))
+        date_ = [split_date(date_i) for date_i in date_arr]
+        year = [date_i["year"] for date_i in date_]
+        month = [date_i["month"] for date_i in date_]
+        day = [date_i["day"] for date_i in date_]
+    year_arr = np.atleast_1d(year)
+    month_arr = np.atleast_1d(month)
+    day_arr = np.atleast_1d(day)
+    
+    result = np.full(year_arr.shape, untestable, dtype=int)
+    
+    valid_indices = isvalid(year_arr) & isvalid(month_arr) & isvalid(day_arr)
+    
+    for i in range(len(result)):
+        if not valid_indices[i]:
+            continue
 
-    if year > 2025 or year < 1850:
-        return failed
+        y_ = int(year_arr[i])
+        m_ = int(month_arr[i])
+        d_ = int(day_arr[i])
+        
+        month_lengths = get_month_lengths(y_)
 
-    if month < 1 or month > 12:
-        return failed
+        if (
+            (y_ > 2025)
+            | (y_ < 1850) 
+            | (m_ < 1) 
+            | (m_ > 12) 
+            | (d_ < 1) 
+            | (d_ > month_lengths[m_ - 1])
+        ):
+          result[i] = failed
+          continue
+        result[i] = passed
 
-    month_lengths = get_month_lengths(year)
+    if len(year_arr) == 1:
+        return int(result[0])
 
-    if day < 1 or day > month_lengths[month - 1]:
-        return failed
+    if isinstance(date, pd.Series):
+        return pd.Series(result, index=date.index)
+        
+    if isinstance(year, pd.Series):
+        return pd.Series(result, index=year.index)
+        
+    if isinstance(month, pd.Series):
+        return pd.Series(result, index=month.index)
+        
+    if isinstance(day, pd.Series):
+        return pd.Series(result, index=day.index)
 
-    return passed
+    return result
 
 
 def do_time_check(date: datetime | None = None, hour: float | None = None) -> int:

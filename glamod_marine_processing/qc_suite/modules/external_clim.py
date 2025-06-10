@@ -315,8 +315,8 @@ class Climatology:
         """
         lat_arr = np.atleast_1d(lat)
         lon_arr = np.atleast_1d(lon)
-        date_arr = pd.to_datetime(np.atleast_1d(date))
         if date is not None:
+            date_arr = pd.to_datetime(np.atleast_1d(date))
             date_ = [split_date(date_i) for date_i in date_arr]
             month = [date_i["month"] for date_i in date_]
             day = [date_i["day"] for date_i in date_]
