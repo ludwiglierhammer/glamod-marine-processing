@@ -79,13 +79,17 @@ def format_return_type(result_array: np.ndarray, *input_values: Any) -> Any:
     return int(result_array)  # np.ndarray or fallback
 
 
-def inspect_arrays(params: list[str]) -> Callable:
+def inspect_arrays(params: list[str], replace=True, skip_none=False) -> Callable:
     """Create a decorator to inspect input sequences and convert them to numpy arrays.
 
     Parameters
     ----------
     params: list of str
         List of parameter names to be inspected.
+    replace: bool, default: True
+        Replace input parameters with inspected arrays.
+    skip_none: bool, default: False
+        Skip if param is None.
 
     Returns
     -------
@@ -105,12 +109,15 @@ def inspect_arrays(params: list[str]) -> Callable:
                 if name not in bound_args.arguments:
                     raise ValueError(f"Parameter {name} is not a valid parameter.")
 
-                arr = np.asarray(bound_args.arguments[name])
+                if bound_args.arguments[name] is None and skip_none:
+                    continue
+                arr = np.atleast_1d(bound_args.arguments[name])
                 if arr.ndim != 1:
                     raise ValueError(f"Input '{name}' must be one-dimensional.")
                 arrays.append(arr)
 
-                bound_args.arguments[name] = arr
+                if replace is True:
+                    bound_args.arguments[name] = arr
             lengths = [len(arr) for arr in arrays]
             if any(length != lengths[0] for length in lengths):
                 raise ValueError(f"Input {params} must all have the same length.")
