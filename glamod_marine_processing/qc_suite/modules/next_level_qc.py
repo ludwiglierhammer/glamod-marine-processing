@@ -435,7 +435,7 @@ def do_time_check(date: datetime | None = None, hour: float | None = None) -> in
     result[valid_indices & ~cond_failed] = passed
 
     if len(hour_arr) == 1:
-        return int(result)
+        return int(result[0])
 
     if isinstance(date, pd.Series):
         return pd.Series(result, index=date.index)
@@ -502,6 +502,7 @@ def do_day_check(
         month = [date_i["month"] for date_i in date_]
         day = [date_i["day"] for date_i in date_]
         hour = [date_i["hour"] for date_i in date_]
+
     year_arr = np.atleast_1d(year)
     month_arr = np.atleast_1d(month)
     day_arr = np.atleast_1d(day)
@@ -532,32 +533,31 @@ def do_day_check(
         y_ = int(year_arr[i])
         m_ = int(month_arr[i])
         d_ = int(day_arr[i])
-        h_ = int(hour_arr[i])
-
-        y2_ = y_
-        d2_ = dayinyear(y_, m_, d_)
-        h2_ = math.floor(h_)
-        m2_ = (h_ - math.floor(h_)) * 60.0
+        h_ = hour_arr[i]
+        y2 = y_
+        d2 = dayinyear(y_, m_, d_)
+        h2 = math.floor(h_)
+        m2 = (h_ - h2) * 60.0
 
         # go back one hour and test if the sun was above the horizon
         if time_since_sun_above_horizon is not None:
-            h2_ = h2_ - time_since_sun_above_horizon
-        if h2_ < 0:
-            h2_ = h2_ + 24.0
-            d2_ = d2_ - 1
-            if d2_ <= 0:
-                y2_ = y2_ - 1
-                d2_ = dayinyear(y2_, 12, 31)
+            h2 = h2 - time_since_sun_above_horizon
+        if h2 < 0:
+            h2 = h2 + 24.0
+            d2 = d2 - 1
+            if d2 <= 0:
+                y2 = y2 - 1
+                d2 = dayinyear(y2, 12, 31)
 
-        lat2_ = lat_
-        lon2_ = lon_
+        lat2 = lat_
+        lon2 = lon_
         if lat_ == 0:
-            lat2_ = 0.0001
+            lat2 = 0.0001
         if lon_ == 0:
-            lon2_ = 0.0001
+            lon2 = 0.0001
 
         _azimuth, elevation, _rta, _hra, _sid, _dec = sunangle(
-            y2_, d2_, h2_, m2_, 0, 0, 0, lat2_, lon2_
+            y2, d2, h2, m2, 0, 0, 0, lat2, lon2
         )
 
         if elevation > 0:
@@ -574,15 +574,6 @@ def do_day_check(
 
     if isinstance(year, pd.Series):
         return pd.Series(result, index=year.index)
-
-    if isinstance(month, pd.Series):
-        return pd.Series(result, index=month.index)
-
-    if isinstance(day, pd.Series):
-        return pd.Series(result, index=day.index)
-
-    if isinstance(hour, pd.Series):
-        return pd.Series(result, index=hour.index)
 
     return result
 
