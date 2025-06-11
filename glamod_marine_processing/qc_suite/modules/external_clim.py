@@ -7,7 +7,7 @@ import warnings
 from collections.abc import Callable
 from datetime import datetime
 from functools import wraps
-from typing import Literal, Sequence
+from typing import Literal, Sequence, TypeAlias
 
 import cf_xarray  # noqa
 import numpy as np
@@ -16,7 +16,7 @@ import xarray as xr
 from numpy import ndarray
 from xclim.core.units import convert_units_to
 
-from .auxiliary import isvalid
+from .auxiliary import ValueFloatType, isvalid
 from .time_control import day_in_year, split_date, which_pentad
 
 
@@ -381,3 +381,6 @@ def get_climatological_value(climatology: Climatology, **kwargs) -> ndarray:
             Climatology value at specified location and time.
     """
     return climatology
+
+
+ClimFloatType: TypeAlias = ValueFloatType | Climatology

@@ -4,15 +4,28 @@ from __future__ import annotations
 
 import inspect
 from collections.abc import Callable, Sequence
+from datetime import datetime
 from functools import wraps
+from typing import Any, TypeAlias
 
 import numpy as np
+import numpy.typing as npt
 import pandas as pd
 
 passed = 0
 failed = 1
 untestable = 2
 untested = 3
+
+ValueFloatType: TypeAlias = (
+    float | None | Sequence[float | None] | npt.NDArray[np.float64] | pd.Series
+)
+ValueIntType: TypeAlias = (
+    int | None | Sequence[int | None] | npt.NDArray[np.int_] | pd.Series
+)
+ValueDatetimeType: TypeAlias = (
+    datetime | None | Sequence[datetime | None] | npt.NDArray[np.datetime64] | pd.Series
+)
 
 
 def isvalid(
@@ -35,6 +48,35 @@ def isvalid(
     if np.isscalar(inval):
         return bool(result)
     return result
+
+
+def format_return_type(result_array: np.ndarray, *input_values: Any) -> Any:
+    """
+    Convert the result numpy array to the same type as the input `value`.
+
+    Parameters
+    ----------
+    result_array : np.ndarray
+        The numpy array of results.
+    input_values : scalar, sequence, np.ndarray, pd.Series or None
+        One or more original input values to infer the desired return type from.
+
+    Returns
+    -------
+    Same type as input
+        The result formatted to match the type of the first valid input value.
+
+    Raises
+    ------
+    ValueError
+        If all input_values are None, so the output type cannot be inferred.
+    """
+    input_value = next((val for val in input_values if val is not None), None)
+    if isinstance(input_value, pd.Series):
+        return pd.Series(result_array, index=input_value.index, dtype=int)
+    if isinstance(input_value, (list, tuple)):
+        return type(input_value)(result_array.tolist())
+    return int(result_array)  # np.ndarray or fallback
 
 
 def inspect_arrays(params: list[str]) -> Callable:
