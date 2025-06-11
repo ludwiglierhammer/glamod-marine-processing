@@ -3,55 +3,70 @@
 from __future__ import annotations
 
 import math
-from datetime import datetime
-from typing import Sequence
 
 import numpy as np
 import pandas as pd
 
 from .astronomical_geometry import sunangle
-from .auxiliary import failed, isvalid, passed, untestable
-from .external_clim import Climatology, inspect_climatology
+from .auxiliary import (
+    ValueDatetimeType,
+    ValueFloatType,
+    ValueIntType,
+    failed,
+    format_return_type,
+    isvalid,
+    passed,
+    untestable,
+)
+from .external_clim import ClimFloatType, inspect_climatology
 from .time_control import dayinyear, get_month_lengths, split_date
 
 
 def climatology_check(
-    value: float | None | Sequence[float | None] | np.ndarray,
-    climate_normal: float | None | Sequence[float | None] | np.ndarray,
+    value: ValueFloatType,
+    climate_normal: ValueFloatType,
     maximum_anomaly: float,
-    standard_deviation: float | None | Sequence[float | None] | np.ndarray = "default",
+    standard_deviation: ValueFloatType = "default",
     standard_deviation_limits: tuple[float, float] | None = None,
     lowbar: float | None = None,
-) -> int:
+) -> ValueIntType:
     """
-    Climatology check to compare a value with a climatological average with some arbitrary limit on the difference.
-    This check can be expanded with some optional parameters.
+    Climatology check to compare a value with a climatological average within specified anomaly limits.
+    This check supports optional parameters to customize the comparison.
+
+    If ``standard_deviation`` is provided, the value is converted into a standardised anomaly. Optionally,
+    if ``standard deviation`` is outside the range specified by ``standard_deviation_limits`` then ``standard_deviation``
+    is set to whichever of the lower or upper limits is closest.
+    If ``lowbar`` is provided, the anomaly must be greater than ``lowbar`` to fail regardless of ``standard_deviation``.
 
     Parameters
     ----------
-    value: float
-        Value to be compared to climatology
-    climate_normal : float
-        The climatological average to which it will be compared
+    value: float, None, sequence of float or None, np.ndarray of float or pd.Series of float
+        Value(s) to be compared to climatology.
+        Can be a scalar, a sequence (e.g., list or tuple), a NumPy array, or a pandas Series.
+    climate_normal : float, None, sequence of float or None, np.ndarray of float or pd.Series of float
+        The climatological average(s) to which the values(s) will be compared.
+        Can be a scalar, a sequence (e.g., list or tuple), a NumPy array, or a pandas Series.
     maximum_anomaly: float
         Largest allowed anomaly.
-        If ``standard_deviation`` is provided, this is the largest allowed standardised anomaly.
-    standard_deviation: float, default: "default"
-        The standard deviation which will be used to standardize the anomaly
-        If standard_deviation is "default", set standard_deviation to 1.0.
+        If ``standard_deviation`` is provided, this is interpreted as the largest allowed standardised anomaly.
+    standard_deviation: float, None, sequence of float or None, np.ndarray of float or pd.Series of float, default: "default"
+        The standard deviation(s) used to standardize the anomaly
+        If set to "default", it is internally treated as 1.0.
+        Can be a scalar, a sequence (e.g., list or tuple), a NumPy array, or a pandas Series.
     standard_deviation_limits: tuple of float, optional
-        A tuple of two floats representing the upper and lower limits for standard deviation used in check
+        A tuple of two floats representing the upper and lower limits for standard deviation used in the check.
     lowbar: float, optional
         The anomaly must be greater than lowbar to fail regardless of standard deviation.
 
     Returns
     -------
-    int
-        2 if stdev_limits[1] is equal or less than stdev_limits[0] or
-        if limit is equal or less than 0 or
-        if either value, climate_normal or standard_deviation is numerically invalid.
-        1 if the difference is outside the specified range,
-        0 otherwise.
+    Same type as input, but with integer values
+        - Returns 2 (or array/sequence/Series of 2s) if `standard_deviation_limits[1]` is less than or equal to
+          `standard_deviation_limits[0]`, or if `maximum_anomaly` is less than or equal to 0, or if any of
+          `value`, `climate_normal`, or `standard_deviation` is numerically invalid (None or NaN).
+        - Returns 1 (or array/sequence/Series of 1s) if the difference is outside the specified range.
+        - Returns 0 (or array/sequence/Series of 0s) otherwise.
     """
     value_arr = np.asarray(value, dtype=float)  # type: np.ndarray
     climate_normal_arr = np.asarray(climate_normal, dtype=float)  # type: np.ndarray
@@ -70,7 +85,7 @@ def climatology_check(
     result = np.full(value_arr.shape, untestable, dtype=int)  # type: np.ndarray
 
     if maximum_anomaly is None or maximum_anomaly <= 0:
-        return result
+        return format_return_type(result, value)
 
     if standard_deviation is None:
         standard_deviation_arr = np.full(value_arr.shape, 1.0)
@@ -78,7 +93,7 @@ def climatology_check(
     if standard_deviation_limits is None:
         standard_deviation_limits = (0, np.inf)
     elif standard_deviation_limits[1] <= standard_deviation_limits[0]:
-        return result
+        return format_return_type(result, value)
 
     valid_indices = (
         isvalid(value)
@@ -113,68 +128,57 @@ def climatology_check(
     result[valid_indices & cond_failed] = failed
     result[valid_indices & ~cond_failed] = passed
 
-    if np.isscalar(value):
-        return int(result)
-
-    if isinstance(value, pd.Series):
-        return pd.Series(result, index=value.index)
-
-    return result
+    return format_return_type(result, value)
 
 
-def value_check(
-    value: float | None | Sequence[float | None] | np.ndarray,
-) -> int | np.ndarray:
-    """Check if a value is equal to None
+def value_check(value: ValueFloatType) -> ValueIntType:
+    """Check if a value is equal to None or numerically invalid (NaN).
 
     Parameters
     ----------
-    inval : float or None
-        The input value to be tested
+    inval : float, None, sequence of float or None, np.ndarray of float or pd.Series of float
+        The input value(s) to be tested.
+        Can be a scalar, sequence (e.g., list or tuple), a NumPy array, or a pandas Series.
 
     Returns
     -------
-    int
-        Returns 1 if the input value is numerically invalid or None, 0 otherwise
+    Same type as input, but with integer values
+        - Returns 1 (or array/sequence/Series of 1s) if the input value is None or numerically invalid (NaN)
+        - Returns 0 (or array/sequence/Series of 0s) otherwise.
     """
     valid_mask = isvalid(value)
     result = np.where(valid_mask, passed, failed)
 
-    if np.isscalar(value):
-        return int(result)
-
-    if isinstance(value, pd.Series):
-        return pd.Series(result, index=value.index)
-
-    return result
+    return format_return_type(result, value)
 
 
 def hard_limit_check(
-    value: float | None | Sequence[float | None] | np.ndarray,
+    value: ValueFloatType,
     limits: tuple[float, float],
-) -> int:
+) -> ValueIntType:
     """Check if a value is outside specified limits.
 
     Parameters
     ----------
-    val: float
-        Value to be tested.
+    val: float, None, sequence of float or None, np.ndarray of float or pd.Series of float
+        The value(s) to be tested against the limits.
+        Can be a scalar, a sequence (e.g., list or tuple), a NumPy array, or a pandas Series.
     limits: tuple of float
         A tuple of two floats representing the lower and upper limit.
 
     Returns
     -------
-    int
-        2 if limits[1] is equal or less than limits[0] of if val is numerically invalid or None,
-        1 if val is outside the limits,
-        0 otherwise
+    Same type as input, but with integer values
+        - Returns 2 (or array/sequence/Series of 2s) if the upper limit is less than or equal
+          to the lower limit, or if the input is invalid (None or NaN).
+        - Returns 1 (or array/sequence/Series of 1s) if value(s) are outside the specified limits.
+        - Returns 0 (or array/sequence/Series of 0s) if value(s) are within limits.
     """
     value_arr = np.asarray(value, dtype=float)
-
     result = np.full(value_arr.shape, untestable, dtype=int)
 
     if limits[1] <= limits[0]:
-        return result
+        return format_return_type(result, value)
 
     valid_indices = isvalid(value)
 
@@ -186,21 +190,15 @@ def hard_limit_check(
     result[valid_indices & cond_passed] = passed
     result[valid_indices & ~cond_passed] = failed
 
-    if np.isscalar(value):
-        return int(result)
-
-    if isinstance(value, pd.Series):
-        return pd.Series(result, index=value.index)
-
-    return result
+    return format_return_type(result, value)
 
 
 def sst_freeze_check(
-    insst: float | None | Sequence[float | None] | np.ndarray,
-    sst_uncertainty: float,
-    freezing_point: float,
-    n_sigma: float,
-) -> int:
+    insst: ValueFloatType,
+    freezing_point: float | None = None,
+    sst_uncertainty: float | None = None,
+    n_sigma: float | None = None,
+) -> ValueIntType:
     """Compare an input SST to see if it is above freezing.
 
     This is a simple freezing point check made slightly more complex. We want to check if a
@@ -214,21 +212,24 @@ def sst_freeze_check(
 
     Parameters
     ----------
-    insst : float
-        input SST to be checked
-    sst_uncertainty : float
-        the uncertainty in the SST value, defaults to zero
-    freezing_point : float
-        the freezing point of the water
-    n_sigma : float
-        number of sigma to use in the check
+    insst : float, None, sequence of float or None, np.ndarray of float or pd.series of float
+        Input sea-surface temperature value(s) to be checked.
+        Can be a scalar, a sequence (e.g., list or tuple), a NumPy array, or a pandas Series.
+    freezing_point : float, optional
+        The freezing point of the water.
+    sst_uncertainty : float, optional
+        The uncertainty in the SST value(s).
+    n_sigma : float, optional
+        Number of sigma to use in the check.
 
     Returns
     -------
-    int
-        2 if either insst, sst_uncertainty, freezing_point or n_sigma is numerically invalid or None,
-        1 if the insst is below freezing point by more than twice the uncertainty,
-        0 otherwise
+    Same type as input, but with integer values
+        - Returns 2 (or array/sequence/Series of 2s) if any of `insst`, `freezing_point`, `sst_uncertainty`,
+          or `n_sigma` is numerically invalid (None or NaN).
+        - Returns 1 (or array/sequence/Series of 1s) if `insst` is below `freezing_point` by more than
+          `n_sigma` times `sst_uncertainty`.
+        - Returns 0 (or array/sequence/Series of 0s) otherwise.
 
     Note
     ----
@@ -246,7 +247,7 @@ def sst_freeze_check(
         or not isvalid(freezing_point)
         or not isvalid(n_sigma)
     ):
-        return result
+        return format_return_type(result, insst)
 
     valid_sst = isvalid(insst)
 
@@ -258,19 +259,10 @@ def sst_freeze_check(
     result[valid_sst & cond_failed] = failed
     result[valid_sst & ~cond_failed] = passed
 
-    if np.isscalar(insst):
-        return int(result)
-
-    if isinstance(insst, pd.Series):
-        return pd.Series(result, index=insst.index)
-
-    return result
+    return format_return_type(result, insst)
 
 
-def do_position_check(
-    lat: float | None | Sequence[float | None] | np.ndarray,
-    lon: float | None | Sequence[float | None] | np.ndarray,
-) -> int:
+def do_position_check(lat: ValueFloatType, lon: ValueFloatType) -> ValueIntType:
     """
     Perform the positional QC check on the report. Simple check to make sure that the latitude and longitude are
     within the bounds specified by the ICOADS documentation. Latitude is between -90 and 90. Longitude is between
@@ -278,17 +270,19 @@ def do_position_check(
 
     Parameters
     ----------
-    latitude : float
-        latitude of observation to be checked in degrees
-    longitude : float
-        longitude of observation to be checked in degree
+    lat : float, None, sequence of float or None, np.ndarray of float or pd.Series of float
+        Latitude(s) of observation in degrees.
+        Can be a scalar, a sequence (e.g., list or tuple), a NumPy array, or a pandas Series.
+    lon : float, None, sequence of float or None, np.ndarray of float or pd.Series of float
+        Longitude() of observation in degree.
+        Can be a scalar, a sequence (e.g., list or tuple), a NumPy array, or a pandas Series.
 
     Returns
     -------
-    int
-        2 if either latitude or longitude is numerically invalid or None,
-        1 if either latitude or longitude is not in valid range,
-        0 otherwise
+    Same type as input, but with integer values
+        - Returns 2 (or array/sequence/Series of 2s) if either latitude or longitude is numerically invalid (None or NaN).
+        - Returns 1 (or array/sequence/Series of 1s) if either latitude or longitude is out of the valid range.
+        - Returns 0 (or array/sequence/Series of 0s) otherwise.
     """
     lat_arr = np.asarray(lat, dtype=float)
     lon_arr = np.asarray(lon, dtype=float)
@@ -308,41 +302,39 @@ def do_position_check(
     result[valid_indices & cond_failed] = failed
     result[valid_indices & ~cond_failed] = passed
 
-    if np.isscalar(lat):
-        return int(result)
-
-    if isinstance(lat, pd.Series):
-        return pd.Series(result, index=lat.index)
-
-    return result
+    return format_return_type(result, lat, lon)
 
 
 def do_date_check(
-    date: datetime | None | Sequence[datetime | None] | np.ndarray = None,
-    year: int | None | Sequence[int | None] | np.nsarray = None,
-    month: int | None | Sequence[int | None] | np.ndarray = None,
-    day: int | None | Sequence[int | None] | np.ndarray = None,
-) -> int:
+    date: ValueDatetimeType = None,
+    year: ValueIntType = None,
+    month: ValueIntType = None,
+    day: ValueIntType = None,
+) -> ValueIntType:
     """
-    Perform the date QC check on the report. Check that the date is valid.
+    Perform the date QC check on the report. Checks whether the given date or date components are valid.
 
     Parameters
     ----------
-    date: datetime-like, optional
-        Date of observation to be checked
-    year : int, optional
-        Year of observation to be checked
-    month : int, optional
-        Month of observation (1-12) to be checked
-    day : int, optional
-        Day of observation to be checked
+    date: datetime, None, sequence of datetime or None, np.ndarray of datetime, or pd.Series of float, optional
+        Date(s) of observation.
+        Can be a scalar, a sequence (e.g., list or tuple), a NumPy array, or a pandas Series.
+    year : int, None, sequence of int or None, np.ndarray of int, or pd.Series of int, optional
+        Year(s) of observation.
+        Can be a scalar, a sequence (e.g., list or tuple), a NumPy array, or a pandas Series.
+    month : int, None, sequence of int or None, np.ndarray of int, or pd.Series of int, optional
+        Month(s) of observation (1-12).
+        Can be a scalar, a sequence (e.g., list or tuple), a NumPy array, or a pandas Series.
+    day : int, None, sequence of int or None, np.ndarray of int, or pd.series of int, optional
+        Day(s) of observation.
+        Can be a scalar, a sequence (e.g., list or tuple), a NumPy array, or a pandas Series.
 
     Returns
     -------
-    int
-        2 if either year, month or day is numerically invalid or None,
-        1 if the date is not a valid date,
-        0 otherwise
+    Same type as input, but with integer values
+        - Returns 2 (or array/sequence/Series of 2s) if any of year, month, or day is numerically invalid or None,
+        - Returns 1 (or array/sequence/Series of 1s) if the date is not valid,
+        - Returns 0 (or array/sequence/Series of 0s) otherwise.
     """
     if date is not None:
         date_arr = pd.to_datetime(np.atleast_1d(date))
@@ -380,47 +372,36 @@ def do_date_check(
             continue
         result[i] = passed
 
-    if len(year_arr) == 1:
-        return int(result[0])
-
-    if isinstance(date, pd.Series):
-        return pd.Series(result, index=date.index)
-
-    if isinstance(year, pd.Series):
-        return pd.Series(result, index=year.index)
-
-    if isinstance(month, pd.Series):
-        return pd.Series(result, index=month.index)
-
-    if isinstance(day, pd.Series):
-        return pd.Series(result, index=day.index)
-
-    return result
+    return format_return_type(result, date, year)
 
 
-def do_time_check(date: datetime | None = None, hour: float | None = None) -> int:
+def do_time_check(
+    date: ValueDatetimeType = None, hour: ValueFloatType = None
+) -> ValueIntType:
     """
     Check that the time is valid i.e. in the range 0.0 to 23.99999...
 
     Parameters
     ----------
-    date: datetime-like, optional
-        Date of report
-    hour : float, optional
-        hour of the time to be checked
+    date: datetime, None, sequence of datetime or None, np.ndarray of datetime, or pd.Series of float, optional
+        Date(s) of observation.
+        Can be a scalar, a sequence (e.g., list or tuple), a NumPy array, or a pandas Series.
+    hour: float, None, sequence of float or None, np.ndarray of float, or pd.Series of float, optional
+        Hour(s) of observation (minutes as decimal).
+        Can be a scalar, a sequence (e.g., list or tuple), a NumPy array, or a pandas Series.
 
     Returns
     -------
-    int
-        2 if hour is numerically invalid or None,
-        1 if hour is not a valid hour,
-        0 otherwise
+    Same type as input, but with integer values
+        - Returns 2 (or array/sequence/Series of 2s) if hour is numerically invalid or None,
+        - Returns 1 (or array/sequence/Series of 1s) if hour is not a valid hour,
+        - Returns 0 (or array/sequence/Series of 0s) otherwise.
     """
     if date is not None:
         date_arr = pd.to_datetime(np.atleast_1d(date))
         date_ = [split_date(date_i) for date_i in date_arr]
         hour = [date_i["hour"] for date_i in date_]
-    hour_arr = np.atleast_1d(hour)
+    hour_arr = np.asarray(hour)
 
     result = np.full(hour_arr.shape, untestable, dtype=int)
 
@@ -434,58 +415,59 @@ def do_time_check(date: datetime | None = None, hour: float | None = None) -> in
     result[valid_indices & cond_failed] = failed
     result[valid_indices & ~cond_failed] = passed
 
-    if len(hour_arr) == 1:
-        return int(result[0])
-
-    if isinstance(date, pd.Series):
-        return pd.Series(result, index=date.index)
-
-    if isinstance(hour, pd.Series):
-        return pd.Series(result, index=hour.index)
-
-    return result
+    return format_return_type(result, date, hour)
 
 
 def do_day_check(
-    date: datetime | None = None,
-    year: int | None = None,
-    month: int | None = None,
-    day: int | None = None,
-    hour: float | None = None,
-    lat: float | None = None,
-    lon: float | None = None,
+    date: ValueDatetimeType = None,
+    year: ValueIntType = None,
+    month: ValueIntType = None,
+    day: ValueIntType = None,
+    hour: ValueFloatType = None,
+    lat: ValueFloatType = None,
+    lon: ValueFloatType = None,
     time_since_sun_above_horizon: float | None = None,
-) -> int:
-    """Given year month day hour lat and long calculate if the sun was above the horizon an hour ago.
+) -> ValueIntType:
+    """Determine if the sun was above the horizon an hour ago based on date, time, and position.
 
-    This is the "day" test used to decide whether a Marine Air Temperature (MAT) measurement is
-    a Night MAT (NMAT) or a Day (MAT). This is important because solar heating of the ship biases
-    the MAT measurements. It uses the function sunangle to calculate the elevation of the sun.
+    This "day" test is used to classify Marine Air Temperature (MAT) measurements as either
+    Night MAT (NMAT) or Day MAT, accounting for solar heating biases. It calculates the sun's
+    elevation using the `sunangle` function, offset by the specified time since sun above horizon.
 
     Parameters
     ----------
-    date: datetime-like, optional
-        Date of report
-    year : int, optional
-        Year of report
-    month : int, optional
-        Month of report
-    day : int, optional
-        Day of report
-    hour : float, optional
-        Hour of report with minutes as decimal part of hour
-    lat : float, optional
-        Latitude of report in degrees
-    lon : float, optional
-        Longitude of report in degrees
+    date: datetime, None, sequence of datetime or None, np.ndarray of datetime, or pd.Series of float, optional
+        Date(s) of observation.
+        Can be a scalar, a sequence (e.g., list or tuple), a NumPy array, or a pandas Series.
+    year : int, None, sequence of int or None, np.ndarray of int, or pd.Series of int, optional
+        Year(s) of observation.
+        Can be a scalar, a sequence (e.g., list or tuple), a NumPy array, or a pandas Series.
+    month : int, None, sequence of int or None, np.ndarray of int, or pd.Series of int, optional
+        Month(s) of observation (1-12).
+        Can be a scalar, a sequence (e.g., list or tuple), a NumPy array, or a pandas Series.
+    day : int, None, sequence of int or None, np.ndarray of int, or pd.series of int, optional
+        Day(s) of observation.
+        Can be a scalar, a sequence (e.g., list or tuple), a NumPy array, or a pandas Series.
+    hour : float, None, sequence of float or None, np.ndarray of float, or pd.Series of float, optional
+        Hour(s) of observation (minutes as decimal).
+        Can be a scalar, a sequence (e.g., list or tuple), a NumPy array, or a pandas Series.
+    lat : float, None, sequence of float or None, np.ndarray of float or pd.Series of float
+        Latitude(s) of observation in degrees.
+        Can be a scalar, a sequence (e.g., list or tuple), a NumPy array, or a pandas Series.
+    lon : float, None, sequence of float or None, np.ndarray of float or pd.Series of float
+        Longitude() of observation in degree.
+        Can be a scalar, a sequence (e.g., list or tuple), a NumPy array, or a pandas Series.
     time_since_sun_above_horizon : float
         Maximum time sun can have been above horizon (or below) to still count as night. Original QC test had this set
         to 1.0 i.e. it was night between one hour after sundown and one hour after sunrise.
 
     Returns
     -------
-    int
-        Set to 0 if it is day, 1 otherwise.
+    Same type as input, but with integer values
+        - Returns 2 (or array/sequence/Series of 2s) if any of do_position_check, do_date_check, or do_time_check returns 2.
+        - Returns 1 (or array/sequence/Series of 1s) if any of do_position_check, do_date_check, or do_time_check returns 1
+          or if it is night (sun below horizon an hour ago).
+        - Returns 0 if it is day (sun above horizon an hour ago).
 
     Note
     ----
@@ -566,144 +548,127 @@ def do_day_check(
 
         result[i] = failed
 
-    if len(year_arr) == 1:
-        return int(result[0])
-
-    if isinstance(date, pd.Series):
-        return pd.Series(result, index=date.index)
-
-    if isinstance(year, pd.Series):
-        return pd.Series(result, index=year.index)
-
-    return result
+    return format_return_type(result, date, year)
 
 
-def do_missing_value_check(
-    value: float | None | Sequence[float | None] | np.ndarray,
-) -> int:
-    """
-    Check that value is not None or NaN.
+def do_missing_value_check(value: ValueFloatType) -> ValueIntType:
+    """Check if a value is equal to None or numerically invalid (NaN).
 
     Parameters
     ----------
-    value : float
-        Value to be checked
+    value : float, None, sequence of float or None, np.ndarray of float or pd.Series of float
+        The input value(s) to be tested.
+        Can be a scalar, sequence (e.g., list or tuple), a NumPy array, or a pandas Series.
 
     Returns
     -------
-    int
-        1 if value is missing, 0 otherwise
+    Same type as input, but with integer values
+        - Returns 1 (or array/sequence/Series of 1s) if the input value is None or numerically invalid (NaN)
+        - Returns 0 (or array/sequence/Series of 0s) otherwise.
     """
     return value_check(value)
 
 
 @inspect_climatology("climatology")
-def do_missing_value_clim_check(
-    climatology: (
-        float
-        | Climatology
-        | None
-        | Sequence[float | Climatology | None]
-        | np.ndarray
-        | Climatology
-    ),
-    **kwargs,
-) -> int:
-    """
-    Check that climatological value is present
+def do_missing_value_clim_check(climatology: ClimFloatType, **kwargs) -> ValueIntType:
+    """Check if a climatological value is equal to None or numerically invalid (NaN).
 
     Parameters
     ----------
-    climatology : float or Climatology
-        Climatology value
-        This could be a float value or Climatology object.
+    climatology : float, None, sequence of float or None, np.ndarray of float, pd.Series of float or Climatology
+        The input climatological value(s) to be tested.
+        Can be a scalar, sequence (e.g., list or tuple), a NumPy array, or a pandas Series.
 
     Returns
     -------
-    int
-        1 if climatology value is missing, 0 otherwise
+    Same type as input, but with integer values
+        - Returns 1 (or array/sequence/Series of 1s) if the input value is None or numerically invalid (NaN)
+        - Returns 0 (or array/sequence/Series of 0s) otherwise.
 
     Note
     ----
-    If ``climatology`` is a Climatology object, pass ``lon`` and ``lat`` and ``date`` or ``month`` and ``day`` as keyword-arguments!
+    If `climatology` is a Climatology object, pass `lon` and `lat` and `date`, or `month` and `day`, as keyword arguments
+    to extract the relevant climatological value.
     """
     return value_check(climatology)
 
 
 def do_hard_limit_check(
-    value: float | None | Sequence[float | None] | np.ndarray, hard_limits: list
-) -> int:
-    """
-    Check that value is within hard limits specified by "hard_limits".
+    value: ValueFloatType, hard_limits: tuple[float, float]
+) -> ValueIntType:
+    """Check if a value is outside specified limits.
 
     Parameters
     ----------
-    value : float
-        Value to be checked.
-    hard_limits : list
-        2-element list containing lower and upper hard limits for the QC check.
+    val: float, None, sequence of float or None, np.ndarray of float or pd.Series of float
+        The value(s) to be tested against the limits.
+        Can be a scalar, a sequence (e.g., list or tuple), a NumPy array, or a pandas Series.
+    limits: tuple of float
+        A tuple of two floats representing the lower and upper limit.
 
     Returns
     -------
-    int
-        1 if value is outside hard limits, 0 otherwise
+    Same type as input, but with integer values
+        - Returns 2 (or array/sequence/Series of 2s) if the upper limit is less than or equal
+          to the lower limit, or if the input is invalid (None or NaN).
+        - Returns 1 (or array/sequence/Series of 1s) if value(s) are outside the specified limits.
+        - Returns 0 (or array/sequence/Series of 0s) if value(s) are within limits.
     """
     return hard_limit_check(value, hard_limits)
 
 
 @inspect_climatology("climatology", optional="standard_deviation")
 def do_climatology_check(
-    value: float | None | Sequence[float | None] | np.ndarray,
-    climatology: float | None | Sequence[float | None] | np.ndarray | Climatology,
+    value: ValueFloatType,
+    climatology: ClimFloatType,
     maximum_anomaly: float,
-    standard_deviation: (
-        float | None | Sequence[float | None] | np.ndarray | Climatology
-    ) = "default",
-    standard_deviation_limits: list | None = None,
+    standard_deviation: ValueFloatType = "default",
+    standard_deviation_limits: tuple[float, float] | None = None,
     lowbar: float | None = None,
     **kwargs,
 ) -> int | np.ndarray:
     """
-    Check that the value is within the prescribed distance from climatology.
+    Climatology check to compare a value with a climatological average within specified anomaly limits.
+    This check supports optional parameters to customize the comparison.
 
     If ``standard_deviation`` is provided, the value is converted into a standardised anomaly. Optionally,
     if ``standard deviation`` is outside the range specified by ``standard_deviation_limits`` then ``standard_deviation``
     is set to whichever of the lower or upper limits is closest.
     If ``lowbar`` is provided, the anomaly must be greater than ``lowbar`` to fail regardless of ``standard_deviation``.
 
-
     Parameters
     ----------
-    value : float
-        Value to be checked
-    climatology: float or Climatology
-        Reference climatological value.
-        This could be a float value or Climatology object.
-        If it is a Climatology object, pass ``lon`` and ``lat`` and ``date`` or ``month`` and ``day`` as keyword-arguments!
-    maximum_anomaly : float
+    value: float, None, sequence of float or None, np.ndarray of float or pd.Series of float
+        Value(s) to be compared to climatology.
+        Can be a scalar, a sequence (e.g., list or tuple), a NumPy array, or a pandas Series.
+    climatology : float, None, sequence of float or None, np.ndarray of float, pd.Series of float or Climatology
+        The climatological average(s) to which the values(s) will be compared.
+        Can be a scalar, a sequence (e.g., list or tuple), a NumPy array, or a pandas Series.
+    maximum_anomaly: float
         Largest allowed anomaly.
-        If ``standard_deviation`` is provided, this is the largest allowed standardised anomaly.
-    standard_deviation : float or Climatology, default: "default"
-        Climatological standard deviation.
-        This could be a float value or Climatology object.
-        If it is a Climatology object, pass ``lon`` and ``lat`` and ``date`` or ``month`` and ``day`` as keyword-arguments!
-    standard_deviation_limits : list, optional
-        2-element list containing lower and upper limits for standard deviation. If the stdev is outside these
-        limits, at_stdev will be set to the nearest limit.
+        If ``standard_deviation`` is provided, this is interpreted as the largest allowed standardised anomaly.
+    standard_deviation: float, None, sequence of float or None, np.ndarray of float, pd.Series of float or Climatology, default: "default"
+        The standard deviation(s) used to standardize the anomaly
+        If set to "default", it is internally treated as 1.0.
+        Can be a scalar, a sequence (e.g., list or tuple), a NumPy array, or a pandas Series.
+    standard_deviation_limits: tuple of float, optional
+        A tuple of two floats representing the upper and lower limits for standard deviation used in the check.
     lowbar: float, optional
         The anomaly must be greater than lowbar to fail regardless of standard deviation.
 
     Returns
     -------
-    int
-        2 if either value, climatology, maximum_anomaly or standard_deviation is numerically invalid or None.
-        1 if value anomaly is outside allowed bounds
-        0 otherwise
+    Same type as input, but with integer values
+        - Returns 2 (or array/sequence/Series of 2s) if `standard_deviation_limits[1]` is less than or equal to
+          `standard_deviation_limits[0]`, or if `maximum_anomaly` is less than or equal to 0, or if any of
+          `value`, `climate_normal`, or `standard_deviation` is numerically invalid (None or NaN).
+        - Returns 1 (or array/sequence/Series of 1s) if the difference is outside the specified range.
+        - Returns 0 (or array/sequence/Series of 0s) otherwise.
 
     Note
     ----
-    If either ``climatology`` or ``standard_deviation`` is a Climatology object,
-    pass ``lon`` and ``lat`` and ``date`` or ``month`` and ``day`` as keyword-arguments!
+    If either `climatology` or `standard_deviation` is a Climatology object, pass `lon` and `lat` and `date`, or `month` and `day`,
+    as keyword arguments to extract the relevant climatological value(s).
     """
     return climatology_check(
         value,
@@ -715,26 +680,25 @@ def do_climatology_check(
     )
 
 
-def do_supersaturation_check(
-    dpt: float | None | Sequence[float | None] | np.ndarray,
-    at2: float | None | Sequence[float | None] | np.ndarray,
-) -> int | np.ndarray:
+def do_supersaturation_check(dpt: ValueFloatType, at2: ValueFloatType) -> ValueIntType:
     """
     Perform the super saturation check. Check if a valid dewpoint temperature is greater than a valid air temperature
 
     Parameters
     ----------
-    dpt : float
-        Dewpoint temperature
-    at2 : float
-        Air temperature
+    dpt : float, None, sequence of float or None, np.ndarray of float or pd.Series of float
+        Dewpoint temperature value(s).
+        Can be a scalar, a sequence (e.g., list or tuple), a NumPy array, or a pandas Series.
+    at2 : float, None, sequence of float or None, np.ndarray of float or pd.Series of float
+        Air temperature values(s).
+        Can be a scalar, a sequence (e.g., list or tuple), a NumPy array, or a pandas Series.
 
     Returns
     -------
-    int
-        2 if either dpt or at2 is numerically invalid or None,
-        1 if supersaturation is detected,
-        0 otherwise
+    Same type as input, but with integer values
+        - Returns 2 (or array/sequence/Series of 2s) if either dpt or at2 is invalid (None or NaN).
+        - Returns 1 (or array/sequence/Series of 1s) if supersaturation is detected,
+        - Returns 0 (or array/sequence/Series of 0s) otherwise.
     """
     dpt_arr = np.asarray(dpt, dtype=float)  # type: np.ndarray
     at2_arr = np.asarray(at2, dtype=float)  # type: np.ndarray
@@ -749,69 +713,79 @@ def do_supersaturation_check(
     result[valid_indices & cond_failed] = failed
     result[valid_indices & ~cond_failed] = passed
 
-    if np.isscalar(dpt) and np.isscalar(at2):
-        return int(result)
-
-    if isinstance(dpt, pd.Series):
-        return pd.Series(result, index=dpt.index)
-
-    if isinstance(at2, pd.Series):
-        return pd.Series(result, index=at2.index)
-
-    return result
+    return format_return_type(result, dpt)
 
 
 def do_sst_freeze_check(
-    sst: float | None | Sequence[float | None] | np.ndarray,
+    sst: ValueFloatType,
     freezing_point: float,
     freeze_check_n_sigma: float,
-) -> int | np.ndarray:
-    """
-    Check that sea surface temperature is above freezing
+) -> ValueIntType:
+    """Compare an input SST to see if it is above freezing.
+
+    This is a simple freezing point check made slightly more complex. We want to check if a
+    measurement of SST is above freezing, but there are two problems. First, the freezing point
+    can vary from place to place depending on the salinity of the water. Second, there is uncertainty
+    in SST measurements. If we place a hard cut-off at -1.8, then we are likely to bias the average
+    of many measurements too high when they are near the freezing point - observational error will
+    push the measurements randomly higher and lower, and this test will trim out the lower tail, thus
+    biasing the result. The inclusion of an SST uncertainty parameter *might* mitigate that and we allow
+    that possibility here.
 
     Parameters
     ----------
-    sst : float
-        Sea surface temperature to be checked
-    freezing_point : float
-        Freezing point of seawater to be used in check
-    freeze_check_n_sigma : float
-        Number of uncertainty standard deviations that sea surface temperature can be below the freezing point
-        before the QC check fails.
+    sst : float, None, sequence of float or None, np.ndarray of float or pd.series of float
+        Input sea-surface temperature value(s) to be checked.
+        Can be a scalar, a sequence (e.g., list or tuple), a NumPy array, or a pandas Series.
+    freezing_point : float, optional
+        The freezing point of the water.
+    n_sigma : float, optional
+        Number of sigma to use in the check.
 
     Returns
     -------
-    int
-        Return 1 if SST below freezing, 0 otherwise
+    Same type as input, but with integer values
+        - Returns 2 (or array/sequence/Series of 2s) if any of `insst`, `freezing_point`, `sst_uncertainty`,
+          or `n_sigma` is numerically invalid (None or NaN).
+        - Returns 1 (or array/sequence/Series of 1s) if `insst` is below `freezing_point`.
+        - Returns 0 (or array/sequence/Series of 0s) otherwise.
+
+    Note
+    ----
+    In previous versions, some parameters had default values:
+
+        * ``sst_uncertainty``: 0.0
+        * ``freezing_point``: -1.80
+        * ``n_sigma``: 2.0
 
     Note
     ----
     Freezing point of sea water is typically -1.8 degC or 271.35 K
     """
-    return sst_freeze_check(sst, 0.0, freezing_point, freeze_check_n_sigma)
+    return sst_freeze_check(sst, freezing_point, 0.0, freeze_check_n_sigma)
 
 
 def do_wind_consistency_check(
-    wind_speed: float | None | Sequence[float | None] | np.ndarray,
-    wind_direction: float | None | Sequence[float | None] | np.ndarray,
-) -> int | np.ndarray:
+    wind_speed: ValueFloatType, wind_direction: ValueFloatType
+) -> ValueIntType:
     """
     Test to compare windspeed to winddirection.
 
     Parameters
     ----------
-    wind_speed : float, None, array-like of float or None
-        Wind speed values to be tested
-    wind_direction : float, None, array-like of float or None
-        Wind direction values to be tested
+    wind_speed : float, None, sequence of float or None, np.ndarray of float or pd.series of float
+        Wind speed value(s).
+        Can be a scalar, a sequence (e.g., list or tuple), a NumPy array, or a pandas Series.
+    wind_direction : float, None, sequence of float or None, np.ndarray of float or pd.series of float
+        Wind direction value(s).
+        Can be a scalar, a sequence (e.g., list or tuple), a NumPy array, or a pandas Series.
 
     Returns
     -------
-    int or np.ndarray of int
-        2 if either wind_speed or wind_direction is numerically invalid or None,
-        1 if windspeed and direction are inconsistent,
-        0 otherwise
-        Returns a integer scalar if input is scalar, else a integer array.
+    Same type as input, but with integer values
+        - Returns 2 (or array/sequence/Series of 2s) if either wind_speed or wind_direction is invalid (None or NaN).
+        - Returns 1 (or array/sequence/Series of 1s) if wind_speed and wind_direction are inconsistent,
+        - Returns 0 (or array/sequence/Series of 0s) otherwise.
     """
     wind_speed_arr = np.asarray(wind_speed, dtype=float)  # type: np.ndarray
     wind_direction_arr = np.asarray(wind_direction, dtype=float)  # type: np.ndarray
@@ -830,13 +804,4 @@ def do_wind_consistency_check(
     result[valid_indices & cond_failed] = failed
     result[valid_indices & ~cond_failed] = passed
 
-    if np.isscalar(wind_speed) and np.isscalar(wind_direction):
-        return int(result)
-
-    if isinstance(wind_speed, pd.Series):
-        return pd.Series(result, index=wind_speed.index)
-
-    if isinstance(wind_direction, pd.Series):
-        return pd.Series(result, index=wind_speed.index)
-
-    return result
+    return format_return_type(result, wind_speed)
