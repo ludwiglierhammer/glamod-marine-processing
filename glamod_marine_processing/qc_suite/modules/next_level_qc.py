@@ -14,6 +14,7 @@ from .auxiliary import (
     ValueIntType,
     failed,
     format_return_type,
+    inspect_arrays,
     isvalid,
     passed,
     untestable,
@@ -262,6 +263,7 @@ def sst_freeze_check(
     return format_return_type(result, insst)
 
 
+@inspect_arrays(["lat", "lon"], replace=False)
 def do_position_check(lat: ValueFloatType, lon: ValueFloatType) -> ValueIntType:
     """
     Perform the positional QC check on the report. Simple check to make sure that the latitude and longitude are
@@ -305,6 +307,7 @@ def do_position_check(lat: ValueFloatType, lon: ValueFloatType) -> ValueIntType:
     return format_return_type(result, lat, lon)
 
 
+@inspect_arrays(["date", "year", "month", "day"], replace=False, skip_none=True)
 def do_date_check(
     date: ValueDatetimeType = None,
     year: ValueIntType = None,
@@ -418,6 +421,11 @@ def do_time_check(
     return format_return_type(result, date, hour)
 
 
+@inspect_arrays(
+    ["date", "year", "month", "day", "hour", "lat", "lon"],
+    replace=False,
+    skip_none=True,
+)
 def do_day_check(
     date: ValueDatetimeType = None,
     year: ValueIntType = None,
@@ -680,6 +688,7 @@ def do_climatology_check(
     )
 
 
+@inspect_arrays(["dpt", "at2"], replace=False)
 def do_supersaturation_check(dpt: ValueFloatType, at2: ValueFloatType) -> ValueIntType:
     """
     Perform the super saturation check. Check if a valid dewpoint temperature is greater than a valid air temperature
@@ -765,6 +774,7 @@ def do_sst_freeze_check(
     return sst_freeze_check(sst, freezing_point, 0.0, freeze_check_n_sigma)
 
 
+@inspect_arrays(["wind_speed", "wind_direction"], replace=False)
 def do_wind_consistency_check(
     wind_speed: ValueFloatType, wind_direction: ValueFloatType
 ) -> ValueIntType:
