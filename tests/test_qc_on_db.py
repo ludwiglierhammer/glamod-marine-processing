@@ -1292,6 +1292,8 @@ def test_do_spike_check(testdata_track):
         ),
         include_groups=False,
     )
+    print(results)
+    print(type(results))
     results = results.explode()
     results.index = db_.index
     results = results.astype(int)

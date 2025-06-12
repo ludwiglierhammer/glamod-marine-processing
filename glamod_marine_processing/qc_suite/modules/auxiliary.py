@@ -23,7 +23,9 @@ PandasNaTType: TypeAlias = type(pd.NaT)
 # --- Scalars ---
 ScalarIntType: TypeAlias = int | np.integer | PandasNAType | None
 ScalarFloatType: TypeAlias = float | np.floating | PandasNAType | None
-ScalarDatetimeType: TypeAlias = datetime | np.datetime64 | pd.Timestamp | PandasNaTType | None
+ScalarDatetimeType: TypeAlias = (
+    datetime | np.datetime64 | pd.Timestamp | PandasNaTType | None
+)
 
 # --- Sequences ---
 SequenceIntType: TypeAlias = (
@@ -61,16 +63,19 @@ def is_scalar_like(x: Any) -> bool:
     - Pandas scalars: pd.Timestamp, pd.Timedelta, pd.NA, pd.NaT
     - Strings and bytes (unless excluded)
 
-    Parameters:
+    Parameters
+    ----------
         x (Any): The value to check.
 
-    Returns:
+    Returns
+    -------
         bool: True if `x` is scalar-like, False otherwise.
     """
     try:
         return np.ndim(x) == 0
     except TypeError:
         return True  # fallback: built-in scalars like int, float, pd.Timestamp
+
 
 def isvalid(
     inval: float | None | Sequence[float | None] | np.ndarray,
@@ -163,9 +168,9 @@ def inspect_arrays(params: list[str], replace=True, skip_none=False) -> Callable
 
                 if replace is True:
                     bound_args.arguments[name] = arr
-                   
-                arrays.append(arr) 
-                    
+
+                arrays.append(arr)
+
             lengths = [len(arr) for arr in arrays]
             if any(length != lengths[0] for length in lengths):
                 raise ValueError(f"Input {params} must all have the same length.")
