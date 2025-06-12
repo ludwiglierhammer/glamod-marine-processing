@@ -160,10 +160,12 @@ def inspect_arrays(params: list[str], replace=True, skip_none=False) -> Callable
                 arr = np.atleast_1d(bound_args.arguments[name])
                 if arr.ndim != 1:
                     raise ValueError(f"Input '{name}' must be one-dimensional.")
-                arrays.append(arr)
 
                 if replace is True:
                     bound_args.arguments[name] = arr
+                   
+                arrays.append(arr) 
+                    
             lengths = [len(arr) for arr in arrays]
             if any(length != lengths[0] for length in lengths):
                 raise ValueError(f"Input {params} must all have the same length.")
