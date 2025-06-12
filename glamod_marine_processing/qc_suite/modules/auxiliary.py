@@ -17,16 +17,60 @@ failed = 1
 untestable = 2
 untested = 3
 
-ValueFloatType: TypeAlias = (
-    float | None | Sequence[float | None] | npt.NDArray[np.float64] | pd.Series
-)
-ValueIntType: TypeAlias = (
-    int | None | Sequence[int | None] | npt.NDArray[np.int_] | pd.Series
-)
-ValueDatetimeType: TypeAlias = (
-    datetime | None | Sequence[datetime | None] | npt.NDArray[np.datetime64] | pd.Series
+PandasNAType: TypeAlias = type(pd.NA)
+PandasNaTType: TypeAlias = type(pd.NaT)
+
+# --- Scalars ---
+ScalarIntType: TypeAlias = int | np.integer | PandasNAType | None
+ScalarFloatType: TypeAlias = float | np.floating | PandasNAType | None
+ScalarDatetimeType: TypeAlias = datetime | np.datetime64 | pd.Timestamp | PandasNaTType | None
+
+# --- Sequences ---
+SequenceIntType: TypeAlias = (
+    Sequence[ScalarIntType]
+    | npt.NDArray[np.integer]
+    | pd.Series  # optionally: pd.Series[np.integer] or pd.Series[pd.Int64Dtype]
 )
 
+SequenceFloatType: TypeAlias = (
+    Sequence[ScalarFloatType]
+    | npt.NDArray[np.floating]
+    | pd.Series  # optionally: pd.Series[np.floating] or pd.Series[pd.Float64Dtype]
+)
+
+SequenceDatetimeType: TypeAlias = (
+    Sequence[ScalarDatetimeType]
+    | npt.NDArray[np.datetime64]
+    | pd.Series  # optionally: pd.Series[pd.DatetimeTZDtype] or similar
+)
+
+# --- Value Types (Scalar or Sequence) ---
+ValueFloatType: TypeAlias = ScalarFloatType | SequenceFloatType
+ValueIntType: TypeAlias = ScalarIntType | SequenceIntType
+ValueDatetimeType: TypeAlias = ScalarDatetimeType | SequenceDatetimeType
+
+
+def is_scalar_like(x: Any) -> bool:
+    """
+    Return True if the input is scalar-like (i.e., has no dimensions).
+
+    A scalar-like value includes:
+    - Python scalars: int, float, bool, None
+    - NumPy scalars: np.int32, np.float64, np.datetime64, etc.
+    - Zero-dimensional NumPy arrays: np.array(5)
+    - Pandas scalars: pd.Timestamp, pd.Timedelta, pd.NA, pd.NaT
+    - Strings and bytes (unless excluded)
+
+    Parameters:
+        x (Any): The value to check.
+
+    Returns:
+        bool: True if `x` is scalar-like, False otherwise.
+    """
+    try:
+        return np.ndim(x) == 0
+    except TypeError:
+        return True  # fallback: built-in scalars like int, float, pd.Timestamp
 
 def isvalid(
     inval: float | None | Sequence[float | None] | np.ndarray,
@@ -72,11 +116,13 @@ def format_return_type(result_array: np.ndarray, *input_values: Any) -> Any:
         If all input_values are None, so the output type cannot be inferred.
     """
     input_value = next((val for val in input_values if val is not None), None)
+    if input_value is None or is_scalar_like(input_value):
+        return int(result_array)
     if isinstance(input_value, pd.Series):
         return pd.Series(result_array, index=input_value.index, dtype=int)
     if isinstance(input_value, (list, tuple)):
         return type(input_value)(result_array.tolist())
-    return int(result_array)  # np.ndarray or fallback
+    return result_array  # np.ndarray or fallback
 
 
 def inspect_arrays(params: list[str], replace=True, skip_none=False) -> Callable:
