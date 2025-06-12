@@ -211,14 +211,7 @@ def test_hard_limit_check(value, limits, expected):
     ],
 )
 def test_sst_freeze_check(sst, sst_uncertainty, freezing_point, n_sigma, expected):
-    assert sst_freeze_check(sst, sst_uncertainty, freezing_point, n_sigma) == expected
-
-
-def _test_sst_freeze_check_raises():
-    with pytest.raises(ValueError):
-        sst_freeze_check(0.0, None, -1.8, 2.0)
-    with pytest.raises(ValueError):
-        sst_freeze_check(0.0, 0.0, None, 2.0)
+    assert sst_freeze_check(sst, freezing_point, sst_uncertainty, n_sigma) == expected
 
 
 def test_sst_freeze_check_defaults():
