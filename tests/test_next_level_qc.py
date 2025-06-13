@@ -521,7 +521,8 @@ def test_do_air_temperature_climatology_check(
 
 def test_do_air_temperature_climatology_check_array():
     at = [5.6, None, np.nan]
-    results = do_climatology_check(at, 2.2, maximum_anomaly=10.0)
+    clim = [2.2, 2.2, 2.2]
+    results = do_climatology_check(at, clim, maximum_anomaly=10.0)
     expected = [passed, untestable, untestable]
     np.testing.assert_array_equal(results, expected)
 

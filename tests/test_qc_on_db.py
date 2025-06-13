@@ -1291,12 +1291,8 @@ def test_do_spike_check(testdata_track):
             n_neighbours=5,
         ),
         include_groups=False,
-    )
-    print(results)
-    print(type(results))
-    results = results.explode()
-    results.index = db_.index
-    results = results.astype(int)
+    ).squeeze()
+
     expected = pd.Series(
         [
             passed,
@@ -1331,10 +1327,7 @@ def test_do_track_check(testdata_track):
             max_midpoint_discrepancy=150.0,
         ),
         include_groups=False,
-    )
-    results = results.explode()
-    results.index = db_.index
-    results = results.astype(int)
+    ).squeeze()
     expected = pd.Series(
         [
             passed,
@@ -1361,10 +1354,7 @@ def test_do_few_check_passed(testdata_track):
             value=track[("header", "latitude")],
         ),
         include_groups=False,
-    )
-    results = results.explode()
-    results.index = db_.index
-    results = results.astype(int)
+    ).squeeze()
     expected = pd.Series(
         [
             passed,
@@ -1390,10 +1380,7 @@ def test_do_few_check_failed(testdata_track):
             value=track[("header", "latitude")],
         ),
         include_groups=False,
-    )
-    results = results.explode()
-    results.index = db_.index
-    results = results.astype(int)
+    ).squeeze()
     expected = pd.Series(
         [
             failed,
@@ -1417,10 +1404,7 @@ def test_do_iquam_track_check(testdata_track):
             n_neighbours=5,
         ),
         include_groups=False,
-    )
-    results = results.explode()
-    results.index = db_.index
-    results = results.astype(int)
+    ).squeeze()
     expected = pd.Series(
         [
             passed,
@@ -1449,10 +1433,7 @@ def test_find_repeated_values(testdata_track):
             threshold=0.7,
         ),
         include_groups=False,
-    )
-    results = results.explode()
-    results.index = db_.index
-    results = results.astype(int)
+    ).squeeze()
     expected = pd.Series(
         [
             passed,
