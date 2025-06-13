@@ -3,13 +3,46 @@
 from __future__ import annotations
 
 import calendar
+import inspect
 import math
+from collections.abc import Callable
 from datetime import datetime, timedelta
+from functools import wraps
 from typing import Sequence
 
 import numpy as np
 
-from .auxiliary import isvalid
+from .auxiliary import is_scalar_like, isvalid
+
+
+def convert_date(params: list[str]) -> Callable:
+    """DOCUMENTATION."""
+
+    def decorator(func):
+        @wraps(func)
+        def wrapper(*args, **kwargs):
+            sig = inspect.signature(func)
+            bound_args = sig.bind(*args, **kwargs)
+            bound_args.apply_defaults()
+
+            date = bound_args.arguments.get("date")
+            if date is None:
+                return func(*bound_args.args, **bound_args.kwargs)
+            if is_scalar_like(date):
+                date = [date]
+            extracted = [split_date(d) for d in date]
+
+            for param in params:
+                if param not in bound_args.arguments:
+                    raise ValueError(f"Parameter {param} is not a valid parameter.")
+
+                bound_args.arguments[param] = [d[param] for d in extracted]
+
+            return func(*bound_args.args, **bound_args.kwargs)
+
+        return wrapper
+
+    return decorator
 
 
 def split_date(date: datetime) -> dict:
