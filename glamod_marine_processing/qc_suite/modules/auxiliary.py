@@ -52,6 +52,13 @@ ValueIntType: TypeAlias = ScalarIntType | SequenceIntType
 ValueDatetimeType: TypeAlias = ScalarDatetimeType | SequenceDatetimeType
 
 
+class TypeContext:
+    """DOCUMENTATION."""
+
+    def __init__(self):
+        self.originals = {}
+
+
 def is_scalar_like(x: Any) -> bool:
     """
     Return True if the input is scalar-like (i.e., has no dimensions).
@@ -77,9 +84,7 @@ def is_scalar_like(x: Any) -> bool:
         return True  # fallback: built-in scalars like int, float, pd.Timestamp
 
 
-def isvalid(
-    inval: float | None | Sequence[float | None] | np.ndarray,
-) -> bool | np.ndarray:
+def isvalid(inval: ValueFloatType) -> bool | np.ndarray:
     """Check if a value(s) are numerically valid (not None or NaN).
 
     Parameters
@@ -101,7 +106,10 @@ def isvalid(
 
 def format_return_type(result_array: np.ndarray, *input_values: Any) -> Any:
     """
-    Convert the result numpy array to the same type as the input `value`.
+    Convert the result numpy array(s) to the same type as the input `value`.
+
+    If result_array is a sequence of arrays, format each element recursively,
+    preserving the container type.
 
     Parameters
     ----------
@@ -112,15 +120,11 @@ def format_return_type(result_array: np.ndarray, *input_values: Any) -> Any:
 
     Returns
     -------
-    Same type as input
+    Same type as input(s)
         The result formatted to match the type of the first valid input value.
-
-    Raises
-    ------
-    ValueError
-        If all input_values are None, so the output type cannot be inferred.
     """
     input_value = next((val for val in input_values if val is not None), None)
+
     if input_value is None or is_scalar_like(input_value):
         return int(result_array)
     if isinstance(input_value, pd.Series):
@@ -128,6 +132,33 @@ def format_return_type(result_array: np.ndarray, *input_values: Any) -> Any:
     if isinstance(input_value, (list, tuple)):
         return type(input_value)(result_array.tolist())
     return result_array  # np.ndarray or fallback
+
+
+def post_format_return_type(params: list[str]) -> Callable:
+    """DOCUMENTATION."""
+
+    def decorator(func):
+        @wraps(func)
+        def wrapper(*args, **kwargs):
+            ctx = kwargs.pop("_ctx", None)
+
+            sig = inspect.signature(func)
+            bound_args = sig.bind(*args, **kwargs)
+            bound_args.apply_defaults()
+
+            # Get original input values from context if available
+            if ctx is not None:
+                input_values = [ctx.originals.get(p) for p in params]
+            else:
+                # Fallback to current values
+                input_values = [bound_args.arguments.get(p) for p in params]
+
+            result = func(*bound_args.args, **bound_args.kwargs)
+            return format_return_type(result, *input_values)
+
+        return wrapper
+
+    return decorator
 
 
 def inspect_arrays(params: list[str], replace=True, skip_none=False) -> Callable:
@@ -151,23 +182,33 @@ def inspect_arrays(params: list[str], replace=True, skip_none=False) -> Callable
     def decorator(func):
         @wraps(func)
         def wrapper(*args, **kwargs):
+
+            # Get or create the shared context object
+            ctx = kwargs.get("_ctx", TypeContext())
+
+            # Bind the args and kwargs to parameter names
             sig = inspect.signature(func)
             bound_args = sig.bind(*args, **kwargs)
             bound_args.apply_defaults()
 
             arrays = []
-            for name in params:
-                if name not in bound_args.arguments:
-                    raise ValueError(f"Parameter {name} is not a valid parameter.")
+            for param in params:
+                if param not in bound_args.arguments:
+                    raise ValueError(f"Parameter {param} is not a valid parameter.")
 
-                if bound_args.arguments[name] is None and skip_none:
+                value = bound_args.arguments[param]
+
+                if value is None and skip_none:
                     continue
-                arr = np.atleast_1d(bound_args.arguments[name])
+
+                ctx.originals[param] = value
+
+                arr = np.atleast_1d(value)
                 if arr.ndim != 1:
-                    raise ValueError(f"Input '{name}' must be one-dimensional.")
+                    raise ValueError(f"Input '{param}' must be one-dimensional.")
 
                 if replace is True:
-                    bound_args.arguments[name] = arr
+                    bound_args.arguments[param] = arr
 
                 arrays.append(arr)
 
@@ -175,6 +216,7 @@ def inspect_arrays(params: list[str], replace=True, skip_none=False) -> Callable
             if any(length != lengths[0] for length in lengths):
                 raise ValueError(f"Input {params} must all have the same length.")
 
+            bound_args.arguments["_ctx"] = ctx
             return func(*bound_args.args, **bound_args.kwargs)
 
         return wrapper
