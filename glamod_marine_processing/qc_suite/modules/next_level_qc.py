@@ -5,7 +5,6 @@ from __future__ import annotations
 import math
 
 import numpy as np
-import pandas as pd
 
 from .astronomical_geometry import sunangle
 from .auxiliary import (
@@ -17,12 +16,15 @@ from .auxiliary import (
     inspect_arrays,
     isvalid,
     passed,
+    post_format_return_type,
     untestable,
 )
 from .external_clim import ClimFloatType, inspect_climatology
-from .time_control import dayinyear, get_month_lengths, split_date
+from .time_control import convert_date, dayinyear, get_month_lengths
 
 
+@inspect_arrays(["value", "climate_normal"])
+@post_format_return_type(["value"])
 def climatology_check(
     value: ValueFloatType,
     climate_normal: ValueFloatType,
@@ -69,27 +71,20 @@ def climatology_check(
         - Returns 1 (or array/sequence/Series of 1s) if the difference is outside the specified range.
         - Returns 0 (or array/sequence/Series of 0s) otherwise.
     """
-    value_arr = np.asarray(value, dtype=float)  # type: np.ndarray
-    climate_normal_arr = np.asarray(climate_normal, dtype=float)  # type: np.ndarray
-
-    if climate_normal_arr.ndim == 0:
-        climate_normal_arr = np.full_like(
-            value_arr, climate_normal_arr
-        )  # type: np.ndarray
+    if climate_normal.ndim == 0:
+        climate_normal = np.full_like(value, climate_normal)  # type: np.ndarray
 
     if isinstance(standard_deviation, str) and standard_deviation == "default":
-        standard_deviation = np.full(value_arr.shape, 1.0, dtype=float)
-    standard_deviation_arr = np.asarray(
-        standard_deviation, dtype=float
-    )  # type: np.ndarray
+        standard_deviation = np.full(value.shape, 1.0, dtype=float)
+    standard_deviation = np.atleast_1d(standard_deviation)  # type: np.ndarray
 
-    result = np.full(value_arr.shape, untestable, dtype=int)  # type: np.ndarray
+    result = np.full(value.shape, untestable, dtype=int)  # type: np.ndarray
 
     if maximum_anomaly is None or maximum_anomaly <= 0:
         return format_return_type(result, value)
 
     if standard_deviation is None:
-        standard_deviation_arr = np.full(value_arr.shape, 1.0)
+        standard_deviation = np.full(value.shape, 1.0)
 
     if standard_deviation_limits is None:
         standard_deviation_limits = (0, np.inf)
@@ -102,36 +97,37 @@ def climatology_check(
         & isvalid(maximum_anomaly)
         & isvalid(standard_deviation)
     )
-
-    standard_deviation_arr = np.clip(
-        standard_deviation_arr,
+    standard_deviation[valid_indices] = np.clip(
+        standard_deviation[valid_indices],
         standard_deviation_limits[0],
         standard_deviation_limits[1],
     )
 
-    climate_diff = np.zeros_like(value_arr)  # type: np.ndarray
+    climate_diff = np.zeros_like(value)  # type: np.ndarray
 
     climate_diff[valid_indices] = np.abs(
-        value_arr[valid_indices] - climate_normal_arr[valid_indices]
+        value[valid_indices] - climate_normal[valid_indices]
     )
 
     if lowbar is None:
-        low_check = np.ones(value_arr.shape, dtype=bool)
+        low_check = np.ones(value.shape, dtype=bool)
     else:
         low_check = climate_diff > lowbar
 
-    cond_failed = np.full(value_arr.shape, False, dtype=bool)
+    cond_failed = np.full(value.shape, False, dtype=bool)
     cond_failed[valid_indices] = (
-        climate_diff[valid_indices] / standard_deviation_arr[valid_indices]
+        climate_diff[valid_indices] / standard_deviation[valid_indices]
         > maximum_anomaly
     ) & low_check[valid_indices]
 
     result[valid_indices & cond_failed] = failed
     result[valid_indices & ~cond_failed] = passed
 
-    return format_return_type(result, value)
+    return result
 
 
+@inspect_arrays(["value"])
+@post_format_return_type(["value"])
 def value_check(value: ValueFloatType) -> ValueIntType:
     """Check if a value is equal to None or numerically invalid (NaN).
 
@@ -150,9 +146,11 @@ def value_check(value: ValueFloatType) -> ValueIntType:
     valid_mask = isvalid(value)
     result = np.where(valid_mask, passed, failed)
 
-    return format_return_type(result, value)
+    return result
 
 
+@inspect_arrays(["value"])
+@post_format_return_type(["value"])
 def hard_limit_check(
     value: ValueFloatType,
     limits: tuple[float, float],
@@ -175,25 +173,26 @@ def hard_limit_check(
         - Returns 1 (or array/sequence/Series of 1s) if value(s) are outside the specified limits.
         - Returns 0 (or array/sequence/Series of 0s) if value(s) are within limits.
     """
-    value_arr = np.asarray(value, dtype=float)
-    result = np.full(value_arr.shape, untestable, dtype=int)
+    result = np.full(value.shape, untestable, dtype=int)
 
     if limits[1] <= limits[0]:
         return format_return_type(result, value)
 
     valid_indices = isvalid(value)
 
-    cond_passed = np.full(value_arr.shape, True, dtype=bool)
-    cond_passed[valid_indices] = (limits[0] <= value_arr[valid_indices]) & (
-        value_arr[valid_indices] <= limits[1]
+    cond_passed = np.full(value.shape, True, dtype=bool)
+    cond_passed[valid_indices] = (limits[0] <= value[valid_indices]) & (
+        value[valid_indices] <= limits[1]
     )
 
     result[valid_indices & cond_passed] = passed
     result[valid_indices & ~cond_passed] = failed
 
-    return format_return_type(result, value)
+    return result
 
 
+@inspect_arrays(["insst"])
+@post_format_return_type(["insst"])
 def sst_freeze_check(
     insst: ValueFloatType,
     freezing_point: float | None = None,
@@ -240,30 +239,30 @@ def sst_freeze_check(
         * ``freezing_point``: -1.80
         * ``n_sigma``: 2.0
     """
-    insst_arr = np.asarray(insst, dtype=float)  # type: np.ndarray
-    result = np.full(insst_arr.shape, untestable, dtype=int)  # type: np.ndarray
+    result = np.full(insst.shape, untestable, dtype=int)  # type: np.ndarray
 
     if (
         not isvalid(sst_uncertainty)
         or not isvalid(freezing_point)
         or not isvalid(n_sigma)
     ):
-        return format_return_type(result, insst)
+        return result
 
     valid_sst = isvalid(insst)
 
-    cond_failed = np.full(insst_arr.shape, True, dtype=bool)
-    cond_failed[valid_sst] = insst_arr[valid_sst] < (
+    cond_failed = np.full(insst.shape, True, dtype=bool)
+    cond_failed[valid_sst] = insst[valid_sst] < (
         freezing_point - n_sigma * sst_uncertainty
     )
 
     result[valid_sst & cond_failed] = failed
     result[valid_sst & ~cond_failed] = passed
 
-    return format_return_type(result, insst)
+    return result
 
 
-@inspect_arrays(["lat", "lon"], replace=False)
+@inspect_arrays(["lat", "lon"])
+@post_format_return_type(["lat", "lon"])
 def do_position_check(lat: ValueFloatType, lon: ValueFloatType) -> ValueIntType:
     """
     Perform the positional QC check on the report. Simple check to make sure that the latitude and longitude are
@@ -286,28 +285,27 @@ def do_position_check(lat: ValueFloatType, lon: ValueFloatType) -> ValueIntType:
         - Returns 1 (or array/sequence/Series of 1s) if either latitude or longitude is out of the valid range.
         - Returns 0 (or array/sequence/Series of 0s) otherwise.
     """
-    lat_arr = np.asarray(lat, dtype=float)
-    lon_arr = np.asarray(lon, dtype=float)
-
-    result = np.full(lat_arr.shape, untestable, dtype=int)  # type: np.ndarray
+    result = np.full(lat.shape, untestable, dtype=int)  # type: np.ndarray
 
     valid_indices = isvalid(lat) & isvalid(lon)
 
-    cond_failed = np.full(lat_arr.shape, True, dtype=bool)
+    cond_failed = np.full(lat.shape, True, dtype=bool)
     cond_failed[valid_indices] = (
-        (lat_arr[valid_indices] < -90)
-        | (lat_arr[valid_indices] > 90)
-        | (lon_arr[valid_indices] < -180)
-        | (lon_arr[valid_indices] > 360)
+        (lat[valid_indices] < -90)
+        | (lat[valid_indices] > 90)
+        | (lon[valid_indices] < -180)
+        | (lon[valid_indices] > 360)
     )
 
     result[valid_indices & cond_failed] = failed
     result[valid_indices & ~cond_failed] = passed
 
-    return format_return_type(result, lat, lon)
+    return result
 
 
-@inspect_arrays(["date", "year", "month", "day"], replace=False, skip_none=True)
+@convert_date(["year", "month", "day"])
+@inspect_arrays(["year", "month", "day"])
+@post_format_return_type(["year"])
 def do_date_check(
     date: ValueDatetimeType = None,
     year: ValueIntType = None,
@@ -339,27 +337,17 @@ def do_date_check(
         - Returns 1 (or array/sequence/Series of 1s) if the date is not valid,
         - Returns 0 (or array/sequence/Series of 0s) otherwise.
     """
-    if date is not None:
-        date_arr = pd.to_datetime(np.atleast_1d(date))
-        date_ = [split_date(date_i) for date_i in date_arr]
-        year = [date_i["year"] for date_i in date_]
-        month = [date_i["month"] for date_i in date_]
-        day = [date_i["day"] for date_i in date_]
-    year_arr = np.atleast_1d(year)
-    month_arr = np.atleast_1d(month)
-    day_arr = np.atleast_1d(day)
+    result = np.full(year.shape, untestable, dtype=int)
 
-    result = np.full(year_arr.shape, untestable, dtype=int)
-
-    valid_indices = isvalid(year_arr) & isvalid(month_arr) & isvalid(day_arr)
+    valid_indices = isvalid(year) & isvalid(month) & isvalid(day)
 
     for i in range(len(result)):
         if not valid_indices[i]:
             continue
 
-        y_ = int(year_arr[i])
-        m_ = int(month_arr[i])
-        d_ = int(day_arr[i])
+        y_ = int(year[i])
+        m_ = int(month[i])
+        d_ = int(day[i])
 
         month_lengths = get_month_lengths(y_)
 
@@ -375,9 +363,12 @@ def do_date_check(
             continue
         result[i] = passed
 
-    return format_return_type(result, date, year)
+    return result
 
 
+@convert_date(["hour"])
+@inspect_arrays(["date", "hour"])
+@post_format_return_type(["date", "hour"])
 def do_time_check(
     date: ValueDatetimeType = None, hour: ValueFloatType = None
 ) -> ValueIntType:
@@ -400,32 +391,22 @@ def do_time_check(
         - Returns 1 (or array/sequence/Series of 1s) if hour is not a valid hour,
         - Returns 0 (or array/sequence/Series of 0s) otherwise.
     """
-    if date is not None:
-        date_arr = pd.to_datetime(np.atleast_1d(date))
-        date_ = [split_date(date_i) for date_i in date_arr]
-        hour = [date_i["hour"] for date_i in date_]
-    hour_arr = np.asarray(hour)
-
-    result = np.full(hour_arr.shape, untestable, dtype=int)
+    result = np.full(hour.shape, untestable, dtype=int)
 
     valid_indices = isvalid(hour)
 
-    cond_failed = np.full(hour_arr.shape, True, dtype=bool)
-    cond_failed[valid_indices] = (hour_arr[valid_indices] >= 24) | (
-        hour_arr[valid_indices] < 0
-    )
+    cond_failed = np.full(hour.shape, True, dtype=bool)
+    cond_failed[valid_indices] = (hour[valid_indices] >= 24) | (hour[valid_indices] < 0)
 
     result[valid_indices & cond_failed] = failed
     result[valid_indices & ~cond_failed] = passed
 
-    return format_return_type(result, date, hour)
+    return result
 
 
-@inspect_arrays(
-    ["date", "year", "month", "day", "hour", "lat", "lon"],
-    replace=False,
-    skip_none=True,
-)
+@convert_date(["year", "month", "day", "hour"])
+@inspect_arrays(["year", "month", "day", "hour", "lat", "lon"])
+@post_format_return_type(["year"])
 def do_day_check(
     date: ValueDatetimeType = None,
     year: ValueIntType = None,
@@ -483,21 +464,6 @@ def do_day_check(
     definition of "day" for marine air temperature QC. Solar heating biases were considered to be negligible mmore
     than one hour after sunset and up to one hour after sunrise.
     """
-    lat_arr = np.atleast_1d(lat)
-    lon_arr = np.atleast_1d(lon)
-    if date is not None:
-        date_arr = pd.to_datetime(np.atleast_1d(date))
-        date_ = [split_date(date_i) for date_i in date_arr]
-        year = [date_i["year"] for date_i in date_]
-        month = [date_i["month"] for date_i in date_]
-        day = [date_i["day"] for date_i in date_]
-        hour = [date_i["hour"] for date_i in date_]
-
-    year_arr = np.atleast_1d(year)
-    month_arr = np.atleast_1d(month)
-    day_arr = np.atleast_1d(day)
-    hour_arr = np.atleast_1d(hour)
-
     p_check = do_position_check(lat, lon)
     p_check = np.atleast_1d(p_check)
     d_check = do_date_check(year=year, month=month, day=day)
@@ -505,9 +471,9 @@ def do_day_check(
     t_check = do_time_check(hour=hour)
     t_check = np.atleast_1d(t_check)
 
-    result = np.full(year_arr.shape, untestable, dtype=int)
+    result = np.full(year.shape, untestable, dtype=int)
 
-    for i in range(len(year_arr)):
+    for i in range(len(year)):
         if (p_check[i] == failed) or (d_check[i] == failed) or (t_check[i] == failed):
             result[i] = failed
             continue
@@ -518,12 +484,12 @@ def do_day_check(
         ):
             continue
 
-        lat_ = lat_arr[i]
-        lon_ = lon_arr[i]
-        y_ = int(year_arr[i])
-        m_ = int(month_arr[i])
-        d_ = int(day_arr[i])
-        h_ = hour_arr[i]
+        lat_ = lat[i]
+        lon_ = lon[i]
+        y_ = int(year[i])
+        m_ = int(month[i])
+        d_ = int(day[i])
+        h_ = hour[i]
         y2 = y_
         d2 = dayinyear(y_, m_, d_)
         h2 = math.floor(h_)
@@ -556,7 +522,7 @@ def do_day_check(
 
         result[i] = failed
 
-    return format_return_type(result, date, year)
+    return result
 
 
 def do_missing_value_check(value: ValueFloatType) -> ValueIntType:
@@ -688,7 +654,8 @@ def do_climatology_check(
     )
 
 
-@inspect_arrays(["dpt", "at2"], replace=False)
+@inspect_arrays(["dpt", "at2"])
+@post_format_return_type(["dpt", "at2"])
 def do_supersaturation_check(dpt: ValueFloatType, at2: ValueFloatType) -> ValueIntType:
     """
     Perform the super saturation check. Check if a valid dewpoint temperature is greater than a valid air temperature
@@ -709,20 +676,17 @@ def do_supersaturation_check(dpt: ValueFloatType, at2: ValueFloatType) -> ValueI
         - Returns 1 (or array/sequence/Series of 1s) if supersaturation is detected,
         - Returns 0 (or array/sequence/Series of 0s) otherwise.
     """
-    dpt_arr = np.asarray(dpt, dtype=float)  # type: np.ndarray
-    at2_arr = np.asarray(at2, dtype=float)  # type: np.ndarray
-
-    result = np.full(dpt_arr.shape, untestable, dtype=int)  # type: np.ndarray
+    result = np.full(dpt.shape, untestable, dtype=int)  # type: np.ndarray
 
     valid_indices = isvalid(dpt) & isvalid(at2)
 
-    cond_failed = np.full(dpt_arr.shape, True, dtype=bool)
-    cond_failed[valid_indices] = dpt_arr[valid_indices] > at2_arr[valid_indices]
+    cond_failed = np.full(dpt.shape, True, dtype=bool)
+    cond_failed[valid_indices] = dpt[valid_indices] > at2[valid_indices]
 
     result[valid_indices & cond_failed] = failed
     result[valid_indices & ~cond_failed] = passed
 
-    return format_return_type(result, dpt)
+    return result
 
 
 def do_sst_freeze_check(
@@ -774,7 +738,8 @@ def do_sst_freeze_check(
     return sst_freeze_check(sst, freezing_point, 0.0, freeze_check_n_sigma)
 
 
-@inspect_arrays(["wind_speed", "wind_direction"], replace=False)
+@inspect_arrays(["wind_speed", "wind_direction"])
+@post_format_return_type(["wind_speed", "wind_direction"])
 def do_wind_consistency_check(
     wind_speed: ValueFloatType, wind_direction: ValueFloatType
 ) -> ValueIntType:
@@ -797,21 +762,16 @@ def do_wind_consistency_check(
         - Returns 1 (or array/sequence/Series of 1s) if wind_speed and wind_direction are inconsistent,
         - Returns 0 (or array/sequence/Series of 0s) otherwise.
     """
-    wind_speed_arr = np.asarray(wind_speed, dtype=float)  # type: np.ndarray
-    wind_direction_arr = np.asarray(wind_direction, dtype=float)  # type: np.ndarray
-
-    result = np.full(wind_speed_arr.shape, untestable, dtype=int)  # type: np.ndarray
+    result = np.full(wind_speed.shape, untestable, dtype=int)  # type: np.ndarray
 
     valid_indices = isvalid(wind_speed) & isvalid(wind_direction)
 
-    cond_failed = np.full(wind_speed_arr.shape, True, dtype=bool)
+    cond_failed = np.full(wind_speed.shape, True, dtype=bool)
     cond_failed[valid_indices] = (
-        (wind_speed_arr[valid_indices] == 0) & (wind_direction_arr[valid_indices] != 0)
-    ) | (
-        (wind_speed_arr[valid_indices] != 0) & (wind_direction_arr[valid_indices] == 0)
-    )
+        (wind_speed[valid_indices] == 0) & (wind_direction[valid_indices] != 0)
+    ) | ((wind_speed[valid_indices] != 0) & (wind_direction[valid_indices] == 0))
 
     result[valid_indices & cond_failed] = failed
     result[valid_indices & ~cond_failed] = passed
 
-    return format_return_type(result, wind_speed)
+    return result

@@ -15,16 +15,17 @@ from .auxiliary import (
     SequenceFloatType,
     SequenceIntType,
     failed,
-    format_return_type,
     inspect_arrays,
     isvalid,
     passed,
+    post_format_return_type,
 )
 
 km_to_nm = 0.539957
 
 
 @inspect_arrays(["value", "lat", "lon", "date"])
+@post_format_return_type(["value"])
 def do_spike_check(
     value: SequenceFloatType,
     lat: SequenceFloatType,
@@ -141,7 +142,7 @@ def do_spike_check(
 
         count_gradient_violations[most_fails] = 0
 
-    return format_return_type(spike_qc, value)
+    return spike_qc
 
 
 def calculate_course_parameters(
@@ -251,12 +252,7 @@ def calculate_speed_course_distance_time_difference(
     timediff.fill(np.nan)
 
     if number_of_obs == 1:
-        return (
-            format_return_type(speed, lat),
-            format_return_type(distance, lat),
-            format_return_type(course, lat),
-            format_return_type(timediff, lat),
-        )
+        return speed, distance, course, timediff
 
     range_end = number_of_obs
     first_entry = "i"
@@ -280,12 +276,7 @@ def calculate_speed_course_distance_time_difference(
         distance[i] = ship_distance
         timediff[i] = ship_time_difference
 
-    return (
-        format_return_type(speed, lat),
-        format_return_type(distance, lat),
-        format_return_type(course, lat),
-        format_return_type(timediff, lat),
-    )
+    return speed, distance, course, timediff
 
 
 @inspect_arrays(["vsi", "dsi", "lat", "lon", "date"])
@@ -397,7 +388,7 @@ def forward_discrepancy(
 
         distance_from_est_location[i] = discrepancy
 
-    return format_return_type(distance_from_est_location, vsi)
+    return distance_from_est_location
 
 
 @inspect_arrays(["vsi", "dsi", "lat", "lon", "date"])
@@ -508,10 +499,11 @@ def backward_discrepancy(
         distance_from_est_location[i] = discrepancy
 
     # that fancy bit at the end reverses the array
-    return format_return_type(distance_from_est_location[::-1], vsi)
+    return distance_from_est_location[::-1]
 
 
 @inspect_arrays(["lat", "lon", "timediff"])
+@post_format_return_type(["lat"])
 def calculate_midpoint(
     lat: SequenceFloatType,
     lon: SequenceFloatType,
@@ -584,10 +576,11 @@ def calculate_midpoint(
 
     midpoint_discrepancies[i + 1] = np.nan
 
-    return format_return_type(midpoint_discrepancies, lat)
+    return midpoint_discrepancies
 
 
 @inspect_arrays(["vsi", "dsi", "lat", "lon", "date"])
+@post_format_return_type(["vsi"])
 def do_track_check(
     vsi: SequenceFloatType,
     dsi: SequenceFloatType,
@@ -667,7 +660,7 @@ def do_track_check(
 
     # fewer than three obs - set the fewsome flag
     if number_of_obs < 3:
-        return format_return_type([passed] * number_of_obs, vsi)
+        return [passed] * number_of_obs
 
     # work out speeds and distances between alternating points
     speed_alt, _distance_alt, _course_alt, _timediff_alt = (
@@ -780,10 +773,11 @@ def do_track_check(
         ):
             trk[i] = failed
 
-    return format_return_type(trk, vsi)
+    return trk
 
 
 @inspect_arrays(["value"])
+@post_format_return_type(["value"])
 def do_few_check(
     value: SequenceFloatType,
 ) -> SequenceIntType:
@@ -811,16 +805,17 @@ def do_few_check(
 
     # no obs in, no qc outcomes out
     if number_of_obs == 0:
-        return format_return_type([passed] * number_of_obs, value)
+        return [passed] * number_of_obs
 
     # fewer than three obs - set the fewsome flag
     if number_of_obs < 3:
-        return format_return_type([failed] * number_of_obs, value)
+        return [failed] * number_of_obs
 
-    return format_return_type([passed] * number_of_obs, value)
+    return [passed] * number_of_obs
 
 
 @inspect_arrays(["at", "dpt", "lat", "lon", "date"])
+@post_format_return_type(["at"])
 def find_saturated_runs(
     at: SequenceFloatType,
     dpt: SequenceFloatType,
@@ -929,10 +924,11 @@ def find_saturated_runs(
             for loc in satcount:
                 repsat[loc] = failed
 
-    return format_return_type(repsat, at)
+    return repsat
 
 
 @inspect_arrays(["value"])
+@post_format_return_type(["value"])
 def find_multiple_rounded_values(
     value: SequenceFloatType, min_count: int, threshold: float
 ) -> SequenceIntType:
@@ -971,7 +967,7 @@ def find_multiple_rounded_values(
     number_of_obs = len(value)
 
     if number_of_obs == 0:
-        return format_return_type([passed] * number_of_obs, value)
+        return [passed] * number_of_obs
 
     rounded = np.asarray([passed] * number_of_obs)
 
@@ -988,7 +984,7 @@ def find_multiple_rounded_values(
                 valcount[str(v)] = [i]
 
     if allcount <= min_count:
-        return format_return_type(rounded, value)
+        return rounded
 
     wholenums = 0
     for key, indices in valcount.items():
@@ -996,16 +992,17 @@ def find_multiple_rounded_values(
             wholenums = wholenums + len(indices)
 
     if float(wholenums) / float(allcount) < threshold:
-        return format_return_type(rounded, value)
+        return rounded
 
     for key, indices in valcount.items():
         if float(key).is_integer():
             rounded[indices] = failed
 
-    return format_return_type(rounded, value)
+    return rounded
 
 
 @inspect_arrays(["value"])
+@post_format_return_type(["value"])
 def find_repeated_values(
     value: SequenceFloatType, min_count: int, threshold: float
 ) -> SequenceIntType:
@@ -1045,7 +1042,7 @@ def find_repeated_values(
     number_of_obs = len(value)
 
     if number_of_obs == 0:
-        return format_return_type([passed] * number_of_obs, value)
+        return [passed] * number_of_obs
 
     rep = np.asarray([passed] * number_of_obs)
 
@@ -1062,16 +1059,17 @@ def find_repeated_values(
                 valcount[str(v)] = [i]
 
     if allcount <= min_count:
-        return format_return_type(rep, value)
+        return rep
 
     for _, indices in valcount.items():
         if float(len(indices)) / float(allcount) > threshold:
             rep[indices] = failed
 
-    return format_return_type(rep, value)
+    return rep
 
 
 @inspect_arrays(["lat", "lon", "date"])
+@post_format_return_type(["lat"])
 def do_iquam_track_check(
     lat: SequenceFloatType,
     lon: SequenceFloatType,
@@ -1139,7 +1137,7 @@ def do_iquam_track_check(
     number_of_obs = len(lat)
 
     if number_of_obs == 0:
-        return format_return_type([passed] * number_of_obs, lat)
+        return [passed] * number_of_obs
 
     speed_violations = []
     count_speed_violations = []
@@ -1186,4 +1184,4 @@ def do_iquam_track_check(
 
         count_speed_violations[most_fails] = passed
 
-    return format_return_type(iquam_track, lat)
+    return iquam_track
