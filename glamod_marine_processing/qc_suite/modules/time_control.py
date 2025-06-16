@@ -12,11 +12,38 @@ from typing import Sequence
 
 import numpy as np
 
-from .auxiliary import _save_originals, is_scalar_like, isvalid
+from .auxiliary import is_scalar_like, isvalid, save_originals
 
 
 def convert_date(params: list[str]) -> Callable:
-    """DOCUMENTATION."""
+    """
+    Decorator to extract date components and inject them as function parameters.
+
+    This decorator intercepts the 'date' argument from the function call, splits it into
+    its components (e.g., year, month, day), and assigns those components to specified
+    parameters in the wrapped function. It supports scalar or sequence inputs for 'date'.
+
+    Parameters
+    ----------
+    params : list of str
+        List of parameter names corresponding to date components to be extracted and
+        passed to the decorated function.
+
+    Returns
+    -------
+    Callable
+        A decorator that wraps a function, extracting date components before calling it.
+
+    Notes
+    -----
+    - The decorator expects the wrapped function to accept the parameters listed in
+      `params`. If a parameter is missing, it raises a `ValueError`.
+    - If the 'date' argument is None, the original function is called without modification.
+    - Uses a `TypeContext` to store original argument values for possible further use.
+    - Supports scalar-like 'date' values as well as iterable sequences.
+    - Assumes a helper function `split_date` exists that splits a date into components
+      and returns a dictionary mapping parameter names to their values.
+    """
 
     def decorator(func):
         @wraps(func)
@@ -25,7 +52,7 @@ def convert_date(params: list[str]) -> Callable:
             bound_args = sig.bind(*args, **kwargs)
             bound_args.apply_defaults()
 
-            ctx = _save_originals(bound_args.arguments, kwargs)
+            ctx = save_originals(bound_args.arguments, kwargs)
 
             date = ctx.originals.get("date")
             if date is None:

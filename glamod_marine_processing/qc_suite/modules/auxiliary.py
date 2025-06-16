@@ -53,13 +53,45 @@ ValueDatetimeType: TypeAlias = ScalarDatetimeType | SequenceDatetimeType
 
 
 class TypeContext:
-    """DOCUMENTATION."""
+    """
+    A container class to hold original (unmodified) function argument values.
+
+    This class is useful for preserving the initial inputs before any
+    processing or transformation steps are applied, enabling later access
+    to the original user inputs.
+
+    Attributes
+    ----------
+    originals : dict
+        A dictionary mapping parameter names to their original values.
+    """
 
     def __init__(self):
         self.originals = {}
 
 
-def _save_originals(args, kwargs):
+def save_originals(args: dict, kwargs: dict) -> TypeContext:
+    """
+    Store original argument values in a TypeContext.
+
+    This function checks if a `_ctx` (TypeContext) object is already present
+    in either the keyword arguments or positional arguments. If not found,
+    it creates a new TypeContext. It then records all argument names and
+    values from `args` into the `originals` dictionary of the context, skipping
+    those already stored.
+
+    Parameters
+    ----------
+    args : dict
+        Dictionary of function arguments (usually from `inspect.BoundArguments.arguments`).
+    kwargs : dict
+        Dictionary of keyword arguments passed to the function, used to check for existing `_ctx`.
+
+    Returns
+    -------
+    TypeContext
+        The context object containing the preserved original argument values.
+    """
     ctx = kwargs.get("_ctx") or args.get("_ctx") or TypeContext()
     for param, value in args.items():
         if param not in ctx.originals:
@@ -145,7 +177,35 @@ def format_return_type(result_array: np.ndarray, *input_values: Any) -> Any:
 
 
 def post_format_return_type(params: list[str]) -> Callable:
-    """DOCUMENTATION."""
+    """
+    Decorator to format a function's return value to match the type of its original input(s).
+
+    This decorator ensures that the output of the decorated function is converted back
+    to the same structure/type as the original input(s) specified by `params`.
+    It uses a context object (`_ctx`) if available to retrieve the original inputs
+    before any preprocessing was applied. If no context is found, it falls back to
+    the current bound arguments.
+
+    Parameters
+    ----------
+    params : list of str
+        List of parameter names whose original input types should be used to
+        format the return value.
+
+    Returns
+    -------
+    Callable
+        A decorator that modifies the decorated function's output to match the
+        input types.
+
+    Notes
+    -----
+    - Assumes a `TypeContext` object may be passed via `_ctx` keyword argument,
+      storing original input values for accurate type formatting.
+    - Falls back gracefully if no context is available, using current arguments.
+    - Useful when function inputs are preprocessed (e.g., converted to arrays),
+      and the output should match the original input types.
+    """
 
     def decorator(func):
         @wraps(func)
@@ -195,7 +255,7 @@ def inspect_arrays(params: list[str], replace=True, skip_none=False) -> Callable
             bound_args = sig.bind(*args, **kwargs)
             bound_args.apply_defaults()
 
-            ctx = _save_originals(bound_args.arguments, kwargs)
+            ctx = save_originals(bound_args.arguments, kwargs)
             arrays = []
             for param in params:
                 if param not in bound_args.arguments:
