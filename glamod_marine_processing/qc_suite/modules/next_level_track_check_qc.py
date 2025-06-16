@@ -24,8 +24,8 @@ from .auxiliary import (
 km_to_nm = 0.539957
 
 
-@inspect_arrays(["value", "lat", "lon", "date"])
 @post_format_return_type(["value"])
+@inspect_arrays(["value", "lat", "lon", "date"])
 def do_spike_check(
     value: SequenceFloatType,
     lat: SequenceFloatType,
@@ -502,8 +502,8 @@ def backward_discrepancy(
     return distance_from_est_location[::-1]
 
 
-@inspect_arrays(["lat", "lon", "timediff"])
 @post_format_return_type(["lat"])
+@inspect_arrays(["lat", "lon", "timediff"])
 def calculate_midpoint(
     lat: SequenceFloatType,
     lon: SequenceFloatType,
@@ -579,8 +579,8 @@ def calculate_midpoint(
     return midpoint_discrepancies
 
 
-@inspect_arrays(["vsi", "dsi", "lat", "lon", "date"])
 @post_format_return_type(["vsi"])
+@inspect_arrays(["vsi", "dsi", "lat", "lon", "date"])
 def do_track_check(
     vsi: SequenceFloatType,
     dsi: SequenceFloatType,
@@ -776,8 +776,8 @@ def do_track_check(
     return trk
 
 
-@inspect_arrays(["value"])
 @post_format_return_type(["value"])
+@inspect_arrays(["value"])
 def do_few_check(
     value: SequenceFloatType,
 ) -> SequenceIntType:
@@ -814,8 +814,8 @@ def do_few_check(
     return [passed] * number_of_obs
 
 
-@inspect_arrays(["at", "dpt", "lat", "lon", "date"])
 @post_format_return_type(["at"])
+@inspect_arrays(["at", "dpt", "lat", "lon", "date"])
 def find_saturated_runs(
     at: SequenceFloatType,
     dpt: SequenceFloatType,
@@ -927,8 +927,8 @@ def find_saturated_runs(
     return repsat
 
 
-@inspect_arrays(["value"])
 @post_format_return_type(["value"])
+@inspect_arrays(["value"])
 def find_multiple_rounded_values(
     value: SequenceFloatType, min_count: int, threshold: float
 ) -> SequenceIntType:
@@ -1001,8 +1001,8 @@ def find_multiple_rounded_values(
     return rounded
 
 
-@inspect_arrays(["value"])
 @post_format_return_type(["value"])
+@inspect_arrays(["value"])
 def find_repeated_values(
     value: SequenceFloatType, min_count: int, threshold: float
 ) -> SequenceIntType:
@@ -1068,8 +1068,8 @@ def find_repeated_values(
     return rep
 
 
-@inspect_arrays(["lat", "lon", "date"])
 @post_format_return_type(["lat"])
+@inspect_arrays(["lat", "lon", "date"])
 def do_iquam_track_check(
     lat: SequenceFloatType,
     lon: SequenceFloatType,

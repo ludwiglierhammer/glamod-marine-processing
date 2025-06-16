@@ -23,8 +23,8 @@ from .external_clim import ClimFloatType, inspect_climatology
 from .time_control import convert_date, dayinyear, get_month_lengths
 
 
-@inspect_arrays(["value", "climate_normal"])
 @post_format_return_type(["value"])
+@inspect_arrays(["value", "climate_normal"])
 def climatology_check(
     value: ValueFloatType,
     climate_normal: ValueFloatType,
@@ -126,8 +126,8 @@ def climatology_check(
     return result
 
 
-@inspect_arrays(["value"])
 @post_format_return_type(["value"])
+@inspect_arrays(["value"])
 def value_check(value: ValueFloatType) -> ValueIntType:
     """Check if a value is equal to None or numerically invalid (NaN).
 
@@ -149,8 +149,8 @@ def value_check(value: ValueFloatType) -> ValueIntType:
     return result
 
 
-@inspect_arrays(["value"])
 @post_format_return_type(["value"])
+@inspect_arrays(["value"])
 def hard_limit_check(
     value: ValueFloatType,
     limits: tuple[float, float],
@@ -191,8 +191,8 @@ def hard_limit_check(
     return result
 
 
-@inspect_arrays(["insst"])
 @post_format_return_type(["insst"])
+@inspect_arrays(["insst"])
 def sst_freeze_check(
     insst: ValueFloatType,
     freezing_point: float | None = None,
@@ -261,8 +261,8 @@ def sst_freeze_check(
     return result
 
 
-@inspect_arrays(["lat", "lon"])
 @post_format_return_type(["lat", "lon"])
+@inspect_arrays(["lat", "lon"])
 def do_position_check(lat: ValueFloatType, lon: ValueFloatType) -> ValueIntType:
     """
     Perform the positional QC check on the report. Simple check to make sure that the latitude and longitude are
@@ -303,9 +303,9 @@ def do_position_check(lat: ValueFloatType, lon: ValueFloatType) -> ValueIntType:
     return result
 
 
+@post_format_return_type(["date", "year"])
 @convert_date(["year", "month", "day"])
 @inspect_arrays(["year", "month", "day"])
-@post_format_return_type(["year"])
 def do_date_check(
     date: ValueDatetimeType = None,
     year: ValueIntType = None,
@@ -366,9 +366,9 @@ def do_date_check(
     return result
 
 
-@convert_date(["hour"])
-@inspect_arrays(["date", "hour"])
 @post_format_return_type(["date", "hour"])
+@convert_date(["hour"])
+@inspect_arrays(["hour"])
 def do_time_check(
     date: ValueDatetimeType = None, hour: ValueFloatType = None
 ) -> ValueIntType:
@@ -404,9 +404,9 @@ def do_time_check(
     return result
 
 
+@post_format_return_type(["date", "year"])
 @convert_date(["year", "month", "day", "hour"])
 @inspect_arrays(["year", "month", "day", "hour", "lat", "lon"])
-@post_format_return_type(["year"])
 def do_day_check(
     date: ValueDatetimeType = None,
     year: ValueIntType = None,
@@ -654,8 +654,8 @@ def do_climatology_check(
     )
 
 
-@inspect_arrays(["dpt", "at2"])
 @post_format_return_type(["dpt", "at2"])
+@inspect_arrays(["dpt", "at2"])
 def do_supersaturation_check(dpt: ValueFloatType, at2: ValueFloatType) -> ValueIntType:
     """
     Perform the super saturation check. Check if a valid dewpoint temperature is greater than a valid air temperature
@@ -738,8 +738,8 @@ def do_sst_freeze_check(
     return sst_freeze_check(sst, freezing_point, 0.0, freeze_check_n_sigma)
 
 
-@inspect_arrays(["wind_speed", "wind_direction"])
 @post_format_return_type(["wind_speed", "wind_direction"])
+@inspect_arrays(["wind_speed", "wind_direction"])
 def do_wind_consistency_check(
     wind_speed: ValueFloatType, wind_direction: ValueFloatType
 ) -> ValueIntType:
