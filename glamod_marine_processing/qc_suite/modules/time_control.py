@@ -12,7 +12,7 @@ from typing import Sequence
 
 import numpy as np
 
-from .auxiliary import is_scalar_like, isvalid
+from .auxiliary import _save_originals, is_scalar_like, isvalid
 
 
 def convert_date(params: list[str]) -> Callable:
@@ -25,19 +25,30 @@ def convert_date(params: list[str]) -> Callable:
             bound_args = sig.bind(*args, **kwargs)
             bound_args.apply_defaults()
 
-            date = bound_args.arguments.get("date")
+            ctx = _save_originals(bound_args.arguments, kwargs)
+
+            date = ctx.originals.get("date")
             if date is None:
                 return func(*bound_args.args, **bound_args.kwargs)
             if is_scalar_like(date):
-                date = [date]
-            extracted = [split_date(d) for d in date]
+                scalar = True
+                extracted = split_date(date)
+            else:
+                scalar = False
+                extracted = [split_date(d) for d in date]
 
             for param in params:
                 if param not in bound_args.arguments:
                     raise ValueError(f"Parameter {param} is not a valid parameter.")
 
-                bound_args.arguments[param] = [d[param] for d in extracted]
+                if scalar is True:
+                    value = extracted[param]
+                else:
+                    value = [e[param] for e in extracted]
 
+                bound_args.arguments[param] = value
+
+            bound_args.arguments["_ctx"] = ctx
             return func(*bound_args.args, **bound_args.kwargs)
 
         return wrapper
@@ -58,13 +69,16 @@ def split_date(date: datetime) -> dict:
     dict
         Dictionary containing year, month, day and hour.
     """
+    default = {"year": np.nan, "month": np.nan, "day": np.nan, "hour": np.nan}
     try:
         year = int(date.year)
         month = int(date.month)
         day = int(date.day)
         hour = date.hour + date.minute / 60.0 + date.second / 3600.0
     except ValueError:
-        return {"year": np.nan, "month": np.nan, "day": np.nan, "hour": np.nan}
+        return default
+    except AttributeError:
+        return default
     return {"year": year, "month": month, "day": day, "hour": hour}
 
 
