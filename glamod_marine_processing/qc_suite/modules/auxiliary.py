@@ -34,6 +34,9 @@ def isvalid(inval: float | None) -> bool:
     return True
 
 
+# def get_target_units(target_units):
+
+
 def convert_to(
     value: float | None | Sequence[float | None], source_units: str, target_units: str
 ):
@@ -63,6 +66,9 @@ def convert_to(
         return convert_units_to(value * registry, target_units)
 
     registry = units(source_units)
+    if target_units == "unknown":
+        target_units = registry.to_base_units()
+
     if isinstance(value, np.ndarray):
         return np.array([_convert_to(v) for v in value])
     if isinstance(value, Sequence):
@@ -190,7 +196,7 @@ def inspect_arrays(params: list[str]) -> Callable:
     return generic_decorator(handler)
 
 
-def convert_units() -> Callable:
+def convert_units(**units_by_name) -> Callable:
     """
     Create a decorator to automatically convert units of specified function parameters.
 
@@ -230,27 +236,28 @@ def convert_units() -> Callable:
     """
 
     def handler(arguments: dict, **meta_kwargs):
-        converter_dict = meta_kwargs.get("converter_dict")
-        if converter_dict is None:
+        units_dict = meta_kwargs.get("units")
+        if units_dict is None:
             return
 
-        for param, convert_units in converter_dict.items():
+        for param, target_units in units_by_name.items():
             if param not in arguments:
                 raise ValueError(
                     f"Parameter '{param}' not found in function arguments."
                 )
+            if param not in units_dict:
+                continue
 
             value = arguments[param]
             if value is None:
                 continue
 
-            source_units = convert_units[0]
-            target_units = convert_units[1]
+            source_units = units_dict[param]
 
             converted = convert_to(value, source_units, target_units)
 
             arguments[param] = converted
 
-    handler._decorator_kwargs = {"converter_dict"}
+    handler._decorator_kwargs = {"units"}
 
     return generic_decorator(handler)
