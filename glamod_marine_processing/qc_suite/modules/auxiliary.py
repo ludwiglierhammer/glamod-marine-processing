@@ -52,6 +52,8 @@ def convert_to(
         The units of the input value(s) (e.g., 'degC', 'm/s').
     target_units: str
         The units to convert to (e.g., 'K', 'km/h').
+        If set to "unknown", the value(s) will be converted to the base SI units
+        of the source_units (e.g., 'degC' ? 'kelvin', 'km' ? 'meter').        
 
     Returns
     -------
