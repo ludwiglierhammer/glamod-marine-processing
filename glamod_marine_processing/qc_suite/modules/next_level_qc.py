@@ -29,7 +29,7 @@ def value_check(inval: float | None) -> int:
     return failed
 
 
-@convert_units()
+@convert_units(latitude="degrees", longitude="degrees")
 def do_position_check(latitude: float, longitude: float) -> int:
     """
     Perform the positional QC check on the report. Simple check to make sure that the latitude and longitude are
@@ -146,7 +146,7 @@ def do_time_check(date: datetime | None = None, hour: float | None = None) -> in
     return passed
 
 
-@convert_units()
+@convert_units(latitude="degrees", longitude="degrees")
 def do_day_check(
     date: datetime | None = None,
     year: int | None = None,
@@ -290,7 +290,7 @@ def do_missing_value_clim_check(climatology: float | Climatology, **kwargs) -> i
     return value_check(climatology)
 
 
-@convert_units()
+@convert_units(value="unknown", hard_limits="unknown")
 def do_hard_limit_check(value: float, hard_limits: tuple[float, float]) -> int:
     """
     Check that value is within hard limits specified by "hard_limits".
@@ -322,7 +322,7 @@ def do_hard_limit_check(value: float, hard_limits: tuple[float, float]) -> int:
 
 
 @inspect_climatology("climatology", optional="standard_deviation")
-@convert_units()
+@convert_units(value="unknown", climatology="unknown")
 def do_climatology_check(
     value: float,
     climatology: float | Climatology,
@@ -361,7 +361,7 @@ def do_climatology_check(
         2-element list containing lower and upper limits for ``standard_deviation``.
         If ``standard_deviation`` is outside these limits, ``standard_deviation`` will be set to the nearest limit.
     lowbar: float, optional
-        ``maximum_anomaly`` must be greater than ``lowbar`` to fail regardless of ``standarddeviation``.
+        ``maximum_anomaly`` must be greater than ``lowbar`` to fail regardless of ``standard_deviation``.
 
     Returns
     -------
@@ -414,7 +414,7 @@ def do_climatology_check(
     return passed
 
 
-@convert_units()
+@convert_units(dpt="K", at2="K")
 def do_supersaturation_check(dpt: float, at2: float) -> int:
     """
     Perform the super saturation check. Check if a valid dewpoint temperature is greater than a valid air temperature
@@ -442,7 +442,7 @@ def do_supersaturation_check(dpt: float, at2: float) -> int:
     return passed
 
 
-@convert_units()
+@convert_units(sst="K", freezing_point="K")
 def do_sst_freeze_check(
     sst: float,
     freezing_point: float,
@@ -509,7 +509,6 @@ def do_sst_freeze_check(
     return passed
 
 
-@convert_units()
 def do_wind_consistency_check(
     wind_speed: float | None,
     wind_direction: int | None,

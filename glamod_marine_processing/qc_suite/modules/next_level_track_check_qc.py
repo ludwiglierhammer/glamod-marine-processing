@@ -15,7 +15,7 @@ from .auxiliary import convert_units, failed, inspect_arrays, isvalid, passed
 
 
 @inspect_arrays(["value", "lat", "lon", "date"])
-@convert_units()
+@convert_units(lat="degrees", lon="degrees")
 def do_spike_check(
     value: Sequence[float],
     lat: Sequence[float],
@@ -123,7 +123,12 @@ def do_spike_check(
     return spike_qc
 
 
-@convert_units()
+@convert_units(
+    lat_later="degrees",
+    lat_earlier="degrees",
+    lon_later="degrees",
+    lon_earlier="degrees",
+)
 def calculate_course_parameters(
     lat_later: float,
     lat_earlier: float,
@@ -180,7 +185,7 @@ def calculate_course_parameters(
 
 
 @inspect_arrays(["lat", "lon", "date"])
-@convert_units()
+@convert_units(lat="degrees", lon="degrees")
 def calculate_speed_course_distance_time_difference(
     lat: Sequence[float],
     lon: Sequence[float],
@@ -252,7 +257,7 @@ def calculate_speed_course_distance_time_difference(
 
 
 @inspect_arrays(["vsi", "dsi", "lat", "lon", "date"])
-@convert_units()
+@convert_units(vsi="km/h", dsi="degrees", lat="degrees", lon="degrees")
 def forward_discrepancy(
     vsi: Sequence[float],
     dsi: Sequence[float],
@@ -356,7 +361,7 @@ def forward_discrepancy(
 
 
 @inspect_arrays(["vsi", "dsi", "lat", "lon", "date"])
-@convert_units()
+@convert_units(vsi="km/h", dsi="degrees", lat="degrees", lon="degrees")
 def backward_discrepancy(
     lat: Sequence[float],
     lon: Sequence[float],
@@ -459,7 +464,7 @@ def backward_discrepancy(
 
 
 @inspect_arrays(["lat", "lon", "timediff"])
-@convert_units()
+@convert_units(lat="degrees", lon="degrees")
 def calculate_midpoint(
     lat: Sequence[float],
     lon: Sequence[float],
@@ -530,7 +535,7 @@ def calculate_midpoint(
 
 
 @inspect_arrays(["vsi", "dsi", "lat", "lon", "date"])
-@convert_units()
+@convert_units(vsi="km/h", dsi="degrees", lat="degrees", lon="degrees")
 def do_track_check(
     vsi: Sequence[float],
     dsi: Sequence[float],
@@ -748,7 +753,7 @@ def do_few_check(
 
 
 @inspect_arrays(["at", "dpt", "lat", "lon", "date"])
-@convert_units()
+@convert_units(at="K", dpt="K", lat="degrees", lon="degrees")
 def find_saturated_runs(
     at: Sequence[float],
     dpt: Sequence[float],
@@ -972,7 +977,7 @@ def find_repeated_values(
 
 
 @inspect_arrays(["lat", "lon", "date"])
-@convert_units()
+@convert_units(lat="degrees", lon="degrees")
 def do_iquam_track_check(
     lat: Sequence[float],
     lon: Sequence[float],
