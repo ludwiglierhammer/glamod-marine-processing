@@ -69,12 +69,10 @@ def test_do_position_check(latitude, longitude, expected):
     assert do_position_check(latitude, longitude) == expected
 
     latitude = convert_to(latitude, "degrees", "rad")
-    longitude = convert_to(longitude, "degrees", "rad")
-    converter_dict = {"latitude": ("rad", "degrees"), "longitude": ("rad", "degrees")}
-    assert (
-        do_position_check(latitude, longitude, converter_dict=converter_dict)
-        == expected
-    )
+    units = {
+        "latitude": "rad",
+    }
+    assert do_position_check(latitude, longitude, units=units) == expected
 
 
 def _test_do_position_check_raises_value_error():
@@ -252,11 +250,7 @@ def test_do_day_check(year, month, day, hour, latitude, longitude, time, expecte
     assert result == expected
 
     latitude = convert_to(latitude, "degrees", "rad")
-    longitude = convert_to(longitude, "degrees", "rad")
-    converter_dict = {
-        "latitude": ("rad", "degrees"),
-        "longitude": ("rad", "degrees"),
-    }
+    units = {"latitude": "rad"}
     result = do_day_check(
         year=year,
         month=month,
@@ -265,7 +259,7 @@ def test_do_day_check(year, month, day, hour, latitude, longitude, time, expecte
         latitude=latitude,
         longitude=longitude,
         time_since_sun_above_horizon=time,
-        converter_dict=converter_dict,
+        units=units,
     )
     assert result == expected
 
@@ -459,8 +453,8 @@ def test_do_hard_limit_check(value, limits, expected):
     assert do_hard_limit_check(value, limits) == expected
 
     value = convert_to(value, "degC", "K")
-    converter_dict = {"hard_limits": ("degC", "K")}
-    assert do_hard_limit_check(value, limits, converter_dict=converter_dict) == expected
+    units = {"hard_limits": "degC"}
+    assert do_hard_limit_check(value, limits, units=units) == expected
 
 
 @pytest.mark.parametrize(
@@ -486,14 +480,14 @@ def test_do_sst_freeze_check(sst, sst_uncertainty, freezing_point, n_sigma, expe
         == expected
     )
     sst = convert_to(sst, "degC", "K")
-    converter_dict = {"freezing_point": ("degC", "K")}
+    units = {"freezing_point": "degC"}
     assert (
         do_sst_freeze_check(
             sst,
             freezing_point,
             freeze_check_n_sigma=n_sigma,
             sst_uncertainty=sst_uncertainty,
-            converter_dict=converter_dict,
+            units=units,
         )
         == expected
     )

@@ -345,7 +345,7 @@ def test_do_at_hard_limit_check(testdata):
         lambda row: do_hard_limit_check(
             value=row["observation_value"],
             hard_limits=[-80, 65],  # degC
-            converter_dict={"hard_limits": ("degC", "K")},
+            units={"hard_limits": "degC"},
         ),
         axis=1,
     )
@@ -629,7 +629,7 @@ def test_do_dpt_hard_limit_check(testdata):
         lambda row: do_hard_limit_check(
             value=row["observation_value"],
             hard_limits=[-80, 65],  # degC
-            converter_dict={"hard_limits": ("degC", "K")},
+            units={"hard_limits": "degC"},
         ),
         axis=1,
     )
@@ -802,7 +802,7 @@ def test_do_sst_freeze_check(testdata):
             sst=row["observation_value"],
             freezing_point=-1.8,
             freeze_check_n_sigma=2.0,
-            converter_dict={"freezing_point": ("degC", "K")},
+            units={"freezing_point": "degC"},
         ),
         axis=1,
     )
@@ -832,7 +832,7 @@ def test_do_sst_hard_limit_check(testdata):
         lambda row: do_hard_limit_check(
             value=row["observation_value"],
             hard_limits=[-5, 45],
-            converter_dict={"hard_limits": ("degC", "K")},
+            units={"hard_limits": "degC"},
         ),
         axis=1,
     )
@@ -1327,7 +1327,7 @@ def test_multiple_row_check(testdata, climdata):
             "names": {"value": "observation_value"},
             "arguments": {
                 "hard_limits": [-80, 65],  # degC
-                "converter_dict": {"hard_limits": ("degC", "K")},
+                "units": {"hard_limits": "degC"},
             },
         },
         "CLIM1": {
