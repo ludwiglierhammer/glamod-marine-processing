@@ -4,9 +4,12 @@ from __future__ import annotations
 
 import inspect
 from collections.abc import Callable, Sequence
+from datetime import datetime
 from functools import wraps
+from typing import Any, TypeAlias
 
 import numpy as np
+import numpy.typing as npt
 import pandas as pd
 from xclim.core.units import convert_units_to, units
 
@@ -15,28 +18,165 @@ failed = 1
 untestable = 2
 untested = 3
 
+PandasNAType: TypeAlias = type(pd.NA)
+PandasNaTType: TypeAlias = type(pd.NaT)
 
-def isvalid(inval: float | None) -> bool:
-    """Check if a value is numerically valid.
+# --- Scalars ---
+ScalarIntType: TypeAlias = int | np.integer | PandasNAType | None
+ScalarFloatType: TypeAlias = float | np.floating | PandasNAType | None
+ScalarDatetimeType: TypeAlias = (
+    datetime | np.datetime64 | pd.Timestamp | PandasNaTType | None
+)
+
+# --- Sequences ---
+SequenceIntType: TypeAlias = (
+    Sequence[ScalarIntType]
+    | npt.NDArray[np.integer]
+    | pd.Series  # optionally: pd.Series[np.integer] or pd.Series[pd.Int64Dtype]
+)
+
+SequenceFloatType: TypeAlias = (
+    Sequence[ScalarFloatType]
+    | npt.NDArray[np.floating]
+    | pd.Series  # optionally: pd.Series[np.floating] or pd.Series[pd.Float64Dtype]
+)
+
+SequenceDatetimeType: TypeAlias = (
+    Sequence[ScalarDatetimeType]
+    | npt.NDArray[np.datetime64]
+    | pd.Series  # optionally: pd.Series[pd.DatetimeTZDtype] or similar
+)
+
+# --- Value Types (Scalar or Sequence) ---
+ValueFloatType: TypeAlias = ScalarFloatType | SequenceFloatType
+ValueIntType: TypeAlias = ScalarIntType | SequenceIntType
+ValueDatetimeType: TypeAlias = ScalarDatetimeType | SequenceDatetimeType
+
+
+class TypeContext:
+    """
+    A container class to hold original (unmodified) function argument values.
+
+    This class is useful for preserving the initial inputs before any
+    processing or transformation steps are applied, enabling later access
+    to the original user inputs.
+
+    Attributes
+    ----------
+    originals : dict
+        A dictionary mapping parameter names to their original values.
+    """
+
+    def __init__(self):
+        self.originals = {}
+
+
+def save_originals(args: dict, kwargs: dict) -> TypeContext:
+    """
+    Store original argument values in a TypeContext.
+
+    This function checks if a `_ctx` (TypeContext) object is already present
+    in either the keyword arguments or positional arguments. If not found,
+    it creates a new TypeContext. It then records all argument names and
+    values from `args` into the `originals` dictionary of the context, skipping
+    those already stored.
 
     Parameters
     ----------
-    inval : float or None
-        The input value to be tested
+    args : dict
+        Dictionary of function arguments (usually from `inspect.BoundArguments.arguments`).
+    kwargs : dict
+        Dictionary of keyword arguments passed to the function, used to check for existing `_ctx`.
 
     Returns
     -------
-    booll
-        Returns False if the input value is numerically invalid or None, True otherwise
+    TypeContext
+        The context object containing the preserved original argument values.
     """
-    if pd.isna(inval):
-        return False
-    return True
+    ctx = kwargs.get("_ctx") or args.get("_ctx") or TypeContext()
+    for param, value in args.items():
+        if param not in ctx.originals:
+            ctx.originals[param] = value
+    return ctx
 
 
-# def get_target_units(target_units):
+def is_scalar_like(x: Any) -> bool:
+    """
+    Return True if the input is scalar-like (i.e., has no dimensions).
+
+    A scalar-like value includes:
+    - Python scalars: int, float, bool, None
+    - NumPy scalars: np.int32, np.float64, np.datetime64, etc.
+    - Zero-dimensional NumPy arrays: np.array(5)
+    - Pandas scalars: pd.Timestamp, pd.Timedelta, pd.NA, pd.NaT
+    - Strings and bytes (unless excluded)
+
+    Parameters
+    ----------
+        x (Any): The value to check.
+
+    Returns
+    -------
+        bool: True if `x` is scalar-like, False otherwise.
+    """
+    try:
+        return np.ndim(x) == 0
+    except TypeError:
+        return True  # fallback: built-in scalars like int, float, pd.Timestamp
 
 
+def isvalid(inval: ValueFloatType) -> bool | np.ndarray:
+    """Check if a value(s) are numerically valid (not None or NaN).
+
+    Parameters
+    ----------
+    inval : float, None, array-like of float or None
+        Input value(s) to be tested
+
+    Returns
+    -------
+    bool or np.ndarray of bool
+        Returns False where the input is None or NaN, True otherwise.
+        Returns a boolean scalar if input is scalar, else a boolean array.
+    """
+    result = np.logical_not(pd.isna(inval))
+    if np.isscalar(inval):
+        return bool(result)
+    return result
+
+
+def format_return_type(result_array: np.ndarray, *input_values: Any) -> Any:
+    """
+    Convert the result numpy array(s) to the same type as the input `value`.
+
+    If result_array is a sequence of arrays, format each element recursively,
+    preserving the container type.
+
+    Parameters
+    ----------
+    result_array : np.ndarray
+        The numpy array of results.
+    input_values : scalar, sequence, np.ndarray, pd.Series or None
+        One or more original input values to infer the desired return type from.
+
+    Returns
+    -------
+    Same type as input(s)
+        The result formatted to match the type of the first valid input value.
+    """
+    input_value = next((val for val in input_values if val is not None), None)
+
+    if input_value is None or is_scalar_like(input_value):
+        if hasattr(result_array, "ndim") and result_array.ndim > 0:
+            result_array = result_array[0]
+        return int(result_array)
+    if isinstance(input_value, pd.Series):
+        return pd.Series(result_array, index=input_value.index, dtype=int)
+    if isinstance(input_value, (list, tuple)):
+        return type(input_value)(result_array.tolist())
+    return result_array  # np.ndarray or fallback
+
+  
 def convert_to(
     value: float | None | Sequence[float | None], source_units: str, target_units: str
 ):
@@ -76,9 +216,11 @@ def convert_to(
     if isinstance(value, Sequence):
         return type(value)(_convert_to(v) for v in value)
     return _convert_to(value)
-
-
-def generic_decorator(handler: Callable[[dict], None]) -> Callable:
+  
+def generic_decorator(
+    pre_handler: Optional[Callable[[dict], None]] = None,
+    post_handler: Optional[Callable[[any, dict], any]] = None
+) -> Callable:
     """
     Creates a decorator that binds function arguments, allows inspection or modification
     of those arguments via a custom handler function, and then calls the original function.
@@ -93,7 +235,7 @@ def generic_decorator(handler: Callable[[dict], None]) -> Callable:
         and optionally other keyword arguments, to inspect, mutate, or validate these
         arguments before the decorated function executes.
         The handler should accept the signature:
-        `handler(arguments: dict, **meta_kwargs) -> None`
+        `handler(arguments: dict, **meta_kwargs) -> None` 
 
     Returns
     -------
@@ -113,24 +255,83 @@ def generic_decorator(handler: Callable[[dict], None]) -> Callable:
     def decorator(func):
         @wraps(func)
         def wrapper(*args, **kwargs):
-            reserved_keys = getattr(handler, "_decorator_kwargs", set())
+            reserved_keys = set()
+            if pre_handler and hasattr(pre_handler, "_decorator_kwargs"):
+                reserved_keys.update(pre_handler._decorator_kwargs)
+            if post_handler and hasattr(post_handler, "_decorator_kwargs"):
+                reserved_keys.update(post_handler._decorator_kwargs)
             meta_kwargs = {k: kwargs.pop(k) for k in reserved_keys if k in kwargs}
 
             sig = inspect.signature(func)
             bound_args = sig.bind(*args, **kwargs)
             bound_args.apply_defaults()
-
-            handler.__funcname__ = func.__name__
-            handler(
-                bound_args.arguments, **meta_kwargs
-            )  # Perform specific inspection/modification
-
-            return func(*bound_args.args, **bound_args.kwargs)
+            
+            # Pre-call processing
+            if pre_handler:
+                pre_handler.__funcname__ = func.__name__
+                pre_handler(
+                    bound_args.arguments, **meta_kwargs
+                )  # Perform specific inspection/modification    
+            
+            result = func(*bound_args.args, **bound_args.kwargs)
+            
+            # Post-call processing
+            if porst_handler:
+                post_handler.__func_name__ = func.__name__
+                result = post_handler(result, bound_args.arguments, **meta_kwargs) 
+                
+            return result 
 
         return wrapper
 
-    return decorator
+    return decorator    
+  
+  
+def post_format_return_type(params: list[str]) -> Callable:
+    """
+    Decorator to format a function's return value to match the type of its original input(s).
 
+    This decorator ensures that the output of the decorated function is converted back
+    to the same structure/type as the original input(s) specified by `params`.
+    It uses a context object (`_ctx`) if available to retrieve the original inputs
+    before any preprocessing was applied. If no context is found, it falls back to
+    the current bound arguments.
+
+    Parameters
+    ----------
+    params : list of str
+        List of parameter names whose original input types should be used to
+        format the return value.
+
+    Returns
+    -------
+    Callable
+        A decorator that modifies the decorated function's output to match the
+        input types.
+
+    Notes
+    -----
+    - Assumes a `TypeContext` object may be passed via `_ctx` keyword argument,
+      storing original input values for accurate type formatting.
+    - Falls back gracefully if no context is available, using current arguments.
+    - Useful when function inputs are preprocessed (e.g., converted to arrays),
+      and the output should match the original input types.
+    """
+    def pre_handler(arguments: dict, **meta_kwargs):
+        ctx = meta_kwargs.get("_ctx") or arguments.get("_ctx")
+        pre_handler._input_values = (
+            [ctx.originals.get(p) for p in params] if ctx else [arguments.get(p) for p in params]
+        )
+
+    def post_handler(result, arguments: dict, **meta_kwargs):
+        return format_return_type(result, *getattr(pre_handler, "_input_values", []))
+
+    # Declare reserved kwargs we want to forward
+    pre_handler._decorator_kwargs = {"_ctx"}
+    post_handler._decorator_kwargs = {"_ctx"}
+
+    return generic_decorator(pre_handler=pre_handler, post_handler=post_handler)
+  
 
 def inspect_arrays(params: list[str]) -> Callable:
     """
@@ -179,23 +380,27 @@ def inspect_arrays(params: list[str]) -> Callable:
     ValueError: Input ['a', 'b'] must all have the same length.
     """
 
-    def handler(arguments: dict, **meta_kwargs):
+    def pre_handler(arguments: dict, **meta_kwargs):
         arrays = []
-        for name in params:
-            if name not in arguments:
-                raise ValueError(f"Parameter {name} is not a valid parameter.")
+        for param in params:
+            if param not in arguments:
+                raise ValueError(f"Parameter {param} is not a valid parameter.")
 
-            arr = np.asarray(arguments[name])
+            arr = np.asarray(arguments[param])
             if arr.ndim != 1:
-                raise ValueError(f"Input '{name}' must be one-dimensional.")
+                raise ValueError(f"Input '{param}' must be one-dimensional.")
+
+            arguments[param] = arr
             arrays.append(arr)
 
-            arguments[name] = arr
         lengths = [len(arr) for arr in arrays]
         if any(length != lengths[0] for length in lengths):
             raise ValueError(f"Input {params} must all have the same length.")
 
-    return generic_decorator(handler)
+    # No post_handler needed here
+    pre_handler._decorator_kwargs = set()
+
+    return generic_decorator(pre_handler=pre_handler)
 
 
 def convert_units(**units_by_name) -> Callable:
@@ -237,7 +442,7 @@ def convert_units(**units_by_name) -> Callable:
     Temperature in Kelvin: 298.15
     """
 
-    def handler(arguments: dict, **meta_kwargs):
+    def pre_handler(arguments: dict, **meta_kwargs):
         units_dict = meta_kwargs.get("units")
         if units_dict is None:
             return
@@ -262,4 +467,4 @@ def convert_units(**units_by_name) -> Callable:
 
     handler._decorator_kwargs = {"units"}
 
-    return generic_decorator(handler)
+    return generic_decorator(pre_handler=pre_handler)

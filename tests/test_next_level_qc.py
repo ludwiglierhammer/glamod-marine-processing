@@ -243,8 +243,8 @@ def test_do_day_check(year, month, day, hour, latitude, longitude, time, expecte
         month=month,
         day=day,
         hour=hour,
-        latitude=latitude,
-        longitude=longitude,
+        lat=latitude,
+        lon=longitude,
         time_since_sun_above_horizon=time,
     )
     assert result == expected
@@ -456,6 +456,20 @@ def test_do_hard_limit_check(value, limits, expected):
     units = {"hard_limits": "degC"}
     assert do_hard_limit_check(value, limits, units=units) == expected
 
+def test_do_supersaturation_check_array():
+    dpt = [3.6, 5.6, 15.6, None, 12.0]
+    at2 = [5.56, 5.6, 13.6, 12.0, np.nan]
+    expected = [passed, passed, failed, untestable, untestable]
+    results = do_supersaturation_check(dpt, at2)
+    np.testing.assert_array_equal(results, expected)
+
+
+@pytest.mark.parametrize(
+    "sst, expected", [(5.6, passed), (None, failed), (np.nan, failed)]
+)  # not sure if np.nan should trigger FAIL
+def test_do_sst_missing_value_check(sst, expected):
+    assert do_missing_value_check(sst) == expected
+
 
 @pytest.mark.parametrize(
     "sst, sst_uncertainty, freezing_point, n_sigma, expected",
@@ -559,3 +573,24 @@ def test_do_wind_consistency_check(wind_speed, wind_direction, expected):
         )
         == expected
     )
+
+
+def test_do_wind_consistency_check_array():
+    wind_speed = [None, 4, 0, 0, 5.0, 5, 12.0, 5, 12.0]
+    wind_direction = [4, None, 0, 120, 0, 361, 362, 165, 73]
+    expected = [
+        untestable,
+        untestable,
+        passed,
+        failed,
+        failed,
+        passed,
+        passed,
+        passed,
+        passed,
+    ]
+    results = do_wind_consistency_check(
+        wind_speed,
+        wind_direction,
+    )
+    np.testing.assert_array_equal(results, expected)
