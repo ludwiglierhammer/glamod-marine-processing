@@ -7,6 +7,7 @@ import pytest
 
 from glamod_marine_processing.qc_suite.modules.auxiliary import (
     failed,
+    isvalid,
     passed,
     untestable,
 )
@@ -24,7 +25,6 @@ from glamod_marine_processing.qc_suite.modules.next_level_qc import (
     do_time_check,
     do_wind_consistency_check,
     hard_limit_check,
-    isvalid,
     sst_freeze_check,
     value_check,
 )
@@ -83,6 +83,23 @@ def test_climatology_plus_stdev_with_lowbar(
         )
         == expected
     )
+
+
+def test_climatology_plus_stdev_with_lowbar_array():
+    value = [None, 1.0, 1.0, 1.0, 7.0, 0.4, 0.4]
+    climate_normal = [0.0, None, 0.0, 0.0, 0.0, 0.0, 0.0]
+    standard_deviation = [1.0, 1.0, None, 2.0, 2.0, 0.1, 0.1]
+    limit = 3.0
+    lowbar = 0.5
+    expected = [untestable, untestable, untestable, passed, failed, passed, passed]
+    results = climatology_check(
+        value,
+        climate_normal,
+        limit,
+        standard_deviation=standard_deviation,
+        lowbar=lowbar,
+    )
+    np.testing.assert_array_equal(results, expected)
 
 
 @pytest.mark.parametrize(
@@ -194,14 +211,7 @@ def test_hard_limit_check(value, limits, expected):
     ],
 )
 def test_sst_freeze_check(sst, sst_uncertainty, freezing_point, n_sigma, expected):
-    assert sst_freeze_check(sst, sst_uncertainty, freezing_point, n_sigma) == expected
-
-
-def _test_sst_freeze_check_raises():
-    with pytest.raises(ValueError):
-        sst_freeze_check(0.0, None, -1.8, 2.0)
-    with pytest.raises(ValueError):
-        sst_freeze_check(0.0, 0.0, None, 2.0)
+    assert sst_freeze_check(sst, freezing_point, sst_uncertainty, n_sigma) == expected
 
 
 def test_sst_freeze_check_defaults():
@@ -209,6 +219,14 @@ def test_sst_freeze_check_defaults():
     assert sst_freeze_check(0.0, **params) == passed
     assert sst_freeze_check(-1.8, **params) == passed
     assert sst_freeze_check(-2.0, **params) == failed
+
+
+def test_sst_freeze_check_array():
+    params = {"sst_uncertainty": 0, "freezing_point": -1.8, "n_sigma": 2.0}
+    sst = [0.0, -1.8, -2.0]
+    results = sst_freeze_check(sst, **params)
+    expected = [passed, passed, failed]
+    np.testing.assert_array_equal(results, expected)
 
 
 @pytest.mark.parametrize(
@@ -396,8 +414,8 @@ def test_do_day_check(year, month, day, hour, latitude, longitude, time, expecte
         month=month,
         day=day,
         hour=hour,
-        latitude=latitude,
-        longitude=longitude,
+        lat=latitude,
+        lon=longitude,
         time_since_sun_above_horizon=time,
     )
     assert result == expected
@@ -470,8 +488,8 @@ def test_do_day_check_using_date(
 
     result = do_day_check(
         date=datetime(year, month, day, truncated_hour, minute),
-        latitude=latitude,
-        longitude=longitude,
+        lat=latitude,
+        lon=longitude,
         time_since_sun_above_horizon=time,
     )
     assert result == expected
@@ -499,6 +517,14 @@ def test_do_air_temperature_climatology_check(
         do_climatology_check(at, at_climatology, maximum_anomaly=maximum_anomaly)
         == expected
     )
+
+
+def test_do_air_temperature_climatology_check_array():
+    at = [5.6, None, np.nan]
+    clim = [2.2, 2.2, 2.2]
+    results = do_climatology_check(at, clim, maximum_anomaly=10.0)
+    expected = [passed, untestable, untestable]
+    np.testing.assert_array_equal(results, expected)
 
 
 @pytest.mark.parametrize(
@@ -774,6 +800,14 @@ def test_do_supersaturation_check(dpt, at, expected):
     assert do_supersaturation_check(dpt, at) == expected
 
 
+def test_do_supersaturation_check_array():
+    dpt = [3.6, 5.6, 15.6, None, 12.0]
+    at2 = [5.56, 5.6, 13.6, 12.0, np.nan]
+    expected = [passed, passed, failed, untestable, untestable]
+    results = do_supersaturation_check(dpt, at2)
+    np.testing.assert_array_equal(results, expected)
+
+
 @pytest.mark.parametrize(
     "sst, expected", [(5.6, passed), (None, failed), (np.nan, failed)]
 )  # not sure if np.nan should trigger FAIL
@@ -816,6 +850,13 @@ def test_do_sst_missing_value_clim_check(sst_climatology, expected):
 )
 def test_do_sst_freeze_check(sst, freezing_point, freeze_check_n_sigma, expected):
     assert do_sst_freeze_check(sst, freezing_point, freeze_check_n_sigma) == expected
+
+
+def test_do_sst_freeze_check_array():
+    sst = [5.6, -5.6, 0.0]
+    expected = [passed, failed, passed]
+    results = do_sst_freeze_check(sst, -1.8, 2.0)
+    np.testing.assert_array_equal(results, expected)
 
 
 @pytest.mark.parametrize(
@@ -880,3 +921,24 @@ def test_do_wind_consistency_check(wind_speed, wind_direction, expected):
         )
         == expected
     )
+
+
+def test_do_wind_consistency_check_array():
+    wind_speed = [None, 4, 0, 0, 5.0, 5, 12.0, 5, 12.0]
+    wind_direction = [4, None, 0, 120, 0, 361, 362, 165, 73]
+    expected = [
+        untestable,
+        untestable,
+        passed,
+        failed,
+        failed,
+        passed,
+        passed,
+        passed,
+        passed,
+    ]
+    results = do_wind_consistency_check(
+        wind_speed,
+        wind_direction,
+    )
+    np.testing.assert_array_equal(results, expected)
