@@ -59,6 +59,14 @@ class TypeContext:
         self.originals = {}
 
 
+def _save_originals(args, kwargs):
+    ctx = kwargs.get("_ctx") or args.get("_ctx") or TypeContext()
+    for param, value in args.items():
+        if param not in ctx.originals:
+            ctx.originals[param] = value
+    return ctx
+
+
 def is_scalar_like(x: Any) -> bool:
     """
     Return True if the input is scalar-like (i.e., has no dimensions).
@@ -126,6 +134,8 @@ def format_return_type(result_array: np.ndarray, *input_values: Any) -> Any:
     input_value = next((val for val in input_values if val is not None), None)
 
     if input_value is None or is_scalar_like(input_value):
+        if hasattr(result_array, "ndim") and result_array.ndim > 0:
+            result_array = result_array[0]
         return int(result_array)
     if isinstance(input_value, pd.Series):
         return pd.Series(result_array, index=input_value.index, dtype=int)
@@ -141,7 +151,6 @@ def post_format_return_type(params: list[str]) -> Callable:
         @wraps(func)
         def wrapper(*args, **kwargs):
             ctx = kwargs.pop("_ctx", None)
-
             sig = inspect.signature(func)
             bound_args = sig.bind(*args, **kwargs)
             bound_args.apply_defaults()
@@ -182,15 +191,11 @@ def inspect_arrays(params: list[str], replace=True, skip_none=False) -> Callable
     def decorator(func):
         @wraps(func)
         def wrapper(*args, **kwargs):
-
-            # Get or create the shared context object
-            ctx = kwargs.get("_ctx", TypeContext())
-
-            # Bind the args and kwargs to parameter names
             sig = inspect.signature(func)
             bound_args = sig.bind(*args, **kwargs)
             bound_args.apply_defaults()
 
+            ctx = _save_originals(bound_args.arguments, kwargs)
             arrays = []
             for param in params:
                 if param not in bound_args.arguments:
@@ -200,8 +205,6 @@ def inspect_arrays(params: list[str], replace=True, skip_none=False) -> Callable
 
                 if value is None and skip_none:
                     continue
-
-                ctx.originals[param] = value
 
                 arr = np.atleast_1d(value)
                 if arr.ndim != 1:
