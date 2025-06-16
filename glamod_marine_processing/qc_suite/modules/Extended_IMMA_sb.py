@@ -15,7 +15,7 @@ from datetime import datetime
 
 import numpy as np
 
-from . import CalcHums, qc
+from . import calculate_humidity, qc
 from . import spherical_geometry as sph
 from . import track_check as tc
 from . import trackqc as tqc
@@ -434,7 +434,7 @@ class MarineReport:
         The listed hum_vars have to be the five calculated humidity variables: 'SHU','VAP','CRH','CWB','DPD'
         There has to be an AT and DPT present to calculate any one of these/
         This also depends on there being a climatological SLP present
-        This uses the CalcHums.py functions.
+        This uses the calculate_humidity.py functions.
 
         :param hum_vars: list of humidity variables to calculate
         :type hum_vars: list of strings
