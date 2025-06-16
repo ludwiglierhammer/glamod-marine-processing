@@ -24,15 +24,98 @@ class IMMA:
 @pytest.fixture
 def reps():
 
-    vals = [{'ID': 'AAAAAAAAA', 'YR': 2003, 'MO': 1, 'DY': 1, 'HR': 2, 'LAT': 0.5, 'LON': 20.5, 'SST': 5.0},
-            {'ID': 'BBBBBBBBB', 'YR': 2002, 'MO': 12, 'DY': 31, 'HR': 2, 'LAT': 1.5, 'LON': 20.5, 'SST': 2.0},
-            {'ID': 'BBBBBBBBB', 'YR': 2002, 'MO': 12, 'DY': 30, 'HR': 2, 'LAT': 1.5, 'LON': 21.5, 'SST': 2.0},
-            {'ID': 'BBBBBBBBB', 'YR': 2002, 'MO': 12, 'DY': 29, 'HR': 2, 'LAT': 1.5, 'LON': 19.5, 'SST': 2.0},
-            {'ID': 'BBBBBBBBB', 'YR': 2002, 'MO': 12, 'DY': 28, 'HR': 2, 'LAT': 0.5, 'LON': 19.5, 'SST': 2.0},
-            {'ID': 'BBBBBBBBB', 'YR': 2003, 'MO': 1, 'DY': 6, 'HR': 2, 'LAT': 0.5, 'LON': 21.5, 'SST': 2.0},
-            {'ID': 'BBBBBBBBB', 'YR': 2003, 'MO': 1, 'DY': 7, 'HR': 2, 'LAT': -0.5, 'LON': 20.5, 'SST': 2.0},
-            {'ID': 'BBBBBBBBB', 'YR': 2003, 'MO': 1, 'DY': 8, 'HR': 2, 'LAT': -0.5, 'LON': 21.5, 'SST': 2.0},
-            {'ID': 'BBBBBBBBB', 'YR': 2003, 'MO': 1, 'DY': 9, 'HR': 2, 'LAT': -0.5, 'LON': 19.5, 'SST': 2.0}]
+    vals = [
+        {
+            "ID": "AAAAAAAAA",
+            "YR": 2003,
+            "MO": 1,
+            "DY": 1,
+            "HR": 2,
+            "LAT": 0.5,
+            "LON": 20.5,
+            "SST": 5.0,
+        },
+        {
+            "ID": "BBBBBBBBB",
+            "YR": 2002,
+            "MO": 12,
+            "DY": 31,
+            "HR": 2,
+            "LAT": 1.5,
+            "LON": 20.5,
+            "SST": 2.0,
+        },
+        {
+            "ID": "BBBBBBBBB",
+            "YR": 2002,
+            "MO": 12,
+            "DY": 30,
+            "HR": 2,
+            "LAT": 1.5,
+            "LON": 21.5,
+            "SST": 2.0,
+        },
+        {
+            "ID": "BBBBBBBBB",
+            "YR": 2002,
+            "MO": 12,
+            "DY": 29,
+            "HR": 2,
+            "LAT": 1.5,
+            "LON": 19.5,
+            "SST": 2.0,
+        },
+        {
+            "ID": "BBBBBBBBB",
+            "YR": 2002,
+            "MO": 12,
+            "DY": 28,
+            "HR": 2,
+            "LAT": 0.5,
+            "LON": 19.5,
+            "SST": 2.0,
+        },
+        {
+            "ID": "BBBBBBBBB",
+            "YR": 2003,
+            "MO": 1,
+            "DY": 6,
+            "HR": 2,
+            "LAT": 0.5,
+            "LON": 21.5,
+            "SST": 2.0,
+        },
+        {
+            "ID": "BBBBBBBBB",
+            "YR": 2003,
+            "MO": 1,
+            "DY": 7,
+            "HR": 2,
+            "LAT": -0.5,
+            "LON": 20.5,
+            "SST": 2.0,
+        },
+        {
+            "ID": "BBBBBBBBB",
+            "YR": 2003,
+            "MO": 1,
+            "DY": 8,
+            "HR": 2,
+            "LAT": -0.5,
+            "LON": 21.5,
+            "SST": 2.0,
+        },
+        {
+            "ID": "BBBBBBBBB",
+            "YR": 2003,
+            "MO": 1,
+            "DY": 9,
+            "HR": 2,
+            "LAT": -0.5,
+            "LON": 19.5,
+            "SST": 2.0,
+        },
+    ]
 
     reps = {}
     for key in vals[0]:
@@ -61,15 +144,96 @@ def reps():
 def reps2():
 
     vals = [
-        {'ID': 'AAAAAAAAA', 'YR': 2003, 'MO': 1, 'DY': 1, 'HR': 2, 'LAT': 0.5, 'LON': 20.5, 'SST': 5.0},
-        {'ID': 'BBBBBBBBB', 'YR': 2002, 'MO': 12, 'DY': 21, 'HR': 2, 'LAT': 1.5, 'LON': 20.5, 'SST': 2.0},
-        {'ID': 'BBBBBBBBB', 'YR': 2002, 'MO': 12, 'DY': 20, 'HR': 2, 'LAT': 1.5, 'LON': 21.5, 'SST': 2.0},
-        {'ID': 'BBBBBBBBB', 'YR': 2002, 'MO': 12, 'DY': 19, 'HR': 2, 'LAT': 1.5, 'LON': 19.5, 'SST': 2.0},
-        {'ID': 'BBBBBBBBB', 'YR': 2002, 'MO': 12, 'DY': 18, 'HR': 2, 'LAT': 0.5, 'LON': 19.5, 'SST': 2.0},
-        {'ID': 'BBBBBBBBB', 'YR': 2003, 'MO': 1, 'DY': 16, 'HR': 2, 'LAT': 0.5, 'LON': 21.5, 'SST': 2.0},
-        {'ID': 'BBBBBBBBB', 'YR': 2003, 'MO': 1, 'DY': 17, 'HR': 2, 'LAT': -0.5, 'LON': 20.5, 'SST': 2.0},
-        {'ID': 'BBBBBBBBB', 'YR': 2003, 'MO': 1, 'DY': 18, 'HR': 2, 'LAT': -0.5, 'LON': 21.5, 'SST': 2.0},
-        {'ID': 'BBBBBBBBB', 'YR': 2003, 'MO': 1, 'DY': 19, 'HR': 2, 'LAT': -0.5, 'LON': 19.5, 'SST': 2.0}
+        {
+            "ID": "AAAAAAAAA",
+            "YR": 2003,
+            "MO": 1,
+            "DY": 1,
+            "HR": 2,
+            "LAT": 0.5,
+            "LON": 20.5,
+            "SST": 5.0,
+        },
+        {
+            "ID": "BBBBBBBBB",
+            "YR": 2002,
+            "MO": 12,
+            "DY": 21,
+            "HR": 2,
+            "LAT": 1.5,
+            "LON": 20.5,
+            "SST": 2.0,
+        },
+        {
+            "ID": "BBBBBBBBB",
+            "YR": 2002,
+            "MO": 12,
+            "DY": 20,
+            "HR": 2,
+            "LAT": 1.5,
+            "LON": 21.5,
+            "SST": 2.0,
+        },
+        {
+            "ID": "BBBBBBBBB",
+            "YR": 2002,
+            "MO": 12,
+            "DY": 19,
+            "HR": 2,
+            "LAT": 1.5,
+            "LON": 19.5,
+            "SST": 2.0,
+        },
+        {
+            "ID": "BBBBBBBBB",
+            "YR": 2002,
+            "MO": 12,
+            "DY": 18,
+            "HR": 2,
+            "LAT": 0.5,
+            "LON": 19.5,
+            "SST": 2.0,
+        },
+        {
+            "ID": "BBBBBBBBB",
+            "YR": 2003,
+            "MO": 1,
+            "DY": 16,
+            "HR": 2,
+            "LAT": 0.5,
+            "LON": 21.5,
+            "SST": 2.0,
+        },
+        {
+            "ID": "BBBBBBBBB",
+            "YR": 2003,
+            "MO": 1,
+            "DY": 17,
+            "HR": 2,
+            "LAT": -0.5,
+            "LON": 20.5,
+            "SST": 2.0,
+        },
+        {
+            "ID": "BBBBBBBBB",
+            "YR": 2003,
+            "MO": 1,
+            "DY": 18,
+            "HR": 2,
+            "LAT": -0.5,
+            "LON": 21.5,
+            "SST": 2.0,
+        },
+        {
+            "ID": "BBBBBBBBB",
+            "YR": 2003,
+            "MO": 1,
+            "DY": 19,
+            "HR": 2,
+            "LAT": -0.5,
+            "LON": 19.5,
+            "SST": 2.0,
+        },
     ]
 
     reps = {}
@@ -99,15 +263,96 @@ def reps2():
 def reps3():
 
     vals = [
-        {'ID': 'AAAAAAAAA', 'YR': 2003, 'MO': 1, 'DY': 1, 'HR': 2, 'LAT': 0.5, 'LON': 20.5, 'SST': 5.0},
-        {'ID': 'BBBBBBBBB', 'YR': 2002, 'MO': 12, 'DY': 21, 'HR': 2, 'LAT': 2.5, 'LON': 20.5, 'SST': 2.0},
-        {'ID': 'BBBBBBBBB', 'YR': 2002, 'MO': 12, 'DY': 20, 'HR': 2, 'LAT': 2.5, 'LON': 22.5, 'SST': 2.0},
-        {'ID': 'BBBBBBBBB', 'YR': 2002, 'MO': 12, 'DY': 19, 'HR': 2, 'LAT': 2.5, 'LON': 18.5, 'SST': 2.0},
-        {'ID': 'BBBBBBBBB', 'YR': 2002, 'MO': 12, 'DY': 18, 'HR': 2, 'LAT': 0.5, 'LON': 18.5, 'SST': 2.0},
-        {'ID': 'BBBBBBBBB', 'YR': 2003, 'MO': 1, 'DY': 16, 'HR': 2, 'LAT': 0.5, 'LON': 22.5, 'SST': 2.0},
-        {'ID': 'BBBBBBBBB', 'YR': 2003, 'MO': 1, 'DY': 17, 'HR': 2, 'LAT': -1.5, 'LON': 20.5, 'SST': 2.0},
-        {'ID': 'BBBBBBBBB', 'YR': 2003, 'MO': 1, 'DY': 18, 'HR': 2, 'LAT': -1.5, 'LON': 22.5, 'SST': 2.0},
-        {'ID': 'BBBBBBBBB', 'YR': 2003, 'MO': 1, 'DY': 19, 'HR': 2, 'LAT': -1.5, 'LON': 18.5, 'SST': 2.0}
+        {
+            "ID": "AAAAAAAAA",
+            "YR": 2003,
+            "MO": 1,
+            "DY": 1,
+            "HR": 2,
+            "LAT": 0.5,
+            "LON": 20.5,
+            "SST": 5.0,
+        },
+        {
+            "ID": "BBBBBBBBB",
+            "YR": 2002,
+            "MO": 12,
+            "DY": 21,
+            "HR": 2,
+            "LAT": 2.5,
+            "LON": 20.5,
+            "SST": 2.0,
+        },
+        {
+            "ID": "BBBBBBBBB",
+            "YR": 2002,
+            "MO": 12,
+            "DY": 20,
+            "HR": 2,
+            "LAT": 2.5,
+            "LON": 22.5,
+            "SST": 2.0,
+        },
+        {
+            "ID": "BBBBBBBBB",
+            "YR": 2002,
+            "MO": 12,
+            "DY": 19,
+            "HR": 2,
+            "LAT": 2.5,
+            "LON": 18.5,
+            "SST": 2.0,
+        },
+        {
+            "ID": "BBBBBBBBB",
+            "YR": 2002,
+            "MO": 12,
+            "DY": 18,
+            "HR": 2,
+            "LAT": 0.5,
+            "LON": 18.5,
+            "SST": 2.0,
+        },
+        {
+            "ID": "BBBBBBBBB",
+            "YR": 2003,
+            "MO": 1,
+            "DY": 16,
+            "HR": 2,
+            "LAT": 0.5,
+            "LON": 22.5,
+            "SST": 2.0,
+        },
+        {
+            "ID": "BBBBBBBBB",
+            "YR": 2003,
+            "MO": 1,
+            "DY": 17,
+            "HR": 2,
+            "LAT": -1.5,
+            "LON": 20.5,
+            "SST": 2.0,
+        },
+        {
+            "ID": "BBBBBBBBB",
+            "YR": 2003,
+            "MO": 1,
+            "DY": 18,
+            "HR": 2,
+            "LAT": -1.5,
+            "LON": 22.5,
+            "SST": 2.0,
+        },
+        {
+            "ID": "BBBBBBBBB",
+            "YR": 2003,
+            "MO": 1,
+            "DY": 19,
+            "HR": 2,
+            "LAT": -1.5,
+            "LON": 18.5,
+            "SST": 2.0,
+        },
     ]
 
     reps = {}
@@ -142,15 +387,96 @@ def dummy_pentad_stdev():
 def reps4():
 
     vals = [
-        {'ID': 'AAAAAAAAA', 'YR': 2003, 'MO': 1, 'DY': 1, 'HR': 2, 'LAT': 0.5, 'LON': 20.5, 'SST': 5.0},
-        {'ID': 'BBBBBBBBB', 'YR': 2002, 'MO': 12, 'DY': 21, 'HR': 2, 'LAT': 3.5, 'LON': 20.5, 'SST': 1.9},
-        {'ID': 'BBBBBBBBB', 'YR': 2002, 'MO': 12, 'DY': 20, 'HR': 2, 'LAT': 3.5, 'LON': 23.5, 'SST': 1.7},
-        {'ID': 'BBBBBBBBB', 'YR': 2002, 'MO': 12, 'DY': 19, 'HR': 2, 'LAT': 3.5, 'LON': 17.5, 'SST': 2.0},
-        {'ID': 'BBBBBBBBB', 'YR': 2002, 'MO': 12, 'DY': 18, 'HR': 2, 'LAT': 0.5, 'LON': 17.5, 'SST': 2.0},
-        {'ID': 'BBBBBBBBB', 'YR': 2003, 'MO': 1, 'DY': 16, 'HR': 2, 'LAT': 0.5, 'LON': 23.5, 'SST': 2.0},
-        {'ID': 'BBBBBBBBB', 'YR': 2003, 'MO': 1, 'DY': 17, 'HR': 2, 'LAT': -2.5, 'LON': 20.5, 'SST': 2.0},
-        {'ID': 'BBBBBBBBB', 'YR': 2003, 'MO': 1, 'DY': 18, 'HR': 2, 'LAT': -2.5, 'LON': 23.5, 'SST': 2.3},
-        {'ID': 'BBBBBBBBB', 'YR': 2003, 'MO': 1, 'DY': 19, 'HR': 2, 'LAT': -2.5, 'LON': 17.5, 'SST': 2.1}
+        {
+            "ID": "AAAAAAAAA",
+            "YR": 2003,
+            "MO": 1,
+            "DY": 1,
+            "HR": 2,
+            "LAT": 0.5,
+            "LON": 20.5,
+            "SST": 5.0,
+        },
+        {
+            "ID": "BBBBBBBBB",
+            "YR": 2002,
+            "MO": 12,
+            "DY": 21,
+            "HR": 2,
+            "LAT": 3.5,
+            "LON": 20.5,
+            "SST": 1.9,
+        },
+        {
+            "ID": "BBBBBBBBB",
+            "YR": 2002,
+            "MO": 12,
+            "DY": 20,
+            "HR": 2,
+            "LAT": 3.5,
+            "LON": 23.5,
+            "SST": 1.7,
+        },
+        {
+            "ID": "BBBBBBBBB",
+            "YR": 2002,
+            "MO": 12,
+            "DY": 19,
+            "HR": 2,
+            "LAT": 3.5,
+            "LON": 17.5,
+            "SST": 2.0,
+        },
+        {
+            "ID": "BBBBBBBBB",
+            "YR": 2002,
+            "MO": 12,
+            "DY": 18,
+            "HR": 2,
+            "LAT": 0.5,
+            "LON": 17.5,
+            "SST": 2.0,
+        },
+        {
+            "ID": "BBBBBBBBB",
+            "YR": 2003,
+            "MO": 1,
+            "DY": 16,
+            "HR": 2,
+            "LAT": 0.5,
+            "LON": 23.5,
+            "SST": 2.0,
+        },
+        {
+            "ID": "BBBBBBBBB",
+            "YR": 2003,
+            "MO": 1,
+            "DY": 17,
+            "HR": 2,
+            "LAT": -2.5,
+            "LON": 20.5,
+            "SST": 2.0,
+        },
+        {
+            "ID": "BBBBBBBBB",
+            "YR": 2003,
+            "MO": 1,
+            "DY": 18,
+            "HR": 2,
+            "LAT": -2.5,
+            "LON": 23.5,
+            "SST": 2.3,
+        },
+        {
+            "ID": "BBBBBBBBB",
+            "YR": 2003,
+            "MO": 1,
+            "DY": 19,
+            "HR": 2,
+            "LAT": -2.5,
+            "LON": 17.5,
+            "SST": 2.1,
+        },
     ]
 
     reps = {}
@@ -171,7 +497,7 @@ def reps4():
         reps["SST_CLIM"].append(0.5)
 
     for key in reps:
-        reps[key] = np.array(reps[key]) # type: np.ndarray
+        reps[key] = np.array(reps[key])  # type: np.ndarray
 
     return reps
 
@@ -179,12 +505,14 @@ def reps4():
 def test_eight_near_neighbours(dummy_pentad_stdev, reps):
 
     g = SuperObsGrid()
-    g.add_multiple_observations(reps['LAT'], reps['LON'], reps['DATE'], reps['SST'] - reps["SST_CLIM"])
+    g.add_multiple_observations(
+        reps["LAT"], reps["LON"], reps["DATE"], reps["SST"] - reps["SST_CLIM"]
+    )
     g.get_buddy_limits_with_parameters(
         dummy_pentad_stdev,
         [[1, 1, 2], [2, 2, 2], [1, 1, 4], [2, 2, 4]],
         [[0, 5, 15, 100], [0], [0, 5, 15, 100], [0]],
-        [[4.0, 3.5, 3.0, 2.5], [4.0], [4.0, 3.5, 3.0, 2.5], [4.0]]
+        [[4.0, 3.5, 3.0, 2.5], [4.0], [4.0, 3.5, 3.0, 2.5], [4.0]],
     )
     mn = g.get_buddy_mean(0.5, 20.5, 1, 1)
     sd = g.get_buddy_stdev(0.5, 20.5, 1, 1)
@@ -196,10 +524,15 @@ def test_eight_near_neighbours(dummy_pentad_stdev, reps):
 def test_eight_distant_near_neighbours(dummy_pentad_stdev, reps2):
 
     g = SuperObsGrid()
-    g.add_multiple_observations(reps2["LAT"], reps2["LON"], reps2["DATE"], reps2["SST"] - reps2["SST_CLIM"])
-    g.get_buddy_limits_with_parameters(dummy_pentad_stdev, [[1, 1, 2], [2, 2, 2], [1, 1, 4], [2, 2, 4]],
-                                       [[0, 5, 15, 100], [0], [0, 5, 15, 100], [0]],
-                                       [[4.0, 3.5, 3.0, 2.5], [4.0], [4.0, 3.5, 3.0, 2.5], [4.0]])
+    g.add_multiple_observations(
+        reps2["LAT"], reps2["LON"], reps2["DATE"], reps2["SST"] - reps2["SST_CLIM"]
+    )
+    g.get_buddy_limits_with_parameters(
+        dummy_pentad_stdev,
+        [[1, 1, 2], [2, 2, 2], [1, 1, 4], [2, 2, 4]],
+        [[0, 5, 15, 100], [0], [0, 5, 15, 100], [0]],
+        [[4.0, 3.5, 3.0, 2.5], [4.0], [4.0, 3.5, 3.0, 2.5], [4.0]],
+    )
     mn = g.get_buddy_mean(0.5, 20.5, 1, 1)
     sd = g.get_buddy_stdev(0.5, 20.5, 1, 1)
 
@@ -210,10 +543,15 @@ def test_eight_distant_near_neighbours(dummy_pentad_stdev, reps2):
 def test_eight_even_more_distant_near_neighbours(dummy_pentad_stdev, reps3):
 
     g = SuperObsGrid()
-    g.add_multiple_observations(reps3["LAT"], reps3["LON"], reps3["DATE"], reps3["SST"] - reps3["SST_CLIM"])
-    g.get_buddy_limits_with_parameters(dummy_pentad_stdev, [[1, 1, 2], [2, 2, 2], [1, 1, 4], [2, 2, 4]],
-                                       [[0, 5, 15, 100], [0], [0, 5, 15, 100], [0]],
-                                       [[4.0, 3.5, 3.0, 2.5], [4.0], [4.0, 3.5, 3.0, 2.5], [4.0]])
+    g.add_multiple_observations(
+        reps3["LAT"], reps3["LON"], reps3["DATE"], reps3["SST"] - reps3["SST_CLIM"]
+    )
+    g.get_buddy_limits_with_parameters(
+        dummy_pentad_stdev,
+        [[1, 1, 2], [2, 2, 2], [1, 1, 4], [2, 2, 4]],
+        [[0, 5, 15, 100], [0], [0, 5, 15, 100], [0]],
+        [[4.0, 3.5, 3.0, 2.5], [4.0], [4.0, 3.5, 3.0, 2.5], [4.0]],
+    )
     mn = g.get_buddy_mean(0.5, 20.5, 1, 1)
     sd = g.get_buddy_stdev(0.5, 20.5, 1, 1)
     assert mn == 1.5
@@ -223,11 +561,15 @@ def test_eight_even_more_distant_near_neighbours(dummy_pentad_stdev, reps3):
 def test_eight_too_distant_neighbours(dummy_pentad_stdev, reps4):
 
     g = SuperObsGrid()
-    g.add_multiple_observations(reps4["LAT"], reps4["LON"], reps4["DATE"], reps4["SST"] - reps4["SST_CLIM"])
-    g.get_buddy_limits_with_parameters(dummy_pentad_stdev,
-                                       [[1, 1, 2], [2, 2, 2], [1, 1, 4], [2, 2, 4]],
-                                       [[0, 5, 15, 100], [0], [0, 5, 15, 100], [0]],
-                                       [[4.0, 3.5, 3.0, 2.5], [4.0], [4.0, 3.5, 3.0, 2.5], [4.0]])
+    g.add_multiple_observations(
+        reps4["LAT"], reps4["LON"], reps4["DATE"], reps4["SST"] - reps4["SST_CLIM"]
+    )
+    g.get_buddy_limits_with_parameters(
+        dummy_pentad_stdev,
+        [[1, 1, 2], [2, 2, 2], [1, 1, 4], [2, 2, 4]],
+        [[0, 5, 15, 100], [0], [0, 5, 15, 100], [0]],
+        [[4.0, 3.5, 3.0, 2.5], [4.0], [4.0, 3.5, 3.0, 2.5], [4.0]],
+    )
     mn = g.get_buddy_mean(0.5, 20.5, 1, 1)
     sd = g.get_buddy_stdev(0.5, 20.5, 1, 1)
     assert mn == 0.0
@@ -259,36 +601,74 @@ def test_that_basic_initialisation_works():
     c = ex.ClimVariable(0.0)
 
     assert c.getclim() == 0.0
-    assert c.getclim('clim') == 0.0
-    assert c.getclim('stdev') is None
+    assert c.getclim("clim") == 0.0
+    assert c.getclim("stdev") is None
 
 
 def test_that_initialisation_with_clim_and_stdev_works():
     c = ex.ClimVariable(0.023, 1.1110)
     assert c.getclim() == 0.023
-    assert c.getclim('clim') == 0.023
-    assert c.getclim('stdev') == 1.1110
+    assert c.getclim("clim") == 0.023
+    assert c.getclim("stdev") == 1.1110
 
 
 def test_setting_variables():
     c = ex.ClimVariable(3.2)
-    assert c.getclim('clim') == 3.2
-    assert c.getclim('stdev') is None
-    c.setclim(5.9, 'clim')
-    assert c.getclim('stdev') is None
+    assert c.getclim("clim") == 3.2
+    assert c.getclim("stdev") is None
+    c.setclim(5.9, "clim")
+    assert c.getclim("stdev") is None
     assert c.getclim() == 5.9
-    c.setclim(12.33, 'stdev')
-    assert c.getclim('stdev') == 12.33
+    c.setclim(12.33, "stdev")
+    assert c.getclim("stdev") == 12.33
     assert c.getclim() == 5.9
 
 
 @pytest.fixture
 def reps_():
 
-    vals = [{'ID': 'AAAAAAAAA', 'YR': 2003, 'MO': 12, 'DY': 1, 'HR': 0, 'LAT': 0.5, 'LON': 0.5, 'SST': 5.0},
-            {'ID': 'BBBBBBBBB', 'YR': 2003, 'MO': 12, 'DY': 1, 'HR': 0, 'LAT': 0.5, 'LON': 0.5, 'SST': 5.0},
-            {'ID': 'BBBBBBBBB', 'YR': 2003, 'MO': 12, 'DY': 1, 'HR': 10.0, 'LAT': 0.5, 'LON': 0.5, 'SST': 5.0},
-            {'ID': 'BBBBBBBBB', 'YR': 2003, 'MO': 12, 'DY': 1, 'HR': 10.0, 'LAT': 1.5, 'LON': 0.5, 'SST': 5.0}]
+    vals = [
+        {
+            "ID": "AAAAAAAAA",
+            "YR": 2003,
+            "MO": 12,
+            "DY": 1,
+            "HR": 0,
+            "LAT": 0.5,
+            "LON": 0.5,
+            "SST": 5.0,
+        },
+        {
+            "ID": "BBBBBBBBB",
+            "YR": 2003,
+            "MO": 12,
+            "DY": 1,
+            "HR": 0,
+            "LAT": 0.5,
+            "LON": 0.5,
+            "SST": 5.0,
+        },
+        {
+            "ID": "BBBBBBBBB",
+            "YR": 2003,
+            "MO": 12,
+            "DY": 1,
+            "HR": 10.0,
+            "LAT": 0.5,
+            "LON": 0.5,
+            "SST": 5.0,
+        },
+        {
+            "ID": "BBBBBBBBB",
+            "YR": 2003,
+            "MO": 12,
+            "DY": 1,
+            "HR": 10.0,
+            "LAT": 1.5,
+            "LON": 0.5,
+            "SST": 5.0,
+        },
+    ]
 
     reps = {}
     for key in vals[0]:
@@ -315,11 +695,58 @@ def reps_():
 
 @pytest.fixture
 def reps2_():
-    vals = [{'ID': 'AAAAAAAAA', 'YR': 2003, 'MO': 1, 'DY': 1, 'HR': 0, 'LAT': 0.5, 'LON': 0.5, 'SST': 5.0},
-            {'ID': 'BBBBBBBBB', 'YR': 2003, 'MO': 1, 'DY': 1, 'HR': 0, 'LAT': 0.5, 'LON': 0.5, 'SST': 5.0},
-            {'ID': 'BBBBBBBBB', 'YR': 2003, 'MO': 1, 'DY': 1, 'HR': 10.0, 'LAT': 0.5, 'LON': 0.5, 'SST': 5.0},
-            {'ID': 'BBBBBBBBB', 'YR': 2002, 'MO': 12, 'DY': 31, 'HR': 10.0, 'LAT': 0.5, 'LON': 0.5, 'SST': 2.0},
-            {'ID': 'BBBBBBBBB', 'YR': 2003, 'MO': 1, 'DY': 1, 'HR': 10.0, 'LAT': 1.5, 'LON': 0.5, 'SST': 5.0}]
+    vals = [
+        {
+            "ID": "AAAAAAAAA",
+            "YR": 2003,
+            "MO": 1,
+            "DY": 1,
+            "HR": 0,
+            "LAT": 0.5,
+            "LON": 0.5,
+            "SST": 5.0,
+        },
+        {
+            "ID": "BBBBBBBBB",
+            "YR": 2003,
+            "MO": 1,
+            "DY": 1,
+            "HR": 0,
+            "LAT": 0.5,
+            "LON": 0.5,
+            "SST": 5.0,
+        },
+        {
+            "ID": "BBBBBBBBB",
+            "YR": 2003,
+            "MO": 1,
+            "DY": 1,
+            "HR": 10.0,
+            "LAT": 0.5,
+            "LON": 0.5,
+            "SST": 5.0,
+        },
+        {
+            "ID": "BBBBBBBBB",
+            "YR": 2002,
+            "MO": 12,
+            "DY": 31,
+            "HR": 10.0,
+            "LAT": 0.5,
+            "LON": 0.5,
+            "SST": 2.0,
+        },
+        {
+            "ID": "BBBBBBBBB",
+            "YR": 2003,
+            "MO": 1,
+            "DY": 1,
+            "HR": 10.0,
+            "LAT": 1.5,
+            "LON": 0.5,
+            "SST": 5.0,
+        },
+    ]
 
     reps = {}
     for key in vals[0]:
@@ -351,7 +778,9 @@ def dummy_pentad_stdev_():
 
 def test_neighbours(reps2_):
     g = SuperObsGrid()
-    g.add_multiple_observations(reps2_["LAT"], reps2_["LON"], reps2_["DATE"], reps2_["SST"] - reps2_["SST_CLIM"])
+    g.add_multiple_observations(
+        reps2_["LAT"], reps2_["LON"], reps2_["DATE"], reps2_["SST"] - reps2_["SST_CLIM"]
+    )
     temp_anom, temp_nobs = g.get_neighbour_anomalies([2, 2, 2], 180, 89, 0)
 
     assert len(temp_anom) == 2
@@ -367,22 +796,23 @@ def test_neighbours(reps2_):
 def test_add_one_maxes_limits(reps_, dummy_pentad_stdev_):
 
     g = SuperObsGrid()
-    g.add_single_observation(reps_['LAT'][0], reps_['LON'][0], reps_['DATE'][0].month, reps_['DATE'][0].day,
-                             reps_['SST'][0] - reps_['SST_CLIM'][0])
+    g.add_single_observation(
+        reps_["LAT"][0],
+        reps_["LON"][0],
+        reps_["DATE"][0].month,
+        reps_["DATE"][0].day,
+        reps_["SST"][0] - reps_["SST_CLIM"][0],
+    )
     g.take_average()
-    g.get_new_buddy_limits(dummy_pentad_stdev_, dummy_pentad_stdev_, dummy_pentad_stdev_)
+    g.get_new_buddy_limits(
+        dummy_pentad_stdev_, dummy_pentad_stdev_, dummy_pentad_stdev_
+    )
 
     mn = g.get_buddy_mean(
-        reps_['LAT'][0],
-        reps_['LON'][0],
-        reps_['DATE'][0].month,
-        reps_['DATE'][0].day
+        reps_["LAT"][0], reps_["LON"][0], reps_["DATE"][0].month, reps_["DATE"][0].day
     )
     sd = g.get_buddy_stdev(
-        reps_['LAT'][0],
-        reps_['LON'][0],
-        reps_['DATE'][0].month,
-        reps_['DATE'][0].day
+        reps_["LAT"][0], reps_["LON"][0], reps_["DATE"][0].month, reps_["DATE"][0].day
     )
 
     assert pytest.approx(sd, 0.0001) == 500
@@ -391,23 +821,21 @@ def test_add_one_maxes_limits(reps_, dummy_pentad_stdev_):
 
 def test_add_multiple(reps_, dummy_pentad_stdev_):
     g = SuperObsGrid()
-    g.add_multiple_observations(reps_["LAT"], reps_["LON"], reps_["DATE"], reps_["SST"] - reps_["SST_CLIM"])
-    g.get_new_buddy_limits(dummy_pentad_stdev_, dummy_pentad_stdev_, dummy_pentad_stdev_)
+    g.add_multiple_observations(
+        reps_["LAT"], reps_["LON"], reps_["DATE"], reps_["SST"] - reps_["SST_CLIM"]
+    )
+    g.get_new_buddy_limits(
+        dummy_pentad_stdev_, dummy_pentad_stdev_, dummy_pentad_stdev_
+    )
 
     mn = g.get_buddy_mean(
-        reps_['LAT'][0],
-        reps_['LON'][0],
-        reps_['DATE'][0].month,
-        reps_['DATE'][0].day
+        reps_["LAT"][0], reps_["LON"][0], reps_["DATE"][0].month, reps_["DATE"][0].day
     )
     sd = g.get_buddy_stdev(
-        reps_['LAT'][0],
-        reps_['LON'][0],
-        reps_['DATE'][0].month,
-        reps_['DATE'][0].day
+        reps_["LAT"][0], reps_["LON"][0], reps_["DATE"][0].month, reps_["DATE"][0].day
     )
 
-    assert pytest.approx(sd, 0.0001) == math.sqrt(10.)
+    assert pytest.approx(sd, 0.0001) == math.sqrt(10.0)
     assert mn == 4.5
 
 
@@ -418,11 +846,9 @@ def test_creation():
 
 def test_buddy_check(reps_, dummy_pentad_stdev_):
 
-    parameters = dict(
-        limits=[[1, 1, 2], [2, 2, 2], [1, 1, 4], [2, 2, 4]],
-        number_of_obs_thresholds=[[0, 5, 15, 100], [0], [0, 5, 15, 100], [0]],
-        multipliers=[[4.0, 3.5, 3.0, 2.5], [4.0], [4.0, 3.5, 3.0, 2.5], [4.0]]
-    )
+    limits = [[1, 1, 2], [2, 2, 2], [1, 1, 4], [2, 2, 4]]
+    number_of_obs_thresholds = [[0, 5, 15, 100], [0], [0, 5, 15, 100], [0]]
+    multipliers = [[4.0, 3.5, 3.0, 2.5], [4.0], [4.0, 3.5, 3.0, 2.5], [4.0]]
 
     result = mds_buddy_check(
         reps_["LAT"],
@@ -430,10 +856,49 @@ def test_buddy_check(reps_, dummy_pentad_stdev_):
         reps_["DATE"],
         reps_["SST"] - reps_["SST_CLIM"],
         dummy_pentad_stdev_,
-        parameters
+        limits,
+        number_of_obs_thresholds,
+        multipliers,
     )
 
     assert np.all(result == [passed, passed, passed, passed])
+
+
+def test_buddy_check_raises(reps_, dummy_pentad_stdev_):
+
+    # Parameter lists have different numbers of members
+    limits = [[1, 1, 2], [2, 2, 2], [1, 1, 4]]
+    number_of_obs_thresholds = [[0, 5, 15, 100], [0], [0, 5, 15, 100], [0]]
+    multipliers = [[4.0, 3.5, 3.0, 2.5], [4.0], [4.0, 3.5, 3.0, 2.5], [4.0]]
+
+    with pytest.raises(ValueError):
+        _ = mds_buddy_check(
+            reps_["LAT"],
+            reps_["LON"],
+            reps_["DATE"],
+            reps_["SST"] - reps_["SST_CLIM"],
+            dummy_pentad_stdev_,
+            limits,
+            number_of_obs_thresholds,
+            multipliers,
+        )
+
+    # number of obs thresholds and multipliers are differently structured
+    limits = [[1, 1, 2], [2, 2, 2], [1, 1, 4], [2, 2, 4]]
+    number_of_obs_thresholds = [[0, 5, 15, 100], [0], [0, 5, 15, 100], [0]]
+    multipliers = [[4.0, 3.5, 3.0, 2.5], [4.0], [4.0, 3.5, 2.5], [4.0]]
+
+    with pytest.raises(ValueError):
+        _ = mds_buddy_check(
+            reps_["LAT"],
+            reps_["LON"],
+            reps_["DATE"],
+            reps_["SST"] - reps_["SST_CLIM"],
+            dummy_pentad_stdev_,
+            limits,
+            number_of_obs_thresholds,
+            multipliers,
+        )
 
 
 def test_bayesian_buddy_check(reps_, dummy_pentad_stdev_):
@@ -446,6 +911,12 @@ def test_bayesian_buddy_check(reps_, dummy_pentad_stdev_):
         dummy_pentad_stdev_,
         dummy_pentad_stdev_,
         dummy_pentad_stdev_,
+        0.05,
+        0.1,
+        1.0,
+        [2, 2, 4],
+        3.0,
+        8.0,
     )
 
     assert np.all(result == [passed, passed, passed, passed])

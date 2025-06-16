@@ -30,7 +30,9 @@ from glamod_marine_processing.qc_suite.modules.auxiliary import (
 km_to_nm = 0.539957
 
 
-def get_threshold_multiplier(total_nobs: int, nob_limits: list[int], multiplier_values: list[float]) -> float:
+def get_threshold_multiplier(
+    total_nobs: int, nob_limits: list[int], multiplier_values: list[float]
+) -> float:
     """Find the highest value of i such that total_nobs is greater than nob_limits[i] and return multiplier_values[i]
 
     This routine is used by the buddy check. It's a bit niche.
@@ -103,10 +105,14 @@ class SuperObsGrid:
         """
         n_obs = len(lats)
         for i in range(n_obs):
-            self.add_single_observation(lats[i], lons[i], dates[i].month, dates[i].day, values[i])
+            self.add_single_observation(
+                lats[i], lons[i], dates[i].month, dates[i].day, values[i]
+            )
         self.take_average()
 
-    def add_single_observation(self, lat: float, lon: float, month: int, day: int, anom: float) -> None:
+    def add_single_observation(
+        self, lat: float, lon: float, month: int, day: int, anom: float
+    ) -> None:
         """Add an anomaly to the grid from specified lat lon and date.
 
         Parameters
@@ -144,11 +150,7 @@ class SuperObsGrid:
         self.grid[nonmiss] = self.grid[nonmiss] / self.nobs[nonmiss]
 
     def get_neighbour_anomalies(
-        self,
-        search_radius: list,
-        xindex: int,
-        yindex: int,
-        pindex: int
+        self, search_radius: list, xindex: int, yindex: int, pindex: int
     ) -> (list[float], list[float]):
         """Search within a specified search radius of the given point and extract the neighbours for buddy check
 
@@ -231,7 +233,9 @@ class SuperObsGrid:
             pindex = nonmiss[2][i]
             m, d = pentad_to_month_day(pindex + 1)
 
-            stdev = pentad_stdev.get_value_mds_style(89.5 - yindex, -179.5 + xindex, m, d)
+            stdev = pentad_stdev.get_value_mds_style(
+                89.5 - yindex, -179.5 + xindex, m, d
+            )
 
             if stdev is None or stdev < 0.0:
                 stdev = 1.0
@@ -396,12 +400,14 @@ class SuperObsGrid:
 
 @inspect_arrays(["lats", "lons", "dates", "anoms"])
 def mds_buddy_check(
-        lats: Sequence[float],
-        lons: Sequence[float],
-        dates: Sequence[datetime],
-        anoms: Sequence[float],
-        pentad_stdev: Climatology,
-        parameters: dict
+    lats: Sequence[float],
+    lons: Sequence[float],
+    dates: Sequence[datetime],
+    anoms: Sequence[float],
+    pentad_stdev: Climatology,
+    limits: list[list[int]],
+    number_of_obs_thresholds: list[list[int]],
+    multipliers: list[list[float]],
 ):
     """Do the old style buddy check.
 
@@ -417,18 +423,42 @@ def mds_buddy_check(
         1-dimensional anomaly array.
     pentad_stdev: Climatology
         Field of standard deviations of 1x1xpentad standard deviations
-    parameters: dict
-        Dictionary of parameters for the buddy check
+    limits: list[list]
+        limits a list of lists. Each list member is a three-membered list specifying the longitudinal, latitudinal,
+        and time range within which buddies are sought at each level of search.
+    number_of_obs_thresholds: list[list]
+        number of observations corresponding to each multiplier in `multipliers`. The initial list should be
+        the same length as the limits list.
+    multipliers: list[list]
+        multiplier, x, used for buddy check mu +- x * sigma. The list should have the same structure as
+        `number_of_obs_threshold`.
 
     Returns
     -------
     array-like of int, shape (n,)
         1-dimensional array containing QC flags.
         1 if buddy check fails, 0 otherwise.
+
+    Notes
+    -----
+    The limits, number_of_obs_thresholds, and multipliers parameters are rather complex. The buddy check basically
+    looks within a lat-lon-time range specified by the first element in limits. If there are more than zero
+    observations in the search range then a multiplier is chosen based on how many observations there are.
+
+    If the first element of limits is [1,1,2] then we first look within a distance equivalent to 1 degree
+    latitude and longitude at the equator and 2 pentads in time. If there are more than zero observations then we
+    calculate the buddy mean and we consult the number_of_obs_threshold. If, for example, this is [0, 5, 15, 100]
+    then we look for the first entry where the number of obs is greater than that threshold. We then look up the
+    multiplier in the appropriate list (say [4, 3.5, 3.0, 2.5]). If the difference between an observation and the
+    buddy mean is greater than the multiplier times the standard deviation at that point then it fails the buddy
+    check. So, if there were 10 observations then the multiplier would be 3.5.
     """
-    limits = parameters["limits"]
-    number_of_obs_thresholds = parameters["number_of_obs_thresholds"]
-    multipliers = parameters["multipliers"]
+    if len(limits) != len(number_of_obs_thresholds) and len(limits) != len(multipliers):
+        raise ValueError("Input parameter lists are not equal length")
+
+    for i in range(len(number_of_obs_thresholds)):
+        if len(number_of_obs_thresholds[i]) != len(multipliers[i]):
+            raise ValueError("Number of obs thresholds and multipliers have different shapes")
 
     # calculate superob averages and numbers of observations
     grid = SuperObsGrid()
@@ -470,6 +500,12 @@ def bayesian_buddy_check(
     stdev1: Climatology,
     stdev2: Climatology,
     stdev3: Climatology,
+    prior_probability_of_gross_error: float,
+    quantization_interval: float,
+    one_sigma_measurement_uncertainty: float,
+    limits: list[int],
+    noise_scaling: float,
+    maximum_anomaly: float,
 ) -> Sequence[int]:
     """Do the Bayesian buddy check. The bayesian buddy check assigns a
     probability of gross error to each observation, which is rounded down to the
@@ -494,36 +530,47 @@ def bayesian_buddy_check(
     stdev3: Climatology
         Field of standard deviations representing standard deviation of difference between
         random neighbour gridcell and full neighbour average (uncertainty in neighbour average)
+    prior_probability_of_gross_error: float
+        Prior probability of gross error, which is the background rate of gross errors.
+    quantization_interval: float
+        Smallest possible increment in the input values.
+    one_sigma_measurement_uncertainty: float
+        Estimated one sigma measurement uncertainty
+    limits: list[int]
+        List with three members which specify the search range for the buddy check
+    noise_scaling: float
+        Tuning parameter used to multiply stdev2. This was determined to be approximately 3.0 by comparison with
+        observed point data. stdev2 was estimated from OSTIA data and typically underestimates the point to area-
+        average difference by this factor.
+    maximum_anomaly: float
+        Largest absolute anomaly, assumes that the maximum and minimum anomalies have the same magnitude
 
     Returns
     -------
     array-like of int, shape (n,)
         1-dimensional array containing probability of gross error
-    """
-    parameters = {
-        "bayesian_buddy_check": {
-            "prior_probability_of_gross_error": 0.05,
-            "quantization_interval": 0.1,
-            "limits": [2, 2, 4],
-            "noise_scaling": 3.0,
-            "measurement_error": 1.0,
-        },
-        "maximum_anomaly": 8.0,
-    }
 
-    p0 = parameters["bayesian_buddy_check"]["prior_probability_of_gross_error"]
-    q = parameters["bayesian_buddy_check"]["quantization_interval"]
-    sigma_m = parameters["bayesian_buddy_check"]["measurement_error"]
+    Notes
+    -----
+    In previous versions the default values for the parameters were
+    * prior_probability_of_gross_error = 0.05
+    * quantization_interval = 0.1
+    * limits = [2, 2, 4]
+    * noise_scaling = 3.0
+    * one_sigma_measurement_uncertainty = 1.0
+    * maximum_anomaly = 8.0
+    """
+
+    p0 = prior_probability_of_gross_error
+    q = quantization_interval
+    sigma_m = one_sigma_measurement_uncertainty
 
     # previous upper QC limits set. Ideally, this should be set based on any previous QC checks.
     # The original default was 8 because the climatology check had a range of +-8C. However, a
     # climatology plus standard deviation check might narrow that range and it might also be
     # spatially varying. There is currently no means of expressing that here.
-    r_hi = parameters["maximum_anomaly"]
+    r_hi = maximum_anomaly
     r_lo = -1.0 * r_hi  # previous lower QC limit set
-
-    limits = parameters["bayesian_buddy_check"]["limits"]
-    noise_scaling = parameters["bayesian_buddy_check"]["noise_scaling"]
 
     grid = SuperObsGrid()
     grid.add_multiple_observations(lats, lons, dates, anoms)
