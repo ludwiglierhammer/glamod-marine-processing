@@ -250,6 +250,7 @@ if io_dict["processed"]["total"] == 0:
     logging.warning("No data to map to CDM after selection and cleaning")
 
 # 2.5 Flag data on blacklist
+blck_dict = {}
 if params.blacklisting:
     logging.info("Flag data on blacklist")
     if not chunksize:
@@ -257,7 +258,6 @@ if params.blacklisting:
     else:
         data_in_data = data_in.data
 
-    blck_dict = {}
     for data in data_in_data:
         for cdm_table, inputs in params.blacklisting.items():
             func = getattr(blacklist_funcs, inputs["func"])
