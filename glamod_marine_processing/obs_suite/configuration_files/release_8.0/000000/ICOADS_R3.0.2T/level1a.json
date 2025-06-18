@@ -8,13 +8,34 @@
     "header": {
       "func": "do_blacklist",
       "params": {
-        "id": "core.ID",
-        "deck": "c1.DCK",
-        "year": "core.YR",
-        "month": "core.MO",
-        "latitude": "core.LAT",
-        "longitude": "core.LON",
-        "platform_type": "c1.PT"
+        "id": [
+          "core",
+          "ID"
+        ],
+        "deck": [
+          "c1",
+          "DCK"
+        ],
+        "year": [
+          "core",
+          "YR"
+        ],
+        "month": [
+          "core",
+          "MO"
+        ],
+        "latitude": [
+          "core",
+          "LAT"
+        ],
+        "longitude": [
+          "core",
+          "LON"
+        ],
+        "platform_type": [
+          "c1",
+          "PT"
+        ]
       },
       "flag": 9,
       "cdm_column": "report_quality"
@@ -22,7 +43,10 @@
     "observations-dpt": {
       "func": "do_humidity_blacklist",
       "params": {
-        "platform_type": "c1.PT"
+        "platform_type": [
+          "c1",
+          "PT"
+        ]
       },
       "flag": 9,
       "cdm_column": "quality_flag"
@@ -30,22 +54,40 @@
     "observations-at": {
       "func": "do_mat_blacklist",
       "params": {
-        "deck": "c1.DCK",
-        "year": "core.YR",
-        "latitude": "core.LAT",
-        "longitude": "core.LON",
-        "platform_type": "c1.PT"
+        "deck": [
+          "c1",
+          "DCK"
+        ],
+        "year": [
+          "core",
+          "YR"
+        ],
+        "latitude": [
+          "core",
+          "LAT"
+        ],
+        "longitude": [
+          "core",
+          "LON"
+        ],
+        "platform_type": [
+          "c1",
+          "PT"
+        ]
       },
       "flag": 9,
-      "qc_column": "quality_flag"
+      "cdm_column": "quality_flag"
     },
     "observations-ws": {
       "func": "do_wind_blacklist",
       "params": {
-        "deck": "c1.DCK"
+        "deck": [
+          "c1",
+          "DCK"
+        ]
       },
       "flag": 9,
-      "qc_column": "quality_flag"
+      "cdm_column": "quality_flag"
     }
   },
   "103-792": {

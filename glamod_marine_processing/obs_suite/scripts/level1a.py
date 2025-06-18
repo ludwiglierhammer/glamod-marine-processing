@@ -260,12 +260,17 @@ if params.blacklisting:
     blck_dict = {}
     for data in data_in_data:
         for cdm_table, inputs in params.blacklisting.items():
-            func = getattr(blacklist_funcs, inputs.func)
-            params = inputs.params
-            qc_flag = inputs.flag
-            qc_column = inputs.cdm_column
+            func = getattr(blacklist_funcs, inputs["func"])
+            kwargs = {}
+            for param, columns in inputs["params"].items():
+                if isinstance(columns, list):
+                    columns = tuple(columns)
+                kwargs[param] = columns
+
+            qc_flag = inputs["flag"]
+            qc_column = inputs["cdm_column"]
             mask = data.apply(
-                lambda row: func(**{k: row[v] for k, v in params.items()}), axis=1
+                lambda row: func(**{k: row[v] for k, v in kwargs.items()}), axis=1
             )
             qc_series = pd.Series(mask.astype(int) * qc_flag, name=qc_column)
             if cdm_table in blck_dict:
