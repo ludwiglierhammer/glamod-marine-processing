@@ -69,6 +69,8 @@ from cdm_reader_mapper import read_mdf
 from cdm_reader_mapper.cdm_mapper import properties
 from cdm_reader_mapper.common import inspect, pandas_TextParser_hdlr
 
+import glamod_marine_processing.obs_suite.modules.blacklisting as blacklist_funcs
+
 reload(logging)  # This is to override potential previous config of logging
 
 
@@ -98,6 +100,7 @@ process_options = [
     "data_model",
     "read_sections",
     "filter_reports_by",
+    "blacklisting",
 ]
 params = script_setup(process_options, sys.argv)
 
@@ -246,6 +249,33 @@ if io_dict["processed"]["total"] == 0:
     process = False
     logging.warning("No data to map to CDM after selection and cleaning")
 
+# 2.5 Flag data on blacklist
+if params.blacklisting:
+    logging.info("Flag data on blacklist")
+    if not chunksize:
+        data_in_data = [data_in.data]
+    else:
+        data_in_data = data_in.data
+
+    blck_dict = {}
+    for data in data_in_data:
+        for cdm_table, inputs in params.blacklisting.items():
+            func = getattr(blacklist_funcs, inputs.func)
+            params = inputs.params
+            qc_flag = inputs.flag
+            qc_column = inputs.cdm_column
+            mask = data.apply(
+                lambda row: func(**{k: row[v] for k, v in params.items()}), axis=1
+            )
+            qc_series = pd.Series(mask.astype(int) * qc_flag, name=qc_column)
+            if cdm_table in blck_dict:
+                blck_dict[cdm_table] += qc_series
+            else:
+                blck_dict[cdm_table] = qc_series
+
+    if chunksize:
+        data_in.data = pandas_TextParser_hdlr.restore(data_in.data)
+
 # 3. Map to common data model and output files
 if process:
     logging.info("Mapping to CDM")
@@ -253,6 +283,9 @@ if process:
     io_dict.update({table: {} for table in tables})
     logging.debug(f"Mapping attributes: {data_in.dtypes}")
     data_in.map_model(log_level="INFO", inplace=True)
+
+    for cdm_table, qc_series in blck_dict.items():
+        data_in[cdm_table, qc_series.name] = qc_series
 
     logging.info("Printing tables to psv files")
     data_in.write(
