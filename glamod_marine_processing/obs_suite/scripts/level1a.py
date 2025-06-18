@@ -269,14 +269,15 @@ if params.blacklisting:
 
             qc_flag = inputs["flag"]
             qc_column = inputs["cdm_column"]
-            mask = data.apply(
+            qc_mask = data.apply(
                 lambda row: func(**{k: row[v] for k, v in kwargs.items()}), axis=1
-            )
-            qc_series = pd.Series(mask.astype(int) * qc_flag, name=qc_column)
+            ).reset_index(drop=True)
+            qc_mask.name = qc_column
+            qc_mask.flag = qc_flag
             if cdm_table in blck_dict:
-                blck_dict[cdm_table] += qc_series
+                blck_dict[cdm_table] += qc_mask
             else:
-                blck_dict[cdm_table] = qc_series
+                blck_dict[cdm_table] = qc_mask
 
     if chunksize:
         data_in.data = pandas_TextParser_hdlr.restore(data_in.data)
@@ -288,10 +289,10 @@ if process:
     io_dict.update({table: {} for table in tables})
     logging.debug(f"Mapping attributes: {data_in.dtypes}")
     data_in.map_model(log_level="INFO", inplace=True)
-
-    for cdm_table, qc_series in blck_dict.items():
-        data_in[cdm_table, qc_series.name] = qc_series
-
+    for cdm_table, qc_mask in blck_dict.items():
+        qc_column = (cdm_table, qc_mask.name)
+        cond = qc_mask & data_in.data[qc_column].notna()
+        data_in.data.loc[cond, qc_column] = qc_mask.flag
     logging.info("Printing tables to psv files")
     data_in.write(
         out_dir=params.level_path,
