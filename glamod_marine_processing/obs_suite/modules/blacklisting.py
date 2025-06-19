@@ -2,9 +2,69 @@
 
 from __future__ import annotations
 
+import builtins
+import inspect
+
 import pandas as pd
 
 
+def auto_cast(func):
+    """
+    A decorator that automatically casts function arguments to the types specified
+    in the function's type annotations.
+
+    This is useful when you want to ensure that inputs conform to expected types
+    without manually converting them inside the function body.
+
+    Raises
+    ------
+    TypeError
+        If the type conversion is not possible.
+    ValueError
+        If an argument cannot be converted to the specified type.
+
+    Examples
+    --------
+    >>> @auto_cast
+    ... def test_func(value: int):
+    ...     print(type(value), value)
+    >>> test_func("10")  # Will convert "10" (str) to 10 (int)
+
+    Limitations
+    -----------
+        - Only works with basic type annotations (e.g., int, float, str).
+        - Does not handle complex annotations like List[int], Optional[str], etc.
+    """
+
+    def wrapper(*args, **kwargs):
+        sig = inspect.signature(func)
+        bound = sig.bind(*args, **kwargs)
+        bound.apply_defaults()
+
+        for name, value in bound.arguments.items():
+            expected_type = sig.parameters[name].annotation
+            expected_type = getattr(builtins, expected_type, None)
+            if isinstance(value, expected_type):
+                continue
+            if expected_type is None:
+                continue
+            try:
+                bound.arguments[name] = expected_type(value)
+            except TypeError:
+                raise TypeError(
+                    f"Type conversion from {value} to {expected_type} is not possible."
+                )
+            except ValueError:
+                raise ValueError(
+                    f"Cannot convert {value} to specific type {expected_type}."
+                )
+
+        return func(*bound.args, **bound.kwargs)
+
+    return wrapper
+
+
+@auto_cast
 def do_blacklist(
     id: str,
     deck: int,
@@ -157,6 +217,7 @@ def do_blacklist(
     return False
 
 
+@auto_cast
 def do_humidity_blacklist(platform_type: int) -> bool:
     """
     Flag certain sources as ineligible for humidity QC.
@@ -176,6 +237,7 @@ def do_humidity_blacklist(platform_type: int) -> bool:
     return True
 
 
+@auto_cast
 def do_mat_blacklist(
     platform_type: int,
     deck: int,
@@ -236,6 +298,7 @@ def do_mat_blacklist(
     return False
 
 
+@auto_cast
 def do_wind_blacklist(deck: int) -> bool:
     """
     Flag certain sources as ineligible for wind QC. Based on Shawn Smith's list.
