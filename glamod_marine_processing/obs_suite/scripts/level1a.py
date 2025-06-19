@@ -293,6 +293,9 @@ if process:
         qc_column = (cdm_table, qc_mask.name)
         cond = qc_mask & data_in.data[qc_column].notna()
         data_in.data.loc[cond, qc_column] = qc_mask.flag
+    data_in.data.loc[data_in.data[("header", "report_quality")] == qc_mask.flag] = (
+        qc_mask.flag
+    )
     logging.info("Printing tables to psv files")
     data_in.write(
         out_dir=params.level_path,
