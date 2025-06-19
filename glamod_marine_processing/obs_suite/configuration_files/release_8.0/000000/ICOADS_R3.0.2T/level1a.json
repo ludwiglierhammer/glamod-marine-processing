@@ -36,9 +36,7 @@
           "c1",
           "PT"
         ]
-      },
-      "flag": 9,
-      "cdm_column": "report_quality"
+      }
     },
     "observations-dpt": {
       "func": "do_humidity_blacklist",
@@ -47,9 +45,7 @@
           "c1",
           "PT"
         ]
-      },
-      "flag": 9,
-      "cdm_column": "quality_flag"
+      }
     },
     "observations-at": {
       "func": "do_mat_blacklist",
@@ -74,9 +70,7 @@
           "c1",
           "PT"
         ]
-      },
-      "flag": 9,
-      "cdm_column": "quality_flag"
+      }
     },
     "observations-ws": {
       "func": "do_wind_blacklist",
@@ -85,9 +79,7 @@
           "c1",
           "DCK"
         ]
-      },
-      "flag": 9,
-      "cdm_column": "quality_flag"
+      }
     }
   },
   "103-792": {
