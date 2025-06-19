@@ -270,7 +270,6 @@ if params.blacklisting:
                 if isinstance(columns, list):
                     columns = tuple(columns)
                 kwargs[param] = columns
-
             blck_mask = data.apply(
                 lambda row: func(**{k: row[v] for k, v in kwargs.items()}), axis=1
             ).reset_index(drop=True)
@@ -298,7 +297,7 @@ if process:
             blck_column = (cdm_table, observations_blck_column)
         cond = blck_mask & data_in.data[blck_column].notna()
         data_in.data.loc[cond, blck_column] = blck_flag
-    data_in.data.loc[data_in.data[("header", "report_quality")] == blck_flag] = (
+    data_in.data.loc[data_in.data[("header", header_blck_column)] == blck_flag] = (
         blck_flag
     )
     logging.info("Printing tables to psv files")
