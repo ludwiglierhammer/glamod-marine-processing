@@ -73,6 +73,10 @@ import glamod_marine_processing.obs_suite.modules.blacklisting as blacklist_func
 
 reload(logging)  # This is to override potential previous config of logging
 
+blck_flag = 9
+header_blck_column = "report_quality"
+observations_blck_column = "quality_flag"
+
 
 # FUNCTIONS -------------------------------------------------------------------
 def write_out_junk(dataObj, filename):
@@ -267,17 +271,15 @@ if params.blacklisting:
                     columns = tuple(columns)
                 kwargs[param] = columns
 
-            qc_flag = inputs["flag"]
-            qc_column = inputs["cdm_column"]
-            qc_mask = data.apply(
+            blck_mask = data.apply(
                 lambda row: func(**{k: row[v] for k, v in kwargs.items()}), axis=1
             ).reset_index(drop=True)
-            qc_mask.name = qc_column
-            qc_mask.flag = qc_flag
             if cdm_table in blck_dict:
-                blck_dict[cdm_table] += qc_mask
+                blck_dict[cdm_table] = pd.concat(
+                    [blck_dict[cdm_table], blck_mask], ignore_index=True
+                )
             else:
-                blck_dict[cdm_table] = qc_mask
+                blck_dict[cdm_table] = blck_mask
 
     if chunksize:
         data_in.data = pandas_TextParser_hdlr.restore(data_in.data)
@@ -289,12 +291,15 @@ if process:
     io_dict.update({table: {} for table in tables})
     logging.debug(f"Mapping attributes: {data_in.dtypes}")
     data_in.map_model(log_level="INFO", inplace=True)
-    for cdm_table, qc_mask in blck_dict.items():
-        qc_column = (cdm_table, qc_mask.name)
-        cond = qc_mask & data_in.data[qc_column].notna()
-        data_in.data.loc[cond, qc_column] = qc_mask.flag
-    data_in.data.loc[data_in.data[("header", "report_quality")] == qc_mask.flag] = (
-        qc_mask.flag
+    for cdm_table, blck_mask in blck_dict.items():
+        if cdm_table == "header":
+            blck_column = (cdm_table, header_blck_column)
+        else:
+            blck_column = (cdm_table, observations_blck_column)
+        cond = blck_mask & data_in.data[blck_column].notna()
+        data_in.data.loc[cond, blck_column] = blck_flag
+    data_in.data.loc[data_in.data[("header", "report_quality")] == blck_flag] = (
+        blck_flag
     )
     logging.info("Printing tables to psv files")
     data_in.write(
