@@ -304,7 +304,6 @@ if process:
         cond = data_in.data[blck_column].notna() & (
             blck_mask | (data_in.data[("header", header_blck_column)] == blck_flag)
         )
-
         data_in.data.loc[cond, blck_column] = blck_flag
 
     logging.info("Printing tables to psv files")
