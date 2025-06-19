@@ -263,7 +263,13 @@ if params.blacklisting:
         data_in_data = data_in.data
 
     for data in data_in_data:
-        for cdm_table, inputs in params.blacklisting.items():
+        cdm_tables = sorted(
+            properties.cdm_tables, key=lambda x: 0 if x == "header" else 1
+        )
+        for cdm_table in cdm_tables:
+            inputs = params.blacklisting.get(cdm_table)
+            if inputs is None:
+                continue
             func = getattr(blacklist_funcs, inputs["func"])
             kwargs = {}
             for param, columns in inputs["params"].items():
@@ -295,11 +301,12 @@ if process:
             blck_column = (cdm_table, header_blck_column)
         else:
             blck_column = (cdm_table, observations_blck_column)
-        cond = blck_mask & data_in.data[blck_column].notna()
+        cond = data_in.data[blck_column].notna() & (
+            blck_mask | (data_in.data[("header", header_blck_column)] == blck_flag)
+        )
+
         data_in.data.loc[cond, blck_column] = blck_flag
-    data_in.data.loc[data_in.data[("header", header_blck_column)] == blck_flag] = (
-        blck_flag
-    )
+
     logging.info("Printing tables to psv files")
     data_in.write(
         out_dir=params.level_path,
