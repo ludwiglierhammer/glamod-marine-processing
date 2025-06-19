@@ -3,13 +3,84 @@
 from __future__ import annotations
 
 import calendar
+import inspect
 import math
+from collections.abc import Callable
 from datetime import datetime, timedelta
+from functools import wraps
 from typing import Sequence
 
 import numpy as np
 
-from .auxiliary import isvalid
+from .auxiliary import is_scalar_like, isvalid, save_originals
+
+
+def convert_date(params: list[str]) -> Callable:
+    """
+    Decorator to extract date components and inject them as function parameters.
+
+    This decorator intercepts the 'date' argument from the function call, splits it into
+    its components (e.g., year, month, day), and assigns those components to specified
+    parameters in the wrapped function. It supports scalar or sequence inputs for 'date'.
+
+    Parameters
+    ----------
+    params : list of str
+        List of parameter names corresponding to date components to be extracted and
+        passed to the decorated function.
+
+    Returns
+    -------
+    Callable
+        A decorator that wraps a function, extracting date components before calling it.
+
+    Notes
+    -----
+    - The decorator expects the wrapped function to accept the parameters listed in
+      `params`. If a parameter is missing, it raises a `ValueError`.
+    - If the 'date' argument is None, the original function is called without modification.
+    - Uses a `TypeContext` to store original argument values for possible further use.
+    - Supports scalar-like 'date' values as well as iterable sequences.
+    - Assumes a helper function `split_date` exists that splits a date into components
+      and returns a dictionary mapping parameter names to their values.
+    """
+
+    def decorator(func):
+        @wraps(func)
+        def wrapper(*args, **kwargs):
+            sig = inspect.signature(func)
+            bound_args = sig.bind(*args, **kwargs)
+            bound_args.apply_defaults()
+
+            ctx = save_originals(bound_args.arguments, kwargs)
+
+            date = ctx.originals.get("date")
+            if date is None:
+                return func(*bound_args.args, **bound_args.kwargs)
+            if is_scalar_like(date):
+                scalar = True
+                extracted = split_date(date)
+            else:
+                scalar = False
+                extracted = [split_date(d) for d in date]
+
+            for param in params:
+                if param not in bound_args.arguments:
+                    raise ValueError(f"Parameter {param} is not a valid parameter.")
+
+                if scalar is True:
+                    value = extracted[param]
+                else:
+                    value = [e[param] for e in extracted]
+
+                bound_args.arguments[param] = value
+
+            bound_args.arguments["_ctx"] = ctx
+            return func(*bound_args.args, **bound_args.kwargs)
+
+        return wrapper
+
+    return decorator
 
 
 def split_date(date: datetime) -> dict:
@@ -25,13 +96,16 @@ def split_date(date: datetime) -> dict:
     dict
         Dictionary containing year, month, day and hour.
     """
+    default = {"year": np.nan, "month": np.nan, "day": np.nan, "hour": np.nan}
     try:
         year = int(date.year)
         month = int(date.month)
         day = int(date.day)
         hour = date.hour + date.minute / 60.0 + date.second / 3600.0
     except ValueError:
-        return {"year": np.nan, "month": np.nan, "day": np.nan, "hour": np.nan}
+        return default
+    except AttributeError:
+        return default
     return {"year": year, "month": month, "day": day, "hour": hour}
 
 

@@ -4,6 +4,84 @@
   "job_memo_mb": 16000,
   "job_time_hr": "01",
   "job_time_min": "30",
+  "blacklisting": {
+    "header": {
+      "func": "do_blacklist",
+      "params": {
+        "id": [
+          "core",
+          "ID"
+        ],
+        "deck": [
+          "c1",
+          "DCK"
+        ],
+        "year": [
+          "core",
+          "YR"
+        ],
+        "month": [
+          "core",
+          "MO"
+        ],
+        "latitude": [
+          "core",
+          "LAT"
+        ],
+        "longitude": [
+          "core",
+          "LON"
+        ],
+        "platform_type": [
+          "c1",
+          "PT"
+        ]
+      }
+    },
+    "observations-dpt": {
+      "func": "do_humidity_blacklist",
+      "params": {
+        "platform_type": [
+          "c1",
+          "PT"
+        ]
+      }
+    },
+    "observations-at": {
+      "func": "do_mat_blacklist",
+      "params": {
+        "deck": [
+          "c1",
+          "DCK"
+        ],
+        "year": [
+          "core",
+          "YR"
+        ],
+        "latitude": [
+          "core",
+          "LAT"
+        ],
+        "longitude": [
+          "core",
+          "LON"
+        ],
+        "platform_type": [
+          "c1",
+          "PT"
+        ]
+      }
+    },
+    "observations-ws": {
+      "func": "do_wind_blacklist",
+      "params": {
+        "deck": [
+          "c1",
+          "DCK"
+        ]
+      }
+    }
+  },
   "103-792": {
     "data_model": "icoads_r302_d792",
     "read_sections": [
