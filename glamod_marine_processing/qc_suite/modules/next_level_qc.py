@@ -22,6 +22,7 @@ from .auxiliary import (
 from .external_clim import ClimFloatType, inspect_climatology
 from .time_control import convert_date, dayinyear, get_month_lengths
 
+
 @post_format_return_type(["value"])
 @inspect_arrays(["value"])
 def value_check(value: ValueFloatType) -> ValueIntType:
@@ -43,6 +44,7 @@ def value_check(value: ValueFloatType) -> ValueIntType:
     result = np.where(valid_mask, passed, failed)
 
     return result
+
 
 @post_format_return_type(["lat", "lon"])
 @inspect_arrays(["lat", "lon"])
@@ -85,7 +87,8 @@ def do_position_check(lat: ValueFloatType, lon: ValueFloatType) -> ValueIntType:
     result[valid_indices & ~cond_failed] = passed
 
     return result
-  
+
+
 @post_format_return_type(["date", "year"])
 @convert_date(["year", "month", "day"])
 @inspect_arrays(["year", "month", "day"])
@@ -306,8 +309,9 @@ def do_day_check(
 
         result[i] = failed
 
-    return result  
-  
+    return result
+
+
 def do_missing_value_check(value: ValueFloatType) -> ValueIntType:
     """Check if a value is equal to None or numerically invalid (NaN).
 
@@ -348,7 +352,8 @@ def do_missing_value_clim_check(climatology: ClimFloatType, **kwargs) -> ValueIn
     to extract the relevant climatological value.
     """
     return value_check(climatology)
-  
+
+
 @post_format_return_type(["value"])
 @inspect_arrays(["value"])
 @convert_units(value="unknown", hard_limits="unknown")
@@ -389,8 +394,9 @@ def do_hard_limit_check(
     result[valid_indices & cond_passed] = passed
     result[valid_indices & ~cond_passed] = failed
 
-    return result  
-  
+    return result
+
+
 @post_format_return_type(["value"])
 @inspect_arrays(["value", "climate_normal"])
 @convert_units(value="unknown", climatology="unknown")
@@ -440,11 +446,11 @@ def do_climatology_check(
           `value`, `climate_normal`, or `standard_deviation` is numerically invalid (None or NaN).
         - Returns 1 (or array/sequence/Series of 1s) if the difference is outside the specified range.
         - Returns 0 (or array/sequence/Series of 0s) otherwise.
-        
+
     Note
     ----
     If either `climatology` or `standard_deviation` is a Climatology object, pass `lon` and `lat` and `date`, or `month` and `day`,
-    as keyword arguments to extract the relevant climatological value(s).        
+    as keyword arguments to extract the relevant climatological value(s).
     """
     if climate_normal.ndim == 0:
         climate_normal = np.full_like(value, climate_normal)  # type: np.ndarray
@@ -498,8 +504,9 @@ def do_climatology_check(
     result[valid_indices & cond_failed] = failed
     result[valid_indices & ~cond_failed] = passed
 
-    return result  
-  
+    return result
+
+
 @post_format_return_type(["dpt", "at2"])
 @inspect_arrays(["dpt", "at2"])
 @convert_units(dpt="K", at2="K")
@@ -533,8 +540,9 @@ def do_supersaturation_check(dpt: ValueFloatType, at2: ValueFloatType) -> ValueI
     result[valid_indices & cond_failed] = failed
     result[valid_indices & ~cond_failed] = passed
 
-    return result  
-  
+    return result
+
+
 @post_format_return_type(["insst"])
 @inspect_arrays(["insst"])
 @convert_units(sst="K", freezing_point="K")
@@ -595,12 +603,12 @@ def do_sst_freeze_check(
         return result
 
     valid_sst = isvalid(insst)
-    
+
     if freeze_check_n_sigma == "default":
         freeze_check_n_sigma = 0.0
 
     if sst_uncertainty == "default":
-        sst_uncertainty = 0.0  
+        sst_uncertainty = 0.0
 
     cond_failed = np.full(insst.shape, True, dtype=bool)
     cond_failed[valid_sst] = insst[valid_sst] < (
@@ -610,8 +618,9 @@ def do_sst_freeze_check(
     result[valid_sst & cond_failed] = failed
     result[valid_sst & ~cond_failed] = passed
 
-    return result  
-  
+    return result
+
+
 @post_format_return_type(["wind_speed", "wind_direction"])
 @inspect_arrays(["wind_speed", "wind_direction"])
 def do_wind_consistency_check(
@@ -648,4 +657,4 @@ def do_wind_consistency_check(
     result[valid_indices & cond_failed] = failed
     result[valid_indices & ~cond_failed] = passed
 
-    return result  
+    return result

@@ -456,6 +456,7 @@ def test_do_hard_limit_check(value, limits, expected):
     units = {"hard_limits": "degC"}
     assert do_hard_limit_check(value, limits, units=units) == expected
 
+
 def test_do_supersaturation_check_array():
     dpt = [3.6, 5.6, 15.6, None, 12.0]
     at2 = [5.56, 5.6, 13.6, 12.0, np.nan]

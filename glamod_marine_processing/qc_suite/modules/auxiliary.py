@@ -176,7 +176,7 @@ def format_return_type(result_array: np.ndarray, *input_values: Any) -> Any:
         return type(input_value)(result_array.tolist())
     return result_array  # np.ndarray or fallback
 
-  
+
 def convert_to(
     value: float | None | Sequence[float | None], source_units: str, target_units: str
 ):
@@ -193,7 +193,7 @@ def convert_to(
     target_units: str
         The units to convert to (e.g., 'K', 'km/h').
         If set to "unknown", the value(s) will be converted to the base SI units
-        of the source_units (e.g., 'degC' ? 'kelvin', 'km' ? 'meter').        
+        of the source_units (e.g., 'degC' ? 'kelvin', 'km' ? 'meter').
 
     Returns
     -------
@@ -216,10 +216,11 @@ def convert_to(
     if isinstance(value, Sequence):
         return type(value)(_convert_to(v) for v in value)
     return _convert_to(value)
-  
+
+
 def generic_decorator(
     pre_handler: Optional[Callable[[dict], None]] = None,
-    post_handler: Optional[Callable[[any, dict], any]] = None
+    post_handler: Optional[Callable[[any, dict], any]] = None,
 ) -> Callable:
     """
     Creates a decorator that binds function arguments, allows inspection or modification
@@ -235,7 +236,7 @@ def generic_decorator(
         and optionally other keyword arguments, to inspect, mutate, or validate these
         arguments before the decorated function executes.
         The handler should accept the signature:
-        `handler(arguments: dict, **meta_kwargs) -> None` 
+        `handler(arguments: dict, **meta_kwargs) -> None`
 
     Returns
     -------
@@ -265,28 +266,28 @@ def generic_decorator(
             sig = inspect.signature(func)
             bound_args = sig.bind(*args, **kwargs)
             bound_args.apply_defaults()
-            
+
             # Pre-call processing
             if pre_handler:
                 pre_handler.__funcname__ = func.__name__
                 pre_handler(
                     bound_args.arguments, **meta_kwargs
-                )  # Perform specific inspection/modification    
-            
+                )  # Perform specific inspection/modification
+
             result = func(*bound_args.args, **bound_args.kwargs)
-            
+
             # Post-call processing
             if porst_handler:
                 post_handler.__func_name__ = func.__name__
-                result = post_handler(result, bound_args.arguments, **meta_kwargs) 
-                
-            return result 
+                result = post_handler(result, bound_args.arguments, **meta_kwargs)
+
+            return result
 
         return wrapper
 
-    return decorator    
-  
-  
+    return decorator
+
+
 def post_format_return_type(params: list[str]) -> Callable:
     """
     Decorator to format a function's return value to match the type of its original input(s).
@@ -317,10 +318,13 @@ def post_format_return_type(params: list[str]) -> Callable:
     - Useful when function inputs are preprocessed (e.g., converted to arrays),
       and the output should match the original input types.
     """
+
     def pre_handler(arguments: dict, **meta_kwargs):
         ctx = meta_kwargs.get("_ctx") or arguments.get("_ctx")
         pre_handler._input_values = (
-            [ctx.originals.get(p) for p in params] if ctx else [arguments.get(p) for p in params]
+            [ctx.originals.get(p) for p in params]
+            if ctx
+            else [arguments.get(p) for p in params]
         )
 
     def post_handler(result, arguments: dict, **meta_kwargs):
@@ -331,7 +335,7 @@ def post_format_return_type(params: list[str]) -> Callable:
     post_handler._decorator_kwargs = {"_ctx"}
 
     return generic_decorator(pre_handler=pre_handler, post_handler=post_handler)
-  
+
 
 def inspect_arrays(params: list[str]) -> Callable:
     """

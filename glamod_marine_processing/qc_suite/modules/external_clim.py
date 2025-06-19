@@ -16,7 +16,7 @@ import xarray as xr
 from numpy import ndarray
 from xclim.core.units import convert_units_to
 
-from .auxiliary import ValueFloatType, isvalid, generic_decorator
+from .auxiliary import ValueFloatType, generic_decorator, isvalid
 from .time_control import day_in_year, split_date, which_pentad
 
 
