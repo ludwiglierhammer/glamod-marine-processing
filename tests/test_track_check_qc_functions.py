@@ -17,7 +17,6 @@ from glamod_marine_processing.qc_suite.modules.next_level_track_check_qc import 
     find_repeated_values,
     find_saturated_runs,
     forward_discrepancy,
-    km_to_nm,
 )
 
 
@@ -28,7 +27,7 @@ def generic_frame(in_pt):
     sst = [22 for _ in range(30)]
     sst[15] = 33
 
-    vsi = [11.11951 * km_to_nm for _ in range(30)]  # knots
+    vsi = [11.11951 for _ in range(30)]  # km/h
     dsi = [0 for _ in range(30)]
     dck = [193 for _ in range(30)]
 
@@ -169,7 +168,6 @@ def test_do_track_check_mixed(ship_frame):
             assert trk[i] == passed
 
 
-@pytest.mark.skip
 def test_do_track_check_testdata():
     vsi = [np.nan] * 10
     dsi = [np.nan] * 10
@@ -208,6 +206,10 @@ def test_do_track_check_testdata():
         lat=lat,
         lon=lon,
         date=date,
+        max_direction_change=60.0,
+        max_speed_change=10.0,
+        max_absolute_speed=40.0,
+        max_midpoint_discrepancy=150.0,
     )
     expected = [
         passed,

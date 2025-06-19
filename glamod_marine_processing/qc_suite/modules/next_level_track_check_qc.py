@@ -14,6 +14,7 @@ from .auxiliary import (
     SequenceDatetimeType,
     SequenceFloatType,
     SequenceIntType,
+    convert_units,
     failed,
     inspect_arrays,
     isvalid,
@@ -21,11 +22,10 @@ from .auxiliary import (
     post_format_return_type,
 )
 
-km_to_nm = 0.539957
-
 
 @post_format_return_type(["value"])
 @inspect_arrays(["value", "lat", "lon", "date"])
+@convert_units(lat="degrees", lon="degrees")
 def do_spike_check(
     value: SequenceFloatType,
     lat: SequenceFloatType,
@@ -145,6 +145,12 @@ def do_spike_check(
     return spike_qc
 
 
+@convert_units(
+    lat_later="degrees",
+    lat_earlier="degrees",
+    lon_later="degrees",
+    lon_earlier="degrees",
+)
 def calculate_course_parameters(
     lat_later: float,
     lat_earlier: float,
@@ -201,6 +207,7 @@ def calculate_course_parameters(
 
 
 @inspect_arrays(["lat", "lon", "date"])
+@convert_units(lat="degrees", lon="degrees")
 def calculate_speed_course_distance_time_difference(
     lat: SequenceFloatType,
     lon: SequenceFloatType,
@@ -280,6 +287,7 @@ def calculate_speed_course_distance_time_difference(
 
 
 @inspect_arrays(["vsi", "dsi", "lat", "lon", "date"])
+@convert_units(vsi="km/h", dsi="degrees", lat="degrees", lon="degrees")
 def forward_discrepancy(
     lat: SequenceFloatType,
     lon: SequenceFloatType,
@@ -299,11 +307,11 @@ def forward_discrepancy(
     Parameters
     ----------
     vsi : sequence of float, 1D np.ndarray of float, or pd.Series of float, shape (n,)
-        One-dimensional reported speed array in knots.
+        One-dimensional reported speed array in km/h.
         Can be a sequence (e.g., list or tuple), a one-dimensional NumPy array, or a pandas Series.
 
     dsi : sequence of float, 1D np.ndarray of float, or pd.Series of float, shape (n,)
-        One-dimensional reported heading array.
+        One-dimensional reported heading array in degrees.
         Can be a sequence (e.g., list or tuple), a one-dimensional NumPy array, or a pandas Series.
 
     lat : sequence of float, 1D np.ndarray of float, or pd.Series of float, shape (n,)
@@ -364,7 +372,7 @@ def forward_discrepancy(
         lat1, lon1 = tc.increment_position(
             lat_previous,
             lon_previous,
-            vsi_previous / km_to_nm,
+            vsi_previous,
             dsi_current,
             timediff,
         )
@@ -372,7 +380,7 @@ def forward_discrepancy(
         lat2, lon2 = tc.increment_position(
             lat_current,
             lon_current,
-            vsi_current / km_to_nm,
+            vsi_current,
             dsi_current,
             timediff,
         )
@@ -392,6 +400,7 @@ def forward_discrepancy(
 
 
 @inspect_arrays(["vsi", "dsi", "lat", "lon", "date"])
+@convert_units(vsi="km/h", dsi="degrees", lat="degrees", lon="degrees")
 def backward_discrepancy(
     lat: SequenceFloatType,
     lon: SequenceFloatType,
@@ -410,11 +419,11 @@ def backward_discrepancy(
     Parameters
     ----------
     vsi : sequence of float, 1D np.ndarray of float, or pd.Series of float, shape (n,)
-        One-dimensional reported speed array in knots.
+        One-dimensional reported speed array in km/h.
         Can be a sequence (e.g., list or tuple), a one-dimensional NumPy array, or a pandas Series.
 
     dsi : sequence of float, 1D np.ndarray of float, or pd.Series of float, shape (n,)
-        One-dimensional reported heading array.
+        One-dimensional reported heading array in degrees.
         Can be a sequence (e.g., list or tuple), a one-dimensional NumPy array, or a pandas Series.
 
     lat : sequence of float, 1D np.ndarray of float, or pd.Series of float, shape (n,)
@@ -475,7 +484,7 @@ def backward_discrepancy(
         lat1, lon1 = tc.increment_position(
             lat_current,
             lon_current,
-            vsi_current / km_to_nm,
+            vsi_current,
             dsi_current - 180.0,
             timediff,
         )
@@ -483,7 +492,7 @@ def backward_discrepancy(
         lat2, lon2 = tc.increment_position(
             lat_previous,
             lon_previous,
-            vsi_previous / km_to_nm,
+            vsi_previous,
             dsi_previous - 180.0,
             timediff,
         )
@@ -504,6 +513,7 @@ def backward_discrepancy(
 
 @post_format_return_type(["lat"])
 @inspect_arrays(["lat", "lon", "timediff"])
+@convert_units(lat="degrees", lon="degrees")
 def calculate_midpoint(
     lat: SequenceFloatType,
     lon: SequenceFloatType,
@@ -581,6 +591,7 @@ def calculate_midpoint(
 
 @post_format_return_type(["vsi"])
 @inspect_arrays(["vsi", "dsi", "lat", "lon", "date"])
+@convert_units(vsi="km/h", dsi="degrees", lat="degrees", lon="degrees")
 def do_track_check(
     vsi: SequenceFloatType,
     dsi: SequenceFloatType,
@@ -599,11 +610,11 @@ def do_track_check(
     Parameters
     ----------
     vsi : sequence of float, 1D np.ndarray of float, or pd.Series of float, shape (n,)
-      One-dimensional reported speed array in knots.
+      One-dimensional reported speed array in km/h.
       Can be a sequence (e.g., list or tuple), a one-dimensional NumPy array, or a pandas Series.
 
     dsi : sequence of float, 1D np.ndarray of float, or pd.Series of float, shape (n,)
-      One-dimensional reported heading array.
+      One-dimensional reported heading array in degrees.
       Can be a sequence (e.g., list or tuple), a one-dimensional NumPy array, or a pandas Series.
 
     lat : sequence of float, 1D np.ndarray of float, or pd.Series of float, shape (n,)
@@ -622,10 +633,10 @@ def do_track_check(
       Maximum valid direction change in degrees.
 
     max_speed_change : float, default: 10.0
-      Maximum valid speed change in knots.
+      Maximum valid speed change in km/h.
 
     max_absolute_speed : float, default: 40.0
-      Maximum valid absolute speed in knots.
+      Maximum valid absolute speed in km/h.
 
     max_midpoint_discrepancy : float, default: 150.0
       Maximum valid midpoint discrepancy in meters.
@@ -762,12 +773,12 @@ def do_track_check(
         )
 
         # check for speeds in excess of 40.00 knots
-        if speed[i] > max_absolute_speed / km_to_nm:
+        if speed[i] > max_absolute_speed:
             thisqc_b += 10.0
 
         # make the final decision
         if (
-            midpoint_diff_from_estimated[i] > max_midpoint_discrepancy / km_to_nm
+            midpoint_diff_from_estimated[i] > max_midpoint_discrepancy
             and thisqc_a > 0
             and thisqc_b > 0
         ):
@@ -816,6 +827,7 @@ def do_few_check(
 
 @post_format_return_type(["at"])
 @inspect_arrays(["at", "dpt", "lat", "lon", "date"])
+@convert_units(at="K", dpt="K", lat="degrees", lon="degrees")
 def find_saturated_runs(
     at: SequenceFloatType,
     dpt: SequenceFloatType,
@@ -1070,6 +1082,7 @@ def find_repeated_values(
 
 @post_format_return_type(["lat"])
 @inspect_arrays(["lat", "lon", "date"])
+@convert_units(lat="degrees", lon="degrees")
 def do_iquam_track_check(
     lat: SequenceFloatType,
     lon: SequenceFloatType,

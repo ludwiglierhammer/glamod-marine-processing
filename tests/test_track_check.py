@@ -7,6 +7,7 @@ import pytest
 
 import glamod_marine_processing.qc_suite.modules.Extended_IMMA as ex
 import glamod_marine_processing.qc_suite.modules.spherical_geometry as sg
+from glamod_marine_processing.qc_suite.modules.auxiliary import convert_to
 from glamod_marine_processing.qc_suite.modules.IMMA1 import IMMA
 from glamod_marine_processing.qc_suite.modules.track_check import (
     check_distance_from_estimate,
@@ -20,15 +21,13 @@ from glamod_marine_processing.qc_suite.modules.track_check import (
     speed_continuity,
 )
 
-km_to_nm = 0.539957
-
 
 def test_ship_heading_north_at_60knots_goes1degree_in_1hour():
     """A ship travelling north at 60 knots will go 1 degree in 1 hours"""
     for lat in range(-90, 90):
         alat1 = lat
         alon1 = lat
-        avs = 60.0 / km_to_nm
+        avs = convert_to(60.0, "knots", "km/h")
         ads = 0.0
         timdif = 2.0
         alat2, alon2 = increment_position(alat1, alon1, avs, ads, timdif)
@@ -41,10 +40,9 @@ def test_ship_heading_north_at_60knots_goes1degree_in_1hour():
 
 def test_ship_heading_east_at_60knots_goes1degree_in_1hour():
     """A ship at the equator travelling east at 60 knots will go 1 degree in 1 hour"""
-    km_to_nm = 0.539957
     alat1 = 0.0
     alat2 = 0.0
-    avs = 60.0 / km_to_nm
+    avs = convert_to(60.0, "knots", "km/h")
     ads = 90.0
     timdif = 2.0
     aud1, avd1 = increment_position(alat1, alat2, avs, ads, timdif)
@@ -57,7 +55,7 @@ def test_ship_heading_east_at_60knots_at_latitude60_goes2degrees_in_1hour():
     km_to_nm = 0.539957
     alat = 60.0
     alon = 0.0
-    avs = 60.0 / km_to_nm
+    avs = convert_to(60.0, "knots", "km/h")
     ads = 90.0
     timdif = 2.0
     dlat, dlon = increment_position(alat, alon, avs, ads, timdif)
@@ -68,7 +66,7 @@ def test_ship_heading_east_at_60knots_at_latitude60_goes2degrees_in_1hour():
 def test_ship_goes_southwest():
     alat1 = 0.0
     alat2 = 0.0
-    avs = 60.0 / km_to_nm
+    avs = convert_to(60.0, "knots", "km/h")
     ads = 225.0
     timdif = 2.0
     aud1, avd1 = increment_position(alat1, alat2, avs, ads, timdif)
@@ -88,7 +86,7 @@ def test_one_input():
 
 def test_zero_index_input():
     m = modesp([-17.0, -17.0])
-    assert m == 8.5 / km_to_nm
+    assert m == convert_to(8.5, "knots", "km/h")
 
 
 @pytest.mark.parametrize(
@@ -100,30 +98,33 @@ def test_zero_index_input():
     ],
 )
 def test_modesp_single_speed_input_over8point5(base_speed, expected):
-    speeds = [base_speed / km_to_nm for i in range(8)]
+    speeds = [convert_to(base_speed, "knots", "km/h") for i in range(8)]
     m = modesp(speeds)
-    assert m == expected / km_to_nm
+    assert m == convert_to(expected, "knots", "km/h")
 
 
 def test_one_of_each_speed_input_min_under8point5():
-    speeds = [i / km_to_nm for i in range(1, 20)]
+    speeds = [convert_to(i, "knots", "km/h") for i in range(1, 20)]
     m = modesp(speeds)
-    assert m == 8.5 / km_to_nm
+    assert m == convert_to(8.5, "knots", "km/h")
 
 
 @pytest.mark.parametrize(
     "amode, expected",
     [
-        (None, (15.00 / km_to_nm, 20.00 / km_to_nm, 0.00 / km_to_nm)),
-        (5.5 / km_to_nm, (15.00 / km_to_nm, 20.00 / km_to_nm, 0.00 / km_to_nm)),
+        (None, (15.00, 20.00, 0.00)),
+        (5.5, (15.00, 20.00, 0.00)),
         (
-            9.5 / km_to_nm,
-            (9.5 * 1.25 / km_to_nm, 30.00 / km_to_nm, 9.5 * 0.75 / km_to_nm),
+            9.5,
+            (9.5 * 1.25, 30.00, 9.5 * 0.75),
         ),
     ],
 )
 def test_set_speed_limits(amode, expected):
-    assert set_speed_limits(amode) == expected
+    amode = convert_to(amode, "knots", "km/h")
+    expected = convert_to(expected, "knots", "km/h")
+    result = set_speed_limits(amode)
+    np.allclose(np.array(result), np.array(expected))
 
 
 # rec = IMMA()
@@ -136,7 +137,7 @@ def test_set_speed_limits(amode, expected):
 @pytest.fixture()
 def trip1():
     _trip1 = ex.Voyage()
-    speed1 = 18.0 / km_to_nm
+    speed1 = convert_to(18.0, "knots", "km/h")
     for hour in range(0, 24):
         rec = IMMA()
         v = {
@@ -160,7 +161,7 @@ def trip1():
 @pytest.fixture()
 def trip2():
     _trip2 = ex.Voyage()
-    speed1 = 18.0 / km_to_nm
+    speed1 = convert_to(18.0, "knots", "km/h")
     for hour in range(0, 3):
         rec = IMMA()
         v = {
@@ -264,16 +265,16 @@ def test_direction_continuity():
 
 
 @pytest.mark.parametrize(
-    "vsi, vsi_previous, max_speed_change, expected",
+    "vsi, vsi_previous, speeds, expected",
     [
-        (12, 12, 12 / km_to_nm, 0),
-        (12, 12, (12 + 10.01) / km_to_nm, 10),
-        (12, 12, (12 + 9.99) / km_to_nm, 0),
+        (12, 12, 12, 0),
+        (12, 12, 12 + 10.01, 10),
+        (12, 12, 12 + 9.99, 0),
         (12, 12, None, 0),
     ],
 )
-def test_speed_continuity(vsi, vsi_previous, max_speed_change, expected):
-    assert speed_continuity(vsi, vsi_previous, max_speed_change) == expected
+def test_speed_continuity(vsi, vsi_previous, speeds, expected):
+    assert speed_continuity(vsi, vsi_previous, speeds) == expected
 
 
 @pytest.mark.parametrize(
