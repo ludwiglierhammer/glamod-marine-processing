@@ -152,7 +152,6 @@ def climdata():
     kwargs = {
         "cache_dir": ".pytest_cache/metoffice_qc",
         "within_drs": False,
-        "branch": "qc_ext_files",
     }
     clim_dict = {}
     clim_dict["AT"] = {
