@@ -983,7 +983,9 @@ class SSTTailChecker:
         # ob-background differences
         self.sst_anom = np.array(sst_anom)  # type: np.ndarray
         # standard deviation of background error
-        self.bgerr = np.sqrt(np.array(bgvar))  # type: np.ndarray
+        bgvar = np.array(bgvar)
+        bgvar[bgvar < 0] = np.nan
+        self.bgerr = np.sqrt(bgvar)  # type: np.ndarray
 
         return invalid_series
 
@@ -1363,11 +1365,11 @@ class SSTBiasedNoisyChecker:
                 bgvar.append(bgvar_val)
 
         # prepare numpy arrays and variables needed for checks
-        sst_anom = np.array(sst_anom)  # ob-background differences
-        bgerr = np.sqrt(np.array(bgvar))  # standard deviation of background error
+        self.sst_anom = np.array(sst_anom)  # ob-background differences
+        bgvar = np.array(bgvar)
+        bgvar[bgvar < 0] = np.nan
+        self.bgerr = np.sqrt(np.array(bgvar))  # standard deviation of background error
 
-        self.sst_anom = sst_anom
-        self.bgerr = bgerr
         self.bgvar_is_masked = bgvar_is_masked
 
         if not is_monotonic(self.hrs):

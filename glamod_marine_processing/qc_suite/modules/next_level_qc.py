@@ -24,109 +24,6 @@ from .time_control import convert_date, dayinyear, get_month_lengths
 
 
 @post_format_return_type(["value"])
-@inspect_arrays(["value", "climate_normal"])
-def climatology_check(
-    value: ValueFloatType,
-    climate_normal: ValueFloatType,
-    maximum_anomaly: float,
-    standard_deviation: ValueFloatType = "default",
-    standard_deviation_limits: tuple[float, float] | None = None,
-    lowbar: float | None = None,
-) -> ValueIntType:
-    """
-    Climatology check to compare a value with a climatological average within specified anomaly limits.
-    This check supports optional parameters to customize the comparison.
-
-    If ``standard_deviation`` is provided, the value is converted into a standardised anomaly. Optionally,
-    if ``standard deviation`` is outside the range specified by ``standard_deviation_limits`` then ``standard_deviation``
-    is set to whichever of the lower or upper limits is closest.
-    If ``lowbar`` is provided, the anomaly must be greater than ``lowbar`` to fail regardless of ``standard_deviation``.
-
-    Parameters
-    ----------
-    value: float, None, sequence of float or None, 1D np.ndarray of float or pd.Series of float
-        Value(s) to be compared to climatology.
-        Can be a scalar, a sequence (e.g., list or tuple), a one-dimensional NumPy array, or a pandas Series.
-    climate_normal : float, None, sequence of float or None, 1D np.ndarray of float or pd.Series of float
-        The climatological average(s) to which the values(s) will be compared.
-        Can be a scalar, a sequence (e.g., list or tuple), a one-dimensional NumPy array, or a pandas Series.
-    maximum_anomaly: float
-        Largest allowed anomaly.
-        If ``standard_deviation`` is provided, this is interpreted as the largest allowed standardised anomaly.
-    standard_deviation: float, None, sequence of float or None, 1D np.ndarray of float or pd.Series of float, default: "default"
-        The standard deviation(s) used to standardize the anomaly
-        If set to "default", it is internally treated as 1.0.
-        Can be a scalar, a sequence (e.g., list or tuple), a one-dimensional NumPy array, or a pandas Series.
-    standard_deviation_limits: tuple of float, optional
-        A tuple of two floats representing the upper and lower limits for standard deviation used in the check.
-    lowbar: float, optional
-        The anomaly must be greater than lowbar to fail regardless of standard deviation.
-
-    Returns
-    -------
-    Same type as input, but with integer values
-        - Returns 2 (or array/sequence/Series of 2s) if `standard_deviation_limits[1]` is less than or equal to
-          `standard_deviation_limits[0]`, or if `maximum_anomaly` is less than or equal to 0, or if any of
-          `value`, `climate_normal`, or `standard_deviation` is numerically invalid (None or NaN).
-        - Returns 1 (or array/sequence/Series of 1s) if the difference is outside the specified range.
-        - Returns 0 (or array/sequence/Series of 0s) otherwise.
-    """
-    if climate_normal.ndim == 0:
-        climate_normal = np.full_like(value, climate_normal)  # type: np.ndarray
-
-    if isinstance(standard_deviation, str) and standard_deviation == "default":
-        standard_deviation = np.full(value.shape, 1.0, dtype=float)
-    standard_deviation = np.atleast_1d(standard_deviation)  # type: np.ndarray
-
-    result = np.full(value.shape, untestable, dtype=int)  # type: np.ndarray
-
-    if maximum_anomaly is None or maximum_anomaly <= 0:
-        return format_return_type(result, value)
-
-    if standard_deviation is None:
-        standard_deviation = np.full(value.shape, 1.0)
-
-    if standard_deviation_limits is None:
-        standard_deviation_limits = (0, np.inf)
-    elif standard_deviation_limits[1] <= standard_deviation_limits[0]:
-        return format_return_type(result, value)
-
-    valid_indices = (
-        isvalid(value)
-        & isvalid(climate_normal)
-        & isvalid(maximum_anomaly)
-        & isvalid(standard_deviation)
-    )
-    standard_deviation[valid_indices] = np.clip(
-        standard_deviation[valid_indices],
-        standard_deviation_limits[0],
-        standard_deviation_limits[1],
-    )
-
-    climate_diff = np.zeros_like(value)  # type: np.ndarray
-
-    climate_diff[valid_indices] = np.abs(
-        value[valid_indices] - climate_normal[valid_indices]
-    )
-
-    if lowbar is None:
-        low_check = np.ones(value.shape, dtype=bool)
-    else:
-        low_check = climate_diff > lowbar
-
-    cond_failed = np.full(value.shape, False, dtype=bool)
-    cond_failed[valid_indices] = (
-        climate_diff[valid_indices] / standard_deviation[valid_indices]
-        > maximum_anomaly
-    ) & low_check[valid_indices]
-
-    result[valid_indices & cond_failed] = failed
-    result[valid_indices & ~cond_failed] = passed
-
-    return result
-
-
-@post_format_return_type(["value"])
 @inspect_arrays(["value"])
 def value_check(value: ValueFloatType) -> ValueIntType:
     """Check if a value is equal to None or numerically invalid (NaN).
@@ -149,120 +46,9 @@ def value_check(value: ValueFloatType) -> ValueIntType:
     return result
 
 
-@post_format_return_type(["value"])
-@inspect_arrays(["value"])
-def hard_limit_check(
-    value: ValueFloatType,
-    limits: tuple[float, float],
-) -> ValueIntType:
-    """Check if a value is outside specified limits.
-
-    Parameters
-    ----------
-    val: float, None, sequence of float or None, 1D np.ndarray of float or pd.Series of float
-        The value(s) to be tested against the limits.
-        Can be a scalar, a sequence (e.g., list or tuple), a one-dimensional NumPy array, or a pandas Series.
-    limits: tuple of float
-        A tuple of two floats representing the lower and upper limit.
-
-    Returns
-    -------
-    Same type as input, but with integer values
-        - Returns 2 (or array/sequence/Series of 2s) if the upper limit is less than or equal
-          to the lower limit, or if the input is invalid (None or NaN).
-        - Returns 1 (or array/sequence/Series of 1s) if value(s) are outside the specified limits.
-        - Returns 0 (or array/sequence/Series of 0s) if value(s) are within limits.
-    """
-    result = np.full(value.shape, untestable, dtype=int)
-
-    if limits[1] <= limits[0]:
-        return format_return_type(result, value)
-
-    valid_indices = isvalid(value)
-
-    cond_passed = np.full(value.shape, True, dtype=bool)
-    cond_passed[valid_indices] = (limits[0] <= value[valid_indices]) & (
-        value[valid_indices] <= limits[1]
-    )
-
-    result[valid_indices & cond_passed] = passed
-    result[valid_indices & ~cond_passed] = failed
-
-    return result
-
-
-@post_format_return_type(["insst"])
-@inspect_arrays(["insst"])
-def sst_freeze_check(
-    insst: ValueFloatType,
-    freezing_point: float | None = None,
-    sst_uncertainty: float | None = None,
-    n_sigma: float | None = None,
-) -> ValueIntType:
-    """Compare an input SST to see if it is above freezing.
-
-    This is a simple freezing point check made slightly more complex. We want to check if a
-    measurement of SST is above freezing, but there are two problems. First, the freezing point
-    can vary from place to place depending on the salinity of the water. Second, there is uncertainty
-    in SST measurements. If we place a hard cut-off at -1.8, then we are likely to bias the average
-    of many measurements too high when they are near the freezing point - observational error will
-    push the measurements randomly higher and lower, and this test will trim out the lower tail, thus
-    biasing the result. The inclusion of an SST uncertainty parameter *might* mitigate that and we allow
-    that possibility here.
-
-    Parameters
-    ----------
-    insst : float, None, sequence of float or None, 1D np.ndarray of float or pd.series of float
-        Input sea-surface temperature value(s) to be checked.
-        Can be a scalar, a sequence (e.g., list or tuple), a one-dimensional NumPy array, or a pandas Series.
-    freezing_point : float, optional
-        The freezing point of the water.
-    sst_uncertainty : float, optional
-        The uncertainty in the SST value(s).
-    n_sigma : float, optional
-        Number of sigma to use in the check.
-
-    Returns
-    -------
-    Same type as input, but with integer values
-        - Returns 2 (or array/sequence/Series of 2s) if any of `insst`, `freezing_point`, `sst_uncertainty`,
-          or `n_sigma` is numerically invalid (None or NaN).
-        - Returns 1 (or array/sequence/Series of 1s) if `insst` is below `freezing_point` by more than
-          `n_sigma` times `sst_uncertainty`.
-        - Returns 0 (or array/sequence/Series of 0s) otherwise.
-
-    Note
-    ----
-    In previous versions, some parameters had default values:
-
-        * ``sst_uncertainty``: 0.0
-        * ``freezing_point``: -1.80
-        * ``n_sigma``: 2.0
-    """
-    result = np.full(insst.shape, untestable, dtype=int)  # type: np.ndarray
-
-    if (
-        not isvalid(sst_uncertainty)
-        or not isvalid(freezing_point)
-        or not isvalid(n_sigma)
-    ):
-        return result
-
-    valid_sst = isvalid(insst)
-
-    cond_failed = np.full(insst.shape, True, dtype=bool)
-    cond_failed[valid_sst] = insst[valid_sst] < (
-        freezing_point - n_sigma * sst_uncertainty
-    )
-
-    result[valid_sst & cond_failed] = failed
-    result[valid_sst & ~cond_failed] = passed
-
-    return result
-
-
 @post_format_return_type(["lat", "lon"])
 @inspect_arrays(["lat", "lon"])
+@convert_units(latitude="degrees", longitude="degrees")
 def do_position_check(lat: ValueFloatType, lon: ValueFloatType) -> ValueIntType:
     """
     Perform the positional QC check on the report. Simple check to make sure that the latitude and longitude are
@@ -407,6 +193,7 @@ def do_time_check(
 @post_format_return_type(["date", "year"])
 @convert_date(["year", "month", "day", "hour"])
 @inspect_arrays(["year", "month", "day", "hour", "lat", "lon"])
+@convert_units(latitude="degrees", longitude="degrees")
 def do_day_check(
     date: ValueDatetimeType = None,
     year: ValueIntType = None,
@@ -567,8 +354,12 @@ def do_missing_value_clim_check(climatology: ClimFloatType, **kwargs) -> ValueIn
     return value_check(climatology)
 
 
+@post_format_return_type(["value"])
+@inspect_arrays(["value"])
+@convert_units(value="unknown", hard_limits="unknown")
 def do_hard_limit_check(
-    value: ValueFloatType, hard_limits: tuple[float, float]
+    value: ValueFloatType,
+    limits: tuple[float, float],
 ) -> ValueIntType:
     """Check if a value is outside specified limits.
 
@@ -588,9 +379,27 @@ def do_hard_limit_check(
         - Returns 1 (or array/sequence/Series of 1s) if value(s) are outside the specified limits.
         - Returns 0 (or array/sequence/Series of 0s) if value(s) are within limits.
     """
-    return hard_limit_check(value, hard_limits)
+    result = np.full(value.shape, untestable, dtype=int)
+
+    if limits[1] <= limits[0]:
+        return format_return_type(result, value)
+
+    valid_indices = isvalid(value)
+
+    cond_passed = np.full(value.shape, True, dtype=bool)
+    cond_passed[valid_indices] = (limits[0] <= value[valid_indices]) & (
+        value[valid_indices] <= limits[1]
+    )
+
+    result[valid_indices & cond_passed] = passed
+    result[valid_indices & ~cond_passed] = failed
+
+    return result
 
 
+@post_format_return_type(["value"])
+@inspect_arrays(["value", "climate_normal"])
+@convert_units(value="unknown", climatology="unknown")
 @inspect_climatology("climatology", optional="standard_deviation")
 def do_climatology_check(
     value: ValueFloatType,
@@ -599,8 +408,7 @@ def do_climatology_check(
     standard_deviation: ValueFloatType = "default",
     standard_deviation_limits: tuple[float, float] | None = None,
     lowbar: float | None = None,
-    **kwargs,
-) -> int | np.ndarray:
+) -> ValueIntType:
     """
     Climatology check to compare a value with a climatological average within specified anomaly limits.
     This check supports optional parameters to customize the comparison.
@@ -621,7 +429,7 @@ def do_climatology_check(
     maximum_anomaly: float
         Largest allowed anomaly.
         If ``standard_deviation`` is provided, this is interpreted as the largest allowed standardised anomaly.
-    standard_deviation: float, None, sequence of float or None, 1D np.ndarray of float, pd.Series of float or Climatology, default: "default"
+    standard_deviation: float, None, sequence of float or None, 1D np.ndarray of float or pd.Series of float, default: "default"
         The standard deviation(s) used to standardize the anomaly
         If set to "default", it is internally treated as 1.0.
         Can be a scalar, a sequence (e.g., list or tuple), a one-dimensional NumPy array, or a pandas Series.
@@ -644,18 +452,64 @@ def do_climatology_check(
     If either `climatology` or `standard_deviation` is a Climatology object, pass `lon` and `lat` and `date`, or `month` and `day`,
     as keyword arguments to extract the relevant climatological value(s).
     """
-    return climatology_check(
-        value,
-        climatology,
-        maximum_anomaly=maximum_anomaly,
-        standard_deviation=standard_deviation,
-        standard_deviation_limits=standard_deviation_limits,
-        lowbar=lowbar,
+    if climate_normal.ndim == 0:
+        climate_normal = np.full_like(value, climate_normal)  # type: np.ndarray
+
+    if isinstance(standard_deviation, str) and standard_deviation == "default":
+        standard_deviation = np.full(value.shape, 1.0, dtype=float)
+    standard_deviation = np.atleast_1d(standard_deviation)  # type: np.ndarray
+
+    result = np.full(value.shape, untestable, dtype=int)  # type: np.ndarray
+
+    if maximum_anomaly is None or maximum_anomaly <= 0:
+        return format_return_type(result, value)
+
+    if standard_deviation is None:
+        standard_deviation = np.full(value.shape, 1.0)
+
+    if standard_deviation_limits is None:
+        standard_deviation_limits = (0, np.inf)
+    elif standard_deviation_limits[1] <= standard_deviation_limits[0]:
+        return format_return_type(result, value)
+
+    valid_indices = (
+        isvalid(value)
+        & isvalid(climate_normal)
+        & isvalid(maximum_anomaly)
+        & isvalid(standard_deviation)
     )
+    standard_deviation[valid_indices] = np.clip(
+        standard_deviation[valid_indices],
+        standard_deviation_limits[0],
+        standard_deviation_limits[1],
+    )
+
+    climate_diff = np.zeros_like(value)  # type: np.ndarray
+
+    climate_diff[valid_indices] = np.abs(
+        value[valid_indices] - climate_normal[valid_indices]
+    )
+
+    if lowbar is None:
+        low_check = np.ones(value.shape, dtype=bool)
+    else:
+        low_check = climate_diff > lowbar
+
+    cond_failed = np.full(value.shape, False, dtype=bool)
+    cond_failed[valid_indices] = (
+        climate_diff[valid_indices] / standard_deviation[valid_indices]
+        > maximum_anomaly
+    ) & low_check[valid_indices]
+
+    result[valid_indices & cond_failed] = failed
+    result[valid_indices & ~cond_failed] = passed
+
+    return result
 
 
 @post_format_return_type(["dpt", "at2"])
 @inspect_arrays(["dpt", "at2"])
+@convert_units(dpt="K", at2="K")
 def do_supersaturation_check(dpt: ValueFloatType, at2: ValueFloatType) -> ValueIntType:
     """
     Perform the super saturation check. Check if a valid dewpoint temperature is greater than a valid air temperature
@@ -689,10 +543,14 @@ def do_supersaturation_check(dpt: ValueFloatType, at2: ValueFloatType) -> ValueI
     return result
 
 
+@post_format_return_type(["insst"])
+@inspect_arrays(["insst"])
+@convert_units(sst="K", freezing_point="K")
 def do_sst_freeze_check(
-    sst: ValueFloatType,
+    insst: ValueFloatType,
     freezing_point: float,
-    freeze_check_n_sigma: float,
+    freeze_check_n_sigma: float | None = "default",
+    sst_uncertainty: float | None = "default",
 ) -> ValueIntType:
     """Compare an input SST to see if it is above freezing.
 
@@ -707,20 +565,24 @@ def do_sst_freeze_check(
 
     Parameters
     ----------
-    sst : float, None, sequence of float or None, 1D np.ndarray of float or pd.series of float
+    insst : float, None, sequence of float or None, 1D np.ndarray of float or pd.series of float
         Input sea-surface temperature value(s) to be checked.
         Can be a scalar, a sequence (e.g., list or tuple), a one-dimensional NumPy array, or a pandas Series.
     freezing_point : float, optional
         The freezing point of the water.
-    n_sigma : float, optional
-        Number of sigma to use in the check.
+    freeze_check_n_sigma : float, optional, default: "default"
+        Number of uncertainty standard deviations that sea surface temperature can be
+        below the freezing point before the QC check fails.
+    sst_uncertainty : float, optional, default: "default"
+        the uncertainty in the SST value
 
     Returns
     -------
     Same type as input, but with integer values
         - Returns 2 (or array/sequence/Series of 2s) if any of `insst`, `freezing_point`, `sst_uncertainty`,
           or `n_sigma` is numerically invalid (None or NaN).
-        - Returns 1 (or array/sequence/Series of 1s) if `insst` is below `freezing_point`.
+        - Returns 1 (or array/sequence/Series of 1s) if `insst` is below `freezing_point` by more than
+          `n_sigma` times `sst_uncertainty`.
         - Returns 0 (or array/sequence/Series of 0s) otherwise.
 
     Note
@@ -730,12 +592,33 @@ def do_sst_freeze_check(
         * ``sst_uncertainty``: 0.0
         * ``freezing_point``: -1.80
         * ``n_sigma``: 2.0
-
-    Note
-    ----
-    Freezing point of sea water is typically -1.8 degC or 271.35 K
     """
-    return sst_freeze_check(sst, freezing_point, 0.0, freeze_check_n_sigma)
+    result = np.full(insst.shape, untestable, dtype=int)  # type: np.ndarray
+
+    if (
+        not isvalid(sst_uncertainty)
+        or not isvalid(freezing_point)
+        or not isvalid(n_sigma)
+    ):
+        return result
+
+    valid_sst = isvalid(insst)
+
+    if freeze_check_n_sigma == "default":
+        freeze_check_n_sigma = 0.0
+
+    if sst_uncertainty == "default":
+        sst_uncertainty = 0.0
+
+    cond_failed = np.full(insst.shape, True, dtype=bool)
+    cond_failed[valid_sst] = insst[valid_sst] < (
+        freezing_point - freeze_check_n_sigma * sst_uncertainty
+    )
+
+    result[valid_sst & cond_failed] = failed
+    result[valid_sst & ~cond_failed] = passed
+
+    return result
 
 
 @post_format_return_type(["wind_speed", "wind_direction"])

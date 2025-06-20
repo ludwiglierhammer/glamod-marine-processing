@@ -365,18 +365,22 @@ def test_do_at_missing_value_check(testdata, apply_func):
 @pytest.mark.parametrize("apply_func", [False, True])
 def test_do_at_hard_limit_check(testdata, apply_func):
     db_ = testdata["observations-at"].copy()
+    params = {
+      "hard_limits": [-80,65],
+      "units": {"hard_limits: "degC"},
+    }
     if apply_func is True:
         results = db_.apply(
             lambda row: do_hard_limit_check(
                 value=row["observation_value"],
-                hard_limits=[193.15, 338.15],  # K
+                **params,
             ),
             axis=1,
         )
     else:
         results = do_hard_limit_check(
             value=db_["observation_value"],
-            hard_limits=[193.15, 338.15],  # K
+            **params,
         )
     expected = pd.Series(
         [
@@ -720,18 +724,22 @@ def test_do_dpt_missing_value_check(testdata, apply_func):
 @pytest.mark.parametrize("apply_func", [False, True])
 def test_do_dpt_hard_limit_check(testdata, apply_func):
     db_ = testdata["observations-dpt"].copy()
+    params = {
+        "hard_limits": [-80, 65],
+        "units": {"hard_limits": "degC"}
+    }
     if apply_func is True:
         results = db_.apply(
             lambda row: do_hard_limit_check(
                 value=row["observation_value"],
-                hard_limits=[193.15, 338.15],  # K
+                **params,
             ),
             axis=1,
         )
     else:
         results = do_hard_limit_check(
             value=db_["observation_value"],
-            hard_limits=[193.15, 338.15],  # K
+            **params,
         )
     expected = pd.Series(
         [
@@ -930,20 +938,23 @@ def test_do_sst_missing_value_check(testdata, apply_func):
 @pytest.mark.parametrize("apply_func", [False, True])
 def test_do_sst_freeze_check(testdata, apply_func):
     db_ = testdata["observations-sst"].copy()
+    params = {
+        "freezing_point": -1.8,
+        "freeze_check_n_sigma": 2.0,
+      "units": {"freezing_point": "degC"},
+    }
     if apply_func is True:
         results = db_.apply(
             lambda row: do_sst_freeze_check(
                 sst=row["observation_value"],
-                freezing_point=271.35,
-                freeze_check_n_sigma=2.0,
+                **params,
             ),
             axis=1,
         )
     else:
         results = do_sst_freeze_check(
             sst=db_["observation_value"],
-            freezing_point=271.35,
-            freeze_check_n_sigma=2.0,
+            **params,
         )
     expected = pd.Series(
         [
@@ -968,18 +979,22 @@ def test_do_sst_freeze_check(testdata, apply_func):
 @pytest.mark.parametrize("apply_func", [False, True])
 def test_do_sst_hard_limit_check(testdata, apply_func):
     db_ = testdata["observations-sst"].copy()
+    params = {
+        "hard_limits": [-5, 65],
+        "units": {"hard_limits": "degC"},
+    }
     if apply_func is True:
         results = db_.apply(
             lambda row: do_hard_limit_check(
                 value=row["observation_value"],
-                hard_limits=[268.15, 318.15],
+                **parans,
             ),
             axis=1,
         )
     else:
         results = do_hard_limit_check(
             value=db_["observation_value"],
-            hard_limits=[268.15, 318.15],
+            **parans,
         )
     expected = pd.Series(
         [
@@ -1501,7 +1516,10 @@ def test_multiple_row_check(testdata, climdata):
         "HLIMITS": {
             "func": "do_hard_limit_check",
             "names": {"value": "observation_value"},
-            "arguments": {"hard_limits": [193.15, 338.15]},  # K
+            "arguments": {
+                "hard_limits": [-80, 65],  # degC
+                "units": {"hard_limits": "degC"},
+            },
         },
         "CLIM1": {
             "func": "do_climatology_check",
