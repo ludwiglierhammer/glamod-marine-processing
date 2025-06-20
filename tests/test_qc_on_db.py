@@ -6,18 +6,18 @@ from _settings import get_settings
 from cdm_reader_mapper import DataBundle, read_tables
 from cdm_reader_mapper.common.getting_files import load_file
 
-from glamod_marine_processing.qc_suite.modules.auxiliary import (
-    failed,
-    passed,
-    untestable,
-)
-from glamod_marine_processing.qc_suite.modules.external_clim import Climatology
 from glamod_marine_processing.obs_suite.modules.icoads_identify import (
     is_buoy,
     is_drifter,
     is_in_valid_list,
     is_ship,
 )
+from glamod_marine_processing.qc_suite.modules.auxiliary import (
+    failed,
+    passed,
+    untestable,
+)
+from glamod_marine_processing.qc_suite.modules.external_clim import Climatology
 from glamod_marine_processing.qc_suite.modules.multiple_row_checks import (
     do_multiple_row_check,
 )
@@ -199,17 +199,17 @@ def climdata():
         [
             "platform_type",
             [4, 5, 6],
-            pd.Series([failed] * 13),
+            pd.Series([False] * 13),
         ],  # platform type is 2 which is not a buoy (4: moored buoy, 5: drifting buoy, 6: ice buoy)
         [
             "platform_type",
             5,
-            pd.Series([failed] * 13),
+            pd.Series([False] * 13),
         ],  # platform type is 2 which is not a drfiting buoy (5: drifting buoy)
         [
             "platform_type",
             2,
-            pd.Series([passed] * 13),
+            pd.Series([True] * 13),
         ],  # platform type is 2 which is a ship
     ],
 )
@@ -229,7 +229,7 @@ def test_is_buoy(testdata):
         axis=1,
     )
     expected = pd.Series(
-        [failed] * 13
+        [False] * 13
     )  # platform type is 2 which is not a buoy (4: moored buoy, 5: drifting buoy, 6: ice buoy)
     pd.testing.assert_series_equal(results, expected)
 
@@ -240,7 +240,7 @@ def test_is_drifter(testdata):
         lambda row: is_drifter(platform_type=row["platform_type"], valid_list=5), axis=1
     )
     expected = pd.Series(
-        [failed] * 13
+        [False] * 13
     )  # platform type is 2 which is not a drifting buoy (5: drifting buoy)
     pd.testing.assert_series_equal(results, expected)
 
@@ -250,7 +250,7 @@ def test_is_ship(testdata):
     results = db_.apply(
         lambda row: is_ship(platform_type=row["platform_type"], valid_list=2), axis=1
     )
-    expected = pd.Series([passed] * 13)  # platform type is 2 which is a ship
+    expected = pd.Series([True] * 13)  # platform type is 2 which is a ship
     pd.testing.assert_series_equal(results, expected)
 
 
@@ -302,7 +302,7 @@ def test_do_time_check(testdata, apply_func):
     db_ = testdata["header"].copy()
     if apply_func is True:
         results = db_.apply(
-            lambda row: do_time_check(hour=row["report_timestamp"].hour), axis=1
+            lambda row: do_time_check(date=row["report_timestamp"]), axis=1
         )
     else:
         results = do_time_check(date=db_["report_timestamp"])
@@ -359,6 +359,8 @@ def test_do_at_missing_value_check(testdata, apply_func):
             passed,
         ]
     )
+    print(results)
+    print(expected)
     pd.testing.assert_series_equal(results, expected)
 
 
@@ -366,8 +368,8 @@ def test_do_at_missing_value_check(testdata, apply_func):
 def test_do_at_hard_limit_check(testdata, apply_func):
     db_ = testdata["observations-at"].copy()
     params = {
-        "hard_limits": [-80, 65],
-        "units": {"hard_limits": "degC"},
+        "limits": [-80, 65],
+        "units": {"limits": "degC"},
     }
     if apply_func is True:
         results = db_.apply(
@@ -724,7 +726,7 @@ def test_do_dpt_missing_value_check(testdata, apply_func):
 @pytest.mark.parametrize("apply_func", [False, True])
 def test_do_dpt_hard_limit_check(testdata, apply_func):
     db_ = testdata["observations-dpt"].copy()
-    params = {"hard_limits": [-80, 65], "units": {"hard_limits": "degC"}}
+    params = {"limits": [-80, 65], "units": {"limits": "degC"}}
     if apply_func is True:
         results = db_.apply(
             lambda row: do_hard_limit_check(
@@ -977,8 +979,8 @@ def test_do_sst_freeze_check(testdata, apply_func):
 def test_do_sst_hard_limit_check(testdata, apply_func):
     db_ = testdata["observations-sst"].copy()
     params = {
-        "hard_limits": [-5, 65],
-        "units": {"hard_limits": "degC"},
+        "limits": [-5, 65],
+        "units": {"limits": "degC"},
     }
     if apply_func is True:
         results = db_.apply(
@@ -1512,8 +1514,8 @@ def test_multiple_row_check(testdata, climdata):
             "func": "do_hard_limit_check",
             "names": {"value": "observation_value"},
             "arguments": {
-                "hard_limits": [-80, 65],  # degC
-                "units": {"hard_limits": "degC"},
+                "limits": [-80, 65],  # degC
+                "units": {"limits": "degC"},
             },
         },
         "CLIM1": {

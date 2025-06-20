@@ -3,16 +3,14 @@
 from __future__ import annotations
 
 import calendar
-import inspect
 import math
 from collections.abc import Callable
 from datetime import datetime, timedelta
-from functools import wraps
 from typing import Sequence
 
 import numpy as np
 
-from .auxiliary import is_scalar_like, isvalid, save_originals
+from .auxiliary import generic_decorator, is_scalar_like, isvalid
 
 
 def convert_date(params: list[str]) -> Callable:
@@ -45,42 +43,32 @@ def convert_date(params: list[str]) -> Callable:
       and returns a dictionary mapping parameter names to their values.
     """
 
-    def decorator(func):
-        @wraps(func)
-        def wrapper(*args, **kwargs):
-            sig = inspect.signature(func)
-            bound_args = sig.bind(*args, **kwargs)
-            bound_args.apply_defaults()
+    def pre_handler(arguments: dict, **meta_kwargs):
+        date = arguments.get("date")
+        if date is None:
+            return
 
-            ctx = save_originals(bound_args.arguments, kwargs)
+        if is_scalar_like(date):
+            scalar = True
+            extracted = split_date(date)
+        else:
+            scalar = False
+            extracted = [split_date(d) for d in date]
 
-            date = ctx.originals.get("date")
-            if date is None:
-                return func(*bound_args.args, **bound_args.kwargs)
-            if is_scalar_like(date):
-                scalar = True
-                extracted = split_date(date)
+        for param in params:
+            if param not in arguments:
+                raise ValueError(f"Parameter '{param}' is not a valid parameter.")
+
+            if scalar:
+                value = extracted[param]
             else:
-                scalar = False
-                extracted = [split_date(d) for d in date]
+                value = [e[param] for e in extracted]
 
-            for param in params:
-                if param not in bound_args.arguments:
-                    raise ValueError(f"Parameter {param} is not a valid parameter.")
+            arguments[param] = value
 
-                if scalar is True:
-                    value = extracted[param]
-                else:
-                    value = [e[param] for e in extracted]
+    pre_handler._decorator_kwargs = set()
 
-                bound_args.arguments[param] = value
-
-            bound_args.arguments["_ctx"] = ctx
-            return func(*bound_args.args, **bound_args.kwargs)
-
-        return wrapper
-
-    return decorator
+    return generic_decorator(pre_handler=pre_handler)
 
 
 def split_date(date: datetime) -> dict:

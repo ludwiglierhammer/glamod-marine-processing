@@ -71,7 +71,7 @@ class TypeContext:
         self.originals = {}
 
 
-def save_originals(args: dict, kwargs: dict) -> TypeContext:
+def _save_originals(args: dict, kwargs: dict) -> TypeContext:
     """
     Store original argument values in a TypeContext.
 
@@ -252,36 +252,63 @@ def generic_decorator(
     - The original function is called with the possibly modified bound arguments after
       handler processing.
     """
+    if pre_handler:
+        pre_handler._is_post_handler = False
+    if post_handler:
+        post_handler._is_post_handler = True
 
     def decorator(func):
+        handlers = []
+        if pre_handler:
+            handlers.append(pre_handler)
+        if post_handler:
+            handlers.append(post_handler)
+
         @wraps(func)
         def wrapper(*args, **kwargs):
             reserved_keys = set()
-            if pre_handler and hasattr(pre_handler, "_decorator_kwargs"):
-                reserved_keys.update(pre_handler._decorator_kwargs)
-            if post_handler and hasattr(post_handler, "_decorator_kwargs"):
-                reserved_keys.update(post_handler._decorator_kwargs)
+            all_pre_handlers = []
+            all_post_handlers = []
+            current_func = wrapper
+            visited = set()
+
+            while (
+                hasattr(current_func, "__wrapped__") and id(current_func) not in visited
+            ):
+                visited.add(id(current_func))
+                for handler in getattr(current_func, "_decorator_handlers", []):
+                    if not callable(handler):
+                        continue
+                    if hasattr(handler, "_decorator_kwargs"):
+                        reserved_keys.update(handler._decorator_kwargs)
+                    if getattr(handler, "_is_post_handler", False):
+                        all_post_handlers.append(handler)
+                    else:
+                        all_pre_handlers.append(handler)
+
+                current_func = current_func.__wrapped__
+
             meta_kwargs = {k: kwargs.pop(k) for k in reserved_keys if k in kwargs}
 
             sig = inspect.signature(func)
             bound_args = sig.bind(*args, **kwargs)
             bound_args.apply_defaults()
 
-            # Pre-call processing
-            if pre_handler:
-                pre_handler.__funcname__ = func.__name__
-                pre_handler(
-                    bound_args.arguments, **meta_kwargs
-                )  # Perform specific inspection/modification
+            original_call = bound_args.arguments.copy()
+
+            for handler in reversed(all_pre_handlers):
+                handler.__funcname__ = func.__name__
+                handler(bound_args.arguments, **meta_kwargs)
 
             result = func(*bound_args.args, **bound_args.kwargs)
 
-            # Post-call processing
-            if post_handler:
-                post_handler.__func_name__ = func.__name__
-                result = post_handler(result, bound_args.arguments, **meta_kwargs)
+            for handler in reversed(all_post_handlers):
+                handler.__funcname__ = func.__name__
+                result = handler(result, bound_args.arguments, **original_call)
 
             return result
+
+        setattr(wrapper, "_decorator_handlers", handlers)
 
         return wrapper
 
@@ -319,22 +346,16 @@ def post_format_return_type(params: list[str]) -> Callable:
       and the output should match the original input types.
     """
 
-    def pre_handler(arguments: dict, **meta_kwargs):
-        ctx = meta_kwargs.get("_ctx") or arguments.get("_ctx")
-        pre_handler._input_values = (
-            [ctx.originals.get(p) for p in params]
-            if ctx
-            else [arguments.get(p) for p in params]
-        )
+    def post_handler(result, arguments: dict, **original_call):
 
-    def post_handler(result, arguments: dict, **meta_kwargs):
-        return format_return_type(result, *getattr(pre_handler, "_input_values", []))
+        input_values = []
+        for param in params:
+            if param in original_call:
+                input_values.append(original_call[param])
+                continue
+        return format_return_type(result, *input_values)
 
-    # Declare reserved kwargs we want to forward
-    pre_handler._decorator_kwargs = {"_ctx"}
-    post_handler._decorator_kwargs = {"_ctx"}
-
-    return generic_decorator(pre_handler=pre_handler, post_handler=post_handler)
+    return generic_decorator(post_handler=post_handler)
 
 
 def inspect_arrays(params: list[str]) -> Callable:
@@ -390,18 +411,19 @@ def inspect_arrays(params: list[str]) -> Callable:
             if param not in arguments:
                 raise ValueError(f"Parameter {param} is not a valid parameter.")
 
-            arr = np.asarray(arguments[param])
+            value = arguments[param]
+            arr = np.atleast_1d(arguments[param])
             if arr.ndim != 1:
                 raise ValueError(f"Input '{param}' must be one-dimensional.")
 
             arguments[param] = arr
-            arrays.append(arr)
+            if value is not None:
+                arrays.append(arr)
 
         lengths = [len(arr) for arr in arrays]
         if any(length != lengths[0] for length in lengths):
             raise ValueError(f"Input {params} must all have the same length.")
 
-    # No post_handler needed here
     pre_handler._decorator_kwargs = set()
 
     return generic_decorator(pre_handler=pre_handler)

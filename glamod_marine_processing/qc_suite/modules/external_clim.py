@@ -55,7 +55,7 @@ def inspect_climatology(
     elif optional is None:
         optional = []
 
-    def handler(arguments: dict, **meta_kwargs):
+    def pre_handler(arguments: dict, **meta_kwargs):
         active_keys = list(climatology_keys)
         for opt in optional:
             if opt in arguments:
@@ -63,20 +63,11 @@ def inspect_climatology(
         for clim_key in active_keys:
             if clim_key not in arguments:
                 raise TypeError(
-                    f"Missing expected argument '{clim_key}' in function '{handler.__funcname__}'."
+                    f"Missing expected argument '{clim_key}' in function '{pre_handler.__funcname__}'."
                     "The decorator requires this argument to be present."
                 )
-
             climatology = arguments[clim_key]
             if isinstance(climatology, Climatology):
-                if "kwargs" not in arguments:
-                    warnings.warn(
-                        f"'kwargs' not found in bound arguments for function '{handler.__funcname__}'. "
-                        "Climatology.get_value(**kwargs) may fail."
-                    )
-                    func_kwargs = {}
-                else:
-                    func_kwargs = arguments["kwargs"]
                 get_value_sig = inspect.signature(climatology.get_value)
                 required_keys = {
                     name
@@ -84,15 +75,15 @@ def inspect_climatology(
                     if param.default is param.empty
                     and param.kind in (param.POSITIONAL_OR_KEYWORD, param.KEYWORD_ONLY)
                 }
-                missing_in_kwargs = required_keys - func_kwargs.keys()
+                missing_in_kwargs = required_keys - meta_kwargs.keys()
                 if missing_in_kwargs:
                     warnings.warn(
                         f"The following required arguments for '{type(clim_key).__name__}.get_value' are missing from **kwargs "
-                        f"in function '{handler.__funcname__}': {missing_in_kwargs}. "
+                        f"in function '{pre_handler.__funcname__}': {missing_in_kwargs}. "
                         f"Ensure all required arguments are passed via **kwargs."
                     )
                 try:
-                    climatology = climatology.get_value(**func_kwargs)
+                    climatology = climatology.get_value(**meta_kwargs)
                 except ValueError:
                     climatology = np.nan
                 except TypeError:
@@ -100,7 +91,9 @@ def inspect_climatology(
 
             arguments[clim_key] = climatology
 
-    return generic_decorator(handler)
+    pre_handler._decorator_kwargs = {"lat", "lon", "date"}
+
+    return generic_decorator(pre_handler=pre_handler)
 
 
 def open_xrdataset(

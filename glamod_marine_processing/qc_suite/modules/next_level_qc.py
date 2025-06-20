@@ -49,7 +49,7 @@ def value_check(value: ValueFloatType) -> ValueIntType:
 
 @post_format_return_type(["lat", "lon"])
 @inspect_arrays(["lat", "lon"])
-@convert_units(latitude="degrees", longitude="degrees")
+@convert_units(lat="degrees", lon="degrees")
 def do_position_check(lat: ValueFloatType, lon: ValueFloatType) -> ValueIntType:
     """
     Perform the positional QC check on the report. Simple check to make sure that the latitude and longitude are
@@ -194,7 +194,7 @@ def do_time_check(
 @post_format_return_type(["date", "year"])
 @convert_date(["year", "month", "day", "hour"])
 @inspect_arrays(["year", "month", "day", "hour", "lat", "lon"])
-@convert_units(latitude="degrees", longitude="degrees")
+@convert_units(lat="degrees", lon="degrees")
 def do_day_check(
     date: ValueDatetimeType = None,
     year: ValueIntType = None,
@@ -357,7 +357,7 @@ def do_missing_value_clim_check(climatology: ClimFloatType, **kwargs) -> ValueIn
 
 @post_format_return_type(["value"])
 @inspect_arrays(["value"])
-@convert_units(value="unknown", hard_limits="unknown")
+@convert_units(value="unknown", limits="unknown")
 def do_hard_limit_check(
     value: ValueFloatType,
     limits: tuple[float, float],
@@ -399,7 +399,7 @@ def do_hard_limit_check(
 
 
 @post_format_return_type(["value"])
-@inspect_arrays(["value", "climate_normal"])
+@inspect_arrays(["value", "climatology"])
 @convert_units(value="unknown", climatology="unknown")
 @inspect_climatology("climatology", optional="standard_deviation")
 def do_climatology_check(
@@ -544,11 +544,11 @@ def do_supersaturation_check(dpt: ValueFloatType, at2: ValueFloatType) -> ValueI
     return result
 
 
-@post_format_return_type(["insst"])
-@inspect_arrays(["insst"])
+@post_format_return_type(["sst"])
+@inspect_arrays(["sst"])
 @convert_units(sst="K", freezing_point="K")
 def do_sst_freeze_check(
-    insst: ValueFloatType,
+    sst: ValueFloatType,
     freezing_point: float,
     freeze_check_n_sigma: float | None = "default",
     sst_uncertainty: float | None = "default",
@@ -566,7 +566,7 @@ def do_sst_freeze_check(
 
     Parameters
     ----------
-    insst : float, None, sequence of float or None, 1D np.ndarray of float or pd.series of float
+    sst : float, None, sequence of float or None, 1D np.ndarray of float or pd.series of float
         Input sea-surface temperature value(s) to be checked.
         Can be a scalar, a sequence (e.g., list or tuple), a one-dimensional NumPy array, or a pandas Series.
     freezing_point : float, optional
@@ -580,9 +580,9 @@ def do_sst_freeze_check(
     Returns
     -------
     Same type as input, but with integer values
-        - Returns 2 (or array/sequence/Series of 2s) if any of `insst`, `freezing_point`, `sst_uncertainty`,
+        - Returns 2 (or array/sequence/Series of 2s) if any of `sst`, `freezing_point`, `sst_uncertainty`,
           or `n_sigma` is numerically invalid (None or NaN).
-        - Returns 1 (or array/sequence/Series of 1s) if `insst` is below `freezing_point` by more than
+        - Returns 1 (or array/sequence/Series of 1s) if `sst` is below `freezing_point` by more than
           `n_sigma` times `sst_uncertainty`.
         - Returns 0 (or array/sequence/Series of 0s) otherwise.
 
@@ -594,7 +594,7 @@ def do_sst_freeze_check(
         * ``freezing_point``: -1.80
         * ``n_sigma``: 2.0
     """
-    result = np.full(insst.shape, untestable, dtype=int)  # type: np.ndarray
+    result = np.full(sst.shape, untestable, dtype=int)  # type: np.ndarray
 
     if (
         not isvalid(sst_uncertainty)
@@ -603,7 +603,7 @@ def do_sst_freeze_check(
     ):
         return result
 
-    valid_sst = isvalid(insst)
+    valid_sst = isvalid(sst)
 
     if freeze_check_n_sigma == "default":
         freeze_check_n_sigma = 0.0
@@ -611,8 +611,8 @@ def do_sst_freeze_check(
     if sst_uncertainty == "default":
         sst_uncertainty = 0.0
 
-    cond_failed = np.full(insst.shape, True, dtype=bool)
-    cond_failed[valid_sst] = insst[valid_sst] < (
+    cond_failed = np.full(sst.shape, True, dtype=bool)
+    cond_failed[valid_sst] = sst[valid_sst] < (
         freezing_point - freeze_check_n_sigma * sst_uncertainty
     )
 

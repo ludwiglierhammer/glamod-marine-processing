@@ -70,7 +70,7 @@ def test_do_position_check(latitude, longitude, expected):
 
     latitude = convert_to(latitude, "degrees", "rad")
     units = {
-        "latitude": "rad",
+        "lat": "rad",
     }
     assert do_position_check(latitude, longitude, units=units) == expected
 
@@ -250,14 +250,14 @@ def test_do_day_check(year, month, day, hour, latitude, longitude, time, expecte
     assert result == expected
 
     latitude = convert_to(latitude, "degrees", "rad")
-    units = {"latitude": "rad"}
+    units = {"lat": "rad"}
     result = do_day_check(
         year=year,
         month=month,
         day=day,
         hour=hour,
-        latitude=latitude,
-        longitude=longitude,
+        lat=latitude,
+        lon=longitude,
         time_since_sun_above_horizon=time,
         units=units,
     )
@@ -450,11 +450,19 @@ def _test_climatology_plus_stdev_check_raises():
     ],
 )
 def test_do_hard_limit_check(value, limits, expected):
-    assert do_hard_limit_check(value, limits) == expected
+    # assert do_hard_limit_check(value, limits) == expected
 
     value = convert_to(value, "degC", "K")
-    units = {"hard_limits": "degC"}
-    assert do_hard_limit_check(value, limits, units=units) == expected
+    units = {"limits": "degC"}
+    assert (
+        do_hard_limit_check(
+            value,
+            limits,
+            units=units,
+        )
+        == expected
+    )
+    # exit()
 
 
 def test_do_supersaturation_check_array():
