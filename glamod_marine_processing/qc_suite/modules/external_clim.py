@@ -6,7 +6,6 @@ import inspect
 import warnings
 from collections.abc import Callable
 from datetime import datetime
-from functools import wraps
 from typing import Literal, Sequence, TypeAlias
 
 import cf_xarray  # noqa

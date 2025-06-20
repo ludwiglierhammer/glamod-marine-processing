@@ -219,8 +219,8 @@ def convert_to(
 
 
 def generic_decorator(
-    pre_handler: Optional[Callable[[dict], None]] = None,
-    post_handler: Optional[Callable[[any, dict], any]] = None,
+    pre_handler: Callable[[dict], None] | None = None,
+    post_handler: Callable[[any, dict], any] | None = None,
 ) -> Callable:
     """
     Creates a decorator that binds function arguments, allows inspection or modification
@@ -277,7 +277,7 @@ def generic_decorator(
             result = func(*bound_args.args, **bound_args.kwargs)
 
             # Post-call processing
-            if porst_handler:
+            if post_handler:
                 post_handler.__func_name__ = func.__name__
                 result = post_handler(result, bound_args.arguments, **meta_kwargs)
 
@@ -469,6 +469,6 @@ def convert_units(**units_by_name) -> Callable:
 
             arguments[param] = converted
 
-    handler._decorator_kwargs = {"units"}
+    pre_handler._decorator_kwargs = {"units"}
 
     return generic_decorator(pre_handler=pre_handler)

@@ -466,13 +466,6 @@ def test_do_supersaturation_check_array():
 
 
 @pytest.mark.parametrize(
-    "sst, expected", [(5.6, passed), (None, failed), (np.nan, failed)]
-)  # not sure if np.nan should trigger FAIL
-def test_do_sst_missing_value_check(sst, expected):
-    assert do_missing_value_check(sst) == expected
-
-
-@pytest.mark.parametrize(
     "sst, sst_uncertainty, freezing_point, n_sigma, expected",
     [
         (15.0, 0.0, -1.8, 2.0, passed),

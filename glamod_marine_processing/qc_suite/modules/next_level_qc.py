@@ -11,6 +11,7 @@ from .auxiliary import (
     ValueDatetimeType,
     ValueFloatType,
     ValueIntType,
+    convert_units,
     failed,
     format_return_type,
     inspect_arrays,
@@ -452,8 +453,8 @@ def do_climatology_check(
     If either `climatology` or `standard_deviation` is a Climatology object, pass `lon` and `lat` and `date`, or `month` and `day`,
     as keyword arguments to extract the relevant climatological value(s).
     """
-    if climate_normal.ndim == 0:
-        climate_normal = np.full_like(value, climate_normal)  # type: np.ndarray
+    if climatology.ndim == 0:
+        climatology = np.full_like(value, climatology)  # type: np.ndarray
 
     if isinstance(standard_deviation, str) and standard_deviation == "default":
         standard_deviation = np.full(value.shape, 1.0, dtype=float)
@@ -474,7 +475,7 @@ def do_climatology_check(
 
     valid_indices = (
         isvalid(value)
-        & isvalid(climate_normal)
+        & isvalid(climatology)
         & isvalid(maximum_anomaly)
         & isvalid(standard_deviation)
     )
@@ -487,7 +488,7 @@ def do_climatology_check(
     climate_diff = np.zeros_like(value)  # type: np.ndarray
 
     climate_diff[valid_indices] = np.abs(
-        value[valid_indices] - climate_normal[valid_indices]
+        value[valid_indices] - climatology[valid_indices]
     )
 
     if lowbar is None:
@@ -598,7 +599,7 @@ def do_sst_freeze_check(
     if (
         not isvalid(sst_uncertainty)
         or not isvalid(freezing_point)
-        or not isvalid(n_sigma)
+        or not isvalid(freeze_check_n_sigma)
     ):
         return result
 

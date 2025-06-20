@@ -366,8 +366,8 @@ def test_do_at_missing_value_check(testdata, apply_func):
 def test_do_at_hard_limit_check(testdata, apply_func):
     db_ = testdata["observations-at"].copy()
     params = {
-      "hard_limits": [-80,65],
-      "units": {"hard_limits: "degC"},
+        "hard_limits": [-80, 65],
+        "units": {"hard_limits": "degC"},
     }
     if apply_func is True:
         results = db_.apply(
@@ -724,10 +724,7 @@ def test_do_dpt_missing_value_check(testdata, apply_func):
 @pytest.mark.parametrize("apply_func", [False, True])
 def test_do_dpt_hard_limit_check(testdata, apply_func):
     db_ = testdata["observations-dpt"].copy()
-    params = {
-        "hard_limits": [-80, 65],
-        "units": {"hard_limits": "degC"}
-    }
+    params = {"hard_limits": [-80, 65], "units": {"hard_limits": "degC"}}
     if apply_func is True:
         results = db_.apply(
             lambda row: do_hard_limit_check(
@@ -941,7 +938,7 @@ def test_do_sst_freeze_check(testdata, apply_func):
     params = {
         "freezing_point": -1.8,
         "freeze_check_n_sigma": 2.0,
-      "units": {"freezing_point": "degC"},
+        "units": {"freezing_point": "degC"},
     }
     if apply_func is True:
         results = db_.apply(
@@ -987,14 +984,14 @@ def test_do_sst_hard_limit_check(testdata, apply_func):
         results = db_.apply(
             lambda row: do_hard_limit_check(
                 value=row["observation_value"],
-                **parans,
+                **params,
             ),
             axis=1,
         )
     else:
         results = do_hard_limit_check(
             value=db_["observation_value"],
-            **parans,
+            **params,
         )
     expected = pd.Series(
         [
@@ -1147,14 +1144,14 @@ def test_do_wind_speed_hard_limit_check(testdata, apply_func):
         results = db_.apply(
             lambda row: do_hard_limit_check(
                 value=row["observation_value"],
-                hard_limits=[0, 13],
+                limits=[0, 13],
             ),
             axis=1,
         )
     else:
         results = do_hard_limit_check(
             value=db_["observation_value"],
-            hard_limits=[0, 13],
+            limits=[0, 13],
         )
     expected = pd.Series(
         [
@@ -1212,14 +1209,12 @@ def test_do_wind_direction_hard_limit_check(testdata, apply_func):
     if apply_func is True:
         results = db_.apply(
             lambda row: do_hard_limit_check(
-                value=row["observation_value"], hard_limits=[0, 360]
+                value=row["observation_value"], limits=[0, 360]
             ),
             axis=1,
         )
     else:
-        results = do_hard_limit_check(
-            value=db_["observation_value"], hard_limits=[0, 360]
-        )
+        results = do_hard_limit_check(value=db_["observation_value"], limits=[0, 360])
     expected = pd.Series(
         [
             passed,
