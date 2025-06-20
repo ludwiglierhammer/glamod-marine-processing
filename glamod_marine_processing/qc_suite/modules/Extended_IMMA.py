@@ -15,8 +15,9 @@ from datetime import datetime
 
 import numpy as np
 
+import glamod_marine_processing.obs_suite.modules.icoads_identify as ii
+
 from . import CalcHums
-from . import icoads_identify as ii
 from . import next_level_qc as qc
 from . import spherical_geometry as sph
 from . import time_control

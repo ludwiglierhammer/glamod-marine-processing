@@ -12,7 +12,7 @@ from glamod_marine_processing.qc_suite.modules.auxiliary import (
     untestable,
 )
 from glamod_marine_processing.qc_suite.modules.external_clim import Climatology
-from glamod_marine_processing.qc_suite.modules.icoads_identify import (
+from glamod_marine_processing.obs_suite.modules.icoads_identify import (
     is_buoy,
     is_drifter,
     is_in_valid_list,

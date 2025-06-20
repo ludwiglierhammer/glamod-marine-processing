@@ -15,7 +15,8 @@ from datetime import datetime
 
 import numpy as np
 
-from . import CalcHums, qc
+from . import CalcHums
+from . import next_level_qc as qc
 from . import spherical_geometry as sph
 from . import track_check as tc
 from . import trackqc as tqc
