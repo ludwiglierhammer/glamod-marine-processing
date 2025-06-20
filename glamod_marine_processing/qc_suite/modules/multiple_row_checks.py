@@ -3,10 +3,11 @@
 from __future__ import annotations
 
 import inspect
+from typing import Literal
 
 import pandas as pd
 
-from .auxiliary import failed
+from .auxiliary import failed, passed, untested
 from .external_clim import get_climatological_value  # noqa
 from .next_level_qc import (  # noqa
     do_climatology_check,
@@ -58,7 +59,8 @@ def do_multiple_row_check(
     data: dict | pd.Series,
     qc_dict: dict | None = None,
     preproc_dict: dict | None = None,
-) -> int:
+    return_method: Literal["all", "passed", "failed"] = "all",
+) -> pd.Series:
     """Basic row-by-row QC by using multiple QC functions.
 
     Parameters
@@ -79,11 +81,19 @@ def do_multiple_row_check(
         "names" (input data names as keyword arguments, that will be retrieved from `data`), and "inputs"
         (list of input-given variables).
         For more information see Examples.
+    return_method: {"all", "passed", "failed"}, default: "all"
+        If "all", return QC dictionary containing all requested QC check flags.
+        If "passed": return QC dictionary containing all requested QC check flags until the first check passes.
+        Other QC checks are flagged as unstested (3).
+        If "failed": return QC dictionary containing all requested QC check flags until the first check fails.
+        Other QC checks are flagged as unstested (3).
 
     Returns
     -------
-    int
-        1 if QC fails, otherwise 0.
+    pd.Series
+        Columns represent arbitrary names of the check (taken from `qc_dict.keys()`).
+        Values representing corresponding QC flags.
+        For information to QC flags see QC functions.
 
     Raises
     ------
@@ -91,6 +101,7 @@ def do_multiple_row_check(
         If a function listed in `qc_dict` or `preproc_dict` is not defined.
         If columns listed in `qc_dict` or `preproc_dict` are not available in `data`.
     ValueError
+        If `return_method` is not one of ["all", "passed", "failed"]
         If variable names listed in `qc_dict` or `preproc_dict` are not valid parameters of the QC function.
 
     Notes
@@ -175,11 +186,12 @@ def do_multiple_row_check(
             },
         }
 
-    Notes
-    -----
-    This function loops over each key-value pair.
-    If one QC function fails, the function returns 1 and stops further processing.
     """
+    if return_method not in ["all", "passed", "failed"]:
+        raise ValueError(
+            f"'return_method' has to be one of ['all', 'passed', 'failed']: {return_method}"
+        )
+
     if qc_dict is None:
         qc_dict = {}
 
@@ -218,8 +230,17 @@ def do_multiple_row_check(
                 arguments[k] = v
             qc_inputs[qc_name]["kwargs"] = arguments
 
+    results = pd.Series()
+    finished = False
     for qc_name, qc_params in qc_inputs.items():
-        qc_flag = qc_params["function"](**qc_params["requests"], **qc_params["kwargs"])
-        if qc_flag == failed:
-            return qc_flag
-    return qc_flag
+        if finished is True:
+            results[qc_name] = untested
+            continue
+        results[qc_name] = qc_params["function"](
+            **qc_params["requests"], **qc_params["kwargs"]
+        )
+        if (results[qc_name] == failed and return_method == "failed") or (
+            results[qc_name] == passed and return_method == "passed"
+        ):
+            finished = True
+    return results
