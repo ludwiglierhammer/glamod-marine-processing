@@ -38,6 +38,14 @@ def _is_func_param(func, param):
     return param in sig.parameters
 
 
+def _is_in_data(name, data):
+    if isinstance(data, pd.Series):
+        return name in data
+    elif isinstance(data, pd.DataFrame):
+        return name in data.columns
+    raise TypeError(f"Unsupported data type: {type(data)}")
+
+
 def _get_requests_from_params(params, func, data):
     requests = {}
     if params is None:
@@ -47,7 +55,7 @@ def _get_requests_from_params(params, func, data):
             raise ValueError(
                 f"Parameter '{param}' is not a valid parameter of function '{func.__name__}'"
             )
-        if cname not in data:
+        if not _is_in_data(cname, data):
             raise NameError(
                 f"Variable '{cname}' is not available in input data: {data}."
             )
@@ -55,8 +63,17 @@ def _get_requests_from_params(params, func, data):
     return requests
 
 
+def _get_preprocessed_args(arguments, preprocessed):
+    args = {}
+    for k, v in arguments.items():
+        if v == "_preprocessed__":
+            v = preprocessed[k]
+        args[k] = v
+    return args
+
+
 def do_multiple_row_check(
-    data: dict | pd.Series,
+    data: pd.Series | pd.DataFrame,
     qc_dict: dict | None = None,
     preproc_dict: dict | None = None,
     return_method: Literal["all", "passed", "failed"] = "all",
@@ -65,7 +82,7 @@ def do_multiple_row_check(
 
     Parameters
     ----------
-    data : dict or pd.Series
+    data : pd.Series or pd.DataFrame
         Hashable input data.
     qc_dict : dict, optional
         Nested QC dictionary.
@@ -118,10 +135,10 @@ def do_multiple_row_check(
     .. code-block:: python
 
         qc_dict = {
-            "hard_limits_check": {
-                "func": "do_air_temperature_hard_limit_check",
+            "hard_limit_check": {
+                "func": "do_hard_limit_check",
                 "names": "ATEMP",
-                "arguments": {"hard_limits": [193.15, 338.15]},
+                "arguments": {"limits": [193.15, 338.15]},
             }
         }
 
@@ -223,24 +240,38 @@ def do_multiple_row_check(
         qc_inputs[qc_name]["requests"] = requests
         qc_inputs[qc_name]["kwargs"] = {}
         if "arguments" in qc_params.keys():
-            arguments = {}
-            for k, v in qc_params["arguments"].items():
-                if v == "__preprocessed__":
-                    v = preprocessed[k]
-                arguments[k] = v
-            qc_inputs[qc_name]["kwargs"] = arguments
+            qc_inputs = _get_preprocessed_args(qc_params["arguments"], preprocessed)
 
-    results = pd.Series()
-    finished = False
+    is_series = isinstance(data, pd.Series)
+    if is_series:
+        data = pd.DataFrame([data.values], columns=data.index)
+
+    mask = pd.Series(True, index=data.index)
+    results = pd.DataFrame(untested, index=data.index, columns=qc_inputs.keys())
+
     for qc_name, qc_params in qc_inputs.items():
-        if finished is True:
-            results[qc_name] = untested
+        if not mask.any():
             continue
-        results[qc_name] = qc_params["function"](
-            **qc_params["requests"], **qc_params["kwargs"]
-        )
-        if (results[qc_name] == failed and return_method == "failed") or (
-            results[qc_name] == passed and return_method == "passed"
-        ):
-            finished = True
+
+        args = {
+            k: (v[mask] if isinstance(v, pd.Series) else v)
+            for k, v in qc_params["requests"].items()
+        }
+        kwargs = {
+            k: (v[mask] if isinstance(v, pd.Series) else v)
+            for k, v in qc_params["kwargs"].items()
+        }
+
+        partial_result = qc_params["function"](**args, **kwargs)
+        full_result = pd.Series(untested, index=data.index)
+        full_result.loc[mask] = partial_result
+        results[qc_name] = full_result
+
+        if return_method == "failed":
+            mask &= full_result != failed
+        elif return_method == "passed":
+            mask &= full_result != passed
+
+    if is_series is True:
+        return results.iloc[0]
     return results

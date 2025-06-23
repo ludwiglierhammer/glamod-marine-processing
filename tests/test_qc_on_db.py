@@ -1713,7 +1713,8 @@ def test_find_saturated_runs(testdata_track):
         ),
     ],
 )
-def test_multiple_row_check(testdata, climdata, return_method, expected):
+@pytest.mark.parametrize("apply_func", [False, True])
+def test_multiple_row_check(testdata, climdata, return_method, expected, apply_func):
     db_ = testdata["observations-at"].copy()
     climatology = Climatology.open_netcdf_file(
         climdata["AT"]["mean"],
@@ -1787,14 +1788,24 @@ def test_multiple_row_check(testdata, climdata, return_method, expected):
             },
         },
     }
-    results = db_.apply(
-        lambda row: do_multiple_row_check(
-            data=row,
+    if apply_func is True:
+        results = db_.apply(
+            lambda row: do_multiple_row_check(
+                data=row,
+                qc_dict=qc_dict,
+                preproc_dict=preproc_dict,
+                return_method=return_method,
+            ),
+            axis=1,
+        )
+    else:
+        results = do_multiple_row_check(
+            data=db_.data,
             qc_dict=qc_dict,
             preproc_dict=preproc_dict,
             return_method=return_method,
-        ),
-        axis=1,
-    )
+        )
+    print(results)
     expected = pd.DataFrame(expected)
+    print(expected)
     pd.testing.assert_frame_equal(results, expected)
