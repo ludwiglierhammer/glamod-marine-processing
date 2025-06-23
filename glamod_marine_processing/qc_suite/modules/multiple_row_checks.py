@@ -66,7 +66,7 @@ def _get_requests_from_params(params, func, data):
 def _get_preprocessed_args(arguments, preprocessed):
     args = {}
     for k, v in arguments.items():
-        if v == "_preprocessed__":
+        if v == "__preprocessed__":
             v = preprocessed[k]
         args[k] = v
     return args
@@ -239,8 +239,11 @@ def do_multiple_row_check(
         qc_inputs[qc_name]["function"] = func
         qc_inputs[qc_name]["requests"] = requests
         qc_inputs[qc_name]["kwargs"] = {}
+
         if "arguments" in qc_params.keys():
-            qc_inputs = _get_preprocessed_args(qc_params["arguments"], preprocessed)
+            qc_inputs[qc_name]["kwargs"] = _get_preprocessed_args(
+                qc_params["arguments"], preprocessed
+            )
 
     is_series = isinstance(data, pd.Series)
     if is_series:
