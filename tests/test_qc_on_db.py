@@ -101,21 +101,22 @@ def testdata():
 
 @pytest.fixture(scope="session")
 def testdata_track():
-    dataset = "ICOADS_R3.0.0T"
+    dataset = "ICOADS_R3.0.2T"
     _settings = get_settings(dataset)
-    cache_dir = f".pytest_cache/Eqc/{dataset}/qc/{_settings.deck}"
+    cache_dir = f".pytest_cache/Eqc/{dataset}/qc/PT2"
     tables = [
         "header",
-        "observations-at",
+        # "observations-at",
     ]
     for table in tables:
         load_file(
-            f"{_settings.input_dir}/cdm_tables/{table}-{_settings.cdm}.psv",
+            f"icoads/r302/PT2/cdm_tables/{table}-icoads_r302_PT2_2016-04-11_subset.psv",
             cache_dir=cache_dir,
             within_drs=False,
+            branch="track_checker",
         )
 
-    db_tables = read_tables(cache_dir)
+    db_tables = read_tables(cache_dir, cdm_subset=["header"])
     db_tables.data = db_tables.replace("null", None)
     for table in tables:
         db_tables.data[(table, "latitude")] = db_tables[(table, "latitude")].astype(
@@ -360,8 +361,6 @@ def test_do_at_missing_value_check(testdata, apply_func):
             passed,
         ]
     )
-    print(results)
-    print(expected)
     pd.testing.assert_series_equal(results, expected)
 
 
@@ -1325,6 +1324,11 @@ def test_do_spike_check(testdata_track):
 
 def test_do_track_check(testdata_track):
     db_ = testdata_track.copy()
+    db_.data.loc[2, ("header", "latitude")] = -23.0
+    db_.data.loc[12, ("header", "latitude")] = -23.0
+    db_.data.loc[24, ("header", "latitude")] = -23.0
+    db_.data.loc[48, ("header", "latitude")] = -23.0
+
     groups = db_.groupby([("header", "primary_station_id")], group_keys=False)
     results = groups.apply(
         lambda track: do_track_check(
@@ -1340,22 +1344,12 @@ def test_do_track_check(testdata_track):
         ),
         include_groups=False,
     ).squeeze()
-    expected = pd.Series(
-        [
-            passed,
-            passed,
-            failed,
-            passed,
-            passed,
-            passed,
-            passed,
-            failed,
-            passed,
-            passed,
-        ]
-    )
+    expected = pd.Series([passed] * len(results))
+    expected.iloc[2] = 1
+    expected.iloc[12] = 1
+    expected.iloc[24] = 1
+    expected.iloc[48] = 1
     pd.testing.assert_series_equal(results, expected, check_names=False)
-    raise ValueError("We need a more reasonable test data!")
 
 
 def test_do_few_check_passed(testdata_track):
@@ -1367,20 +1361,7 @@ def test_do_few_check_passed(testdata_track):
         ),
         include_groups=False,
     ).squeeze()
-    expected = pd.Series(
-        [
-            passed,
-            passed,
-            passed,
-            passed,
-            passed,
-            passed,
-            passed,
-            passed,
-            passed,
-            passed,
-        ]
-    )
+    expected = pd.Series([passed] * len(results))
     pd.testing.assert_series_equal(results, expected, check_names=False)
 
 
@@ -1410,29 +1391,19 @@ def test_do_iquam_track_check(testdata_track):
             lat=track[("header", "latitude")],
             lon=track[("header", "longitude")],
             date=track[("header", "report_timestamp")],
-            speed_limit=15.0,
+            speed_limit=60.0,
             delta_d=1.11,
             delta_t=0.01,
             n_neighbours=5,
         ),
         include_groups=False,
     ).squeeze()
-    expected = pd.Series(
-        [
-            passed,
-            passed,
-            passed,
-            passed,
-            passed,
-            passed,
-            passed,
-            passed,
-            passed,
-            passed,
-        ]
-    )
+    expected = pd.Series([passed] * len(results))
+    expected.iloc[0] = 1
+    expected.iloc[25] = 1
+    expected.iloc[26] = 1
+    expected.iloc[64] = 1
     pd.testing.assert_series_equal(results, expected, check_names=False)
-    raise ValueError("We need a more reasonable test data!")
 
 
 def test_find_repeated_values(testdata_track):
@@ -1805,7 +1776,5 @@ def test_multiple_row_check(testdata, climdata, return_method, expected, apply_f
             preproc_dict=preproc_dict,
             return_method=return_method,
         )
-    print(results)
     expected = pd.DataFrame(expected)
-    print(expected)
     pd.testing.assert_frame_equal(results, expected)

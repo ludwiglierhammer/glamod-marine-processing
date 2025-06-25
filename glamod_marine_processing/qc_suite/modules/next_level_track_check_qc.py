@@ -558,7 +558,6 @@ def calculate_midpoint(
     for i in range(1, number_of_obs - 1):
         t0 = timediff[i]
         t1 = timediff[i + 1]
-
         if t0 is not None and t1 is not None:
             if t0 + t1 != 0:
                 fraction_of_time_diff = t0 / (t0 + t1)
@@ -590,7 +589,7 @@ def calculate_midpoint(
 
 
 @post_format_return_type(["vsi"])
-@inspect_arrays(["vsi", "dsi", "lat", "lon", "date"])
+@inspect_arrays(["vsi", "dsi", "lat", "lon", "date"], sortby="date")
 @convert_units(vsi="km/h", dsi="degrees", lat="degrees", lon="degrees")
 def do_track_check(
     vsi: SequenceFloatType,
@@ -1081,7 +1080,7 @@ def find_repeated_values(
 
 
 @post_format_return_type(["lat"])
-@inspect_arrays(["lat", "lon", "date"])
+@inspect_arrays(["lat", "lon", "date"], sortby="date")
 @convert_units(lat="degrees", lon="degrees")
 def do_iquam_track_check(
     lat: SequenceFloatType,
