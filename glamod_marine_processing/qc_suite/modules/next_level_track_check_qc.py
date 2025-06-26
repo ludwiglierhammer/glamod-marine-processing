@@ -24,7 +24,7 @@ from .auxiliary import (
 
 
 @post_format_return_type(["value"])
-@inspect_arrays(["value", "lat", "lon", "date"])
+@inspect_arrays(["value", "lat", "lon", "date"])  # , sortby="date")
 @convert_units(lat="degrees", lon="degrees")
 def do_spike_check(
     value: SequenceFloatType,
@@ -206,7 +206,7 @@ def calculate_course_parameters(
     return speed, distance, course, timediff
 
 
-@inspect_arrays(["lat", "lon", "date"])
+@inspect_arrays(["lat", "lon", "date"], sortby="date")
 @convert_units(lat="degrees", lon="degrees")
 def calculate_speed_course_distance_time_difference(
     lat: SequenceFloatType,
@@ -286,7 +286,7 @@ def calculate_speed_course_distance_time_difference(
     return speed, distance, course, timediff
 
 
-@inspect_arrays(["vsi", "dsi", "lat", "lon", "date"])
+@inspect_arrays(["vsi", "dsi", "lat", "lon", "date"], sortby="date")
 @convert_units(vsi="km/h", dsi="degrees", lat="degrees", lon="degrees")
 def forward_discrepancy(
     lat: SequenceFloatType,
@@ -399,7 +399,7 @@ def forward_discrepancy(
     return distance_from_est_location
 
 
-@inspect_arrays(["vsi", "dsi", "lat", "lon", "date"])
+@inspect_arrays(["vsi", "dsi", "lat", "lon", "date"], sortby="date")
 @convert_units(vsi="km/h", dsi="degrees", lat="degrees", lon="degrees")
 def backward_discrepancy(
     lat: SequenceFloatType,
