@@ -106,7 +106,8 @@ def testdata_track():
     cache_dir = f".pytest_cache/Eqc/{dataset}/qc/PT2"
     tables = [
         "header",
-        # "observations-at",
+        "observations-at",
+        "observations-sst",
     ]
     for table in tables:
         load_file(
@@ -116,7 +117,7 @@ def testdata_track():
             branch="track_checker",
         )
 
-    db_tables = read_tables(cache_dir, cdm_subset=["header"])
+    db_tables = read_tables(cache_dir)
     db_tables.data = db_tables.replace("null", None)
     for table in tables:
         db_tables.data[(table, "latitude")] = db_tables[(table, "latitude")].astype(
@@ -1277,18 +1278,10 @@ def test_do_wind_consistency_check(testdata, apply_func):
 
 def test_do_spike_check(testdata_track):
     db_ = testdata_track.copy()
-    db_.data[("observations-at", "observation_value")] += [
-        0,
-        0,
-        25,
-        0,
-        0,
-        0,
-        0,
-        15,
-        0,
-        0,
-    ]
+    db_.data.loc[152, ("observations-at", "observation_value")] = 1000.0
+    db_.data.loc[162, ("observations-at", "observation_value")] = 1000.0
+    db_.data.loc[174, ("observations-at", "observation_value")] = 1000.0
+    db_.data.loc[198, ("observations-at", "observation_value")] = 1000.0
     groups = db_.groupby([("header", "primary_station_id")], group_keys=False)
     results = groups.apply(
         lambda track: do_spike_check(
@@ -1303,23 +1296,12 @@ def test_do_spike_check(testdata_track):
         ),
         include_groups=False,
     ).squeeze()
-
-    expected = pd.Series(
-        [
-            passed,
-            passed,
-            failed,
-            passed,
-            passed,
-            passed,
-            passed,
-            failed,
-            passed,
-            passed,
-        ]
-    )
+    expected = pd.Series([passed] * len(results), index=results.index)
+    expected.iloc[152] = 1
+    expected.iloc[162] = 1
+    expected.iloc[174] = 1
+    expected.iloc[198] = 1
     pd.testing.assert_series_equal(results, expected, check_names=False)
-    raise ValueError("We need a more reasonable test data!")
 
 
 def test_do_track_check(testdata_track):
