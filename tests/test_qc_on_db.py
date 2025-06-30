@@ -35,12 +35,14 @@ from glamod_marine_processing.qc_suite.modules.next_level_qc import (
     do_time_check,
     do_wind_consistency_check,
 )
-from glamod_marine_processing.qc_suite.modules.next_level_track_check_qc import (  # find_saturated_runs,
+from glamod_marine_processing.qc_suite.modules.next_level_track_check_qc import (
     do_few_check,
     do_iquam_track_check,
     do_spike_check,
     do_track_check,
+    find_multiple_rounded_values,
     find_repeated_values,
+    find_saturated_runs,
 )
 
 
@@ -107,6 +109,7 @@ def testdata_track():
     tables = [
         "header",
         "observations-at",
+        "observations-dpt",
         "observations-sst",
     ]
     for table in tables:
@@ -1282,7 +1285,9 @@ def test_do_spike_check(testdata_track):
     db_.data.loc[162, ("observations-at", "observation_value")] = 1000.0
     db_.data.loc[174, ("observations-at", "observation_value")] = 1000.0
     db_.data.loc[198, ("observations-at", "observation_value")] = 1000.0
-    groups = db_.groupby([("header", "primary_station_id")], group_keys=False)
+    groups = db_.groupby(
+        [("header", "primary_station_id")], group_keys=False, sort=False
+    )
     results = groups.apply(
         lambda track: do_spike_check(
             value=track[("observations-at", "observation_value")],
@@ -1295,7 +1300,7 @@ def test_do_spike_check(testdata_track):
             n_neighbours=5,
         ),
         include_groups=False,
-    ).squeeze()
+    )
     expected = pd.Series([passed] * len(results), index=results.index)
     expected.iloc[152] = 1
     expected.iloc[162] = 1
@@ -1311,7 +1316,9 @@ def test_do_track_check(testdata_track):
     db_.data.loc[24, ("header", "latitude")] = -23.0
     db_.data.loc[48, ("header", "latitude")] = -23.0
 
-    groups = db_.groupby([("header", "primary_station_id")], group_keys=False)
+    groups = db_.groupby(
+        [("header", "primary_station_id")], group_keys=False, sort=False
+    )
     results = groups.apply(
         lambda track: do_track_check(
             vsi=track[("header", "station_speed")],
@@ -1325,7 +1332,7 @@ def test_do_track_check(testdata_track):
             max_midpoint_discrepancy=150.0,
         ),
         include_groups=False,
-    ).squeeze()
+    )
     expected = pd.Series([passed] * len(results))
     expected.iloc[2] = 1
     expected.iloc[12] = 1
@@ -1336,38 +1343,41 @@ def test_do_track_check(testdata_track):
 
 def test_do_few_check_passed(testdata_track):
     db_ = testdata_track.copy()
-    groups = db_.groupby([("header", "primary_station_id")], group_keys=False)
+    groups = db_.groupby(
+        [("header", "primary_station_id")], group_keys=False, sort=False
+    )
     results = groups.apply(
         lambda track: do_few_check(
             value=track[("header", "latitude")],
         ),
         include_groups=False,
-    ).squeeze()
+    )
     expected = pd.Series([passed] * len(results))
     pd.testing.assert_series_equal(results, expected, check_names=False)
 
 
 def test_do_few_check_failed(testdata_track):
-    db_ = testdata_track.copy()[:2]
-    groups = db_.groupby([("header", "primary_station_id")], group_keys=False)
+    db_ = testdata_track.copy()
+    db_.data = db_.data[:2]
+    groups = db_.groupby(
+        [("header", "primary_station_id")], group_keys=False, sort=False
+    )
     results = groups.apply(
         lambda track: do_few_check(
             value=track[("header", "latitude")],
         ),
         include_groups=False,
-    ).squeeze()
-    expected = pd.Series(
-        [
-            failed,
-            failed,
-        ]
     )
+    results = results.iloc[0, :]
+    expected = pd.Series([failed] * len(results))
     pd.testing.assert_series_equal(results, expected, check_names=False)
 
 
 def test_do_iquam_track_check(testdata_track):
     db_ = testdata_track.copy()
-    groups = db_.groupby([("header", "primary_station_id")], group_keys=False)
+    groups = db_.groupby(
+        [("header", "primary_station_id")], group_keys=False, sort=False
+    )
     results = groups.apply(
         lambda track: do_iquam_track_check(
             lat=track[("header", "latitude")],
@@ -1379,7 +1389,7 @@ def test_do_iquam_track_check(testdata_track):
             n_neighbours=5,
         ),
         include_groups=False,
-    ).squeeze()
+    )
     expected = pd.Series([passed] * len(results))
     expected.iloc[0] = 1
     expected.iloc[25] = 1
@@ -1390,7 +1400,12 @@ def test_do_iquam_track_check(testdata_track):
 
 def test_find_repeated_values(testdata_track):
     db_ = testdata_track.copy()
-    groups = db_.groupby([("header", "primary_station_id")], group_keys=False)
+    repeated = db_.data.loc[160, ("observations-at", "observation_value")]
+    for i in range(161, 201):
+        db_.data.loc[i, ("observations-at", "observation_value")] = repeated
+    groups = db_.groupby(
+        [("header", "primary_station_id")], group_keys=False, sort=False
+    )
     results = groups.apply(
         lambda track: find_repeated_values(
             value=track[("observations-at", "observation_value")],
@@ -1398,27 +1413,57 @@ def test_find_repeated_values(testdata_track):
             threshold=0.7,
         ),
         include_groups=False,
-    ).squeeze()
-    expected = pd.Series(
-        [
-            passed,
-            passed,
-            passed,
-            passed,
-            passed,
-            passed,
-            passed,
-            passed,
-            passed,
-            passed,
-        ]
     )
+    expected = pd.Series([passed] * len(results), index=results.index)
+    for i in range(160, 201):
+        expected.iloc[i] = 1
     pd.testing.assert_series_equal(results, expected, check_names=False)
-    raise ValueError("We need a more reasonable test data!")
 
 
 def test_find_saturated_runs(testdata_track):
-    raise ValueError("We need a more reasonable test data!")
+    db_ = testdata_track.copy()
+    for i in range(161, 201):
+        db_.data.loc[i, ("observations-at", "observation_value")] = 300.0
+        db_.data.loc[i, ("observations-dpt", "observation_value")] = 300.0
+    groups = db_.groupby(
+        [("header", "primary_station_id")], group_keys=False, sort=False
+    )
+    results = groups.apply(
+        lambda track: find_saturated_runs(
+            at=track[("observations-at", "observation_value")],
+            dpt=track[("observations-dpt", "observation_value")],
+            lat=track[("header", "latitude")],
+            lon=track[("header", "longitude")],
+            date=track[("header", "report_timestamp")],
+            min_time_threshold=48.0,
+            shortest_run=4,
+        ),
+        include_groups=False,
+    )
+    expected = pd.Series([passed] * len(results), index=results.index)
+    for i in range(161, 201):
+        expected.iloc[i] = 1
+    pd.testing.assert_series_equal(results, expected, check_names=False)
+
+
+def test_find_multiple_rounded_values(testdata_track):
+    db_ = testdata_track.copy()
+    db_.data[("observations-at", "observation_value")] -= 273.15
+    for i in range(160, 200):
+        db_.data.loc[i, ("observations-at", "observation_value")] = 30.0
+    groups = db_.groupby(
+        [("header", "primary_station_id")], group_keys=False, sort=False
+    )
+    results = groups.apply(
+        lambda track: find_multiple_rounded_values(
+            value=track[("observations-at", "observation_value")],
+            min_count=20,
+            threshold=0.5,
+        ),
+        include_groups=False,
+    )
+    expected = pd.Series([passed] * len(results))
+    pd.testing.assert_series_equal(results, expected, check_names=False)
 
 
 @pytest.mark.parametrize(
