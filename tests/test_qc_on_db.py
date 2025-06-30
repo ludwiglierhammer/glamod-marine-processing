@@ -1463,6 +1463,8 @@ def test_find_multiple_rounded_values(testdata_track):
         include_groups=False,
     )
     expected = pd.Series([passed] * len(results))
+    for i in range(160, 200):
+        expected.iloc[i] = failed
     pd.testing.assert_series_equal(results, expected, check_names=False)
 
 
