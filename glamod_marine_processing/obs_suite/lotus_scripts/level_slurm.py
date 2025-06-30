@@ -247,6 +247,8 @@ for sid_dck in process_list:
             ti = t
 
     calc_tasks = False
+    if script_config["parallel_jobs"] is True:
+        taskfarm_files = []
     with open(taskfarm_file, "w") as fh:
         for source_file in source_files:
             yyyy, mm = get_yyyymm(source_file)
@@ -305,6 +307,9 @@ for sid_dck in process_list:
             line = f"{line}\n"
             fh.writelines(line)
 
+    if script_config["parallel_jobs"] is True:
+        taskfarm_files.append(taskfarm_file)
+
     logging.info(f"{sid_dck}: launching array")
     logging.info(f"Script {taskfarm_file} was created.")
     if script_config["submit_jobs"] is True:
@@ -317,8 +322,8 @@ for sid_dck in process_list:
             logging.info("Run jobs interactively.")
             subprocess.call(["/bin/sh", taskfarm_file], shell=False)
             logging.info(f"Check whether jobs was successful: {log_diri}")
-        elif script_config["parallel_jobs"] is True:
-            logging.info("Run jobs interactively in parallel.")
+        elif script_config["parallel_tasks"] is True:
+            logging.info("Run tasks per job interactively in parallel.")
             subprocess.call(
                 [
                     "/bin/parallel",
@@ -329,3 +334,10 @@ for sid_dck in process_list:
                 ],
                 shell=False,
             )
+if script_config["parallel_jobs"] is True:
+    logging.info("Run jobs interactively in parallel.")
+    subprocess.call(
+        ["/bin/parallel", "--jobs", script_config["n_max_jobs"]]
+        + sum([["::::", f] for f in taskfarm_files], []),
+        shell=False,
+    )
