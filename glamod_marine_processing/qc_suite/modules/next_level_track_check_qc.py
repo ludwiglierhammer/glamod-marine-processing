@@ -24,7 +24,7 @@ from .auxiliary import (
 
 
 @post_format_return_type(["value"])
-@inspect_arrays(["value", "lat", "lon", "date"])  # , sortby="date")
+@inspect_arrays(["value", "lat", "lon", "date"], sortby="date")
 @convert_units(lat="degrees", lon="degrees")
 def do_spike_check(
     value: SequenceFloatType,
@@ -206,7 +206,7 @@ def calculate_course_parameters(
     return speed, distance, course, timediff
 
 
-@inspect_arrays(["lat", "lon", "date"], sortby="date")
+@inspect_arrays(["lat", "lon", "date"])
 @convert_units(lat="degrees", lon="degrees")
 def calculate_speed_course_distance_time_difference(
     lat: SequenceFloatType,
@@ -511,7 +511,6 @@ def backward_discrepancy(
     return distance_from_est_location[::-1]
 
 
-@post_format_return_type(["lat"])
 @inspect_arrays(["lat", "lon", "timediff"])
 @convert_units(lat="degrees", lon="degrees")
 def calculate_midpoint(
@@ -825,7 +824,7 @@ def do_few_check(
 
 
 @post_format_return_type(["at"])
-@inspect_arrays(["at", "dpt", "lat", "lon", "date"])
+@inspect_arrays(["at", "dpt", "lat", "lon", "date"], sortby="date")
 @convert_units(at="K", dpt="K", lat="degrees", lon="degrees")
 def find_saturated_runs(
     at: SequenceFloatType,
@@ -930,7 +929,6 @@ def find_saturated_runs(
             date_later=date[later],
             date_earlier=date[earlier],
         )
-
         if tdiff >= min_time_threshold:
             for loc in satcount:
                 repsat[loc] = failed
