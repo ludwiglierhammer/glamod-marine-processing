@@ -145,6 +145,9 @@ else:
 if isinstance(source_pattern, dict):
     source_pattern = source_pattern[dataset]
 
+if not isinstance(source_pattern, list):
+    source_pattern = [source_pattern]
+
 PYSCRIPT = f"{level}.py"
 MACHINE = script_config["scripts"]["machine"].lower()
 overwrite = script_config["overwrite"]
@@ -227,11 +230,21 @@ for sid_dck in process_list:
 
     year_init = int(get_year(release_periods, sid_dck, "year_init"))
     year_end = int(get_year(release_periods, sid_dck, "year_end"))
-    source_files = glob.glob(os.path.join(level_source_dir, sid_dck, source_pattern))
-    if level in slurm_preferences.one_task:
-        source_files = [source_files[0]]
+    source_files = []
+    for pattern in source_pattern:
+        sfiles = glob.glob(os.path.join(level_source_dir, sid_dck, pattern))
+        if len(sfiles) == 0:
+            continue
+        if level in slurm_preferences.one_task:
+            source_files = [sfiles[0]]
+            break
+        source_files.append(sfiles)
 
     array_size = len(source_files)
+    if array_size == 0:
+        logging.info("No tasks to be calculated")
+        continue
+
     if level in slurm_preferences.TaskPNi.keys():
         TaskPNi = slurm_preferences.TaskPNi[level]
     else:
@@ -253,10 +266,6 @@ for sid_dck in process_list:
             ti = ":".join([t_hhi, t_mmi, "00"])
         else:
             ti = t
-
-    if len(source_files) == 0:
-        logging.info("No tasks to be calculated")
-        continue
 
     with open(taskfarm_file, mode) as fh:
         for source_file in source_files:
