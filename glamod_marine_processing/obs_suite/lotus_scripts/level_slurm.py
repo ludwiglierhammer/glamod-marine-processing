@@ -325,6 +325,7 @@ for sid_dck in process_list:
         logging.info("Run tasks per job interactively in parallel.")
         cmd = [
             "/bin/parallel",
+            "--citation",
             "--jobs",
             script_config["n_max_jobs"],
             "::::",
@@ -343,6 +344,7 @@ if script_config["parallel_jobs"] is True:
     logging.info("Run jobs interactively in parallel.")
     cmd = [
         "/bin/parallel",
+        "--citation",
         "--jobs",
         script_config["n_max_jobs"],
         "::::",
