@@ -198,7 +198,8 @@ t_mm = script_config["job_time_min"]
 t = ":".join([t_hh, t_mm, "00"])
 
 logging.info("SUBMITTING ARRAYS...")
-
+if script_config["parallel_jobs"] is True:
+    taskfarm_files = []
 for sid_dck in process_list:
 
     logging.info(f"Creating scripts for {sid_dck}")
@@ -247,8 +248,6 @@ for sid_dck in process_list:
             ti = t
 
     calc_tasks = False
-    if script_config["parallel_jobs"] is True:
-        taskfarm_files = []
     with open(taskfarm_file, "w") as fh:
         for source_file in source_files:
             yyyy, mm = get_yyyymm(source_file)
@@ -336,8 +335,10 @@ for sid_dck in process_list:
             )
 if script_config["parallel_jobs"] is True:
     logging.info("Run jobs interactively in parallel.")
-    subprocess.call(
-        ["/bin/parallel", "--jobs", script_config["n_max_jobs"]]
-        + sum([["::::", f] for f in taskfarm_files], []),
-        shell=False,
-    )
+    cmd = [
+        "/bin/parallel",
+        "--jobs",
+        script_config["n_max_jobs"],
+        "::::",
+    ] + taskfarm_files
+    subprocess.call(cmd, shell=False)
