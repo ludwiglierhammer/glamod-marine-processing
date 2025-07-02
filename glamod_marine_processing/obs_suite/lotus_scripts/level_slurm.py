@@ -238,7 +238,7 @@ for sid_dck in process_list:
         if level in slurm_preferences.one_task:
             source_files = [sfiles[0]]
             break
-        source_files.append(sfiles)
+        source_files.extend(sfiles)
 
     array_size = len(source_files)
     if array_size == 0:
@@ -334,7 +334,6 @@ for sid_dck in process_list:
         logging.info("Run tasks per job interactively in parallel.")
         cmd = [
             "/bin/parallel",
-            "--citation",
             "--jobs",
             script_config["n_max_jobs"],
             "::::",
@@ -353,7 +352,6 @@ if script_config["parallel_jobs"] is True:
     logging.info("Run jobs interactively in parallel.")
     cmd = [
         "/bin/parallel",
-        "--citation",
         "--jobs",
         script_config["n_max_jobs"],
         "::::",
