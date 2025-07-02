@@ -8,7 +8,8 @@ import os
 from pathlib import Path
 
 import pandas as pd
-from cdm_reader_mapper import cdm_mapper
+from cdm_reader_mapper import read_tables
+from cdm_reader_mapper.cdm_mapper import properties
 
 
 def get_year_month(df, time_axis):
@@ -38,7 +39,8 @@ def concat_unknow_date_files(idir, odir, table, release, update, prev_deck_list)
         time_axis = "date_time"
     for prev_deck in prev_deck_list:
         table_dir = os.path.join(idir, prev_deck)
-        table_df = cdm_mapper.read_tables(table_dir, cdm_subset=table)
+        table_df = read_tables(table_dir, cdm_subset=table)
+        table_df = table_df[table]
         if table_df.empty:
             continue
         year_month = get_year_month(table_df, time_axis)
@@ -110,7 +112,7 @@ def post_processing(
             Path(x).name for x in glob.glob(os.path.join(idir, "log", "*"))
         ]
     if cdm_tables is True:
-        tables = cdm_mapper.properties.cdm_tables
+        tables = properties.cdm_tables
     else:
         tables = ["*"]
     for table in tables:
