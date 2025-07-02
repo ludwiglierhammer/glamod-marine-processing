@@ -10,6 +10,7 @@ from pathlib import Path
 import pandas as pd
 from cdm_reader_mapper import read_tables
 from cdm_reader_mapper.cdm_mapper import properties
+from joblib import Parallel, delayed
 
 
 def get_year_month(df, time_axis):
@@ -84,6 +85,7 @@ def post_processing(
     prev_deck_list=None,
     date_avail=False,
     cdm_tables=True,
+    parallel=False,
     overwrite=False,
 ):
     """Merge decks from deck list into one single new deck.
@@ -102,8 +104,10 @@ def post_processing(
         List of previous level1a decks.
     date_avail, bool
         Set True if date information is in file names.
-    cdm_tables, bool
+    cdm_tables: bool
         Use cdm table names.
+    parallel: bool
+        Compute tables in parallel.
     overwrite: bool
         If True, overwrite already existing files.
     """
@@ -115,22 +119,24 @@ def post_processing(
         tables = properties.cdm_tables
     else:
         tables = ["*"]
-    for table in tables:
-        if date_avail is True:
-            concat_known_date_files(
-                idir=idir,
-                odir=odir,
-                table=table,
-                release=release,
-                update=update,
-                prev_deck_list=prev_deck_list,
-            )
-        else:
-            concat_unknow_date_files(
-                idir=idir,
-                odir=odir,
-                table=table,
-                release=release,
-                update=update,
-                prev_deck_list=prev_deck_list,
-            )
+        parallel = False
+
+    if date_avail is True:
+        concat_func = concat_known_date_files
+    else:
+        concat_func = concat_unknow_date_files
+
+    kwargs = {
+        "idir": idir,
+        "odir": odir,
+        "release": release,
+        "update": update,
+        "prev_deck_list": prev_deck_list,
+    }
+
+    if parallel is True:
+        Parallel(n_jobs=len(tables))(
+            delayed(concat_func)(table=table, **kwargs) for table in tables
+        )
+    else:
+        [concat_func(table=table, **kwargs) for table in tables]
