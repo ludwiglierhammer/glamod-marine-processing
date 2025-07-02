@@ -218,6 +218,12 @@ class Options:
             default="12",
             help="Maximum number of jobs running in parallel. Use only with parallel_jobs.",
         )
+        self.nohup = click.option(
+            "-nohup",
+            "--nohup",
+            is_flag=True,
+            help="Use nohup to run job scripts in the background",
+        )
         self.level = click.option(
             "-l",
             "--level",

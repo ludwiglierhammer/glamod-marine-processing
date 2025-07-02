@@ -339,6 +339,15 @@ for sid_dck in process_list:
             "::::",
             taskfarm_file,
         ]
+        if script_config["nohup"] is True:
+            nohup_out = os.path.join(sid_dck_log_dir, f"nohup_{pattern}.out")
+            nohup_err = os.path.join(sid_dck_log_dir, f"nohup_{pattern}.err")
+            nohup_pid = os.path.join(sid_dck_log_dir, f"nohup_{pattern}.pid")
+            cdm = (
+                ["nohup"]
+                + cmd
+                + [">", nohup_out, "2>", nohup_err, "& echo $! >", nohup_pid]
+            )
         subprocess.call(cmd, shell=False)
         continue
 
@@ -357,4 +366,13 @@ if script_config["parallel_jobs"] is True:
         "::::",
         taskfarm_files,
     ]
+    if script_config["nohup"] is True:
+        nohup_out = os.path.join(sid_dck_log_dir, f"nohup_{pattern}.out")
+        nohup_err = os.path.join(sid_dck_log_dir, f"nohup_{pattern}.err")
+        nohup_pid = os.path.join(sid_dck_log_dir, f"nohup_{pattern}.pid")
+        cdm = (
+            ["nohup"]
+            + cmd
+            + [">", nohup_out, "2>", nohup_err, "& echo $! >", nohup_pid]
+        )
     subprocess.call(cmd, shell=False)
