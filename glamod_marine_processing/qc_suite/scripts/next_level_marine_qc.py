@@ -35,6 +35,9 @@ from glamod_marine_processing.qc_suite.modules.next_level_track_check_qc import 
     do_track_check,
     find_repeated_values,
 )
+from glamod_marine_processing.qc_suite.modules.next_level_deck_qc import (
+    mds_buddy_check,
+)
 
 @inspect_climatology("climatology")
 def calculate_anomalies(value, climatology, **kwargs):
@@ -100,31 +103,40 @@ from pathlib import Path
 
 data_dir = Path(os.getenv("DATADIR"))
 
+
+
 print("Start")
 print(datetime.datetime.now())
 
 imodel = "icoads"
+encoding = "cp1252"
 
-single_file = data_dir / "ICOADS" / "cat.txt"
 
-with open(single_file, 'w') as outfile:
-    filepaths = [
-        data_dir / "ICOADS" / "IMMA1_R3.0.0_1850-01.gz",
-        data_dir / "ICOADS" / "IMMA1_R3.0.0_1850-02.gz",
-        data_dir / "ICOADS" / "IMMA1_R3.0.0_1850-03.gz",
-    ]
-    for fname in filepaths:
-        with gzip.open(fname, "rb") as f_in:
-            with open(str(fname).replace(".gz", ""), "wb") as f_out:
-                shutil.copyfileobj(f_in, f_out)
-        with open(str(fname).replace(".gz", "")) as f:
-            for line in f:
-                outfile.write(line)
+# single_file = data_dir / "ICOADS" / "cat.txt"
+#
+# with open(single_file, 'w') as outfile:
+#     filepaths = [
+#         data_dir / "ICOADS" / "IMMA1_R3.0.0_1899-01.gz",
+#         # data_dir / "ICOADS" / "IMMA1_R3.0.0_1850-02.gz",
+#         # data_dir / "ICOADS" / "IMMA1_R3.0.0_1850-03.gz",
+#         # data_dir / "ICOADS" / "IMMA1_R3.0.0_1850-04.gz",
+#         # data_dir / "ICOADS" / "IMMA1_R3.0.0_1850-05.gz",
+#     ]
+#     for fname in filepaths:
+#         with gzip.open(fname, "rb") as f_in:
+#             with open(str(fname).replace(".gz", ""), "wb") as f_out:
+#                 shutil.copyfileobj(f_in, f_out)
+#         with open(str(fname).replace(".gz", "")) as f:
+#             for line in f:
+#                 outfile.write(line)
+single_file = data_dir / "ICOADS" / "IMMA1_R3.0.0_1899-01"
 
 print("Preprocessed IMMA files, gunzipped, concatenated etc.")
 print(datetime.datetime.now())
 
-db_imma = read_mdf(single_file, imodel=imodel)
+db_imma = read_mdf(single_file, imodel=imodel, encoding=encoding)
+db_cdm = db_imma.map_model()
+
 
 print("Read IMMA files")
 print(datetime.datetime.now())
@@ -156,6 +168,17 @@ sst_clim = Climatology.open_netcdf_file(clim_file_names, 'analysed_sst')
 print("Read SST climatology")
 print(datetime.datetime.now())
 
+#read in AT stdev climatology
+at_stdev_clim_file = Path(data_dir) / 'QCClimatologies' / 'AT_pentad_stdev_climatology.nc'
+at_stdev_clim = Climatology.open_netcdf_file(
+    at_stdev_clim_file,
+    'at',
+    time_axis="pentad_time"
+)
+
+print("Read air temperature stdev clim")
+print(datetime.datetime.now())
+
 sst_anomalies = obs_sst.apply(
         lambda row: calculate_anomalies(
             value=row["observation_value"],
@@ -178,7 +201,7 @@ results = groups.apply(
         lat=track["latitude"],
         lon=track["longitude"],
         date=track["report_timestamp"],
-        ids=track["station_name"],
+        ids=track.name,
         max_direction_change=60.0,
         max_speed_change=10.0,
         max_absolute_speed=40.0,
@@ -192,6 +215,35 @@ track_check_qc = results.values.astype(int)
 
 print("Run track checks")
 print(datetime.datetime.now())
+
+# Buddy check
+limits = [[1, 1, 2], [2, 2, 2], [1, 1, 4], [2, 2, 4]]
+number_of_obs_thresholds = [[0, 5, 15, 100], [0], [0, 5, 15, 100], [0]]
+multipliers = [[4.0, 3.5, 3.0, 2.5], [4.0], [4.0, 3.5, 3.0, 2.5], [4.0]]
+
+selection = ~np.isnan(sst_anomalies)
+lats = obs_sst['latitude'].values[selection]
+lons = obs_sst['longitude'].values[selection]
+dates = obs_sst['date_time'][selection].reset_index().date_time
+
+buddy_check = mds_buddy_check(
+            lats,
+            lons,
+            dates,
+            sst_anomalies[selection],
+            at_stdev_clim,
+            limits,
+            number_of_obs_thresholds,
+            multipliers,
+        )
+
+buddy_check_filled = np.zeros(len(sst_anomalies)) + 2.0
+buddy_check_filled[selection] = buddy_check[:]
+buddy_check = buddy_check_filled
+
+print("Ran buddy checks")
+print(datetime.datetime.now())
+
 
 position_check_qc = header.apply(
         lambda row: do_position_check(
@@ -245,14 +297,19 @@ sst_hard_limit = obs_sst.apply(
         axis=1,
 )
 
+
 print("Ran single obs checks")
 print(datetime.datetime.now())
+
+
+
 
 obs_sst['anom'] = sst_anomalies
 obs_sst['mdi'] = sst_missing_check
 obs_sst['fc'] = sst_freeze_check
 obs_sst['hl'] = sst_hard_limit
 obs_sst['clim'] = sst_climatology_check
+obs_sst['bud'] = buddy_check
 
 header['tc'] = track_check_qc
 
@@ -260,7 +317,7 @@ obs_sst = obs_sst[obs_sst['report_id'].notna()]
 
 combined = pd.merge(header, obs_sst, how='left', on='report_id')
 
-combined[['mdi', 'fc', 'hl', 'clim']] = combined[['mdi','fc', 'hl', 'clim']].fillna(value=2)
+combined[['mdi', 'fc', 'hl', 'clim', 'bud']] = combined[['mdi','fc', 'hl', 'clim', 'bud']].fillna(value=2)
 combined[['tc']] = combined[['tc']].fillna(value=2)
 
 track_check_qc = combined['tc'].values
@@ -268,6 +325,7 @@ sst_hard_limit = combined['hl'].values
 sst_missing_check = combined['mdi'].values
 sst_freeze_check = combined['fc'].values
 sst_climatology_check = combined['clim'].values
+sst_buddy_check = combined['bud'].values
 
 lats = combined['latitude_x']
 lats2 = combined['latitude_y']
@@ -280,8 +338,9 @@ colors = np.array([[0,0,0] for _ in range(len(lats))])
 colors[track_check_qc != 0] = [1,0,0]
 colors[sst_climatology_check != 0] = [0,1,0]
 colors[sst_freeze_check != 0] = [0,0,1]
-colors[sst_hard_limit != 0] = [0,1,1]
+colors[sst_hard_limit != 0] =  [0.5, 0.5, 0.0]
 colors[sst_missing_check != 0] = [0.1, 0.1, 0.1]
+colors[sst_buddy_check == 1] = [0,1,1]
 
 id_list = combined['primary_station_id'].unique()
 

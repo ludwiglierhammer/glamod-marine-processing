@@ -82,7 +82,7 @@ class SuperObsGrid:
         self.buddy_stdev = np.zeros((360, 180, 73))  # type: np.ndarray
         self.nobs = np.zeros((360, 180, 73))  # type: np.ndarray
 
-    @inspect_arrays(["lats", "lons", "dates", "values"])
+    @inspect_arrays(["lats", "lons", "values"])
     def add_multiple_observations(
         self,
         lats: Sequence[float],
@@ -233,8 +233,8 @@ class SuperObsGrid:
             pindex = nonmiss[2][i]
             m, d = pentad_to_month_day(pindex + 1)
 
-            stdev = pentad_stdev.get_value_mds_style(
-                89.5 - yindex, -179.5 + xindex, m, d
+            stdev = pentad_stdev.get_value(#get_value_mds_style(
+                lat=89.5 - yindex, lon=-179.5 + xindex, month=m, day=d
             )
 
             if stdev is None or stdev < 0.0:
@@ -398,7 +398,7 @@ class SuperObsGrid:
         return self.buddy_stdev[xindex][yindex][pindex]
 
 
-@inspect_arrays(["lats", "lons", "dates", "anoms"])
+@inspect_arrays(["lats", "lons", "anoms"])
 def mds_buddy_check(
     lats: Sequence[float],
     lons: Sequence[float],

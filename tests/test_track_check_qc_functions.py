@@ -138,6 +138,7 @@ def test_do_track_check_passed(ship_frame):
         date=ship_frame.date,
         vsi=ship_frame.vsi,
         dsi=ship_frame.dsi,
+        ids='NAME',
         max_direction_change=60.0,
         max_speed_change=10.0,
         max_absolute_speed=40.0,
@@ -157,6 +158,7 @@ def test_do_track_check_mixed(ship_frame):
         date=ship_frame.date,
         vsi=ship_frame.vsi,
         dsi=ship_frame.dsi,
+        ids='NAME',
         max_direction_change=60.0,
         max_speed_change=10.0,
         max_absolute_speed=40.0,
@@ -286,6 +288,7 @@ def test_do_track_check_raises(ship_frame, key):
             max_speed_change=10.0,
             max_absolute_speed=40.0,
             max_midpoint_discrepancy=150.0,
+            ids='NAME',
             **kwargs,
         )
 

@@ -12,6 +12,7 @@ from . import spherical_geometry as sg
 from . import time_control
 from . import track_check as tc
 from .auxiliary import failed, inspect_arrays, isvalid, passed
+from .icoads_identify import id_is_generic
 
 km_to_nm = 0.539957
 
@@ -532,6 +533,7 @@ def do_track_check(
     lat: Sequence[float],
     lon: Sequence[float],
     date: Sequence[datetime],
+    ids: str,
     max_direction_change: float,
     max_speed_change: float,
     max_absolute_speed: float,
@@ -593,20 +595,25 @@ def do_track_check(
     if number_of_obs < 3:
         return np.asarray([passed] * number_of_obs)
 
+    if id_is_generic(ids, pd.Timestamp(date[0]).year):
+        return np.asarray([passed] * number_of_obs)
+
+    time_order = np.argsort(date)
+
     # work out speeds and distances between alternating points
     speed_alt, _distance_alt, _course_alt, _timediff_alt = (
         calculate_speed_course_distance_time_difference(
-            lat=lat,
-            lon=lon,
-            date=date,
+            lat=lat[time_order],
+            lon=lon[time_order],
+            date=date[time_order],
             alternating=True,
         )
     )
     speed, _distance, course, timediff = (
         calculate_speed_course_distance_time_difference(
-            lat=lat,
-            lon=lon,
-            date=date,
+            lat=lat[time_order],
+            lon=lon[time_order],
+            date=date[time_order],
         )
     )
 
@@ -618,23 +625,23 @@ def do_track_check(
 
     # compare reported speeds and positions if we have them
     forward_diff_from_estimated = forward_discrepancy(
-        lat=lat,
-        lon=lon,
-        date=date,
-        vsi=vsi,
-        dsi=dsi,
+        lat=lat[time_order],
+        lon=lon[time_order],
+        date=date[time_order],
+        vsi=vsi[time_order],
+        dsi=dsi[time_order],
     )
     reverse_diff_from_estimated = backward_discrepancy(
-        lat=lat,
-        lon=lon,
-        date=date,
-        vsi=vsi,
-        dsi=dsi,
+        lat=lat[time_order],
+        lon=lon[time_order],
+        date=date[time_order],
+        vsi=vsi[time_order],
+        dsi=dsi[time_order],
     )
 
     midpoint_diff_from_estimated = calculate_midpoint(
-        lat=lat,
-        lon=lon,
+        lat=lat[time_order],
+        lon=lon[time_order],
         timediff=timediff,
     )
 
@@ -671,23 +678,23 @@ def do_track_check(
         # Quality-control by examining the distance
         # between the calculated and reported second position.
         thisqc_b += tc.check_distance_from_estimate(
-            vsi[i],
-            vsi[i - 1],
+            vsi[time_order[i]],
+            vsi[time_order[i - 1]],
             timediff[i],
             forward_diff_from_estimated[i],
             reverse_diff_from_estimated[i],
         )
         # Check for continuity of direction
         thisqc_b += tc.direction_continuity(
-            dsi[i],
-            dsi[i - 1],
+            dsi[time_order[i]],
+            dsi[time_order[i - 1]],
             course[i],
             max_direction_change,
         )
         # Check for continuity of speed.
         thisqc_b += tc.speed_continuity(
-            vsi[i],
-            vsi[i - 1],
+            vsi[time_order[i]],
+            vsi[time_order[i - 1]],
             speed[i],
             max_speed_change,
         )
@@ -703,6 +710,8 @@ def do_track_check(
             and thisqc_b > 0
         ):
             trk[i] = failed
+
+    trk[time_order] = trk[:]
 
     return trk
 
