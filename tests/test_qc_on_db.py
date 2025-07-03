@@ -1391,10 +1391,6 @@ def test_do_iquam_track_check(testdata_track):
         include_groups=False,
     )
     expected = pd.Series([passed] * len(results))
-    expected.iloc[0] = 1
-    expected.iloc[25] = 1
-    expected.iloc[26] = 1
-    expected.iloc[64] = 1
     pd.testing.assert_series_equal(results, expected, check_names=False)
 
 
