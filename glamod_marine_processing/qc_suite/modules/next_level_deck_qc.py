@@ -25,9 +25,8 @@ from glamod_marine_processing.qc_suite.modules.auxiliary import (
     passed,
     untested,
     inspect_arrays,
+    convert_units,
 )
-
-km_to_nm = 0.539957
 
 
 def get_threshold_multiplier(
@@ -39,11 +38,13 @@ def get_threshold_multiplier(
 
     Parameters
     ----------
-    total_nobs: int
+    total_nobs : int
         total number of neighbour observations
-    nob_limits: list[int]
+
+    nob_limits : list[int]
         list containing the limiting numbers of observations in ascending order first element must be zero
-    multiplier_values: list[float]
+
+    multiplier_values : list[float]
         list containing the multiplier values associated.
 
     Returns
@@ -233,7 +234,7 @@ class SuperObsGrid:
             pindex = nonmiss[2][i]
             m, d = pentad_to_month_day(pindex + 1)
 
-            stdev = pentad_stdev.get_value(#get_value_mds_style(
+            stdev = pentad_stdev.get_value(  # get_value_mds_style(
                 lat=89.5 - yindex, lon=-179.5 + xindex, month=m, day=d
             )
 
@@ -458,7 +459,9 @@ def mds_buddy_check(
 
     for i in range(len(number_of_obs_thresholds)):
         if len(number_of_obs_thresholds[i]) != len(multipliers[i]):
-            raise ValueError("Number of obs thresholds and multipliers have different shapes")
+            raise ValueError(
+                "Number of obs thresholds and multipliers have different shapes"
+            )
 
     # calculate superob averages and numbers of observations
     grid = SuperObsGrid()
@@ -492,6 +495,7 @@ def mds_buddy_check(
 
 
 @inspect_arrays(["lats", "lons", "dates", "anoms"])
+@convert_units(lats="degrees", lons="degrees")
 def bayesian_buddy_check(
     lats: Sequence[float],
     lons: Sequence[float],

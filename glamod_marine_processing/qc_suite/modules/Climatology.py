@@ -5,7 +5,7 @@ from __future__ import annotations
 import numpy as np
 from netCDF4 import Dataset
 
-from . location_control import (
+from .location_control import (
     mds_lat_to_yindex,
     mds_lon_to_xindex,
     lat_to_yindex,
@@ -13,12 +13,12 @@ from . location_control import (
     get_four_surrounding_points,
     fill_missing_vals,
 )
-from . time_control import (
+from .time_control import (
     which_pentad,
     get_month_lengths,
     day_in_year,
 )
-from . interpolation import bilinear_interp
+from .interpolation import bilinear_interp
 
 
 class Climatology:

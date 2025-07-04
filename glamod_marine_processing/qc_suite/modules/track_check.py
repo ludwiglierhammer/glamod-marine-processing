@@ -15,9 +15,7 @@ import numpy as np
 
 from . import Extended_IMMA as ex
 from . import spherical_geometry as sph
-from .auxiliary import isvalid
-
-km_to_nm = 0.539957
+from .auxiliary import convert_to, isvalid
 
 
 def modesp(awork: list) -> float:
@@ -35,12 +33,12 @@ def modesp(awork: list) -> float:
     Parameters
     ----------
     awork : list
-        List of input speeds in km/hr
+        List of input speeds in km/h
 
     Returns
     -------
     float
-        Bin-centre speed (expressed in km/ht) for the 3 knot bin which contains most speeds in
+        Bin-centre speed (expressed in km/h) for the 3 knot bin which contains most speeds in
         input array, or 8.5, whichever is higher
     """
     # if there is one or no observations then return None
@@ -58,10 +56,11 @@ def modesp(awork: list) -> float:
     atmode = 0
     icmode = 0
     amode = np.nan
+    awork = convert_to(awork, "km/h", "knots")
     if ntime > 1:
         for i in range(1, ntime):
             # fixed so that indexing starts at zero
-            index = int(math.floor(km_to_nm * awork[i] / 3.0))
+            index = int(math.floor(awork[i] / 3.0))
             if index < 0:
                 index = 0
             elif index > 11:
@@ -78,10 +77,7 @@ def modesp(awork: list) -> float:
         if amode <= 8.50:
             amode = 8.50
 
-    if isvalid(amode):
-        amode /= km_to_nm
-
-    return amode
+    return convert_to(amode, "knots", "km/h")
 
 
 def set_speed_limits(amode: float) -> (float, float, float):
@@ -90,28 +86,23 @@ def set_speed_limits(amode: float) -> (float, float, float):
     Parameters
     ----------
     amode : float
-        modal speed
+        modal speed in kmk/h
 
     Returns
     -------
     (float, float, float)
         max speed, max max speed and min speed
     """
-    amax = 15.00 / km_to_nm
-    amaxx = 20.00 / km_to_nm
-    amin = 0.00 / km_to_nm
+    amax = convert_to(15.0, "knots", "km/h")
+    amaxx = convert_to(20.0, "knots", "km/h")
+    amin = 0.00
 
-    if isvalid(amode):
-        if amode <= 8.51 / km_to_nm:
-            amax = 15.00 / km_to_nm
-            amaxx = 20.00 / km_to_nm
-            amin = 0.00 / km_to_nm
-        else:
-            amax = amode * 1.25
-            amaxx = 30.00 / km_to_nm
-            amin = amode * 0.75
+    if not isvalid(amode):
+        return amax, amaxx, amin
+    if amode <= convert_to(8.51, "knots", "km/h"):
+        return amax, amaxx, amin
 
-    return amax, amaxx, amin
+    return amode * 1.25, convert_to(30.0, "knots", "km/h"), amode * 0.75
 
 
 def increment_position(
@@ -123,11 +114,11 @@ def increment_position(
     Parameters
     ----------
     alat1 : float
-        Latitude at starting point
+        Latitude at starting point in degrees
     alon1 : float
-        Longitude at starting point
+        Longitude at starting point in degrees
     avs : float
-        speed of ship in km/hr
+        speed of ship in km/h
     ads : float
         heading of ship in degrees
     timdif : float
@@ -187,7 +178,7 @@ def distr1(invoyage: ex.Voyage) -> list:
             lat1, lon1 = increment_position(
                 invoyage.getvar(i - 1, "LAT"),
                 invoyage.getvar(i - 1, "LON"),
-                invoyage.getvar(i - 1, "vsi") / km_to_nm,
+                convert_to(invoyage.getvar(i - 1, "vsi"), "knots", "km/h"),
                 invoyage.getvar(i - 1, "dsi"),
                 invoyage.getvar(i, "time_diff"),
             )
@@ -195,7 +186,7 @@ def distr1(invoyage: ex.Voyage) -> list:
             lat2, lon2 = increment_position(
                 invoyage.getvar(i, "LAT"),
                 invoyage.getvar(i, "LON"),
-                invoyage.getvar(i, "vsi") / km_to_nm,
+                convert_to(invoyage.getvar(i, "vsi"), "knots", "km/h"),
                 invoyage.getvar(i, "dsi"),
                 invoyage.getvar(i, "time_diff"),
             )
@@ -256,7 +247,7 @@ def distr2(invoyage: ex.Voyage) -> list:
             lat1, lon1 = increment_position(
                 invoyage.getvar(i, "LAT"),
                 invoyage.getvar(i, "LON"),
-                invoyage.getvar(i, "vsi") / km_to_nm,
+                convert_to(invoyage.getvar(i, "vsi"), "knots", "km/h"),
                 invoyage.getvar(i, "dsi") - 180.0,
                 invoyage.getvar(i, "time_diff"),
             )
@@ -264,7 +255,7 @@ def distr2(invoyage: ex.Voyage) -> list:
             lat2, lon2 = increment_position(
                 invoyage.getvar(i - 1, "LAT"),
                 invoyage.getvar(i - 1, "LON"),
-                invoyage.getvar(i - 1, "vsi") / km_to_nm,
+                convert_to(invoyage.getvar(i - 1, "vsi"), "knots", "km/h"),
                 invoyage.getvar(i - 1, "dsi") - 180.0,
                 invoyage.getvar(i, "time_diff"),
             )
@@ -373,7 +364,7 @@ def direction_continuity(
     ship_directions : float
         calculated ship direction from reported positions in degrees
     max_direction_change : float
-        largest deviations that will not be flagged
+        largest deviations that will not be flagged in degrees
 
     Returns
     -------
@@ -415,13 +406,13 @@ def speed_continuity(
     Parameters
     ----------
     vsi : float
-        Reported speed in knots at current time step
+        Reported speed in km/h at current time step
     vsi_previous : float
-        Reported speed in knots at previous time step
+        Reported speed in km/h at previous time step
     speeds : float
-        Speed of ship calculated from locations at current and previous time steps in km/hr
+        Speed of ship calculated from locations at current and previous time steps in km/h
     max_speed_change : float
-        largest change of speed that will not raise flag, default 10
+        largest change of speed that will not raise flag in km/h, default 10
 
     Returns
     -------
@@ -433,8 +424,8 @@ def speed_continuity(
         return result
 
     if (
-        abs(vsi / km_to_nm - speeds) > max_speed_change / km_to_nm
-        and abs(vsi_previous / km_to_nm - speeds) > max_speed_change / km_to_nm
+        abs(vsi - speeds) > max_speed_change
+        and abs(vsi_previous - speeds) > max_speed_change
     ):
         result = 10.0
 
@@ -454,9 +445,9 @@ def check_distance_from_estimate(
     Parameters
     ----------
     vsi : float
-        reported speed in knots at current time step
+        reported speed in km/h at current time step
     vsi_previous : float
-        reported speed in knots at previous time step
+        reported speed in km/h at previous time step
     time_differences : float
         calculated time differences between reports in hours
     fwd_diff_from_estimated : float
@@ -483,7 +474,7 @@ def check_distance_from_estimate(
         return result
 
     if vsi > 0 and vsi_previous > 0 and time_differences > 0:
-        alwdis = time_differences * ((vsi + vsi_previous) / 2.0) / km_to_nm
+        alwdis = time_differences * ((vsi + vsi_previous) / 2.0)
 
         if fwd_diff_from_estimated > alwdis and rev_diff_from_estimated > alwdis:
             result = 10.0

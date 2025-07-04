@@ -6,15 +6,16 @@ import inspect
 import warnings
 from collections.abc import Callable
 from datetime import datetime
-from functools import wraps
-from typing import Literal, Sequence
+from typing import Literal, Sequence, TypeAlias
 
 import cf_xarray  # noqa
 import numpy as np
+import pandas as pd
 import xarray as xr
 from numpy import ndarray
 from xclim.core.units import convert_units_to
 
+from .auxiliary import ValueFloatType, generic_decorator, isvalid
 from .time_control import day_in_year, split_date, which_pentad
 
 
@@ -54,62 +55,45 @@ def inspect_climatology(
     elif optional is None:
         optional = []
 
-    def decorator(func):
-        @wraps(func)
-        def wrapper(*args, **kwargs):
-            sig = inspect.signature(func)
-            bound_args = sig.bind(*args, **kwargs)
-            active_keys = list(climatology_keys)
-            for opt in optional:
-                if opt in bound_args.arguments:
-                    active_keys.append(opt)
-            for clim_key in active_keys:
-                if clim_key not in bound_args.arguments:
+    def pre_handler(arguments: dict, **meta_kwargs):
+        active_keys = list(climatology_keys)
+        for opt in optional:
+            if opt in arguments:
+                active_keys.append(opt)
+        for clim_key in active_keys:
+            if clim_key not in arguments:
+                raise TypeError(
+                    f"Missing expected argument '{clim_key}' in function '{pre_handler.__funcname__}'."
+                    "The decorator requires this argument to be present."
+                )
+            climatology = arguments[clim_key]
+            if isinstance(climatology, Climatology):
+                get_value_sig = inspect.signature(climatology.get_value)
+                required_keys = {
+                    name
+                    for name, param in get_value_sig.parameters.items()
+                    if param.default is param.empty
+                    and param.kind in (param.POSITIONAL_OR_KEYWORD, param.KEYWORD_ONLY)
+                }
+                missing_in_kwargs = required_keys - meta_kwargs.keys()
+                if missing_in_kwargs:
                     warnings.warn(
-                        f"Argument '{clim_key}' is missing in function '{func.__name__}'. "
-                        "This may affect the behavior expected by the decorator. Skipping."
+                        f"The following required arguments for '{type(clim_key).__name__}.get_value' are missing from **kwargs "
+                        f"in function '{pre_handler.__funcname__}': {missing_in_kwargs}. "
+                        f"Ensure all required arguments are passed via **kwargs."
                     )
-                    continue
+                try:
+                    climatology = climatology.get_value(**meta_kwargs)
+                except ValueError:
+                    climatology = np.nan
+                except TypeError:
+                    climatology = np.nan
 
-                climatology = bound_args.arguments[clim_key]
-                if isinstance(climatology, Climatology):
-                    if "kwargs" not in bound_args.arguments:
-                        warnings.warn(
-                            f"'kwargs' not found in bound arguments for function '{func.__name__}'. "
-                            "Climatology.get_value(**kwargs) may fail."
-                        )
-                        func_kwargs = {}
-                    else:
-                        func_kwargs = bound_args.arguments["kwargs"]
-                    get_value_sig = inspect.signature(climatology.get_value)
-                    required_keys = {
-                        name
-                        for name, param in get_value_sig.parameters.items()
-                        if param.default is param.empty
-                        and param.kind
-                        in (param.POSITIONAL_OR_KEYWORD, param.KEYWORD_ONLY)
-                    }
-                    missing_in_kwargs = required_keys - func_kwargs.keys()
-                    if missing_in_kwargs:
-                        warnings.warn(
-                            f"The following required arguments for '{type(clim_key).__name__}.get_value' are missing from **kwargs "
-                            f"in function '{func.__name__}': {missing_in_kwargs}. "
-                            f"Ensure all required arguments are passed via **kwargs."
-                        )
-                    try:
-                        climatology = climatology.get_value(**func_kwargs)
-                    except ValueError:
-                        climatology = np.nan
-                    except TypeError:
-                        climatology = np.nan
+            arguments[clim_key] = climatology
 
-                bound_args.arguments[clim_key] = climatology
+    pre_handler._decorator_kwargs = {"lat", "lon", "date"}
 
-            return func(*bound_args.args, **bound_args.kwargs)
-
-        return wrapper
-
-    return decorator
+    return generic_decorator(pre_handler=pre_handler)
 
 
 def open_xrdataset(
@@ -281,11 +265,11 @@ class Climatology:
 
     def get_value(
         self,
-        lat: float | None = None,
-        lon: float | None = None,
-        date: datetime | None = None,
-        month: int | None = None,
-        day: int | None = None,
+        lat: float | None | Sequence[float | None] | np.ndarray = None,
+        lon: float | None | Sequence[float | None] | np.ndarray = None,
+        date: datetime | None | Sequence[datetime | None] | np.ndarray = None,
+        month: int | None | Sequence[int | None] | np.ndarray = None,
+        day: int | None | Sequence[int | None] | np.ndarray = None,
     ) -> ndarray:
         """Get the value from a climatology at the give position and time.
 
@@ -311,21 +295,34 @@ class Climatology:
         ----
         Use only exact matches for selecting time and nearest valid index value for selecting location.
         """
-        data = self.data.copy()
-        if isinstance(date, datetime):
-            date_ = split_date(date)
-            if date_ is None:
-                return
-            month = date_["month"]
-            day = date_["day"]
-        if month is not None or day is not None:
-            tindex = self.get_tindex(month, day)
-            data = data.isel(**{self.time_axis: tindex})
-        if lat is not None:
-            data = data.sel(**{self.lat_axis: lat}, method="nearest")
-        if lon is not None:
-            data = data.sel(**{self.lon_axis: lon}, method="nearest")
-        return data.values
+        lat_arr = np.atleast_1d(lat)
+        lon_arr = np.atleast_1d(lon)
+        if date is not None:
+            date_arr = pd.to_datetime(np.atleast_1d(date))
+            date_ = [split_date(date_i) for date_i in date_arr]
+            month = [date_i["month"] for date_i in date_]
+            day = [date_i["day"] for date_i in date_]
+        month_arr = np.atleast_1d(month)
+        day_arr = np.atleast_1d(day)
+        valid_indices = isvalid(lat) & isvalid(lon) & isvalid(month) & isvalid(day)
+        result = np.full(lat_arr.shape, None, dtype=float)  # type: np.ndarray
+
+        for i in range(np.size(result)):
+            if not valid_indices[i]:
+                continue
+            tindex = self.get_tindex(int(month_arr[i]), int(day_arr[i]))
+            data = self.data.isel(**{self.time_axis: tindex})
+            data = data.sel(**{self.lat_axis: lat_arr[i]}, method="nearest")
+            data = data.sel(**{self.lon_axis: lon_arr[i]}, method="nearest")
+            result[i] = data.values
+
+        if np.isscalar(lat):
+            return result[0]
+
+        if isinstance(lat, pd.Series):
+            return pd.Series(result, index=lat.index)
+
+        return result
 
     def get_tindex(self, month: int, day: int) -> int:
         """Get the time index of the input month and day.
@@ -344,7 +341,7 @@ class Climatology:
         """
         if self.ntime == 1:
             return 0
-        elif self.ntime == 73:
+        if self.ntime == 73:
             return which_pentad(month, day) - 1
         return day_in_year(month, day) - 1
 
@@ -366,3 +363,6 @@ def get_climatological_value(climatology: Climatology, **kwargs) -> ndarray:
             Climatology value at specified location and time.
     """
     return climatology
+
+
+ClimFloatType: TypeAlias = ValueFloatType | Climatology

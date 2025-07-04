@@ -16,8 +16,7 @@ from datetime import datetime
 import numpy as np
 
 from . import calculate_humidity
-from . import icoads_identify as ii
-
+import glamod_marine_processing.obs_suite.modules.icoads_identify as ii
 from . location_control import mds_lat_to_yindex, mds_lon_to_xindex
 from . time_control import which_pentad, pentad_to_month_day
 from . import next_level_qc as qc
@@ -500,13 +499,13 @@ class MarineReport:
                 "VAP", calculate_humidity.vap(self.getvar("DPT"), self.getvar("AT"), slpclim)
             )
             self.setvar(
-                "SHU", CalcHums.sh(self.getvar("DPT"), self.getvar("AT"), slpclim)
+                "SHU", calculate_humidity.sh(self.getvar("DPT"), self.getvar("AT"), slpclim)
             )
             self.setvar(
                 "CRH", calculate_humidity.rh(self.getvar("DPT"), self.getvar("AT"), slpclim)
             )
             self.setvar(
-                "CWB", CalcHums.wb(self.getvar("DPT"), self.getvar("AT"), slpclim)
+                "CWB", calculate_humidity.wb(self.getvar("DPT"), self.getvar("AT"), slpclim)
             )
             self.setvar("DPD", calculate_humidity.dpd(self.getvar("DPT"), self.getvar("AT")))
 

@@ -3,10 +3,11 @@
 from __future__ import annotations
 
 import inspect
+from typing import Literal
 
 import pandas as pd
 
-from .auxiliary import failed
+from .auxiliary import failed, passed, untested
 from .external_clim import get_climatological_value  # noqa
 from .next_level_qc import (  # noqa
     do_climatology_check,
@@ -37,6 +38,14 @@ def _is_func_param(func, param):
     return param in sig.parameters
 
 
+def _is_in_data(name, data):
+    if isinstance(data, pd.Series):
+        return name in data
+    elif isinstance(data, pd.DataFrame):
+        return name in data.columns
+    raise TypeError(f"Unsupported data type: {type(data)}")
+
+
 def _get_requests_from_params(params, func, data):
     requests = {}
     if params is None:
@@ -46,7 +55,7 @@ def _get_requests_from_params(params, func, data):
             raise ValueError(
                 f"Parameter '{param}' is not a valid parameter of function '{func.__name__}'"
             )
-        if cname not in data:
+        if not _is_in_data(cname, data):
             raise NameError(
                 f"Variable '{cname}' is not available in input data: {data}."
             )
@@ -54,16 +63,26 @@ def _get_requests_from_params(params, func, data):
     return requests
 
 
+def _get_preprocessed_args(arguments, preprocessed):
+    args = {}
+    for k, v in arguments.items():
+        if v == "__preprocessed__":
+            v = preprocessed[k]
+        args[k] = v
+    return args
+
+
 def do_multiple_row_check(
-    data: dict | pd.Series,
+    data: pd.Series | pd.DataFrame,
     qc_dict: dict | None = None,
     preproc_dict: dict | None = None,
-) -> int:
+    return_method: Literal["all", "passed", "failed"] = "all",
+) -> pd.Series:
     """Basic row-by-row QC by using multiple QC functions.
 
     Parameters
     ----------
-    data : dict or pd.Series
+    data : pd.Series or pd.DataFrame
         Hashable input data.
     qc_dict : dict, optional
         Nested QC dictionary.
@@ -79,11 +98,19 @@ def do_multiple_row_check(
         "names" (input data names as keyword arguments, that will be retrieved from `data`), and "inputs"
         (list of input-given variables).
         For more information see Examples.
+    return_method: {"all", "passed", "failed"}, default: "all"
+        If "all", return QC dictionary containing all requested QC check flags.
+        If "passed": return QC dictionary containing all requested QC check flags until the first check passes.
+        Other QC checks are flagged as unstested (3).
+        If "failed": return QC dictionary containing all requested QC check flags until the first check fails.
+        Other QC checks are flagged as unstested (3).
 
     Returns
     -------
-    int
-        1 if QC fails, otherwise 0.
+    pd.Series
+        Columns represent arbitrary names of the check (taken from `qc_dict.keys()`).
+        Values representing corresponding QC flags.
+        For information to QC flags see QC functions.
 
     Raises
     ------
@@ -91,6 +118,7 @@ def do_multiple_row_check(
         If a function listed in `qc_dict` or `preproc_dict` is not defined.
         If columns listed in `qc_dict` or `preproc_dict` are not available in `data`.
     ValueError
+        If `return_method` is not one of ["all", "passed", "failed"]
         If variable names listed in `qc_dict` or `preproc_dict` are not valid parameters of the QC function.
 
     Notes
@@ -107,10 +135,10 @@ def do_multiple_row_check(
     .. code-block:: python
 
         qc_dict = {
-            "hard_limits_check": {
-                "func": "do_air_temperature_hard_limit_check",
+            "hard_limit_check": {
+                "func": "do_hard_limit_check",
                 "names": "ATEMP",
-                "arguments": {"hard_limits": [193.15, 338.15]},
+                "arguments": {"limits": [193.15, 338.15]},
             }
         }
 
@@ -175,11 +203,12 @@ def do_multiple_row_check(
             },
         }
 
-    Notes
-    -----
-    This function loops over each key-value pair.
-    If one QC function fails, the function returns 1 and stops further processing.
     """
+    if return_method not in ["all", "passed", "failed"]:
+        raise ValueError(
+            f"'return_method' has to be one of ['all', 'passed', 'failed']: {return_method}"
+        )
+
     if qc_dict is None:
         qc_dict = {}
 
@@ -210,16 +239,42 @@ def do_multiple_row_check(
         qc_inputs[qc_name]["function"] = func
         qc_inputs[qc_name]["requests"] = requests
         qc_inputs[qc_name]["kwargs"] = {}
+
         if "arguments" in qc_params.keys():
-            arguments = {}
-            for k, v in qc_params["arguments"].items():
-                if v == "__preprocessed__":
-                    v = preprocessed[k]
-                arguments[k] = v
-            qc_inputs[qc_name]["kwargs"] = arguments
+            qc_inputs[qc_name]["kwargs"] = _get_preprocessed_args(
+                qc_params["arguments"], preprocessed
+            )
+
+    is_series = isinstance(data, pd.Series)
+    if is_series:
+        data = pd.DataFrame([data.values], columns=data.index)
+
+    mask = pd.Series(True, index=data.index)
+    results = pd.DataFrame(untested, index=data.index, columns=qc_inputs.keys())
 
     for qc_name, qc_params in qc_inputs.items():
-        qc_flag = qc_params["function"](**qc_params["requests"], **qc_params["kwargs"])
-        if qc_flag == failed:
-            return qc_flag
-    return qc_flag
+        if not mask.any():
+            continue
+
+        args = {
+            k: (v[mask] if isinstance(v, pd.Series) else v)
+            for k, v in qc_params["requests"].items()
+        }
+        kwargs = {
+            k: (v[mask] if isinstance(v, pd.Series) else v)
+            for k, v in qc_params["kwargs"].items()
+        }
+
+        partial_result = qc_params["function"](**args, **kwargs)
+        full_result = pd.Series(untested, index=data.index)
+        full_result.loc[mask] = partial_result
+        results[qc_name] = full_result
+
+        if return_method == "failed":
+            mask &= full_result != failed
+        elif return_method == "passed":
+            mask &= full_result != passed
+
+    if is_series is True:
+        return results.iloc[0]
+    return results

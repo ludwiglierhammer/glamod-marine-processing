@@ -2,8 +2,6 @@
 
 from __future__ import annotations
 
-from .auxiliary import failed, passed
-
 
 def is_in_valid_list(
     value: str | int | float, valid_list: str | int | float | list
@@ -25,8 +23,8 @@ def is_in_valid_list(
     if not isinstance(valid_list, list):
         valid_list = [valid_list]
     if value in valid_list:
-        return passed
-    return failed
+        return True
+    return False
 
 
 def is_buoy(platform_type: int, valid_list: list | int = [6, 7]) -> int:
