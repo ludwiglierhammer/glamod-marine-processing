@@ -1,8 +1,7 @@
-from datetime import datetime
+import math
 
 import numpy as np
 import pandas as pd
-import math
 
 import pytest
 
@@ -149,116 +148,6 @@ def dummy_pentad_stdev():
 
 @pytest.fixture
 def reps4():
-
-    # vals = [
-    #     {
-    #         "ID": "AAAAAAAAA",
-    #         "YR": 2003,
-    #         "MO": 1,
-    #         "DY": 1,
-    #         "HR": 2,
-    #         "LAT": 0.5,
-    #         "LON": 20.5,
-    #         "SST": 5.0,
-    #     },
-    #     {
-    #         "ID": "BBBBBBBBB",
-    #         "YR": 2002,
-    #         "MO": 12,
-    #         "DY": 21,
-    #         "HR": 2,
-    #         "LAT": 3.5,
-    #         "LON": 20.5,
-    #         "SST": 1.9,
-    #     },
-    #     {
-    #         "ID": "BBBBBBBBB",
-    #         "YR": 2002,
-    #         "MO": 12,
-    #         "DY": 20,
-    #         "HR": 2,
-    #         "LAT": 3.5,
-    #         "LON": 23.5,
-    #         "SST": 1.7,
-    #     },
-    #     {
-    #         "ID": "BBBBBBBBB",
-    #         "YR": 2002,
-    #         "MO": 12,
-    #         "DY": 19,
-    #         "HR": 2,
-    #         "LAT": 3.5,
-    #         "LON": 17.5,
-    #         "SST": 2.0,
-    #     },
-    #     {
-    #         "ID": "BBBBBBBBB",
-    #         "YR": 2002,
-    #         "MO": 12,
-    #         "DY": 18,
-    #         "HR": 2,
-    #         "LAT": 0.5,
-    #         "LON": 17.5,
-    #         "SST": 2.0,
-    #     },
-    #     {
-    #         "ID": "BBBBBBBBB",
-    #         "YR": 2003,
-    #         "MO": 1,
-    #         "DY": 16,
-    #         "HR": 2,
-    #         "LAT": 0.5,
-    #         "LON": 23.5,
-    #         "SST": 2.0,
-    #     },
-    #     {
-    #         "ID": "BBBBBBBBB",
-    #         "YR": 2003,
-    #         "MO": 1,
-    #         "DY": 17,
-    #         "HR": 2,
-    #         "LAT": -2.5,
-    #         "LON": 20.5,
-    #         "SST": 2.0,
-    #     },
-    #     {
-    #         "ID": "BBBBBBBBB",
-    #         "YR": 2003,
-    #         "MO": 1,
-    #         "DY": 18,
-    #         "HR": 2,
-    #         "LAT": -2.5,
-    #         "LON": 23.5,
-    #         "SST": 2.3,
-    #     },
-    #     {
-    #         "ID": "BBBBBBBBB",
-    #         "YR": 2003,
-    #         "MO": 1,
-    #         "DY": 19,
-    #         "HR": 2,
-    #         "LAT": -2.5,
-    #         "LON": 17.5,
-    #         "SST": 2.1,
-    #     },
-    # ]
-    #
-    # reps = {}
-    # for key in vals[0]:
-    #     reps[key] = []
-    # reps["DATE"] = []
-    # reps["SST_CLIM"] = []
-    #
-    # for v in vals:
-    #     for key in reps:
-    #         if key != "DATE" and key != "SST_CLIM":
-    #             reps[key].append(v[key])
-    #
-    #     hour = int(v["HR"])
-    #     minute = 60 * (v["HR"] - hour)
-    #     date = datetime(v["YR"], v["MO"], v["DY"], hour, minute)
-    #     reps["DATE"].append(date)
-    #     reps["SST_CLIM"].append(0.5)
 
     reps = {
         "ID": [

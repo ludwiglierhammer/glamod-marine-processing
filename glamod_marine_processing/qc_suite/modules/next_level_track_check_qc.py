@@ -7,10 +7,10 @@ from datetime import datetime
 import numpy as np
 import pandas as pd
 
+from glamod_marine_processing.obs_suite.modules.icoads_identify import id_is_generic
 from . import spherical_geometry as sg
 from . import time_control
 from . import track_check as tc
-from glamod_marine_processing.obs_suite.modules.icoads_identify import id_is_generic
 
 from .auxiliary import (
     SequenceDatetimeType,
@@ -264,16 +264,15 @@ def calculate_speed_course_distance_time_difference(
         return speed, distance, course, timediff
 
     range_end = number_of_obs
-    first_entry = "i"
-    second_entry = "i - 1"
-    if alternating is True:
+    first_entry_offset = 0
+    second_entry_offset = -1
+    if alternating:
         range_end = number_of_obs - 1
-        first_entry = "i + 1"
-        second_entry = "i - 1"
+        first_entry_offset = 1
 
     for i in range(1, range_end):
-        fe = eval(first_entry)  # noqa
-        se = eval(second_entry)  # noqa
+        fe = i + first_entry_offset
+        se = i + second_entry_offset
         ship_speed, ship_distance, ship_direction, ship_time_difference = (
             calculate_course_parameters(
                 lat[fe], lat[se], lon[fe], lon[se], date[fe], date[se]
@@ -368,18 +367,21 @@ def forward_discrepancy(
         lon_current = lon[i]
         lon_previous = lon[i - 1]
 
-        if (
-            not isvalid(vsi_current)
-            or not isvalid(vsi_previous)
-            or not isvalid(dsi_current)
-            or not isvalid(dsi_previous)
-            or not isvalid(tsi_current)
-            or not isvalid(tsi_previous)
-            or not isvalid(lat_current)
-            or not isvalid(lat_previous)
-            or not isvalid(lon_current)
-            or not isvalid(lon_previous)
-        ):
+        if False in [
+            isvalid(x)
+            for x in [
+                vsi_current,
+                dsi_current,
+                vsi_previous,
+                dsi_previous,
+                tsi_current,
+                tsi_previous,
+                lat_current,
+                lat_previous,
+                lon_current,
+                lon_previous,
+            ]
+        ]:
             continue
 
         timediff = (tsi_current - tsi_previous).total_seconds() / 3600
@@ -480,18 +482,21 @@ def backward_discrepancy(
         lon_current = lon[i]
         lon_previous = lon[i - 1]
 
-        if (
-            not isvalid(vsi_current)
-            or not isvalid(vsi_previous)
-            or not isvalid(dsi_current)
-            or not isvalid(dsi_previous)
-            or not isvalid(tsi_current)
-            or not isvalid(tsi_previous)
-            or not isvalid(lat_current)
-            or not isvalid(lat_previous)
-            or not isvalid(lon_current)
-            or not isvalid(lon_previous)
-        ):
+        if False in [
+            isvalid(x)
+            for x in [
+                vsi_current,
+                dsi_current,
+                vsi_previous,
+                dsi_previous,
+                tsi_current,
+                tsi_previous,
+                lat_current,
+                lat_previous,
+                lon_current,
+                lon_previous,
+            ]
+        ]:
             continue
 
         timediff = (tsi_current - tsi_previous).total_seconds() / 3600
@@ -686,7 +691,7 @@ def do_track_check(
 
     # no obs in, no qc outcomes out
     if number_of_obs == 0:
-        return
+        return np.asarray([])
 
     # fewer than three obs - set the fewsome flag
     if number_of_obs < 3:

@@ -490,8 +490,8 @@ def mds_buddy_check(
     if len(limits) != len(number_of_obs_thresholds) and len(limits) != len(multipliers):
         raise ValueError("Input parameter lists are not equal length")
 
-    for i in range(len(number_of_obs_thresholds)):
-        if len(number_of_obs_thresholds[i]) != len(multipliers[i]):
+    for i, thresholds in enumerate(number_of_obs_thresholds):
+        if len(thresholds) != len(multipliers[i]):
             raise ValueError(
                 "Number of obs thresholds and multipliers have different shapes"
             )
