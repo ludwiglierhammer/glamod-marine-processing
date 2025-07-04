@@ -472,6 +472,9 @@ def convert_units(**units_by_name) -> Callable:
         units_dict = meta_kwargs.get("units")
         if units_dict is None:
             return
+        if isinstance(units_dict, str):
+            units_str = units_dict
+            units_dict = {param: units_str for param in arguments}
 
         for param, target_units in units_by_name.items():
             if param not in arguments:
