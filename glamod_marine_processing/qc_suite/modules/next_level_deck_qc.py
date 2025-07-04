@@ -216,9 +216,9 @@ class SuperObsGrid:
     def get_buddy_limits_with_parameters(
         self,
         pentad_stdev: Climatology,
-        limits: list[int],
-        number_of_obs_thresholds: list[int],
-        multipliers: list[float],
+        limits: list[list[int]],
+        number_of_obs_thresholds: list[list[int]],
+        multipliers: list[list[float]],
     ) -> None:
         """Get buddy limits with parameters.
 
@@ -227,13 +227,13 @@ class SuperObsGrid:
         pentad_stdev : Climatology
             Climatology object containing the 3-dimensional latitude array containing the standard deviations.
 
-        limits : list[int]
+        limits : list[list[int]]
             list of the limits
 
-        number_of_obs_thresholds : list[int]
+        number_of_obs_thresholds : list[list[int]]
             list containing the number of obs thresholds
 
-        multipliers : list[float]
+        multipliers : list[list[float]]
             list containing the multipliers to be applied
 
         Returns
