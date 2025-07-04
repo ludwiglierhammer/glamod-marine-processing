@@ -10,8 +10,8 @@ from glamod_marine_processing.qc_suite.modules.Climatology import (
 from glamod_marine_processing.qc_suite.modules.external_clim import Climatology
 
 
-@pytest.fixture
-def external_clim(scope="session"):
+@pytest.fixture(scope="session")
+def external_clim():
     kwargs = {
         "cache_dir": ".pytest_cache/external_clim",
         "within_drs": False,
@@ -26,8 +26,8 @@ def external_clim(scope="session"):
     return clim_dict
 
 
-@pytest.fixture
-def external_at(external_clim, scope="session"):
+@pytest.fixture(scope="session")
+def external_at(external_clim):
     return Climatology.open_netcdf_file(
         external_clim["AT"]["mean"],
         "at",
@@ -35,8 +35,8 @@ def external_at(external_clim, scope="session"):
     )
 
 
-@pytest.fixture
-def expected_at(external_clim, sope="session"):
+@pytest.fixture(scope="session")
+def expected_at(external_clim):
     return Climatology_exp.from_filename(
         external_clim["AT"]["mean"],
         "at",
