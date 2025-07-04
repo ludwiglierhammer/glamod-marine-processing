@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import datetime
 import re
 
 import numpy as np
@@ -29,6 +30,11 @@ def _array_function(value1, value2):
 @inspect_arrays(["value1", "value3"])
 def _array_function2(value1, value2):
     return value1, value2
+
+
+@convert_date(["year", "month", "day"])
+def _date_function(date, year=None, month=None, day=None):
+    return year, month, day
 
 
 @pytest.mark.parametrize("units", [{"value": "degC"}, "degC"])
@@ -80,3 +86,10 @@ def test_inspect_arrays_raise_length():
 def test_inspect_arrays_raise_parameter():
     with pytest.raises(ValueError, match="Parameter value3 is not a valid parameter."):
         _array_function2(1, 2)
+
+
+def test_convert_date():
+    year, month, day = _date_function(pd.to_datetime("2019-9-27"))
+    assert year == 2019
+    assert month == 9
+    assert day == 27
