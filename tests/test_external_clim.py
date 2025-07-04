@@ -1,0 +1,58 @@
+from __future__ import annotations
+
+import pytest
+from cdm_reader_mapper.common.getting_files import load_file
+
+from glamod_marine_processing.qc_suite.modules.Climatology import (
+    Climatology as Climatology_exp,
+)
+from glamod_marine_processing.qc_suite.modules.external_clim import Climatology
+
+
+@pytest.fixture
+def external_clim(scope="session"):
+    kwargs = {
+        "cache_dir": ".pytest_cache/external_clim",
+        "within_drs": False,
+    }
+    clim_dict = {}
+    clim_dict["AT"] = {
+        "mean": load_file(
+            "metoffice_qc/external_files/AT_pentad_climatology.nc",
+            **kwargs,
+        ),
+    }
+    return clim_dict
+
+
+@pytest.fixture
+def external_at(external_clim, scope="session"):
+    return Climatology.open_netcdf_file(
+        external_clim["AT"]["mean"],
+        "at",
+        time_axis="pentad_time",
+    )
+
+
+@pytest.fixture
+def expected_at(external_clim, sope="session"):
+    return Climatology_exp.from_filename(
+        external_clim["AT"]["mean"],
+        "at",
+    )
+
+
+@pytest.mark.parametrize(
+    "lat, lon, month, day",
+    [[53.5, 10.0, 7, 4], [42.5, 1.4, 2, 16], [57.5, 9.4, 6, 1], [-68.4, -52.3, 11, 21]],
+)
+def test_get_value(external_at, expected_at, lat, lon, month, day):
+    kwargs = {
+        "lat": lat,
+        "lon": lon,
+        "month": month,
+        "day": day,
+    }
+    result = external_at.get_value(**kwargs)
+    expected = expected_at.get_value(**kwargs)
+    assert result == expected
