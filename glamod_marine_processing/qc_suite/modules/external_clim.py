@@ -16,7 +16,7 @@ from numpy import ndarray
 from xclim.core.units import convert_units_to
 
 from .auxiliary import ValueFloatType, generic_decorator, isvalid
-from .time_control import day_in_year, split_date, which_pentad
+from .time_control import day_in_year, get_month_lengths, split_date, which_pentad
 
 
 def inspect_climatology(
@@ -307,18 +307,34 @@ class Climatology:
         valid_indices = isvalid(lat) & isvalid(lon) & isvalid(month) & isvalid(day)
         result = np.full(lat_arr.shape, None, dtype=float)  # type: np.ndarray
 
-        if isinstance(valid_indices, bool):
+        if isinstance(valid_indices, (bool, np.bool)):
             valid_indices = [valid_indices]
 
         for i in range(np.size(result)):
-            print(valid_indices)
-            print(i)
             if not valid_indices[i]:
                 continue
-            tindex = self.get_tindex(int(month_arr[i]), int(day_arr[i]))
+
+            mon_i = int(month_arr[i])
+            ml = get_month_lengths(2004)
+            day_i = int(day_arr[i])
+            lat_i = lat_arr[i]
+            lon_i = lon_arr[i]
+            if (
+                mon_i < 1
+                or mon_i > 12
+                or day_i < 1
+                or day_i > ml[mon_i - 1]
+                or lat_i < -180
+                or lat_i > 180
+                or lon_i < -90
+                or lon_i > 90
+            ):
+                continue
+
+            tindex = self.get_tindex(mon_i, day_i)
             data = self.data.isel(**{self.time_axis: tindex})
-            data = data.sel(**{self.lat_axis: lat_arr[i]}, method="nearest")
-            data = data.sel(**{self.lon_axis: lon_arr[i]}, method="nearest")
+            data = data.sel(**{self.lat_axis: lat_i}, method="nearest")
+            data = data.sel(**{self.lon_axis: lon_i}, method="nearest")
             result[i] = data.values
 
         if np.isscalar(lat):
