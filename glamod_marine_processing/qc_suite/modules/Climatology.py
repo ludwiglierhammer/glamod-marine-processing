@@ -5,16 +5,20 @@ from __future__ import annotations
 import numpy as np
 from netCDF4 import Dataset
 
-from .interpolation import bilinear_interp
 from .location_control import (
-    fill_missing_vals,
-    get_four_surrounding_points,
-    lat_to_yindex,
-    lon_to_xindex,
     mds_lat_to_yindex,
     mds_lon_to_xindex,
+    lat_to_yindex,
+    lon_to_xindex,
+    get_four_surrounding_points,
+    fill_missing_vals,
 )
-from .time_control import day_in_year, get_month_lengths, which_pentad
+from .time_control import (
+    which_pentad,
+    get_month_lengths,
+    day_in_year,
+)
+from .interpolation import bilinear_interp
 
 
 class Climatology:
@@ -83,7 +87,7 @@ class Climatology:
                 field = np.flip(field, 1)
 
             # if the longitudes start near zero then roll the array along its longitude axis
-            if longitudes[0] > 0.0 and longitudes[0] < 1.0:
+            if 0.0 < longitudes[0] < 1.0:
                 lon_len = field.shape[2]
                 field = np.roll(field, lon_len // 2, axis=2)
 

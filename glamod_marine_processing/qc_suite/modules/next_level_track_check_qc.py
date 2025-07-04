@@ -7,9 +7,11 @@ from datetime import datetime
 import numpy as np
 import pandas as pd
 
+from glamod_marine_processing.obs_suite.modules.icoads_identify import id_is_generic
 from . import spherical_geometry as sg
 from . import time_control
 from . import track_check as tc
+
 from .auxiliary import (
     SequenceDatetimeType,
     SequenceFloatType,
@@ -262,16 +264,15 @@ def calculate_speed_course_distance_time_difference(
         return speed, distance, course, timediff
 
     range_end = number_of_obs
-    first_entry = "i"
-    second_entry = "i - 1"
-    if alternating is True:
+    first_entry_offset = 0
+    second_entry_offset = -1
+    if alternating:
         range_end = number_of_obs - 1
-        first_entry = "i + 1"
-        second_entry = "i - 1"
+        first_entry_offset = 1
 
     for i in range(1, range_end):
-        fe = eval(first_entry)  # noqa
-        se = eval(second_entry)  # noqa
+        fe = i + first_entry_offset
+        se = i + second_entry_offset
         ship_speed, ship_distance, ship_direction, ship_time_difference = (
             calculate_course_parameters(
                 lat[fe], lat[se], lon[fe], lon[se], date[fe], date[se]
@@ -296,45 +297,58 @@ def forward_discrepancy(
     dsi: SequenceFloatType,
 ) -> SequenceFloatType:
     """Calculate what the distance is between the projected position (based on the reported
-    speed and heading at the current and previous time steps) and the actual position. The
-    observations are taken in time order.
+        speed and heading at the current and previous time steps) and the actual position. The
+        observations are taken in time order.
 
-    This takes the speed and direction reported by the ship and projects it forwards half a
-    time step, it then projects it forwards another half time-step using the speed and
-    direction for the next report, to which the projected location
-    is then compared. The distances between the projected and actual locations is returned
+        This takes the speed and direction reported by the ship and projects it forwards half a
+        time step, it then projects it forwards another half time-step using the speed and
+        direction for the next report, to which the projected location
+        is then compared. The distances between the projected and actual locations is returned
 
-    Parameters
-    ----------
-    vsi : sequence of float, 1D np.ndarray of float, or pd.Series of float, shape (n,)
-        One-dimensional reported speed array in km/h.
-        Can be a sequence (e.g., list or tuple), a one-dimensional NumPy array, or a pandas Series.
+        Parameters
+        ----------
+    <<<<<<< HEAD
+        lat: array-like of float, shape (n,)
+            1-dimensional latitude array in degrees.
+        lon: array-like of float, shape (n,)
+            1-dimensional longitude array in degrees.
+        date: array-like of datetime, shape (n,)
+            1-dimensional date array.
+        vsi: array-like of float, shape (n,)
+            1-dimensional reported speed array in knots.
+        dsi: array-like of float, shape (n,)
+            1-dimensional reported heading array.
+    =======
+        vsi : sequence of float, 1D np.ndarray of float, or pd.Series of float, shape (n,)
+            One-dimensional reported speed array in km/h.
+            Can be a sequence (e.g., list or tuple), a one-dimensional NumPy array, or a pandas Series.
 
-    dsi : sequence of float, 1D np.ndarray of float, or pd.Series of float, shape (n,)
-        One-dimensional reported heading array in degrees.
-        Can be a sequence (e.g., list or tuple), a one-dimensional NumPy array, or a pandas Series.
+        dsi : sequence of float, 1D np.ndarray of float, or pd.Series of float, shape (n,)
+            One-dimensional reported heading array in degrees.
+            Can be a sequence (e.g., list or tuple), a one-dimensional NumPy array, or a pandas Series.
 
-    lat : sequence of float, 1D np.ndarray of float, or pd.Series of float, shape (n,)
-        One-dimensional latitude array in degrees.
-        Can be a sequence (e.g., list or tuple), a one-dimensional NumPy array, or a pandas Series.
+        lat : sequence of float, 1D np.ndarray of float, or pd.Series of float, shape (n,)
+            One-dimensional latitude array in degrees.
+            Can be a sequence (e.g., list or tuple), a one-dimensional NumPy array, or a pandas Series.
 
-    lon : sequence of float, 1D np.ndarray of float, or pd.Series of float, shape (n,)
-        One-dimensional longitude array in degrees.
-        Can be a sequence (e.g., list or tuple), a one-dimensional NumPy array, or a pandas Series.
+        lon : sequence of float, 1D np.ndarray of float, or pd.Series of float, shape (n,)
+            One-dimensional longitude array in degrees.
+            Can be a sequence (e.g., list or tuple), a one-dimensional NumPy array, or a pandas Series.
 
-    date : sequence of datetime, 1D np.ndarray of datetime, or pd.Series of datetime, shape (n,)
-        One-dimensional date array.
-        Can be a sequence (e.g., list or tuple), a one-dimensional NumPy array, or a pandas Series.
+        date : sequence of datetime, 1D np.ndarray of datetime, or pd.Series of datetime, shape (n,)
+            One-dimensional date array.
+            Can be a sequence (e.g., list or tuple), a one-dimensional NumPy array, or a pandas Series.
+    >>>>>>> 8163bfa5381dd3075aae36a777386d8732f5f0cb
 
-    Returns
-    -------
-    Same type as input, but with float values, shape (n,)
-        One-dimensional array, sequence, or pandas Series containing distances from estimated positions.
+        Returns
+        -------
+        Same type as input, but with float values, shape (n,)
+            One-dimensional array, sequence, or pandas Series containing distances from estimated positions.
 
-    Raises
-    ------
-    ValueError
-        If either input is not 1-dimensional or if their lengths do not match.
+        Raises
+        ------
+        ValueError
+            If either input is not 1-dimensional or if their lengths do not match.
     """
     number_of_obs = len(lat)
 
@@ -353,18 +367,21 @@ def forward_discrepancy(
         lon_current = lon[i]
         lon_previous = lon[i - 1]
 
-        if (
-            not isvalid(vsi_current)
-            or not isvalid(vsi_previous)
-            or not isvalid(dsi_current)
-            or not isvalid(dsi_previous)
-            or not isvalid(tsi_current)
-            or not isvalid(tsi_previous)
-            or not isvalid(lat_current)
-            or not isvalid(lat_previous)
-            or not isvalid(lon_current)
-            or not isvalid(lon_previous)
-        ):
+        if False in [
+            isvalid(x)
+            for x in [
+                vsi_current,
+                dsi_current,
+                vsi_previous,
+                dsi_previous,
+                tsi_current,
+                tsi_previous,
+                lat_current,
+                lat_previous,
+                lon_current,
+                lon_previous,
+            ]
+        ]:
             continue
 
         timediff = (tsi_current - tsi_previous).total_seconds() / 3600
@@ -465,18 +482,21 @@ def backward_discrepancy(
         lon_current = lon[i]
         lon_previous = lon[i - 1]
 
-        if (
-            not isvalid(vsi_current)
-            or not isvalid(vsi_previous)
-            or not isvalid(dsi_current)
-            or not isvalid(dsi_previous)
-            or not isvalid(tsi_current)
-            or not isvalid(tsi_previous)
-            or not isvalid(lat_current)
-            or not isvalid(lat_previous)
-            or not isvalid(lon_current)
-            or not isvalid(lon_previous)
-        ):
+        if False in [
+            isvalid(x)
+            for x in [
+                vsi_current,
+                dsi_current,
+                vsi_previous,
+                dsi_previous,
+                tsi_current,
+                tsi_previous,
+                lat_current,
+                lat_previous,
+                lon_current,
+                lon_previous,
+            ]
+        ]:
             continue
 
         timediff = (tsi_current - tsi_previous).total_seconds() / 3600
@@ -598,6 +618,7 @@ def do_track_check(
     lat: SequenceFloatType,
     lon: SequenceFloatType,
     date: SequenceDatetimeType,
+    ids: str,
     max_direction_change: float,
     max_speed_change: float,
     max_absolute_speed: float,
@@ -628,6 +649,9 @@ def do_track_check(
     date : sequence of datetime, 1D np.ndarray of datetime, or pd.Series of datetime, shape (n,)
       One-dimensional date array.
       Can be a sequence (e.g., list or tuple), a one-dimensional NumPy array, or a pandas Series.
+
+    ids : str
+        ID of ship - callsign or other ID
 
     max_direction_change : float, default: 60.0
       Maximum valid direction change in degrees.
@@ -667,26 +691,31 @@ def do_track_check(
 
     # no obs in, no qc outcomes out
     if number_of_obs == 0:
-        return
+        return np.asarray([])
 
     # fewer than three obs - set the fewsome flag
     if number_of_obs < 3:
         return [passed] * number_of_obs
 
+    if id_is_generic(ids, pd.Timestamp(date[0]).year):
+        return np.asarray([passed] * number_of_obs)
+
+    time_order = np.argsort(date)
+
     # work out speeds and distances between alternating points
     speed_alt, _distance_alt, _course_alt, _timediff_alt = (
         calculate_speed_course_distance_time_difference(
-            lat=lat,
-            lon=lon,
-            date=date,
+            lat=lat[time_order],
+            lon=lon[time_order],
+            date=date[time_order],
             alternating=True,
         )
     )
     speed, _distance, course, timediff = (
         calculate_speed_course_distance_time_difference(
-            lat=lat,
-            lon=lon,
-            date=date,
+            lat=lat[time_order],
+            lon=lon[time_order],
+            date=date[time_order],
         )
     )
 
@@ -698,23 +727,23 @@ def do_track_check(
 
     # compare reported speeds and positions if we have them
     forward_diff_from_estimated = forward_discrepancy(
-        lat=lat,
-        lon=lon,
-        date=date,
-        vsi=vsi,
-        dsi=dsi,
+        lat=lat[time_order],
+        lon=lon[time_order],
+        date=date[time_order],
+        vsi=vsi[time_order],
+        dsi=dsi[time_order],
     )
     reverse_diff_from_estimated = backward_discrepancy(
-        lat=lat,
-        lon=lon,
-        date=date,
-        vsi=vsi,
-        dsi=dsi,
+        lat=lat[time_order],
+        lon=lon[time_order],
+        date=date[time_order],
+        vsi=vsi[time_order],
+        dsi=dsi[time_order],
     )
 
     midpoint_diff_from_estimated = calculate_midpoint(
-        lat=lat,
-        lon=lon,
+        lat=lat[time_order],
+        lon=lon[time_order],
         timediff=timediff,
     )
 
@@ -751,23 +780,23 @@ def do_track_check(
         # Quality-control by examining the distance
         # between the calculated and reported second position.
         thisqc_b += tc.check_distance_from_estimate(
-            vsi[i],
-            vsi[i - 1],
+            vsi[time_order[i]],
+            vsi[time_order[i - 1]],
             timediff[i],
             forward_diff_from_estimated[i],
             reverse_diff_from_estimated[i],
         )
         # Check for continuity of direction
         thisqc_b += tc.direction_continuity(
-            dsi[i],
-            dsi[i - 1],
+            dsi[time_order[i]],
+            dsi[time_order[i - 1]],
             course[i],
             max_direction_change,
         )
         # Check for continuity of speed.
         thisqc_b += tc.speed_continuity(
-            vsi[i],
-            vsi[i - 1],
+            vsi[time_order[i]],
+            vsi[time_order[i - 1]],
             speed[i],
             max_speed_change,
         )
@@ -783,6 +812,8 @@ def do_track_check(
             and thisqc_b > 0
         ):
             trk[i] = failed
+
+    trk[time_order] = trk[:]
 
     return trk
 

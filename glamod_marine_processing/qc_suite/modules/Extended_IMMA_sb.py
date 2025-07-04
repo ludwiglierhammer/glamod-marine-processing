@@ -15,7 +15,7 @@ from datetime import datetime
 
 import numpy as np
 
-from . import CalcHums
+from . import calculate_humidity
 from . import next_level_qc as qc
 from . import spherical_geometry as sph
 from . import track_check as tc
@@ -435,7 +435,7 @@ class MarineReport:
         The listed hum_vars have to be the five calculated humidity variables: 'SHU','VAP','CRH','CWB','DPD'
         There has to be an AT and DPT present to calculate any one of these/
         This also depends on there being a climatological SLP present
-        This uses the CalcHums.py functions.
+        This uses the calculate_humidity.py functions.
 
         :param hum_vars: list of humidity variables to calculate
         :type hum_vars: list of strings
@@ -455,18 +455,18 @@ class MarineReport:
         else:
             # Calculate the humidity variables
             self.setvar(
-                "VAP", CalcHums.vap(self.getvar("DPT"), self.getvar("AT"), slpclim)
+                "VAP", calculate_humidity.vap(self.getvar("DPT"), self.getvar("AT"), slpclim)
             )
             self.setvar(
-                "SHU", CalcHums.sh(self.getvar("DPT"), self.getvar("AT"), slpclim)
+                "SHU", calculate_humidity.sh(self.getvar("DPT"), self.getvar("AT"), slpclim)
             )
             self.setvar(
-                "CRH", CalcHums.rh(self.getvar("DPT"), self.getvar("AT"), slpclim)
+                "CRH", calculate_humidity.rh(self.getvar("DPT"), self.getvar("AT"), slpclim)
             )
             self.setvar(
-                "CWB", CalcHums.wb(self.getvar("DPT"), self.getvar("AT"), slpclim)
+                "CWB", calculate_humidity.wb(self.getvar("DPT"), self.getvar("AT"), slpclim)
             )
-            self.setvar("DPD", CalcHums.dpd(self.getvar("DPT"), self.getvar("AT")))
+            self.setvar("DPD", calculate_humidity.dpd(self.getvar("DPT"), self.getvar("AT")))
 
             # Test for silliness - if silly, return all as None
             if self.getvar("CRH") is None:
