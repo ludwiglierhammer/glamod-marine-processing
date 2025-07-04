@@ -307,7 +307,12 @@ class Climatology:
         valid_indices = isvalid(lat) & isvalid(lon) & isvalid(month) & isvalid(day)
         result = np.full(lat_arr.shape, None, dtype=float)  # type: np.ndarray
 
+        if isinstance(valid_indices, bool):
+            valid_indices = [valid_indices]
+
         for i in range(np.size(result)):
+            print(valid_indices)
+            print(i)
             if not valid_indices[i]:
                 continue
             tindex = self.get_tindex(int(month_arr[i]), int(day_arr[i]))
