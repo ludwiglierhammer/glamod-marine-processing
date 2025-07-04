@@ -247,7 +247,8 @@ class SuperObsGrid:
             pindex = nonmiss[2][i]
             m, d = pentad_to_month_day(pindex + 1)
 
-            stdev = pentad_stdev.get_value(  # get_value_mds_style(
+            # Originally get_value_mds_style - note might be mismatch
+            stdev = pentad_stdev.get_value(
                 lat=89.5 - yindex, lon=-179.5 + xindex, month=m, day=d
             )
 
@@ -423,7 +424,7 @@ class SuperObsGrid:
         return self.buddy_stdev[xindex][yindex][pindex]
 
 
-@inspect_arrays(["lats", "lons", "anoms"])
+@inspect_arrays(["lats", "lons", "dates", "anoms"])
 @convert_units(lats="degrees", lons="degrees")
 def mds_buddy_check(
     lats: Sequence[float],
