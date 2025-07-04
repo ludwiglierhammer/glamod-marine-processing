@@ -112,24 +112,24 @@ imodel = "icoads"
 encoding = "cp1252"
 
 
-# single_file = data_dir / "ICOADS" / "cat.txt"
-#
-# with open(single_file, 'w') as outfile:
-#     filepaths = [
-#         data_dir / "ICOADS" / "IMMA1_R3.0.0_1899-01.gz",
-#         # data_dir / "ICOADS" / "IMMA1_R3.0.0_1850-02.gz",
-#         # data_dir / "ICOADS" / "IMMA1_R3.0.0_1850-03.gz",
-#         # data_dir / "ICOADS" / "IMMA1_R3.0.0_1850-04.gz",
-#         # data_dir / "ICOADS" / "IMMA1_R3.0.0_1850-05.gz",
-#     ]
-#     for fname in filepaths:
-#         with gzip.open(fname, "rb") as f_in:
-#             with open(str(fname).replace(".gz", ""), "wb") as f_out:
-#                 shutil.copyfileobj(f_in, f_out)
-#         with open(str(fname).replace(".gz", "")) as f:
-#             for line in f:
-#                 outfile.write(line)
-single_file = data_dir / "ICOADS" / "IMMA1_R3.0.0_1899-01"
+single_file = data_dir / "ICOADS" / "cat.txt"
+
+with open(single_file, 'w') as outfile:
+    filepaths = [
+        data_dir / "ICOADS" / "IMMA1_R3.0.0_1899-01.gz",
+        # data_dir / "ICOADS" / "IMMA1_R3.0.0_1850-02.gz",
+        # data_dir / "ICOADS" / "IMMA1_R3.0.0_1850-03.gz",
+        # data_dir / "ICOADS" / "IMMA1_R3.0.0_1850-04.gz",
+        # data_dir / "ICOADS" / "IMMA1_R3.0.0_1850-05.gz",
+    ]
+    for fname in filepaths:
+        with gzip.open(fname, "rb") as f_in:
+            with open(str(fname).replace(".gz", ""), "wb") as f_out:
+                shutil.copyfileobj(f_in, f_out)
+        with open(str(fname).replace(".gz", "")) as f:
+            for line in f:
+                outfile.write(line)
+#single_file = data_dir / "ICOADS" / "IMMA1_R3.0.0_1899-01"
 
 print("Preprocessed IMMA files, gunzipped, concatenated etc.")
 print(datetime.datetime.now())
@@ -344,7 +344,7 @@ colors[sst_buddy_check == 1] = [0,1,1]
 
 id_list = combined['primary_station_id'].unique()
 
-plot_all_tracks = True
+plot_all_tracks = False
 if plot_all_tracks:
     for id0 in id_list:
         subset = combined[combined['primary_station_id'] == id0]
@@ -366,8 +366,8 @@ if plot_all_tracks:
         colors0[tcqc == 2] = [0,1,0]
         colors0[tcqc == 3] = [0,0,1]
 
-        sizes0 = np.array([5 for _ in range(len(lats0))])
-        sizes0[0] = 20
+        sizes0 = np.array([25 for _ in range(len(lats0))])
+        sizes0[0] = 50
 
         fig = plt.figure(figsize=(20, 10))
         ax = plt.axes(projection=ccrs.PlateCarree(central_longitude=0))
