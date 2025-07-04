@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import numpy as np
 import pytest
 from cdm_reader_mapper.common.getting_files import load_file
 
@@ -44,7 +45,20 @@ def expected_at(external_clim, sope="session"):
 
 @pytest.mark.parametrize(
     "lat, lon, month, day",
-    [[53.5, 10.0, 7, 4], [42.5, 1.4, 2, 16], [57.5, 9.4, 6, 1], [-68.4, -52.3, 11, 21]],
+    [
+        [53.5, 10.0, 7, 4],
+        [42.5, 1.4, 2, 16],
+        [57.5, 9.4, 6, 1],
+        [-68.4, -52.3, 11, 21],
+        [-190.0, 10.0, 7, 4],
+        [42.5, 95.0, 2, 16],
+        [57.5, 9.4, 13, 1],
+        [-68.4, -52.3, 11, 42],
+        [None, 10.0, 7, 4],
+        [42.5, None, 2, 16],
+        [57.5, 9.4, None, 1],
+        [-68.4, -52.3, 11, None],
+    ],
 )
 def test_get_value(external_at, expected_at, lat, lon, month, day):
     kwargs = {
@@ -55,4 +69,5 @@ def test_get_value(external_at, expected_at, lat, lon, month, day):
     }
     result = external_at.get_value(**kwargs)
     expected = expected_at.get_value(**kwargs)
-    assert result == expected
+    expected = np.float64(np.nan if expected is None else expected)
+    assert np.allclose(result, expected, equal_nan=True)
