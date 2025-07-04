@@ -95,13 +95,16 @@ class SuperObsGrid:
 
         Parameters
         ----------
-        lats: array-like of float, shape (n,)
+        lats : array-like of float, shape (n,)
             1-dimensional latitude array.
-        lons: array-like of float, shape (n,)
+
+        lons : array-like of float, shape (n,)
             1-dimensional longitude array.
-        dates: array-like of datetime, shape (n,)
+
+        dates : array-like of datetime, shape (n,)
             1-dimensional date array.
-        values: array-like of float, shape (n,)
+
+        values : array-like of float, shape (n,)
             1-dimensional anomaly array.
         """
         n_obs = len(lats)
@@ -118,15 +121,19 @@ class SuperObsGrid:
 
         Parameters
         ----------
-        lat: float
+        lat : float
             Latitude of the observation in degrees
-        lon: float
+
+        lon : float
             Longitude of the observation in degrees
-        month: int
+
+        month : int
             Month of the observation
-        day: int
+
+        day : int
             Day of the observation
-        anom: float
+
+        anom : float
             Value to be added to the grid
 
         Returns
@@ -157,13 +164,16 @@ class SuperObsGrid:
 
         Parameters
         ----------
-        search_radius: list
+        search_radius : list
             three element array search radius in which to look lon, lat, time
-        xindex: int
+
+        xindex : int
             the xindex of the gridcell to start from
-        yindex: int
+
+        yindex : int
             the yindex of the gridcell to start from
-        pindex: int
+
+        pindex : int
             the pindex of the gridcell to start from
 
         Returns
@@ -214,13 +224,16 @@ class SuperObsGrid:
 
         Parameters
         ----------
-        pentad_stdev: Climatology
-            Climatology object containing the 3-dimensional latitude array containing the standard deviations
-        limits: list[int]
+        pentad_stdev : Climatology
+            Climatology object containing the 3-dimensional latitude array containing the standard deviations.
+
+        limits : list[int]
             list of the limits
-        number_of_obs_thresholds: list[int]
+
+        number_of_obs_thresholds : list[int]
             list containing the number of obs thresholds
-        multipliers: list[float]
+
+        multipliers : list[float]
             list containing the multipliers to be applied
 
         Returns
@@ -278,20 +291,25 @@ class SuperObsGrid:
 
         Parameters
         ----------
-        stdev1: np.ndarray
+        stdev1 : np.ndarray
             Field of standard deviations representing standard deviation of difference between target
             gridcell and complete neighbour average (grid area to neighbourhood difference)
-        stdev2: np.ndarray
+
+        stdev2 : np.ndarray
             Field of standard deviations representing standard deviation of difference between a single
             observation and the target gridcell average (point to grid area difference)
-        stdev3: np.ndarray
+
+        stdev3 : np.ndarray
             Field of standard deviations representing standard deviation of difference between random
             neighbour gridcell and full neighbour average (uncertainty in neighbour average)
-        limits: list[float]
+
+        limits : list[float]
             three membered list of number of degrees in latitude and longitude and number of pentads
-        sigma_m: float
+
+        sigma_m : float
             Estimated measurement error uncertainty
-        noise_scaling: float
+
+        noise_scaling : float
             scale noise by a factor of noise_scaling used to match observed variability
 
         Returns
@@ -355,13 +373,16 @@ class SuperObsGrid:
 
         Parameters
         ----------
-        lat: float
+        lat : float
             latitude of the location for which the buddy mean is desired
-        lon: float
+
+        lon : float
             longitude of the location for which the buddy mean is desired
-        month: int
+
+        month : int
             month for which the buddy mean is desired
-        day: int
+
+        day : int
             day for which the buddy mean is desired
 
         Returns
@@ -379,13 +400,16 @@ class SuperObsGrid:
 
         Parameters
         ----------
-        lat: float
+        lat : float
             latitude of the location for which the buddy standard deviation is desired
-        lon: float
+
+        lon : float
             longitude of the location for which the buddy standard deviation is desired
-        month: int
+
+        month : int
             month for which the buddy standard deviation is desired
-        day: int
+
+        day : int
             day for which the buddy standard deviation is desired
 
         Returns
@@ -400,6 +424,7 @@ class SuperObsGrid:
 
 
 @inspect_arrays(["lats", "lons", "anoms"])
+@convert_units(lats="degrees", lons="degrees")
 def mds_buddy_check(
     lats: Sequence[float],
     lons: Sequence[float],
@@ -414,23 +439,30 @@ def mds_buddy_check(
 
     Parameters
     ----------
-    lats: array-like of float, shape (n,)
+    lats : array-like of float, shape (n,)
         1-dimensional latitude array.
-    lons: array-like of float, shape (n,)
+
+    lons : array-like of float, shape (n,)
         1-dimensional longitude array.
-    dates: array-like of datetime, shape (n,)
+
+    dates : array-like of datetime, shape (n,)
         1-dimensional date array.
-    anoms: array-like of float, shape (n,)
+
+    anoms : array-like of float, shape (n,)
         1-dimensional anomaly array.
-    pentad_stdev: Climatology
+
+    pentad_stdev : Climatology
         Field of standard deviations of 1x1xpentad standard deviations
-    limits: list[list]
+
+    limits : list[list]
         limits a list of lists. Each list member is a three-membered list specifying the longitudinal, latitudinal,
         and time range within which buddies are sought at each level of search.
-    number_of_obs_thresholds: list[list]
+
+    number_of_obs_thresholds : list[list]
         number of observations corresponding to each multiplier in `multipliers`. The initial list should be
         the same length as the limits list.
-    multipliers: list[list]
+
+    multipliers : list[list]
         multiplier, x, used for buddy check mu +- x * sigma. The list should have the same structure as
         `number_of_obs_threshold`.
 
@@ -517,36 +549,48 @@ def bayesian_buddy_check(
 
     Parameters
     ----------
-    lats: array-like of float, shape (n,)
+    lats : array-like of float, shape (n,)
         1-dimensional latitude array.
-    lons: array-like of float, shape (n,)
+
+    lons : array-like of float, shape (n,)
         1-dimensional longitude array.
-    dates: array-like of datetime, shape (n,)
+
+    dates : array-like of datetime, shape (n,)
         1-dimensional date array.
-    anoms: array-like of float, shape (n,)
+
+    anoms : array-like of float, shape (n,)
         1-dimensional anomaly array.
-    stdev1: Climatology
+
+    stdev1 : Climatology
         Field of standard deviations representing standard deviation of difference between
         target gridcell and complete neighbour average (grid area to neighbourhood difference)
-    stdev2: Climatology
+
+    stdev2 : Climatology
         Field of standard deviations representing standard deviation of difference between
         a single observation and the target gridcell average (point to grid area difference)
-    stdev3: Climatology
+
+    stdev3 : Climatology
         Field of standard deviations representing standard deviation of difference between
         random neighbour gridcell and full neighbour average (uncertainty in neighbour average)
-    prior_probability_of_gross_error: float
+
+    prior_probability_of_gross_error : float
         Prior probability of gross error, which is the background rate of gross errors.
-    quantization_interval: float
+
+    quantization_interval : float
         Smallest possible increment in the input values.
-    one_sigma_measurement_uncertainty: float
+
+    one_sigma_measurement_uncertainty : float
         Estimated one sigma measurement uncertainty
-    limits: list[int]
+
+    limits : list[int]
         List with three members which specify the search range for the buddy check
-    noise_scaling: float
+
+    noise_scaling : float
         Tuning parameter used to multiply stdev2. This was determined to be approximately 3.0 by comparison with
         observed point data. stdev2 was estimated from OSTIA data and typically underestimates the point to area-
         average difference by this factor.
-    maximum_anomaly: float
+
+    maximum_anomaly : float
         Largest absolute anomaly, assumes that the maximum and minimum anomalies have the same magnitude
 
     Returns
