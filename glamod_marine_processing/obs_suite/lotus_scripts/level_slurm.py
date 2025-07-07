@@ -343,12 +343,18 @@ for sid_dck in process_list:
             nohup_out = os.path.join(sid_dck_log_dir, f"nohup_{pattern}.out")
             nohup_err = os.path.join(sid_dck_log_dir, f"nohup_{pattern}.err")
             nohup_pid = os.path.join(sid_dck_log_dir, f"nohup_{pattern}.pid")
-            cdm = (
-                ["nohup"]
-                + cmd
-                + [">", nohup_out, "2>", nohup_err, "& echo $! >", nohup_pid]
-            )
-        subprocess.call(cmd, shell=False)
+            cdm = ["nohup"] + cmd
+            with open(nohup_out, "w") as out, open(nohup_err, "w") as err:
+                proc = subprocess.Popen(
+                    cmd,
+                    stdout=out,
+                    stderr=err,
+                    preexec_fn=os.setpgrp,
+                )
+
+            with open(nohup_pid, "w") as pidf:
+                pidf.write(str(proc.pid))
+
         continue
 
     if script_config["run_jobs"] is True:
@@ -370,9 +376,13 @@ if script_config["parallel_jobs"] is True:
         nohup_out = os.path.join(sid_dck_log_dir, f"nohup_{pattern}.out")
         nohup_err = os.path.join(sid_dck_log_dir, f"nohup_{pattern}.err")
         nohup_pid = os.path.join(sid_dck_log_dir, f"nohup_{pattern}.pid")
-        cdm = (
-            ["nohup"]
-            + cmd
-            + [">", nohup_out, "2>", nohup_err, "& echo $! >", nohup_pid]
-        )
-    subprocess.call(cmd, shell=False)
+        cdm = ["nohup"] + cmd
+        with open(nohup_out, "w") as out, open(nohup_err, "w") as err:
+            proc = subprocess.Popen(
+                cmd,
+                stdout=out,
+                stderr=err,
+                preexec_fn=os.setpgrp,
+            )
+        with open(nohup_pid, "w") as pidf:
+            pidf.write(str(proc.pid))
