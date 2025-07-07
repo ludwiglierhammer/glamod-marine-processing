@@ -41,8 +41,14 @@ def concat_unknow_date_files(idir, odir, table, release, update, prev_deck_list)
     for prev_deck in prev_deck_list:
         table_dir = os.path.join(idir, prev_deck)
         table_df = read_tables(table_dir, cdm_subset=table)
-        table_df = table_df[table]
         if table_df.empty:
+            continue
+        next = False
+        try:
+            table_df = table_df[table]
+        except KeyError:
+            next = True
+        if next is True:
             continue
         year_month = get_year_month(table_df, time_axis)
         for ym, df in table_df.groupby(year_month):
