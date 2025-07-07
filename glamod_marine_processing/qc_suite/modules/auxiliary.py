@@ -174,6 +174,8 @@ def format_return_type(result_array: np.ndarray, *input_values: Any) -> Any:
         return pd.Series(result_array, index=input_value.index, dtype=int)
     if isinstance(input_value, (list, tuple)):
         return type(input_value)(result_array.tolist())
+    if isinstance(input_value, np.ndarray) and isinstance(result_array, pd.Series):
+        return result_array.to_numpy()
     return result_array  # np.ndarray or fallback
 
 
