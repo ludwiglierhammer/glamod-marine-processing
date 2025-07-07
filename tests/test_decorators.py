@@ -37,6 +37,11 @@ def _date_function(date, year=None, month=None, day=None):
     return year, month, day
 
 
+@convert_date(["year2", "month", "day"])
+def _date_function2(date, year=None, month=None, day=None):
+    return year, month, day
+
+
 @pytest.mark.parametrize("units", [{"value": "degC"}, "degC"])
 def test_convert_units(units):
     result = _convert_function(30.0, units=units)
@@ -84,12 +89,23 @@ def test_inspect_arrays_raise_length():
 
 
 def test_inspect_arrays_raise_parameter():
-    with pytest.raises(ValueError, match="Parameter value3 is not a valid parameter."):
+    with pytest.raises(
+        ValueError, match="Parameter 'value3' is not a valid parameter."
+    ):
         _array_function2(1, 2)
 
 
-def test_convert_date():
-    year, month, day = _date_function(pd.to_datetime("2019-9-27"))
-    assert year == 2019
-    assert month == 9
-    assert day == 27
+@pytest.mark.parametrize(
+    "date, year, month, day",
+    [["2019-9-27", 2019, 9, 27], ["2019-9", 2019, 9, 1], ["2019", 2019, 1, 1]],
+)
+def test_convert_date(date, year, month, day):
+    yy, mm, dd = _date_function(pd.to_datetime(date))
+    assert yy == year
+    assert mm == month
+    assert dd == day
+
+
+def test_convert_date_raise():
+    with pytest.raises(ValueError, match="Parameter 'year2' is not a valid parameter."):
+        _date_function2(pd.to_datetime("2019-09-27"))
