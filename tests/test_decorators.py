@@ -12,7 +12,6 @@ from glamod_marine_processing.qc_suite.modules.auxiliary import (
     inspect_arrays,
     post_format_return_type,
 )
-from glamod_marine_processing.qc_suite.modules.external_clim import inspect_climatology
 from glamod_marine_processing.qc_suite.modules.time_control import convert_date
 
 

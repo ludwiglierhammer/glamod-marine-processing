@@ -1,13 +1,17 @@
 from __future__ import annotations
 
 import numpy as np
+import pandas as pd
 import pytest
 from cdm_reader_mapper.common.getting_files import load_file
 
 from glamod_marine_processing.qc_suite.modules.Climatology import (
     Climatology as Climatology_exp,
 )
-from glamod_marine_processing.qc_suite.modules.external_clim import Climatology
+from glamod_marine_processing.qc_suite.modules.external_clim import (
+    Climatology,
+    inspect_climatology,
+)
 
 
 @pytest.fixture(scope="session")
@@ -43,6 +47,11 @@ def expected_at(external_clim):
     )
 
 
+@inspect_climatology("climatology")
+def _inspect_climatology(climatology, **kwargs):
+    return climatology
+
+
 @pytest.mark.parametrize(
     "lat, lon, month, day",
     [
@@ -71,3 +80,50 @@ def test_get_value(external_at, expected_at, lat, lon, month, day):
     expected = expected_at.get_value(**kwargs)
     expected = np.float64(np.nan if expected is None else expected)
     assert np.allclose(result, expected, equal_nan=True)
+
+
+@pytest.mark.parametrize(
+    "lat, lon, month, day, expected",
+    [
+        [53.5, 10.0, 7, 4, 17.317651748657227],
+        [42.5, 1.4, 2, 16, 3.752354383468628],
+        [57.5, 9.4, 6, 1, 13.33060359954834],
+        [-68.4, -52.3, 11, 21, -4.203909397125244],
+    ],
+)
+def test_inspect_climatology(external_at, lat, lon, month, day, expected):
+    result = _inspect_climatology(external_at, lat=lat, lon=lon, month=month, day=day)
+    assert result == expected
+
+
+@pytest.mark.parametrize(
+    "lat, lon, month, day, expected",
+    [
+        [53.5, 10.0, 7, 4, 17.317651748657227],
+        [42.5, 1.4, 2, 16, 3.752354383468628],
+        [57.5, 9.4, 6, 1, 13.33060359954834],
+        [-68.4, -52.3, 11, 21, -4.203909397125244],
+    ],
+)
+def test_inspect_climatology_date(external_at, lat, lon, month, day, expected):
+    date = pd.to_datetime(f"2002-{month}-{day}")
+    result = _inspect_climatology(external_at, lat=lat, lon=lon, date=date)
+    assert result == expected
+
+
+@pytest.mark.parametrize(
+    "lat, lon, month, day",
+    [
+        [-190.0, 10.0, 7, 4],
+        [42.5, 95.0, 2, 16],
+        [57.5, 9.4, 13, 1],
+        [-68.4, -52.3, 11, 42],
+        [None, 10.0, 7, 4],
+        [42.5, None, 2, 16],
+        [57.5, 9.4, None, 1],
+        [-68.4, -52.3, 11, None],
+    ],
+)
+def test_inspect_climatology_nan(external_at, lat, lon, month, day):
+    result = _inspect_climatology(external_at, lat=lat, lon=lon, month=month, day=day)
+    assert np.isnan(result)
