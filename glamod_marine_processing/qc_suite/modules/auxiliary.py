@@ -409,7 +409,7 @@ def inspect_arrays(params: list[str]) -> Callable:
         arrays = []
         for param in params:
             if param not in arguments:
-                raise ValueError(f"Parameter {param} is not a valid parameter.")
+                raise ValueError(f"Parameter '{param}' is not a valid parameter.")
 
             value = arguments[param]
             arr = np.atleast_1d(arguments[param])
