@@ -16,7 +16,7 @@ from numpy import ndarray
 from xclim.core.units import convert_units_to
 
 from .auxiliary import ValueFloatType, generic_decorator, isvalid
-from .time_control import day_in_year, get_month_lengths, split_date, which_pentad
+from .time_control import convert_date, day_in_year, get_month_lengths, which_pentad
 
 
 def inspect_climatology(
@@ -69,6 +69,7 @@ def inspect_climatology(
             climatology = arguments[clim_key]
             if isinstance(climatology, Climatology):
                 get_value_sig = inspect.signature(climatology.get_value)
+                required_keys = {}
                 required_keys = {
                     name
                     for name, param in get_value_sig.parameters.items()
@@ -84,14 +85,12 @@ def inspect_climatology(
                     )
                 try:
                     climatology = climatology.get_value(**meta_kwargs)
-                except ValueError:
-                    climatology = np.nan
-                except TypeError:
+                except (TypeError, ValueError):
                     climatology = np.nan
 
             arguments[clim_key] = climatology
 
-    pre_handler._decorator_kwargs = {"lat", "lon", "date"}
+    pre_handler._decorator_kwargs = {"lat", "lon", "date", "month", "day"}
 
     return generic_decorator(pre_handler=pre_handler)
 
@@ -263,10 +262,11 @@ class Climatology:
             self.data.attrs["units"] = source_units
         self.data = convert_units_to(self.data, target_units)
 
+    @convert_date(["month", "day"])
     def get_value(
         self,
-        lat: float | None | Sequence[float | None] | np.ndarray = None,
-        lon: float | None | Sequence[float | None] | np.ndarray = None,
+        lat: float | Sequence[float] | np.ndarray,
+        lon: float | Sequence[float] | np.ndarray,
         date: datetime | None | Sequence[datetime | None] | np.ndarray = None,
         month: int | None | Sequence[int | None] | np.ndarray = None,
         day: int | None | Sequence[int | None] | np.ndarray = None,
@@ -297,11 +297,6 @@ class Climatology:
         """
         lat_arr = np.atleast_1d(lat)
         lon_arr = np.atleast_1d(lon)
-        if date is not None:
-            date_arr = pd.to_datetime(np.atleast_1d(date))
-            date_ = [split_date(date_i) for date_i in date_arr]
-            month = [date_i["month"] for date_i in date_]
-            day = [date_i["day"] for date_i in date_]
         month_arr = np.atleast_1d(month)
         day_arr = np.atleast_1d(day)
         valid_indices = isvalid(lat) & isvalid(lon) & isvalid(month) & isvalid(day)
