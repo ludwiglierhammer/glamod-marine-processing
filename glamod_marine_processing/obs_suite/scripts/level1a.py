@@ -69,7 +69,13 @@ from cdm_reader_mapper import read_mdf
 from cdm_reader_mapper.cdm_mapper import properties
 from cdm_reader_mapper.common import inspect, pandas_TextParser_hdlr
 
+import glamod_marine_processing.obs_suite.modules.blacklisting as blacklist_funcs
+
 reload(logging)  # This is to override potential previous config of logging
+
+blck_flag = 9
+header_blck_column = "report_quality"
+observations_blck_column = "quality_flag"
 
 
 # FUNCTIONS -------------------------------------------------------------------
@@ -98,6 +104,7 @@ process_options = [
     "data_model",
     "read_sections",
     "filter_reports_by",
+    "blacklisting",
 ]
 params = script_setup(process_options, sys.argv)
 
@@ -246,6 +253,42 @@ if io_dict["processed"]["total"] == 0:
     process = False
     logging.warning("No data to map to CDM after selection and cleaning")
 
+# 2.5 Flag data on blacklist
+blck_dict = {}
+if params.blacklisting:
+    logging.info("Flag data on blacklist")
+    if not chunksize:
+        data_in_data = [data_in.data]
+    else:
+        data_in_data = data_in.data
+
+    for data in data_in_data:
+        cdm_tables = sorted(
+            properties.cdm_tables, key=lambda x: 0 if x == "header" else 1
+        )
+        for cdm_table in cdm_tables:
+            inputs = params.blacklisting.get(cdm_table)
+            if inputs is None:
+                continue
+            func = getattr(blacklist_funcs, inputs["func"])
+            kwargs = {}
+            for param, columns in inputs["params"].items():
+                if isinstance(columns, list):
+                    columns = tuple(columns)
+                kwargs[param] = columns
+            blck_mask = data.apply(
+                lambda row: func(**{k: row[v] for k, v in kwargs.items()}), axis=1
+            ).reset_index(drop=True)
+            if cdm_table in blck_dict:
+                blck_dict[cdm_table] = pd.concat(
+                    [blck_dict[cdm_table], blck_mask], ignore_index=True
+                )
+            else:
+                blck_dict[cdm_table] = blck_mask
+
+    if chunksize:
+        data_in.data = pandas_TextParser_hdlr.restore(data_in.data)
+
 # 3. Map to common data model and output files
 if process:
     logging.info("Mapping to CDM")
@@ -253,6 +296,15 @@ if process:
     io_dict.update({table: {} for table in tables})
     logging.debug(f"Mapping attributes: {data_in.dtypes}")
     data_in.map_model(log_level="INFO", inplace=True)
+    for cdm_table, blck_mask in blck_dict.items():
+        if cdm_table == "header":
+            blck_column = (cdm_table, header_blck_column)
+        else:
+            blck_column = (cdm_table, observations_blck_column)
+        cond = data_in.data[blck_column].notna() & (
+            blck_mask | (data_in.data[("header", header_blck_column)] == blck_flag)
+        )
+        data_in.data.loc[cond, blck_column] = blck_flag
 
     logging.info("Printing tables to psv files")
     data_in.write(

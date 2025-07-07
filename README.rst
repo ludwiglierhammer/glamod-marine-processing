@@ -125,7 +125,7 @@ This package was created with Cookiecutter_ and the `audreyfeldroy/cookiecutter-
         :alt: Funding
 
 .. |license| image:: https://img.shields.io/github/license/glamod/glamod-marine-processing.svg
-        :target: https://github.com/glamod/glamod-marine-processing/blob/master/LICENSE
+        :target: https://github.com/glamod/glamod-marine-processing/blob/main/LICENSE
         :alt: License
 
 .. |noc| image:: https://img.shields.io/badge/Thanks%20to-NOC-blue.svg
