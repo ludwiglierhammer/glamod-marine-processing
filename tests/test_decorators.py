@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-import datetime
 import re
 
 import numpy as np
@@ -42,6 +41,11 @@ def _date_function2(date, year=None, month=None, day=None):
     return year, month, day
 
 
+@post_format_return_type(["value"])
+def _format_function(value):
+    return pd.Series(value) + 5
+
+
 @pytest.mark.parametrize("units", [{"value": "degC"}, "degC"])
 def test_convert_units(units):
     result = _convert_function(30.0, units=units)
@@ -72,8 +76,8 @@ def test_inspect_arrays(value1, value2):
     result1, result2 = _array_function(value1, value2)
     expected1 = np.atleast_1d(value1)
     expected2 = np.atleast_1d(value2)
-    assert np.array_equal(result1, expected1)
-    assert np.array_equal(result2, expected2)
+    np.testing.assert_equal(result1, expected1)
+    np.testing.assert_equal(result2, expected2)
 
 
 def test_inspect_arrays_raise_dimension():
@@ -109,3 +113,24 @@ def test_convert_date(date, year, month, day):
 def test_convert_date_raise():
     with pytest.raises(ValueError, match="Parameter 'year2' is not a valid parameter."):
         _date_function2(pd.to_datetime("2019-09-27"))
+
+
+@pytest.mark.parametrize(
+    "value, expected, array_type",
+    [
+        [[1, 2, 3, 4], [6, 7, 8, 9], "list"],
+        [pd.Series([1, 2, 3, 4]), pd.Series([6, 7, 8, 9]), "series"],
+        [np.array([1, 2, 3, 4]), np.array([6, 7, 8, 9]), "numpy"],
+        [1, 6, "scalar"],
+    ],
+)
+def test_post_format_return_type(value, expected, array_type):
+    result = _format_function(value)
+    if array_type == "list":
+        np.testing.assert_equal(result, expected)
+    elif array_type == "numpy":
+        np.testing.assert_equal(result, expected)
+    elif array_type == "series":
+        pd.testing.assert_series_equal(result, expected)
+    elif array_type == "scalar":
+        assert result == expected
