@@ -307,18 +307,6 @@ def forward_discrepancy(
 
         Parameters
         ----------
-    <<<<<<< HEAD
-        lat: array-like of float, shape (n,)
-            1-dimensional latitude array in degrees.
-        lon: array-like of float, shape (n,)
-            1-dimensional longitude array in degrees.
-        date: array-like of datetime, shape (n,)
-            1-dimensional date array.
-        vsi: array-like of float, shape (n,)
-            1-dimensional reported speed array in knots.
-        dsi: array-like of float, shape (n,)
-            1-dimensional reported heading array.
-    =======
         vsi : sequence of float, 1D np.ndarray of float, or pd.Series of float, shape (n,)
             One-dimensional reported speed array in km/h.
             Can be a sequence (e.g., list or tuple), a one-dimensional NumPy array, or a pandas Series.
@@ -338,7 +326,6 @@ def forward_discrepancy(
         date : sequence of datetime, 1D np.ndarray of datetime, or pd.Series of datetime, shape (n,)
             One-dimensional date array.
             Can be a sequence (e.g., list or tuple), a one-dimensional NumPy array, or a pandas Series.
-    >>>>>>> 8163bfa5381dd3075aae36a777386d8732f5f0cb
 
         Returns
         -------
