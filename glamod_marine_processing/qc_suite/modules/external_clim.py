@@ -79,10 +79,9 @@ def inspect_climatology(
                 missing_in_kwargs = required_keys - meta_kwargs.keys()
                 if missing_in_kwargs:
                     warnings.warn(
-                        f"The following required arguments for '{type(clim_key).__name__}.get_value' are missing from **kwargs "
+                        f"The following required key-word arguments for 'Climatology.get_value' are missing "
                         f"in function '{pre_handler.__funcname__}': {missing_in_kwargs}. "
-                        f"Ensure all required arguments are passed via **kwargs.",
-                        UserWarning,
+                        f"Ensure all required arguments are passed via **kwargs."
                     )
                 try:
                     climatology = climatology.get_value(**meta_kwargs)

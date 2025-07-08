@@ -140,3 +140,8 @@ def test_inspect_climatology_raise(external_at):
         match="Missing expected argument 'climatology2' in function '_inspect_climatology2'. The decorator requires this argument to be present.",
     ):
         _inspect_climatology2(external_at, lat=53.5, lon=10.0, month=7, day=4)
+
+
+def test_inspect_climatology_warns(external_at):
+    with pytest.warns(UserWarning):
+        _inspect_climatology(external_at, lat=53.5)
