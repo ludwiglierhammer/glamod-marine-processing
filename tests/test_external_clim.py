@@ -52,6 +52,11 @@ def _inspect_climatology(climatology, **kwargs):
     return climatology
 
 
+@inspect_climatology("climatology2")
+def _inspect_climatology2(climatology, **kwargs):
+    return climatology
+
+
 @pytest.mark.parametrize(
     "lat, lon, month, day",
     [
@@ -127,3 +132,11 @@ def test_inspect_climatology_date(external_at, lat, lon, month, day, expected):
 def test_inspect_climatology_nan(external_at, lat, lon, month, day):
     result = _inspect_climatology(external_at, lat=lat, lon=lon, month=month, day=day)
     assert np.isnan(result)
+
+
+def test_inspect_climatology_raise(external_at):
+    with pytest.raises(
+        TypeError,
+        match="Missing expected argument 'climatology2' in function '_inspect_climatology2'. The decorator requires this argument to be present.",
+    ):
+        _inspect_climatology2(external_at, lat=53.5, lon=10.0, month=7, day=4)

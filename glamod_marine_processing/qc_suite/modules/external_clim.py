@@ -63,7 +63,7 @@ def inspect_climatology(
         for clim_key in active_keys:
             if clim_key not in arguments:
                 raise TypeError(
-                    f"Missing expected argument '{clim_key}' in function '{pre_handler.__funcname__}'."
+                    f"Missing expected argument '{clim_key}' in function '{pre_handler.__funcname__}'. "
                     "The decorator requires this argument to be present."
                 )
             climatology = arguments[clim_key]
@@ -81,7 +81,8 @@ def inspect_climatology(
                     warnings.warn(
                         f"The following required arguments for '{type(clim_key).__name__}.get_value' are missing from **kwargs "
                         f"in function '{pre_handler.__funcname__}': {missing_in_kwargs}. "
-                        f"Ensure all required arguments are passed via **kwargs."
+                        f"Ensure all required arguments are passed via **kwargs.",
+                        UserWarning,
                     )
                 try:
                     climatology = climatology.get_value(**meta_kwargs)

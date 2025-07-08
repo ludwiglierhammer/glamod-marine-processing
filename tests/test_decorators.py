@@ -20,6 +20,11 @@ def _convert_function(value):
     return value
 
 
+@convert_units(value2="K")
+def _convert_function2(value):
+    return value
+
+
 @inspect_arrays(["value1", "value2"])
 def _array_function(value1, value2):
     return value1, value2
@@ -59,6 +64,13 @@ def test_convert_units_no_conversion():
 def test_convert_units_raise():
     with pytest.raises(DimensionalityError):
         _convert_function(30.0, units="hPa")
+
+
+def test_convert_units_valueerror():
+    with pytest.raises(
+        ValueError, match="Parameter 'value2' not found in function arguments."
+    ):
+        _convert_function2(30.0, units={"value2": "degC"})
 
 
 @pytest.mark.parametrize(
