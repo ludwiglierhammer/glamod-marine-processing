@@ -174,6 +174,8 @@ def format_return_type(result_array: np.ndarray, *input_values: Any) -> Any:
         return pd.Series(result_array, index=input_value.index, dtype=int)
     if isinstance(input_value, (list, tuple)):
         return type(input_value)(result_array.tolist())
+    if isinstance(input_value, np.ndarray) and isinstance(result_array, pd.Series):
+        return result_array.to_numpy()
     return result_array  # np.ndarray or fallback
 
 
@@ -409,7 +411,7 @@ def inspect_arrays(params: list[str]) -> Callable:
         arrays = []
         for param in params:
             if param not in arguments:
-                raise ValueError(f"Parameter {param} is not a valid parameter.")
+                raise ValueError(f"Parameter '{param}' is not a valid parameter.")
 
             value = arguments[param]
             arr = np.atleast_1d(arguments[param])
@@ -472,6 +474,9 @@ def convert_units(**units_by_name) -> Callable:
         units_dict = meta_kwargs.get("units")
         if units_dict is None:
             return
+        if isinstance(units_dict, str):
+            units_str = units_dict
+            units_dict = {param: units_str for param in arguments}
 
         for param, target_units in units_by_name.items():
             if param not in arguments:

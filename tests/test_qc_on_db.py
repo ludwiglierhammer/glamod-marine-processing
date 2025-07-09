@@ -360,8 +360,6 @@ def test_do_at_missing_value_check(testdata, apply_func):
             passed,
         ]
     )
-    print(results)
-    print(expected)
     pd.testing.assert_series_equal(results, expected)
 
 

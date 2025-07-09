@@ -16,7 +16,7 @@ from numpy import ndarray
 from xclim.core.units import convert_units_to
 
 from .auxiliary import ValueFloatType, generic_decorator, isvalid
-from .time_control import day_in_year, split_date, which_pentad
+from .time_control import convert_date, day_in_year, get_month_lengths, which_pentad
 
 
 def inspect_climatology(
@@ -63,12 +63,13 @@ def inspect_climatology(
         for clim_key in active_keys:
             if clim_key not in arguments:
                 raise TypeError(
-                    f"Missing expected argument '{clim_key}' in function '{pre_handler.__funcname__}'."
+                    f"Missing expected argument '{clim_key}' in function '{pre_handler.__funcname__}'. "
                     "The decorator requires this argument to be present."
                 )
             climatology = arguments[clim_key]
             if isinstance(climatology, Climatology):
                 get_value_sig = inspect.signature(climatology.get_value)
+                required_keys = {}
                 required_keys = {
                     name
                     for name, param in get_value_sig.parameters.items()
@@ -78,20 +79,18 @@ def inspect_climatology(
                 missing_in_kwargs = required_keys - meta_kwargs.keys()
                 if missing_in_kwargs:
                     warnings.warn(
-                        f"The following required arguments for '{type(clim_key).__name__}.get_value' are missing from **kwargs "
+                        f"The following required key-word arguments for 'Climatology.get_value' are missing "
                         f"in function '{pre_handler.__funcname__}': {missing_in_kwargs}. "
                         f"Ensure all required arguments are passed via **kwargs."
                     )
                 try:
                     climatology = climatology.get_value(**meta_kwargs)
-                except ValueError:
-                    climatology = np.nan
-                except TypeError:
+                except (TypeError, ValueError):
                     climatology = np.nan
 
             arguments[clim_key] = climatology
 
-    pre_handler._decorator_kwargs = {"lat", "lon", "date"}
+    pre_handler._decorator_kwargs = {"lat", "lon", "date", "month", "day"}
 
     return generic_decorator(pre_handler=pre_handler)
 
@@ -263,10 +262,11 @@ class Climatology:
             self.data.attrs["units"] = source_units
         self.data = convert_units_to(self.data, target_units)
 
+    @convert_date(["month", "day"])
     def get_value(
         self,
-        lat: float | None | Sequence[float | None] | np.ndarray = None,
-        lon: float | None | Sequence[float | None] | np.ndarray = None,
+        lat: float | Sequence[float] | np.ndarray,
+        lon: float | Sequence[float] | np.ndarray,
         date: datetime | None | Sequence[datetime | None] | np.ndarray = None,
         month: int | None | Sequence[int | None] | np.ndarray = None,
         day: int | None | Sequence[int | None] | np.ndarray = None,
@@ -297,23 +297,39 @@ class Climatology:
         """
         lat_arr = np.atleast_1d(lat)
         lon_arr = np.atleast_1d(lon)
-        if date is not None:
-            date_arr = pd.to_datetime(np.atleast_1d(date))
-            date_ = [split_date(date_i) for date_i in date_arr]
-            month = [date_i["month"] for date_i in date_]
-            day = [date_i["day"] for date_i in date_]
         month_arr = np.atleast_1d(month)
         day_arr = np.atleast_1d(day)
         valid_indices = isvalid(lat) & isvalid(lon) & isvalid(month) & isvalid(day)
         result = np.full(lat_arr.shape, None, dtype=float)  # type: np.ndarray
 
+        if isinstance(valid_indices, (bool, np.bool)):
+            valid_indices = [valid_indices]
+
         for i in range(np.size(result)):
             if not valid_indices[i]:
                 continue
-            tindex = self.get_tindex(int(month_arr[i]), int(day_arr[i]))
+
+            mon_i = int(month_arr[i])
+            ml = get_month_lengths(2004)
+            day_i = int(day_arr[i])
+            lat_i = lat_arr[i]
+            lon_i = lon_arr[i]
+            if (
+                mon_i < 1
+                or mon_i > 12
+                or day_i < 1
+                or day_i > ml[mon_i - 1]
+                or lat_i < -180
+                or lat_i > 180
+                or lon_i < -90
+                or lon_i > 90
+            ):
+                continue
+
+            tindex = self.get_tindex(mon_i, day_i)
             data = self.data.isel(**{self.time_axis: tindex})
-            data = data.sel(**{self.lat_axis: lat_arr[i]}, method="nearest")
-            data = data.sel(**{self.lon_axis: lon_arr[i]}, method="nearest")
+            data = data.sel(**{self.lat_axis: lat_i}, method="nearest")
+            data = data.sel(**{self.lon_axis: lon_i}, method="nearest")
             result[i] = data.values
 
         if np.isscalar(lat):
