@@ -84,16 +84,22 @@ def split_date(date: datetime) -> dict:
     dict
         Dictionary containing year, month, day and hour.
     """
-    default = {"year": np.nan, "month": np.nan, "day": np.nan, "hour": np.nan}
     try:
         year = int(date.year)
+    except (AttributeError, ValueError):
+        year = np.nan
+    try:
         month = int(date.month)
+    except (AttributeError, ValueError):
+        month = np.nan
+    try:
         day = int(date.day)
+    except (AttributeError, ValueError):
+        day = np.nan
+    try:
         hour = date.hour + date.minute / 60.0 + date.second / 3600.0
-    except ValueError:
-        return default
-    except AttributeError:
-        return default
+    except (AttributeError, ValueError):
+        hour = np.nan
     return {"year": year, "month": month, "day": day, "hour": hour}
 
 

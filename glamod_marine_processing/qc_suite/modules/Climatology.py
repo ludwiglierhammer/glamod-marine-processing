@@ -212,6 +212,14 @@ class Climatology:
         ml = get_month_lengths(2004)
         if day < 1 or day > ml[month - 1]:
             return None
+        if lat is None:
+            return
+        if lat < -180 or lat > 180:
+            return
+        if lon is None:
+            return
+        if lon < -80 or lon > 90:
+            return
 
         yindex = lat_to_yindex(lat, self.res)
         xindex = lon_to_xindex(lon, self.res)
