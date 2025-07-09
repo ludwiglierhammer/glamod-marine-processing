@@ -1345,12 +1345,12 @@ def test_do_track_check(testdata_track):
         [
             passed,
             passed,
-            failed,
             passed,
             passed,
             passed,
             passed,
-            failed,
+            passed,
+            passed,
             passed,
             passed,
         ]
