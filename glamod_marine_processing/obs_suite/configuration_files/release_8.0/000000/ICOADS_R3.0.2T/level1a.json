@@ -100,6 +100,18 @@
       ]
     }
   },
+  "generic_ids": {
+    "params": {
+      "inid": [
+        "core",
+        "ID"
+      ],
+      "inyear": [
+        "core",
+        "YR"
+      ]
+    }
+  },
   "103-793": {
     "data_model": "icoads_r302_d793",
     "read_sections": [
