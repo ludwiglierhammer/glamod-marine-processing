@@ -294,7 +294,7 @@ if params.blacklisting:
 
 # 2.6. Flag data with generic ID
 gnrc_dict = {}
-if param.generic_ids:
+if params.generic_ids:
     logging.info("Flag data with generic ID")
     if not chunksize:
         data_in_data = [data_in.data]
@@ -328,7 +328,7 @@ if process:
     io_dict.update({table: {} for table in tables})
     logging.debug(f"Mapping attributes: {data_in.dtypes}")
     data_in.map_model(log_level="INFO", inplace=True)
-    gnrc_column = (cdm_table, header_quality_column)
+    gnrc_column = ("header", header_quality_column)
     cond = data_in.data[gnrc_column].notna() & gnrc_dict["header"]
     data_in.data.loc[cond, gnrc_column] = gnrc_flag
 
