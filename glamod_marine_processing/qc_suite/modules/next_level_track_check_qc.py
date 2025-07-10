@@ -26,7 +26,7 @@ from .auxiliary import (
 
 
 @post_format_return_type(["value"])
-@inspect_arrays(["value", "lat", "lon", "date"])
+@inspect_arrays(["value", "lat", "lon", "date"], sortby="date")
 @convert_units(lat="degrees", lon="degrees")
 def do_spike_check(
     value: SequenceFloatType,
@@ -191,11 +191,11 @@ def calculate_course_parameters(
         date_earlier.year,
         date_earlier.month,
         date_earlier.day,
-        date_earlier.hour,
+        date_earlier.hour + date_earlier.minute / 60.0,
         date_later.year,
         date_later.month,
         date_later.day,
-        date_later.hour,
+        date_later.hour + date_later.minute / 60.0,
     )
     if timediff != 0 and isvalid(timediff):
         speed = distance / abs(timediff)
@@ -287,7 +287,7 @@ def calculate_speed_course_distance_time_difference(
     return speed, distance, course, timediff
 
 
-@inspect_arrays(["vsi", "dsi", "lat", "lon", "date"])
+@inspect_arrays(["vsi", "dsi", "lat", "lon", "date"], sortby="date")
 @convert_units(vsi="km/h", dsi="degrees", lat="degrees", lon="degrees")
 def forward_discrepancy(
     lat: SequenceFloatType,
@@ -403,7 +403,7 @@ def forward_discrepancy(
     return distance_from_est_location
 
 
-@inspect_arrays(["vsi", "dsi", "lat", "lon", "date"])
+@inspect_arrays(["vsi", "dsi", "lat", "lon", "date"], sortby="date")
 @convert_units(vsi="km/h", dsi="degrees", lat="degrees", lon="degrees")
 def backward_discrepancy(
     lat: SequenceFloatType,
@@ -518,7 +518,6 @@ def backward_discrepancy(
     return distance_from_est_location[::-1]
 
 
-@post_format_return_type(["lat"])
 @inspect_arrays(["lat", "lon", "timediff"])
 @convert_units(lat="degrees", lon="degrees")
 def calculate_midpoint(
@@ -565,7 +564,6 @@ def calculate_midpoint(
     for i in range(1, number_of_obs - 1):
         t0 = timediff[i]
         t1 = timediff[i + 1]
-
         if t0 is not None and t1 is not None:
             if t0 + t1 != 0:
                 fraction_of_time_diff = t0 / (t0 + t1)
@@ -597,7 +595,7 @@ def calculate_midpoint(
 
 
 @post_format_return_type(["vsi"])
-@inspect_arrays(["vsi", "dsi", "lat", "lon", "date"])
+@inspect_arrays(["vsi", "dsi", "lat", "lon", "date"], sortby="date")
 @convert_units(vsi="km/h", dsi="degrees", lat="degrees", lon="degrees")
 def do_track_check(
     vsi: SequenceFloatType,
@@ -844,7 +842,7 @@ def do_few_check(
 
 
 @post_format_return_type(["at"])
-@inspect_arrays(["at", "dpt", "lat", "lon", "date"])
+@inspect_arrays(["at", "dpt", "lat", "lon", "date"], sortby="date")
 @convert_units(at="K", dpt="K", lat="degrees", lon="degrees")
 def find_saturated_runs(
     at: SequenceFloatType,
@@ -949,7 +947,6 @@ def find_saturated_runs(
             date_later=date[later],
             date_earlier=date[earlier],
         )
-
         if tdiff >= min_time_threshold:
             for loc in satcount:
                 repsat[loc] = failed
@@ -1099,7 +1096,7 @@ def find_repeated_values(
 
 
 @post_format_return_type(["lat"])
-@inspect_arrays(["lat", "lon", "date"])
+@inspect_arrays(["lat", "lon", "date"], sortby="date")
 @convert_units(lat="degrees", lon="degrees")
 def do_iquam_track_check(
     lat: SequenceFloatType,

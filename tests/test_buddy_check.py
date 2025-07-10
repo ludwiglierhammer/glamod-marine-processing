@@ -16,11 +16,6 @@ from glamod_marine_processing.qc_suite.modules.next_level_deck_qc import (
 from glamod_marine_processing.qc_suite.modules.auxiliary import passed
 
 
-class IMMA:
-    def __init__(self):  # Standard instance object
-        self.data = {}  # Dictionary to hold the parameter values
-
-
 @pytest.fixture
 def reps():
 

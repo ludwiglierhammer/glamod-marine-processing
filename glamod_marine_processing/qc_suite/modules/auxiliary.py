@@ -360,7 +360,7 @@ def post_format_return_type(params: list[str]) -> Callable:
     return generic_decorator(post_handler=post_handler)
 
 
-def inspect_arrays(params: list[str]) -> Callable:
+def inspect_arrays(params: list[str], sortby: str | None = None) -> Callable:
     """
     Create a decorator that inspects specified input parameters of a function,
     converts them to one-dimensional NumPy arrays, and validates their lengths.
@@ -374,6 +374,8 @@ def inspect_arrays(params: list[str]) -> Callable:
     params : list of str
         A list of parameter names to inspect in the decorated function's arguments.
         Each named parameter will be converted to a NumPy array and validated.
+    sortby : str, optional
+        The name of the parameter to sort by.
 
     Returns
     -------
@@ -426,9 +428,20 @@ def inspect_arrays(params: list[str]) -> Callable:
         if any(length != lengths[0] for length in lengths):
             raise ValueError(f"Input {params} must all have the same length.")
 
-    pre_handler._decorator_kwargs = set()
+        if sortby:
+            unsorted_array = arguments[sortby]
+            indices = np.argsort(unsorted_array)
+            for param in params:
+                arguments[param] = arguments[param][indices]
 
-    return generic_decorator(pre_handler=pre_handler)
+    def post_handler(result, arguments: dict, **original_call):
+        if sortby is None:
+            return result
+        sort_indices = np.argsort(original_call[sortby])
+        inverse_indices = np.argsort(sort_indices)
+        return result[inverse_indices]
+
+    return generic_decorator(pre_handler=pre_handler, post_handler=post_handler)
 
 
 def convert_units(**units_by_name) -> Callable:
