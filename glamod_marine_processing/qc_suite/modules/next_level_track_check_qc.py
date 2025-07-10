@@ -189,11 +189,11 @@ def calculate_course_parameters(
         date_earlier.year,
         date_earlier.month,
         date_earlier.day,
-        date_earlier.hour + date_earlier.minute/60.,
+        date_earlier.hour + date_earlier.minute / 60.0,
         date_later.year,
         date_later.month,
         date_later.day,
-        date_later.hour + date_later.minute/60.,
+        date_later.hour + date_later.minute / 60.0,
     )
     if timediff != 0 and isvalid(timediff):
         speed = distance / abs(timediff)
