@@ -364,6 +364,7 @@ class Options:
         self.process_list = click.option(
             "-p_list",
             "--process_list",
+            multiple=True,
             help="List of decks to process. Take default from level configuration file (obs_suite).",
         )
         self.year_init = click.option(
