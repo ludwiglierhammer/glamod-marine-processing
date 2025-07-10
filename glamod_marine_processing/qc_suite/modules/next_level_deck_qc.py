@@ -26,6 +26,7 @@ from glamod_marine_processing.qc_suite.modules.auxiliary import (
     untested,
     inspect_arrays,
     convert_units,
+    post_format_return_type,
 )
 
 
@@ -423,7 +424,7 @@ class SuperObsGrid:
         pindex = which_pentad(month, day) - 1
         return self.buddy_stdev[xindex][yindex][pindex]
 
-
+@post_format_return_type(["anoms"])
 @inspect_arrays(["lats", "lons", "dates", "anoms"])
 @convert_units(lats="degrees", lons="degrees")
 def mds_buddy_check(
@@ -526,7 +527,7 @@ def mds_buddy_check(
 
     return qc_outcomes
 
-
+@post_format_return_type(["anoms"])
 @inspect_arrays(["lats", "lons", "dates", "anoms"])
 @convert_units(lats="degrees", lons="degrees")
 def bayesian_buddy_check(
