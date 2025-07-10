@@ -1431,7 +1431,7 @@ def test_find_saturated_runs(testdata_track):
             lat=track[("header", "latitude")],
             lon=track[("header", "longitude")],
             date=track[("header", "report_timestamp")],
-            min_time_threshold=48.0,
+            min_time_threshold=38.0,
             shortest_run=4,
         ),
         include_groups=False,
