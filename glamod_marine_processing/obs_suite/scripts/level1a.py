@@ -161,7 +161,7 @@ if params.filter_reports_by:
         data_excluded["data"][k] = data_excl.data
         io_dict["not_selected"][k]["total"] = len(data_excl)
         if io_dict["not_selected"][k]["total"] > 0:
-            if data_in.dtype.get(col, {}) in ["str", "object", "key"]:
+            if data_in.dtypes.get(col, {}) in ["str", "object", "key"]:
                 io_dict["not_selected"][k].update(data_excl.unique(columns=col))
     io_dict["not_selected"]["total"] = sum(
         [v.get("total") for k, v in io_dict["not_selected"].items()]
