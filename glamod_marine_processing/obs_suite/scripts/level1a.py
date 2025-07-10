@@ -328,9 +328,14 @@ if process:
     io_dict.update({table: {} for table in tables})
     logging.debug(f"Mapping attributes: {data_in.dtypes}")
     data_in.map_model(log_level="INFO", inplace=True)
-    gnrc_column = ("header", header_quality_column)
-    cond = data_in.data[gnrc_column].notna() & gnrc_dict["header"]
-    data_in.data.loc[cond, gnrc_column] = gnrc_flag
+
+    for cdm_table, gnrc_mask in gnrc_dict.items():
+        if cdm_table == "header":
+            gnrc_column = (cdm_table, header_quality_column)
+        else:
+            gnrc_column = (cdm_table, observations_quality_column)
+        cond = data_in.data[gnrc_column].notna() & gnrc_dict[cdm_table]
+        data_in.data.loc[cond, gnrc_column] = gnrc_flag
 
     for cdm_table, blck_mask in blck_dict.items():
         if cdm_table == "header":
