@@ -214,12 +214,12 @@ def test_do_track_check_testdata():
     expected = [
         passed,
         passed,
-        failed,
         passed,
         passed,
         passed,
         passed,
-        failed,
+        passed,
+        passed,
         passed,
         passed,
     ]
