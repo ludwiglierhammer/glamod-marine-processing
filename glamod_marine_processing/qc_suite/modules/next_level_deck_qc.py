@@ -8,6 +8,7 @@ from typing import Sequence
 
 import math
 import numpy as np
+import pandas as pd
 
 from glamod_marine_processing.qc_suite.modules.external_clim import Climatology
 from glamod_marine_processing.qc_suite.modules.next_level_trackqc import is_monotonic
@@ -110,8 +111,9 @@ class SuperObsGrid:
         """
         n_obs = len(lats)
         for i in range(n_obs):
+            date = pd.Timestamp(dates[i])
             self.add_single_observation(
-                lats[i], lons[i], dates[i].month, dates[i].day, values[i]
+                lats[i], lons[i], date.month, date.day, values[i]
             )
         self.take_average()
 
@@ -511,8 +513,8 @@ def mds_buddy_check(
     for i in range(numobs):
         lat = lats[i]
         lon = lons[i]
-        mon = dates[i].month
-        day = dates[i].day
+        mon = pd.Timestamp(dates[i]).month
+        day = pd.Timestamp(dates[i]).day
 
         # if the SST anomaly differs from the neighbour average by more than the calculated range then reject
         x = anoms[i]

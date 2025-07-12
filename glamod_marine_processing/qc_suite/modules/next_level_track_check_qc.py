@@ -680,7 +680,7 @@ def do_track_check(
 
     # fewer than three obs - set the fewsome flag
     if number_of_obs < 3:
-        return [passed] * number_of_obs
+        return np.asarray([passed] * number_of_obs)
 
     if id_is_generic(ids, pd.Timestamp(date[0]).year):
         return np.asarray([passed] * number_of_obs)

@@ -13,7 +13,10 @@ import pandas as pd
 from cdm_reader_mapper import read_mdf
 from cdm_reader_mapper.data import test_data
 
-from glamod_marine_processing.qc_suite.modules.external_clim import Climatology, inspect_climatology
+from glamod_marine_processing.qc_suite.modules.external_clim import (
+    Climatology,
+    inspect_climatology,
+)
 
 from glamod_marine_processing.qc_suite.modules.next_level_qc import (
     do_climatology_check,
@@ -39,11 +42,11 @@ from glamod_marine_processing.qc_suite.modules.next_level_deck_qc import (
     mds_buddy_check,
 )
 
+
 @inspect_climatology("climatology")
 def calculate_anomalies(value, climatology, **kwargs):
     anomaly = value - climatology
     return anomaly
-
 
 
 def fix_cdm(db_cdm):
@@ -66,7 +69,7 @@ def fix_cdm(db_cdm):
             ids = db_cdm.data[(table, "primary_station_id")]
             for i, id in enumerate(ids):
                 if id is None:
-                    ids[i] = '        '
+                    ids[i] = "        "
             db_cdm.data[(table, "primary_station_id")] = ids
 
             db_cdm.data[(table, "report_timestamp")] = pd.to_datetime(
@@ -104,23 +107,40 @@ from pathlib import Path
 data_dir = Path(os.getenv("DATADIR"))
 
 
-
 print("Start")
+print(datetime.datetime.now())
+
+# Read in the climatology
+data_dir = os.getenv("DATADIR")
+# clim_file_names = []
+# for i in range(365):
+#     new_output_file = Path(data_dir) / "SST_CCI_climatology" / f"D{i + 1:03d}.nc"
+#     clim_file_names.append(new_output_file)
+# sst_clim = Climatology.open_netcdf_file(clim_file_names, 'analysed_sst')
+sst_clim = Climatology.open_netcdf_file(
+    Path(data_dir) / "SST_CCI_climatology" / "SST_1x1_daily.nc",
+    "sst",
+    time_axis="time",
+    lat_axis="latitude",
+    lon_axis="longitude",
+)
+
+print("Read SST climatology")
 print(datetime.datetime.now())
 
 imodel = "icoads"
 encoding = "cp1252"
 
 
-single_file = data_dir / "ICOADS" / "cat.txt"
+single_file = Path(data_dir) / "ICOADS" / "cat.txt"
 
-with open(single_file, 'w') as outfile:
+with open(single_file, "w") as outfile:
     filepaths = [
-        data_dir / "ICOADS" / "IMMA1_R3.0.0_1899-01.gz",
-        # data_dir / "ICOADS" / "IMMA1_R3.0.0_1850-02.gz",
-        # data_dir / "ICOADS" / "IMMA1_R3.0.0_1850-03.gz",
-        # data_dir / "ICOADS" / "IMMA1_R3.0.0_1850-04.gz",
-        # data_dir / "ICOADS" / "IMMA1_R3.0.0_1850-05.gz",
+        Path(data_dir) / "ICOADS" / "IMMA1_R3.0.0_1850-01.gz",
+        Path(data_dir) / "ICOADS" / "IMMA1_R3.0.0_1850-02.gz",
+        Path(data_dir) / "ICOADS" / "IMMA1_R3.0.0_1850-03.gz",
+        Path(data_dir) / "ICOADS" / "IMMA1_R3.0.0_1850-04.gz",
+        Path(data_dir) / "ICOADS" / "IMMA1_R3.0.0_1850-05.gz",
     ]
     for fname in filepaths:
         with gzip.open(fname, "rb") as f_in:
@@ -129,7 +149,7 @@ with open(single_file, 'w') as outfile:
         with open(str(fname).replace(".gz", "")) as f:
             for line in f:
                 outfile.write(line)
-#single_file = data_dir / "ICOADS" / "IMMA1_R3.0.0_1899-01"
+# single_file = data_dir / "ICOADS" / "IMMA1_R3.0.0_1899-01"
 
 print("Preprocessed IMMA files, gunzipped, concatenated etc.")
 print(datetime.datetime.now())
@@ -142,52 +162,42 @@ print("Read IMMA files")
 print(datetime.datetime.now())
 
 # Fix missing hours
-hours = db_imma.data[('core','HR')].values
+hours = db_imma.data[("core", "HR")].values
 hours[np.isnan(hours)] = 0.0
-db_imma.data[('core','HR')].values[:] = hours
+db_imma.data[("core", "HR")].values[:] = hours
 
 db_cdm = db_imma.map_model()
 
 db_cdm = fix_cdm(db_cdm)
 
-header = db_cdm.data['header'].sort_values(by=['primary_station_id', 'report_id'])
-obs_sst = db_cdm.data['observations-sst'].sort_values(by='report_id')
-obs_at = db_cdm.data['observations-at'].sort_values(by='report_id')
+header = db_cdm.data["header"].sort_values(by=["primary_station_id", "report_id"])
+obs_sst = db_cdm.data["observations-sst"].sort_values(by="report_id")
+obs_at = db_cdm.data["observations-at"].sort_values(by="report_id")
 
 print("Read everything in IMMAwise")
 print(datetime.datetime.now())
 
-# Read in the climatology
-data_dir = os.getenv("DATADIR")
-clim_file_names = []
-for i in range(365):
-    new_output_file = Path(data_dir) / "SST_CCI_climatology" / f"D{i + 1:03d}.nc"
-    clim_file_names.append(new_output_file)
-sst_clim = Climatology.open_netcdf_file(clim_file_names, 'analysed_sst')
 
-print("Read SST climatology")
-print(datetime.datetime.now())
-
-#read in AT stdev climatology
-at_stdev_clim_file = Path(data_dir) / 'QCClimatologies' / 'AT_pentad_stdev_climatology.nc'
+# read in SST stdev climatology
+at_stdev_clim_file = (
+    Path(data_dir) / "QCClimatologies" / "HadSST2_pentad_stdev_climatology.nc"
+)
 at_stdev_clim = Climatology.open_netcdf_file(
-    at_stdev_clim_file,
-    'at',
-    time_axis="pentad_time"
+    at_stdev_clim_file, "sst", time_axis="time"
 )
 
-print("Read air temperature stdev clim")
+print("Read SST temperature stdev clim")
 print(datetime.datetime.now())
 
 sst_anomalies = obs_sst.apply(
-        lambda row: calculate_anomalies(
-            value=row["observation_value"],
-            climatology=sst_clim,
-            lat=row["latitude"],
-            lon=row["longitude"],
-            date=row["date_time"],
-        ),
-        axis=1,
+    lambda row: calculate_anomalies(
+        value=row["observation_value"],
+        climatology=sst_clim,
+        lat=row["latitude"],
+        lon=row["longitude"],
+        date=row["date_time"],
+    ),
+    axis=1,
 )
 
 print("Calculated anomalies")
@@ -195,18 +205,20 @@ print(datetime.datetime.now())
 
 groups = header.groupby("primary_station_id", group_keys=False)
 results = groups.apply(
-    lambda track: pd.Series(do_track_check(
-        vsi=track["station_speed"],
-        dsi=track["station_course"],
-        lat=track["latitude"],
-        lon=track["longitude"],
-        date=track["report_timestamp"],
-        ids=track.name,
-        max_direction_change=60.0,
-        max_speed_change=10.0,
-        max_absolute_speed=40.0,
-        max_midpoint_discrepancy=150.0,
-    )),
+    lambda track: pd.Series(
+        do_track_check(
+            vsi=track["station_speed"],
+            dsi=track["station_course"],
+            lat=track["latitude"],
+            lon=track["longitude"],
+            date=track["report_timestamp"],
+            ids=track.name,
+            max_direction_change=60.0,
+            max_speed_change=10.0,
+            max_absolute_speed=40.0,
+            max_midpoint_discrepancy=150.0,
+        )
+    ),
     include_groups=False,
 )
 results = results.explode()
@@ -222,20 +234,20 @@ number_of_obs_thresholds = [[0, 5, 15, 100], [0], [0, 5, 15, 100], [0]]
 multipliers = [[4.0, 3.5, 3.0, 2.5], [4.0], [4.0, 3.5, 3.0, 2.5], [4.0]]
 
 selection = ~np.isnan(sst_anomalies)
-lats = obs_sst['latitude'].values[selection]
-lons = obs_sst['longitude'].values[selection]
-dates = obs_sst['date_time'][selection].reset_index().date_time
+lats = obs_sst["latitude"].values[selection]
+lons = obs_sst["longitude"].values[selection]
+dates = obs_sst["date_time"][selection].reset_index().date_time
 
 buddy_check = mds_buddy_check(
-            lats,
-            lons,
-            dates,
-            sst_anomalies[selection],
-            at_stdev_clim,
-            limits,
-            number_of_obs_thresholds,
-            multipliers,
-        )
+    lats,
+    lons,
+    dates,
+    sst_anomalies[selection],
+    at_stdev_clim,
+    limits,
+    number_of_obs_thresholds,
+    multipliers,
+)
 
 buddy_check_filled = np.zeros(len(sst_anomalies)) + 2.0
 buddy_check_filled[selection] = buddy_check[:]
@@ -245,112 +257,91 @@ print("Ran buddy checks")
 print(datetime.datetime.now())
 
 
-position_check_qc = header.apply(
-        lambda row: do_position_check(
-            latitude=row["latitude"],
-            longitude=row["longitude"]
-        ),
-        axis=1,
+position_check_qc = do_position_check(lat=header["latitude"], lon=header["longitude"])
+
+day_check = do_day_check(
+    date=header["report_timestamp"],
+    lat=header["latitude"],
+    lon=header["longitude"],
 )
 
-day_check_qc = header.apply(
-        lambda row: do_day_check(
-            date=row["report_timestamp"],
-            latitude=row["latitude"],
-            longitude=row["longitude"],
-        ),
-        axis=1,
+sst_climatology_check = do_climatology_check(
+    value=obs_sst["observation_value"],
+    climatology=sst_clim,
+    maximum_anomaly=8.0,  # K
+    lat=obs_sst["latitude"],
+    lon=obs_sst["longitude"],
+    date=obs_sst["date_time"],
 )
 
-sst_climatology_check = obs_sst.apply(
-        lambda row: do_climatology_check(
-            value=row["observation_value"],
-            climatology=sst_clim,
-            maximum_anomaly=8.0,  # K
-            lat=row["latitude"],
-            lon=row["longitude"],
-            date=row["date_time"],
-        ),
-        axis=1,
-    )
+sst_missing_check = do_missing_value_check(value=obs_sst["observation_value"])
 
-
-sst_missing_check = obs_sst.apply(
-        lambda row: do_missing_value_check(value=row["observation_value"]),
-        axis=1,
+sst_freeze_check = do_sst_freeze_check(
+    sst=obs_sst["observation_value"],
+    freezing_point=271.35,
+    freeze_check_n_sigma=2.0
 )
 
-sst_freeze_check = obs_sst.apply(
-        lambda row: do_sst_freeze_check(
-            sst=row["observation_value"],
-            freezing_point=271.35,
-            freeze_check_n_sigma=2.0
-        ),
-        axis=1,
+sst_hard_limit = do_hard_limit_check(
+    value=obs_sst["observation_value"],
+    limits=[268.15, 318.15],
 )
 
-sst_hard_limit = obs_sst.apply(
-        lambda row: do_hard_limit_check(
-            value=row["observation_value"],
-            hard_limits=[268.15, 318.15],
-        ),
-        axis=1,
-)
 
 
 print("Ran single obs checks")
 print(datetime.datetime.now())
 
 
+obs_sst["anom"] = sst_anomalies
+obs_sst["mdi"] = sst_missing_check
+obs_sst["fc"] = sst_freeze_check
+obs_sst["hl"] = sst_hard_limit
+obs_sst["clim"] = sst_climatology_check
+obs_sst["bud"] = buddy_check
 
+header["tc"] = track_check_qc
 
-obs_sst['anom'] = sst_anomalies
-obs_sst['mdi'] = sst_missing_check
-obs_sst['fc'] = sst_freeze_check
-obs_sst['hl'] = sst_hard_limit
-obs_sst['clim'] = sst_climatology_check
-obs_sst['bud'] = buddy_check
+obs_sst = obs_sst[obs_sst["report_id"].notna()]
 
-header['tc'] = track_check_qc
+combined = pd.merge(header, obs_sst, how="left", on="report_id")
 
-obs_sst = obs_sst[obs_sst['report_id'].notna()]
+combined[["mdi", "fc", "hl", "clim", "bud"]] = combined[
+    ["mdi", "fc", "hl", "clim", "bud"]
+].fillna(value=2)
+combined[["tc"]] = combined[["tc"]].fillna(value=2)
 
-combined = pd.merge(header, obs_sst, how='left', on='report_id')
+track_check_qc = combined["tc"].values
+sst_hard_limit = combined["hl"].values
+sst_missing_check = combined["mdi"].values
+sst_freeze_check = combined["fc"].values
+sst_climatology_check = combined["clim"].values
+sst_buddy_check = combined["bud"].values
 
-combined[['mdi', 'fc', 'hl', 'clim', 'bud']] = combined[['mdi','fc', 'hl', 'clim', 'bud']].fillna(value=2)
-combined[['tc']] = combined[['tc']].fillna(value=2)
+lats = combined["latitude_x"]
+lats2 = combined["latitude_y"]
+lons = combined["longitude_x"]
+lons2 = combined["longitude_y"]
+ssts = combined["observation_value"] - 273.15
+anoms = combined["anom"]
 
-track_check_qc = combined['tc'].values
-sst_hard_limit = combined['hl'].values
-sst_missing_check = combined['mdi'].values
-sst_freeze_check = combined['fc'].values
-sst_climatology_check = combined['clim'].values
-sst_buddy_check = combined['bud'].values
-
-lats = combined['latitude_x']
-lats2 = combined['latitude_y']
-lons = combined['longitude_x']
-lons2 = combined['longitude_y']
-ssts = combined['observation_value'] - 273.15
-anoms = combined['anom']
-
-colors = np.array([[0,0,0] for _ in range(len(lats))])
-colors[track_check_qc != 0] = [1,0,0]
-colors[sst_climatology_check != 0] = [0,1,0]
-colors[sst_freeze_check != 0] = [0,0,1]
-colors[sst_hard_limit != 0] =  [0.5, 0.5, 0.0]
+colors = np.array([[0, 0, 0] for _ in range(len(lats))])
+colors[track_check_qc != 0] = [1, 0, 0]
+colors[sst_climatology_check != 0] = [0, 1, 0]
+colors[sst_freeze_check != 0] = [0, 0, 1]
+colors[sst_hard_limit != 0] = [0.5, 0.5, 0.0]
 colors[sst_missing_check != 0] = [0.1, 0.1, 0.1]
-colors[sst_buddy_check == 1] = [0,1,1]
+colors[sst_buddy_check == 1] = [0, 1, 1]
 
-id_list = combined['primary_station_id'].unique()
+id_list = combined["primary_station_id"].unique()
 
-plot_all_tracks = False
+plot_all_tracks = True
 if plot_all_tracks:
     for id0 in id_list:
-        subset = combined[combined['primary_station_id'] == id0]
-        lats0 = subset['latitude_x']
-        lons0 = subset['longitude_x']
-        tcqc = subset['tc']
+        subset = combined[combined["primary_station_id"] == id0]
+        lats0 = subset["latitude_x"]
+        lons0 = subset["longitude_x"]
+        tcqc = subset["tc"]
 
         if max(tcqc) == 0:
             continue
@@ -361,10 +352,10 @@ if plot_all_tracks:
         min_lat = min(lats0) - 3
         max_lat = max(lats0) + 3
 
-        colors0 = np.array([[0,0,0] for _ in range(len(lats0))])
-        colors0[tcqc == 1] = [1,0,0]
-        colors0[tcqc == 2] = [0,1,0]
-        colors0[tcqc == 3] = [0,0,1]
+        colors0 = np.array([[0, 0, 0] for _ in range(len(lats0))])
+        colors0[tcqc == 1] = [1, 0, 0]
+        colors0[tcqc == 2] = [0, 1, 0]
+        colors0[tcqc == 3] = [0, 0, 1]
 
         sizes0 = np.array([25 for _ in range(len(lats0))])
         sizes0[0] = 50
@@ -372,9 +363,11 @@ if plot_all_tracks:
         fig = plt.figure(figsize=(20, 10))
         ax = plt.axes(projection=ccrs.PlateCarree(central_longitude=0))
         ax.set_extent([min_lon, max_lon, min_lat, max_lat], crs=ccrs.PlateCarree())
-        ax.coastlines(linewidth=1, color='#cccccc')
-        ax.plot(lons0,lats0, alpha=0.5, transform=ccrs.PlateCarree())
-        ax.scatter(lons0,lats0, c=colors0, s=sizes0, alpha=0.5, transform=ccrs.PlateCarree())
+        ax.coastlines(linewidth=1, color="#cccccc")
+        ax.plot(lons0, lats0, alpha=0.5, transform=ccrs.PlateCarree())
+        ax.scatter(
+            lons0, lats0, c=colors0, s=sizes0, alpha=0.5, transform=ccrs.PlateCarree()
+        )
         plt.title(id0)
         plt.show()
         plt.close()
@@ -385,18 +378,18 @@ print(datetime.datetime.now())
 fig = plt.figure(figsize=(20, 10))
 ax = plt.axes(projection=ccrs.PlateCarree(central_longitude=0))
 ax.set_extent([-180, 180, -90, 90], crs=ccrs.PlateCarree())
-ax.coastlines(linewidth=1, color='#cccccc')
-ax.scatter(lons,lats, c=colors, s=5, alpha=0.5, transform=ccrs.PlateCarree())
+ax.coastlines(linewidth=1, color="#cccccc")
+ax.scatter(lons, lats, c=colors, s=5, alpha=0.5, transform=ccrs.PlateCarree())
 plt.show()
 plt.close()
 
-fig, axs = plt.subplots(2,3)
+fig, axs = plt.subplots(2, 3)
 
-axs[0][0].scatter(lons,lats, c=colors, s=5, alpha=0.2)
-axs[0][0].set_xlim(-180,180)
+axs[0][0].scatter(lons, lats, c=colors, s=5, alpha=0.2)
+axs[0][0].set_xlim(-180, 180)
 axs[0][0].set_ylim(-70, 70)
 
-axs[0][1].scatter(ssts,lats, c=colors, s=5, alpha=0.2)
+axs[0][1].scatter(ssts, lats, c=colors, s=5, alpha=0.2)
 axs[0][1].set_xlim(-7, 35)
 axs[0][1].set_ylim(-70, 70)
 
@@ -406,7 +399,11 @@ axs[1][0].set_ylim(-7, 35)
 
 axs[0][2].scatter(
     ssts,
-    track_check_qc+sst_hard_limit+sst_missing_check+sst_freeze_check+sst_climatology_check,
+    track_check_qc
+    + sst_hard_limit
+    + sst_missing_check
+    + sst_freeze_check
+    + sst_climatology_check,
     c=colors,
     s=25,
     alpha=0.2,
@@ -419,4 +416,3 @@ axs[1][1].set_ylim(-70, 70)
 axs[1][2].hist(ssts, bins=100)
 
 plt.show()
-

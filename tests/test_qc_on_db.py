@@ -100,6 +100,27 @@ def testdata():
 
     return data_dict
 
+@pytest.fixture(scope="session")
+def testdata_buddy():
+    kwargs = {
+        "cache_dir": ".pytest_cache/metoffice_qc",
+        "within_drs": False,
+    }
+    buddy_data = {
+        'stdev': load_file(
+            f"metoffice_qc/external_files/HadSST2_pentad_stdev_climatology.nc",
+            branch="buddy_check",
+            **kwargs
+        ),
+        'mean': load_file(
+            f"metoffice_qc/external_files/SST_daily_climatology_january.nc",
+            branch="buddy_check",
+            **kwargs
+        ),
+    }
+    return buddy_data
+
+
 
 @pytest.fixture(scope="session")
 def testdata_track():
@@ -1805,3 +1826,12 @@ def test_multiple_row_check(testdata, climdata, return_method, expected, apply_f
         )
     expected = pd.DataFrame(expected)
     pd.testing.assert_frame_equal(results, expected)
+
+
+def test_bud(testdata_buddy, climdata):
+    stdev_climatology = Climatology.open_netcdf_file(testdata_buddy["stdev"], "sst", time_axis="time")
+    mean_climatology = Climatology.open_netcdf_file(climdata["SST"]["mean"], "sst", time_axis="time")
+
+    print(testdata_buddy)
+
+
