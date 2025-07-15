@@ -10,7 +10,11 @@ import math
 import numpy as np
 import pandas as pd
 
-from glamod_marine_processing.qc_suite.modules.external_clim import Climatology, inspect_climatology
+from glamod_marine_processing.qc_suite.modules.external_clim import (
+    Climatology,
+    inspect_climatology,
+    ClimFloatType
+)
 from glamod_marine_processing.qc_suite.modules.next_level_trackqc import is_monotonic
 from glamod_marine_processing.qc_suite.modules.statistics import p_gross
 from glamod_marine_processing.qc_suite.modules.location_control import (
@@ -436,7 +440,7 @@ def mds_buddy_check(
     lons: Sequence[float],
     dates: Sequence[datetime],
     values: Sequence[float],
-    climatology,
+    climatology: ClimFloatType,
     pentad_stdev: Climatology,
     limits: list[list[int]],
     number_of_obs_thresholds: list[list[int]],
@@ -459,7 +463,7 @@ def mds_buddy_check(
         1-dimensional anomaly array.
 
     climatology : float, None, sequence of float or None, 1D np.ndarray of float, pd.Series of float or Climatology
-        The climatological average(s) to which the values(s) will be compared.
+        The climatological average(s) used to calculate anomalies.
         Can be a scalar, a sequence (e.g., list or tuple), a one-dimensional NumPy array, or a pandas Series.
 
     pentad_stdev : Climatology
@@ -549,7 +553,7 @@ def bayesian_buddy_check(
     lons: Sequence[float],
     dates: Sequence[datetime],
     values: Sequence[float],
-    climatology,
+    climatology: ClimFloatType,
     stdev1: Climatology,
     stdev2: Climatology,
     stdev3: Climatology,
@@ -579,7 +583,7 @@ def bayesian_buddy_check(
         1-dimensional anomaly array.
 
     climatology : float, None, sequence of float or None, 1D np.ndarray of float, pd.Series of float or Climatology
-        The climatological average(s) to which the values(s) will be compared.
+        The climatological average(s) used to calculate anomalies.
         Can be a scalar, a sequence (e.g., list or tuple), a one-dimensional NumPy array, or a pandas Series.
 
     stdev1 : Climatology
