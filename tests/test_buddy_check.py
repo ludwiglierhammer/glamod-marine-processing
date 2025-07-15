@@ -547,7 +547,8 @@ def test_add_one_maxes_limits(reps_, dummy_pentad_stdev_):
     )
     g.take_average()
     g.get_new_buddy_limits(
-        dummy_pentad_stdev_, dummy_pentad_stdev_, dummy_pentad_stdev_
+        dummy_pentad_stdev_, dummy_pentad_stdev_, dummy_pentad_stdev_,
+        limits = (2, 2, 4), sigma_m = 1.0, noise_scaling = 3.0
     )
 
     mn = g.get_buddy_mean(
@@ -567,7 +568,8 @@ def test_add_multiple(reps_, dummy_pentad_stdev_):
         reps_["LAT"], reps_["LON"], reps_["DATE"], reps_["SST"] - reps_["SST_CLIM"]
     )
     g.get_new_buddy_limits(
-        dummy_pentad_stdev_, dummy_pentad_stdev_, dummy_pentad_stdev_
+        dummy_pentad_stdev_, dummy_pentad_stdev_, dummy_pentad_stdev_,
+        limits = (2, 2, 4), sigma_m = 1.0, noise_scaling = 3.0
     )
 
     mn = g.get_buddy_mean(

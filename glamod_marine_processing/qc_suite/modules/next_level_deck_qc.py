@@ -292,9 +292,9 @@ class SuperObsGrid:
         stdev1: Climatology,
         stdev2: Climatology,
         stdev3: Climatology,
-        limits: list[int, int, int] = (2, 2, 4),
-        sigma_m: float = 1.0,
-        noise_scaling: float = 3.0,
+        limits: list[int, int, int],
+        sigma_m: float,
+        noise_scaling: float,
     ) -> None:
         """Get buddy limits for new bayesian buddy check.
 
@@ -324,6 +324,13 @@ class SuperObsGrid:
         Returns
         -------
         None
+
+        Notes
+        -----
+        The original default values for limits, sigma_m, and noise_scaling originally defaulted to:
+        * limits = (2, 2, 4)
+        * sigma_m = 1.0
+        * noise_scaling = 3.0
         """
         nonmiss = np.nonzero(self.nobs)
 
