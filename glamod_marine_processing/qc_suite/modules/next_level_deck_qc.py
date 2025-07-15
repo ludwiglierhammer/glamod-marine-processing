@@ -191,7 +191,7 @@ class SuperObsGrid:
         """
         assert len(search_radius) == 3, str(len(search_radius))
 
-        radcon = 3.1415928 / 180.0
+        radcon = np.pi / 180.0
 
         latitude_approx = 89.5 - yindex
 
