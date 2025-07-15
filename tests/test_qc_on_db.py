@@ -1828,10 +1828,10 @@ def test_multiple_row_check(testdata, climdata, return_method, expected, apply_f
     pd.testing.assert_frame_equal(results, expected)
 
 
-def test_bud(testdata_buddy, climdata):
-    stdev_climatology = Climatology.open_netcdf_file(testdata_buddy["stdev"], "sst", time_axis="time")
-    mean_climatology = Climatology.open_netcdf_file(climdata["SST"]["mean"], "sst", time_axis="time")
-
-    print(testdata_buddy)
+# def test_bud(testdata_buddy, climdata):
+#     stdev_climatology = Climatology.open_netcdf_file(testdata_buddy["stdev"], "sst", time_axis="time")
+#     mean_climatology = Climatology.open_netcdf_file(climdata["SST"]["mean"], "sst", time_axis="time")
+#
+#     print(testdata_buddy)
 
 

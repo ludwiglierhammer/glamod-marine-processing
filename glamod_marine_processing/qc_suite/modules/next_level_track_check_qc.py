@@ -685,22 +685,20 @@ def do_track_check(
     if id_is_generic(ids, pd.Timestamp(date[0]).year):
         return np.asarray([passed] * number_of_obs)
 
-    time_order = np.argsort(date)
-
     # work out speeds and distances between alternating points
     speed_alt, _distance_alt, _course_alt, _timediff_alt = (
         calculate_speed_course_distance_time_difference(
-            lat=lat[time_order],
-            lon=lon[time_order],
-            date=date[time_order],
+            lat=lat,
+            lon=lon,
+            date=date,
             alternating=True,
         )
     )
     speed, _distance, course, timediff = (
         calculate_speed_course_distance_time_difference(
-            lat=lat[time_order],
-            lon=lon[time_order],
-            date=date[time_order],
+            lat=lat,
+            lon=lon,
+            date=date,
         )
     )
 
@@ -712,23 +710,23 @@ def do_track_check(
 
     # compare reported speeds and positions if we have them
     forward_diff_from_estimated = forward_discrepancy(
-        lat=lat[time_order],
-        lon=lon[time_order],
-        date=date[time_order],
-        vsi=vsi[time_order],
-        dsi=dsi[time_order],
+        lat=lat,
+        lon=lon,
+        date=date,
+        vsi=vsi,
+        dsi=dsi,
     )
     reverse_diff_from_estimated = backward_discrepancy(
-        lat=lat[time_order],
-        lon=lon[time_order],
-        date=date[time_order],
-        vsi=vsi[time_order],
-        dsi=dsi[time_order],
+        lat=lat,
+        lon=lon,
+        date=date,
+        vsi=vsi,
+        dsi=dsi,
     )
 
     midpoint_diff_from_estimated = calculate_midpoint(
-        lat=lat[time_order],
-        lon=lon[time_order],
+        lat=lat,
+        lon=lon,
         timediff=timediff,
     )
 
@@ -765,23 +763,23 @@ def do_track_check(
         # Quality-control by examining the distance
         # between the calculated and reported second position.
         thisqc_b += tc.check_distance_from_estimate(
-            vsi[time_order[i]],
-            vsi[time_order[i - 1]],
+            vsi[i],
+            vsi[i - 1],
             timediff[i],
             forward_diff_from_estimated[i],
             reverse_diff_from_estimated[i],
         )
         # Check for continuity of direction
         thisqc_b += tc.direction_continuity(
-            dsi[time_order[i]],
-            dsi[time_order[i - 1]],
+            dsi[i],
+            dsi[i - 1],
             course[i],
             max_direction_change,
         )
         # Check for continuity of speed.
         thisqc_b += tc.speed_continuity(
-            vsi[time_order[i]],
-            vsi[time_order[i - 1]],
+            vsi[i],
+            vsi[i - 1],
             speed[i],
             max_speed_change,
         )
@@ -797,8 +795,6 @@ def do_track_check(
             and thisqc_b > 0
         ):
             trk[i] = failed
-
-    trk[time_order] = trk[:]
 
     return trk
 
