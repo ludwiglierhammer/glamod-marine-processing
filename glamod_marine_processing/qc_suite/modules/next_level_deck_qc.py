@@ -10,7 +10,7 @@ import math
 import numpy as np
 import pandas as pd
 
-from glamod_marine_processing.qc_suite.modules.external_clim import Climatology
+from glamod_marine_processing.qc_suite.modules.external_clim import Climatology, inspect_climatology
 from glamod_marine_processing.qc_suite.modules.next_level_trackqc import is_monotonic
 from glamod_marine_processing.qc_suite.modules.statistics import p_gross
 from glamod_marine_processing.qc_suite.modules.location_control import (
@@ -427,14 +427,16 @@ class SuperObsGrid:
         pindex = which_pentad(month, day) - 1
         return self.buddy_stdev[xindex][yindex][pindex]
 
-@post_format_return_type(["anoms"])
-@inspect_arrays(["lats", "lons", "dates", "anoms"])
+@post_format_return_type(["values"])
+@inspect_arrays(["lats", "lons", "dates", "values"])
 @convert_units(lats="degrees", lons="degrees")
+@inspect_climatology("climatology")
 def mds_buddy_check(
     lats: Sequence[float],
     lons: Sequence[float],
     dates: Sequence[datetime],
-    anoms: Sequence[float],
+    values: Sequence[float],
+    climatology,
     pentad_stdev: Climatology,
     limits: list[list[int]],
     number_of_obs_thresholds: list[list[int]],
@@ -453,7 +455,7 @@ def mds_buddy_check(
     dates : array-like of datetime, shape (n,)
         1-dimensional date array.
 
-    anoms : array-like of float, shape (n,)
+    values : array-like of float, shape (n,)
         1-dimensional anomaly array.
 
     pentad_stdev : Climatology
@@ -491,6 +493,8 @@ def mds_buddy_check(
     buddy mean is greater than the multiplier times the standard deviation at that point then it fails the buddy
     check. So, if there were 10 observations then the multiplier would be 3.5.
     """
+    anoms = values - climatology
+
     if len(limits) != len(number_of_obs_thresholds) and len(limits) != len(multipliers):
         raise ValueError("Input parameter lists are not equal length")
 
