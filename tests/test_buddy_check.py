@@ -4,6 +4,7 @@ import numpy as np
 import pandas as pd
 
 import pytest
+from pyproj.network import set_ca_bundle_path
 
 import glamod_marine_processing.qc_suite.modules.Climatology as clim
 import glamod_marine_processing.qc_suite.modules.Extended_IMMA as ex
@@ -396,6 +397,54 @@ def buddy_reps():
 
     return reps
 
+@pytest.fixture
+def buddy_reps_time(second_date):
+    reps = {
+        "ID": [
+            "AAAAAAAAA",
+            "BBBBBBBBB", "BBBBBBBBB", "BBBBBBBBB",
+            "BBBBBBBBB", "BBBBBBBBB",
+            "BBBBBBBBB", "BBBBBBBBB", "BBBBBBBBB",
+        ],
+        "LAT": [
+            0.5,
+            1.5, 1.5, 1.5,
+            0.5, 0.5,
+            -0.5, -0.5, -0.5,
+        ],
+        "LON": [
+            0.5,
+            -0.5, 0.5, 1.5,
+            -0.5, 1.5,
+            -0.5, 0.5, 1.5
+        ],
+        "SST": [
+            5.0,
+            0.0, 0.0, 0.0,
+            0.0, 0.0,
+            0.0, 0.0, 0.0
+        ],
+        "DATE": [
+            "2003-12-01T00:00:00.000000000",
+            second_date, second_date, second_date,
+            second_date, second_date,
+            second_date, second_date, second_date,
+        ],
+        "SST_CLIM": [
+            0.0,
+            0.0, 0.0, 0.0,
+            0.0, 0.0,
+            0.0, 0.0, 0.0
+        ],
+    }
+
+    for key in reps:
+        reps[key] = np.array(reps[key])
+
+    reps["DATE"] = pd.to_datetime(reps["DATE"]).tolist()
+
+    return reps
+
 
 @pytest.fixture
 def buddy_reps_spread():
@@ -576,6 +625,7 @@ def test_buddy_check_single_ob_flagged_untestable(buddy_reps_singleton, dummy_pe
 
 
 def test_buddy_check_designed_to_fail(buddy_reps, dummy_pentad_stdev_):
+    # One observation with 8 neighbours that has a disparate anomaly
     limits = [[1, 1, 2], [2, 2, 2], [1, 1, 4], [2, 2, 4]]
     number_of_obs_thresholds = [[0, 5, 15, 100], [0], [0, 5, 15, 100], [0]]
     multipliers = [[4.0, 3.5, 3.0, 2.5], [4.0], [4.0, 3.5, 3.0, 2.5], [4.0]]
@@ -597,8 +647,42 @@ def test_buddy_check_designed_to_fail(buddy_reps, dummy_pentad_stdev_):
         else:
             assert flag == 0
 
+@pytest.mark.parametrize(
+    ['second_date', 'expected'],
+    [
+        ["2003-12-11T00:00:00.000000000", failed],
+        ["2003-12-21T00:00:00.000000000", failed],
+        ["2003-11-21T00:00:00.000000000", failed],
+        ["2003-12-25T00:00:00.000000000", untestable],
+    ]
+)
+def test_buddy_check_designed_to_fail_time(buddy_reps_time, dummy_pentad_stdev_, expected):
+    # One observation with 8 neighbours that has a disparate anomaly
+    limits = [[1, 1, 2], [2, 2, 2], [1, 1, 4], [2, 2, 4]]
+    number_of_obs_thresholds = [[0, 5, 15, 100], [0], [0, 5, 15, 100], [0]]
+    multipliers = [[4.0, 3.5, 3.0, 2.5], [4.0], [4.0, 3.5, 3.0, 2.5], [4.0]]
+
+    result = mds_buddy_check(
+        buddy_reps_time["LAT"],
+        buddy_reps_time["LON"],
+        buddy_reps_time["DATE"],
+        buddy_reps_time["SST"] - buddy_reps_time["SST_CLIM"],
+        dummy_pentad_stdev_,
+        limits,
+        number_of_obs_thresholds,
+        multipliers,
+    )
+
+    for i, flag in enumerate(result):
+        if i == 0:
+            assert flag == expected
+        else:
+            assert flag == 0
+
 
 def test_buddy_check_designed_to_fail_2(buddy_reps_spread, dummy_pentad_stdev_):
+    # One observation with 8 neighbours that has a disparate anomaly, but the neighbours
+    # are spread further apart
     limits = [[1, 1, 2], [2, 2, 2], [1, 1, 4], [2, 2, 4]]
     number_of_obs_thresholds = [[0, 5, 15, 100], [0], [0, 5, 15, 100], [0]]
     multipliers = [[4.0, 3.5, 3.0, 2.5], [4.0], [4.0, 3.5, 3.0, 2.5], [4.0]]
