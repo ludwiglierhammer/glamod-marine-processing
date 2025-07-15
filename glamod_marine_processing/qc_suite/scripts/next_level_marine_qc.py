@@ -118,12 +118,21 @@ data_dir = os.getenv("DATADIR")
 #     clim_file_names.append(new_output_file)
 # sst_clim = Climatology.open_netcdf_file(clim_file_names, 'analysed_sst')
 sst_clim = Climatology.open_netcdf_file(
-    Path(data_dir) / "SST_CCI_climatology" / "SST_1x1_daily.nc",
-    "sst",
-    time_axis="time",
+    Path(data_dir) / "QCClimatologies" / "AT_pentad_climatology.nc",
+    "at",
+    time_axis="pentad_time",
     lat_axis="latitude",
     lon_axis="longitude",
+    source_units="degC",
+    target_units="K",
 )
+# sst_clim = Climatology.open_netcdf_file(
+#     Path(data_dir) / "SST_CCI_climatology" / "SST_1x1_daily.nc",
+#     "sst",
+#     time_axis="time",
+#     lat_axis="latitude",
+#     lon_axis="longitude",
+# )
 
 print("Read SST climatology")
 print(datetime.datetime.now())
@@ -137,10 +146,8 @@ single_file = Path(data_dir) / "ICOADS" / "cat.txt"
 with open(single_file, "w") as outfile:
     filepaths = [
         Path(data_dir) / "ICOADS" / "IMMA1_R3.0.0_1850-01.gz",
-        Path(data_dir) / "ICOADS" / "IMMA1_R3.0.0_1850-02.gz",
-        Path(data_dir) / "ICOADS" / "IMMA1_R3.0.0_1850-03.gz",
-        Path(data_dir) / "ICOADS" / "IMMA1_R3.0.0_1850-04.gz",
-        Path(data_dir) / "ICOADS" / "IMMA1_R3.0.0_1850-05.gz",
+        # Path(data_dir) / "ICOADS" / "IMMA1_R3.0.0_1850-02.gz",
+        # Path(data_dir) / "ICOADS" / "IMMA1_R3.0.0_1850-03.gz",
     ]
     for fname in filepaths:
         with gzip.open(fname, "rb") as f_in:

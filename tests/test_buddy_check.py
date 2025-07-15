@@ -353,6 +353,104 @@ def reps2_():
 
     return reps
 
+@pytest.fixture
+def buddy_reps():
+
+    reps = {
+        "ID": [
+            "AAAAAAAAA",
+            "BBBBBBBBB", "BBBBBBBBB", "BBBBBBBBB",
+            "BBBBBBBBB", "BBBBBBBBB",
+            "BBBBBBBBB", "BBBBBBBBB", "BBBBBBBBB",
+        ],
+        "LAT": [
+            0.5,
+            1.5, 1.5, 1.5,
+            0.5, 0.5,
+            -0.5, -0.5, -0.5,
+        ],
+        "LON": [
+            0.5,
+            -0.5, 0.5, 1.5,
+            -0.5, 1.5,
+            -0.5, 0.5, 1.5
+        ],
+        "SST": [
+            5.0,
+            0.0, 0.0, 0.0,
+            0.0, 0.0,
+            0.0, 0.0, 0.0
+        ],
+        "DATE": [
+            "2003-12-01T00:00:00.000000000",
+            "2003-12-01T00:00:00.000000000", "2003-12-01T00:00:00.000000000", "2003-12-01T00:00:00.000000000",
+            "2003-12-01T00:00:00.000000000", "2003-12-01T00:00:00.000000000",
+            "2003-12-01T00:00:00.000000000", "2003-12-01T00:00:00.000000000", "2003-12-01T00:00:00.000000000",
+        ],
+        "SST_CLIM": [
+            0.0,
+            0.0, 0.0, 0.0,
+            0.0, 0.0,
+            0.0, 0.0, 0.0
+        ],
+    }
+
+    for key in reps:
+        reps[key] = np.array(reps[key])
+
+    reps["DATE"] = pd.to_datetime(reps["DATE"]).tolist()
+
+    return reps
+
+@pytest.fixture
+def buddy_reps_spread():
+
+    reps = {
+        "ID": [
+            "AAAAAAAAA",
+            "BBBBBBBBB", "BBBBBBBBB", "BBBBBBBBB",
+            "BBBBBBBBB", "BBBBBBBBB",
+            "BBBBBBBBB", "BBBBBBBBB", "BBBBBBBBB",
+        ],
+        "LAT": [
+            0.5,
+            2.5, 2.5, 2.5,
+            0.5, 0.5,
+            -1.5, -1.5, -1.5,
+        ],
+        "LON": [
+            0.5,
+            -1.5, 0.5, 2.5,
+            -1.5, 2.5,
+            -1.5, 0.5, 2.5
+        ],
+        "SST": [
+            5.0,
+            0.0, 0.0, 0.0,
+            0.0, 0.0,
+            0.0, 0.0, 0.0
+        ],
+        "DATE": [
+            "2003-12-01T00:00:00.000000000",
+            "2003-12-01T00:00:00.000000000", "2003-12-01T00:00:00.000000000", "2003-12-01T00:00:00.000000000",
+            "2003-12-01T00:00:00.000000000", "2003-12-01T00:00:00.000000000",
+            "2003-12-01T00:00:00.000000000", "2003-12-01T00:00:00.000000000", "2003-12-01T00:00:00.000000000",
+        ],
+        "SST_CLIM": [
+            0.0,
+            0.0, 0.0, 0.0,
+            0.0, 0.0,
+            0.0, 0.0, 0.0
+        ],
+    }
+
+    for key in reps:
+        reps[key] = np.array(reps[key])
+
+    reps["DATE"] = pd.to_datetime(reps["DATE"]).tolist()
+
+    return reps
+
 
 @pytest.fixture
 def dummy_pentad_stdev_():
@@ -445,6 +543,51 @@ def test_buddy_check(reps_, dummy_pentad_stdev_):
     )
 
     assert np.all(result == [passed, passed, passed, passed])
+
+
+def test_buddy_check_designed_to_fail(buddy_reps, dummy_pentad_stdev_):
+    limits = [[1, 1, 2], [2, 2, 2], [1, 1, 4], [2, 2, 4]]
+    number_of_obs_thresholds = [[0, 5, 15, 100], [0], [0, 5, 15, 100], [0]]
+    multipliers = [[4.0, 3.5, 3.0, 2.5], [4.0], [4.0, 3.5, 3.0, 2.5], [4.0]]
+
+    result = mds_buddy_check(
+        buddy_reps["LAT"],
+        buddy_reps["LON"],
+        buddy_reps["DATE"],
+        buddy_reps["SST"] - buddy_reps["SST_CLIM"],
+        dummy_pentad_stdev_,
+        limits,
+        number_of_obs_thresholds,
+        multipliers,
+    )
+
+    for i, flag in enumerate(result):
+        if i == 0:
+            assert flag == 1
+        else:
+            assert flag == 0
+
+def test_buddy_check_designed_to_fail_2(buddy_reps_spread, dummy_pentad_stdev_):
+    limits = [[1, 1, 2], [2, 2, 2], [1, 1, 4], [2, 2, 4]]
+    number_of_obs_thresholds = [[0, 5, 15, 100], [0], [0, 5, 15, 100], [0]]
+    multipliers = [[4.0, 3.5, 3.0, 2.5], [4.0], [4.0, 3.5, 3.0, 2.5], [4.0]]
+
+    result = mds_buddy_check(
+        buddy_reps_spread["LAT"],
+        buddy_reps_spread["LON"],
+        buddy_reps_spread["DATE"],
+        buddy_reps_spread["SST"] - buddy_reps_spread["SST_CLIM"],
+        dummy_pentad_stdev_,
+        limits,
+        number_of_obs_thresholds,
+        multipliers,
+    )
+
+    for i, flag in enumerate(result):
+        if i == 0:
+            assert flag == 1
+        else:
+            assert flag == 0
 
 
 def test_buddy_check_raises(reps_, dummy_pentad_stdev_):
