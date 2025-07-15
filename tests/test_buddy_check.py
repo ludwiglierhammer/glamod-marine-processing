@@ -11,8 +11,8 @@ import glamod_marine_processing.qc_suite.modules.Extended_IMMA as ex
 from glamod_marine_processing.qc_suite.modules.next_level_deck_qc import (
     SuperObsGrid,
     get_threshold_multiplier,
-    mds_buddy_check,
-    bayesian_buddy_check,
+    do_mds_buddy_check,
+    do_bayesian_buddy_check,
 )
 from glamod_marine_processing.qc_suite.modules.auxiliary import (
     passed,
@@ -593,7 +593,7 @@ def test_buddy_check(reps_, dummy_pentad_stdev_):
     number_of_obs_thresholds = [[0, 5, 15, 100], [0], [0, 5, 15, 100], [0]]
     multipliers = [[4.0, 3.5, 3.0, 2.5], [4.0], [4.0, 3.5, 3.0, 2.5], [4.0]]
 
-    result = mds_buddy_check(
+    result = do_mds_buddy_check(
         reps_["LAT"],
         reps_["LON"],
         reps_["DATE"],
@@ -613,7 +613,7 @@ def test_buddy_check_single_ob_flagged_untestable(buddy_reps_singleton, dummy_pe
     number_of_obs_thresholds = [[0, 5, 15, 100], [0], [0, 5, 15, 100], [0]]
     multipliers = [[4.0, 3.5, 3.0, 2.5], [4.0], [4.0, 3.5, 3.0, 2.5], [4.0]]
 
-    result = mds_buddy_check(
+    result = do_mds_buddy_check(
         buddy_reps_singleton["LAT"],
         buddy_reps_singleton["LON"],
         buddy_reps_singleton["DATE"],
@@ -634,7 +634,7 @@ def test_buddy_check_designed_to_fail(buddy_reps, dummy_pentad_stdev_):
     number_of_obs_thresholds = [[0, 5, 15, 100], [0], [0, 5, 15, 100], [0]]
     multipliers = [[4.0, 3.5, 3.0, 2.5], [4.0], [4.0, 3.5, 3.0, 2.5], [4.0]]
 
-    result = mds_buddy_check(
+    result = do_mds_buddy_check(
         buddy_reps["LAT"],
         buddy_reps["LON"],
         buddy_reps["DATE"],
@@ -667,7 +667,7 @@ def test_buddy_check_designed_to_fail_time(buddy_reps_time, dummy_pentad_stdev_,
     number_of_obs_thresholds = [[0, 5, 15, 100], [0], [0, 5, 15, 100], [0]]
     multipliers = [[4.0, 3.5, 3.0, 2.5], [4.0], [4.0, 3.5, 3.0, 2.5], [4.0]]
 
-    result = mds_buddy_check(
+    result = do_mds_buddy_check(
         buddy_reps_time["LAT"],
         buddy_reps_time["LON"],
         buddy_reps_time["DATE"],
@@ -693,7 +693,7 @@ def test_buddy_check_designed_to_fail_2(buddy_reps_spread, dummy_pentad_stdev_):
     number_of_obs_thresholds = [[0, 5, 15, 100], [0], [0, 5, 15, 100], [0]]
     multipliers = [[4.0, 3.5, 3.0, 2.5], [4.0], [4.0, 3.5, 3.0, 2.5], [4.0]]
 
-    result = mds_buddy_check(
+    result = do_mds_buddy_check(
         buddy_reps_spread["LAT"],
         buddy_reps_spread["LON"],
         buddy_reps_spread["DATE"],
@@ -719,7 +719,7 @@ def test_buddy_check_raises(reps_, dummy_pentad_stdev_):
     multipliers = [[4.0, 3.5, 3.0, 2.5], [4.0], [4.0, 3.5, 3.0, 2.5], [4.0]]
 
     with pytest.raises(ValueError):
-        _ = mds_buddy_check(
+        _ = do_mds_buddy_check(
             reps_["LAT"],
             reps_["LON"],
             reps_["DATE"],
@@ -737,7 +737,7 @@ def test_buddy_check_raises(reps_, dummy_pentad_stdev_):
     multipliers = [[4.0, 3.5, 3.0, 2.5], [4.0], [4.0, 3.5, 2.5], [4.0]]
 
     with pytest.raises(ValueError):
-        _ = mds_buddy_check(
+        _ = do_mds_buddy_check(
             reps_["LAT"],
             reps_["LON"],
             reps_["DATE"],
@@ -751,7 +751,7 @@ def test_buddy_check_raises(reps_, dummy_pentad_stdev_):
 
 
 def test_bayesian_buddy_check(reps_, dummy_pentad_stdev_):
-    result = bayesian_buddy_check(
+    result = do_bayesian_buddy_check(
         reps_["LAT"],
         reps_["LON"],
         reps_["DATE"],

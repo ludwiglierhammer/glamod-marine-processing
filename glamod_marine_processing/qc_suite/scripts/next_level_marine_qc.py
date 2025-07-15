@@ -39,7 +39,7 @@ from glamod_marine_processing.qc_suite.modules.next_level_track_check_qc import 
     find_repeated_values,
 )
 from glamod_marine_processing.qc_suite.modules.next_level_deck_qc import (
-    mds_buddy_check,
+    do_mds_buddy_check,
 )
 
 
@@ -245,7 +245,7 @@ lats = obs_sst["latitude"].values[selection]
 lons = obs_sst["longitude"].values[selection]
 dates = obs_sst["date_time"][selection].reset_index().date_time
 
-buddy_check = mds_buddy_check(
+buddy_check = do_mds_buddy_check(
     lats,
     lons,
     dates,

@@ -442,7 +442,7 @@ class SuperObsGrid:
 @inspect_arrays(["lats", "lons", "dates", "values"])
 @convert_units(lats="degrees", lons="degrees")
 @inspect_climatology("climatology")
-def mds_buddy_check(
+def do_mds_buddy_check(
     lats: Sequence[float],
     lons: Sequence[float],
     dates: Sequence[datetime],
@@ -555,7 +555,7 @@ def mds_buddy_check(
 @inspect_arrays(["lats", "lons", "dates", "values"])
 @convert_units(lats="degrees", lons="degrees")
 @inspect_climatology("climatology")
-def bayesian_buddy_check(
+def do_bayesian_buddy_check(
     lats: Sequence[float],
     lons: Sequence[float],
     dates: Sequence[datetime],
