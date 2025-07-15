@@ -13,12 +13,15 @@ from glamod_marine_processing.qc_suite.modules.next_level_deck_qc import (
     mds_buddy_check,
     bayesian_buddy_check,
 )
-from glamod_marine_processing.qc_suite.modules.auxiliary import passed
-
+from glamod_marine_processing.qc_suite.modules.auxiliary import (
+    passed,
+    failed,
+    untested,
+    untestable
+)
 
 @pytest.fixture
 def reps():
-
     reps = {
         "ID": [
             "AAAAAAAAA",
@@ -58,7 +61,6 @@ def reps():
 
 @pytest.fixture
 def reps2():
-
     reps = {
         "ID": [
             "AAAAAAAAA",
@@ -98,7 +100,6 @@ def reps2():
 
 @pytest.fixture
 def reps3():
-
     reps = {
         "ID": [
             "AAAAAAAAA",
@@ -143,7 +144,6 @@ def dummy_pentad_stdev():
 
 @pytest.fixture
 def reps4():
-
     reps = {
         "ID": [
             "AAAAAAAAA",
@@ -182,7 +182,6 @@ def reps4():
 
 
 def test_eight_near_neighbours(dummy_pentad_stdev, reps):
-
     g = SuperObsGrid()
     g.add_multiple_observations(
         reps["LAT"], reps["LON"], reps["DATE"], reps["SST"] - reps["SST_CLIM"]
@@ -201,7 +200,6 @@ def test_eight_near_neighbours(dummy_pentad_stdev, reps):
 
 
 def test_eight_distant_near_neighbours(dummy_pentad_stdev, reps2):
-
     g = SuperObsGrid()
     g.add_multiple_observations(
         reps2["LAT"], reps2["LON"], reps2["DATE"], reps2["SST"] - reps2["SST_CLIM"]
@@ -220,7 +218,6 @@ def test_eight_distant_near_neighbours(dummy_pentad_stdev, reps2):
 
 
 def test_eight_even_more_distant_near_neighbours(dummy_pentad_stdev, reps3):
-
     g = SuperObsGrid()
     g.add_multiple_observations(
         reps3["LAT"], reps3["LON"], reps3["DATE"], reps3["SST"] - reps3["SST_CLIM"]
@@ -238,7 +235,6 @@ def test_eight_even_more_distant_near_neighbours(dummy_pentad_stdev, reps3):
 
 
 def test_eight_too_distant_neighbours(dummy_pentad_stdev, reps4):
-
     g = SuperObsGrid()
     g.add_multiple_observations(
         reps4["LAT"], reps4["LON"], reps4["DATE"], reps4["SST"] - reps4["SST_CLIM"]
@@ -305,7 +301,6 @@ def test_setting_variables():
 
 @pytest.fixture
 def reps_():
-
     reps = {
         "ID": ["AAAAAAAAA", "BBBBBBBBB", "BBBBBBBBB", "BBBBBBBBB"],
         "LAT": [0.5, 0.5, 0.5, 1.5],
@@ -330,7 +325,6 @@ def reps_():
 
 @pytest.fixture
 def reps2_():
-
     reps = {
         "ID": ["AAAAAAAAA", "BBBBBBBBB", "BBBBBBBBB", "BBBBBBBBB", "BBBBBBBBB"],
         "LAT": [0.5, 0.5, 0.5, 0.5, 1.5],
@@ -353,9 +347,9 @@ def reps2_():
 
     return reps
 
+
 @pytest.fixture
 def buddy_reps():
-
     reps = {
         "ID": [
             "AAAAAAAAA",
@@ -402,9 +396,9 @@ def buddy_reps():
 
     return reps
 
+
 @pytest.fixture
 def buddy_reps_spread():
-
     reps = {
         "ID": [
             "AAAAAAAAA",
@@ -453,6 +447,25 @@ def buddy_reps_spread():
 
 
 @pytest.fixture
+def buddy_reps_singleton():
+    reps = {
+        "ID": ["AAAAAAAAA", ],
+        "LAT": [0.5],
+        "LON": [0.5],
+        "SST": [5.0],
+        "DATE": ["2003-12-01T00:00:00.000000000"],
+        "SST_CLIM": [0.0],
+    }
+
+    for key in reps:
+        reps[key] = np.array(reps[key])
+
+    reps["DATE"] = pd.to_datetime(reps["DATE"]).tolist()
+
+    return reps
+
+
+@pytest.fixture
 def dummy_pentad_stdev_():
     return clim.Climatology(np.full([73, 180, 360], 1.0))
 
@@ -475,7 +488,6 @@ def test_neighbours(reps2_):
 
 
 def test_add_one_maxes_limits(reps_, dummy_pentad_stdev_):
-
     g = SuperObsGrid()
     g.add_single_observation(
         reps_["LAT"][0],
@@ -526,7 +538,6 @@ def test_creation():
 
 
 def test_buddy_check(reps_, dummy_pentad_stdev_):
-
     limits = [[1, 1, 2], [2, 2, 2], [1, 1, 4], [2, 2, 4]]
     number_of_obs_thresholds = [[0, 5, 15, 100], [0], [0, 5, 15, 100], [0]]
     multipliers = [[4.0, 3.5, 3.0, 2.5], [4.0], [4.0, 3.5, 3.0, 2.5], [4.0]]
@@ -543,6 +554,25 @@ def test_buddy_check(reps_, dummy_pentad_stdev_):
     )
 
     assert np.all(result == [passed, passed, passed, passed])
+
+
+def test_buddy_check_single_ob_flagged_untestable(buddy_reps_singleton, dummy_pentad_stdev_):
+    limits = [[1, 1, 2], [2, 2, 2], [1, 1, 4], [2, 2, 4]]
+    number_of_obs_thresholds = [[0, 5, 15, 100], [0], [0, 5, 15, 100], [0]]
+    multipliers = [[4.0, 3.5, 3.0, 2.5], [4.0], [4.0, 3.5, 3.0, 2.5], [4.0]]
+
+    result = mds_buddy_check(
+        buddy_reps_singleton["LAT"],
+        buddy_reps_singleton["LON"],
+        buddy_reps_singleton["DATE"],
+        buddy_reps_singleton["SST"] - buddy_reps_singleton["SST_CLIM"],
+        dummy_pentad_stdev_,
+        limits,
+        number_of_obs_thresholds,
+        multipliers,
+    )
+
+    assert result[0] == untestable
 
 
 def test_buddy_check_designed_to_fail(buddy_reps, dummy_pentad_stdev_):
@@ -566,6 +596,7 @@ def test_buddy_check_designed_to_fail(buddy_reps, dummy_pentad_stdev_):
             assert flag == 1
         else:
             assert flag == 0
+
 
 def test_buddy_check_designed_to_fail_2(buddy_reps_spread, dummy_pentad_stdev_):
     limits = [[1, 1, 2], [2, 2, 2], [1, 1, 4], [2, 2, 4]]
@@ -591,7 +622,6 @@ def test_buddy_check_designed_to_fail_2(buddy_reps_spread, dummy_pentad_stdev_):
 
 
 def test_buddy_check_raises(reps_, dummy_pentad_stdev_):
-
     # Parameter lists have different numbers of members
     limits = [[1, 1, 2], [2, 2, 2], [1, 1, 4]]
     number_of_obs_thresholds = [[0, 5, 15, 100], [0], [0, 5, 15, 100], [0]]
@@ -628,7 +658,6 @@ def test_buddy_check_raises(reps_, dummy_pentad_stdev_):
 
 
 def test_bayesian_buddy_check(reps_, dummy_pentad_stdev_):
-
     result = bayesian_buddy_check(
         reps_["LAT"],
         reps_["LON"],

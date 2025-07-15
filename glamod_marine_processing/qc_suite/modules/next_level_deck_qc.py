@@ -25,6 +25,7 @@ from glamod_marine_processing.qc_suite.modules.auxiliary import (
     failed,
     passed,
     untested,
+    untestable,
     inspect_arrays,
     convert_units,
     post_format_return_type,
@@ -522,7 +523,9 @@ def mds_buddy_check(
         bsd = grid.get_buddy_stdev(lat, lon, mon, day)
 
         qc_outcomes[i] = passed
-        if abs(x - bm) >= bsd:
+        if bsd == 500.0:
+            qc_outcomes[i] = untestable
+        elif abs(x - bm) >= bsd:
             qc_outcomes[i] = failed
 
     del grid
