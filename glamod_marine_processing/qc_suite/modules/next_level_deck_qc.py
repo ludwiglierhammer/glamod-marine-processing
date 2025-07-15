@@ -458,6 +458,10 @@ def mds_buddy_check(
     values : array-like of float, shape (n,)
         1-dimensional anomaly array.
 
+    climatology : float, None, sequence of float or None, 1D np.ndarray of float, pd.Series of float or Climatology
+        The climatological average(s) to which the values(s) will be compared.
+        Can be a scalar, a sequence (e.g., list or tuple), a one-dimensional NumPy array, or a pandas Series.
+
     pentad_stdev : Climatology
         Field of standard deviations of 1x1xpentad standard deviations
 
@@ -536,14 +540,16 @@ def mds_buddy_check(
 
     return qc_outcomes
 
-@post_format_return_type(["anoms"])
-@inspect_arrays(["lats", "lons", "dates", "anoms"])
+@post_format_return_type(["values"])
+@inspect_arrays(["lats", "lons", "dates", "values"])
 @convert_units(lats="degrees", lons="degrees")
+@inspect_climatology("climatology")
 def bayesian_buddy_check(
     lats: Sequence[float],
     lons: Sequence[float],
     dates: Sequence[datetime],
-    anoms: Sequence[float],
+    values: Sequence[float],
+    climatology,
     stdev1: Climatology,
     stdev2: Climatology,
     stdev3: Climatology,
@@ -569,8 +575,12 @@ def bayesian_buddy_check(
     dates : array-like of datetime, shape (n,)
         1-dimensional date array.
 
-    anoms : array-like of float, shape (n,)
+    values : array-like of float, shape (n,)
         1-dimensional anomaly array.
+
+    climatology : float, None, sequence of float or None, 1D np.ndarray of float, pd.Series of float or Climatology
+        The climatological average(s) to which the values(s) will be compared.
+        Can be a scalar, a sequence (e.g., list or tuple), a one-dimensional NumPy array, or a pandas Series.
 
     stdev1 : Climatology
         Field of standard deviations representing standard deviation of difference between
@@ -619,6 +629,7 @@ def bayesian_buddy_check(
     * one_sigma_measurement_uncertainty = 1.0
     * maximum_anomaly = 8.0
     """
+    anoms = values - climatology
 
     p0 = prior_probability_of_gross_error
     q = quantization_interval
