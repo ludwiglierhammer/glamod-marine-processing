@@ -219,7 +219,6 @@ results = groups.apply(
             lat=track["latitude"],
             lon=track["longitude"],
             date=track["report_timestamp"],
-            ids=track.name,
             max_direction_change=60.0,
             max_speed_change=10.0,
             max_absolute_speed=40.0,

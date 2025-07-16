@@ -456,7 +456,12 @@ def do_mds_buddy_check(
         number_of_obs_thresholds: list[list[int]],
         multipliers: list[list[float]],
 ):
-    """Do the old style buddy check.
+    """Do the old style buddy check. The buddy check compares an observation to the average of its near neighbours
+    (called the buddy mean). Depending on how many neighbours there are and their proximity to the observation being
+    tested a multiplier is set. If the difference between the observation and the buddy mean is larger than the
+    multiplier times the standard deviation then the observation fails the buddy check. If no buddy observations are
+    found within the specified limits, then the limits are expanded until the check runs out of specified limits or
+    observations are found within the limits.
 
     Parameters
     ----------
