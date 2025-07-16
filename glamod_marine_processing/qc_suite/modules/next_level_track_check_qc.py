@@ -7,7 +7,6 @@ from datetime import datetime
 import numpy as np
 import pandas as pd
 
-from glamod_marine_processing.obs_suite.modules.icoads_identify import id_is_generic
 from . import spherical_geometry as sg
 from . import time_control
 from . import track_check as tc
@@ -603,7 +602,6 @@ def do_track_check(
     lat: SequenceFloatType,
     lon: SequenceFloatType,
     date: SequenceDatetimeType,
-    ids: str,
     max_direction_change: float,
     max_speed_change: float,
     max_absolute_speed: float,
@@ -634,9 +632,6 @@ def do_track_check(
     date : sequence of datetime, 1D np.ndarray of datetime, or pd.Series of datetime, shape (n,)
       One-dimensional date array.
       Can be a sequence (e.g., list or tuple), a one-dimensional NumPy array, or a pandas Series.
-
-    ids : str
-        ID of ship - callsign or other ID
 
     max_direction_change : float, default: 60.0
       Maximum valid direction change in degrees.
@@ -680,9 +675,6 @@ def do_track_check(
 
     # fewer than three obs - set the fewsome flag
     if number_of_obs < 3:
-        return np.asarray([passed] * number_of_obs)
-
-    if id_is_generic(ids, pd.Timestamp(date[0]).year):
         return np.asarray([passed] * number_of_obs)
 
     # work out speeds and distances between alternating points

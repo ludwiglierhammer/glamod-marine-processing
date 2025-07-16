@@ -1347,7 +1347,6 @@ def test_do_track_check(testdata_track):
             lat=track[("header", "latitude")],
             lon=track[("header", "longitude")],
             date=track[("header", "report_timestamp")],
-            ids=track.name,
             max_direction_change=60.0,
             max_speed_change=10.0,
             max_absolute_speed=40.0,
