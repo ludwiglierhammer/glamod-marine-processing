@@ -4,7 +4,6 @@ import numpy as np
 import pandas as pd
 
 import pytest
-from pyproj.network import set_ca_bundle_path
 
 import glamod_marine_processing.qc_suite.modules.Climatology as clim
 import glamod_marine_processing.qc_suite.modules.Extended_IMMA as ex
