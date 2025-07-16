@@ -742,4 +742,24 @@ def test_bayesian_buddy_check(reps_, dummy_pentad_stdev_):
         8.0,
     )
 
-    assert np.all(result == [passed, passed, passed, passed])
+    assert np.all(result == [0,0,0,0])
+
+def test_bayesian_buddy_check_again(buddy_reps, dummy_pentad_stdev_):
+    result = do_bayesian_buddy_check(
+        buddy_reps["LAT"],
+        buddy_reps["LON"],
+        buddy_reps["DATE"],
+        buddy_reps["SST"],
+        buddy_reps["SST_CLIM"],
+        dummy_pentad_stdev_,
+        dummy_pentad_stdev_,
+        dummy_pentad_stdev_,
+        0.05,
+        0.1,
+        1.0,
+        [2, 2, 4],
+        3.0,
+        8.0,
+    )
+
+    assert np.all(result == [1,0,0,0,0,0,0,0,0])
