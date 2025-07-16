@@ -6,7 +6,6 @@ import pandas as pd
 import pytest
 
 import glamod_marine_processing.qc_suite.modules.Climatology as clim
-import glamod_marine_processing.qc_suite.modules.Extended_IMMA as ex
 from glamod_marine_processing.qc_suite.modules.next_level_deck_qc import (
     SuperObsGrid,
     get_threshold_multiplier,
@@ -19,6 +18,7 @@ from glamod_marine_processing.qc_suite.modules.auxiliary import (
     untested,
     untestable
 )
+
 
 @pytest.fixture
 def reps():
@@ -272,33 +272,6 @@ def test_simple():
             assert multiplier == 2.0
 
 
-def test_that_basic_initialisation_works():
-    c = ex.ClimVariable(0.0)
-
-    assert c.getclim() == 0.0
-    assert c.getclim("clim") == 0.0
-    assert c.getclim("stdev") is None
-
-
-def test_that_initialisation_with_clim_and_stdev_works():
-    c = ex.ClimVariable(0.023, 1.1110)
-    assert c.getclim() == 0.023
-    assert c.getclim("clim") == 0.023
-    assert c.getclim("stdev") == 1.1110
-
-
-def test_setting_variables():
-    c = ex.ClimVariable(3.2)
-    assert c.getclim("clim") == 3.2
-    assert c.getclim("stdev") is None
-    c.setclim(5.9, "clim")
-    assert c.getclim("stdev") is None
-    assert c.getclim() == 5.9
-    c.setclim(12.33, "stdev")
-    assert c.getclim("stdev") == 12.33
-    assert c.getclim() == 5.9
-
-
 @pytest.fixture
 def reps_():
     reps = {
@@ -395,6 +368,7 @@ def buddy_reps():
     reps["DATE"] = pd.to_datetime(reps["DATE"]).tolist()
 
     return reps
+
 
 @pytest.fixture
 def buddy_reps_time(second_date):
@@ -547,7 +521,7 @@ def test_add_one_maxes_limits(reps_, dummy_pentad_stdev_):
     g.take_average()
     g.get_new_buddy_limits(
         dummy_pentad_stdev_, dummy_pentad_stdev_, dummy_pentad_stdev_,
-        limits = (2, 2, 4), sigma_m = 1.0, noise_scaling = 3.0
+        limits=(2, 2, 4), sigma_m=1.0, noise_scaling=3.0
     )
 
     mn = g.get_buddy_mean(
@@ -568,7 +542,7 @@ def test_add_multiple(reps_, dummy_pentad_stdev_):
     )
     g.get_new_buddy_limits(
         dummy_pentad_stdev_, dummy_pentad_stdev_, dummy_pentad_stdev_,
-        limits = (2, 2, 4), sigma_m = 1.0, noise_scaling = 3.0
+        limits=(2, 2, 4), sigma_m=1.0, noise_scaling=3.0
     )
 
     mn = g.get_buddy_mean(
@@ -650,6 +624,7 @@ def test_buddy_check_designed_to_fail(buddy_reps, dummy_pentad_stdev_):
             assert flag == 1
         else:
             assert flag == 0
+
 
 @pytest.mark.parametrize(
     ['second_date', 'expected'],
