@@ -33,11 +33,13 @@ from glamod_marine_processing.qc_suite.modules.auxiliary import (
     inspect_arrays,
     convert_units,
     post_format_return_type,
+    SequenceFloatType,
+    SequenceDatetimeType,
 )
 
 
 def get_threshold_multiplier(
-    total_nobs: int, nob_limits: list[int], multiplier_values: list[float]
+        total_nobs: int, nob_limits: list[int], multiplier_values: list[float]
 ) -> float:
     """Find the highest value of i such that total_nobs is greater than nob_limits[i] and return multiplier_values[i]
 
@@ -92,11 +94,11 @@ class SuperObsGrid:
 
     @inspect_arrays(["lats", "lons", "values"])
     def add_multiple_observations(
-        self,
-        lats: Sequence[float],
-        lons: Sequence[float],
-        dates: Sequence[datetime],
-        values: Sequence[float],
+            self,
+            lats: SequenceFloatType,
+            lons: SequenceFloatType,
+            dates: SequenceDatetimeType,
+            values: SequenceFloatType,
     ) -> None:
         """Add a series of observations to the grid and take the grid average
 
@@ -123,7 +125,7 @@ class SuperObsGrid:
         self.take_average()
 
     def add_single_observation(
-        self, lat: float, lon: float, month: int, day: int, anom: float
+            self, lat: float, lon: float, month: int, day: int, anom: float
     ) -> None:
         """Add an anomaly to the grid from specified lat lon and date.
 
@@ -166,7 +168,7 @@ class SuperObsGrid:
         self.grid[nonmiss] = self.grid[nonmiss] / self.nobs[nonmiss]
 
     def get_neighbour_anomalies(
-        self, search_radius: list, xindex: int, yindex: int, pindex: int
+            self, search_radius: list, xindex: int, yindex: int, pindex: int
     ) -> (list[float], list[float]):
         """Search within a specified search radius of the given point and extract the neighbours for buddy check
 
@@ -204,9 +206,9 @@ class SuperObsGrid:
         temp_nobs = []
 
         for xpt, ypt, ppt in itertools.product(
-            range(-1 * full_xspan, full_xspan + 1),
-            range(-1 * yspan, yspan + 1),
-            range(-1 * pspan, pspan + 1),
+                range(-1 * full_xspan, full_xspan + 1),
+                range(-1 * yspan, yspan + 1),
+                range(-1 * pspan, pspan + 1),
         ):
             if xpt == 0 and ypt == 0 and ppt == 0:
                 continue
@@ -222,11 +224,11 @@ class SuperObsGrid:
         return temp_anom, temp_nobs
 
     def get_buddy_limits_with_parameters(
-        self,
-        pentad_stdev: Climatology,
-        limits: list[list[int]],
-        number_of_obs_thresholds: list[list[int]],
-        multipliers: list[list[float]],
+            self,
+            pentad_stdev: Climatology,
+            limits: list[list[int]],
+            number_of_obs_thresholds: list[list[int]],
+            multipliers: list[list[float]],
     ) -> None:
         """Get buddy limits with parameters.
 
@@ -275,10 +277,10 @@ class SuperObsGrid:
                     total_nobs = int(np.sum(temp_nobs))
 
                     self.buddy_stdev[xindex][yindex][pindex] = (
-                        get_threshold_multiplier(
-                            total_nobs, number_of_obs_thresholds[j], multipliers[j]
-                        )
-                        * stdev
+                            get_threshold_multiplier(
+                                total_nobs, number_of_obs_thresholds[j], multipliers[j]
+                            )
+                            * stdev
                     )
 
                     match_not_found = False
@@ -288,13 +290,13 @@ class SuperObsGrid:
                 self.buddy_stdev[xindex][yindex][pindex] = 500.0
 
     def get_new_buddy_limits(
-        self,
-        stdev1: Climatology,
-        stdev2: Climatology,
-        stdev3: Climatology,
-        limits: list[int, int, int],
-        sigma_m: float,
-        noise_scaling: float,
+            self,
+            stdev1: Climatology,
+            stdev2: Climatology,
+            stdev3: Climatology,
+            limits: list[int, int, int],
+            sigma_m: float,
+            noise_scaling: float,
     ) -> None:
         """Get buddy limits for new bayesian buddy check.
 
@@ -364,19 +366,19 @@ class SuperObsGrid:
                 ntot = 0.0
                 for n_obs in temp_nobs:
                     # measurement error for each 1x1x5day cell
-                    tot += sigma_m**2.0 / n_obs
+                    tot += sigma_m ** 2.0 / n_obs
                     # sampling error for each 1x1x5day cell
                     # multiply by three to match observed stdev
-                    tot += noise_scaling * (stdev2_ex**2.0 / n_obs)
+                    tot += noise_scaling * (stdev2_ex ** 2.0 / n_obs)
                     ntot += 1.0
 
-                sigma_buddy = tot / (ntot**2.0)
-                sigma_buddy += stdev3_ex**2.0 / ntot
+                sigma_buddy = tot / (ntot ** 2.0)
+                sigma_buddy += stdev3_ex ** 2.0 / ntot
 
                 self.buddy_stdev[xindex][yindex][pindex] = math.sqrt(
-                    sigma_m**2.0
-                    + stdev1_ex**2.0
-                    + noise_scaling * stdev2_ex**2.0
+                    sigma_m ** 2.0
+                    + stdev1_ex ** 2.0
+                    + noise_scaling * stdev2_ex ** 2.0
                     + sigma_buddy
                 )
 
@@ -438,20 +440,21 @@ class SuperObsGrid:
         pindex = which_pentad(month, day) - 1
         return self.buddy_stdev[xindex][yindex][pindex]
 
+
 @post_format_return_type(["values"])
 @inspect_arrays(["lats", "lons", "dates", "values"])
 @convert_units(lats="degrees", lons="degrees")
 @inspect_climatology("climatology")
 def do_mds_buddy_check(
-    lats: Sequence[float],
-    lons: Sequence[float],
-    dates: Sequence[datetime],
-    values: Sequence[float],
-    climatology: ClimFloatType,
-    pentad_stdev: Climatology,
-    limits: list[list[int]],
-    number_of_obs_thresholds: list[list[int]],
-    multipliers: list[list[float]],
+        lats: SequenceFloatType,
+        lons: SequenceFloatType,
+        dates: SequenceDatetimeType,
+        values: SequenceFloatType,
+        climatology: ClimFloatType,
+        pentad_stdev: Climatology,
+        limits: list[list[int]],
+        number_of_obs_thresholds: list[list[int]],
+        multipliers: list[list[float]],
 ):
     """Do the old style buddy check.
 
@@ -551,25 +554,26 @@ def do_mds_buddy_check(
 
     return qc_outcomes
 
+
 @post_format_return_type(["values"])
 @inspect_arrays(["lats", "lons", "dates", "values"])
 @convert_units(lats="degrees", lons="degrees")
 @inspect_climatology("climatology")
 def do_bayesian_buddy_check(
-    lats: Sequence[float],
-    lons: Sequence[float],
-    dates: Sequence[datetime],
-    values: Sequence[float],
-    climatology: ClimFloatType,
-    stdev1: Climatology,
-    stdev2: Climatology,
-    stdev3: Climatology,
-    prior_probability_of_gross_error: float,
-    quantization_interval: float,
-    one_sigma_measurement_uncertainty: float,
-    limits: list[int],
-    noise_scaling: float,
-    maximum_anomaly: float,
+        lats: SequenceFloatType,
+        lons: SequenceFloatType,
+        dates: SequenceDatetimeType,
+        values: SequenceFloatType,
+        climatology: ClimFloatType,
+        stdev1: Climatology,
+        stdev2: Climatology,
+        stdev3: Climatology,
+        prior_probability_of_gross_error: float,
+        quantization_interval: float,
+        one_sigma_measurement_uncertainty: float,
+        limits: list[int],
+        noise_scaling: float,
+        maximum_anomaly: float,
 ) -> Sequence[int]:
     """Do the Bayesian buddy check. The bayesian buddy check assigns a
     probability of gross error to each observation, which is rounded down to the
