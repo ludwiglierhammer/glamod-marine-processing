@@ -574,6 +574,7 @@ def do_bayesian_buddy_check(
         limits: list[int],
         noise_scaling: float,
         maximum_anomaly: float,
+        fail_probability: float,
 ) -> Sequence[int]:
     """Do the Bayesian buddy check. The bayesian buddy check assigns a
     probability of gross error to each observation, which is rounded down to the
@@ -629,10 +630,15 @@ def do_bayesian_buddy_check(
     maximum_anomaly : float
         Largest absolute anomaly, assumes that the maximum and minimum anomalies have the same magnitude
 
+    fail_probability : float
+        Probability of gross error that corresponds to a failed test. Anything with a probability of gross error
+        greater than fail_probability will be considered failing.
+
     Returns
     -------
     array-like of int, shape (n,)
-        1-dimensional array containing probability of gross error
+        1-dimensional array containing passed, failed or untestable flags. Untestable flags will be set if there
+        are no buddies in the specified limits.
 
     Notes
     -----
@@ -671,6 +677,8 @@ def do_bayesian_buddy_check(
         day = dates[i].day
 
         # Calculate the probability of gross error given the set-up
+        buddy_stdev = grid.get_buddy_stdev(lat, lon, mon, day)
+
         ppp = p_gross(
             p0,
             q,
@@ -678,16 +686,16 @@ def do_bayesian_buddy_check(
             r_lo,
             anoms[i],
             grid.get_buddy_mean(lat, lon, mon, day),
-            grid.get_buddy_stdev(lat, lon, mon, day),
+            buddy_stdev,
         )
 
         # QC outcome is coded as an integer between 0 and 9 indicating 10 times the probability of
         # gross error.
-        qc_outcomes[i] = 0
-        if ppp > 0:
-            flag = int(math.floor(ppp * 10))
-            flag = min(flag, 9)
-            qc_outcomes[i] = flag
+        qc_outcomes[i] = passed
+        if ppp > fail_probability:
+            qc_outcomes[i] = failed
+        if buddy_stdev == 500.:
+            qc_outcomes[i] = untestable
 
     del grid
 

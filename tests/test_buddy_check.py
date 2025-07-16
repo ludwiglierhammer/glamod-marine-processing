@@ -740,9 +740,11 @@ def test_bayesian_buddy_check(reps_, dummy_pentad_stdev_):
         [2, 2, 4],
         3.0,
         8.0,
+        0.3
     )
 
-    assert np.all(result == [0,0,0,0])
+    assert np.all(result == [passed, passed, passed, passed])
+
 
 def test_bayesian_buddy_check_again(buddy_reps, dummy_pentad_stdev_):
     result = do_bayesian_buddy_check(
@@ -760,6 +762,46 @@ def test_bayesian_buddy_check_again(buddy_reps, dummy_pentad_stdev_):
         [2, 2, 4],
         3.0,
         8.0,
+        0.1
     )
 
-    assert np.all(result == [1,0,0,0,0,0,0,0,0])
+    assert np.all(result == [
+       failed, passed, passed, passed, passed, passed, passed, passed, passed
+    ])
+
+
+@pytest.mark.parametrize(
+    ['second_date', 'expected'],
+    [
+        ["2003-12-11T00:00:00.000000000", failed],
+        ["2003-12-21T00:00:00.000000000", failed],
+        ["2003-11-21T00:00:00.000000000", failed],
+        ["2003-12-25T00:00:00.000000000", untestable],
+    ]
+)
+def test_bayesian_buddy_check_designed_to_fail_time(
+        buddy_reps_time, dummy_pentad_stdev_, expected
+):
+    result = do_bayesian_buddy_check(
+        buddy_reps_time["LAT"],
+        buddy_reps_time["LON"],
+        buddy_reps_time["DATE"],
+        buddy_reps_time["SST"],
+        buddy_reps_time["SST_CLIM"],
+        dummy_pentad_stdev_,
+        dummy_pentad_stdev_,
+        dummy_pentad_stdev_,
+        0.05,
+        0.1,
+        1.0,
+        [2, 2, 4],
+        3.0,
+        8.0,
+        0.1
+    )
+
+    for i, flag in enumerate(result):
+        if i == 0:
+            assert flag == expected
+        else:
+            assert flag == 0
