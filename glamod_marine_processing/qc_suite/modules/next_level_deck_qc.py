@@ -159,8 +159,8 @@ class SuperObsGrid:
         assert 0 <= pindex < 73, "bad pentad" + str(month) + str(day)
 
         if anom is not None:
-            self.grid[xindex][yindex][pindex] += anom
-            self.nobs[xindex][yindex][pindex] += 1
+            self.grid[xindex, yindex, pindex] += anom
+            self.nobs[xindex, yindex, pindex] += 1
 
     def take_average(self) -> None:
         """Take the average of a grid to which reps have been added using add_rep"""
@@ -210,16 +210,18 @@ class SuperObsGrid:
                 range(-1 * yspan, yspan + 1),
                 range(-1 * pspan, pspan + 1),
         ):
+            # Skip the central grid cell, as we don't want to buddy check it against itself
             if xpt == 0 and ypt == 0 and ppt == 0:
                 continue
 
+            # Wrap at grid boundaries
             thisxx = (xindex + xpt) % 360
             thisyy = (yindex + ypt) % 180
             thispp = (pindex + ppt) % 73
 
-            if self.nobs[thisxx][thisyy][thispp] != 0:
-                temp_anom.append(self.grid[thisxx][thisyy][thispp])
-                temp_nobs.append(self.nobs[thisxx][thisyy][thispp])
+            if self.nobs[thisxx, thisyy, thispp] != 0:
+                temp_anom.append(self.grid[thisxx, thisyy, thispp])
+                temp_nobs.append(self.nobs[thisxx, thisyy, thispp])
 
         return temp_anom, temp_nobs
 
@@ -262,7 +264,7 @@ class SuperObsGrid:
                 lat=89.5 - yindex, lon=-179.5 + xindex, month=m, day=d
             )
 
-            if stdev is None or stdev < 0.0:
+            if stdev is None or stdev < 0.0 or np.isnan(stdev):
                 stdev = 1.0
 
             match_not_found = True
@@ -273,10 +275,10 @@ class SuperObsGrid:
                 )
 
                 if len(temp_anom) > 0 and match_not_found:
-                    self.buddy_mean[xindex][yindex][pindex] = np.mean(temp_anom)
+                    self.buddy_mean[xindex, yindex, pindex] = np.mean(temp_anom)
                     total_nobs = int(np.sum(temp_nobs))
 
-                    self.buddy_stdev[xindex][yindex][pindex] = (
+                    self.buddy_stdev[xindex, yindex, pindex] = (
                             get_threshold_multiplier(
                                 total_nobs, number_of_obs_thresholds[j], multipliers[j]
                             )
@@ -286,8 +288,8 @@ class SuperObsGrid:
                     match_not_found = False
 
             if match_not_found:
-                self.buddy_mean[xindex][yindex][pindex] = 0.0
-                self.buddy_stdev[xindex][yindex][pindex] = 500.0
+                self.buddy_mean[xindex, yindex, pindex] = 0.0
+                self.buddy_stdev[xindex, yindex, pindex] = 500.0
 
     def get_new_buddy_limits(
             self,
@@ -360,7 +362,7 @@ class SuperObsGrid:
             )
 
             if len(temp_anom) > 0:
-                self.buddy_mean[xindex][yindex][pindex] = np.mean(temp_anom)
+                self.buddy_mean[xindex, yindex, pindex] = np.mean(temp_anom)
 
                 tot = 0.0
                 ntot = 0.0
@@ -375,7 +377,7 @@ class SuperObsGrid:
                 sigma_buddy = tot / (ntot ** 2.0)
                 sigma_buddy += stdev3_ex ** 2.0 / ntot
 
-                self.buddy_stdev[xindex][yindex][pindex] = math.sqrt(
+                self.buddy_stdev[xindex, yindex, pindex] = math.sqrt(
                     sigma_m ** 2.0
                     + stdev1_ex ** 2.0
                     + noise_scaling * stdev2_ex ** 2.0
@@ -383,8 +385,8 @@ class SuperObsGrid:
                 )
 
             else:
-                self.buddy_mean[xindex][yindex][pindex] = 0.0
-                self.buddy_stdev[xindex][yindex][pindex] = 500.0
+                self.buddy_mean[xindex, yindex, pindex] = 0.0
+                self.buddy_stdev[xindex, yindex, pindex] = 500.0
 
     def get_buddy_mean(self, lat: float, lon: float, month: int, day: int) -> float:
         """Get the buddy mean from the grid for a specified time and place
@@ -411,7 +413,7 @@ class SuperObsGrid:
         xindex = mds_lon_to_xindex(lon, res=1.0)
         yindex = mds_lat_to_yindex(lat, res=1.0)
         pindex = which_pentad(month, day) - 1
-        return self.buddy_mean[xindex][yindex][pindex]
+        return self.buddy_mean[xindex, yindex, pindex]
 
     def get_buddy_stdev(self, lat: float, lon: float, month: int, day: int) -> float:
         """Get the buddy standard deviation from the grid for a specified time and place
@@ -438,18 +440,18 @@ class SuperObsGrid:
         xindex = mds_lon_to_xindex(lon, res=1.0)
         yindex = mds_lat_to_yindex(lat, res=1.0)
         pindex = which_pentad(month, day) - 1
-        return self.buddy_stdev[xindex][yindex][pindex]
+        return self.buddy_stdev[xindex, yindex, pindex]
 
 
-@post_format_return_type(["values"])
-@inspect_arrays(["lats", "lons", "dates", "values"])
+@post_format_return_type(["value"])
+@inspect_arrays(["lat", "lon", "date", "value"])
 @convert_units(lats="degrees", lons="degrees")
 @inspect_climatology("climatology")
 def do_mds_buddy_check(
-        lats: SequenceFloatType,
-        lons: SequenceFloatType,
-        dates: SequenceDatetimeType,
-        values: SequenceFloatType,
+        lat: SequenceFloatType,
+        lon: SequenceFloatType,
+        date: SequenceDatetimeType,
+        value: SequenceFloatType,
         climatology: ClimFloatType,
         pentad_stdev: Climatology,
         limits: list[list[int]],
@@ -465,16 +467,16 @@ def do_mds_buddy_check(
 
     Parameters
     ----------
-    lats : array-like of float, shape (n,)
+    lat : array-like of float, shape (n,)
         1-dimensional latitude array.
 
-    lons : array-like of float, shape (n,)
+    lon : array-like of float, shape (n,)
         1-dimensional longitude array.
 
-    dates : array-like of datetime, shape (n,)
+    date : array-like of datetime, shape (n,)
         1-dimensional date array.
 
-    values : array-like of float, shape (n,)
+    value : array-like of float, shape (n,)
         1-dimensional anomaly array.
 
     climatology : float, None, sequence of float or None, 1D np.ndarray of float, pd.Series of float or Climatology
@@ -516,7 +518,7 @@ def do_mds_buddy_check(
     buddy mean is greater than the multiplier times the standard deviation at that point then it fails the buddy
     check. So, if there were 10 observations then the multiplier would be 3.5.
     """
-    anoms = values - climatology
+    anoms = value - climatology
 
     if len(limits) != len(number_of_obs_thresholds) and len(limits) != len(multipliers):
         raise ValueError("Input parameter lists are not equal length")
@@ -529,28 +531,28 @@ def do_mds_buddy_check(
 
     # calculate superob averages and numbers of observations
     grid = SuperObsGrid()
-    grid.add_multiple_observations(lats, lons, dates, anoms)
+    grid.add_multiple_observations(lat, lon, date, anoms)
     grid.get_buddy_limits_with_parameters(
         pentad_stdev, limits, number_of_obs_thresholds, multipliers
     )
 
-    numobs = len(lats)
+    numobs = len(lat)
     qc_outcomes = np.zeros(numobs) + untested
 
     # finally loop over all reports and update buddy QC
     for i in range(numobs):
-        lat = lats[i]
-        lon = lons[i]
-        mon = pd.Timestamp(dates[i]).month
-        day = pd.Timestamp(dates[i]).day
+        lat_ = lat[i]
+        lon_ = lon[i]
+        mon = pd.Timestamp(date[i]).month
+        day = pd.Timestamp(date[i]).day
 
         # if the SST anomaly differs from the neighbour average by more than the calculated range then reject
         x = anoms[i]
-        bm = grid.get_buddy_mean(lat, lon, mon, day)
-        bsd = grid.get_buddy_stdev(lat, lon, mon, day)
+        bm = grid.get_buddy_mean(lat_, lon_, mon, day)
+        bsd = grid.get_buddy_stdev(lat_, lon_, mon, day)
 
         qc_outcomes[i] = passed
-        if bsd == 500.0:
+        if bsd == 500.0 or np.isnan(bsd):
             qc_outcomes[i] = untestable
         elif abs(x - bm) >= bsd:
             qc_outcomes[i] = failed
