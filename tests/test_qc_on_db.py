@@ -113,13 +113,11 @@ def climdata_buddy():
     }
     buddy_data = {
         "stdev": load_file(
-            f"metoffice_qc/external_files/HadSST2_pentad_stdev_climatology.nc",
-            branch="buddy_check",
+            "metoffice_qc/external_files/HadSST2_pentad_stdev_climatology.nc",
             **kwargs,
         ),
         "mean": load_file(
-            f"metoffice_qc/external_files/HadSST2_pentad_climatology.nc",
-            branch="buddy_check",
+            "metoffice_qc/external_files/HadSST2_pentad_climatology.nc",
             **kwargs,
         ),
     }
@@ -134,23 +132,19 @@ def climdata_bayesian():
     }
     buddy_data = {
         "ostia1": load_file(
-            f"metoffice_qc/external_files/OSTIA_buddy_range_sampling_error.nc",
-            branch="buddy_check",
+            "metoffice_qc/external_files/OSTIA_buddy_range_sampling_error.nc",
             **kwargs,
         ),
         "ostia2": load_file(
-            f"metoffice_qc/external_files/OSTIA_compare_1x1x5box_to_buddy_average.nc",
-            branch="buddy_check",
+            "metoffice_qc/external_files/OSTIA_compare_1x1x5box_to_buddy_average.nc",
             **kwargs,
         ),
         "ostia3": load_file(
-            f"metoffice_qc/external_files/OSTIA_compare_one_ob_to_1x1x5box.nc",
-            branch="buddy_check",
+            "metoffice_qc/external_files/OSTIA_compare_one_ob_to_1x1x5box.nc",
             **kwargs,
         ),
         "mean": load_file(
-            f"metoffice_qc/external_files/HadSST2_pentad_climatology.nc",
-            branch="buddy_check",
+            "metoffice_qc/external_files/HadSST2_pentad_climatology.nc",
             **kwargs,
         ),
     }
@@ -173,7 +167,6 @@ def testdata_track():
             f"icoads/r302/PT2/cdm_tables/{table}-icoads_r302_PT2_2016-04-11_subset.psv",
             cache_dir=cache_dir,
             within_drs=False,
-            branch="track_checker",
         )
 
     db_tables = read_tables(cache_dir)
@@ -1895,7 +1888,7 @@ def test_buddy_check(climdata_buddy, testdata_track):
     )
 
     for i, flag in enumerate(result):
-        if i in [7,8,9,10,12,13,14,15,45]:
+        if i in [7, 8, 9, 10, 12, 13, 14, 15, 45]:
             assert flag == failed
         else:
             assert flag == passed
