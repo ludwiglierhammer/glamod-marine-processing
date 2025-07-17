@@ -22,6 +22,10 @@ from glamod_marine_processing.qc_suite.modules.external_clim import Climatology
 from glamod_marine_processing.qc_suite.modules.multiple_row_checks import (
     do_multiple_row_check,
 )
+from glamod_marine_processing.qc_suite.modules.next_level_deck_qc import (
+    do_bayesian_buddy_check,
+    do_mds_buddy_check,
+)
 from glamod_marine_processing.qc_suite.modules.next_level_qc import (
     do_climatology_check,
     do_date_check,
@@ -44,10 +48,7 @@ from glamod_marine_processing.qc_suite.modules.next_level_track_check_qc import 
     find_repeated_values,
     find_saturated_runs,
 )
-from glamod_marine_processing.qc_suite.modules.next_level_deck_qc import (
-    do_mds_buddy_check,
-    do_bayesian_buddy_check,
-)
+
 
 @pytest.fixture(scope="session")
 def testdata():
@@ -103,6 +104,7 @@ def testdata():
 
     return data_dict
 
+
 @pytest.fixture(scope="session")
 def climdata_buddy():
     kwargs = {
@@ -110,18 +112,19 @@ def climdata_buddy():
         "within_drs": False,
     }
     buddy_data = {
-        'stdev': load_file(
+        "stdev": load_file(
             f"metoffice_qc/external_files/HadSST2_pentad_stdev_climatology.nc",
             branch="buddy_check",
-            **kwargs
+            **kwargs,
         ),
-        'mean': load_file(
+        "mean": load_file(
             f"metoffice_qc/external_files/HadSST2_pentad_climatology.nc",
             branch="buddy_check",
-            **kwargs
+            **kwargs,
         ),
     }
     return buddy_data
+
 
 @pytest.fixture(scope="session")
 def climdata_bayesian():
@@ -130,29 +133,28 @@ def climdata_bayesian():
         "within_drs": False,
     }
     buddy_data = {
-        'ostia1': load_file(
+        "ostia1": load_file(
             f"metoffice_qc/external_files/OSTIA_buddy_range_sampling_error.nc",
             branch="buddy_check",
-            **kwargs
+            **kwargs,
         ),
-        'ostia2': load_file(
+        "ostia2": load_file(
             f"metoffice_qc/external_files/OSTIA_compare_1x1x5box_to_buddy_average.nc",
             branch="buddy_check",
-            **kwargs
+            **kwargs,
         ),
-        'ostia3': load_file(
+        "ostia3": load_file(
             f"metoffice_qc/external_files/OSTIA_compare_one_ob_to_1x1x5box.nc",
             branch="buddy_check",
-            **kwargs
+            **kwargs,
         ),
-        'mean': load_file(
+        "mean": load_file(
             f"metoffice_qc/external_files/HadSST2_pentad_climatology.nc",
             branch="buddy_check",
-            **kwargs
+            **kwargs,
         ),
     }
     return buddy_data
-
 
 
 @pytest.fixture(scope="session")
@@ -1859,13 +1861,18 @@ def test_multiple_row_check(testdata, climdata, return_method, expected, apply_f
     expected = pd.DataFrame(expected)
     pd.testing.assert_frame_equal(results, expected)
 
+
 def test_buddy_check(climdata_buddy, testdata_track):
 
     sst_climatology = Climatology.open_netcdf_file(
-        climdata_buddy['mean'], 'sst', time_axis='time', source_units='degC', target_units='K'
+        climdata_buddy["mean"],
+        "sst",
+        time_axis="time",
+        source_units="degC",
+        target_units="K",
     )
     stdev_climatology = Climatology.open_netcdf_file(
-        climdata_buddy['stdev'], 'sst', time_axis='time'
+        climdata_buddy["stdev"], "sst", time_axis="time"
     )
 
     limits = [[1, 1, 2], [2, 2, 2], [1, 1, 4], [2, 2, 4]]
@@ -1890,20 +1897,25 @@ def test_buddy_check(climdata_buddy, testdata_track):
     for i, flag in enumerate(result):
         assert flag == passed
 
+
 @pytest.mark.skip
 def test_bayesian_buddy_check(climdata_bayesian, testdata_track):
 
     sst_climatology = Climatology.open_netcdf_file(
-        climdata_bayesian['mean'], 'sst', time_axis='time', source_units='degC', target_units='K'
+        climdata_bayesian["mean"],
+        "sst",
+        time_axis="time",
+        source_units="degC",
+        target_units="K",
     )
     ostia1_climatology = Climatology.open_netcdf_file(
-        climdata_bayesian['ostia1'], 'sst', time_axis='time'
+        climdata_bayesian["ostia1"], "sst", time_axis="time"
     )
     ostia2_climatology = Climatology.open_netcdf_file(
-        climdata_bayesian['ostia2'], 'sst', time_axis='time'
+        climdata_bayesian["ostia2"], "sst", time_axis="time"
     )
     ostia3_climatology = Climatology.open_netcdf_file(
-        climdata_bayesian['ostia3'], 'sst', time_axis='time'
+        climdata_bayesian["ostia3"], "sst", time_axis="time"
     )
 
     db_ = testdata_track["observations-sst"].copy()
@@ -1924,7 +1936,7 @@ def test_bayesian_buddy_check(climdata_bayesian, testdata_track):
         [2, 2, 4],
         3.0,
         8.0,
-        0.3
+        0.3,
     )
 
     for i, flag in enumerate(result):

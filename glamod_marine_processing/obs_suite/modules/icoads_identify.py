@@ -150,7 +150,7 @@ def id_is_generic(inid: str, inyear: int) -> bool:
         "MASKSTID",
         "MASK",
         "XXXX",
-        "/////"
+        "/////",
     ]
 
     if 1921 <= inyear <= 1941:

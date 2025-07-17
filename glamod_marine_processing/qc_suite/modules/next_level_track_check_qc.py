@@ -10,7 +10,6 @@ import pandas as pd
 from . import spherical_geometry as sg
 from . import time_control
 from . import track_check as tc
-
 from .auxiliary import (
     SequenceDatetimeType,
     SequenceFloatType,
@@ -296,45 +295,45 @@ def forward_discrepancy(
     dsi: SequenceFloatType,
 ) -> SequenceFloatType:
     """Calculate what the distance is between the projected position (based on the reported
-        speed and heading at the current and previous time steps) and the actual position. The
-        observations are taken in time order.
+    speed and heading at the current and previous time steps) and the actual position. The
+    observations are taken in time order.
 
-        This takes the speed and direction reported by the ship and projects it forwards half a
-        time step, it then projects it forwards another half time-step using the speed and
-        direction for the next report, to which the projected location
-        is then compared. The distances between the projected and actual locations is returned
+    This takes the speed and direction reported by the ship and projects it forwards half a
+    time step, it then projects it forwards another half time-step using the speed and
+    direction for the next report, to which the projected location
+    is then compared. The distances between the projected and actual locations is returned
 
-        Parameters
-        ----------
-        vsi : sequence of float, 1D np.ndarray of float, or pd.Series of float, shape (n,)
-            One-dimensional reported speed array in km/h.
-            Can be a sequence (e.g., list or tuple), a one-dimensional NumPy array, or a pandas Series.
+    Parameters
+    ----------
+    vsi : sequence of float, 1D np.ndarray of float, or pd.Series of float, shape (n,)
+        One-dimensional reported speed array in km/h.
+        Can be a sequence (e.g., list or tuple), a one-dimensional NumPy array, or a pandas Series.
 
-        dsi : sequence of float, 1D np.ndarray of float, or pd.Series of float, shape (n,)
-            One-dimensional reported heading array in degrees.
-            Can be a sequence (e.g., list or tuple), a one-dimensional NumPy array, or a pandas Series.
+    dsi : sequence of float, 1D np.ndarray of float, or pd.Series of float, shape (n,)
+        One-dimensional reported heading array in degrees.
+        Can be a sequence (e.g., list or tuple), a one-dimensional NumPy array, or a pandas Series.
 
-        lat : sequence of float, 1D np.ndarray of float, or pd.Series of float, shape (n,)
-            One-dimensional latitude array in degrees.
-            Can be a sequence (e.g., list or tuple), a one-dimensional NumPy array, or a pandas Series.
+    lat : sequence of float, 1D np.ndarray of float, or pd.Series of float, shape (n,)
+        One-dimensional latitude array in degrees.
+        Can be a sequence (e.g., list or tuple), a one-dimensional NumPy array, or a pandas Series.
 
-        lon : sequence of float, 1D np.ndarray of float, or pd.Series of float, shape (n,)
-            One-dimensional longitude array in degrees.
-            Can be a sequence (e.g., list or tuple), a one-dimensional NumPy array, or a pandas Series.
+    lon : sequence of float, 1D np.ndarray of float, or pd.Series of float, shape (n,)
+        One-dimensional longitude array in degrees.
+        Can be a sequence (e.g., list or tuple), a one-dimensional NumPy array, or a pandas Series.
 
-        date : sequence of datetime, 1D np.ndarray of datetime, or pd.Series of datetime, shape (n,)
-            One-dimensional date array.
-            Can be a sequence (e.g., list or tuple), a one-dimensional NumPy array, or a pandas Series.
+    date : sequence of datetime, 1D np.ndarray of datetime, or pd.Series of datetime, shape (n,)
+        One-dimensional date array.
+        Can be a sequence (e.g., list or tuple), a one-dimensional NumPy array, or a pandas Series.
 
-        Returns
-        -------
-        Same type as input, but with float values, shape (n,)
-            One-dimensional array, sequence, or pandas Series containing distances from estimated positions.
+    Returns
+    -------
+    Same type as input, but with float values, shape (n,)
+        One-dimensional array, sequence, or pandas Series containing distances from estimated positions.
 
-        Raises
-        ------
-        ValueError
-            If either input is not 1-dimensional or if their lengths do not match.
+    Raises
+    ------
+    ValueError
+        If either input is not 1-dimensional or if their lengths do not match.
     """
     number_of_obs = len(lat)
 

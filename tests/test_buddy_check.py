@@ -1,22 +1,23 @@
+from __future__ import annotations
+
 import math
 
 import numpy as np
 import pandas as pd
-
 import pytest
 
 import glamod_marine_processing.qc_suite.modules.Climatology as clim
+from glamod_marine_processing.qc_suite.modules.auxiliary import (
+    failed,
+    passed,
+    untestable,
+    untested,
+)
 from glamod_marine_processing.qc_suite.modules.next_level_deck_qc import (
     SuperObsGrid,
-    get_threshold_multiplier,
-    do_mds_buddy_check,
     do_bayesian_buddy_check,
-)
-from glamod_marine_processing.qc_suite.modules.auxiliary import (
-    passed,
-    failed,
-    untested,
-    untestable
+    do_mds_buddy_check,
+    get_threshold_multiplier,
 )
 
 
@@ -326,40 +327,40 @@ def buddy_reps():
     reps = {
         "ID": [
             "AAAAAAAAA",
-            "BBBBBBBBB", "BBBBBBBBB", "BBBBBBBBB",
-            "BBBBBBBBB", "BBBBBBBBB",
-            "BBBBBBBBB", "BBBBBBBBB", "BBBBBBBBB",
+            "BBBBBBBBB",
+            "BBBBBBBBB",
+            "BBBBBBBBB",
+            "BBBBBBBBB",
+            "BBBBBBBBB",
+            "BBBBBBBBB",
+            "BBBBBBBBB",
+            "BBBBBBBBB",
         ],
         "LAT": [
             0.5,
-            1.5, 1.5, 1.5,
-            0.5, 0.5,
-            -0.5, -0.5, -0.5,
-        ],
-        "LON": [
+            1.5,
+            1.5,
+            1.5,
             0.5,
-            -0.5, 0.5, 1.5,
-            -0.5, 1.5,
-            -0.5, 0.5, 1.5
+            0.5,
+            -0.5,
+            -0.5,
+            -0.5,
         ],
-        "SST": [
-            5.0,
-            0.0, 0.0, 0.0,
-            0.0, 0.0,
-            0.0, 0.0, 0.0
-        ],
+        "LON": [0.5, -0.5, 0.5, 1.5, -0.5, 1.5, -0.5, 0.5, 1.5],
+        "SST": [5.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0],
         "DATE": [
             "2003-12-01T00:00:00.000000000",
-            "2003-12-01T00:00:00.000000000", "2003-12-01T00:00:00.000000000", "2003-12-01T00:00:00.000000000",
-            "2003-12-01T00:00:00.000000000", "2003-12-01T00:00:00.000000000",
-            "2003-12-01T00:00:00.000000000", "2003-12-01T00:00:00.000000000", "2003-12-01T00:00:00.000000000",
+            "2003-12-01T00:00:00.000000000",
+            "2003-12-01T00:00:00.000000000",
+            "2003-12-01T00:00:00.000000000",
+            "2003-12-01T00:00:00.000000000",
+            "2003-12-01T00:00:00.000000000",
+            "2003-12-01T00:00:00.000000000",
+            "2003-12-01T00:00:00.000000000",
+            "2003-12-01T00:00:00.000000000",
         ],
-        "SST_CLIM": [
-            0.0,
-            0.0, 0.0, 0.0,
-            0.0, 0.0,
-            0.0, 0.0, 0.0
-        ],
+        "SST_CLIM": [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0],
     }
 
     for key in reps:
@@ -375,40 +376,40 @@ def buddy_reps_time(second_date):
     reps = {
         "ID": [
             "AAAAAAAAA",
-            "BBBBBBBBB", "BBBBBBBBB", "BBBBBBBBB",
-            "BBBBBBBBB", "BBBBBBBBB",
-            "BBBBBBBBB", "BBBBBBBBB", "BBBBBBBBB",
+            "BBBBBBBBB",
+            "BBBBBBBBB",
+            "BBBBBBBBB",
+            "BBBBBBBBB",
+            "BBBBBBBBB",
+            "BBBBBBBBB",
+            "BBBBBBBBB",
+            "BBBBBBBBB",
         ],
         "LAT": [
             0.5,
-            1.5, 1.5, 1.5,
-            0.5, 0.5,
-            -0.5, -0.5, -0.5,
-        ],
-        "LON": [
+            1.5,
+            1.5,
+            1.5,
             0.5,
-            -0.5, 0.5, 1.5,
-            -0.5, 1.5,
-            -0.5, 0.5, 1.5
+            0.5,
+            -0.5,
+            -0.5,
+            -0.5,
         ],
-        "SST": [
-            5.0,
-            0.0, 0.0, 0.0,
-            0.0, 0.0,
-            0.0, 0.0, 0.0
-        ],
+        "LON": [0.5, -0.5, 0.5, 1.5, -0.5, 1.5, -0.5, 0.5, 1.5],
+        "SST": [5.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0],
         "DATE": [
             "2003-12-01T00:00:00.000000000",
-            second_date, second_date, second_date,
-            second_date, second_date,
-            second_date, second_date, second_date,
+            second_date,
+            second_date,
+            second_date,
+            second_date,
+            second_date,
+            second_date,
+            second_date,
+            second_date,
         ],
-        "SST_CLIM": [
-            0.0,
-            0.0, 0.0, 0.0,
-            0.0, 0.0,
-            0.0, 0.0, 0.0
-        ],
+        "SST_CLIM": [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0],
     }
 
     for key in reps:
@@ -424,40 +425,40 @@ def buddy_reps_spread():
     reps = {
         "ID": [
             "AAAAAAAAA",
-            "BBBBBBBBB", "BBBBBBBBB", "BBBBBBBBB",
-            "BBBBBBBBB", "BBBBBBBBB",
-            "BBBBBBBBB", "BBBBBBBBB", "BBBBBBBBB",
+            "BBBBBBBBB",
+            "BBBBBBBBB",
+            "BBBBBBBBB",
+            "BBBBBBBBB",
+            "BBBBBBBBB",
+            "BBBBBBBBB",
+            "BBBBBBBBB",
+            "BBBBBBBBB",
         ],
         "LAT": [
             0.5,
-            2.5, 2.5, 2.5,
-            0.5, 0.5,
-            -1.5, -1.5, -1.5,
-        ],
-        "LON": [
+            2.5,
+            2.5,
+            2.5,
             0.5,
-            -1.5, 0.5, 2.5,
-            -1.5, 2.5,
-            -1.5, 0.5, 2.5
+            0.5,
+            -1.5,
+            -1.5,
+            -1.5,
         ],
-        "SST": [
-            5.0,
-            0.0, 0.0, 0.0,
-            0.0, 0.0,
-            0.0, 0.0, 0.0
-        ],
+        "LON": [0.5, -1.5, 0.5, 2.5, -1.5, 2.5, -1.5, 0.5, 2.5],
+        "SST": [5.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0],
         "DATE": [
             "2003-12-01T00:00:00.000000000",
-            "2003-12-01T00:00:00.000000000", "2003-12-01T00:00:00.000000000", "2003-12-01T00:00:00.000000000",
-            "2003-12-01T00:00:00.000000000", "2003-12-01T00:00:00.000000000",
-            "2003-12-01T00:00:00.000000000", "2003-12-01T00:00:00.000000000", "2003-12-01T00:00:00.000000000",
+            "2003-12-01T00:00:00.000000000",
+            "2003-12-01T00:00:00.000000000",
+            "2003-12-01T00:00:00.000000000",
+            "2003-12-01T00:00:00.000000000",
+            "2003-12-01T00:00:00.000000000",
+            "2003-12-01T00:00:00.000000000",
+            "2003-12-01T00:00:00.000000000",
+            "2003-12-01T00:00:00.000000000",
         ],
-        "SST_CLIM": [
-            0.0,
-            0.0, 0.0, 0.0,
-            0.0, 0.0,
-            0.0, 0.0, 0.0
-        ],
+        "SST_CLIM": [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0],
     }
 
     for key in reps:
@@ -471,7 +472,9 @@ def buddy_reps_spread():
 @pytest.fixture
 def buddy_reps_singleton():
     reps = {
-        "ID": ["AAAAAAAAA", ],
+        "ID": [
+            "AAAAAAAAA",
+        ],
         "LAT": [0.5],
         "LON": [0.5],
         "SST": [5.0],
@@ -520,8 +523,12 @@ def test_add_one_maxes_limits(reps_, dummy_pentad_stdev_):
     )
     g.take_average()
     g.get_new_buddy_limits(
-        dummy_pentad_stdev_, dummy_pentad_stdev_, dummy_pentad_stdev_,
-        limits=(2, 2, 4), sigma_m=1.0, noise_scaling=3.0
+        dummy_pentad_stdev_,
+        dummy_pentad_stdev_,
+        dummy_pentad_stdev_,
+        limits=(2, 2, 4),
+        sigma_m=1.0,
+        noise_scaling=3.0,
     )
 
     mn = g.get_buddy_mean(
@@ -541,8 +548,12 @@ def test_add_multiple(reps_, dummy_pentad_stdev_):
         reps_["LAT"], reps_["LON"], reps_["DATE"], reps_["SST"] - reps_["SST_CLIM"]
     )
     g.get_new_buddy_limits(
-        dummy_pentad_stdev_, dummy_pentad_stdev_, dummy_pentad_stdev_,
-        limits=(2, 2, 4), sigma_m=1.0, noise_scaling=3.0
+        dummy_pentad_stdev_,
+        dummy_pentad_stdev_,
+        dummy_pentad_stdev_,
+        limits=(2, 2, 4),
+        sigma_m=1.0,
+        noise_scaling=3.0,
     )
 
     mn = g.get_buddy_mean(
@@ -581,7 +592,9 @@ def test_buddy_check(reps_, dummy_pentad_stdev_):
     assert np.all(result == [passed, passed, passed, passed])
 
 
-def test_buddy_check_single_ob_flagged_untestable(buddy_reps_singleton, dummy_pentad_stdev_):
+def test_buddy_check_single_ob_flagged_untestable(
+    buddy_reps_singleton, dummy_pentad_stdev_
+):
     limits = [[1, 1, 2], [2, 2, 2], [1, 1, 4], [2, 2, 4]]
     number_of_obs_thresholds = [[0, 5, 15, 100], [0], [0, 5, 15, 100], [0]]
     multipliers = [[4.0, 3.5, 3.0, 2.5], [4.0], [4.0, 3.5, 3.0, 2.5], [4.0]]
@@ -627,15 +640,17 @@ def test_buddy_check_designed_to_fail(buddy_reps, dummy_pentad_stdev_):
 
 
 @pytest.mark.parametrize(
-    ['second_date', 'expected'],
+    ["second_date", "expected"],
     [
         ["2003-12-11T00:00:00.000000000", failed],
         ["2003-12-21T00:00:00.000000000", failed],
         ["2003-11-21T00:00:00.000000000", failed],
         ["2003-12-25T00:00:00.000000000", untestable],
-    ]
+    ],
 )
-def test_buddy_check_designed_to_fail_time(buddy_reps_time, dummy_pentad_stdev_, expected):
+def test_buddy_check_designed_to_fail_time(
+    buddy_reps_time, dummy_pentad_stdev_, expected
+):
     # One observation with 8 neighbours that has a disparate anomaly
     limits = [[1, 1, 2], [2, 2, 2], [1, 1, 4], [2, 2, 4]]
     number_of_obs_thresholds = [[0, 5, 15, 100], [0], [0, 5, 15, 100], [0]]
@@ -740,7 +755,7 @@ def test_bayesian_buddy_check(reps_, dummy_pentad_stdev_):
         [2, 2, 4],
         3.0,
         8.0,
-        0.3
+        0.3,
     )
 
     assert np.all(result == [passed, passed, passed, passed])
@@ -762,25 +777,26 @@ def test_bayesian_buddy_check_again(buddy_reps, dummy_pentad_stdev_):
         [2, 2, 4],
         3.0,
         8.0,
-        0.1
+        0.1,
     )
 
-    assert np.all(result == [
-       failed, passed, passed, passed, passed, passed, passed, passed, passed
-    ])
+    assert np.all(
+        result
+        == [failed, passed, passed, passed, passed, passed, passed, passed, passed]
+    )
 
 
 @pytest.mark.parametrize(
-    ['second_date', 'expected'],
+    ["second_date", "expected"],
     [
         ["2003-12-11T00:00:00.000000000", failed],
         ["2003-12-21T00:00:00.000000000", failed],
         ["2003-11-21T00:00:00.000000000", failed],
         ["2003-12-25T00:00:00.000000000", untestable],
-    ]
+    ],
 )
 def test_bayesian_buddy_check_designed_to_fail_time(
-        buddy_reps_time, dummy_pentad_stdev_, expected
+    buddy_reps_time, dummy_pentad_stdev_, expected
 ):
     result = do_bayesian_buddy_check(
         buddy_reps_time["LAT"],
@@ -797,7 +813,7 @@ def test_bayesian_buddy_check_designed_to_fail_time(
         [2, 2, 4],
         3.0,
         8.0,
-        0.1
+        0.1,
     )
 
     for i, flag in enumerate(result):

@@ -455,18 +455,24 @@ class MarineReport:
         else:
             # Calculate the humidity variables
             self.setvar(
-                "VAP", calculate_humidity.vap(self.getvar("DPT"), self.getvar("AT"), slpclim)
+                "VAP",
+                calculate_humidity.vap(self.getvar("DPT"), self.getvar("AT"), slpclim),
             )
             self.setvar(
-                "SHU", calculate_humidity.sh(self.getvar("DPT"), self.getvar("AT"), slpclim)
+                "SHU",
+                calculate_humidity.sh(self.getvar("DPT"), self.getvar("AT"), slpclim),
             )
             self.setvar(
-                "CRH", calculate_humidity.rh(self.getvar("DPT"), self.getvar("AT"), slpclim)
+                "CRH",
+                calculate_humidity.rh(self.getvar("DPT"), self.getvar("AT"), slpclim),
             )
             self.setvar(
-                "CWB", calculate_humidity.wb(self.getvar("DPT"), self.getvar("AT"), slpclim)
+                "CWB",
+                calculate_humidity.wb(self.getvar("DPT"), self.getvar("AT"), slpclim),
             )
-            self.setvar("DPD", calculate_humidity.dpd(self.getvar("DPT"), self.getvar("AT")))
+            self.setvar(
+                "DPD", calculate_humidity.dpd(self.getvar("DPT"), self.getvar("AT"))
+            )
 
             # Test for silliness - if silly, return all as None
             if self.getvar("CRH") is None:

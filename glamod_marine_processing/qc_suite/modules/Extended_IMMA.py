@@ -15,15 +15,16 @@ from datetime import datetime
 
 import numpy as np
 
-from . import calculate_humidity
 import glamod_marine_processing.obs_suite.modules.icoads_identify as ii
-from . location_control import mds_lat_to_yindex, mds_lon_to_xindex
-from . time_control import which_pentad, pentad_to_month_day
+
+from . import calculate_humidity
 from . import next_level_qc as qc
 from . import spherical_geometry as sph
 from . import time_control
 from . import track_check as tc
 from . import trackqc as tqc
+from .location_control import mds_lat_to_yindex, mds_lon_to_xindex
+from .time_control import pentad_to_month_day, which_pentad
 
 VARLIST = [
     "YR",
@@ -496,18 +497,24 @@ class MarineReport:
         else:
             # Calculate the humidity variables
             self.setvar(
-                "VAP", calculate_humidity.vap(self.getvar("DPT"), self.getvar("AT"), slpclim)
+                "VAP",
+                calculate_humidity.vap(self.getvar("DPT"), self.getvar("AT"), slpclim),
             )
             self.setvar(
-                "SHU", calculate_humidity.sh(self.getvar("DPT"), self.getvar("AT"), slpclim)
+                "SHU",
+                calculate_humidity.sh(self.getvar("DPT"), self.getvar("AT"), slpclim),
             )
             self.setvar(
-                "CRH", calculate_humidity.rh(self.getvar("DPT"), self.getvar("AT"), slpclim)
+                "CRH",
+                calculate_humidity.rh(self.getvar("DPT"), self.getvar("AT"), slpclim),
             )
             self.setvar(
-                "CWB", calculate_humidity.wb(self.getvar("DPT"), self.getvar("AT"), slpclim)
+                "CWB",
+                calculate_humidity.wb(self.getvar("DPT"), self.getvar("AT"), slpclim),
             )
-            self.setvar("DPD", calculate_humidity.dpd(self.getvar("DPT"), self.getvar("AT")))
+            self.setvar(
+                "DPD", calculate_humidity.dpd(self.getvar("DPT"), self.getvar("AT"))
+            )
 
             # Test for silliness - if silly, return all as None
             if self.getvar("CRH") is None:
