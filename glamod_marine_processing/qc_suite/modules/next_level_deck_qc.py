@@ -445,7 +445,7 @@ class SuperObsGrid:
 
 @post_format_return_type(["value"])
 @inspect_arrays(["lat", "lon", "date", "value"])
-@convert_units(lats="degrees", lons="degrees")
+@convert_units(lat="degrees", lon="degrees")
 @inspect_climatology("climatology")
 def do_mds_buddy_check(
         lat: SequenceFloatType,
@@ -453,7 +453,7 @@ def do_mds_buddy_check(
         date: SequenceDatetimeType,
         value: SequenceFloatType,
         climatology: ClimFloatType,
-        pentad_stdev: Climatology,
+        standard_deviation: Climatology,
         limits: list[list[int]],
         number_of_obs_thresholds: list[list[int]],
         multipliers: list[list[float]],
@@ -483,7 +483,7 @@ def do_mds_buddy_check(
         The climatological average(s) used to calculate anomalies.
         Can be a scalar, a sequence (e.g., list or tuple), a one-dimensional NumPy array, or a pandas Series.
 
-    pentad_stdev : Climatology
+    standard_deviation : Climatology
         Field of standard deviations of 1x1xpentad standard deviations
 
     limits : list[list]
@@ -533,7 +533,7 @@ def do_mds_buddy_check(
     grid = SuperObsGrid()
     grid.add_multiple_observations(lat, lon, date, anoms)
     grid.get_buddy_limits_with_parameters(
-        pentad_stdev, limits, number_of_obs_thresholds, multipliers
+        standard_deviation, limits, number_of_obs_thresholds, multipliers
     )
 
     numobs = len(lat)
@@ -562,15 +562,15 @@ def do_mds_buddy_check(
     return qc_outcomes
 
 
-@post_format_return_type(["values"])
-@inspect_arrays(["lats", "lons", "dates", "values"])
-@convert_units(lats="degrees", lons="degrees")
+@post_format_return_type(["value"])
+@inspect_arrays(["lat", "lon", "date", "value"])
+@convert_units(lat="degrees", lon="degrees")
 @inspect_climatology("climatology")
 def do_bayesian_buddy_check(
-        lats: SequenceFloatType,
-        lons: SequenceFloatType,
-        dates: SequenceDatetimeType,
-        values: SequenceFloatType,
+        lat: SequenceFloatType,
+        lon: SequenceFloatType,
+        date: SequenceDatetimeType,
+        value: SequenceFloatType,
         climatology: ClimFloatType,
         stdev1: Climatology,
         stdev2: Climatology,
@@ -589,16 +589,16 @@ def do_bayesian_buddy_check(
 
     Parameters
     ----------
-    lats : array-like of float, shape (n,)
+    lat : array-like of float, shape (n,)
         1-dimensional latitude array.
 
-    lons : array-like of float, shape (n,)
+    lon : array-like of float, shape (n,)
         1-dimensional longitude array.
 
-    dates : array-like of datetime, shape (n,)
+    date : array-like of datetime, shape (n,)
         1-dimensional date array.
 
-    values : array-like of float, shape (n,)
+    value : array-like of float, shape (n,)
         1-dimensional anomaly array.
 
     climatology : float, None, sequence of float or None, 1D np.ndarray of float, pd.Series of float or Climatology
@@ -657,7 +657,7 @@ def do_bayesian_buddy_check(
     * one_sigma_measurement_uncertainty = 1.0
     * maximum_anomaly = 8.0
     """
-    anoms = values - climatology
+    anoms = value - climatology
 
     p0 = prior_probability_of_gross_error
     q = quantization_interval
@@ -671,20 +671,20 @@ def do_bayesian_buddy_check(
     r_lo = -1.0 * r_hi  # previous lower QC limit set
 
     grid = SuperObsGrid()
-    grid.add_multiple_observations(lats, lons, dates, anoms)
+    grid.add_multiple_observations(lat, lon, date, anoms)
     grid.get_new_buddy_limits(stdev1, stdev2, stdev3, limits, sigma_m, noise_scaling)
 
-    numobs = len(lats)
+    numobs = len(lat)
     qc_outcomes = np.zeros(numobs) + untested
 
     for i in range(numobs):
-        lat = lats[i]
-        lon = lons[i]
-        mon = dates[i].month
-        day = dates[i].day
+        lat_ = lat[i]
+        lon_ = lon[i]
+        mon = pd.Timestamp(date[i]).month
+        day = pd.Timestamp(date[i]).day
 
         # Calculate the probability of gross error given the set-up
-        buddy_stdev = grid.get_buddy_stdev(lat, lon, mon, day)
+        buddy_stdev = grid.get_buddy_stdev(lat_, lon_, mon, day)
 
         ppp = p_gross(
             p0,
@@ -692,12 +692,12 @@ def do_bayesian_buddy_check(
             r_hi,
             r_lo,
             anoms[i],
-            grid.get_buddy_mean(lat, lon, mon, day),
+            grid.get_buddy_mean(lat_, lon_, mon, day),
             buddy_stdev,
         )
 
-        # QC outcome is coded as an integer between 0 and 9 indicating 10 times the probability of
-        # gross error.
+        # QC outcome is based on the probability of gross error. If the probability of gross error is larger than
+        # the fail_probability then it is considered a fail.
         qc_outcomes[i] = passed
         if ppp > fail_probability:
             qc_outcomes[i] = failed

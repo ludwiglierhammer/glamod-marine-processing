@@ -123,6 +123,36 @@ def climdata_buddy():
     }
     return buddy_data
 
+@pytest.fixture(scope="session")
+def climdata_bayesian():
+    kwargs = {
+        "cache_dir": ".pytest_cache/metoffice_qc",
+        "within_drs": False,
+    }
+    buddy_data = {
+        'ostia1': load_file(
+            f"metoffice_qc/external_files/OSTIA_buddy_range_sampling_error.nc",
+            branch="buddy_check",
+            **kwargs
+        ),
+        'ostia2': load_file(
+            f"metoffice_qc/external_files/OSTIA_compare_1x1x5box_to_buddy_average.nc",
+            branch="buddy_check",
+            **kwargs
+        ),
+        'ostia3': load_file(
+            f"metoffice_qc/external_files/OSTIA_compare_one_ob_to_1x1x5box.nc",
+            branch="buddy_check",
+            **kwargs
+        ),
+        'mean': load_file(
+            f"metoffice_qc/external_files/HadSST2_pentad_climatology.nc",
+            branch="buddy_check",
+            **kwargs
+        ),
+    }
+    return buddy_data
+
 
 
 @pytest.fixture(scope="session")
@@ -1855,6 +1885,46 @@ def test_buddy_check(climdata_buddy, testdata_track):
         limits,
         number_of_obs_thresholds,
         multipliers,
+    )
+
+    for i, flag in enumerate(result):
+        assert flag == passed
+
+@pytest.mark.skip
+def test_bayesian_buddy_check(climdata_bayesian, testdata_track):
+
+    sst_climatology = Climatology.open_netcdf_file(
+        climdata_bayesian['mean'], 'sst', time_axis='time', source_units='degC', target_units='K'
+    )
+    ostia1_climatology = Climatology.open_netcdf_file(
+        climdata_bayesian['ostia1'], 'sst', time_axis='time'
+    )
+    ostia2_climatology = Climatology.open_netcdf_file(
+        climdata_bayesian['ostia2'], 'sst', time_axis='time'
+    )
+    ostia3_climatology = Climatology.open_netcdf_file(
+        climdata_bayesian['ostia3'], 'sst', time_axis='time'
+    )
+
+    db_ = testdata_track["observations-sst"].copy()
+    db_.dropna(subset=["observation_value"], inplace=True, ignore_index=True)
+
+    result = do_bayesian_buddy_check(
+        db_["latitude"],
+        db_["longitude"],
+        db_["date_time"],
+        db_["observation_value"],
+        sst_climatology,
+        ostia1_climatology,
+        ostia2_climatology,
+        ostia3_climatology,
+        0.05,
+        0.1,
+        1.0,
+        [2, 2, 4],
+        3.0,
+        8.0,
+        0.3
     )
 
     for i, flag in enumerate(result):
