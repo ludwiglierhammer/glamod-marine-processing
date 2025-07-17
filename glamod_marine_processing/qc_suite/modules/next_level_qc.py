@@ -31,7 +31,7 @@ def value_check(value: ValueFloatType) -> ValueIntType:
 
     Parameters
     ----------
-    inval : float, None, sequence of float or None, 1D np.ndarray of float or pd.Series of float
+    value : float, None, sequence of float or None, 1D np.ndarray of float or pd.Series of float
         The input value(s) to be tested.
         Can be a scalar, sequence (e.g., list or tuple), a one-dimensional NumPy array, or a pandas Series.
 
@@ -366,7 +366,7 @@ def do_hard_limit_check(
 
     Parameters
     ----------
-    val: float, None, sequence of float or None, 1D np.ndarray of float or pd.Series of float
+    value: float, None, sequence of float or None, 1D np.ndarray of float or pd.Series of float
         The value(s) to be tested against the limits.
         Can be a scalar, a sequence (e.g., list or tuple), a one-dimensional NumPy array, or a pandas Series.
     limits: tuple of float
@@ -431,7 +431,7 @@ def do_climatology_check(
         Largest allowed anomaly.
         If ``standard_deviation`` is provided, this is interpreted as the largest allowed standardised anomaly.
     standard_deviation: float, None, sequence of float or None, 1D np.ndarray of float or pd.Series of float, default: "default"
-        The standard deviation(s) used to standardize the anomaly
+        The standard deviation(s) used to standardise the anomaly
         If set to "default", it is internally treated as 1.0.
         Can be a scalar, a sequence (e.g., list or tuple), a one-dimensional NumPy array, or a pandas Series.
     standard_deviation_limits: tuple of float, optional
@@ -561,7 +561,7 @@ def do_sst_freeze_check(
     in SST measurements. If we place a hard cut-off at -1.8, then we are likely to bias the average
     of many measurements too high when they are near the freezing point - observational error will
     push the measurements randomly higher and lower, and this test will trim out the lower tail, thus
-    biasing the result. The inclusion of an SST uncertainty parameter *might* mitigate that and we allow
+    biasing the result. The inclusion of an SST uncertainty parameter *might* mitigate that, and we allow
     that possibility here.
 
     Parameters

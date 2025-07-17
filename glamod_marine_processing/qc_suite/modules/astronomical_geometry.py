@@ -125,8 +125,10 @@ def sun_ascension(
     Parameters
     ----------
     long_of_sun: float
+
     sin_long_of_sun: float
-    angle_of elliptic: float
+
+    angle_of_elliptic: float
 
     Returns
     -------
@@ -343,7 +345,7 @@ def azimuth_elevation(
     sin_elevation = sin_of_elevation(phi, declination, hour_angle)
     elevation = math.asin(sin_elevation)
     azimuth = sun_azimuth(phi, declination)
-    # If sun is not very near the zenith, leave a as 0 or 180
+    # If sun is not very near the zenith, leave as 0 or 180
     if abs(elevation - 2 * np.pi / 4.0) > 0.000001:
         # Protect against rounding error near +/-90 degrees.
         azimuth = calculate_azimuth(declination, hour_angle, elevation, phi)

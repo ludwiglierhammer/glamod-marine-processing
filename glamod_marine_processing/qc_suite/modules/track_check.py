@@ -3,7 +3,7 @@ The New Track Check QC module provides the functions needed to perform the
 track check. The main routine is mds_full_track_check which takes a
 list of class`.MarineReport` from a single ship and runs the track check on them.
 This is an update of the MDS system track check in that it assumes the Earth is a
-sphere. In practice it gives similar results to the cylindrical earth formerly
+sphere. In practice, it gives similar results to the cylindrical earth formerly
 assumed.
 """
 
@@ -17,7 +17,7 @@ from . import spherical_geometry as sph
 from .auxiliary import convert_to, isvalid
 
 
-def modesp(awork: list) -> float:
+def modal_speed(awork: list) -> float:
     """Calculate the modal speed from the input array in 3 knot bins. Returns the
     bin-centre for the modal group.
 
@@ -32,7 +32,7 @@ def modesp(awork: list) -> float:
     Parameters
     ----------
     awork : list
-        List of input speeds in km/h
+        Input speeds in km/h
 
     Returns
     -------
@@ -90,7 +90,7 @@ def set_speed_limits(amode: float) -> (float, float, float):
     Returns
     -------
     (float, float, float)
-        max speed, max max speed and min speed
+        max speed, maximum max speed and min speed
     """
     amax = convert_to(15.0, "knots", "km/h")
     amaxx = convert_to(20.0, "knots", "km/h")
@@ -157,7 +157,7 @@ def direction_continuity(
     ship_directions : float
         calculated ship direction from reported positions in degrees
     max_direction_change : float
-        largest deviations that will not be flagged in degrees
+        Largest deviations that will not be flagged in degrees
 
     Returns
     -------
@@ -205,7 +205,7 @@ def speed_continuity(
     speeds : float
         Speed of ship calculated from locations at current and previous time steps in km/h
     max_speed_change : float
-        largest change of speed that will not raise flag in km/h, default 10
+        Largest change of speed that will not raise flag in km/h, default 10
 
     Returns
     -------

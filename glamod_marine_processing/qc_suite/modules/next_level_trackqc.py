@@ -249,7 +249,7 @@ class SpeedChecker:
             valid = False
         return valid
 
-    def _do_speed_check(self):
+    def do_speed_check(self):
         """Perform the actual speed check"""
         nrep = self.nreps
         min_win_period_hours = self.min_win_period * 24.0
@@ -436,7 +436,7 @@ class NewSpeedChecker:
             self.n_neighbours,
         )
 
-    def _do_new_speed_check(self) -> None:
+    def do_new_speed_check(self) -> None:
         """Perform the actual new speed check"""
         nrep = self.nreps
         min_win_period_hours = self.min_win_period * 24.0
@@ -613,7 +613,7 @@ class AgroundChecker:
         self.lat_smooth = lat_smooth
         self.hrs_smooth = hrs_smooth
 
-    def _do_aground_check(self):
+    def do_aground_check(self):
         """Perform the actual aground check"""
         half_win = (self.smooth_win - 1) / 2
         min_win_period_hours = self.min_win_period * 24.0
@@ -837,7 +837,7 @@ class SSTTailChecker:
             valid = False
         return valid
 
-    def _do_sst_tail_check(self, start_tail: bool):
+    def do_sst_tail_check(self, start_tail: bool):
         """Perform the actual SST tail check"""
         if not self.valid_parameters():
             self.qc_outcomes[:] = untestable
@@ -1240,7 +1240,7 @@ class SSTBiasedNoisyChecker:
         self.qc_outcomes_noise[:] = input_state
         self.qc_outcomes_bias[:] = input_state
 
-    def _do_sst_biased_noisy_check(self):
+    def do_sst_biased_noisy_check(self):
         """Perform the bias/noise check QC"""
         if not self.valid_parameters():
             self.set_all_qc_outcomes_to(untestable)
@@ -1306,7 +1306,7 @@ class SSTBiasedNoisyChecker:
                 dates.year,
                 dates.month,
                 dates.day,
-                dates.hour + (dates.minute) / 60,
+                dates.hour + dates.minute / 60,
                 lat,
                 lon,
                 -2.5,
@@ -1453,7 +1453,7 @@ def do_speed_check(
     checker = SpeedChecker(
         lons, lats, dates, speed_limit, min_win_period, max_win_period
     )
-    checker._do_speed_check()
+    checker.do_speed_check()
     return checker.get_qc_outcomes()
 
 
@@ -1523,7 +1523,7 @@ def do_new_speed_check(
         delta_t,
         n_neighbours,
     )
-    checker._do_new_speed_check()
+    checker.do_new_speed_check()
     return checker.get_qc_outcomes()
 
 
@@ -1572,7 +1572,7 @@ def do_aground_check(
     checker = AgroundChecker(
         lons, lats, dates, smooth_win, min_win_period, max_win_period
     )
-    checker._do_aground_check()
+    checker.do_aground_check()
     return checker.get_qc_outcomes()
 
 
@@ -1613,7 +1613,7 @@ def do_new_aground_check(
     * min_win_period = 8
     """
     checker = AgroundChecker(lons, lats, dates, smooth_win, min_win_period, None)
-    checker._do_aground_check()
+    checker.do_aground_check()
     return checker.get_qc_outcomes()
 
 
@@ -1709,7 +1709,7 @@ def do_sst_start_tail_check(
         drif_intra,
         background_err_lim,
     )
-    checker._do_sst_tail_check(True)
+    checker.do_sst_tail_check(True)
     return checker.get_qc_outcomes()
 
 
@@ -1805,7 +1805,7 @@ def do_sst_end_tail_check(
         drif_intra,
         background_err_lim,
     )
-    checker._do_sst_tail_check(False)
+    checker.do_sst_tail_check(False)
     return checker.get_qc_outcomes()
 
 
@@ -1894,7 +1894,7 @@ def do_sst_biased_check(
         n_bad,
         background_err_lim,
     )
-    checker._do_sst_biased_noisy_check()
+    checker.do_sst_biased_noisy_check()
     return checker.get_qc_outcomes_bias()
 
 
@@ -1983,7 +1983,7 @@ def do_sst_noisy_check(
         n_bad,
         background_err_lim,
     )
-    checker._do_sst_biased_noisy_check()
+    checker.do_sst_biased_noisy_check()
     return checker.get_qc_outcomes_noise()
 
 
@@ -2072,5 +2072,5 @@ def do_sst_biased_noisy_short_check(
         n_bad,
         background_err_lim,
     )
-    checker._do_sst_biased_noisy_check()
+    checker.do_sst_biased_noisy_check()
     return checker.get_qc_outcomes_short()

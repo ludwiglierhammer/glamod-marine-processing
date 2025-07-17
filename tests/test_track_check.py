@@ -9,7 +9,7 @@ from glamod_marine_processing.qc_suite.modules.track_check import (
     check_distance_from_estimate,
     direction_continuity,
     increment_position,
-    modesp,
+    modal_speed,
     set_speed_limits,
     speed_continuity,
 )
@@ -68,17 +68,17 @@ def test_ship_goes_southwest():
 
 
 def test_noinput():
-    m = modesp([])
+    m = modal_speed([])
     assert np.isnan(m)
 
 
 def test_one_input():
-    m = modesp([17.0])
+    m = modal_speed([17.0])
     assert np.isnan(m)
 
 
 def test_zero_index_input():
-    m = modesp([-17.0, -17.0])
+    m = modal_speed([-17.0, -17.0])
     assert m == convert_to(8.5, "knots", "km/h")
 
 
@@ -92,13 +92,13 @@ def test_zero_index_input():
 )
 def test_modesp_single_speed_input_over8point5(base_speed, expected):
     speeds = [convert_to(base_speed, "knots", "km/h") for _ in range(8)]
-    m = modesp(speeds)
+    m = modal_speed(speeds)
     assert m == convert_to(expected, "knots", "km/h")
 
 
 def test_one_of_each_speed_input_min_under8point5():
     speeds = [convert_to(i, "knots", "km/h") for i in range(1, 20)]
-    m = modesp(speeds)
+    m = modal_speed(speeds)
     assert m == convert_to(8.5, "knots", "km/h")
 
 

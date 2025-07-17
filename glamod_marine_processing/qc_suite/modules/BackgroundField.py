@@ -72,7 +72,7 @@ def safe_make_dir(out_dir, year, month):
     """
     Build subdirectories of year and month within out_dir unless these already exist
 
-    :param out_dir: base directory to build year and month sub directories in
+    :param out_dir: base directory to build year and month subdirectories in
     :param year: year for subdirectory name
     :param month: month for subdirectory name
     :return: full pathname of created directory

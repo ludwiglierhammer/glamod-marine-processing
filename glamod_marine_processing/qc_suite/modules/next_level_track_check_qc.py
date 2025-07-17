@@ -415,7 +415,7 @@ def backward_discrepancy(
     final, later observation to the first (in contrast to distr1 which runs in time order)
 
     This takes the speed and direction reported by the ship and projects it forwards half a time step, it then
-    projects it forwards another half time step using the speed and direction for the next report, to which the
+    projects it forwards another half-time step using the speed and direction for the next report, to which the
     projected location is then compared. The distances between the projected and actual locations is returned
 
     Parameters
@@ -587,7 +587,7 @@ def calculate_midpoint(
 
         midpoint_discrepancies[i] = discrepancy
 
-    midpoint_discrepancies[i + 1] = np.nan
+    #midpoint_discrepancies[i + 1] = np.nan
 
     return midpoint_discrepancies
 
@@ -694,7 +694,7 @@ def do_track_check(
     )
 
     # what are the mean and mode speeds?
-    modal_speed = tc.modesp(speed)
+    modal_speed = tc.modal_speed(speed)
 
     # set speed limits based on modal speed
     amax, _amaxx, _amin = tc.set_speed_limits(modal_speed)
@@ -1118,7 +1118,7 @@ def do_iquam_track_check(
 
     speed_limit : float
       Speed limit of platform in kilometers per hour.
-      Typically 60.0 for ships and 15.0 for drifting buoys.
+      Typically, 60.0 for ships and 15.0 for drifting buoys.
 
     delta_d : float
       Latitude tolerance in degrees.

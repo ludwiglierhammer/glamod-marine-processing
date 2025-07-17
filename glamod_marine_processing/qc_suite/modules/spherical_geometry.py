@@ -10,7 +10,7 @@ from .auxiliary import isvalid
 
 """
 The spherical geometry module is a simple collection of calculations on a sphere
-Sourced from http://williams.best.vwh.net/avform.htm
+Sourced from https://edwilliams.org/avform147.htm formerly williams.best.vwh.net/avform.htm 
 """
 earths_radius = 6371.0088
 radians_per_degree = np.pi / 180.0
@@ -91,20 +91,21 @@ def angular_distance(lat1: float, lon1: float, lat2: float, lon2: float) -> floa
         delta_lambda
     )
     bit2 = bit2 * bit2
-    topbit = bit1 + bit2
-    topbit = np.sqrt(topbit)
-    bottombit = np.sin(lat1) * np.sin(lat2) + np.cos(lat1) * np.cos(lat2) * np.cos(
+    top_bit = bit1 + bit2
+    top_bit = np.sqrt(top_bit)
+    bottom_bit = np.sin(lat1) * np.sin(lat2) + np.cos(lat1) * np.cos(lat2) * np.cos(
         delta_lambda
     )
-    return np.arctan2(topbit, bottombit)
+    return np.arctan2(top_bit, bottom_bit)
 
 
 def lat_lon_from_course_and_distance(
     lat1: float, lon1: float, tc: float, d: float
-) -> float:
+) -> tuple[float, float]:
     """
     calculate a latitude and longitude given a starting point, course (in radians) and
-    angular distance (also in radians) #http://williams.best.vwh.net/avform.htm#LL
+    angular distance (also in radians) from https://edwilliams.org/avform147.htm
+    formerly williams.best.vwh.net/avform.htm#LL
 
     Parameters
     ----------
@@ -119,7 +120,7 @@ def lat_lon_from_course_and_distance(
 
     Returns
     -------
-    float
+    float, float
         return the new latitude and longitude
     """
     lat1 = lat1 * radians_per_degree
@@ -219,9 +220,10 @@ def course_between_points(lat1: float, lon1: float, lat2: float, lon2: float) ->
 
 def intermediate_point(
     lat1: float, lon1: float, lat2: float, lon2: float, f: float
-) -> float:
+) -> tuple[float, float]:
     """Given two lat,lon point find the latitude and longitude that are a fraction f
-    of the great circle distance between them http://williams.best.vwh.net/avform.htm#Intermediate
+    of the great circle distance between them https://edwilliams.org/avform147.htm formerly
+    williams.best.vwh.net/avform.htm#Intermediate
 
     Parameters
     ----------
@@ -238,7 +240,7 @@ def intermediate_point(
 
     Returns
     -------
-    float
+    float, float
         return the latitude and longitude of the point a fraction f along the great circle between the
         first and second points.
 

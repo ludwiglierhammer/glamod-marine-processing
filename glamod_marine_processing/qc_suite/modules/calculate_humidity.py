@@ -1,6 +1,6 @@
 """
 The CalcHums module contains a set of functions for calculating humidity
-variables. At present it can only cope with scalars, not arrays.
+variables. At present, it can only cope with scalars, not arrays.
 
 There are routines for:
 specific humidity from dew point temperature and temperature and pressure
@@ -44,7 +44,7 @@ def vap(td, t, p, roundit=True):
     from a scalar or array of dew point temperature and returns it.
     It requires a sea (station actually but sea level ok for marine data)
     level pressure value. This can be a scalar or an array, even if dewpoint
-    temperautre is an array (CHECK). To test whether to apply the ice or water
+    temperature is an array (CHECK). To test whether to apply the ice or water
     calculation a dry bulb temperature is needed. This allows calculation of a
     pseudo-wet bulb temperature (imprecise) first. If the wet bulb temperature is
     at or below 0 deg C then the ice calculation is used.
@@ -72,7 +72,7 @@ def vap(td, t, p, roundit=True):
     Buck 1981
     Buck, A. L.: New equations for computing vapor pressure and enhancement factor, J. Appl.
     Meteorol., 20, 1527?1532, 1981.
-    Jenson et al 1990
+    Jenson et al. 1990
     Jensen, M. E., Burman, R. D., and Allen, R. G. (Eds.): Evapotranspiration and
     Irrigation Water Requirements: ASCE Manuals and Reports on Engineering Practices No.
     70, American Society of Civil Engineers, New York, 360 pp., 1990.
@@ -325,10 +325,10 @@ def rh(td, t, p, roundit=True):
     es = 6.1121 * f * np.exp(((18.729 - (t / 227.3)) * t) / (257.87 + t))
 
     a = 0.000066 * p
-    b = (409.8 * es) / ((t + 237.3) ** 2)  # t here rather than td because for es, t==td
+    b = (409.8 * es) / ((t + 237.3) ** 2)  # "t" here rather than "td" because for es, t==td
     w = ((a * t) + (b * t)) / (
         a + b
-    )  # second t is t here rather than td because for ex, t==td
+    )  # second "t" is "t" here rather than "td" because for ex, t==td
 
     # Now test for whether pseudo-wetbulb is above or below/equal to zero
     # to establish whether to calculate e with respect to ice or water
@@ -378,7 +378,7 @@ def wb(td, t, p, roundit=True):
     w = wet bulb temperature in degrees C (array or scalar)
 
     Ref:
-    Jenson et al 1990
+    Jenson et al. 1990
     Jensen, M. E., Burman, R. D., and Allen, R. G. (Eds.): Evapotranspiration and
     Irrigation Water Requirements: ASCE Manuals and Reports on Engineering Practices No.
     70, American Society of Civil Engineers, New York, 360 pp., 1990.
@@ -487,7 +487,7 @@ def td_from_vap(e, p, t, roundit=True):
     Buck 1981
     Buck, A. L.: New equations for computing vapor pressure and enhancement factor, J. Appl.
     Meteorol., 20, 1527?1532, 1981.
-    Jenson et al 1990
+    Jenson et al. 1990
     Jensen, M. E., Burman, R. D., and Allen, R. G. (Eds.): Evapotranspiration and
     Irrigation Water Requirements: ASCE Manuals and Reports on Engineering Practices No.
     70, American Society of Civil Engineers, New York, 360 pp., 1990.

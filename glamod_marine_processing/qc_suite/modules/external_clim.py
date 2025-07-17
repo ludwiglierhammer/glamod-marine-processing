@@ -69,7 +69,6 @@ def inspect_climatology(
             climatology = arguments[clim_key]
             if isinstance(climatology, Climatology):
                 get_value_sig = inspect.signature(climatology.get_value)
-                required_keys = {}
                 required_keys = {
                     name
                     for name, param in get_value_sig.parameters.items()
@@ -247,9 +246,10 @@ class Climatology:
 
         Parameters
         ----------
-        target_units: str
+        target_units : str
             Target units to which units must conform.
-        source_units, str, optional
+
+        source_units : str, optional
             Source units if not specified in :py:class:`Climatology`.
 
         Note
