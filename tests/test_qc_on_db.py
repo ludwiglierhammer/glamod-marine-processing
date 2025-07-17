@@ -113,13 +113,11 @@ def climdata_buddy():
     }
     buddy_data = {
         "stdev": load_file(
-            f"metoffice_qc/external_files/HadSST2_pentad_stdev_climatology.nc",
-            branch="buddy_check",
+            "metoffice_qc/external_files/HadSST2_pentad_stdev_climatology.nc",
             **kwargs,
         ),
         "mean": load_file(
-            f"metoffice_qc/external_files/HadSST2_pentad_climatology.nc",
-            branch="buddy_check",
+            "metoffice_qc/external_files/HadSST2_pentad_climatology.nc",
             **kwargs,
         ),
     }
@@ -134,23 +132,19 @@ def climdata_bayesian():
     }
     buddy_data = {
         "ostia1": load_file(
-            f"metoffice_qc/external_files/OSTIA_buddy_range_sampling_error.nc",
-            branch="buddy_check",
+            "metoffice_qc/external_files/OSTIA_buddy_range_sampling_error.nc",
             **kwargs,
         ),
         "ostia2": load_file(
-            f"metoffice_qc/external_files/OSTIA_compare_1x1x5box_to_buddy_average.nc",
-            branch="buddy_check",
+            "metoffice_qc/external_files/OSTIA_compare_1x1x5box_to_buddy_average.nc",
             **kwargs,
         ),
         "ostia3": load_file(
-            f"metoffice_qc/external_files/OSTIA_compare_one_ob_to_1x1x5box.nc",
-            branch="buddy_check",
+            "metoffice_qc/external_files/OSTIA_compare_one_ob_to_1x1x5box.nc",
             **kwargs,
         ),
         "mean": load_file(
-            f"metoffice_qc/external_files/HadSST2_pentad_climatology.nc",
-            branch="buddy_check",
+            "metoffice_qc/external_files/HadSST2_pentad_climatology.nc",
             **kwargs,
         ),
     }
@@ -173,7 +167,6 @@ def testdata_track():
             f"icoads/r302/PT2/cdm_tables/{table}-icoads_r302_PT2_2016-04-11_subset.psv",
             cache_dir=cache_dir,
             within_drs=False,
-            branch="track_checker",
         )
 
     db_tables = read_tables(cache_dir)
@@ -1883,22 +1876,24 @@ def test_buddy_check(climdata_buddy, testdata_track):
     db_.dropna(subset=["observation_value"], inplace=True, ignore_index=True)
 
     result = do_mds_buddy_check(
-        db_["latitude"],
-        db_["longitude"],
-        db_["date_time"],
-        db_["observation_value"],
-        sst_climatology,
-        stdev_climatology,
-        limits,
-        number_of_obs_thresholds,
-        multipliers,
+        lat=db_["latitude"],
+        lon=db_["longitude"],
+        date=db_["date_time"],
+        value=db_["observation_value"],
+        climatology=sst_climatology,
+        standard_deviation=stdev_climatology,
+        limits=limits,
+        number_of_obs_thresholds=number_of_obs_thresholds,
+        multipliers=multipliers,
     )
 
     for i, flag in enumerate(result):
-        assert flag == passed
+        if i in [7, 8, 9, 10, 12, 13, 14, 15, 45]:
+            assert flag == failed
+        else:
+            assert flag == passed
 
 
-@pytest.mark.skip
 def test_bayesian_buddy_check(climdata_bayesian, testdata_track):
 
     sst_climatology = Climatology.open_netcdf_file(
@@ -1922,21 +1917,21 @@ def test_bayesian_buddy_check(climdata_bayesian, testdata_track):
     db_.dropna(subset=["observation_value"], inplace=True, ignore_index=True)
 
     result = do_bayesian_buddy_check(
-        db_["latitude"],
-        db_["longitude"],
-        db_["date_time"],
-        db_["observation_value"],
-        sst_climatology,
-        ostia1_climatology,
-        ostia2_climatology,
-        ostia3_climatology,
-        0.05,
-        0.1,
-        1.0,
-        [2, 2, 4],
-        3.0,
-        8.0,
-        0.3,
+        lat=db_["latitude"],
+        lon=db_["longitude"],
+        date=db_["date_time"],
+        value=db_["observation_value"],
+        climatology=sst_climatology,
+        stdev1=ostia1_climatology,
+        stdev2=ostia2_climatology,
+        stdev3=ostia3_climatology,
+        prior_probability_of_gross_error=0.05,
+        quantization_interval=0.1,
+        one_sigma_measurement_uncertainty=1.0,
+        limits=[2, 2, 4],
+        noise_scaling=3.0,
+        maximum_anomaly=8.0,
+        fail_probability=0.3,
     )
 
     for i, flag in enumerate(result):

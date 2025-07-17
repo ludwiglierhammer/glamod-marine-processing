@@ -11,7 +11,6 @@ from glamod_marine_processing.qc_suite.modules.auxiliary import (
     failed,
     passed,
     untestable,
-    untested,
 )
 from glamod_marine_processing.qc_suite.modules.next_level_deck_qc import (
     SuperObsGrid,

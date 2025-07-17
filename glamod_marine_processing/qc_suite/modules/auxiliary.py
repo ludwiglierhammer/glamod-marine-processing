@@ -290,9 +290,13 @@ def generic_decorator(
 
                 current_func = current_func.__wrapped__
 
-            meta_kwargs = {k: kwargs.pop(k) for k in reserved_keys if k in kwargs}
-
             sig = inspect.signature(func)
+            meta_kwargs = {
+                k: kwargs.pop(k) if k not in sig.parameters else kwargs[k]
+                for k in reserved_keys
+                if k in kwargs
+            }
+
             bound_args = sig.bind(*args, **kwargs)
             bound_args.apply_defaults()
 
