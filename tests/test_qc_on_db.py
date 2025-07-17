@@ -1895,7 +1895,10 @@ def test_buddy_check(climdata_buddy, testdata_track):
     )
 
     for i, flag in enumerate(result):
-        assert flag == passed
+        if i in [7,8,9,10,12,13,14,15,45]:
+            assert flag == failed
+        else:
+            assert flag == passed
 
 
 def test_bayesian_buddy_check(climdata_bayesian, testdata_track):
@@ -1940,4 +1943,3 @@ def test_bayesian_buddy_check(climdata_bayesian, testdata_track):
 
     for i, flag in enumerate(result):
         assert flag == passed
-    exit()

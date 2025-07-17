@@ -349,11 +349,11 @@ class SuperObsGrid:
             stdev2_ex = stdev2.get_value(89.5 - yindex, -179.5 + xindex, m, d)
             stdev3_ex = stdev3.get_value(89.5 - yindex, -179.5 + xindex, m, d)
 
-            if stdev1_ex is None or stdev1_ex < 0.0:
+            if stdev1_ex is None or stdev1_ex < 0.0 or np.isnan(stdev1_ex):
                 stdev1_ex = 1.0
-            if stdev2_ex is None or stdev2_ex < 0.0:
+            if stdev2_ex is None or stdev2_ex < 0.0 or np.isnan(stdev2_ex):
                 stdev2_ex = 1.0
-            if stdev3_ex is None or stdev3_ex < 0.0:
+            if stdev3_ex is None or stdev3_ex < 0.0 or np.isnan(stdev3_ex):
                 stdev3_ex = 1.0
 
             # if there is neighbour in that range then calculate a mean
