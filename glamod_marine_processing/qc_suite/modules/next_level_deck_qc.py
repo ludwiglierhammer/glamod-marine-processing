@@ -685,7 +685,6 @@ def do_bayesian_buddy_check(
 
         # Calculate the probability of gross error given the set-up
         buddy_stdev = grid.get_buddy_stdev(lat_, lon_, mon, day)
-
         ppp = p_gross(
             p0,
             q,
