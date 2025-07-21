@@ -220,7 +220,7 @@ def write_cdm_tables(params, df, tables=[], outname=None, **kwargs):
         try:
             df = df[table]
         except KeyError:
-            logging.info(f"{table} not found.")
+            logging.info(f"Table {table} is already selected.")
         df.to_csv(
             outname,
             index=False,
