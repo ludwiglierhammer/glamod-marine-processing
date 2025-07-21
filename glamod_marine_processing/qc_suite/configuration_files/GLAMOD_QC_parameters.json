@@ -343,6 +343,10 @@
     "combined": {
       "SUPERSAT": {
         "func": "do_supersaturation_check",
+        "inputs": {
+          "dpt": "observation-dpt",
+          "at2": "observation-at"
+        },
         "names": {
           "dpt": "observation_value",
           "at2": "observation_value"
@@ -350,6 +354,10 @@
       },
       "WIND": {
         "func": "do_wind_consistency_check",
+        "inputs": {
+          "wind_speed": "observation-ws",
+          "wind_direction": "observation-wd"
+        },
         "names": {
           "wind_speed": "observation_value",
           "wind_direction": "observation_value"
