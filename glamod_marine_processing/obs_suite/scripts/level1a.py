@@ -155,8 +155,7 @@ if params.filter_reports_by:
         logging.info("Selecting {} values: {}".format(k, ",".join(v)))
         filter_location = tuple(k.split("."))
         col = filter_location[0] if len(filter_location) == 1 else filter_location
-        values = v
-        selection = {col: values}
+        selection = {col: v}
         data_in, data_excl = data_in.split_by_column_entries(selection)
         data_excluded["data"][k] = data_excl.data
         io_dict["not_selected"][k]["total"] = len(data_excl)
@@ -197,9 +196,7 @@ for data, mask in zipped:
 
 newmask_buffer.seek(0)
 if chunksize:
-    data_in.mask = pd.read_csv(
-        newmask_buffer, names=[x for x in mask], chunksize=chunksize
-    )
+    data_in.mask = pandas_TextParser_hdlr.restore(data_in.mask)
     data_in.data = pandas_TextParser_hdlr.restore(data_in.data)
 
 # Now see what fails
