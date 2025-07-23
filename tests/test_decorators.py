@@ -11,6 +11,7 @@ from glamod_marine_processing.qc_suite.modules.auxiliary import (
     convert_units,
     inspect_arrays,
     post_format_return_type,
+    is_scalar_like,
 )
 from glamod_marine_processing.qc_suite.modules.time_control import convert_date
 
@@ -145,3 +146,17 @@ def test_post_format_return_type(value, expected, array_type):
         pd.testing.assert_series_equal(result, expected)
     elif array_type == "scalar":
         assert result == expected
+
+@pytest.mark.parametrize(
+    "value, expected",
+    [
+        (0.0, True),
+        (0, True),
+        (True, True),
+        ([0.0], False),
+        (np.array(5), True),
+        (np.array([5,6]), False)
+    ]
+)
+def test_is_scalar_like(value, expected):
+    assert is_scalar_like(value) == expected
