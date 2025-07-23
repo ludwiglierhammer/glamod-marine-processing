@@ -262,7 +262,7 @@ def do_day_check(
     result = np.full(year.shape, untestable, dtype=int)
 
     for i in range(len(year)):
-        if (p_check[i] == failed) or (d_check[i] == failed) or (t_check[i] == failed):
+        if failed in (p_check[i], d_check[i], t_check[i]):
             result[i] = failed
             continue
         if (

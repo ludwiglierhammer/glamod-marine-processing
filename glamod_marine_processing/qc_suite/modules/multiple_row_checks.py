@@ -90,7 +90,7 @@ def _is_in_data(name: str, data:pd.Series | pd.DataFrame) -> bool:
     """
     if isinstance(data, pd.Series):
         return name in data
-    elif isinstance(data, pd.DataFrame):
+    if isinstance(data, pd.DataFrame):
         return name in data.columns
     raise TypeError(f"Unsupported data type: {type(data)}")
 
