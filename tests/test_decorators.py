@@ -13,6 +13,7 @@ from glamod_marine_processing.qc_suite.modules.auxiliary import (
     post_format_return_type,
     is_scalar_like,
     convert_to,
+    format_return_type,
 )
 from glamod_marine_processing.qc_suite.modules.time_control import convert_date
 
@@ -176,3 +177,21 @@ def test_is_scalar_like(value, expected):
 def test_convert_to(value, source_unit, target_unit, expected):
     result = convert_to(value, source_unit, target_unit)
     assert pytest.approx(result) == expected
+
+
+@pytest.mark.parametrize(
+    "value, expected, array_type",
+    [
+        [np.array([1, 2, 3, 4]), [1, 2, 3, 4], "list"],
+        [np.array([1, 2, 3, 4]), pd.Series([1, 2, 3, 4]), "series"],
+        [np.array([1, 2, 3, 4]), np.array([1, 2, 3, 4]), "numpy"],
+    ],
+)
+def test_format_return_type(value, expected, array_type):
+    result = format_return_type(value, expected)
+    if array_type == "list":
+        np.testing.assert_equal(result, expected)
+    elif array_type == "numpy":
+        np.testing.assert_equal(result, expected)
+    elif array_type == "series":
+        pd.testing.assert_series_equal(result, expected)
