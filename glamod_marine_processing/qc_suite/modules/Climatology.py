@@ -132,7 +132,7 @@ class Climatology:
 
         result = self.field[tindex, yindex, xindex]
 
-        if type(result) is np.float64 or type(result) is np.float32:
+        if isinstance(result, np.float64) or isinstance(result, np.float32):
             pass
         else:
             if result.mask:
@@ -174,7 +174,7 @@ class Climatology:
 
         result = self.field[tindex, yindex, xindex]
 
-        if type(result) is np.float64 or type(result) is np.float32:
+        if isinstance(result, np.float64) or isinstance(result, np.float32):
             pass
         else:
             if result.mask:
@@ -223,7 +223,7 @@ class Climatology:
 
         result = self.field[tindex, yindex, xindex]
 
-        if type(result) is np.float64 or type(result) is np.float32:
+        if isinstance(result, np.float64) or isinstance(result, np.float32):
             pass
         else:
             if result.mask:

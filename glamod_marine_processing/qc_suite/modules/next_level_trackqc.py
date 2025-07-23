@@ -172,7 +172,8 @@ class SpeedChecker:
     movement is detected it is likely a human operator can then better pick out the actual bad data. False
     fails caused by positional errors (particularly in fast ocean currents) will also need reinstating.
     """
-
+    # pylint: disable=too-many-instance-attributes
+    # pylint: disable=too-many-positional-arguments
     def __init__(
         self,
         lons: Sequence[float],
@@ -335,7 +336,8 @@ class NewSpeedChecker:
     min_win_period: minimum period of time in days over which position is assessed for speed estimates (see
     description)
     """
-
+    # pylint: disable=too-many-instance-attributes
+    # pylint: disable=too-many-positional-arguments
     def __init__(
         self,
         lons: Sequence[float],
@@ -509,6 +511,8 @@ class AgroundChecker:
     greater than min_win_period and allow for erratic temporal sampling e.g. min_win_period+2 to allow for gaps of
     up to 2-days in sampling).
     """
+    # pylint: disable=too-many-instance-attributes
+    # pylint: disable=too-many-positional-arguments
 
     # displacement resulting from 1/100th deg 'position-jitter' at equator (km)
     tolerance = sphere_distance(0, 0, 0.01, 0.01)
@@ -728,7 +732,8 @@ class SSTTailChecker:
     background_err_lim: float
         Background error variance beyond which the SST background is deemed unreliable (degC squared)
     """
-
+    # pylint: disable=too-many-instance-attributes
+    # pylint: disable=too-many-positional-arguments
     def __init__(
         self,
         lat: Sequence[float],
@@ -1120,7 +1125,8 @@ class SSTBiasedNoisyChecker:
     error as entirely correlated across a long-record, which maximises its possible impact on the bias assessment. In
     this case the histogram approach was used as the limit could be tuned to give better results.
     """
-
+    # pylint: disable=too-many-instance-attributes
+    # pylint: disable=too-many-positional-arguments
     def __init__(
         self,
         lat: Sequence[float],
