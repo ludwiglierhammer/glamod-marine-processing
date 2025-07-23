@@ -73,8 +73,7 @@ def modal_speed(awork: list) -> float:
                 atmode = acint[index] - 1.50
 
         amode = atmode / icmode
-        if amode <= 8.50:
-            amode = 8.50
+        amode = max(amode, 8.5)
 
     return convert_to(amode, "knots", "km/h")
 

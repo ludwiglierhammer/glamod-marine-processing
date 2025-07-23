@@ -1,4 +1,9 @@
-"""Quality control suite spherical geometry module."""
+"""
+Quality control suite spherical geometry module.
+
+The spherical geometry module is a simple collection of calculations on a sphere
+Sourced from https://edwilliams.org/avform147.htm formerly williams.best.vwh.net/avform.htm
+"""
 
 from __future__ import annotations
 
@@ -8,10 +13,6 @@ import numpy as np
 
 from .auxiliary import isvalid
 
-"""
-The spherical geometry module is a simple collection of calculations on a sphere
-Sourced from https://edwilliams.org/avform147.htm formerly williams.best.vwh.net/avform.htm 
-"""
 earths_radius = 6371.0088
 radians_per_degree = np.pi / 180.0
 
