@@ -138,80 +138,29 @@ from _utilities import (
 )
 from cdm_reader_mapper.cdm_mapper.tables.tables import get_cdm_atts
 
+from glamod_marine_processing.qc_suite.modules.multiple_row_checks import (
+    do_multiple_row_check,
+)
+from glamod_marine_processing.qc_suite.modules.next_elvel_deck_qc import (
+    do_bayesian_buddy_check,
+    do_mds_buddy_check,
+)
+from glamod_marine_processing.qc_suite.modules.next_level_track_check_qc import (
+    do_few_check,
+    do_iquam_track_check,
+    do_spike_check,
+    do_track_check,
+    find_multiple_rounded_values,
+    find_repeated_values,
+    find_saturated_runs,
+)
+
 reload(logging)  # This is to override potential previous config of logging
 
 
 # Functions--------------------------------------------------------------------
-# This is to get the unique flag per parameter
-def get_qc_flags(qc, qc_df_full):
-    """Get QC flag."""
-    qc_avail = True
-    bad_flag = "1" if qc != "POS" else "2"
-    good_flag = "0"
-    qc_filename = os.path.join(
-        qc_path,
-        params.year,
-        params.month,
-        "_".join([qc, "qc", params.year + params.month, "CCIrun.csv"]),
-    )
-    logging.info(f"Reading {qc} qc file: {qc_filename}")
-    qc_df = pd.read_csv(
-        qc_filename,
-        dtype=qc_dtype,
-        usecols=qc_columns.get(qc),
-        delimiter=qc_delimiter,
-        on_bad_lines="skip",
-    )
-    # Map UID to CDM (hardcoded source ICOADS_R3.0.0T here!!!!!)
-    # and keep only reports from current monthly table
-    # qc_df['UID'] = 'ICOADS-30-' + qc_df['UID']
-    qc_df.set_index("UID", inplace=True, drop=True)
-    qc_df = qc_df.reindex(header_db.index)
-    if len(qc_df.dropna(how="all")) == 0:
-        # We can have files with nothing other than duplicates (which are not qced):
-        # set qc to not available but don't fail: keep on generating level1e product afterwards
-        logging.warning(f"No {qc} flags matching")
-        qc_avail = False
-        return qc_avail, qc_df_full
-
-    locs_notna = qc_df.notna().all(axis=1)
-    qc_df.loc[locs_notna, "total"] = qc_df.loc[locs_notna].sum(axis=1)
-    qc_df.loc[locs_notna, "global"] = qc_df["total"].apply(
-        lambda x: good_flag if x == 0 else bad_flag
-    )
-    qc_df.rename({"global": qc}, axis=1, inplace=True)
-    # For measured params, eliminate resulting quality_flag when that parameter
-    # is not available in a report ('noval'==1)
-    # Mixing failing and missing is annoying for several things afterwards
-    if qc != "POS":
-        qc_df.loc[qc_df["noval"] == "1", qc] = np.nan
-    qc_df_full[qc] = qc_df[qc]
-    return qc_avail, qc_df_full
-
-
-def add_report_quality(qc_df_full):
-    """Add report quality."""
-    failed_location = "2"
-    pass_report = "0"
-    failed_report = "1"
-    not_checked_report = "2"
-    # Initialize to not checked: there were lots of discussions with this!
-    # override ICOADS IRF flag if not checked in C3S system? In the end we said yes.
-    qc_df_full["report_quality"] = not_checked_report
-    # First: all observed params fail -> report_quality = '1'
-    qc_param = [x for x in qc_list if x != "POS"]
-    qc_param_applied = qc_df_full[qc_param].count(axis=1)
-    qc_param_sum = qc_df_full[qc_param].astype(float).sum(axis=1)
-    qc_df_full.loc[
-        (qc_param_sum >= qc_param_applied) & (qc_param_applied > 0), "report_quality"
-    ] = failed_report
-    # Second: at least one observed param passed -> report_quality = '0'
-    qc_df_full.loc[qc_param_sum < qc_param_applied, "report_quality"] = pass_report
-    # Third: POS qc fails, no matter how good the observed params are -> report_quality '1'
-    qc_df_full.loc[qc_df_full["POS"] == failed_location, "report_quality"] = (
-        failed_report
-    )
-    return qc_df_full
+def quality_control(df):
+    return df
 
 
 def compare_quality_checks(df):
@@ -305,53 +254,6 @@ def process_table(table_df, table, pass_time=None):
     write_cdm_tables(params, table_df, tables=table)
 
 
-# ------------------------------------------------------------------------------
-
-# PARAMETERIZE HOW TO HANDLE QC FILES AND HOW TO APPLY THESE TO THE CDM FIELDS-
-# -----------------------------------------------------------------------------
-# 1. These are the columns we actually use from the qc files, regardless of the
-# existence of others. These names must be the same as the ones in the QC file
-# header (1st line)
-qc_columns = dict()
-qc_columns["SST"] = ["UID", "bud", "clim", "nonorm", "freez", "noval", "hardlimit"]
-qc_columns["AT"] = [
-    "UID",
-    "bud",
-    "clim",
-    "nonorm",
-    "noval",
-    "mat_blacklist",
-    "hardlimit",
-]
-qc_columns["SLP"] = ["UID", "bud", "clim", "nonorm", "noval"]
-qc_columns["DPT"] = ["UID", "bud", "clim", "nonorm", "ssat", "noval", "rep", "repsat"]
-qc_columns["POS"] = ["UID", "trk", "date", "time", "pos", "blklst"]
-qc_columns["W"] = ["UID", "noval", "hardlimit", "consistency", "wind_blacklist"]
-
-# 2. This is to what table-element pair each qc file is pointing to
-qc_cdm = {
-    "SST": ("observations-sst", "quality_flag"),
-    "SLP": ("observations-slp", "quality_flag"),
-    "AT": ("observations-at", "quality_flag"),
-    "DPT": [("observations-dpt", "quality_flag"), ("observations-wbt", "quality_flag")],
-    "W": [("observations-ws", "quality_flag"), ("observations-wd", "quality_flag")],
-    "POS": ("header", "location_quality"),
-}
-
-# 3. This is the same as above but with different indexing,
-# to ease certain operations
-table_qc = {}
-for k, v in qc_cdm.items():
-    if isinstance(v, list):
-        for t in v:
-            table_qc[t[0]] = {"qc": k, "element": t[1]}
-    else:
-        table_qc[v[0]] = {"qc": k, "element": v[1]}
-
-qc_dtype = {"UID": "object"}
-qc_delimiter = ","
-# -----------------------------------------------------------------------------
-
 # Some other parameters -------------------------------------------------------
 cdm_atts = get_cdm_atts()
 obs_tables = [x for x in cdm_atts.keys() if x != "header"]
@@ -374,46 +276,14 @@ logging.basicConfig(
 )
 
 process_options = [
+    "qc_settings",
     "history_explain",
-    "qc_first_date_avail",
-    "qc_last_date_avail",
     "no_qc_suite",
 ]
 params = script_setup(process_options, sys.argv)
 
-if params.year_init:
-    setattr(params, "qc_first_date_avail", f"{params.year_init}-01")
-if params.year_end:
-    setattr(params, "qc_last_date_avail", f"{params.year_end}-12")
-qc_path = os.path.join(params.data_path, params.release, "metoffice_qc", "base")
-
 # Check we have all the dirs!
 paths_exist(qc_path)
-
-# Check we have QC files!
-logging.info(f"Using qc files in {qc_path}")
-qc_pos_filename = os.path.join(
-    qc_path,
-    params.year,
-    params.month,
-    "_".join(["POS", "qc", params.year + params.month, "CCIrun.csv"]),
-)
-qc_avail = True
-if not os.path.isfile(qc_pos_filename):
-    file_date = datetime.datetime.strptime(
-        str(params.year) + "-" + str(params.month), "%Y-%m"
-    )
-    last_date = datetime.datetime.strptime(params.qc_last_date_avail, "%Y-%m")
-    first_date = datetime.datetime.strptime(params.qc_first_date_avail, "%Y-%m")
-    if file_date > last_date or file_date < first_date:
-        qc_avail = False
-        logging.warning(
-            f"QC only available in period {str(params.qc_first_date_avail)} to {str(params.qc_last_date_avail)}"
-        )
-        logging.warning("level1e data will be created with no merging")
-    else:
-        logging.warning(f"POSITION QC file not found: {qc_pos_filename}")
-        qc_avail = False
 
 # Do some additional checks before clicking go, do we have a valid header?
 header_filename = params.filename
@@ -433,8 +303,8 @@ for table in obs_tables:
     table_filename = header_filename.replace("header", table)
     if not os.path.isfile(table_filename):
         logging.warning(f"CDM table not available: {table_filename}")
-    else:
-        tables_in.append(table)
+        continue
+    tables_in.append(table)
 
 if len(tables_in) == 1:
     logging.error(
@@ -456,27 +326,6 @@ header_db.set_index("report_id", inplace=True, drop=False)
 ql_dict = {}
 
 # 1. PROCESS QC FLAGS ---------------------------------------------------------
-# GET THE QC FILES WE NEED FOR THE CURRENT SET OF CDM TABLES
-# AND CREATE A DF WITH THE UNIQUE FLAGS PER QC AND HAVE IT INDEXED TO FULL CDM
-# TABLE (ALL REPORTS)
-# ALSO BUILD FROM FULL QC FLAGS SET THE REPORT_QUALITY FLAG
-qc_list = list({table_qc.get(table).get("qc") for table in tables_in})
-qc_df = pd.DataFrame(index=header_db.index, columns=qc_list)
-if qc_avail:
-    # Make sure POS is first as we need it to process the rest!
-    # The use of POS in other QCs is probably a need inherited from BetaRelease,
-    # where param qc was merged with POS QC. Now we don't do that, so I am quite
-    # positive we don't use POS in assigning quality_flag in obs table
-    qc_list.remove("POS")
-    qc_list.insert(0, "POS")
-    for qc in qc_list:
-        qc_avail, qc_df = get_qc_flags(qc, qc_df)
-        if not qc_avail:
-            break
-
-if qc_avail:
-    qc_df = add_report_quality(qc_df)
-
 pass_time = None
 if params.no_qc_suite:
     qc_avail = True
@@ -501,11 +350,7 @@ qc_df = qc_df[qc_df.index.isin(report_ids)]
 location_quality = header_db["location_quality"].copy()
 report_time_quality = header_db["report_time_quality"].copy()
 
-flag = True if qc_avail else False
-process_table(header_db, "header", pass_time=pass_time)
-for table in obs_tables:
-    flag = True if table in tables_in and qc_avail else False
-    process_table(table, table, pass_time=pass_time)
+# QUALITY CONTROL!!!
 
 # CHECKOUT --------------------------------------------------------------------
 logging.info("Saving json quicklook")
