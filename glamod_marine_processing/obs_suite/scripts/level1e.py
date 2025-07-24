@@ -159,7 +159,7 @@ reload(logging)  # This is to override potential previous config of logging
 
 
 # Functions--------------------------------------------------------------------
-def quality_control(df):
+def get_single_qc_flag(df):
     return df
 
 
@@ -282,6 +282,8 @@ process_options = [
 ]
 params = script_setup(process_options, sys.argv)
 
+return_method = "failed"
+
 # Check we have all the dirs!
 paths_exist(qc_path)
 
@@ -291,9 +293,11 @@ if not os.path.isfile(header_filename):
     logging.error(f"Header table file not found: {header_filename}")
     sys.exit(1)
 
-header_db = read_cdm_tables(params, "header")["header"]
+data_dict = {}
 
-if header_db.empty:
+data_dict["header"] = read_cdm_tables(params, "header")
+
+if header_df.empty:
     logging.error("Empty or non-existing header table")
     sys.exit(1)
 
@@ -315,42 +319,134 @@ if len(tables_in) == 1:
 # Remove report_ids without any observations
 report_ids = pd.Series()
 for table_in in tables_in:
-    db_ = read_cdm_tables(params, table_in)
-    if not db_.empty:
-        db_ = db_[table_in]
-        report_ids = pd.concat([report_ids, db_["report_id"]], ignore_index=True)
+    if table_in not in data_dict.keys():
+        db_ = read_cdm_tables(params, table_in)
+        if db_.empty:
+            continue
+        data_dict[table_in] = db_[table_in]
+    report_ids = pd.concat(
+        [report_ids, data_dict[table_in]["report_id"]], ignore_index=True
+    )
+
 report_ids = report_ids[report_ids.duplicated()]
 
+for table, df in data_dict.items():
+    df = df.set_index("report_id", drop=False)
+    data_dict[table] = df.loc[report_ids]
+
 # DO THE DATA PROCESSING ------------------------------------------------------
-header_db.set_index("report_id", inplace=True, drop=False)
-ql_dict = {}
 
-# 1. PROCESS QC FLAGS ---------------------------------------------------------
-pass_time = None
-if params.no_qc_suite:
-    qc_avail = True
-    # Set report_quality to passed if report_quality is not checked
-    qc_df["report_quality"] = header_db["report_quality"]
-    qc_df["report_quality"] = qc_df["report_quality"].mask(
-        qc_df["report_quality"] == "2", "0"
+# 1. Observational checks
+# 1.1. Header
+header_df = data_dict["header"].copy()
+idx_blck = header_df[header_df["report_quality"] == "6"].index
+idx_gnrc = header_df[header_df["report_quality"] == "88"].index
+
+# Deselect rows on blacklist
+data = header_df.drop(index=idx_blck)
+
+# Select header quality flags
+report_quality = data["report_quality"].copy()
+location_quality = data["location_quality"].copy()
+report_time_quality = data["report_time_quality"].copy()
+
+# 1.1.1. Position check
+# Deselect already failed location_qualities
+data_pos = data[~location_quality.isin(["2"])]
+idx_pos = data_pos.idx
+
+# Do position check
+qc_dict = params.qc_settings.get("position_check", {}).get("header", {})
+pos_qc = do_multiple_row_check(
+    data=data_pos,
+    qc_dict=qc_dict,
+    return_method=return_method,
+)
+pos_qc = get_single_qc_flag(pos_qc)
+location_quality.loc[idx_pos] = pos_qc
+
+# 1.1.2. Time check
+# Deselect already failed report_time_qualities
+data_time = data[~report_time_quality.isin(["4", "5"])]
+idx_time = data_time.idx
+
+# Do time check
+qc_dict = params.qc_settings.get("time_check", {}).get("header", {})
+time_qc = do_multiple_row_check(
+    data=data_time,
+    qc_dict=qc_dict,
+    return_method=return_method,
+)
+time_qc = get_single_qc_flag(time_qc)
+report_time_quality.loc[idx_time] = time_qc
+
+# 1.1.3. Report quality
+report_quality = compare_quality_checks(report_time_quality)
+
+# 1.2. Observations
+quality_flags = {}
+for obs_table in obs_tables:
+    data = data_dict[obs_table].copy()
+    # Select observation quality_flag
+    quality_flag = data["quality_flag"]
+    quality_flag.loc[idx_blck] = "6"
+
+    # Deselect rows on blacklist
+    data = data.drop(index=idx_blck)
+
+    # Deselect already failed quality_flags
+    data_qc = data[~quality_flag.isin("1")]
+    # Deselect already failed report_qualities
+    data_qc = data_qc[~report_quality.isin("1")]
+    idx_qc = data_qc.index
+
+    # Do observation check
+    preproc_dict = params.qc_settings.get("preprocessing", {}).get(obs_table, {})
+    qc_dict = params.qc_settings.get("observations_check", {}).get(obs_table, {})
+    obs_qc = do_multiple_row_check(
+        data=data_qc,
+        preproc_dict=preproc_dict,
+        qc_dict=qc_dict,
+        return_method=return_method,
     )
-    pass_time = header_db["report_time_quality"]
+    obs_qc = get_single_qc_flag(obs_qc)
 
-qc_df = qc_df[qc_df.index.isin(report_ids)]
+    # Flag quality_flag
+    quality_flag.loc[idx_qc] = obs_qc
+    quality_flags[obs_table] = compare_quality_checks(quality_flag)
 
-# 2. APPLY FLAGS, LOOP THROUGH TABLES -----------------------------------------
+# 2. Track check
+# 2.1. Header
+# Deselect rows on blacklist
+data = header_df.drop(index=idx_blck)
+# Deselect rows containing generic ids
+data = data.drop(index=gnrc_idx)
+# Deselect already failed report_qualities
+data = data[~report_quality.isin(["1"])]
 
-# Test new things with 090-221. See 1984-03. What happens if not POS flags matching?
-# Need to make sure we override with 'not-checked'(2 or 3 depending on element!) default settings:
-#    header.report_quality = default ICOADS IRF flag to not-checked ('2')
-#    observations.quality_flag = default not-checked ('2') to not-checked('2')
-#    header.location_quality = default not-checked ('3') to not-checked('3')
+qc_dict = params.qc_settings.get("track_check", {}).get("header", {})
+for qc_name in qc_dict.keys():
+    func = globals().get(qc_dict[qc_name]["func"])
+    names = qc_dict[qc_name].get("names", {})
+    inputs = {k: data[v] for k, v in names}
+    kwargs = qc_dict[qc_name].get("arguments", {})
+    track_qc = func(**inputs, **kwargs)
+    idx_failed = track_qc[track_qc.isin("1")].index
+    report_quality.loc[idx_failed] = track_qc.loc[idx_failed]
 
-# First header, then rest.
-location_quality = header_db["location_quality"].copy()
-report_time_quality = header_db["report_time_quality"].copy()
-
-# QUALITY CONTROL!!!
+# ?. PROCESS QC FLAGS ---------------------------------------------------------
+# Replace QC flags in C-RAID data; other approach needed!!!
+# pass_time = None
+# if params.no_qc_suite:
+#    qc_avail = True
+#    # Set report_quality to passed if report_quality is not checked
+#    qc_df["report_quality"] = header_db["report_quality"]
+#    qc_df["report_quality"] = qc_df["report_quality"].mask(
+#        qc_df["report_quality"] == "2", "0"
+#    )
+#    pass_time = header_db["report_time_quality"]
+#
+# qc_df = qc_df[qc_df.index.isin(report_ids)]
 
 # CHECKOUT --------------------------------------------------------------------
 logging.info("Saving json quicklook")
