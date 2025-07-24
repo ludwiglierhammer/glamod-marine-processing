@@ -352,7 +352,7 @@ if process:
     )
 
     for table in tables:
-        io_dict[table]["total"] = inspect.get_length(data_in.data[table])
+        io_dict[table]["total"] = len(data_in[table].dropna(how="all"))
 
 logging.info("Saving json quicklook")
 save_quicklook(params, io_dict, date_handler)
