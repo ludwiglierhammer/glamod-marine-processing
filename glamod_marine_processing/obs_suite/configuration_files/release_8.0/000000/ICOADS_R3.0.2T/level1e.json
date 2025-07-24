@@ -114,7 +114,7 @@
         }
       }
     },
-    "observation_check": {
+    "position_check": {
       "header": {
         "POS": {
           "func": "do_position_check",
@@ -122,7 +122,10 @@
             "latitude": "latitude",
             "longitude": "longitude"
           }
-        },
+        }
+    },
+    "time_check": {
+      "header": {
         "DATE": {
           "func": "do_date_check",
           "names": {
@@ -146,7 +149,9 @@
             "time_since_sun_above_horizon": 1.0
           }
         }
-      },
+      }
+    },
+    "observation_check": {
       "observation-at": {
         "MISSVAL": {
           "func": "do_missing_value_check",
