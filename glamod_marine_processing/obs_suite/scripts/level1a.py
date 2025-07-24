@@ -74,7 +74,7 @@ from glamod_marine_processing.obs_suite.modules.icoads_identify import id_is_gen
 
 reload(logging)  # This is to override potential previous config of logging
 
-blck_flag = 99
+blck_flag = 6
 gnrc_flag = 88
 header_quality_column = "report_quality"
 observations_quality_column = "quality_flag"
