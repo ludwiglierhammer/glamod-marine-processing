@@ -96,7 +96,7 @@ def do_spike_check(
 
     number_of_obs = len(value)
 
-    spike_qc = np.asarray([passed] * number_of_obs)
+    spike_qc = np.asarray([passed] * number_of_obs)  # type: np.ndarray
 
     for t1 in range(number_of_obs):
 
@@ -337,7 +337,7 @@ def forward_discrepancy(
     """
     number_of_obs = len(lat)
 
-    distance_from_est_location = np.asarray([np.nan] * number_of_obs)
+    distance_from_est_location = np.asarray([np.nan] * number_of_obs)  # type: np.ndarray
 
     for i in range(1, number_of_obs):
 
@@ -452,7 +452,7 @@ def backward_discrepancy(
     """
     number_of_obs = len(lat)
 
-    distance_from_est_location = np.asarray([np.nan] * number_of_obs)
+    distance_from_est_location = np.asarray([np.nan] * number_of_obs)  # type: np.ndarray
 
     for i in range(number_of_obs - 1, 0, -1):
 
@@ -557,7 +557,7 @@ def calculate_midpoint(
     """
     number_of_obs = len(lat)
 
-    midpoint_discrepancies = np.asarray([np.nan] * number_of_obs)
+    midpoint_discrepancies = np.asarray([np.nan] * number_of_obs)  # type: np.ndarray
 
     for i in range(1, number_of_obs - 1):
         t0 = timediff[i]
@@ -722,7 +722,7 @@ def do_track_check(
     )
 
     # do QC
-    trk = np.asarray([passed] * number_of_obs)
+    trk = np.asarray([passed] * number_of_obs)  # type: np.ndarray
 
     for i in range(1, number_of_obs - 1):
         thisqc_a = 0
@@ -893,7 +893,7 @@ def find_saturated_runs(
     """
     satcount = []
 
-    repsat = np.asarray([passed] * len(lat))
+    repsat = np.asarray([passed] * len(lat))  # type: np.ndarray
 
     for i in range(len(repsat)):
 
@@ -983,7 +983,7 @@ def find_multiple_rounded_values(
     if number_of_obs == 0:
         return [passed] * number_of_obs
 
-    rounded = np.asarray([passed] * number_of_obs)
+    rounded = np.asarray([passed] * number_of_obs)  # type: np.ndarray
 
     valcount = {}
     allcount = 0
@@ -1058,7 +1058,7 @@ def find_repeated_values(
     if number_of_obs == 0:
         return [passed] * number_of_obs
 
-    rep = np.asarray([passed] * number_of_obs)
+    rep = np.asarray([passed] * number_of_obs)  # type: np.ndarray
 
     valcount = {}
     allcount = 0
@@ -1157,7 +1157,7 @@ def do_iquam_track_check(
     speed_violations = []
     count_speed_violations = []
 
-    iquam_track = np.asarray([passed] * number_of_obs)
+    iquam_track = np.asarray([passed] * number_of_obs)  # type: np.ndarray
 
     for t1 in range(0, number_of_obs):
         violations_for_this_report = []

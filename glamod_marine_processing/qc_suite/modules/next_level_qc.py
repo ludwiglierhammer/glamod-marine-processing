@@ -76,7 +76,7 @@ def do_position_check(lat: ValueFloatType, lon: ValueFloatType) -> ValueIntType:
 
     valid_indices = isvalid(lat) & isvalid(lon)
 
-    cond_failed = np.full(lat.shape, True, dtype=bool)
+    cond_failed = np.full(lat.shape, True, dtype=bool)  # type: np.ndarray
     cond_failed[valid_indices] = (
         (lat[valid_indices] < -90)
         | (lat[valid_indices] > 90)
@@ -124,7 +124,7 @@ def do_date_check(
         - Returns 1 (or array/sequence/Series of 1s) if the date is not valid,
         - Returns 0 (or array/sequence/Series of 0s) otherwise.
     """
-    result = np.full(year.shape, untestable, dtype=int)
+    result = np.full(year.shape, untestable, dtype=int)   # type: np.ndarray
 
     valid_indices = isvalid(year) & isvalid(month) & isvalid(day)
 
@@ -178,11 +178,11 @@ def do_time_check(
         - Returns 1 (or array/sequence/Series of 1s) if hour is not a valid hour,
         - Returns 0 (or array/sequence/Series of 0s) otherwise.
     """
-    result = np.full(hour.shape, untestable, dtype=int)
+    result = np.full(hour.shape, untestable, dtype=int)  # type: np.ndarray
 
     valid_indices = isvalid(hour)
 
-    cond_failed = np.full(hour.shape, True, dtype=bool)
+    cond_failed = np.full(hour.shape, True, dtype=bool)  # type: np.ndarray
     cond_failed[valid_indices] = (hour[valid_indices] >= 24) | (hour[valid_indices] < 0)
 
     result[valid_indices & cond_failed] = failed
@@ -253,13 +253,13 @@ def do_day_check(
     than one hour after sunset and up to one hour after sunrise.
     """
     p_check = do_position_check(lat, lon)
-    p_check = np.atleast_1d(p_check)
+    p_check = np.atleast_1d(p_check)  # type: np.ndarray
     d_check = do_date_check(year=year, month=month, day=day)
-    d_check = np.atleast_1d(d_check)
+    d_check = np.atleast_1d(d_check)  # type: np.ndarray
     t_check = do_time_check(hour=hour)
-    t_check = np.atleast_1d(t_check)
+    t_check = np.atleast_1d(t_check)  # type: np.ndarray
 
-    result = np.full(year.shape, untestable, dtype=int)
+    result = np.full(year.shape, untestable, dtype=int)  # type: np.ndarray
 
     for i in range(len(year)):
         if failed in (p_check[i], d_check[i], t_check[i]):
@@ -380,14 +380,14 @@ def do_hard_limit_check(
         - Returns 1 (or array/sequence/Series of 1s) if value(s) are outside the specified limits.
         - Returns 0 (or array/sequence/Series of 0s) if value(s) are within limits.
     """
-    result = np.full(value.shape, untestable, dtype=int)
+    result = np.full(value.shape, untestable, dtype=int)  # type: np.ndarray
 
     if limits[1] <= limits[0]:
         return format_return_type(result, value)
 
     valid_indices = isvalid(value)
 
-    cond_passed = np.full(value.shape, True, dtype=bool)
+    cond_passed = np.full(value.shape, True, dtype=bool)  # type: np.ndarray
     cond_passed[valid_indices] = (limits[0] <= value[valid_indices]) & (
         value[valid_indices] <= limits[1]
     )
@@ -492,11 +492,11 @@ def do_climatology_check(
     )
 
     if lowbar is None:
-        low_check = np.ones(value.shape, dtype=bool)
+        low_check = np.ones(value.shape, dtype=bool)  # type: np.ndarray
     else:
         low_check = climate_diff > lowbar
 
-    cond_failed = np.full(value.shape, False, dtype=bool)
+    cond_failed = np.full(value.shape, False, dtype=bool)  # type: np.ndarray
     cond_failed[valid_indices] = (
         climate_diff[valid_indices] / standard_deviation[valid_indices]
         > maximum_anomaly
@@ -535,7 +535,7 @@ def do_supersaturation_check(dpt: ValueFloatType, at2: ValueFloatType) -> ValueI
 
     valid_indices = isvalid(dpt) & isvalid(at2)
 
-    cond_failed = np.full(dpt.shape, True, dtype=bool)
+    cond_failed = np.full(dpt.shape, True, dtype=bool)  # type: np.ndarray
     cond_failed[valid_indices] = dpt[valid_indices] > at2[valid_indices]
 
     result[valid_indices & cond_failed] = failed
@@ -611,7 +611,7 @@ def do_sst_freeze_check(
     if sst_uncertainty == "default":
         sst_uncertainty = 0.0
 
-    cond_failed = np.full(sst.shape, True, dtype=bool)
+    cond_failed = np.full(sst.shape, True, dtype=bool)  # type: np.ndarray
     cond_failed[valid_sst] = sst[valid_sst] < (
         freezing_point - freeze_check_n_sigma * sst_uncertainty
     )
@@ -650,7 +650,7 @@ def do_wind_consistency_check(
 
     valid_indices = isvalid(wind_speed) & isvalid(wind_direction)
 
-    cond_failed = np.full(wind_speed.shape, True, dtype=bool)
+    cond_failed = np.full(wind_speed.shape, True, dtype=bool)  # type: np.ndarray
     cond_failed[valid_indices] = (
         (wind_speed[valid_indices] == 0) & (wind_direction[valid_indices] != 0)
     ) | ((wind_speed[valid_indices] != 0) & (wind_direction[valid_indices] == 0))

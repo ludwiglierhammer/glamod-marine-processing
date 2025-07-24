@@ -270,7 +270,7 @@ class Climatology:
         date: datetime | None | Sequence[datetime | None] | np.ndarray = None,
         month: int | None | Sequence[int | None] | np.ndarray = None,
         day: int | None | Sequence[int | None] | np.ndarray = None,
-    ) -> ndarray:
+    ) -> ndarray | pd.Series:
         """Get the value from a climatology at the give position and time.
 
         Parameters
@@ -288,17 +288,17 @@ class Climatology:
 
         Returns
         -------
-        ndarray
+        ndarray or ps.Series
             Climatology value at specified location and time.
 
         Note
         ----
         Use only exact matches for selecting time and nearest valid index value for selecting location.
         """
-        lat_arr = np.atleast_1d(lat)
-        lon_arr = np.atleast_1d(lon)
-        month_arr = np.atleast_1d(month)
-        day_arr = np.atleast_1d(day)
+        lat_arr = np.atleast_1d(lat)  # type: np.ndarray
+        lon_arr = np.atleast_1d(lon) # type: np.ndarray
+        month_arr = np.atleast_1d(month) # type: np.ndarray
+        day_arr = np.atleast_1d(day) # type: np.ndarray
         valid_indices = isvalid(lat) & isvalid(lon) & isvalid(month) & isvalid(day)
         result = np.full(lat_arr.shape, None, dtype=float)  # type: np.ndarray
 

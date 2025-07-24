@@ -524,12 +524,12 @@ def time_in_whole_days(time_in_hours: int, day: int, years_since_1980: int, leap
     return years_since_1980 * 365 + leap + day - 1.0 + time_in_hours / 24.0
 
 
-def leap_year_correction(time_in_hours: int, day: int, years_since_1980: int) -> float:
+def leap_year_correction(time_in_hours: float, day: int, years_since_1980: int) -> float:
     """Make leap year correction.
 
     Parameters
     ----------
-    time_in_hours: int
+    time_in_hours: float
         Time in hours
     day: int
         Day number

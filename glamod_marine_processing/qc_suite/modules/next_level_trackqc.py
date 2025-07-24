@@ -172,6 +172,7 @@ class SpeedChecker:
     movement is detected it is likely a human operator can then better pick out the actual bad data. False
     fails caused by positional errors (particularly in fast ocean currents) will also need reinstating.
     """
+
     # pylint: disable=too-many-instance-attributes
     # pylint: disable=too-many-positional-arguments
     def __init__(
@@ -336,6 +337,7 @@ class NewSpeedChecker:
     min_win_period: minimum period of time in days over which position is assessed for speed estimates (see
     description)
     """
+
     # pylint: disable=too-many-instance-attributes
     # pylint: disable=too-many-positional-arguments
     def __init__(
@@ -371,8 +373,8 @@ class NewSpeedChecker:
             The smallest increment in distance that can be resolved. For 0.01 degrees of lat-lon this is 1.11 km. Used
             in the IQUAM track check
         delta_t: float
-            The smallest increment in time that can be resolved. For hourly data expressed as a float this is 0.01 hours.
-            Used in the IQUAM track check
+            The smallest increment in time that can be resolved. For hourly data expressed as a float this is 0.01
+            hours. Used in the IQUAM track check
         n_neighbours: int
             Number of neighbours considered in the IQUAM track check
         """
@@ -511,10 +513,11 @@ class AgroundChecker:
     greater than min_win_period and allow for erratic temporal sampling e.g. min_win_period+2 to allow for gaps of
     up to 2-days in sampling).
     """
+
     # pylint: disable=too-many-instance-attributes
     # pylint: disable=too-many-positional-arguments
 
-    # displacement resulting from 1/100th deg 'position-jitter' at equator (km)
+    # displacement resulting from 1/100th deg 'position-jitter' at the equator (km)
     tolerance = sphere_distance(0, 0, 0.01, 0.01)
 
     def __init__(
@@ -623,6 +626,8 @@ class AgroundChecker:
         min_win_period_hours = self.min_win_period * 24.0
         if self.max_win_period is not None:
             max_win_period_hours = self.max_win_period * 24.0
+        else:
+            max_win_period_hours = None
 
         if not self.valid_parameters() or not self.valid_arrays():
             self.qc_outcomes[:] = untestable
@@ -732,6 +737,7 @@ class SSTTailChecker:
     background_err_lim: float
         Background error variance beyond which the SST background is deemed unreliable (degC squared)
     """
+
     # pylint: disable=too-many-instance-attributes
     # pylint: disable=too-many-positional-arguments
     def __init__(
@@ -934,7 +940,7 @@ class SSTTailChecker:
                 dates.year,
                 dates.month,
                 dates.day,
-                dates.hour + (dates.minute) / 60,
+                dates.hour + dates.minute / 60,
                 lat,
                 lon,
                 -2.5,
@@ -1125,6 +1131,7 @@ class SSTBiasedNoisyChecker:
     error as entirely correlated across a long-record, which maximises its possible impact on the bias assessment. In
     this case the histogram approach was used as the limit could be tuned to give better results.
     """
+
     # pylint: disable=too-many-instance-attributes
     # pylint: disable=too-many-positional-arguments
     def __init__(

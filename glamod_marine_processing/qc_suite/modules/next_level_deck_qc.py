@@ -344,9 +344,9 @@ class SuperObsGrid:
 
             m, d = pentad_to_month_day(pindex + 1)
 
-            stdev1_ex = stdev1.get_value(89.5 - yindex, -179.5 + xindex, m, d)
-            stdev2_ex = stdev2.get_value(89.5 - yindex, -179.5 + xindex, m, d)
-            stdev3_ex = stdev3.get_value(89.5 - yindex, -179.5 + xindex, m, d)
+            stdev1_ex = stdev1.get_value(89.5 - yindex, -179.5 + xindex, month=m, day=d)
+            stdev2_ex = stdev2.get_value(89.5 - yindex, -179.5 + xindex, month=m, day=d)
+            stdev3_ex = stdev3.get_value(89.5 - yindex, -179.5 + xindex, month=m, day=d)
 
             if stdev1_ex is None or stdev1_ex < 0.0 or np.isnan(stdev1_ex):
                 stdev1_ex = 1.0
@@ -630,8 +630,8 @@ def do_bayesian_buddy_check(
 
     noise_scaling : float
         Tuning parameter used to multiply stdev2. This was determined to be approximately 3.0 by comparison with
-        observed point data. stdev2 was estimated from OSTIA data and typically underestimates the point to area-
-        average difference by this factor.
+        observed point data. stdev2 was estimated from OSTIA data and typically underestimates the point to
+        area-average difference by this factor.
 
     maximum_anomaly : float
         Largest absolute anomaly, assumes that the maximum and minimum anomalies have the same magnitude

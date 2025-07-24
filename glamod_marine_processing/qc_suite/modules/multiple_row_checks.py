@@ -169,7 +169,7 @@ def do_multiple_row_check(
     qc_dict: dict | None = None,
     preproc_dict: dict | None = None,
     return_method: Literal["all", "passed", "failed"] = "all",
-) -> pd.Series:
+) -> pd.Series | pd.DataFrame:
     """Basic row-by-row QC by using multiple QC functions.
 
     Parameters

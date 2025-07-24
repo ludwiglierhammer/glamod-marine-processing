@@ -229,11 +229,18 @@ def generic_decorator(
     of those arguments via a custom handler function, and then calls the original function.
 
     This base decorator manages argument binding and supports passing additional reserved
-    keyword arguments to the handler through the decorated function's kwargs.
+    keyword arguments to the handler through the decorated function's kwargs. Pre-handlers are
+    applied before the function is called and post-handlers afterwards.
 
     Parameters
     ----------
-    handler : Callable[[dict], None]
+    pre_handler : Callable[[dict], None]
+        A function that takes a dictionary of bound arguments (`bound_args.arguments`)
+        and optionally other keyword arguments, to inspect, mutate, or validate these
+        arguments before the decorated function executes.
+        The handler should accept the signature:
+        `handler(arguments: dict, **meta_kwargs) -> None`
+    post_handler : Callable[[dict], None]
         A function that takes a dictionary of bound arguments (`bound_args.arguments`)
         and optionally other keyword arguments, to inspect, mutate, or validate these
         arguments before the decorated function executes.
