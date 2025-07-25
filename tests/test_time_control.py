@@ -8,9 +8,7 @@ import pytest
 from glamod_marine_processing.qc_suite.modules.time_control import (
     convert_date_to_hours,
     day_in_year,
-    last_month_was,
     leap_year_correction,
-    next_month_is,
     pentad_to_month_day,
     split_date,
     which_pentad,
@@ -116,30 +114,6 @@ def test_year_month_gen_raises():
         list(year_month_gen(1999, -1, 2000, 2))
     with pytest.raises(ValueError):
         list(year_month_gen(1999, 1, 2000, 13))
-
-
-@pytest.mark.parametrize(
-    "year, month, expected",
-    [
-        (1989, 12, (1989, 11)),
-        (2010, 9, (2010, 8)),
-        (2025, 1, (2024, 12)),
-    ],
-)
-def test_last_month_was(year, month, expected):
-    assert last_month_was(year, month) == expected
-
-
-@pytest.mark.parametrize(
-    "year, month, expected",
-    [
-        (1989, 12, (1990, 1)),
-        (2010, 9, (2010, 10)),
-        (2025, 1, (2025, 2)),
-    ],
-)
-def test_next_month_is(year, month, expected):
-    assert next_month_is(year, month) == expected
 
 
 @pytest.mark.parametrize(

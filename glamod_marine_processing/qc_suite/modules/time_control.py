@@ -583,53 +583,6 @@ def time_difference(
     return 24.0 * (last_day - first_day)
 
 
-def last_month_was(year: int, month: int) -> tuple[int, int]:
-    """Short function to get the previous month given a particular month of interest
-
-    Parameters
-    ----------
-    year : int
-        Year of interest
-    month : int
-        Month of interest
-
-    Returns
-    -------
-    tuple of int
-        A tuple of two ints representing year and month of previous month
-
-    """
-    last_year = year
-    last_month = month - 1
-    if last_month == 0:
-        last_month = 12
-        last_year = year - 1
-
-    return last_year, last_month
-
-
-def next_month_is(year: int, month: int) -> tuple[int, int]:
-    """Short function to get the next month given a particular month of interest
-
-    Parameters
-    ----------
-    year : int
-        Year of interest
-    month : int
-        Month of interest
-
-    Returns
-    -------
-    tuple of int
-        A tuple of two ints representing year and month of next month
-    """
-    next_year = year
-    next_month = month + 1
-    if next_month > 12:
-        next_month = 1
-        next_year = year + 1
-
-    return next_year, next_month
 
 
 def year_month_gen(
