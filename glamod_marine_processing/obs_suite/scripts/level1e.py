@@ -126,11 +126,9 @@ import os
 import sys
 from importlib import reload
 
-import numpy as np
 import pandas as pd
 from _utilities import (
     date_handler,
-    paths_exist,
     read_cdm_tables,
     save_quicklook,
     script_setup,
@@ -152,6 +150,7 @@ reload(logging)  # This is to override potential previous config of logging
 
 # Functions--------------------------------------------------------------------
 def get_single_qc_flag(df):
+    """Get single QC flag from DataFrame containing multiple QC flags."""
     return df
 
 
@@ -161,89 +160,6 @@ def compare_quality_checks(df):
     df = df.mask(report_time_quality == "4", "1")
     df = df.mask(report_time_quality == "5", "1")
     return df
-
-
-# This is to apply the qc flags and write out flagged tables
-def process_table(table_df, table, pass_time=None):
-    """Process table."""
-    if pass_time is None:
-        pass_time = "2"
-    not_checked_report = "2"
-    not_checked_location = "3"
-    not_checked_param = "2"
-    logging.info(f"Processing table {table}")
-
-    if isinstance(table_df, str):
-        # Assume 'header' and in a DF in table_df otherwise
-        # Open table and reindex
-        table_df = read_cdm_tables(params, table)
-
-        if table_df is None or table_df.empty:
-            logging.warning(f"Empty or non existing table {table}")
-            return
-        table_df = table_df[table].set_index("report_id", drop=False)
-
-    previous = len(table_df)
-    table_df = table_df[table_df["report_id"].isin(report_ids)]
-    total = len(table_df)
-    removed = previous - total
-    ql_dict[table] = {
-        "total": total,
-        "deleted": removed,
-    }
-    if table_df.empty:
-        logging.warning(f"Empty table {table}.")
-        return
-
-    if flag:
-        qc = table_qc.get(table).get("qc")
-        element = table_qc.get(table).get("element")
-        qc_table = qc_df[[qc]]
-        qc_table = qc_table.rename({qc: element}, axis=1)
-        table_df.update(qc_table)
-
-        updated_locs = qc_table.loc[qc_table.notna().all(axis=1)].index
-
-        if table != "header":
-            ql_dict[table]["quality_flag"] = (
-                table_df[element].value_counts(dropna=False).to_dict()
-            )
-
-        if table == "header":
-            table_df.update(qc_df["report_quality"])
-            history_add = f";{history_tstmp}. {params.history_explain}"
-            table_df.loc[:, "report_time_quality"] = pass_time
-            ql_dict[table]["location_quality_flag"] = (
-                table_df["location_quality"].value_counts(dropna=False).to_dict()
-            )
-            ql_dict[table]["report_quality_flag"] = (
-                table_df["report_quality"].value_counts(dropna=False).to_dict()
-            )
-            table_df.update(
-                table_df.loc[updated_locs, "history"].apply(lambda x: x + history_add)
-            )
-    # Here very last minute change to account for reports not in QC files:
-    # need to make sure it is all not-checked!
-    # Test new things with 090-221. See 1984-03.
-    # What happens if not POS flags matching?
-    else:
-        if table != "header":
-            table_df.loc[:, "quality_flag"] = not_checked_param
-        else:
-            table_df.loc[:, "report_time_quality"] = pass_time
-            table_df.loc[:, "report_quality"] = not_checked_report
-            table_df.loc[:, "location_quality"] = not_checked_location
-
-    if table != "header":
-        table_df.loc[:, "quality_flag"] = compare_quality_checks(
-            table_df["quality_flag"]
-        )
-    if table == "header":
-        table_df.loc[:, "report_quality"] = compare_quality_checks(
-            table_df["report_quality"]
-        )
-
-    write_cdm_tables(params, table_df, tables=table)
 
 
 # Some other parameters -------------------------------------------------------
@@ -276,9 +192,6 @@ params = script_setup(process_options, sys.argv)
 
 return_method = "failed"
 
-# Check we have all the dirs!
-paths_exist(qc_path)
-
 # Do some additional checks before clicking go, do we have a valid header?
 header_filename = params.filename
 if not os.path.isfile(header_filename):
@@ -289,7 +202,7 @@ data_dict = {}
 
 data_dict["header"] = read_cdm_tables(params, "header")
 
-if header_df.empty:
+if data_dict["header"].empty:
     logging.error("Empty or non-existing header table")
     sys.exit(1)
 
@@ -322,9 +235,17 @@ for table_in in tables_in:
 
 report_ids = report_ids[report_ids.duplicated()]
 
+ql_dict = {}
 for table, df in data_dict.items():
     df = df.set_index("report_id", drop=False)
+    p_length = len(df)
     data_dict[table] = df.loc[report_ids]
+    c_length = len(data_dict[table])
+    r_length = p_length - c_length
+    ql_dict[table] = {
+        "total": c_length,
+        "deleted": r_length,
+    }
 
 # DO THE DATA PROCESSING ------------------------------------------------------
 
@@ -430,7 +351,7 @@ data = header_df.drop(index=idx_blck)
 # Deselect already failed report_qualities
 data = data[~report_quality.isin(["1"])]
 # Deselect rows containing generic ids
-data = data.drop(index=gnrc_idx)
+data = data.drop(index=idx_gnrc)
 
 qc_dict = params.qc_settings.get("track_check", {}).get("header", {})
 for qc_name in qc_dict.keys():
@@ -450,10 +371,10 @@ for obs_table in obs_tables:
     data = data_dict[obs_table].copy()
     # Deselect already failed quality_flags
     data = data[~quality_flag.isin("1")]
+    # Deselect rows on blacklist
+    data = data.drop(index=idx_blck)
     # Deselect rows containing generic ids
-    data = data.drop(index=gnrc_idx)
-    # Deselect rows containing generic ids
-    data = data.drop(index=gnrc_idx)
+    data = data.drop(index=idx_gnrc)
 
     for qc_name in qc_dict.keys():
         func = getattr(next_level_track_check_qc, qc_dict[qc_name]["func"])
@@ -489,12 +410,12 @@ for obs_table in obs_tables:
     data = data_dict[obs_table].copy()
     # Deselect already failed quality_flags
     data = data[~quality_flag.isin("1")]
+    # Deselect on blacklist
+    data = data.drop(index=idx_blck)
     # Deselect rows containing generic ids
-    data = data.drop(index=gnrc_idx)
-    # Deselect rows containing generic ids
-    data = data.drop(index=gnrc_idx)
+    data = data.drop(index=idx_gnrc)
     for qc_name in qc_dict.keys():
-        func = getattr(next_level_track_check_qc, qc_dict[qc_name]["func"])
+        func = getattr(next_level_deck_qc, qc_dict[qc_name]["func"])
         names = qc_dict[qc_name].get("names", {})
         inputs = {k: data[v] for k, v in names}
         kwargs = qc_dict[qc_name].get("arguments", {})
@@ -503,6 +424,34 @@ for obs_table in obs_tables:
         quality_flag.loc[idx_failed] = qc_flag.loc[idx_failed]
     quality_flags[obs_table] = quality_flag
 
+# WRITE QC FLAGS TO DATA ------------------------------------------------------
+history_add = f";{history_tstmp}. {params.history_explain}"
+header_df["location_quality"] = location_quality
+header_df["report_time_quality"] = report_time_quality
+header_df["report_quality"] = report_quality
+ql_dict["header"]["location_quality_flag"] = location_quality.value_counts(
+    dropna=False
+).to_dict()
+ql_dict["header"]["report_quality_flag"] = report_quality.value_counts(
+    dropna=False
+).to_dict()
+ql_dict["header"]["report_time_quality_flag"] = report_time_quality.value_counts(
+    dropna=False
+).to_dict()
+header_df.update(
+    header_df.loc[~header_df.index.isin(idx_blck), "history"].apply(
+        lambda x: x + history_add
+    )
+)
+write_cdm_tables(params, header_df, tables="header")
+
+for obs_table in obs_tables:
+    obs_df = data_dict[obs_table].copy()
+    obs_df["quality_flag"] = quality_flags[obs_table]
+    ql_dict[obs_table]["quality_flag"] = (
+        obs_df["quality_flag"].value_counts(dropna=False).to_dict()
+    )
+    write_cdm_tables(params, obs_df, tables=obs_table)
 
 # ?. PROCESS QC FLAGS ---------------------------------------------------------
 # Replace QC flags in C-RAID data; other approach needed!!!
