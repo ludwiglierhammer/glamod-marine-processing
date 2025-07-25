@@ -65,7 +65,7 @@ def vap(td: float, t: float, p: float, roundit: bool = True) -> float:
         vapour pressure in hPa (array or scalar)
 
     Notes
-    ------
+    -----
     Buck 1981
     Buck, A. L.: New equations for computing vapor pressure and enhancement factor, J. Appl.
     Meteorol., 20, 1527?1532, 1981.

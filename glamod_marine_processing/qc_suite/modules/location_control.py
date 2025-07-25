@@ -238,7 +238,7 @@ def filler(value_to_fill, neighbour1, neighbour2, opposite):
     it is replaced with the value from the opposite member.
 
     Parameters
-    ==========
+    ----------
     value_to_fill: float
         The value to fill.
 
@@ -252,7 +252,7 @@ def filler(value_to_fill, neighbour1, neighbour2, opposite):
         The opposite member.
 
     Returns
-    =======
+    -------
     float
     """
     if not isvalid(value_to_fill):

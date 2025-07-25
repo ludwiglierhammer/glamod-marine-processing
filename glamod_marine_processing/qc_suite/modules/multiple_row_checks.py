@@ -28,16 +28,16 @@ def _get_function(name: str) -> Callable:
     """Returns the function of a given name or raises a NameError
 
     Parameters
-    ==========
+    ----------
     name : str
-        Name of the function to be returend
+        Name of the function to be returned
 
     Returns
-    =======
+    -------
     Callable
 
     Raises
-    ======
+    ------
     NameError
         If function of that name does not exist
     """
@@ -60,7 +60,7 @@ def _is_func_param(func: Callable, param: str) -> bool:
     Returns
     -------
     bool
-        Returns True if param is one of the functions parameters or the function uses **kwargs
+        Returns True if param is one of the functions parameters or the function uses ``**kwargs``.
     """
     sig = inspect.signature(func)
     if "kwargs" in sig.parameters:

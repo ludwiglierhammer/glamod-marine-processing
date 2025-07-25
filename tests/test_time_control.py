@@ -2,8 +2,7 @@ from __future__ import annotations
 
 from datetime import datetime
 
-import numpy as np
-import pytest
+import pytest  # noqa
 
 from glamod_marine_processing.qc_suite.modules.time_control import (
     convert_date_to_hours,
