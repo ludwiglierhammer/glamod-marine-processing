@@ -296,16 +296,16 @@ def do_multiple_row_check(
         }
 
     """
-    if return_method not in ["all", "passed", "failed"]:
-        raise ValueError(
-            f"'return_method' has to be one of ['all', 'passed', 'failed']: {return_method}"
-        )
-
     if qc_dict is None:
         qc_dict = {}
 
     if preproc_dict is None:
         preproc_dict = {}
+
+    if return_method not in ["all", "passed", "failed"]:
+        raise ValueError(
+            f"'return_method' has to be one of ['all', 'passed', 'failed']: {return_method}"
+        )
 
     # Firstly, check if all functions are callable and all requested input variables are available!
     preprocessed = {}

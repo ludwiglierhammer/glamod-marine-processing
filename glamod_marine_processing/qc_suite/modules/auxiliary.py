@@ -53,53 +53,6 @@ ValueIntType: TypeAlias = ScalarIntType | SequenceIntType
 ValueDatetimeType: TypeAlias = ScalarDatetimeType | SequenceDatetimeType
 
 
-class TypeContext:
-    """
-    A container class to hold original (unmodified) function argument values.
-
-    This class is useful for preserving the initial inputs before any
-    processing or transformation steps are applied, enabling later access
-    to the original user inputs.
-
-    Attributes
-    ----------
-    originals : dict
-        A dictionary mapping parameter names to their original values.
-    """
-
-    def __init__(self):
-        self.originals = {}
-
-
-def _save_originals(args: dict, kwargs: dict) -> TypeContext:
-    """
-    Store original argument values in a TypeContext.
-
-    This function checks if a `_ctx` (TypeContext) object is already present
-    in either the keyword arguments or positional arguments. If not found,
-    it creates a new TypeContext. It then records all argument names and
-    values from `args` into the `originals` dictionary of the context, skipping
-    those already stored.
-
-    Parameters
-    ----------
-    args : dict
-        Dictionary of function arguments (usually from `inspect.BoundArguments.arguments`).
-    kwargs : dict
-        Dictionary of keyword arguments passed to the function, used to check for existing `_ctx`.
-
-    Returns
-    -------
-    TypeContext
-        The context object containing the preserved original argument values.
-    """
-    ctx = kwargs.get("_ctx") or args.get("_ctx") or TypeContext()
-    for param, value in args.items():
-        if param not in ctx.originals:
-            ctx.originals[param] = value
-    return ctx
-
-
 def is_scalar_like(x: Any) -> bool:
     """
     Return True if the input is scalar-like (i.e., has no dimensions).

@@ -159,6 +159,7 @@ def test_post_format_return_type(value, expected, array_type):
         ([0.0], False),
         (np.array(5), True),
         (np.array([5, 6]), False),
+        ("a", True),
     ],
 )
 def test_is_scalar_like(value, expected):

@@ -37,7 +37,6 @@ def convert_date(params: list[str]) -> Callable:
     - The decorator expects the wrapped function to accept the parameters listed in
       `params`. If a parameter is missing, it raises a `ValueError`.
     - If the 'date' argument is None, the original function is called without modification.
-    - Uses a `TypeContext` to store original argument values for possible further use.
     - Supports scalar-like 'date' values as well as iterable sequences.
     - Assumes a helper function `split_date` exists that splits a date into components
       and returns a dictionary mapping parameter names to their values.

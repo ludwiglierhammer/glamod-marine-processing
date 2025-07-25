@@ -120,7 +120,7 @@ def test_multiple_row_check_raises_return_method():
     with pytest.raises(ValueError):
         do_multiple_row_check(
             data=pd.Series(),
-            qc_dict={},
+            qc_dict=None,
             return_method="false",
         )
 
