@@ -123,6 +123,7 @@
             "longitude": "longitude"
           }
         }
+      }
     },
     "time_check": {
       "header": {
@@ -355,7 +356,7 @@
       "combined": {
         "SUPERSAT": {
           "func": "do_supersaturation_check",
-          "inputs": {
+          "tables": {
             "dpt": "observation-dpt",
             "at2": "observation-at"
           },
@@ -366,7 +367,7 @@
         },
         "WIND": {
           "func": "do_wind_consistency_check",
-          "inputs": {
+          "tables": {
             "wind_speed": "observation-ws",
             "wind_direction": "observation-wd"
           },
@@ -450,6 +451,13 @@
       "combined": {
         "SAT": {
           "func": "find_saturated_runs",
+          "tables": {
+            "at": "observations-at",
+            "dpt": "observations-dpt",
+            "lat": "observations-at",
+            "lon": "observations-at",
+            "date": "observations-at"
+          },
           "names": {
             "at": "observation_value",
             "dpt": "observation_value",
