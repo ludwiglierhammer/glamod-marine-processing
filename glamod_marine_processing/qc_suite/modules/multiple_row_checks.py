@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 import inspect
-from typing import Literal, Callable
+from typing import Callable, Literal
 
 import pandas as pd
 
@@ -95,7 +95,9 @@ def _is_in_data(name: str, data: pd.Series | pd.DataFrame) -> bool:
     raise TypeError(f"Unsupported data type: {type(data)}")
 
 
-def _get_requests_from_params(params: dict | None, func: Callable, data: pd.Series | pd.DataFrame) -> dict:
+def _get_requests_from_params(
+    params: dict | None, func: Callable, data: pd.Series | pd.DataFrame
+) -> dict:
     """Given a dictionary of key value pairs where the keys are parameters in the function, func, and the values
     are columns or variables in data, create a new dictionary in which the keys are the parameter names (as in the
     original dictionary) and the values are the numbers extracted from data.

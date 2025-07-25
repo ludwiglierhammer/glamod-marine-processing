@@ -337,7 +337,9 @@ def forward_discrepancy(
     """
     number_of_obs = len(lat)
 
-    distance_from_est_location = np.asarray([np.nan] * number_of_obs)  # type: np.ndarray
+    distance_from_est_location = np.asarray(
+        [np.nan] * number_of_obs
+    )  # type: np.ndarray
 
     for i in range(1, number_of_obs):
 
@@ -452,7 +454,9 @@ def backward_discrepancy(
     """
     number_of_obs = len(lat)
 
-    distance_from_est_location = np.asarray([np.nan] * number_of_obs)  # type: np.ndarray
+    distance_from_est_location = np.asarray(
+        [np.nan] * number_of_obs
+    )  # type: np.ndarray
 
     for i in range(number_of_obs - 1, 0, -1):
 

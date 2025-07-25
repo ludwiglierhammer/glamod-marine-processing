@@ -141,6 +141,7 @@ def reps3():
 def dummy_pentad_stdev():
     return clim.Climatology(np.full([73, 180, 360], 1.5))
 
+
 @pytest.fixture
 def dummy_pentad_stdev_empty():
     return clim.Climatology(np.full([73, 180, 360], np.nan))
@@ -543,6 +544,7 @@ def test_add_one_maxes_limits(reps_, dummy_pentad_stdev_):
 
     assert pytest.approx(sd, 0.0001) == 500
     assert mn == 0.0
+
 
 def test_add_one_maxes_limits_with_missing_stdevs(reps_, dummy_pentad_stdev_empty):
     g = SuperObsGrid()

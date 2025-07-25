@@ -1,16 +1,16 @@
 from __future__ import annotations
 
-import pandas as pd
 import numpy as np
+import pandas as pd
 import pytest
 
 from glamod_marine_processing.qc_suite.modules.multiple_row_checks import (
-    do_multiple_row_check,
     _get_function,
+    _get_preprocessed_args,
+    _get_requests_from_params,
     _is_func_param,
     _is_in_data,
-    _get_requests_from_params,
-    _get_preprocessed_args,
+    do_multiple_row_check,
 )
 
 
@@ -101,19 +101,14 @@ def test_get_requests_from_params_raises():
 
 def test_get_preprocessed_args():
 
-    test_arguments = {
-        'var1': 'filename',
-        'var2': '__preprocessed__'
-    }
+    test_arguments = {"var1": "filename", "var2": "__preprocessed__"}
 
-    test_preprocessed = {
-        'var2': 99
-    }
+    test_preprocessed = {"var2": 99}
 
     result = _get_preprocessed_args(test_arguments, test_preprocessed)
 
-    assert result['var1'] == 'filename'
-    assert result['var2'] == 99
+    assert result["var1"] == "filename"
+    assert result["var2"] == 99
 
 
 def test_multiple_row_check_raises_return_method():

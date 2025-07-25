@@ -124,7 +124,7 @@ def do_date_check(
         - Returns 1 (or array/sequence/Series of 1s) if the date is not valid,
         - Returns 0 (or array/sequence/Series of 0s) otherwise.
     """
-    result = np.full(year.shape, untestable, dtype=int)   # type: np.ndarray
+    result = np.full(year.shape, untestable, dtype=int)  # type: np.ndarray
 
     valid_indices = isvalid(year) & isvalid(month) & isvalid(day)
 

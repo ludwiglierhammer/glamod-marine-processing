@@ -8,12 +8,12 @@ import pytest
 from pint.errors import DimensionalityError
 
 from glamod_marine_processing.qc_suite.modules.auxiliary import (
-    convert_units,
-    inspect_arrays,
-    post_format_return_type,
-    is_scalar_like,
     convert_to,
+    convert_units,
     format_return_type,
+    inspect_arrays,
+    is_scalar_like,
+    post_format_return_type,
 )
 from glamod_marine_processing.qc_suite.modules.time_control import convert_date
 

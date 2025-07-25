@@ -232,6 +232,7 @@ def fill_missing_vals(
 
     return outq11, outq12, outq21, outq22
 
+
 def filler(value_to_fill, neighbour1, neighbour2, opposite):
     """If the value_to_fill is invalid it is replaced with the mean of the neighbours and if it is still invalid then
     it is replaced with the value from the opposite member.
@@ -259,6 +260,7 @@ def filler(value_to_fill, neighbour1, neighbour2, opposite):
     if not isvalid(value_to_fill):
         value_to_fill = opposite
     return value_to_fill
+
 
 def get_four_surrounding_points(
     lat: float, lon: float, res: int, max90: bool = True
