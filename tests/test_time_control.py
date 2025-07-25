@@ -12,7 +12,6 @@ from glamod_marine_processing.qc_suite.modules.time_control import (
     pentad_to_month_day,
     split_date,
     which_pentad,
-    year_month_gen,
 )
 
 
@@ -90,30 +89,6 @@ def test_leap_year_correction():
     assert leap_year_correction(24, 1, 0) == 0
     assert leap_year_correction(24, 1, 4) == 1461
     assert leap_year_correction(24, 1, -3) == -1096
-
-
-def test_year_month_gen():
-    years = [year for year, month in year_month_gen(2001, 1, 2001, 12)]
-    months = [month for year, month in year_month_gen(2001, 1, 2001, 12)]
-    for year in years:
-        assert year == 2001
-    assert months == list(range(1, 13))
-
-    years = [year for year, month in year_month_gen(2000, 1, 2001, 12)]
-    months = [month for year, month in year_month_gen(2000, 1, 2001, 12)]
-    assert len(years) == 24
-    for year in years:
-        assert year in [2000, 2001]
-    assert months == list(range(1, 13)) + list(range(1, 13))
-
-
-def test_year_month_gen_raises():
-    with pytest.raises(ValueError):
-        list(year_month_gen(2000, 1, 1999, 2))
-    with pytest.raises(ValueError):
-        list(year_month_gen(1999, -1, 2000, 2))
-    with pytest.raises(ValueError):
-        list(year_month_gen(1999, 1, 2000, 13))
 
 
 @pytest.mark.parametrize(

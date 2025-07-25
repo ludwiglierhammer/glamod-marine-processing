@@ -585,55 +585,6 @@ def time_difference(
 
 
 
-def year_month_gen(
-    year1: int, month1: int, year2: int, month2: int
-) -> Generator[tuple[int | Any, int | Any] | tuple[int, int], Any, None]:
-    """A generator to loop one month at a time between year1 month1 and year2 month2
-
-    Parameters
-    ----------
-    year1 : int
-        Year of start month
-    month1 : int
-        Month of start month
-    year2 : int
-        Year of end month
-    month2 : int
-        Month of end month
-
-    Returns
-    -------
-    tuple of int
-        An iterator that yields tuples of a year and month
-
-    Raises
-    ------
-    ValueError
-        If year2 is less than year1 or
-        if either month1 or month2 not in range 1-12.
-    """
-    if year2 < year1:
-        raise ValueError(
-            f"year1 is greater than year2: year1 = {year1}, year2 = {year2}."
-        )
-    if not (0 < month1 <= 12):
-        raise ValueError(f"month1 is not in valid range (1 to 12): month1 = {month1}.")
-    if not (0 < month2 <= 12):
-        raise ValueError(f"month2 is not in valid range (1 to 12): month2 = {month2}.")
-
-    year = year1
-    month = month1
-
-    while not (year == year2 and month == month2):
-        yield year, month
-        month += 1
-        if month > 12:
-            month = 1
-            year += 1
-
-    yield year, month
-
-
 def get_month_lengths(year: int) -> list[int]:
     """Return a list holding the lengths of the months in a given year
 
