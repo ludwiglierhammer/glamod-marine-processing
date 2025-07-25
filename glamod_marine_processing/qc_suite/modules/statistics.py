@@ -89,7 +89,7 @@ def p_data_given_gross(q: float, r_hi: float, r_lo: float) -> float:
     Returns
     -------
     float
-        probability of the observed value given that its a gross error.
+        probability of the observed value given that it is a gross error.
 
     Raises
     ------
@@ -192,7 +192,7 @@ def winsorised_mean(inarr: list[float]) -> float:
     Note
     ----
     The winsorised mean is that which you get if you set the first quarter of
-    the sorted input array to the 1st quartile value and the the last quarter
+    the sorted input array to the 1st quartile value and the last quarter
     to the 3rd quartile and then take the mean. This is quite a heavy trimming of
     the distribution. It makes it very resistant - about half the obs can be egregiously
     bad without affecting the mean strongly - but it will be less accurate if

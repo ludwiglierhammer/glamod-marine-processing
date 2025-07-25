@@ -88,7 +88,7 @@ def lat_to_yindex(lat: float, res: float) -> int:
     ----
     The routine assumes that the structure of the SST array is a grid that is 360 x 180 x 73
     i.e. one year of 1degree lat x 1degree lon data split up into pentads. The west-most box is at 180degrees with
-    index 0 and the northern most box also has index zero. Inputs on the border between grid cells are pushed south.
+    index 0 and the northernmost box also has index zero. Inputs on the border between grid cells are pushed south.
 
     Note
     ----
@@ -180,7 +180,7 @@ def lon_to_xindex(lon: float, res: float) -> int:
     ----
     The routine assumes that the structure of the SST array is a grid that is 360 x 180 x 73
     i.e. one year of 1degree lat x 1degree lon data split up into pentads. The west-most box is at 180degrees W with
-    index 0 and the northern most box also has index zero. Inputs on the border between grid cells are pushed east.
+    index 0 and the northernmost box also has index zero. Inputs on the border between grid cells are pushed east.
 
     Note
     ----
@@ -225,27 +225,41 @@ def fill_missing_vals(
     outq21 = q21
     outq22 = q22
 
-    if not isvalid(outq11):
-        outq11 = missing_mean([q12, q21])
-    if not isvalid(outq11):
-        outq11 = q22
-
-    if not isvalid(outq22):
-        outq22 = missing_mean([q12, q21])
-    if not isvalid(outq22):
-        outq22 = q11
-
-    if not isvalid(outq12):
-        outq12 = missing_mean([q11, q22])
-    if not isvalid(outq12):
-        outq12 = q21
-
-    if not isvalid(outq21):
-        outq21 = missing_mean([q11, q22])
-    if not isvalid(outq21):
-        outq21 = q12
+    outq11 = filler(outq11, q12, q21, q22)
+    outq22 = filler(outq22, q12, q21, q11)
+    outq12 = filler(outq12, q11, q22, q21)
+    outq21 = filler(outq21, q11, q22, q12)
 
     return outq11, outq12, outq21, outq22
+
+
+def filler(value_to_fill, neighbour1, neighbour2, opposite):
+    """If the value_to_fill is invalid it is replaced with the mean of the neighbours and if it is still invalid then
+    it is replaced with the value from the opposite member.
+
+    Parameters
+    ----------
+    value_to_fill: float
+        The value to fill.
+
+    neighbour1: float
+        The first neighbour.
+
+    neighbour2: float
+        The second neighbour.
+
+    opposite: float
+        The opposite member.
+
+    Returns
+    -------
+    float
+    """
+    if not isvalid(value_to_fill):
+        value_to_fill = missing_mean([neighbour1, neighbour2])
+    if not isvalid(value_to_fill):
+        value_to_fill = opposite
+    return value_to_fill
 
 
 def get_four_surrounding_points(
@@ -289,7 +303,7 @@ def get_four_surrounding_points(
         y2 = yindex_to_lat(y2_index, res=res)
     else:
         y2 = 89.5
-        if max90 is not True:
+        if not max90:
             y2 = 90.5
 
     if lat - 0.5 >= -90:
@@ -297,7 +311,7 @@ def get_four_surrounding_points(
         y1 = yindex_to_lat(y1_index, res=res)
     else:
         y1 = -89.5
-        if max90 is not True:
+        if not max90:
             y1 = -90.5
 
     return x1, x2, y1, y2

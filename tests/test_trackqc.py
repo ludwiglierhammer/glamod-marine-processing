@@ -7,7 +7,7 @@ from datetime import datetime
 import numpy as np
 import pytest
 
-import glamod_marine_processing.qc_suite.modules.next_level_trackqc as tqc
+import glamod_marine_processing.qc_suite.modules.buoy_tracking_qc as tqc
 from glamod_marine_processing.qc_suite.modules.auxiliary import untestable
 
 

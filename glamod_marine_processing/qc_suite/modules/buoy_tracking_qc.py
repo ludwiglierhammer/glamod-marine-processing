@@ -13,7 +13,7 @@ import numpy as np
 
 from .astronomical_geometry import sunangle
 from .auxiliary import failed, isvalid, passed, untestable, untested
-from .next_level_track_check_qc import do_iquam_track_check, inspect_arrays
+from .qc_sequential_reports import do_iquam_track_check, inspect_arrays
 from .spherical_geometry import sphere_distance
 from .statistics import trim_mean, trim_std
 from .time_control import convert_date_to_hours, dayinyear
@@ -249,7 +249,7 @@ class SpeedChecker:
             valid = False
         return valid
 
-    def _do_speed_check(self):
+    def do_speed_check(self):
         """Perform the actual speed check"""
         nrep = self.nreps
         min_win_period_hours = self.min_win_period * 24.0
@@ -369,8 +369,8 @@ class NewSpeedChecker:
             The smallest increment in distance that can be resolved. For 0.01 degrees of lat-lon this is 1.11 km. Used
             in the IQUAM track check
         delta_t: float
-            The smallest increment in time that can be resolved. For hourly data expressed as a float this is 0.01 hours.
-            Used in the IQUAM track check
+            The smallest increment in time that can be resolved. For hourly data expressed as a float this is 0.01
+            hours. Used in the IQUAM track check
         n_neighbours: int
             Number of neighbours considered in the IQUAM track check
         """
@@ -436,7 +436,7 @@ class NewSpeedChecker:
             self.n_neighbours,
         )
 
-    def _do_new_speed_check(self) -> None:
+    def do_new_speed_check(self) -> None:
         """Perform the actual new speed check"""
         nrep = self.nreps
         min_win_period_hours = self.min_win_period * 24.0
@@ -510,7 +510,7 @@ class AgroundChecker:
     up to 2-days in sampling).
     """
 
-    # displacement resulting from 1/100th deg 'position-jitter' at equator (km)
+    # displacement resulting from 1/100th deg 'position-jitter' at the equator (km)
     tolerance = sphere_distance(0, 0, 0.01, 0.01)
 
     def __init__(
@@ -613,12 +613,14 @@ class AgroundChecker:
         self.lat_smooth = lat_smooth
         self.hrs_smooth = hrs_smooth
 
-    def _do_aground_check(self):
+    def do_aground_check(self):
         """Perform the actual aground check"""
         half_win = (self.smooth_win - 1) / 2
         min_win_period_hours = self.min_win_period * 24.0
         if self.max_win_period is not None:
             max_win_period_hours = self.max_win_period * 24.0
+        else:
+            max_win_period_hours = None
 
         if not self.valid_parameters() or not self.valid_arrays():
             self.qc_outcomes[:] = untestable
@@ -837,7 +839,7 @@ class SSTTailChecker:
             valid = False
         return valid
 
-    def _do_sst_tail_check(self, start_tail: bool):
+    def do_sst_tail_check(self, start_tail: bool):
         """Perform the actual SST tail check"""
         if not self.valid_parameters():
             self.qc_outcomes[:] = untestable
@@ -929,7 +931,7 @@ class SSTTailChecker:
                 dates.year,
                 dates.month,
                 dates.day,
-                dates.hour + (dates.minute) / 60,
+                dates.hour + dates.minute / 60,
                 lat,
                 lon,
                 -2.5,
@@ -1240,7 +1242,7 @@ class SSTBiasedNoisyChecker:
         self.qc_outcomes_noise[:] = input_state
         self.qc_outcomes_bias[:] = input_state
 
-    def _do_sst_biased_noisy_check(self):
+    def do_sst_biased_noisy_check(self):
         """Perform the bias/noise check QC"""
         if not self.valid_parameters():
             self.set_all_qc_outcomes_to(untestable)
@@ -1306,7 +1308,7 @@ class SSTBiasedNoisyChecker:
                 dates.year,
                 dates.month,
                 dates.day,
-                dates.hour + (dates.minute) / 60,
+                dates.hour + dates.minute / 60,
                 lat,
                 lon,
                 -2.5,
@@ -1453,7 +1455,7 @@ def do_speed_check(
     checker = SpeedChecker(
         lons, lats, dates, speed_limit, min_win_period, max_win_period
     )
-    checker._do_speed_check()
+    checker.do_speed_check()
     return checker.get_qc_outcomes()
 
 
@@ -1523,7 +1525,7 @@ def do_new_speed_check(
         delta_t,
         n_neighbours,
     )
-    checker._do_new_speed_check()
+    checker.do_new_speed_check()
     return checker.get_qc_outcomes()
 
 
@@ -1572,7 +1574,7 @@ def do_aground_check(
     checker = AgroundChecker(
         lons, lats, dates, smooth_win, min_win_period, max_win_period
     )
-    checker._do_aground_check()
+    checker.do_aground_check()
     return checker.get_qc_outcomes()
 
 
@@ -1613,7 +1615,7 @@ def do_new_aground_check(
     * min_win_period = 8
     """
     checker = AgroundChecker(lons, lats, dates, smooth_win, min_win_period, None)
-    checker._do_aground_check()
+    checker.do_aground_check()
     return checker.get_qc_outcomes()
 
 
@@ -1709,7 +1711,7 @@ def do_sst_start_tail_check(
         drif_intra,
         background_err_lim,
     )
-    checker._do_sst_tail_check(True)
+    checker.do_sst_tail_check(True)
     return checker.get_qc_outcomes()
 
 
@@ -1805,7 +1807,7 @@ def do_sst_end_tail_check(
         drif_intra,
         background_err_lim,
     )
-    checker._do_sst_tail_check(False)
+    checker.do_sst_tail_check(False)
     return checker.get_qc_outcomes()
 
 
@@ -1894,7 +1896,7 @@ def do_sst_biased_check(
         n_bad,
         background_err_lim,
     )
-    checker._do_sst_biased_noisy_check()
+    checker.do_sst_biased_noisy_check()
     return checker.get_qc_outcomes_bias()
 
 
@@ -1983,7 +1985,7 @@ def do_sst_noisy_check(
         n_bad,
         background_err_lim,
     )
-    checker._do_sst_biased_noisy_check()
+    checker.do_sst_biased_noisy_check()
     return checker.get_qc_outcomes_noise()
 
 
@@ -2072,5 +2074,5 @@ def do_sst_biased_noisy_short_check(
         n_bad,
         background_err_lim,
     )
-    checker._do_sst_biased_noisy_check()
+    checker.do_sst_biased_noisy_check()
     return checker.get_qc_outcomes_short()

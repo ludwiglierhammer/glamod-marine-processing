@@ -1,6 +1,6 @@
 """
 The CalcHums module contains a set of functions for calculating humidity
-variables. At present it can only cope with scalars, not arrays.
+variables. At present, it can only cope with scalars, not arrays.
 
 There are routines for:
 specific humidity from dew point temperature and temperature and pressure
@@ -38,41 +38,38 @@ import numpy as np
 from .auxiliary import isvalid
 
 
-def vap(td, t, p, roundit=True):
-    """
-    Calculate a vapour pressure scalar or array
+def vap(td: float, t: float, p: float, roundit: bool = True) -> float:
+    """Calculate a vapour pressure scalar or array
     from a scalar or array of dew point temperature and returns it.
     It requires a sea (station actually but sea level ok for marine data)
     level pressure value. This can be a scalar or an array, even if dewpoint
-    temperautre is an array (CHECK). To test whether to apply the ice or water
+    temperature is an array (CHECK). To test whether to apply the ice or water
     calculation a dry bulb temperature is needed. This allows calculation of a
     pseudo-wet bulb temperature (imprecise) first. If the wet bulb temperature is
     at or below 0 deg C then the ice calculation is used.
 
-    :param td: dew point temperature in degrees C (array or scalar)
-    :param t: dry bulb temperature in degrees C (array or scalar)
-    :param p: pressure at observation level in hPa (array or scalar - can be scalar even if others are arrays)
-    :param roundit: flag to tell function to round to one decimal place, default TRUE
-    :type td: float
-    :type t: float
-    :type p: float
-    :type roundit: boolean
-    :return: vapour pressure in hPa (array or scalar)
-    :rtype: float
+    Parameters
+    ----------
+    td: float
+        dew point temperature in degrees C (array or scalar)
+    t: float
+        dry bulb temperature in degrees C (array or scalar)
+    p: float
+        pressure at observation level in hPa (array or scalar - can be scalar even if others are arrays)
+    roundit: bool
+        flag to tell function to round to one decimal place, default TRUE
 
-    Inputs:
-    td = dew point temperature in degrees C (array or scalar)
-    p = pressure at observation level in hPa (array or scalar - can be scalar even if others are arrays)
-    t = dry bulb temperature in degrees C (array or scalar)
+    Returns
+    -------
+    float
+        vapour pressure in hPa (array or scalar)
 
-    Outputs:
-    e = vapour pressure in hPa (array or scalar)
-
-    Ref:
+    Notes
+    -----
     Buck 1981
     Buck, A. L.: New equations for computing vapor pressure and enhancement factor, J. Appl.
     Meteorol., 20, 1527?1532, 1981.
-    Jenson et al 1990
+    Jenson et al. 1990
     Jensen, M. E., Burman, R. D., and Allen, R. G. (Eds.): Evapotranspiration and
     Irrigation Water Requirements: ASCE Manuals and Reports on Engineering Practices No.
     70, American Society of Civil Engineers, New York, 360 pp., 1990.
@@ -107,31 +104,29 @@ def vap(td, t, p, roundit=True):
     return e
 
 
-def vap_from_sh(sh, p, roundit=True):
-    """
-    Calculate a vapour pressure scalar or array
+def vap_from_sh(sh: float, p: float, roundit: bool = True) -> float:
+    """Calculate a vapour pressure scalar or array
     from a scalar or array of specific humidity and pressure and returns it.
     It requires a sea (station actually but sea level ok for marine data)
     level pressure value. This can be a scalar or an array, even if specific humidity
     is an array (CHECK).
 
-    :param sh: specific humidity in g/kg (array or scalar)
-    :param p: pressure at observation level in hPa (array or scalar - can be scalar even if others are arrays)
-    :param roundit: flag to tell function to round to one decimal place, default TRUE
-    :type sh: float
-    :type p: float
-    :type roundit: boolean
-    :return: vapour pressure in hPa (array or scalar)
-    :rtype: float
+    Parameters
+    ----------
+    sh: float
+        specific humidity in g/kg (array or scalar)
+    p: float
+        pressure at observation level in hPa (array or scalar - can be scalar even if others are arrays)
+    roundit: bool
+        flag to tell function to round to one decimal place, default TRUE
 
-    Inputs:
-    sh = specific humidity in g/kg (array or scalar)
-    p = pressure at observation level in hPa (array or scalar - can be scalar even if others are arrays)
+    Returns
+    -------
+    float
+        e, vapour pressure in hPa (array or scalar)
 
-    Outputs:
-    e = vapour pressure in hPa (array or scalar)
-
-    Ref:
+    Notes
+    -----
     Peixoto & Oort, 1996, Ross & Elliott, 1996
     Peixoto, J. P. and Oort, A. H.: The climatology of relative humidity in the atmosphere, J.
     Climate, 9, 3443?3463, 1996.
@@ -139,7 +134,6 @@ def vap_from_sh(sh, p, roundit=True):
     TESTED!
     e = vap_from_sh(7.6,1013.)
     e = 12.3
-
     """
     e = ((sh / 1000.0) * p) / (0.622 + (0.378 * (sh / 1000.0)))
 
@@ -149,35 +143,31 @@ def vap_from_sh(sh, p, roundit=True):
     return e
 
 
-def sh(td, t, p, roundit=True):
-    """
-    Calculate a specific humidity scalar or array
+def sh(td: float, t: float, p: float, roundit: bool = True) -> float:
+    """Calculate a specific humidity scalar or array
     from a scalar or array of vapour pressure and returns it.
     It requires a sea (station actually but sea level ok for marine data)
     level pressure value. This can be a scalar or an array, even if vapour
     pressure is an array (CHECK).
 
-    :param td: dew point temperature in degrees C (array or scalar)
-    :param t: dry bulb temperature in degrees C (array or scalar)
-    :param p: pressure at observation level in hPa (array or scalar - can be scalar even if others are arrays)
-    :param roundit: flag to tell function to round to one decimal place, default TRUE
-    :type td: float
-    :type t: float
-    :type p: float
-    :type roundit: boolean, default is True
-    :return: specific humidity in g/kg (array or scalar)
-    :rtype: float
+    Parameters
+    ----------
+    td : float
+        dew point temperature in degrees C (array or scalar)
+    t : float
+        dry bulb temperature in degrees C (array or scalar)
+    p : float
+        pressure at observation level in hPa (array or scalar - can be scalar even if others are arrays)
+    roundit : bool
+        flag to tell function to round to one decimal place, default TRUE
 
-    Inputs:
-    td = dew point temperature in degrees C (array or scalar)
-    t = dry bulb temperature in degrees C (array or scalar)
-    p = pressure at observation level in hPa (array or scalar - can be scalar even if others are arrays)
-    GIVES: e = vapour pressure in hPa (array or scalar) - see vap()
+    Returns
+    -------
+    float
+        specific humidity in g/kg (array or scalar)
 
-    Outputs:
-    q = specific humidity in g/kg (array or scalar)
-
-    Ref:
+    Notes
+    -----
     Peixoto & Oort, 1996, Ross & Elliott, 1996
     Peixoto, J. P. and Oort, A. H.: The climatology of relative humidity in the atmosphere, J.
     Climate, 9, 3443?3463, 1996.
@@ -185,7 +175,6 @@ def sh(td, t, p, roundit=True):
     TESTED!
     sh = sh(10.,15.,1013.)
     sh = 7.6
-
     """
     if not isvalid(td) or not isvalid(t) or not isvalid(p):
         return np.nan
@@ -214,32 +203,29 @@ def sh(td, t, p, roundit=True):
     return q
 
 
-def sh_from_vap(e, p, roundit=True):
-    """
-    Calculate a specific humidity scalar or array
+def sh_from_vap(e: float, p: float, roundit: bool = True) -> float:
+    """Calculate a specific humidity scalar or array
     from a scalar or array of vapour pressure and returns it.
     It requires a sea (station actually but sea level ok for marine data)
     level pressure value. This can be a scalar or an array, even if vapour
     pressure is an array (CHECK).
 
-    :param e: vapour pressure in hPa (array or scalar)
-    :param p: pressure at observation level in hPa (array or scalar - can be scalar even if others are arrays)
-    :param roundit: flag to tell function to round to one decimal place, default TRUE
-    :type e: float
-    :type p: float
-    :type roundit: boolean
-    :return: specific humidity in g/kg (array or scalar)
-    :rtype: float
+    Parameters
+    ----------
+    e : float
+        vapour pressure in hPa (array or scalar)
+    p : float
+        pressure at observation level in hPa (array or scalar - can be scalar even if others are arrays)
+    roundit : bool
+        flag to tell function to round to one decimal place, default TRUE
 
-    Inputs:
-    e = vapour pressure in hPa (array or scalar)
-    p = pressure at observation level in hPa (array or scalar - can be scalar even if others are arrays)
-    GIVES: e = vapour pressure in hPa (array or scalar) - see vap()
+    Returns
+    -------
+    float
+        specific humidity in g/kg (array or scalar)
 
-    Outputs:
-    q = specific humidity in g/kg (array or scalar)
-
-    Ref:
+    Notes
+    -----
     Peixoto & Oort, 1996, Ross & Elliott, 1996
     Peixoto, J. P. and Oort, A. H.: The climatology of relative humidity in the atmosphere, J.
     Climate, 9, 3443?3463, 1996.
@@ -247,7 +233,6 @@ def sh_from_vap(e, p, roundit=True):
     TESTED!
     sh = sh(10.,15.,1013.)
     sh = 7.6
-
     """
     q = 1000.0 * ((0.622 * e) / (p - ((1 - 0.622) * e)))
 
@@ -257,9 +242,8 @@ def sh_from_vap(e, p, roundit=True):
     return q
 
 
-def rh(td, t, p, roundit=True):
-    """
-    Calculate a relative humidity scalar or array
+def rh(td: float, t: float, p: float, roundit: bool = True) -> float:
+    """Calculate a relative humidity scalar or array
     from a scalar or array of vapour pressure and temperature and returns
     it. It calculates the saturated vapour pressure from t.
     It requires a sea (station actually but sea level ok for marine data)
@@ -270,33 +254,29 @@ def rh(td, t, p, roundit=True):
     calculation of a pseudo-wet bulb temperature (imprecise) first. If the
     wet bulb temperature is at or below 0 deg C then the ice calculation is used.
 
-    :param td: dew point temperature in degrees C (array or scalar)
-    :param t: dry bulb temperature in degrees C (array or scalar)
-    :param p: pressure at observation level in hPa (array or scalar - can be scalar even if others are arrays)
-    :param roundit: flag to tell function to round to one decimal place, default TRUE
-    :type td: float
-    :type t: float
-    :type p: float
-    :type roundit: boolean
-    :return: relative humidity in %rh (array or scalar)
-    :rtype: float
+    Parameters
+    ----------
+    td : float
+        dew point temperature in degrees C (array or scalar)
+    t : float
+        dry bulb temperature in degrees C (array or scalar)
+    p : float
+        pressure at observation level in hPa (array or scalar - can be scalar even if others are arrays)
+    roundit : bool
+        flag to tell function to round to one decimal place, default TRUE
 
-    Inputs:
-    td = dew point temperature in degrees C (array or scalar)
-    p = pressure at observation level in hPa (array or scalar - can be scalar even if others are arrays)
-    t = dry bulb temperature in degrees C (array or scalar)
-    GIVES: e = vapour pressure in hPa (array or scalar)
-    GIVES: es = saturated vapour pressure in hPa (array or scalar)
+    Returns
+    -------
+    float
+        relative humidity in %rh (array or scalar)
 
-    Outputs:
-    r = relative humidity in %rh (array or scalar)
-
+    Notes
+    -----
     Ref:
 
     TESTED!
     rh = rh(10.,15.,1013.)
     rh = 72.0
-
     """
     if not isvalid(td) or not isvalid(t) or not isvalid(p):
         return np.nan
@@ -325,10 +305,12 @@ def rh(td, t, p, roundit=True):
     es = 6.1121 * f * np.exp(((18.729 - (t / 227.3)) * t) / (257.87 + t))
 
     a = 0.000066 * p
-    b = (409.8 * es) / ((t + 237.3) ** 2)  # t here rather than td because for es, t==td
+    b = (409.8 * es) / (
+        (t + 237.3) ** 2
+    )  # "t" here rather than "td" because for es, t==td
     w = ((a * t) + (b * t)) / (
         a + b
-    )  # second t is t here rather than td because for ex, t==td
+    )  # second "t" is "t" here rather than "td" because for ex, t==td
 
     # Now test for whether pseudo-wetbulb is above or below/equal to zero
     # to establish whether to calculate e with respect to ice or water
@@ -345,9 +327,8 @@ def rh(td, t, p, roundit=True):
     return r
 
 
-def wb(td, t, p, roundit=True):
-    """
-    Calculate a wet bulb temperature scalar or array
+def wb(td: float, t: float, p: float, roundit: bool = True) -> float:
+    """Calculate a wet bulb temperature scalar or array
     from a scalar or array of vapour pressure and temperature and
     dew point temperature and returns it.
     It requires a sea (station actually but sea level ok for marine data)
@@ -357,28 +338,26 @@ def wb(td, t, p, roundit=True):
     calculation of a pseudo-wet bulb temperature (imprecise) first. If the
     wet bulb temperature is at or below 0 deg C then the ice calculation is used.
 
-    :param td: dew point temperature in degrees C (array or scalar)
-    :param t: dry bulb temperature in degrees C (array or scalar)
-    :param p: pressure at observation level in hPa (array or scalar - can be scalar even if others are arrays)
-    :param roundit: flag to tell function to round to one decimal place, default TRUE
-    :type td: float
-    :type t: float
-    :type p: float
-    :type roundit:
-    :return: wet bulb temperature in degrees C (array or scalar)
-    :rtype: float
+    Parameters
+    ----------
+    td : float
+        dew point temperature in degrees C (array or scalar)
+    t : float
+        dry bulb temperature in degrees C (array or scalar)
+    p : float
+        pressure at observation level in hPa (array or scalar - can be scalar even if others are arrays)
+    roundit : bool
+        flag to tell function to round to one decimal place, default TRUE
 
-    Inputs:
-    td = dew point temperature in degrees C (array or scalar)
-    t = dry bulb temperature in degrees C (array or scalar)
-    p = pressure at observation level in hPa (array or scalar - can be scalar even if others are arrays)
-    GIVES: e = vapour pressure in hPa (array or scalar)
+    Returns
+    -------
+    float
+        wet bulb temperature in degrees C (array or scalar)
 
-    Outputs:
-    w = wet bulb temperature in degrees C (array or scalar)
-
+    Notes
+    -----
     Ref:
-    Jenson et al 1990
+    Jenson et al. 1990
     Jensen, M. E., Burman, R. D., and Allen, R. G. (Eds.): Evapotranspiration and
     Irrigation Water Requirements: ASCE Manuals and Reports on Engineering Practices No.
     70, American Society of Civil Engineers, New York, 360 pp., 1990.
@@ -386,7 +365,6 @@ def wb(td, t, p, roundit=True):
     TESTED!
     wb = wb(10.,15.,1013)
     wb = 12.2
-
     """
     if not isvalid(td) or not isvalid(t) or not isvalid(p):
         return np.nan
@@ -418,33 +396,31 @@ def wb(td, t, p, roundit=True):
     return w
 
 
-def dpd(td, t, roundit=True):
-    """
-    Calculate a dew point depression scalar or array
+def dpd(td: float, t: float, roundit: bool = True) -> float:
+    """Calculate a dew point depression scalar or array
     from a scalar or array of temperature and dew point temperature and returns it.
 
-    :param td: dew point temperature in degrees C (array or scalar)
-    :param t: dry bulb temperature in degrees C (array or scalar)
-    :param roundit: flag to tell function to round to one decimal place, default TRUE
-    :type td: float
-    :type t: float
-    :type roundit: boolean
-    :return: dew point depression in degrees C (array or scalar)
-    :rtype: float
+    Parameters
+    ----------
+    td : float
+        dew point temperature in degrees C (array or scalar)
+    t : float
+        dry bulb temperature in degrees C (array or scalar)
+    roundit : bool
+        flag to tell function to round to one decimal place, default TRUE
 
-    Inputs:
-    td = dew point temperature in degrees C (array or scalar)
-    t = dry bulb temperature in degrees C (array or scalar)
+    Returns
+    -------
+    float
+        dew point depression in degrees C (array or scalar)
 
-    Outputs:
-    dp = dew point depression in degrees C (array or scalar)
-
+    Notes
+    -----
     Ref:
 
     TESTED!
     dpd = dpd(10..,15.)
     dpd = 5.0
-
     """
     if not isvalid(td) or not isvalid(t):
         return np.nan
@@ -457,37 +433,34 @@ def dpd(td, t, roundit=True):
     return dp
 
 
-def td_from_vap(e, p, t, roundit=True):
-    """
-    Calculate a dew point depression scalar or array
+def td_from_vap(e: float, p: float, t: float, roundit: bool = True) -> float:
+    """Calculate a dew point depression scalar or array
     from a scalar or array of vapour pressure and pressure and returns it.
     It also requires temperature to check whether the wet bulb temperature
     is <= 0.0 - if so the ice bulb calculation is used.
 
-    :param e: vapour pressure in hPa (array or scalar)
-    :param p: pressure at observation level in hPa (array or scalar - can be scalar even if others are arrays)
-    :param t: dry bulb temperature in degrees C (array or scalar)
-    :param roundit: flag to tell function to round to one decimal place, default TRUE
-    :type e: float
-    :type p: float
-    :type t: float
-    :type roundit:
-    :return: dew point depression in degrees C (array or scalar)
-    :rtype: float
+    Parameters
+    ----------
+    e : float
+        vapour pressure in hPa (array or scalar)
+    p : float
+        pressure at observation level in hPa (array or scalar - can be scalar even if others are arrays)
+    t : float
+        dry bulb temperature in degrees C (array or scalar)
+    roundit : bool
+        flag to tell function to round to one decimal place, default TRUE
 
-    Inputs:
-    e = vapour pressure in hPa (array or scalar)
-    t = dry bulb temperature in degrees C (array or scalar)
-    p = pressure at observation level in hPa (array or scalar - can be scalar even if others are arrays)
+    Returns
+    -------
+    float
+        dew point depression in degrees C (array or scalar)
 
-    Outputs:
-    dp = dew point depression in degrees C (array or scalar)
-
-    Ref:
+    Notes
+    -----
     Buck 1981
     Buck, A. L.: New equations for computing vapor pressure and enhancement factor, J. Appl.
     Meteorol., 20, 1527?1532, 1981.
-    Jenson et al 1990
+    Jenson et al. 1990
     Jensen, M. E., Burman, R. D., and Allen, R. G. (Eds.): Evapotranspiration and
     Irrigation Water Requirements: ASCE Manuals and Reports on Engineering Practices No.
     70, American Society of Civil Engineers, New York, 360 pp., 1990.

@@ -3,13 +3,13 @@
 from __future__ import annotations
 
 import inspect
-from typing import Literal
+from typing import Callable, Literal
 
 import pandas as pd
 
 from .auxiliary import failed, passed, untested
 from .external_clim import get_climatological_value  # noqa
-from .next_level_qc import (  # noqa
+from .qc_individual_reports import (  # noqa
     do_climatology_check,
     do_date_check,
     do_day_check,
@@ -24,29 +24,107 @@ from .next_level_qc import (  # noqa
 )
 
 
-def _get_function(name):
+def _get_function(name: str) -> Callable:
+    """Returns the function of a given name or raises a NameError
+
+    Parameters
+    ----------
+    name : str
+        Name of the function to be returned
+
+    Returns
+    -------
+    Callable
+
+    Raises
+    ------
+    NameError
+        If function of that name does not exist
+    """
     func = globals().get(name)
     if not callable(func):
         raise NameError(f"Function '{name}' is not defined.")
     return func
 
 
-def _is_func_param(func, param):
+def _is_func_param(func: Callable, param: str) -> bool:
+    """Returns True if param is the name of a parameter of function func.
+
+    Parameters
+    ----------
+    func: Callable
+        Function whose parameters are to be inspected.
+    param: str
+        Name of the parameter.
+
+    Returns
+    -------
+    bool
+        Returns True if param is one of the functions parameters or the function uses ``**kwargs``.
+    """
     sig = inspect.signature(func)
     if "kwargs" in sig.parameters:
         return True
     return param in sig.parameters
 
 
-def _is_in_data(name, data):
+def _is_in_data(name: str, data: pd.Series | pd.DataFrame) -> bool:
+    """Return True if named column or variable, name, is in data
+
+    Parameters
+    ----------
+    name: str
+        Name of variable.
+    data: pd.Series or pd.DataFrame
+        Pandas Series or DataFrame to be tested.
+
+    Returns
+    -------
+    bool
+        Returns True if name is one of the columns or variables in data, False otherwise
+
+    Raises
+    ------
+    TypeError
+        If data type is not pd.Series or pd.DataFrame
+    """
     if isinstance(data, pd.Series):
         return name in data
-    elif isinstance(data, pd.DataFrame):
+    if isinstance(data, pd.DataFrame):
         return name in data.columns
     raise TypeError(f"Unsupported data type: {type(data)}")
 
 
-def _get_requests_from_params(params, func, data):
+def _get_requests_from_params(
+    params: dict | None, func: Callable, data: pd.Series | pd.DataFrame
+) -> dict:
+    """Given a dictionary of key value pairs where the keys are parameters in the function, func, and the values
+    are columns or variables in data, create a new dictionary in which the keys are the parameter names (as in the
+    original dictionary) and the values are the numbers extracted from data.
+
+    Parameters
+    ----------
+    params : dict or None
+        Dictionary. Keys are parameter names for the function func, and values are the names of columns or variables
+        in data
+    func : Callable
+        Function for which the parameters will be checked
+    data : pd.Series or pd.DataFrame
+        DataSeries or DataFrame containing the data to be extracted.
+
+    Returns
+    -------
+    dict
+        Dictionary containing the key value pairs where the keys are as in the input dictionary and the values are
+        extracted from the corresponding columns of data.
+
+    Raises
+    ------
+    ValueError
+        If one of the dictionary keys from params is not a valid argument in func.
+    NameError
+        If one of the dictionary values from params is not a column or variable in data.
+    """
     requests = {}
     if params is None:
         return requests
@@ -63,7 +141,23 @@ def _get_requests_from_params(params, func, data):
     return requests
 
 
-def _get_preprocessed_args(arguments, preprocessed):
+def _get_preprocessed_args(arguments: dict, preprocessed: dict) -> dict:
+    """Given a dictionary of key value pairs, if one of the values is equal to __preprocessed__ then replace
+    the value with the value corresponding to that key in preprocessed.
+
+    Parameters
+    ----------
+    arguments: dict
+        Dictionary of key value pairs where the keys are variable names and the values are strings.
+    preprocessed: dict
+        Dictionary of key value pairs where the keys correspond to variable names.
+
+    Returns
+    -------
+    dict
+        Dictionary of key value pairs where values in arguments that were set to __preprocessed__ were replaced by
+        values from the dictionary preprocessed.
+    """
     args = {}
     for k, v in arguments.items():
         if v == "__preprocessed__":
@@ -77,7 +171,7 @@ def do_multiple_row_check(
     qc_dict: dict | None = None,
     preproc_dict: dict | None = None,
     return_method: Literal["all", "passed", "failed"] = "all",
-) -> pd.Series:
+) -> pd.Series | pd.DataFrame:
     """Basic row-by-row QC by using multiple QC functions.
 
     Parameters
@@ -204,16 +298,16 @@ def do_multiple_row_check(
         }
 
     """
-    if return_method not in ["all", "passed", "failed"]:
-        raise ValueError(
-            f"'return_method' has to be one of ['all', 'passed', 'failed']: {return_method}"
-        )
-
     if qc_dict is None:
         qc_dict = {}
 
     if preproc_dict is None:
         preproc_dict = {}
+
+    if return_method not in ["all", "passed", "failed"]:
+        raise ValueError(
+            f"'return_method' has to be one of ['all', 'passed', 'failed']: {return_method}"
+        )
 
     # Firstly, check if all functions are callable and all requested input variables are available!
     preprocessed = {}

@@ -69,7 +69,6 @@ def inspect_climatology(
             climatology = arguments[clim_key]
             if isinstance(climatology, Climatology):
                 get_value_sig = inspect.signature(climatology.get_value)
-                required_keys = {}
                 required_keys = {
                     name
                     for name, param in get_value_sig.parameters.items()
@@ -247,9 +246,10 @@ class Climatology:
 
         Parameters
         ----------
-        target_units: str
+        target_units : str
             Target units to which units must conform.
-        source_units, str, optional
+
+        source_units : str, optional
             Source units if not specified in :py:class:`Climatology`.
 
         Note
@@ -270,7 +270,7 @@ class Climatology:
         date: datetime | None | Sequence[datetime | None] | np.ndarray = None,
         month: int | None | Sequence[int | None] | np.ndarray = None,
         day: int | None | Sequence[int | None] | np.ndarray = None,
-    ) -> ndarray:
+    ) -> ndarray | pd.Series:
         """Get the value from a climatology at the give position and time.
 
         Parameters
@@ -288,17 +288,17 @@ class Climatology:
 
         Returns
         -------
-        ndarray
+        ndarray or pd.Series
             Climatology value at specified location and time.
 
         Note
         ----
         Use only exact matches for selecting time and nearest valid index value for selecting location.
         """
-        lat_arr = np.atleast_1d(lat)
-        lon_arr = np.atleast_1d(lon)
-        month_arr = np.atleast_1d(month)
-        day_arr = np.atleast_1d(day)
+        lat_arr = np.atleast_1d(lat)  # type: np.ndarray
+        lon_arr = np.atleast_1d(lon)  # type: np.ndarray
+        month_arr = np.atleast_1d(month)  # type: np.ndarray
+        day_arr = np.atleast_1d(day)  # type: np.ndarray
         valid_indices = isvalid(lat) & isvalid(lon) & isvalid(month) & isvalid(day)
         result = np.full(lat_arr.shape, None, dtype=float)  # type: np.ndarray
 

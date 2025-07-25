@@ -16,20 +16,17 @@ from glamod_marine_processing.qc_suite.modules.location_control import (
 )
 
 
-def test_0_is_89point5():
-    assert yindex_to_lat(0, res=1) == 89.5
-
-
-def test_179_is_minus89point5():
-    assert yindex_to_lat(179, res=1) == -89.5
-
-
-def test_35_is_minus87point5_atresof5():
-    assert yindex_to_lat(35, res=5) == -87.5
-
-
-def test_0_is_87point5_atresof5():
-    assert yindex_to_lat(0, res=5) == 87.5
+@pytest.mark.parametrize(
+    "yindex, resolution, expected",
+    [
+        (0, 1, 89.5),
+        (179, 1, -89.5),
+        (35, 5, -87.5),
+        (0, 5, 87.5),
+    ],
+)
+def test_0_is_89point5(yindex, resolution, expected):
+    assert yindex_to_lat(yindex, res=resolution) == expected
 
 
 @pytest.mark.parametrize(

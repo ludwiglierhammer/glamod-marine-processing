@@ -12,7 +12,7 @@ from glamod_marine_processing.qc_suite.modules.auxiliary import (
     passed,
     untestable,
 )
-from glamod_marine_processing.qc_suite.modules.next_level_qc import (
+from glamod_marine_processing.qc_suite.modules.qc_individual_reports import (
     do_climatology_check,
     do_date_check,
     do_day_check,

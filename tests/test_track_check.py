@@ -1,29 +1,22 @@
 from __future__ import annotations
 
-import math
-
 import numpy as np
 import pytest
 
-import glamod_marine_processing.qc_suite.modules.Extended_IMMA as ex
 import glamod_marine_processing.qc_suite.modules.spherical_geometry as sg
 from glamod_marine_processing.qc_suite.modules.auxiliary import convert_to
-from glamod_marine_processing.qc_suite.modules.IMMA1 import IMMA
-from glamod_marine_processing.qc_suite.modules.track_check import (
+from glamod_marine_processing.qc_suite.modules.track_check_utils import (
     check_distance_from_estimate,
     direction_continuity,
-    distr1,
-    distr2,
     increment_position,
-    midpt,
-    modesp,
+    modal_speed,
     set_speed_limits,
     speed_continuity,
 )
 
 
 def test_ship_heading_north_at_60knots_goes1degree_in_1hour():
-    """A ship travelling north at 60 knots will go 1 degree in 1 hours"""
+    """A ship travelling north at 60 knots will go 1 degree in 1 hour"""
     for lat in range(-90, 90):
         alat1 = lat
         alon1 = lat
@@ -75,17 +68,17 @@ def test_ship_goes_southwest():
 
 
 def test_noinput():
-    m = modesp([])
+    m = modal_speed([])
     assert np.isnan(m)
 
 
 def test_one_input():
-    m = modesp([17.0])
+    m = modal_speed([17.0])
     assert np.isnan(m)
 
 
 def test_zero_index_input():
-    m = modesp([-17.0, -17.0])
+    m = modal_speed([-17.0, -17.0])
     assert m == convert_to(8.5, "knots", "km/h")
 
 
@@ -98,14 +91,14 @@ def test_zero_index_input():
     ],
 )
 def test_modesp_single_speed_input_over8point5(base_speed, expected):
-    speeds = [convert_to(base_speed, "knots", "km/h") for i in range(8)]
-    m = modesp(speeds)
+    speeds = [convert_to(base_speed, "knots", "km/h") for _ in range(8)]
+    m = modal_speed(speeds)
     assert m == convert_to(expected, "knots", "km/h")
 
 
 def test_one_of_each_speed_input_min_under8point5():
     speeds = [convert_to(i, "knots", "km/h") for i in range(1, 20)]
-    m = modesp(speeds)
+    m = modal_speed(speeds)
     assert m == convert_to(8.5, "knots", "km/h")
 
 
@@ -125,130 +118,6 @@ def test_set_speed_limits(amode, expected):
     expected = convert_to(expected, "knots", "km/h")
     result = set_speed_limits(amode)
     np.allclose(np.array(result), np.array(expected))
-
-
-# rec = IMMA()
-# v = {'ID':'SHIP1   ', 'YR':2001, 'MO':1, 'DY':1, 'HR':hour, 'LAT': hour*speed1/60., 'LON':0.0, 'DS':8, 'VS':4 }
-# for key in v: rec.data[key] = v[key]
-# .trip1.add_report(ex.MarineReport(rec))
-# shipid, lat, lon, sst, mat, year, month, day, hour, icoads_ds, icoads_vs, uid
-
-
-@pytest.fixture()
-def trip1():
-    _trip1 = ex.Voyage()
-    speed1 = convert_to(18.0, "knots", "km/h")
-    for hour in range(0, 24):
-        rec = IMMA()
-        v = {
-            "ID": "SHIP1    ",
-            "YR": 2001,
-            "MO": 1,
-            "DY": 1,
-            "HR": hour,
-            "LAT": hour * speed1 * 360.0 / (2 * np.pi * sg.earths_radius),
-            "LON": 0.0,
-            "DS": 8,
-            "VS": 4,
-        }
-        for key in v:
-            rec.data[key] = v[key]
-        _trip1.add_report(ex.MarineReport(rec))
-
-    return _trip1
-
-
-@pytest.fixture()
-def trip2():
-    _trip2 = ex.Voyage()
-    speed1 = convert_to(18.0, "knots", "km/h")
-    for hour in range(0, 3):
-        rec = IMMA()
-        v = {
-            "ID": "SHIP1    ",
-            "YR": 2001,
-            "MO": 1,
-            "DY": 1,
-            "HR": hour,
-            "LAT": hour * speed1 * 360.0 / (2 * np.pi * sg.earths_radius),
-            "LON": 0.0,
-            "DS": 8,
-            "VS": 4,
-        }
-        for key in v:
-            rec.data[key] = v[key]
-        _trip2.add_report(ex.MarineReport(rec))
-    _trip2.reps[1].setvar("LON", 1.0)
-
-    return _trip2
-
-
-def test_first_entry_missing(trip1):
-    difference_from_estimated_location = distr1(trip1)
-    assert difference_from_estimated_location[0] is None
-
-
-def test_ship_is_at_computed_location(trip1):
-    difference_from_estimated_location = distr1(trip1)
-    for i, diff in enumerate(difference_from_estimated_location):
-        if 0 < i < len(difference_from_estimated_location) - 1:
-            assert pytest.approx(diff, 1) == 0
-
-
-def test_misplaced_ob_out_by_1degree_times_coslat(trip2):
-    difference_from_estimated_location = distr1(trip2)
-    expected = (
-        (2 * np.pi * sg.earths_radius)
-        * np.cos(trip2.reps[1].lat() * np.pi / 180.0)
-        / 360
-    )
-    assert pytest.approx(difference_from_estimated_location[1], 0.00001) == expected
-
-
-def test_last_entry_missing_1(trip1):
-    difference_from_estimated_location = distr2(trip1)
-    assert difference_from_estimated_location[-1] is None
-
-
-def test_ship_is_at_computed_location_1(trip1):
-    difference_from_estimated_location = distr2(trip1)
-    for i, diff in enumerate(difference_from_estimated_location):
-        if 0 < i < len(difference_from_estimated_location) - 1:
-            assert pytest.approx(diff, 1) == 0
-
-
-def test_misplaced_ob_out_by_1degree_times_coslat_1(trip2):
-    difference_from_estimated_location = distr2(trip2)
-    expected = (
-        (2 * np.pi * sg.earths_radius)
-        * np.cos(trip2.reps[1].lat() * np.pi / 180.0)
-        / 360.0
-    )
-    assert pytest.approx(difference_from_estimated_location[1], 0.00001) == expected
-
-
-def test_first_and_last_are_missing_2(trip1):
-    midpoint_discrepancies = midpt(trip1)
-    assert midpoint_discrepancies[0] is None
-    assert midpoint_discrepancies[-1] is None
-
-
-def test_midpt_1_deg_error_out_by_60coslat_2(trip2):
-    midpoint_discrepancies = midpt(trip2)
-    assert (
-        pytest.approx(midpoint_discrepancies[1], 0.00001)
-        == (2 * np.pi * sg.earths_radius)
-        * math.cos(trip2.reps[1].lat() * np.pi / 180)
-        / 360.0
-    )
-
-
-def test_midpt_at_computed_location_2(trip1):
-    midpoint_discrepancies = midpt(trip1)
-    for i, pt in enumerate(midpoint_discrepancies):
-        if 0 < i < len(midpoint_discrepancies) - 1:
-            assert pt is not None
-            assert pytest.approx(pt, 1) == 0
 
 
 @pytest.mark.parametrize("angle", [0, 45, 90, 135, 180, 225, 270, 315, 360])
