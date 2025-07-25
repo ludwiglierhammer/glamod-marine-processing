@@ -6,7 +6,6 @@ import math
 
 import numpy as np
 
-from .auxiliary import isvalid
 from .time_control import (
     convert_time_in_hours,
     leap_year_correction,
@@ -15,37 +14,6 @@ from .time_control import (
 
 # Conversion factor between degrees and radians
 degrad = np.pi / 180.0
-
-
-def angle_diff(angle1: float, angle2: float) -> float:
-    """
-    Calculate the angular distance on a circle between two points given in radians
-
-    Parameters
-    ----------
-    angle1 : float
-        Angle of first point in radians
-    angle2 : float
-        Angle of second point in radians
-
-    Returns
-    -------
-    float
-        Angle between the two input points in radians.
-
-    Raises
-    ------
-    ValueError
-        If either angle1 or angle2 is numerically invalid or None.
-    """
-    if not isvalid(angle1) or not isvalid(angle2):
-        raise ValueError("One or more angles is None")
-
-    # calculate angle between two angles
-    diff = abs(angle1 - angle2)
-    if diff > np.pi:
-        diff = 2.0 * np.pi - diff
-    return diff
 
 
 def sun_position(time: float) -> float:
