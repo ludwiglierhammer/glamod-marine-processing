@@ -138,21 +138,13 @@ from _utilities import (
 )
 from cdm_reader_mapper.cdm_mapper.tables.tables import get_cdm_atts
 
+from glamod_marine_processing.qc_suite.modules import (
+    next_level_deck_qc,
+    next_level_qc,
+    next_level_track_check_qc,
+)
 from glamod_marine_processing.qc_suite.modules.multiple_row_checks import (
     do_multiple_row_check,
-)
-from glamod_marine_processing.qc_suite.modules.next_elvel_deck_qc import (
-    do_bayesian_buddy_check,
-    do_mds_buddy_check,
-)
-from glamod_marine_processing.qc_suite.modules.next_level_track_check_qc import (
-    do_few_check,
-    do_iquam_track_check,
-    do_spike_check,
-    do_track_check,
-    find_multiple_rounded_values,
-    find_repeated_values,
-    find_saturated_runs,
 )
 
 reload(logging)  # This is to override potential previous config of logging
@@ -385,6 +377,7 @@ report_quality = compare_quality_checks(report_time_quality)
 
 # 1.2. Observations
 quality_flags = {}
+# 1.2.1. Do observation check
 for obs_table in obs_tables:
     data = data_dict[obs_table].copy()
     # Select observation quality_flag
@@ -400,7 +393,6 @@ for obs_table in obs_tables:
     data_qc = data_qc[~report_quality.isin("1")]
     idx_qc = data_qc.index
 
-    # Do observation check
     preproc_dict = params.qc_settings.get("preprocessing", {}).get(obs_table, {})
     qc_dict = params.qc_settings.get("observations_check", {}).get(obs_table, {})
     obs_qc = do_multiple_row_check(
@@ -415,24 +407,102 @@ for obs_table in obs_tables:
     quality_flag.loc[idx_qc] = obs_qc
     quality_flags[obs_table] = compare_quality_checks(quality_flag)
 
+# 1.2.2. Do combined observation check
+qc_dict = params.qc_settings.get("observations_check", {}).get("combined", {})
+for qc_name in qc_dict.keys():
+    func = getattr(next_level_qc, qc_dict[qc_name]["func"])
+    tables = qc_dict[qc_name]["tables"]
+    names = qc_dict[qc_name]["names"]
+    inputs = {}
+    for ivar, table in tables.items():
+        data = data_dict[table].copy()
+        column = names[ivar]
+        inputs[ivar] = data[column]
+    qc_flag = func(**inputs)
+    idx_failed = qc_flag[qc_flag.isin("1")].index
+    for table in tables.values():
+        quality_flags[table].loc[idx_failed] = qc_flag.loc[idx_failed]
+
 # 2. Track check
 # 2.1. Header
 # Deselect rows on blacklist
 data = header_df.drop(index=idx_blck)
-# Deselect rows containing generic ids
-data = data.drop(index=gnrc_idx)
 # Deselect already failed report_qualities
 data = data[~report_quality.isin(["1"])]
+# Deselect rows containing generic ids
+data = data.drop(index=gnrc_idx)
 
 qc_dict = params.qc_settings.get("track_check", {}).get("header", {})
 for qc_name in qc_dict.keys():
-    func = globals().get(qc_dict[qc_name]["func"])
+    func = getattr(next_level_track_check_qc, qc_dict[qc_name]["func"])
     names = qc_dict[qc_name].get("names", {})
     inputs = {k: data[v] for k, v in names}
     kwargs = qc_dict[qc_name].get("arguments", {})
     track_qc = func(**inputs, **kwargs)
     idx_failed = track_qc[track_qc.isin("1")].index
     report_quality.loc[idx_failed] = track_qc.loc[idx_failed]
+
+# 2.2. Observations
+# 2.2.1. Do observation track check
+qc_dict = params.qc_settings.get("track_check", {}).get("observations", {})
+for obs_table in obs_tables:
+    quality_flag = quality_flags[obs_table]
+    data = data_dict[obs_table].copy()
+    # Deselect already failed quality_flags
+    data = data[~quality_flag.isin("1")]
+    # Deselect rows containing generic ids
+    data = data.drop(index=gnrc_idx)
+    # Deselect rows containing generic ids
+    data = data.drop(index=gnrc_idx)
+
+    for qc_name in qc_dict.keys():
+        func = getattr(next_level_track_check_qc, qc_dict[qc_name]["func"])
+        names = qc_dict[qc_name].get("names", {})
+        inputs = {k: data[v] for k, v in names}
+        kwargs = qc_dict[qc_name].get("arguments", {})
+        qc_flag = func(**inputs, **kwargs)
+        idx_failed = qc_flag[qc_flag.isin("1")].index
+        quality_flag.loc[idx_failed] = qc_flag.loc[idx_failed]
+    quality_flags[obs_table] = quality_flag
+
+# 2.2.2. Do combined observations track check
+qc_dict = params.qc_settings.get("track_check", {}).get("combined", {})
+for qc_name in qc_dict.keys():
+    func = getattr(next_level_qc, qc_dict[qc_name]["func"])
+    tables = qc_dict[qc_name]["tables"]
+    names = qc_dict[qc_name]["names"]
+    kwargs = qc_dict[qc_name]["arguments"]
+    inputs = {}
+    for ivar, table in tables.items():
+        data = data_dict[table].copy()
+        column = names[ivar]
+        inputs[ivar] = data[column]
+    qc_flag = func(**inputs)
+    idx_failed = qc_flag[qc_flag.isin("1")].index
+    for table in tables.values():
+        quality_flags[table].loc[idx_failed] = qc_flag.loc[idx_failed]
+
+# 3. Buddy check
+qc_dict = params.qc_settings.get("buddy_check", {}).get("observations", {})
+for obs_table in obs_tables:
+    quality_flag = quality_flags[obs_table]
+    data = data_dict[obs_table].copy()
+    # Deselect already failed quality_flags
+    data = data[~quality_flag.isin("1")]
+    # Deselect rows containing generic ids
+    data = data.drop(index=gnrc_idx)
+    # Deselect rows containing generic ids
+    data = data.drop(index=gnrc_idx)
+    for qc_name in qc_dict.keys():
+        func = getattr(next_level_track_check_qc, qc_dict[qc_name]["func"])
+        names = qc_dict[qc_name].get("names", {})
+        inputs = {k: data[v] for k, v in names}
+        kwargs = qc_dict[qc_name].get("arguments", {})
+        qc_flag = func(**inputs, **kwargs)
+        idx_failed = qc_flag[qc_flag.isin("1")].index
+        quality_flag.loc[idx_failed] = qc_flag.loc[idx_failed]
+    quality_flags[obs_table] = quality_flag
+
 
 # ?. PROCESS QC FLAGS ---------------------------------------------------------
 # Replace QC flags in C-RAID data; other approach needed!!!
