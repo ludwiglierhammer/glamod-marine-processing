@@ -288,7 +288,7 @@ class Climatology:
 
         Returns
         -------
-        ndarray or ps.Series
+        ndarray or pd.Series
             Climatology value at specified location and time.
 
         Note
