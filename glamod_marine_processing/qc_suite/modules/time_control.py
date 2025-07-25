@@ -583,8 +583,6 @@ def time_difference(
     return 24.0 * (last_day - first_day)
 
 
-
-
 def get_month_lengths(year: int) -> list[int]:
     """Return a list holding the lengths of the months in a given year
 
