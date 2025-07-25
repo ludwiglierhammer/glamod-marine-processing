@@ -137,9 +137,9 @@ from _utilities import (
 from cdm_reader_mapper.cdm_mapper.tables.tables import get_cdm_atts
 
 from glamod_marine_processing.qc_suite.modules import (
-    next_level_deck_qc,
-    next_level_qc,
-    next_level_track_check_qc,
+    qc_grouped_reports,
+    qc_individual_reports,
+    qc_sequential_reports,
 )
 from glamod_marine_processing.qc_suite.modules.multiple_row_checks import (
     do_multiple_row_check,
@@ -331,7 +331,7 @@ for obs_table in obs_tables:
 # 1.2.2. Do combined observation check
 qc_dict = params.qc_settings.get("observations_check", {}).get("combined", {})
 for qc_name in qc_dict.keys():
-    func = getattr(next_level_qc, qc_dict[qc_name]["func"])
+    func = getattr(qc_individual_reports, qc_dict[qc_name]["func"])
     tables = qc_dict[qc_name]["tables"]
     names = qc_dict[qc_name]["names"]
     inputs = {}
@@ -355,7 +355,7 @@ data = data.drop(index=idx_gnrc)
 
 qc_dict = params.qc_settings.get("track_check", {}).get("header", {})
 for qc_name in qc_dict.keys():
-    func = getattr(next_level_track_check_qc, qc_dict[qc_name]["func"])
+    func = getattr(qc_sequential_reports, qc_dict[qc_name]["func"])
     names = qc_dict[qc_name].get("names", {})
     inputs = {k: data[v] for k, v in names}
     kwargs = qc_dict[qc_name].get("arguments", {})
@@ -377,7 +377,7 @@ for obs_table in obs_tables:
     data = data.drop(index=idx_gnrc)
 
     for qc_name in qc_dict.keys():
-        func = getattr(next_level_track_check_qc, qc_dict[qc_name]["func"])
+        func = getattr(qc_sequential_reports, qc_dict[qc_name]["func"])
         names = qc_dict[qc_name].get("names", {})
         inputs = {k: data[v] for k, v in names}
         kwargs = qc_dict[qc_name].get("arguments", {})
@@ -389,7 +389,7 @@ for obs_table in obs_tables:
 # 2.2.2. Do combined observations track check
 qc_dict = params.qc_settings.get("track_check", {}).get("combined", {})
 for qc_name in qc_dict.keys():
-    func = getattr(next_level_qc, qc_dict[qc_name]["func"])
+    func = getattr(qc_sequential_reports, qc_dict[qc_name]["func"])
     tables = qc_dict[qc_name]["tables"]
     names = qc_dict[qc_name]["names"]
     kwargs = qc_dict[qc_name]["arguments"]
@@ -415,7 +415,7 @@ for obs_table in obs_tables:
     # Deselect rows containing generic ids
     data = data.drop(index=idx_gnrc)
     for qc_name in qc_dict.keys():
-        func = getattr(next_level_deck_qc, qc_dict[qc_name]["func"])
+        func = getattr(qc_grouped_reports, qc_dict[qc_name]["func"])
         names = qc_dict[qc_name].get("names", {})
         inputs = {k: data[v] for k, v in names}
         kwargs = qc_dict[qc_name].get("arguments", {})
