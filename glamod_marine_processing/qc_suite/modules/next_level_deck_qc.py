@@ -29,7 +29,7 @@ from glamod_marine_processing.qc_suite.modules.location_control import (
     mds_lat_to_yindex,
     mds_lon_to_xindex,
 )
-from glamod_marine_processing.qc_suite.modules.next_level_trackqc import is_monotonic
+from glamod_marine_processing.qc_suite.modules.buoy_tracking_qc import is_monotonic
 from glamod_marine_processing.qc_suite.modules.statistics import p_gross
 from glamod_marine_processing.qc_suite.modules.time_control import (
     pentad_to_month_day,
