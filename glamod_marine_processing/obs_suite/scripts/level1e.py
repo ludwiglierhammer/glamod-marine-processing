@@ -151,7 +151,19 @@ reload(logging)  # This is to override potential previous config of logging
 # Functions--------------------------------------------------------------------
 def get_single_qc_flag(df):
     """Get single QC flag from DataFrame containing multiple QC flags."""
-    return df
+
+    def reduce_qc_flags(row):
+        if (row == 1).any():
+            return 1
+        if (row == 0).any():
+            return 0
+        if (row == 2).any():
+            return 2
+        if (row == 3).any():
+            return 3
+        raise ValueError(f"Row {row} does not contain valid QC flags.")
+
+    return pd.DataFrame(df.apply(reduce_qc_flags, axis=1), columns=["QC_FLAG"])
 
 
 def compare_quality_checks(df):
@@ -198,13 +210,14 @@ if not os.path.isfile(header_filename):
     logging.error(f"Header table file not found: {header_filename}")
     sys.exit(1)
 
-data_dict = {}
+header_db = read_cdm_tables(params, "header")
 
-data_dict["header"] = read_cdm_tables(params, "header")
-
-if data_dict["header"].empty:
+if header_db.empty:
     logging.error("Empty or non-existing header table")
     sys.exit(1)
+
+data_dict = {}
+data_dict["header"] = header_db["header"]
 
 # See what CDM tables are available for this fileID
 tables_in = ["header"]
@@ -239,7 +252,8 @@ ql_dict = {}
 for table, df in data_dict.items():
     df = df.set_index("report_id", drop=False)
     p_length = len(df)
-    data_dict[table] = df.loc[report_ids]
+    valid_indexes = df.index.intersection(report_ids)
+    data_dict[table] = df.loc[valid_indexes]
     c_length = len(data_dict[table])
     r_length = p_length - c_length
     ql_dict[table] = {
@@ -247,13 +261,43 @@ for table, df in data_dict.items():
         "deleted": r_length,
     }
 
+# DO SOME PREPROCESSING ------------------------------------------------------
+for table in tables_in:
+    if table not in data_dict.keys():
+        continue
+    data = data_dict[table]
+    if table == "header":
+        data["platform_type"] = data["platform_type"].astype(int)
+        data["latitude"] = data["latitude"].astype(float)
+        data["longitude"] = data["longitude"].astype(float)
+        data["report_timestamp"] = pd.to_datetime(
+            data["report_timestamp"],
+            format="%Y-%m-%d %H:%M:%S",
+            errors="coerce",
+        )
+        data["station_speed"] = data["station_speed"].astype(float)
+        data["station_course"] = data["station_course"].astype(float)
+        data["report_quality"] = data["report_quality"].astype(int)
+        data["location_quality"] = data["location_quality"].astype(int)
+        data["report_time_quality"] = data["report_time_quality"].astype(int)
+    else:
+        data["observation_value"] = data["observation_value"].astype(float)
+        data["latitude"] = data["latitude"].astype(float)
+        data["longitude"] = data["longitude"].astype(float)
+        data["date_time"] = pd.to_datetime(
+            data["date_time"],
+            format="%Y-%m-%d %H:%M:%S",
+            errors="coerce",
+        )
+        data["quality_flag"] = data["quality_flag"].astype(int)
+
 # DO THE DATA PROCESSING ------------------------------------------------------
 
 # 1. Observational checks
 # 1.1. Header
 header_df = data_dict["header"].copy()
-idx_blck = header_df[header_df["report_quality"] == "6"].index
-idx_gnrc = header_df[header_df["report_quality"] == "88"].index
+idx_blck = header_df[header_df["report_quality"] == 6].index
+idx_gnrc = header_df[header_df["report_quality"] == 88].index
 
 # Deselect rows on blacklist
 data = header_df.drop(index=idx_blck)
@@ -265,8 +309,8 @@ report_time_quality = data["report_time_quality"].copy()
 
 # 1.1.1. Position check
 # Deselect already failed location_qualities
-data_pos = data[~location_quality.isin(["2"])]
-idx_pos = data_pos.idx
+data_pos = data[~location_quality.isin([2])]
+idx_pos = data_pos.index
 
 # Do position check
 qc_dict = params.qc_settings.get("position_check", {}).get("header", {})
@@ -276,12 +320,12 @@ pos_qc = do_multiple_row_check(
     return_method=return_method,
 )
 pos_qc = get_single_qc_flag(pos_qc)
-location_quality.loc[idx_pos] = pos_qc
+location_quality.loc[idx_pos] = pos_qc["QC_FLAG"]
 
 # 1.1.2. Time check
 # Deselect already failed report_time_qualities
-data_time = data[~report_time_quality.isin(["4", "5"])]
-idx_time = data_time.idx
+data_time = data[~report_time_quality.isin([4, 5])]
+idx_time = data_time.index
 
 # Do time check
 qc_dict = params.qc_settings.get("time_check", {}).get("header", {})
@@ -291,7 +335,7 @@ time_qc = do_multiple_row_check(
     return_method=return_method,
 )
 time_qc = get_single_qc_flag(time_qc)
-report_time_quality.loc[idx_time] = time_qc
+report_time_quality.loc[idx_time] = time_qc["QC_FLAG"]
 
 # 1.1.3. Report quality
 report_quality = compare_quality_checks(report_time_quality)
@@ -300,18 +344,20 @@ report_quality = compare_quality_checks(report_time_quality)
 quality_flags = {}
 # 1.2.1. Do observation check
 for obs_table in obs_tables:
+    if obs_table not in data_dict.keys():
+        continue
     data = data_dict[obs_table].copy()
     # Select observation quality_flag
     quality_flag = data["quality_flag"]
-    quality_flag.loc[idx_blck] = "6"
+    quality_flag.loc[idx_blck] = 6
 
     # Deselect rows on blacklist
     data = data.drop(index=idx_blck)
 
     # Deselect already failed quality_flags
-    data_qc = data[~quality_flag.isin("1")]
+    data_qc = data[~quality_flag.isin([1])]
     # Deselect already failed report_qualities
-    data_qc = data_qc[~report_quality.isin("1")]
+    data_qc = data_qc[~report_quality.isin([1])]
     idx_qc = data_qc.index
 
     preproc_dict = params.qc_settings.get("preprocessing", {}).get(obs_table, {})
@@ -325,7 +371,7 @@ for obs_table in obs_tables:
     obs_qc = get_single_qc_flag(obs_qc)
 
     # Flag quality_flag
-    quality_flag.loc[idx_qc] = obs_qc
+    quality_flag.loc[idx_qc] = obs_qc["QC_FLAG"]
     quality_flags[obs_table] = compare_quality_checks(quality_flag)
 
 # 1.2.2. Do combined observation check
@@ -340,7 +386,7 @@ for qc_name in qc_dict.keys():
         column = names[ivar]
         inputs[ivar] = data[column]
     qc_flag = func(**inputs)
-    idx_failed = qc_flag[qc_flag.isin("1")].index
+    idx_failed = qc_flag[qc_flag.isin([1])].index
     for table in tables.values():
         quality_flags[table].loc[idx_failed] = qc_flag.loc[idx_failed]
 
@@ -349,7 +395,7 @@ for qc_name in qc_dict.keys():
 # Deselect rows on blacklist
 data = header_df.drop(index=idx_blck)
 # Deselect already failed report_qualities
-data = data[~report_quality.isin(["1"])]
+data = data[~report_quality.isin([[1]])]
 # Deselect rows containing generic ids
 data = data.drop(index=idx_gnrc)
 
@@ -357,20 +403,22 @@ qc_dict = params.qc_settings.get("track_check", {}).get("header", {})
 for qc_name in qc_dict.keys():
     func = getattr(qc_sequential_reports, qc_dict[qc_name]["func"])
     names = qc_dict[qc_name].get("names", {})
-    inputs = {k: data[v] for k, v in names}
+    inputs = {k: data[v] for k, v in names.items()}
     kwargs = qc_dict[qc_name].get("arguments", {})
     track_qc = func(**inputs, **kwargs)
-    idx_failed = track_qc[track_qc.isin("1")].index
+    idx_failed = track_qc[track_qc.isin([1])].index
     report_quality.loc[idx_failed] = track_qc.loc[idx_failed]
 
 # 2.2. Observations
 # 2.2.1. Do observation track check
 qc_dict = params.qc_settings.get("track_check", {}).get("observations", {})
 for obs_table in obs_tables:
+    if obs_table not in data_dict.keys():
+        continue
     quality_flag = quality_flags[obs_table]
     data = data_dict[obs_table].copy()
     # Deselect already failed quality_flags
-    data = data[~quality_flag.isin("1")]
+    data = data[~quality_flag.isin([1])]
     # Deselect rows on blacklist
     data = data.drop(index=idx_blck)
     # Deselect rows containing generic ids
@@ -379,10 +427,10 @@ for obs_table in obs_tables:
     for qc_name in qc_dict.keys():
         func = getattr(qc_sequential_reports, qc_dict[qc_name]["func"])
         names = qc_dict[qc_name].get("names", {})
-        inputs = {k: data[v] for k, v in names}
+        inputs = {k: data[v] for k, v in names.items()}
         kwargs = qc_dict[qc_name].get("arguments", {})
         qc_flag = func(**inputs, **kwargs)
-        idx_failed = qc_flag[qc_flag.isin("1")].index
+        idx_failed = qc_flag[qc_flag.isin([1])].index
         quality_flag.loc[idx_failed] = qc_flag.loc[idx_failed]
     quality_flags[obs_table] = quality_flag
 
@@ -398,18 +446,20 @@ for qc_name in qc_dict.keys():
         data = data_dict[table].copy()
         column = names[ivar]
         inputs[ivar] = data[column]
-    qc_flag = func(**inputs)
-    idx_failed = qc_flag[qc_flag.isin("1")].index
-    for table in tables.values():
-        quality_flags[table].loc[idx_failed] = qc_flag.loc[idx_failed]
+    # qc_flag = func(**inputs, **kwargs)
+    # idx_failed = qc_flag[qc_flag.isin([1])].index
+    # for table in tables.values():
+    #    quality_flags[table].loc[idx_failed] = qc_flag.loc[idx_failed]
 
 # 3. Buddy check
 qc_dict = params.qc_settings.get("buddy_check", {}).get("observations", {})
 for obs_table in obs_tables:
+    if obs_table not in data_dict.keys():
+        continue
     quality_flag = quality_flags[obs_table]
     data = data_dict[obs_table].copy()
     # Deselect already failed quality_flags
-    data = data[~quality_flag.isin("1")]
+    data = data[~quality_flag.isin([1])]
     # Deselect on blacklist
     data = data.drop(index=idx_blck)
     # Deselect rows containing generic ids
@@ -417,10 +467,10 @@ for obs_table in obs_tables:
     for qc_name in qc_dict.keys():
         func = getattr(qc_grouped_reports, qc_dict[qc_name]["func"])
         names = qc_dict[qc_name].get("names", {})
-        inputs = {k: data[v] for k, v in names}
+        inputs = {k: data[v] for k, v in names.items()}
         kwargs = qc_dict[qc_name].get("arguments", {})
         qc_flag = func(**inputs, **kwargs)
-        idx_failed = qc_flag[qc_flag.isin("1")].index
+        idx_failed = qc_flag[qc_flag.isin([1])].index
         quality_flag.loc[idx_failed] = qc_flag.loc[idx_failed]
     quality_flags[obs_table] = quality_flag
 
