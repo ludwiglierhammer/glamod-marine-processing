@@ -29,7 +29,7 @@ from glamod_marine_processing.qc_suite.modules.location_control import (
     mds_lat_to_yindex,
     mds_lon_to_xindex,
 )
-from glamod_marine_processing.qc_suite.modules.next_level_trackqc import is_monotonic
+from glamod_marine_processing.qc_suite.modules.buoy_tracking_qc import is_monotonic
 from glamod_marine_processing.qc_suite.modules.statistics import p_gross
 from glamod_marine_processing.qc_suite.modules.time_control import (
     pentad_to_month_day,
@@ -258,7 +258,7 @@ class SuperObsGrid:
             pindex = nonmiss[2][i]
             m, d = pentad_to_month_day(pindex + 1)
 
-            # Originally get_value_mds_style - note might be mismatch
+            # Originally get_value_mds_style - note: might be a mismatch
             stdev = pentad_stdev.get_value(
                 lat=89.5 - yindex, lon=-179.5 + xindex, month=m, day=d
             )
@@ -315,7 +315,7 @@ class SuperObsGrid:
             Field of standard deviations representing standard deviation of difference between random
             neighbour gridcell and full neighbour average (uncertainty in neighbour average)
 
-        limits : list[float]
+        limits : list[int, int, int]
             three membered list of number of degrees in latitude and longitude and number of pentads
 
         sigma_m : float
@@ -344,9 +344,9 @@ class SuperObsGrid:
 
             m, d = pentad_to_month_day(pindex + 1)
 
-            stdev1_ex = stdev1.get_value(89.5 - yindex, -179.5 + xindex, m, d)
-            stdev2_ex = stdev2.get_value(89.5 - yindex, -179.5 + xindex, m, d)
-            stdev3_ex = stdev3.get_value(89.5 - yindex, -179.5 + xindex, m, d)
+            stdev1_ex = stdev1.get_value(89.5 - yindex, -179.5 + xindex, month=m, day=d)
+            stdev2_ex = stdev2.get_value(89.5 - yindex, -179.5 + xindex, month=m, day=d)
+            stdev3_ex = stdev3.get_value(89.5 - yindex, -179.5 + xindex, month=m, day=d)
 
             if stdev1_ex is None or stdev1_ex < 0.0 or np.isnan(stdev1_ex):
                 stdev1_ex = 1.0
@@ -511,7 +511,7 @@ def do_mds_buddy_check(
 
     If the first element of limits is [1,1,2] then we first look within a distance equivalent to 1 degree
     latitude and longitude at the equator and 2 pentads in time. If there are more than zero observations then we
-    calculate the buddy mean and we consult the number_of_obs_threshold. If, for example, this is [0, 5, 15, 100]
+    calculate the buddy mean, and we consult the number_of_obs_threshold. If, for example, this is [0, 5, 15, 100]
     then we look for the first entry where the number of obs is greater than that threshold. We then look up the
     multiplier in the appropriate list (say [4, 3.5, 3.0, 2.5]). If the difference between an observation and the
     buddy mean is greater than the multiplier times the standard deviation at that point then it fails the buddy
@@ -630,8 +630,8 @@ def do_bayesian_buddy_check(
 
     noise_scaling : float
         Tuning parameter used to multiply stdev2. This was determined to be approximately 3.0 by comparison with
-        observed point data. stdev2 was estimated from OSTIA data and typically underestimates the point to area-
-        average difference by this factor.
+        observed point data. stdev2 was estimated from OSTIA data and typically underestimates the point to
+        area-average difference by this factor.
 
     maximum_anomaly : float
         Largest absolute anomaly, assumes that the maximum and minimum anomalies have the same magnitude
@@ -664,7 +664,7 @@ def do_bayesian_buddy_check(
 
     # previous upper QC limits set. Ideally, this should be set based on any previous QC checks.
     # The original default was 8 because the climatology check had a range of +-8C. However, a
-    # climatology plus standard deviation check might narrow that range and it might also be
+    # climatology plus standard deviation check might narrow that range, and it might also be
     # spatially varying. There is currently no means of expressing that here.
     r_hi = maximum_anomaly
     r_lo = -1.0 * r_hi  # previous lower QC limit set

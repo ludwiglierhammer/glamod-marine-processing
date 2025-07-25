@@ -5,10 +5,7 @@ from __future__ import annotations
 import numpy as np
 from netCDF4 import Dataset
 
-from .interpolation import bilinear_interp
 from .location_control import (
-    fill_missing_vals,
-    get_four_surrounding_points,
     lat_to_yindex,
     lon_to_xindex,
     mds_lat_to_yindex,
@@ -132,7 +129,7 @@ class Climatology:
 
         result = self.field[tindex, yindex, xindex]
 
-        if type(result) is np.float64 or type(result) is np.float32:
+        if isinstance(result, np.float64) or isinstance(result, np.float32):
             pass
         else:
             if result.mask:
@@ -174,7 +171,7 @@ class Climatology:
 
         result = self.field[tindex, yindex, xindex]
 
-        if type(result) is np.float64 or type(result) is np.float32:
+        if isinstance(result, np.float64) or isinstance(result, np.float32):
             pass
         else:
             if result.mask:
@@ -223,7 +220,7 @@ class Climatology:
 
         result = self.field[tindex, yindex, xindex]
 
-        if type(result) is np.float64 or type(result) is np.float32:
+        if isinstance(result, np.float64) or isinstance(result, np.float32):
             pass
         else:
             if result.mask:
@@ -232,73 +229,3 @@ class Climatology:
                 result = result.data[0]
 
         return result
-
-    def get_interpolated_value(self, lat, lon, mo, dy):
-        """
-        Get the value from the climatology interpolated to the precise location of
-        the observation in time and space
-
-        :param lat: latitude of location to extract value from in degrees
-        :param lon: longitude of location to extract value from in degrees
-        :param mo: month for which the value is required
-        :param dy: day for which the value is required
-        :type lat: float
-        :type lon: float
-        :type mo: integer
-        :type dy: integer
-        :return: climatology value at specified location and time.
-        :rtype: float
-        """
-        # check that the lat lon point falls in a grid cell with a value or on
-        # the border of one
-        if lat + 0.001 < 90:
-            pert1 = self.get_value(lat + 0.001, lon + 0.001, mo, dy)
-            pert2 = self.get_value(lat + 0.001, lon - 0.001, mo, dy)
-        else:
-            pert1 = None
-            pert2 = None
-        if lat - 0.001 > -90:
-            pert3 = self.get_value(lat - 0.001, lon + 0.001, mo, dy)
-            pert4 = self.get_value(lat - 0.001, lon - 0.001, mo, dy)
-        else:
-            pert3 = None
-            pert4 = None
-
-        if pert1 is None and pert2 is None and pert3 is None and pert4 is None:
-            return None
-
-        x1, x2, y1, y2 = get_four_surrounding_points(lat, lon, 1)
-
-        try:
-            q11 = self.get_value(y1, x1, mo, dy)
-        except Exception:
-            q11 = None
-        if q11 is not None:
-            q11 = float(q11)
-
-        try:
-            q22 = self.get_value(y2, x2, mo, dy)
-        except Exception:
-            q22 = None
-        if q22 is not None:
-            q22 = float(q22)
-
-        try:
-            q12 = self.get_value(y2, x1, mo, dy)
-        except Exception:
-            q12 = None
-        if q12 is not None:
-            q12 = float(q12)
-
-        try:
-            q21 = self.get_value(y1, x2, mo, dy)
-        except Exception:
-            q21 = None
-        if q21 is not None:
-            q21 = float(q21)
-
-        q11, q12, q21, q22 = fill_missing_vals(q11, q12, q21, q22)
-
-        x1, x2, y1, y2 = get_four_surrounding_points(lat, lon, 0)
-
-        return bilinear_interp(x1, x2, y1, y2, lon, lat, q11, q12, q21, q22)

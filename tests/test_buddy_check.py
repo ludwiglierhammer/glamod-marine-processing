@@ -12,7 +12,7 @@ from glamod_marine_processing.qc_suite.modules.auxiliary import (
     passed,
     untestable,
 )
-from glamod_marine_processing.qc_suite.modules.next_level_deck_qc import (
+from glamod_marine_processing.qc_suite.modules.qc_grouped_reports import (
     SuperObsGrid,
     do_bayesian_buddy_check,
     do_mds_buddy_check,
@@ -141,6 +141,10 @@ def reps3():
 def dummy_pentad_stdev():
     return clim.Climatology(np.full([73, 180, 360], 1.5))
 
+@pytest.fixture
+def dummy_pentad_stdev_empty():
+    return clim.Climatology(np.full([73, 180, 360], np.nan))
+
 
 @pytest.fixture
 def reps4():
@@ -262,9 +266,9 @@ def test_lowest_nobs_limit_not_zero():
 
 
 def test_simple():
-    for n in range(1, 20):
+    for n in range(0, 20):
         multiplier = get_threshold_multiplier(n, [0, 5, 10], [4, 3, 2])
-        if 1 <= n <= 5:
+        if 0 <= n <= 5:
             assert multiplier == 4.0
         elif 5 < n <= 10:
             assert multiplier == 3.0
@@ -525,6 +529,35 @@ def test_add_one_maxes_limits(reps_, dummy_pentad_stdev_):
         dummy_pentad_stdev_,
         dummy_pentad_stdev_,
         dummy_pentad_stdev_,
+        limits=(2, 2, 4),
+        sigma_m=1.0,
+        noise_scaling=3.0,
+    )
+
+    mn = g.get_buddy_mean(
+        reps_["LAT"][0], reps_["LON"][0], reps_["DATE"][0].month, reps_["DATE"][0].day
+    )
+    sd = g.get_buddy_stdev(
+        reps_["LAT"][0], reps_["LON"][0], reps_["DATE"][0].month, reps_["DATE"][0].day
+    )
+
+    assert pytest.approx(sd, 0.0001) == 500
+    assert mn == 0.0
+
+def test_add_one_maxes_limits_with_missing_stdevs(reps_, dummy_pentad_stdev_empty):
+    g = SuperObsGrid()
+    g.add_single_observation(
+        reps_["LAT"][0],
+        reps_["LON"][0],
+        reps_["DATE"][0].month,
+        reps_["DATE"][0].day,
+        reps_["SST"][0] - reps_["SST_CLIM"][0],
+    )
+    g.take_average()
+    g.get_new_buddy_limits(
+        dummy_pentad_stdev_empty,
+        dummy_pentad_stdev_empty,
+        dummy_pentad_stdev_empty,
         limits=(2, 2, 4),
         sigma_m=1.0,
         noise_scaling=3.0,
