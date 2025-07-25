@@ -10,7 +10,6 @@ from glamod_marine_processing.qc_suite.modules.time_control import (
     day_in_year,
     last_month_was,
     leap_year_correction,
-    month_match,
     next_month_is,
     pentad_to_month_day,
     season,
