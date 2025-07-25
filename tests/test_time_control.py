@@ -40,19 +40,6 @@ def test_split_date(date, expected_year, expected_month, expected_day, expected_
 
 
 @pytest.mark.parametrize(
-    "y1, m1, y2, m2, expected",
-    [
-        (2024, 1, 2024, 1, True),
-        (2023, 1, 2024, 1, False),
-        (2024, 1, 2024, 2, False),
-        (2021, 12, 2025, 3, False),
-    ],
-)
-def test_month_match(y1, m1, y2, m2, expected):
-    assert month_match(y1, m1, y2, m2) == expected
-
-
-@pytest.mark.parametrize(
     "year, month, day, expected_year, expected_month, expected_day",
     [
         (2024, 1, 1, 2023, 12, 31),

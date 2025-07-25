@@ -102,35 +102,6 @@ def split_date(date: datetime) -> dict:
     return {"year": year, "month": month, "day": day, "hour": hour}
 
 
-def month_match(
-    y1: int,
-    m1: int,
-    y2: int,
-    m2: int,
-) -> int:
-    """Check whether month matches.
-
-    Parameters
-    ----------
-    y1: int
-        First year to check.
-    m1: int
-        First month to check.
-    y2: int
-        Second year to check.
-    m2: int
-        Second month to check.
-
-    Returns
-    -------
-    int
-        Returns True if both `y1` and `y2` and `m1` and `m2` match, else False.
-    """
-    if y1 == y2 and m1 == m2:
-        return True
-    return False
-
-
 def yesterday(
     year: int,
     month: int,
@@ -501,7 +472,9 @@ def leap_year(years_since_1980: int) -> int:
     return math.floor(years_since_1980 / 4.0)
 
 
-def time_in_whole_days(time_in_hours: int, day: int, years_since_1980: int, leap: int) -> float:
+def time_in_whole_days(
+    time_in_hours: int, day: int, years_since_1980: int, leap: int
+) -> float:
     """Calculate from time in hours to time in whole days.
 
     Parameters
@@ -523,7 +496,9 @@ def time_in_whole_days(time_in_hours: int, day: int, years_since_1980: int, leap
     return years_since_1980 * 365 + leap + day - 1.0 + time_in_hours / 24.0
 
 
-def leap_year_correction(time_in_hours: float, day: int, years_since_1980: int) -> float:
+def leap_year_correction(
+    time_in_hours: float, day: int, years_since_1980: int
+) -> float:
     """Make leap year correction.
 
     Parameters
@@ -720,8 +695,9 @@ def next_month_is(year: int, month: int) -> tuple[int, int]:
     return next_year, next_month
 
 
-def year_month_gen(year1: int, month1: int, year2: int, month2: int) -> Generator[
-    tuple[int | Any, int | Any] | tuple[int, int], Any, None]:
+def year_month_gen(
+    year1: int, month1: int, year2: int, month2: int
+) -> Generator[tuple[int | Any, int | Any] | tuple[int, int], Any, None]:
     """A generator to loop one month at a time between year1 month1 and year2 month2
 
     Parameters
