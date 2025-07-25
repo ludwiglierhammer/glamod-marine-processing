@@ -9,7 +9,7 @@ import pandas as pd
 
 from .auxiliary import failed, passed, untested
 from .external_clim import get_climatological_value  # noqa
-from .next_level_qc import (  # noqa
+from .qc_individual_reports import (  # noqa
     do_climatology_check,
     do_date_check,
     do_day_check,

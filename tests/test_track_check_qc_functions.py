@@ -5,7 +5,7 @@ import pandas as pd
 import pytest
 
 from glamod_marine_processing.qc_suite.modules.auxiliary import failed, passed
-from glamod_marine_processing.qc_suite.modules.next_level_track_check_qc import (
+from glamod_marine_processing.qc_suite.modules.qc_sequential_reports import (
     backward_discrepancy,
     calculate_course_parameters,
     calculate_speed_course_distance_time_difference,

@@ -12,7 +12,7 @@ from glamod_marine_processing.qc_suite.modules.auxiliary import (
     passed,
     untestable,
 )
-from glamod_marine_processing.qc_suite.modules.next_level_deck_qc import (
+from glamod_marine_processing.qc_suite.modules.qc_grouped_reports import (
     SuperObsGrid,
     do_bayesian_buddy_check,
     do_mds_buddy_check,

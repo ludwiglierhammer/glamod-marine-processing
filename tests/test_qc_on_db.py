@@ -22,11 +22,11 @@ from glamod_marine_processing.qc_suite.modules.external_clim import Climatology
 from glamod_marine_processing.qc_suite.modules.multiple_row_checks import (
     do_multiple_row_check,
 )
-from glamod_marine_processing.qc_suite.modules.next_level_deck_qc import (
+from glamod_marine_processing.qc_suite.modules.qc_grouped_reports import (
     do_bayesian_buddy_check,
     do_mds_buddy_check,
 )
-from glamod_marine_processing.qc_suite.modules.next_level_qc import (
+from glamod_marine_processing.qc_suite.modules.qc_individual_reports import (
     do_climatology_check,
     do_date_check,
     do_day_check,
@@ -39,7 +39,7 @@ from glamod_marine_processing.qc_suite.modules.next_level_qc import (
     do_time_check,
     do_wind_consistency_check,
 )
-from glamod_marine_processing.qc_suite.modules.next_level_track_check_qc import (
+from glamod_marine_processing.qc_suite.modules.qc_sequential_reports import (
     do_few_check,
     do_iquam_track_check,
     do_spike_check,
