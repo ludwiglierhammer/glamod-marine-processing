@@ -5,7 +5,7 @@ import pytest
 
 import glamod_marine_processing.qc_suite.modules.spherical_geometry as sg
 from glamod_marine_processing.qc_suite.modules.auxiliary import convert_to
-from glamod_marine_processing.qc_suite.modules.track_check import (
+from glamod_marine_processing.qc_suite.modules.track_check_utils import (
     check_distance_from_estimate,
     direction_continuity,
     increment_position,

@@ -9,7 +9,7 @@ import pandas as pd
 
 from . import spherical_geometry as sg
 from . import time_control
-from . import track_check as tc
+from . import track_check_utils as tc
 from .auxiliary import (
     SequenceDatetimeType,
     SequenceFloatType,
