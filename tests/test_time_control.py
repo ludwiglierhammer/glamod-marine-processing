@@ -16,7 +16,6 @@ from glamod_marine_processing.qc_suite.modules.time_control import (
     split_date,
     which_pentad,
     year_month_gen,
-    yesterday,
 )
 
 
@@ -36,31 +35,6 @@ def test_split_date(date, expected_year, expected_month, expected_day, expected_
     }
     for key in expected:
         assert result[key] == expected[key]
-
-
-@pytest.mark.parametrize(
-    "year, month, day, expected_year, expected_month, expected_day",
-    [
-        (2024, 1, 1, 2023, 12, 31),
-        (2024, 3, 1, 2024, 2, 29),
-        (2023, 3, 1, 2023, 2, 28),
-        (2024, 12, 31, 2024, 12, 30),
-        (2024, 2, 29, 2024, 2, 28),
-    ],
-)
-def test_yesterday(year, month, day, expected_year, expected_month, expected_day):
-    assert yesterday(year, month, day) == (
-        expected_year,
-        expected_month,
-        expected_day,
-    )
-
-
-def test_yesterday_nan():
-    year, month, day = yesterday(2025, 2, 29)
-    assert np.isnan(year)
-    assert np.isnan(month)
-    assert np.isnan(day)
 
 
 @pytest.mark.parametrize(

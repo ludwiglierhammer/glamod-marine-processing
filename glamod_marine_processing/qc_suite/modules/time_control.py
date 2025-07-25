@@ -102,37 +102,6 @@ def split_date(date: datetime) -> dict:
     return {"year": year, "month": month, "day": day, "hour": hour}
 
 
-def yesterday(
-    year: int,
-    month: int,
-    day: int,
-) -> tuple[int | np.nan, int | np.nan, int | np.nan]:
-    """For specified year, month and day return the year, month and day of the day before.
-
-    Parameters
-    ----------
-    year: int
-        Current year.
-    month: int
-        Current month.
-    day: int
-        Current day.
-
-    Returns
-    -------
-    tuple of int
-        A tuple of three ints representing year, month and day of the day before,
-        returns a tuple of three ``np.nan`` values if the input day does not exist (e.g. Feb 30th).
-    """
-    try:
-        dt = datetime(year, month, day)
-        delta = timedelta(-1)
-        dt = dt + delta
-        return dt.year, dt.month, dt.day
-    except Exception:
-        return np.nan, np.nan, np.nan
-
-
 def season(month: int) -> str | None:
     """Return short season name for given month, ``None`` for months like 13 that do not exist.
 
