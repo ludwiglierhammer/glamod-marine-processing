@@ -68,7 +68,7 @@ def _is_func_param(func: Callable, param: str) -> bool:
     return param in sig.parameters
 
 
-def _is_in_data(name: str, data:pd.Series | pd.DataFrame) -> bool:
+def _is_in_data(name: str, data: pd.Series | pd.DataFrame) -> bool:
     """Return True if named column or variable, name, is in data
 
     Parameters

@@ -296,9 +296,9 @@ class Climatology:
         Use only exact matches for selecting time and nearest valid index value for selecting location.
         """
         lat_arr = np.atleast_1d(lat)  # type: np.ndarray
-        lon_arr = np.atleast_1d(lon) # type: np.ndarray
-        month_arr = np.atleast_1d(month) # type: np.ndarray
-        day_arr = np.atleast_1d(day) # type: np.ndarray
+        lon_arr = np.atleast_1d(lon)  # type: np.ndarray
+        month_arr = np.atleast_1d(month)  # type: np.ndarray
+        day_arr = np.atleast_1d(day)  # type: np.ndarray
         valid_indices = isvalid(lat) & isvalid(lon) & isvalid(month) & isvalid(day)
         result = np.full(lat_arr.shape, None, dtype=float)  # type: np.ndarray
 

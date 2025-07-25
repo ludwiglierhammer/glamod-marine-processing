@@ -587,8 +587,6 @@ def calculate_midpoint(
 
         midpoint_discrepancies[i] = discrepancy
 
-    #midpoint_discrepancies[i + 1] = np.nan
-
     return midpoint_discrepancies
 
 

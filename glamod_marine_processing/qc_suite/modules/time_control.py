@@ -5,8 +5,8 @@ from __future__ import annotations
 import calendar
 import math
 from collections.abc import Callable
-from datetime import datetime, timedelta
-from typing import Sequence, Any, Generator
+from datetime import datetime
+from typing import Sequence
 
 import numpy as np
 

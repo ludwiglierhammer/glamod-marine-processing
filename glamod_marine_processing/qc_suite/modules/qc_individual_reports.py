@@ -68,7 +68,7 @@ def do_position_check(lat: ValueFloatType, lon: ValueFloatType) -> ValueIntType:
     Returns
     -------
     Same type as input, but with integer values
-        - Returns 2 (or array/sequence/Series of 2s) if either latitude or longitude is numerically invalid (None or NaN).
+        - Returns 2 (or array/sequence/Series of 2s) if either latitude or longitude is numerically invalid (None/NaN).
         - Returns 1 (or array/sequence/Series of 1s) if either latitude or longitude is out of the valid range.
         - Returns 0 (or array/sequence/Series of 0s) otherwise.
     """
@@ -241,9 +241,10 @@ def do_day_check(
     Returns
     -------
     Same type as input, but with integer values
-        - Returns 2 (or array/sequence/Series of 2s) if any of do_position_check, do_date_check, or do_time_check returns 2.
-        - Returns 1 (or array/sequence/Series of 1s) if any of do_position_check, do_date_check, or do_time_check returns 1
-          or if it is night (sun below horizon an hour ago).
+        - Returns 2 (or array/sequence/Series of 2s) if any of do_position_check, do_date_check, or do_time_check
+          returns 2.
+        - Returns 1 (or array/sequence/Series of 1s) if any of do_position_check, do_date_check, or do_time_check
+          returns 1 or if it is night (sun below horizon an hour ago).
         - Returns 0 if it is day (sun above horizon an hour ago).
 
     Note
@@ -350,8 +351,8 @@ def do_missing_value_clim_check(climatology: ClimFloatType, **kwargs) -> ValueIn
 
     Note
     ----
-    If `climatology` is a Climatology object, pass `lon` and `lat` and `date`, or `month` and `day`, as keyword arguments
-    to extract the relevant climatological value.
+    If `climatology` is a Climatology object, pass `lon` and `lat` and `date`, or `month` and `day`, as keyword
+    arguments to extract the relevant climatological value.
     """
     return value_check(climatology)
 
@@ -416,8 +417,8 @@ def do_climatology_check(
     This check supports optional parameters to customize the comparison.
 
     If ``standard_deviation`` is provided, the value is converted into a standardised anomaly. Optionally,
-    if ``standard deviation`` is outside the range specified by ``standard_deviation_limits`` then ``standard_deviation``
-    is set to whichever of the lower or upper limits is closest.
+    if ``standard deviation`` is outside the range specified by ``standard_deviation_limits`` then
+    ``standard_deviation`` is set to whichever of the lower or upper limits is closest.
     If ``lowbar`` is provided, the anomaly must be greater than ``lowbar`` to fail regardless of ``standard_deviation``.
 
     Parameters
@@ -431,7 +432,8 @@ def do_climatology_check(
     maximum_anomaly: float
         Largest allowed anomaly.
         If ``standard_deviation`` is provided, this is interpreted as the largest allowed standardised anomaly.
-    standard_deviation: float, None, sequence of float or None, 1D np.ndarray of float or pd.Series of float, default: "default"
+    standard_deviation: float, None, sequence of float or None, 1D np.ndarray of float or pd.Series of float,
+        default: "default"
         The standard deviation(s) used to standardise the anomaly
         If set to "default", it is internally treated as 1.0.
         Can be a scalar, a sequence (e.g., list or tuple), a one-dimensional NumPy array, or a pandas Series.
@@ -451,8 +453,8 @@ def do_climatology_check(
 
     Note
     ----
-    If either `climatology` or `standard_deviation` is a Climatology object, pass `lon` and `lat` and `date`, or `month` and `day`,
-    as keyword arguments to extract the relevant climatological value(s).
+    If either `climatology` or `standard_deviation` is a Climatology object, pass `lon` and `lat` and `date`, or
+    `month` and `day`, as keyword arguments to extract the relevant climatological value(s).
     """
     if climatology.ndim == 0:
         climatology = np.full_like(value, climatology)  # type: np.ndarray
