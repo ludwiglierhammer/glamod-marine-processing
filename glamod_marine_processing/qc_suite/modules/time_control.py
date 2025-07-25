@@ -102,38 +102,6 @@ def split_date(date: datetime) -> dict:
     return {"year": year, "month": month, "day": day, "hour": hour}
 
 
-def season(month: int) -> str | None:
-    """Return short season name for given month, ``None`` for months like 13 that do not exist.
-
-    Parameters
-    ----------
-    month: int
-        Current month.
-
-    Returns
-    -------
-    str or None
-        Name of the season with includes `month` (DJF, MAM, JJA, or SON) or ``None`` if the input month is non-existent (e.g. 13).
-    """
-    if month < 1 or month > 12:
-        return None
-    season_list = [
-        "DJF",
-        "DJF",
-        "MAM",
-        "MAM",
-        "MAM",
-        "JJA",
-        "JJA",
-        "JJA",
-        "SON",
-        "SON",
-        "SON",
-        "DJF",
-    ]
-    return season_list[month - 1]
-
-
 def pentad_to_month_day(p: int) -> tuple[int, int]:
     """Given a pentad number, return the month and day of the first day in the pentad.
 

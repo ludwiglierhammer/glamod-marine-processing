@@ -12,7 +12,6 @@ from glamod_marine_processing.qc_suite.modules.time_control import (
     leap_year_correction,
     next_month_is,
     pentad_to_month_day,
-    season,
     split_date,
     which_pentad,
     year_month_gen,
@@ -35,30 +34,6 @@ def test_split_date(date, expected_year, expected_month, expected_day, expected_
     }
     for key in expected:
         assert result[key] == expected[key]
-
-
-@pytest.mark.parametrize(
-    "month, expected",
-    [
-        (1, "DJF"),
-        (2, "DJF"),
-        (3, "MAM"),
-        (4, "MAM"),
-        (5, "MAM"),
-        (6, "JJA"),
-        (7, "JJA"),
-        (8, "JJA"),
-        (9, "SON"),
-        (10, "SON"),
-        (11, "SON"),
-        (12, "DJF"),
-        (0, None),
-        (-1, None),
-        (13, None),
-    ],
-)
-def test_seasons(month, expected):
-    assert season(month) == expected
 
 
 def test_pentad_to_mont():
