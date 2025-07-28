@@ -195,8 +195,6 @@ def save_quicklook(params, ql_dict, date_handler):
 
 def read_cdm_tables(params, table):
     """Read CDM tables."""
-    # if isinstance(table, str):
-    #    table = [table]
     return read_tables(
         params.prev_level_path,
         suffix=params.prev_fileID,
