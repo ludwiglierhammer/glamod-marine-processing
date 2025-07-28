@@ -35,6 +35,18 @@
             "clim_name": "t2m_stdevs",
             "time_axis": "pentad_time"
           }
+        },
+        "stdev1": {
+          "file_name": "SST_buddy_one_ob_to_box_avg.nc",
+          "clim_name": "SST"
+        },
+        "stdev2": {
+          "file_name": "SST_buddy_one_ob_to_box_avg.nc",
+          "clim_name": "SST"
+        },
+        "stdev3": {
+          "file_name": "SST_buddy_avg_sampling",
+          "clim_name": "SST"
         }
       },
       "observations-dpt": {
@@ -81,6 +93,22 @@
             "target_units": "K",
             "source_units": "degC"
           }
+        },
+        "standard_deviation": {
+          "file_name": "SST/Old_SST_stdev_climatology.nc",
+          "clim_name": "sst"
+        },
+        "stdev1": {
+          "file_name": "SST_buddy_one_ob_to_box_avg.nc",
+          "clim_name": "SST"
+        },
+        "stdev2": {
+          "file_name": "SST_buddy_one_ob_to_box_avg.nc",
+          "clim_name": "SST"
+        },
+        "stdev3": {
+          "file_name": "SST_buddy_avg_sampling",
+          "clim_name": "SST"
         }
       },
       "observations-slp": {
@@ -143,8 +171,8 @@
           "func": "do_day_check",
           "names": {
             "date": "report_timestamp",
-            "latitude": "latitude",
-            "longitude": "longitude"
+            "lat": "latitude",
+            "lon": "longitude"
           },
           "arguments": {
             "time_since_sun_above_horizon": 1.0
@@ -483,10 +511,10 @@
             "value": "observation_value"
           },
           "arguments": {
-            "climatology": "???",
-            "stdev1": "???",
-            "stdev2": "???",
-            "stdev3": "???",
+            "climatology": "__preprocessed__",
+            "stdev1": "__preprocessed__",
+            "stdev2": "__preprocessed__",
+            "stdev3": "__preprocessed__",
             "prior_probability_of_gross_error": 0.05,
             "quantization_interval": 0.1,
             "one_sigma_measurement_uncertainty": 1.0,
@@ -509,8 +537,8 @@
             "value": "observation_value"
           },
           "arguments": {
-            "climatology": "???",
-            "standard_deviation": "???",
+            "climatology": "__preprocessed__",
+            "standard_deviation": "__preprocessed__",
             "limits": [
               [
                 1,
@@ -574,6 +602,32 @@
               ]
             ]
           }
+        }
+      },
+      "observations-slp": {
+        "MDS": {
+          "limits": [
+            [
+              1,
+              1,
+              0
+            ],
+            [
+              2,
+              2,
+              0
+            ],
+            [
+              3,
+              3,
+              0
+            ],
+            [
+              4,
+              4,
+              0
+            ]
+          ]
         }
       }
     }
