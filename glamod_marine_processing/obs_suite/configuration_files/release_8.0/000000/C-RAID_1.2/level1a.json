@@ -12,5 +12,11 @@
     "drifter_history",
     "drifter_measurements",
     "drifter_sensor"
-  ]
+  ],
+  "filter_reports_by": {
+    "drifter_measurements.POSITION_QC": [
+      "4.0",
+      "5.0"
+    ]
+  }
 }
