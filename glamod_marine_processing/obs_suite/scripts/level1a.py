@@ -131,9 +131,7 @@ read_kwargs = {
 }
 
 data_in = read_mdf(L0_filename, **read_kwargs)
-
 io_dict["read"] = {"total": len(data_in)}
-
 # 2. PT fixing, filtering and invalid rejectionselect_true
 # 2.1. Fix platform type
 
@@ -152,7 +150,8 @@ if params.filter_reports_by:
     # 3.1. Select by report_filters options
     for k, v in params.filter_reports_by.items():
         io_dict["not_selected"][k] = {}
-        logging.info("Selecting {} values: {}".format(k, ",".join(v)))
+        v_str = [str(v_) for v_ in v]
+        logging.info("Selecting {} values: {}".format(k, ", ".join(v_str)))
         filter_location = tuple(k.split("."))
         col = filter_location[0] if len(filter_location) == 1 else filter_location
         selection = {col: v}
@@ -166,8 +165,8 @@ if params.filter_reports_by:
     io_dict["not_selected"]["total"] = sum(
         [v.get("total") for k, v in io_dict["not_selected"].items()]
     )
-
 io_dict["pre_selected"] = {"total": len(data_in)}
+
 # 2.3. Keep track of invalid data
 # First create a global mask and count failure occurrences
 newmask_buffer = StringIO()
