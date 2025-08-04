@@ -98,6 +98,7 @@ process_options = [
     "histories",
     "duplicates",
     "drop_qualities",
+    "delete_no_obs",
 ]
 params = script_setup(process_options, sys.argv)
 
@@ -129,7 +130,19 @@ try:
 except AttributeError:  # for python < 3.11
     history_tstmp = datetime.datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S")
 
-for table in properties.cdm_tables:
+tables = properties.cdm_tables
+obs_tables = [table for table in tables if table != "header"]
+if params.delete_no_obs is True:
+    report_ids = pd.Series()
+    for table in obs_tables:
+        db_ = read_cdm_tables(params, table)
+        if not db_.empty:
+            report_ids = pd.concat(
+                [report_ids, db_[(table, "report_id")]], ignore_index=True
+            )
+    report_ids = report_ids.drop_duplicates().reset_index(drop=True)
+
+for table in tables:
     datetime_col = (
         ("header", "report_timestamp") if table == "header" else (table, "date_time")
     )
@@ -144,6 +157,10 @@ for table in properties.cdm_tables:
         continue
 
     table_db.set_index((table, "report_id"), inplace=True, drop=False)
+    if table == "header" and params.delete_no_obs is True:
+        logging.info("Delete header information without any observations.")
+        table_db.data = table_db[table_db.index.isin(report_ids)]
+
     ql_dict[table]["read"] = len(table_db)
 
     if params.corrections is None:
