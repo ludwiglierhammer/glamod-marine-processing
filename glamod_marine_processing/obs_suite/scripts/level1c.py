@@ -221,13 +221,15 @@ logging.basicConfig(
     filename=None,
 )
 
-params = script_setup([], sys.argv)
-
-id_validation_path = os.path.join(
-    params.data_path, params.release, "NOC_ANC_INFO", "json_files"
-)
-
-paths_exist([id_validation_path, params.level_invalid_path])
+params = script_setup(["noc_version"], sys.argv)
+paths_exist(params.level_invalid_path)
+if params.noc_version:
+    id_validation_path = os.path.join(
+        params.data_path, "datasets", "NOC_ANC_INFO", params.noc_version, "json_files"
+    )
+    paths_exist(id_validation_path)
+else:
+    id_validation_path = ""
 
 ql_dict = {table: {} for table in properties.cdm_tables}
 
