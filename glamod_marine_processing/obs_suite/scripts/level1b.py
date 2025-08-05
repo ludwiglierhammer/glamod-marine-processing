@@ -139,13 +139,13 @@ for table in tables:
     logging.info(params.prev_fileID)
     logging.info(table)
     table_db = read_cdm_tables(params, table)
-    table_db.data = table_db[table]
 
     if table_db.empty:
         logging.warning(f"Empty or non-existing table {table}")
         ql_dict[table]["read"] = 0
         continue
 
+    table_db.data = table_db[table]
     table_db.set_index("report_id", inplace=True, drop=False)
     if table == "header" and params.delete_no_obs is True:
         logging.info("Delete header information without any observations.")
