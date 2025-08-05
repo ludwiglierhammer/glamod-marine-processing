@@ -214,6 +214,7 @@ for table in tables:
             logging.warning(f"No {column} corrections found.")
             continue
 
+        correction_df = correction_df.replace("{}", None)
         ql_dict[table]["corrections"][column]["applied"] = 0
         table_db[column].loc[change_indexes] = correction_df[column]
 
@@ -259,10 +260,10 @@ for table in tables:
     if table_db.empty:
         continue
 
-    table_db[(table, "monthly_period")] = pd.to_datetime(
+    table_db.data["monthly_period"] = pd.to_datetime(
         table_db[datetime_col], errors="coerce", utc=True
     ).dt.to_period("M")
-    monthly_periods = list(table_db[(table, "monthly_period")].dropna().unique())
+    monthly_periods = list(table_db["monthly_period"].dropna().unique())
     source_mon_period = pd.Period(
         year=int(params.year), month=int(params.month), freq="M"
     )
@@ -271,8 +272,8 @@ for table in tables:
     # the date in the file
     if len(monthly_periods) == 0:
         monthly_periods.append(source_mon_period)
-    table_db[(table, "monthly_period")].fillna(source_mon_period, inplace=True)
-    table_db.set_index((table, "monthly_period"), inplace=True, drop=True)
+    table_db["monthly_period"].fillna(source_mon_period, inplace=True)
+    table_db.set_index("monthly_period", inplace=True, drop=True)
     len_db = len(table_db)
     if source_mon_period in monthly_periods:
         logging.info(
