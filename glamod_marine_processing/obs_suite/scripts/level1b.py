@@ -167,7 +167,7 @@ for table in tables:
     ql_dict[table]["corrections"] = {}
 
     for column, elements in table_corrections.items():
-        directory = elements.get("dir")
+        directories = elements.get("dir")
         position = elements.get("pos")
         changed = elements.get("changed")
 
@@ -179,23 +179,29 @@ for table in tables:
             columns.append("changed")
             usecols.append(changed)
 
-        cor_path = os.path.join(
-            L1b_main_corrections, directory, params.fileID_date + cor_ext
-        )
-        if not os.path.isfile(cor_path):
-            logging.warning(f"Correction file {cor_path} not found")
-            continue
+        if isinstance(directories, str):
+            directories = [directories]
 
-        correction_df = pd.read_csv(
-            cor_path,
-            delimiter=delimiter,
-            dtype="object",
-            header=None,
-            usecols=usecols,
-            names=columns,
-            quotechar=None,
-            quoting=3,
-        )
+        correction_df = pd.DataFrame()
+        for directory in directories:
+            cor_path = os.path.join(
+                L1b_main_corrections, directory, params.fileID_date + cor_ext
+            )
+            if not os.path.isfile(cor_path):
+                logging.warning(f"Correction file {cor_path} not found")
+                continue
+
+            cor_df = pd.read_csv(
+                cor_path,
+                delimiter=delimiter,
+                dtype="object",
+                header=None,
+                usecols=usecols,
+                names=columns,
+                quotechar=None,
+                quoting=3,
+            )
+            correction_df = pd.concat([correction_df, cor_df], ignore_index=True)
 
         if correction_df.empty:
             logging.warning(f"No {column} corrections found.")

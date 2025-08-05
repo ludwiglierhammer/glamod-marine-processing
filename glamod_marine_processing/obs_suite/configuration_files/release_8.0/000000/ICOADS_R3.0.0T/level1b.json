@@ -18,12 +18,18 @@
         "changed": 2
       },
       "duplicate_status": {
-        "dir": "DUP_FILES",
+        "dir": [
+          "DUP_FILES",
+          "DUP_FILES_ID"
+        ],
         "pos": 1,
         "changed": null
       },
       "duplicates": {
-        "dir": "DUP_FILES",
+        "dir": [
+          "DUP_FILES",
+          "DUP_FILES_ID"
+        ],
         "pos": 2,
         "changed": null
       },
