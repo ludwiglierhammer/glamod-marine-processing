@@ -263,9 +263,9 @@ if merge:
 process_table(header_db, "header")
 
 header_db.set_index("report_id", inplace=True, drop=False)
-# for obs
-# for table in obs_tables:
-#    process_table(table, table)
+
+for table in obs_tables:
+    process_table(table, table)
 
 # 4. SAVE QUICKLOOK -----------------------------------------------------------
 logging.info("Saving json quicklook")
