@@ -225,7 +225,7 @@ params = script_setup(["noc_version"], sys.argv)
 paths_exist(params.level_invalid_path)
 if params.noc_version:
     id_validation_path = os.path.join(
-        params.data_path, "datasets", "NOC_ANC_INFO", params.noc_version, "json_files"
+        params.data_path, "datasets", "NOC_ANC_INFO", params.noc_version
     )
     paths_exist(id_validation_path)
 else:
