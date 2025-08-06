@@ -152,14 +152,12 @@ def validate_id(idSeries):
 def read_table_files(table):
     """Read table files."""
     logging.info(f"Reading data from {table} table files")
-    table_df = pd.DataFrame()
-
     # First read the master file, if any, then append leaks
     # If no yyyy-mm master file, can still have reports from datetime leaks
     # On reading 'header' read null as NaN so that we can validate null ids as NaN easily
-    table_df = read_cdm_tables(params, table)
+    table_db = read_cdm_tables(params, table)
     try:
-        len(table_df)
+        len(table_db)
     except Exception:
         logging.warning(
             "Empty or non-existing master {} table. Attempting \
@@ -173,15 +171,17 @@ def read_table_files(table):
     if len(leak_files) > 0:
         for leak_file in leak_files:
             logging.info(f"Reading datetime leak file {leak_file}")
-            table_dfi = read_cdm_tables(params, table)
-            if len(table_dfi) == 0:
+            table_dbi = read_cdm_tables(params, table)
+            if len(table_dbi) == 0:
                 logging.error(f"Could not read leak file or is empty {leak_file}")
                 sys.exit(1)
-            leaks_in += len(table_dfi)
-            table_df = pd.concat([table_df, table_dfi], axis=0, sort=False)
-    if len(table_df) > 0:
+            leaks_in += len(table_dbi)
+            table_db.data = pd.concat(
+                [table_db.data, table_dbi.data], axis=0, sort=False
+            )
+    if len(table_db) > 0:
         ql_dict[table] = {"leaks_in": leaks_in}
-    return table_df
+    return table_db
 
 
 def process_table(table_df, table):
@@ -251,13 +251,13 @@ except AttributeError:  # for python < 3.11
 # in level1b resulted in a change in the month
 table = "header"
 table_db = read_table_files(table)
-columns = table_db.columns
-table_db.data = table_db[table]
 if table_db.empty:
     logging.error(f"No data could be read for file partition {params.fileID}")
     sys.exit(1)
 
+table_db.data = table_db[table]
 table_db.set_index("report_id", inplace=True, drop=False)
+
 # Initialize mask
 mask_df = pd.DataFrame(index=table_db.index, columns=validated + ["all"])
 mask_df[validated] = True
