@@ -171,7 +171,7 @@ def read_table_files(table):
     if len(leak_files) > 0:
         for leak_file in leak_files:
             logging.info(f"Reading datetime leak file {leak_file}")
-            table_dbi = read_cdm_tables(params, table)
+            table_dbi = read_cdm_tables(params, table, ifile=leak_file)
             if len(table_dbi) == 0:
                 logging.warning(f"Could not read leak file or is empty {leak_file}")
                 continue
