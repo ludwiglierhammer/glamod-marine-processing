@@ -173,8 +173,8 @@ def read_table_files(table):
             logging.info(f"Reading datetime leak file {leak_file}")
             table_dbi = read_cdm_tables(params, table)
             if len(table_dbi) == 0:
-                logging.error(f"Could not read leak file or is empty {leak_file}")
-                sys.exit(1)
+                logging.warning(f"Could not read leak file or is empty {leak_file}")
+                continue
             leaks_in += len(table_dbi)
             table_db.data = pd.concat(
                 [table_db.data, table_dbi.data], axis=0, sort=False
