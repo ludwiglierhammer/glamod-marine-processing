@@ -126,6 +126,7 @@ import os
 import sys
 from importlib import reload
 
+import numpy as np
 import pandas as pd
 from _utilities import (
     date_handler,
@@ -135,15 +136,8 @@ from _utilities import (
     write_cdm_tables,
 )
 from cdm_reader_mapper.cdm_mapper.tables.tables import get_cdm_atts
-
-from glamod_marine_processing.qc_suite.modules import (
-    qc_grouped_reports,
-    qc_individual_reports,
-    qc_sequential_reports,
-)
-from glamod_marine_processing.qc_suite.modules.multiple_row_checks import (
-    do_multiple_row_check,
-)
+from marine_qc import qc_grouped_reports, qc_individual_reports, qc_sequential_reports
+from marine_qc.multiple_row_checks import do_multiple_row_check
 
 reload(logging)  # This is to override potential previous config of logging
 
@@ -151,19 +145,15 @@ reload(logging)  # This is to override potential previous config of logging
 # Functions--------------------------------------------------------------------
 def get_single_qc_flag(df):
     """Get single QC flag from DataFrame containing multiple QC flags."""
+    mask_0 = (df == 0).any(axis=1)
+    mask_1 = (df == 1).any(axis=1)
+    mask_2 = (df == 2).any(axis=1)
+    mask_3 = (df == 3).any(axis=1)
 
-    def reduce_qc_flags(row):
-        if (row == 1).any():
-            return 1
-        if (row == 0).any():
-            return 0
-        if (row == 2).any():
-            return 2
-        if (row == 3).any():
-            return 3
-        raise ValueError(f"Row {row} does not contain valid QC flags.")
-
-    return pd.DataFrame(df.apply(reduce_qc_flags, axis=1), columns=["QC_FLAG"])
+    conditions = [mask_1, mask_0, mask_2, mask_3]
+    choices = [1, 0, 2, 3]
+    result = np.select(conditions, choices, default=3)
+    return pd.Series(result, index=df.index, name="QC_FLAG")
 
 
 def compare_quality_checks(df):
@@ -177,6 +167,7 @@ def compare_quality_checks(df):
 # Some other parameters -------------------------------------------------------
 cdm_atts = get_cdm_atts()
 obs_tables = [x for x in cdm_atts.keys() if x != "header"]
+# obs_tables = []
 
 try:
     history_tstmp = datetime.datetime.now(datetime.UTC).strftime("%Y-%m-%d %H:%M:%S")
@@ -294,7 +285,9 @@ for table in tables_in:
 # DO THE DATA PROCESSING ------------------------------------------------------
 
 # 1. Observational checks
+logging.info("1. Do individual checks")
 # 1.1. Header
+logging.info("1.1. Do header checks")
 header_df = data_dict["header"].copy()
 idx_blck = header_df[header_df["report_quality"] == 6].index
 idx_gnrc = header_df[header_df["report_quality"] == 88].index
@@ -308,6 +301,7 @@ location_quality = data["location_quality"].copy()
 report_time_quality = data["report_time_quality"].copy()
 
 # 1.1.1. Position check
+logging.info("1.1.1. Do positional checks")
 # Deselect already failed location_qualities
 data_pos = data[~location_quality.isin([2])]
 idx_pos = data_pos.index
@@ -320,9 +314,10 @@ pos_qc = do_multiple_row_check(
     return_method=return_method,
 )
 pos_qc = get_single_qc_flag(pos_qc)
-location_quality.loc[idx_pos] = pos_qc["QC_FLAG"]
+location_quality.loc[idx_pos] = pos_qc
 
 # 1.1.2. Time check
+logging.info("1.1.2. Do time checks")
 # Deselect already failed report_time_qualities
 data_time = data[~report_time_quality.isin([4, 5])]
 idx_time = data_time.index
@@ -335,17 +330,20 @@ time_qc = do_multiple_row_check(
     return_method=return_method,
 )
 time_qc = get_single_qc_flag(time_qc)
-report_time_quality.loc[idx_time] = time_qc["QC_FLAG"]
+report_time_quality.loc[idx_time] = time_qc
 
 # 1.1.3. Report quality
+logging.info("1.1.3. Set report quality")
 report_quality = compare_quality_checks(report_time_quality)
 
 # 1.2. Observations
+logging.info("1.2. Do observations checks")
 quality_flags = {}
 # 1.2.1. Do observation check
 for obs_table in obs_tables:
     if obs_table not in data_dict.keys():
         continue
+    logging.info(f"1.2.1. Do {obs_table} check")
     data = data_dict[obs_table].copy()
     # Select observation quality_flag
     quality_flag = data["quality_flag"]
@@ -377,6 +375,7 @@ for obs_table in obs_tables:
 # 1.2.2. Do combined observation check
 qc_dict = params.qc_settings.get("observations_check", {}).get("combined", {})
 for qc_name in qc_dict.keys():
+    logging.info(f"1.2.2. Do {qc_name} check")
     func = getattr(qc_individual_reports, qc_dict[qc_name]["func"])
     tables = qc_dict[qc_name]["tables"]
     names = qc_dict[qc_name]["names"]
@@ -390,6 +389,7 @@ for qc_name in qc_dict.keys():
     for table in tables.values():
         quality_flags[table].loc[idx_failed] = qc_flag.loc[idx_failed]
 
+exit()
 # 2. Track check
 # 2.1. Header
 # Deselect rows on blacklist
@@ -433,7 +433,8 @@ for obs_table in obs_tables:
         idx_failed = qc_flag[qc_flag.isin([1])].index
         quality_flag.loc[idx_failed] = qc_flag.loc[idx_failed]
     quality_flags[obs_table] = quality_flag
-
+    print(quality_flag)
+    exit()
 # 2.2.2. Do combined observations track check
 qc_dict = params.qc_settings.get("track_check", {}).get("combined", {})
 for qc_name in qc_dict.keys():
