@@ -156,6 +156,11 @@ def test_is_deck_str():
         ("7        ", 1950, True),
         ("QUALMS", "1999", False),
         ("7        ", "1950", True),
+        ("       ", 1899, True),
+        ("", 1899, True),
+        ("       ", 1899, True),
+        ("        ", 1899, True),
+        ("         ", 1899, True),
     ],
 )
 def test_id_is_generic(in_id, year, expected):

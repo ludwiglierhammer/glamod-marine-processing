@@ -128,7 +128,6 @@ from importlib import reload
 
 import numpy as np
 import pandas as pd
-
 from _utilities import (
     date_handler,
     paths_exist,
@@ -137,7 +136,6 @@ from _utilities import (
     script_setup,
     write_cdm_tables,
 )
-
 from cdm_reader_mapper.cdm_mapper.tables.tables import get_cdm_atts
 
 reload(logging)  # This is to override potential previous config of logging

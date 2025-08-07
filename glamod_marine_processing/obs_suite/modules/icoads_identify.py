@@ -136,7 +136,10 @@ def id_is_generic(inid: str, inyear: int) -> bool:
     """
     generic_ids = [
         None,
+        "         ",
+        "        ",
         "",
+        " ",
         "1",
         "58",
         "RIGG",

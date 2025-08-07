@@ -56,16 +56,6 @@ repos:
     rev: 'v2.11'
     hooks:
       - id: vulture
-  - repo: https://github.com/nbQA-dev/nbQA
-    rev: 1.8.5
-    hooks:
-      - id: nbqa-pyupgrade
-        args: [ '--py38-plus' ]
-        additional_dependencies: [ 'pyupgrade==3.15.2' ]
-      - id: nbqa-black
-        additional_dependencies: [ 'black==23.12.1' ]
-      - id: nbqa-isort
-        additional_dependencies: [ 'isort==5.13.2' ]
   - repo: https://github.com/keewis/blackdoc
     rev: v0.3.9
     hooks:
