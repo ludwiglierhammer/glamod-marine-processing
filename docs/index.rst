@@ -14,8 +14,7 @@ run the observations suite, and also more detailed information on this branch of
 the marine code.
 
 The Observation Suite is a set of python and shell scripts to harmonize and
-convert input observational data sources to CDM formatted files. This includes
-merging the CDM files with the output from the metadata and qc suites.
+convert input observational data sources to CDM formatted files.
 
 It is based on a set of chained processes, each step feeding into the next one
 and with the initial dataset (previously prepared for inclusion in the marine
@@ -49,7 +48,6 @@ concurrently to the overall scheme (see figure below).
    level1b
    level1c
    level1d
-   qc
    level1e
    level2
    contributing

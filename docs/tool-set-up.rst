@@ -36,28 +36,16 @@ You can set the paths via the command-line interface.
 Installation
 ------------
 
-To install the minimum dependency version, run:
+Once you have a copy of the source, you can install it with pip_:
 
-.. code-block:: bash
+.. code-block:: console
 
-  pip install -e .
+   pip install -e .
 
-To install the optional dependencies for the quality control workflow, run:
+If you're interested in participating in the development of the **glamod-marine-processing**, you can install the package in development mode after cloning the repository from source:
 
-.. code-block:: bash
+.. code-block:: console
 
-  pip install -e .[qc]
-
-To install the optional dependencies for the observations workflow, run:
-
-.. code-block:: bash
-
-  pip install -e .[obs]
-
-To install the all the above for complete dependenciy version, run:
-
-.. code-block:: bash
-
-  pip install -e .[complete]
-
-This will also install all required dependencies.
+    pip install -e .[dev]      # Install optional development dependencies in addition
+    pip install -e .[docs]     # Install optional dependencies for the documentation in addition
+    pip install -e .[all]      # Install all the above for complete dependency version
