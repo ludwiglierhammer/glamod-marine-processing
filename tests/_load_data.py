@@ -19,21 +19,6 @@ def load_pub47(**kwargs):
     )
 
 
-def load_metoffice_qc(**kwargs):
-    """Load metoffice QC data from cdm-testdata."""
-    for qc_file in [
-        "AT_qc_202201_CCIrun.csv",
-        "DPT_qc_202201_CCIrun.csv",
-        "POS_qc_202201_CCIrun.csv",
-        "SLP_qc_202201_CCIrun.csv",
-        "SST_qc_202201_CCIrun.csv",
-        "SST_qc_202201_hires_CCIrun.csv",
-        "Variables_202201_CCIrun.csv",
-        "W_qc_202201_CCIrun.csv",
-    ]:
-        load_file(f"metoffice_qc/base/2022/01/{qc_file}", **kwargs)
-
-
 def load_input(dataset, level, settings, cache_dir):
     """Load level input data data from cdm-testdata."""
     p_level = settings.prev_level[level]

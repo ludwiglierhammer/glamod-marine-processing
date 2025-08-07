@@ -48,7 +48,7 @@ dev = [
   "codespell ==2.4.1",
   "coverage >=7.5.0",
   "coveralls >=4.0.1",
-  "deptry ==0.23.0",
+  "deptry ==0.23.1",
   "distributed >=2.0",
   "flake8 >=7.1.1",
   "flake8-rst-docstrings >=0.3.0",
@@ -78,7 +78,6 @@ docs = [
 all = ["glamod_marine_processing[dev]", "glamod_marine_processing[docs]"]
 
 [project.scripts]
-qc_suite = "glamod_marine_processing.cli_qc:qc_cli"
 obs_suite = "glamod_marine_processing.cli_obs:obs_cli"
 pre_proc = "glamod_marine_processing.cli_preproc:pre_proc_cli"
 post_proc = "glamod_marine_processing.cli_postproc:post_proc_cli"
@@ -126,7 +125,7 @@ values = [
 
 [tool.codespell]
 ignore-words-list = "freez, fO, ND, BUID, SME, ASII, inpt"
-skip = "glamod_marine_processing/qc_suite/imma/*.json, tests/*.py, glamod_marine_processing/qc_suite/imma/code_tables/*"
+skip = "tests/*.py"
 
 [tool.coverage.run]
 relative_files = true
@@ -135,7 +134,7 @@ omit = ["tests/*.py"]
 [tool.deptry]
 extend_exclude = ["docs"]
 ignore_notebooks = true
-pep621_dev_dependency_groups = ["all", "dev", "docs", "obs", "qc"]
+pep621_dev_dependency_groups = ["all", "dev", "docs"]
 
 [tool.deptry.package_module_name_map]
 "scikit-learn" = "sklearn"
@@ -270,7 +269,6 @@ max-complexity = 15
 "docs/*.py" = ["D100", "D101", "D102", "D103"]
 "tests/**/*test*.py" = ["D100", "D101", "D102", "D103", "N802", "S101"]
 "glamod_marine_processing/**/__init__.py" = ["F401", "F403"]
-"glamod_marine_processing/qc_suite/modules/*.py" = ["S101"]
 "glamod_marine_processing/obs_suite/scripts/*.py" = ["S105"]
 
 [tool.ruff.lint.pycodestyle]

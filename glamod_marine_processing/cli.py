@@ -297,12 +297,6 @@ class Options:
             default=False,
             help="Use already existing configuration file.",
         )
-        self.preprocessing = click.option(
-            "-preproc",
-            "--preprocessing",
-            is_flag=True,
-            help="Do some preprocessing for qc_suite only (qc_suite).",
-        )
         self.available_date_information = click.option(
             "-date_avail",
             "--available_date_information",
@@ -322,18 +316,6 @@ class Options:
             is_flag=True,
             help="Overwrite already existing data.",
         )
-        self.high_resolution_qc = click.option(
-            "-hi_qc",
-            "--high_resolution_qc",
-            is_flag=True,
-            help="Do high resolution QC for qc_suite only (qc_suite).",
-        )
-        self.quality_control = click.option(
-            "-qc",
-            "--quality_control",
-            is_flag=True,
-            help="Do quality control for qc_suite only (qc_suite).",
-        )
         self.source_pattern = click.option(
             "-sp",
             "--source_pattern",
@@ -343,11 +325,6 @@ class Options:
             "-p_id",
             "--prev_file_id",
             help="fileID of input file names. Default <YYYY><MM><RELEASE>",
-        )
-        self.external_qc_files = click.option(
-            "-ext_qc",
-            "--external_qc_files",
-            help="Path to external QC files. Default: <data_directory>/external_files (qc_suite).",
         )
         self.process_list = click.option(
             "-p_list",
