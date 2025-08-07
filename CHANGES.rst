@@ -9,7 +9,8 @@ Contributors to this version: Ludwig Lierhammer (:user:`ludwiglierhammer`)
 
 Announcements
 ^^^^^^^^^^^^^
-This release drops support for Python 3.9 and adds support for Python 3.13 (:pull:`76`).
+* This release drops support for Python 3.9 and adds support for Python 3.13 (:pull:`76`).
+* ``qc_suite`` is now in https://github.com/glamod/marine_qc (:pull:`117`).
 
 New features and enhancements
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -39,6 +40,7 @@ Breaking changes
 * ``obs_suite``: rename level3 output from <YYYY>-<MM>-<RELEASE>-<UPDATE>-pressure_data.psv to pressure-data-<YYYY>-<MM>-<RELEASE>-<UPDATE>.psv (:pull:`79`)
 * command-line interface: set default release from "release_7.0" to "release_8.0" (:issue:`113`, :pull:`102`)
 * extract blacklisting and some ICOADS specific functions from ``qc_suite```to ``obs_suite`` (:issue:`131`, :pull:`137`)
+* refactor ``qc_suite`` and move to https://github.com/glamod/marine_qc (:issue:`108`, :pull:`117`)
 
 v7.1.0 (2024-11-25)
 -------------------
