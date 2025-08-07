@@ -6,11 +6,11 @@
 Level 1e
 ========
 
-The level1e processing merges the data quality flags from the Met Office QC
-suite (add ref) with the data from level 1d. The QC software generates two sets
-of QC files, one basic QC of the observations from all platforms and an enhanced
-track and quality check for drifting buoy data. The basic QC flags are stored in
-*data_directory*/*release*/*dataset*/metoffice_qc/base/.
+The level1e adds quality control flags to the level1d data.
+For quality control, the MetOffice QC (https://github.com/glamod/marine_qc)
+is used.
+
+For more information to the quality control package see: https://marine-qc.readthedocs.io/en/latest/
 
 This script executes an array of monthly subjobs per source and deck included in
 the process_list. The configuration for the process is directly accessed from

@@ -21,8 +21,9 @@ Once installed you can use it as an command-line interface. For more information
 
 .. code-block:: console
 
-    qc_suite --help        # Quality control workflow help page
+    pre_proc --help        # Preprocessing steps to create level0 data
     obs_suite --help       # Observations workflow help page
+    post_proc  --help      # Postprocessing step to merge available level1a decks into one single deck
 
 Installation
 ------------
