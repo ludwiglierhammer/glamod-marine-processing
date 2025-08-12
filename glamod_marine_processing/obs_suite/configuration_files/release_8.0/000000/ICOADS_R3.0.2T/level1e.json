@@ -169,8 +169,8 @@
         }
       }
     },
-    "observation_check": {
-      "observation-at": {
+    "observations_check": {
+      "observations-at": {
         "MISSVAL": {
           "func": "do_missing_value_check",
           "names": {
@@ -232,7 +232,7 @@
           }
         }
       },
-      "observation-dpt": {
+      "observations-dpt": {
         "MISSVAL": {
           "func": "do_missing_value_check",
           "names": {
@@ -261,7 +261,7 @@
           }
         }
       },
-      "observation-slp": {
+      "observations-slp": {
         "MISSVAL": {
           "func": "do_missing_value_check",
           "names": {
@@ -287,7 +287,7 @@
           }
         }
       },
-      "observation-sst": {
+      "observations-sst": {
         "MISSVAL": {
           "func": "do_missing_value_check",
           "names": {
@@ -333,7 +333,7 @@
           }
         }
       },
-      "observation-wbt": {
+      "observations-wbt": {
         "MISSVAL": {
           "func": "do_missing_value_check",
           "names": {
@@ -341,7 +341,7 @@
           }
         }
       },
-      "observation-wd": {
+      "observations-wd": {
         "MISSVAL": {
           "func": "do_missing_value_check",
           "names": {
@@ -361,7 +361,7 @@
           }
         }
       },
-      "observation-ws": {
+      "observations-ws": {
         "MISSVAL": {
           "func": "do_missing_value_check",
           "names": {
