@@ -166,17 +166,6 @@
           "names": {
             "date": "report_timestamp"
           }
-        },
-        "DAY": {
-          "func": "do_day_check",
-          "names": {
-            "date": "report_timestamp",
-            "lat": "latitude",
-            "lon": "longitude"
-          },
-          "arguments": {
-            "time_since_sun_above_horizon": 1.0
-          }
         }
       }
     },
@@ -204,6 +193,17 @@
               193.15,
               338.15
             ]
+          }
+        },
+        "DAY": {
+          "func": "do_day_check",
+          "names": {
+            "date": "date_time",
+            "lat": "latitude",
+            "lon": "longitude"
+          },
+          "arguments": {
+            "time_since_sun_above_horizon": 1.0
           }
         },
         "CLIM1": {
