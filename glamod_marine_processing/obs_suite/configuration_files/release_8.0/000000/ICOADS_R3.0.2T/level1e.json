@@ -6,407 +6,383 @@
   "job_time_min": "59",
   "history_explain": "Position, tracking and parameter QC flags added",
   "qc_settings": {
-    "preprocessing": {
-      "observations-at": {
-        "climatology": {
-          "func": "get_climatological_value",
-          "names": {
-            "lat": "latitude",
-            "lon": "longitude",
-            "date": "date_time"
+    "individual_reports": {
+      "preprocessing": {
+        "observations-at": {
+          "climatology": {
+            "func": "get_climatological_value",
+            "names": {
+              "lat": "latitude",
+              "lon": "longitude",
+              "date": "date_time"
+            },
+            "inputs": {
+              "file_name": "ERAClimatologies/t2m_pentad_1by1marine_ERA-Interim_data_19792015.nc",
+              "clim_name": "t2m_clims",
+              "time_axis": "pentad_time",
+              "target_units": "K",
+              "source_units": "degC"
+            }
           },
-          "inputs": {
-            "file_name": "ERAClimatologies/t2m_pentad_1by1marine_ERA-Interim_data_19792015.nc",
-            "clim_name": "t2m_clims",
-            "time_axis": "pentad_time",
-            "target_units": "K",
-            "source_units": "degC"
+          "standard_deviation": {
+            "func": "get_climatological_value",
+            "names": {
+              "lat": "latitude",
+              "lon": "longitude",
+              "date": "date_time"
+            },
+            "inputs": {
+              "file_name": "ERAClimatologies/t2m_pentad_1by1marine_ERA-Interim_data_19792015.nc",
+              "clim_name": "t2m_stdevs",
+              "time_axis": "pentad_time"
+            }
           }
         },
-        "standard_deviation": {
-          "func": "get_climatological_value",
-          "names": {
-            "lat": "latitude",
-            "lon": "longitude",
-            "date": "date_time"
+        "observations-dpt": {
+          "climatology": {
+            "func": "get_climatological_value",
+            "names": {
+              "lat": "latitude",
+              "lon": "longitude",
+              "date": "date_time"
+            },
+            "inputs": {
+              "file_name": "ERAClimatologies/td2m_pentad_1by1marine_ERA-Interim_data_19792015.nc",
+              "clim_name": "td2m_clims",
+              "time_axis": "pentad_time",
+              "target_units": "K",
+              "source_units": "degC"
+            }
           },
-          "inputs": {
-            "file_name": "ERAClimatologies/t2m_pentad_1by1marine_ERA-Interim_data_19792015.nc",
-            "clim_name": "t2m_stdevs",
-            "time_axis": "pentad_time"
+          "standard_deviation": {
+            "func": "get_climatological_value",
+            "names": {
+              "lat": "latitude",
+              "lon": "longitude",
+              "date": "date_time"
+            },
+            "inputs": {
+              "file_name": "ERAClimatologies/td2m_pentad_1by1marine_ERA-Interim_data_19792015.nc",
+              "clim_name": "td2m_stdevs",
+              "time_axis": "pentad_time"
+            }
           }
         },
-        "stdev1": {
-          "file_name": "SST_buddy_one_ob_to_box_avg.nc",
-          "clim_name": "SST"
+        "observations-sst": {
+          "climatology": {
+            "func": "get_climatological_value",
+            "names": {
+              "lat": "latitude",
+              "lon": "longitude",
+              "date": "date_time"
+            },
+            "inputs": {
+              "file_name": "SST/HadSST2_daily_1x1_climatology.nc",
+              "clim_name": "sst",
+              "target_units": "K",
+              "source_units": "degC"
+            }
+          },
+          "standard_deviation": {
+            "file_name": "SST/Old_SST_stdev_climatology.nc",
+            "clim_name": "sst"
+          }
         },
-        "stdev2": {
-          "file_name": "SST_buddy_one_ob_to_box_avg.nc",
-          "clim_name": "SST"
-        },
-        "stdev3": {
-          "file_name": "SST_buddy_avg_sampling",
-          "clim_name": "SST"
+        "observations-slp": {
+          "climatology": {
+            "func": "get_climatological_value",
+            "names": {
+              "lat": "latitude",
+              "lon": "longitude",
+              "date": "date_time"
+            },
+            "inputs": {
+              "file_name": "SLP/SLP_pentad_climatology.nc",
+              "clim_name": "slp",
+              "target_units": "Pa",
+              "source_units": "hPa"
+            }
+          },
+          "standard_deviation": {
+            "func": "get_climatological_value",
+            "names": {
+              "lat": "latitude",
+              "lon": "longitude",
+              "date": "date_time"
+            },
+            "inputs": {
+              "file_name": "SLP/SLP_pentad_stdev_climatology.nc",
+              "clim_name": "slp",
+              "target_units": "Pa",
+              "source_units": "hPa"
+            }
+          }
         }
       },
-      "observations-dpt": {
-        "climatology": {
-          "func": "get_climatological_value",
-          "names": {
-            "lat": "latitude",
-            "lon": "longitude",
-            "date": "date_time"
-          },
-          "inputs": {
-            "file_name": "ERAClimatologies/td2m_pentad_1by1marine_ERA-Interim_data_19792015.nc",
-            "clim_name": "td2m_clims",
-            "time_axis": "pentad_time",
-            "target_units": "K",
-            "source_units": "degC"
-          }
-        },
-        "standard_deviation": {
-          "func": "get_climatological_value",
-          "names": {
-            "lat": "latitude",
-            "lon": "longitude",
-            "date": "date_time"
-          },
-          "inputs": {
-            "file_name": "ERAClimatologies/td2m_pentad_1by1marine_ERA-Interim_data_19792015.nc",
-            "clim_name": "td2m_stdevs",
-            "time_axis": "pentad_time"
-          }
-        }
-      },
-      "observations-sst": {
-        "climatology": {
-          "func": "get_climatological_value",
-          "names": {
-            "lat": "latitude",
-            "lon": "longitude",
-            "date": "date_time"
-          },
-          "inputs": {
-            "file_name": "SST/HadSST2_daily_1x1_climatology.nc",
-            "clim_name": "sst",
-            "target_units": "K",
-            "source_units": "degC"
-          }
-        },
-        "standard_deviation": {
-          "file_name": "SST/Old_SST_stdev_climatology.nc",
-          "clim_name": "sst"
-        },
-        "stdev1": {
-          "file_name": "SST_buddy_one_ob_to_box_avg.nc",
-          "clim_name": "SST"
-        },
-        "stdev2": {
-          "file_name": "SST_buddy_one_ob_to_box_avg.nc",
-          "clim_name": "SST"
-        },
-        "stdev3": {
-          "file_name": "SST_buddy_avg_sampling",
-          "clim_name": "SST"
-        }
-      },
-      "observations-slp": {
-        "climatology": {
-          "func": "get_climatological_value",
-          "names": {
-            "lat": "latitude",
-            "lon": "longitude",
-            "date": "date_time"
-          },
-          "inputs": {
-            "file_name": "SLP/SLP_pentad_climatology.nc",
-            "clim_name": "slp",
-            "target_units": "Pa",
-            "source_units": "hPa"
-          }
-        },
-        "standard_deviation": {
-          "func": "get_climatological_value",
-          "names": {
-            "lat": "latitude",
-            "lon": "longitude",
-            "date": "date_time"
-          },
-          "inputs": {
-            "file_name": "SLP/SLP_pentad_stdev_climatology.nc",
-            "clim_name": "slp",
-            "target_units": "Pa",
-            "source_units": "hPa"
-          }
-        }
-      }
-    },
-    "position_check": {
       "header": {
-        "POS": {
-          "func": "do_position_check",
-          "names": {
-            "lat": "latitude",
-            "lon": "longitude"
+        "position_check": {
+          "POS": {
+            "func": "do_position_check",
+            "names": {
+              "lat": "latitude",
+              "lon": "longitude"
+            }
+          }
+        },
+        "time_check": {
+          "DATE": {
+            "func": "do_date_check",
+            "names": {
+              "date": "report_timestamp"
+            }
+          },
+          "TIME": {
+            "func": "do_time_check",
+            "names": {
+              "date": "report_timestamp"
+            }
+          }
+        }
+      },
+      "observations": {
+        "observations-at": {
+          "MISSVAL": {
+            "func": "do_missing_value_check",
+            "names": {
+              "value": "observation_value"
+            }
+          },
+          "MISSCLIM": {
+            "func": "do_missing_value_clim_check",
+            "arguments": {
+              "climatology": "__preprocessed__"
+            }
+          },
+          "HLIMITS": {
+            "func": "do_hard_limit_check",
+            "names": {
+              "value": "observation_value"
+            },
+            "arguments": {
+              "limits": [
+                193.15,
+                338.15
+              ]
+            }
+          },
+          "DAY": {
+            "func": "do_day_check",
+            "names": {
+              "date": "date_time",
+              "lat": "latitude",
+              "lon": "longitude"
+            },
+            "arguments": {
+              "time_since_sun_above_horizon": 1.0
+            }
+          },
+          "CLIM1": {
+            "func": "do_climatology_check",
+            "names": {
+              "value": "observation_value"
+            },
+            "arguments": {
+              "climatology": "__preprocessed__",
+              "maximum_anomaly": 10.0
+            }
+          },
+          "CLIM2": {
+            "func": "do_climatology_check",
+            "names": {
+              "value": "observation_value"
+            },
+            "arguments": {
+              "climatology": "__preprocessed__",
+              "standard_deviation": "__preprocessed__",
+              "standard_deviation_limits": [
+                1.0,
+                4.0
+              ],
+              "maximum_anomaly": 5.5
+            }
+          }
+        },
+        "observations-dpt": {
+          "MISSVAL": {
+            "func": "do_missing_value_check",
+            "names": {
+              "value": "observation_value"
+            }
+          },
+          "MISSCLIM": {
+            "func": "do_missing_value_clim_check",
+            "arguments": {
+              "climatology": "__preprocessed__"
+            }
+          },
+          "CLIM2": {
+            "func": "do_climatology_check",
+            "names": {
+              "value": "observation_value"
+            },
+            "arguments": {
+              "climatology": "__preprocessed__",
+              "standard_deviation": "__preprocessed__",
+              "standard_deviation_limits": [
+                1.0,
+                4.0
+              ],
+              "maximum_anomaly": 5.5
+            }
+          }
+        },
+        "observations-slp": {
+          "MISSVAL": {
+            "func": "do_missing_value_check",
+            "names": {
+              "value": "observation_value"
+            }
+          },
+          "MISSCLIM": {
+            "func": "do_missing_value_clim_check",
+            "arguments": {
+              "climatology": "__preprocessed__"
+            }
+          },
+          "CLIM3": {
+            "func": "do_climatology_check",
+            "names": {
+              "value": "observation_value"
+            },
+            "arguments": {
+              "climatology": "__preprocessed__",
+              "standard_deviation": "__preprocessed__",
+              "maximum_anomaly": 3.0,
+              "lowbar": 10.0
+            }
+          }
+        },
+        "observations-sst": {
+          "MISSVAL": {
+            "func": "do_missing_value_check",
+            "names": {
+              "value": "observation_value"
+            }
+          },
+          "MISSCLIM": {
+            "func": "do_missing_value_clim_check",
+            "arguments": {
+              "climatology": "__preprocessed__"
+            }
+          },
+          "HLIMITS": {
+            "func": "do_hard_limit_check",
+            "names": {
+              "value": "observation_value"
+            },
+            "arguments": {
+              "limits": [
+                268.15,
+                318.15
+              ]
+            }
+          },
+          "FREEZE": {
+            "func": "do_sst_freeze_check",
+            "names": {
+              "sst": "observation_value"
+            },
+            "arguments": {
+              "freezing_point": 271.35,
+              "freeze_check_n_sigma": 2.0
+            }
+          },
+          "CLIM1": {
+            "func": "do_climatology_check",
+            "names": {
+              "value": "observation_value"
+            },
+            "arguments": {
+              "climatology": "__preprocessed__",
+              "maximum_anomaly": 8.0
+            }
+          }
+        },
+        "observations-wbt": {
+          "MISSVAL": {
+            "func": "do_missing_value_check",
+            "names": {
+              "value": "observation_value"
+            }
+          }
+        },
+        "observations-wd": {
+          "MISSVAL": {
+            "func": "do_missing_value_check",
+            "names": {
+              "value": "observation_value"
+            }
+          },
+          "HLIMITS": {
+            "func": "do_hard_limit_check",
+            "names": {
+              "value": "observation_value"
+            },
+            "arguments": {
+              "limits": [
+                0,
+                360
+              ]
+            }
+          }
+        },
+        "observations-ws": {
+          "MISSVAL": {
+            "func": "do_missing_value_check",
+            "names": {
+              "value": "observation_value"
+            }
+          },
+          "HLIMITS": {
+            "func": "do_hard_limit_check",
+            "names": {
+              "value": "observation_value"
+            },
+            "arguments": {
+              "limits": [
+                0.0,
+                50.0
+              ]
+            }
+          }
+        },
+        "combined": {
+          "SUPERSAT": {
+            "func": "do_supersaturation_check",
+            "tables": {
+              "dpt": "observation-dpt",
+              "at2": "observation-at"
+            },
+            "names": {
+              "dpt": "observation_value",
+              "at2": "observation_value"
+            }
+          },
+          "WIND": {
+            "func": "do_wind_consistency_check",
+            "tables": {
+              "wind_speed": "observation-ws",
+              "wind_direction": "observation-wd"
+            },
+            "names": {
+              "wind_speed": "observation_value",
+              "wind_direction": "observation_value"
+            }
           }
         }
       }
     },
-    "time_check": {
-      "header": {
-        "DATE": {
-          "func": "do_date_check",
-          "names": {
-            "date": "report_timestamp"
-          }
-        },
-        "TIME": {
-          "func": "do_time_check",
-          "names": {
-            "date": "report_timestamp"
-          }
-        }
-      }
-    },
-    "observations_check": {
-      "observations-at": {
-        "MISSVAL": {
-          "func": "do_missing_value_check",
-          "names": {
-            "value": "observation_value"
-          }
-        },
-        "MISSCLIM": {
-          "func": "do_missing_value_clim_check",
-          "arguments": {
-            "climatology": "__preprocessed__"
-          }
-        },
-        "HLIMITS": {
-          "func": "do_hard_limit_check",
-          "names": {
-            "value": "observation_value"
-          },
-          "arguments": {
-            "limits": [
-              193.15,
-              338.15
-            ]
-          }
-        },
-        "DAY": {
-          "func": "do_day_check",
-          "names": {
-            "date": "date_time",
-            "lat": "latitude",
-            "lon": "longitude"
-          },
-          "arguments": {
-            "time_since_sun_above_horizon": 1.0
-          }
-        },
-        "CLIM1": {
-          "func": "do_climatology_check",
-          "names": {
-            "value": "observation_value"
-          },
-          "arguments": {
-            "climatology": "__preprocessed__",
-            "maximum_anomaly": 10.0
-          }
-        },
-        "CLIM2": {
-          "func": "do_climatology_check",
-          "names": {
-            "value": "observation_value"
-          },
-          "arguments": {
-            "climatology": "__preprocessed__",
-            "standard_deviation": "__preprocessed__",
-            "standard_deviation_limits": [
-              1.0,
-              4.0
-            ],
-            "maximum_anomaly": 5.5
-          }
-        }
-      },
-      "observations-dpt": {
-        "MISSVAL": {
-          "func": "do_missing_value_check",
-          "names": {
-            "value": "observation_value"
-          }
-        },
-        "MISSCLIM": {
-          "func": "do_missing_value_clim_check",
-          "arguments": {
-            "climatology": "__preprocessed__"
-          }
-        },
-        "CLIM2": {
-          "func": "do_climatology_check",
-          "names": {
-            "value": "observation_value"
-          },
-          "arguments": {
-            "climatology": "__preprocessed__",
-            "standard_deviation": "__preprocessed__",
-            "standard_deviation_limits": [
-              1.0,
-              4.0
-            ],
-            "maximum_anomaly": 5.5
-          }
-        }
-      },
-      "observations-slp": {
-        "MISSVAL": {
-          "func": "do_missing_value_check",
-          "names": {
-            "value": "observation_value"
-          }
-        },
-        "MISSCLIM": {
-          "func": "do_missing_value_clim_check",
-          "arguments": {
-            "climatology": "__preprocessed__"
-          }
-        },
-        "CLIM3": {
-          "func": "do_climatology_check",
-          "names": {
-            "value": "observation_value"
-          },
-          "arguments": {
-            "climatology": "__preprocessed__",
-            "standard_deviation": "__preprocessed__",
-            "maximum_anomaly": 3.0,
-            "lowbar": 10.0
-          }
-        }
-      },
-      "observations-sst": {
-        "MISSVAL": {
-          "func": "do_missing_value_check",
-          "names": {
-            "value": "observation_value"
-          }
-        },
-        "MISSCLIM": {
-          "func": "do_missing_value_clim_check",
-          "arguments": {
-            "climatology": "__preprocessed__"
-          }
-        },
-        "HLIMITS": {
-          "func": "do_hard_limit_check",
-          "names": {
-            "value": "observation_value"
-          },
-          "arguments": {
-            "limits": [
-              268.15,
-              318.15
-            ]
-          }
-        },
-        "FREEZE": {
-          "func": "do_sst_freeze_check",
-          "names": {
-            "sst": "observation_value"
-          },
-          "arguments": {
-            "freezing_point": 271.35,
-            "freeze_check_n_sigma": 2.0
-          }
-        },
-        "CLIM1": {
-          "func": "do_climatology_check",
-          "names": {
-            "value": "observation_value"
-          },
-          "arguments": {
-            "climatology": "__preprocessed__",
-            "maximum_anomaly": 8.0
-          }
-        }
-      },
-      "observations-wbt": {
-        "MISSVAL": {
-          "func": "do_missing_value_check",
-          "names": {
-            "value": "observation_value"
-          }
-        }
-      },
-      "observations-wd": {
-        "MISSVAL": {
-          "func": "do_missing_value_check",
-          "names": {
-            "value": "observation_value"
-          }
-        },
-        "HLIMITS": {
-          "func": "do_hard_limit_check",
-          "names": {
-            "value": "observation_value"
-          },
-          "arguments": {
-            "limits": [
-              0,
-              360
-            ]
-          }
-        }
-      },
-      "observations-ws": {
-        "MISSVAL": {
-          "func": "do_missing_value_check",
-          "names": {
-            "value": "observation_value"
-          }
-        },
-        "HLIMITS": {
-          "func": "do_hard_limit_check",
-          "names": {
-            "value": "observation_value"
-          },
-          "arguments": {
-            "limits": [
-              0.0,
-              50.0
-            ]
-          }
-        }
-      },
-      "combined": {
-        "SUPERSAT": {
-          "func": "do_supersaturation_check",
-          "tables": {
-            "dpt": "observation-dpt",
-            "at2": "observation-at"
-          },
-          "names": {
-            "dpt": "observation_value",
-            "at2": "observation_value"
-          }
-        },
-        "WIND": {
-          "func": "do_wind_consistency_check",
-          "tables": {
-            "wind_speed": "observation-ws",
-            "wind_direction": "observation-wd"
-          },
-          "names": {
-            "wind_speed": "observation_value",
-            "wind_direction": "observation_value"
-          }
-        }
-      }
-    },
-    "track_check": {
+    "sequential_reports": {
       "header": {
         "TRACK": {
           "func": "do_track_check",
@@ -500,7 +476,55 @@
         }
       }
     },
-    "buddy_check": {
+    "grouped_reports": {
+      "preprocessing": {
+        "observations-at": {
+          "climatology": {
+            "inputs": "__individual_reports__"
+          },
+          "stdev1": {
+            "inputs": {
+              "file_name": "SST_buddy_one_ob_to_box_avg.nc",
+              "clim_name": "SST"
+            }
+          },
+          "stdev2": {
+            "inputs": {
+              "file_name": "SST_buddy_one_ob_to_box_avg.nc",
+              "clim_name": "SST"
+            }
+          },
+          "stdev3": {
+            "inputs": {
+              "file_name": "SST_buddy_avg_sampling",
+              "clim_name": "SST"
+            }
+          }
+        },
+        "observations-sst": {
+          "climatology": {
+            "inputs": "__individual_reports__"
+          },
+          "stdev1": {
+            "inputs": {
+              "file_name": "SST_buddy_one_ob_to_box_avg.nc",
+              "clim_name": "SST"
+            }
+          },
+          "stdev2": {
+            "inputs": {
+              "file_name": "SST_buddy_one_ob_to_box_avg.nc",
+              "clim_name": "SST"
+            }
+          },
+          "stdev3": {
+            "inputs": {
+              "file_name": "SST_buddy_avg_sampling",
+              "clim_name": "SST"
+            }
+          }
+        }
+      },
       "observations": {
         "BAYESIAN": {
           "func": "do_bayesian_buddy_check",
