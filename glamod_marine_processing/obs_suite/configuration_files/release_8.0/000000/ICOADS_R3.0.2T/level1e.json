@@ -84,8 +84,16 @@
             }
           },
           "standard_deviation": {
-            "file_name": "SST/Old_SST_stdev_climatology.nc",
-            "clim_name": "sst"
+            "func": "get_climatological_value",
+            "names": {
+              "lat": "latitude",
+              "lon": "longitude",
+              "date": "date_time"
+            },
+            "inputs": {
+              "file_name": "SST/HadSST2_pentad_stdev_climatology.nc",
+              "clim_name": "sst"
+            }
           }
         },
         "observations-slp": {
