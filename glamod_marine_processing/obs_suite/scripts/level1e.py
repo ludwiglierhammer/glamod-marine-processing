@@ -130,6 +130,7 @@ import numpy as np
 import pandas as pd
 from _utilities import (
     date_handler,
+    paths_exist,
     read_cdm_tables,
     save_quicklook,
     script_setup,
@@ -137,6 +138,7 @@ from _utilities import (
 )
 from cdm_reader_mapper.cdm_mapper.tables.tables import get_cdm_atts
 from marine_qc import qc_grouped_reports, qc_individual_reports, qc_sequential_reports
+from marine_qc.external_clim import Climatology
 from marine_qc.multiple_row_checks import do_multiple_row_check
 
 reload(logging)  # This is to override potential previous config of logging
@@ -158,16 +160,35 @@ def get_single_qc_flag(df):
 
 def compare_quality_checks(df):
     """Compare entries with location_quality and report_time_quality."""
-    df = df.mask(location_quality == "2", "1")
-    df = df.mask(report_time_quality == "4", "1")
-    df = df.mask(report_time_quality == "5", "1")
+    df = df.mask(location_quality == 2, 1)
+    df = df.mask(report_time_quality == 4, 1)
+    df = df.mask(report_time_quality == 5, 1)
     return df
+
+
+def update_filenames(d):
+    """Ad external file path to file names."""
+    if isinstance(d, dict):
+        for k, v in d.items():
+            if k == "file_name":
+                d[k] = os.path.join(ext_path, v)
+            elif isinstance(v, dict):
+                update_filenames(v)
+
+
+def open_netcdffiles(d):
+    """Open filenames as Climatology objects."""
+    if isinstance(d, dict):
+        for k, v in d.items():
+            if k == "inputs":
+                d[k] = Climatology.open_netcdf_file(**v)
+            elif isinstance(v, dict):
+                open_netcdffiles(v)
 
 
 # Some other parameters -------------------------------------------------------
 cdm_atts = get_cdm_atts()
 obs_tables = [x for x in cdm_atts.keys() if x != "header"]
-# obs_tables = []
 
 try:
     history_tstmp = datetime.datetime.now(datetime.UTC).strftime("%Y-%m-%d %H:%M:%S")
@@ -192,8 +213,11 @@ process_options = [
     "no_qc_suite",
 ]
 params = script_setup(process_options, sys.argv)
-
 return_method = "failed"
+
+# Set file path to external files
+ext_path = os.path.join(params.data_path, "external_files")
+paths_exist(ext_path)
 
 # Do some additional checks before clicking go, do we have a valid header?
 header_filename = params.filename
@@ -256,38 +280,42 @@ for table, df in data_dict.items():
 for table in tables_in:
     if table not in data_dict.keys():
         continue
-    data = data_dict[table]
+    data_df = data_dict[table]
     if table == "header":
-        data["platform_type"] = data["platform_type"].astype(int)
-        data["latitude"] = data["latitude"].astype(float)
-        data["longitude"] = data["longitude"].astype(float)
-        data["report_timestamp"] = pd.to_datetime(
-            data["report_timestamp"],
+        data_df["platform_type"] = data_df["platform_type"].astype(int)
+        data_df["latitude"] = data_df["latitude"].astype(float)
+        data_df["longitude"] = data_df["longitude"].astype(float)
+        data_df["report_timestamp"] = pd.to_datetime(
+            data_df["report_timestamp"],
             format="%Y-%m-%d %H:%M:%S",
             errors="coerce",
         )
-        data["station_speed"] = data["station_speed"].astype(float)
-        data["station_course"] = data["station_course"].astype(float)
-        data["report_quality"] = data["report_quality"].astype(int)
-        data["location_quality"] = data["location_quality"].astype(int)
-        data["report_time_quality"] = data["report_time_quality"].astype(int)
+        data_df["station_speed"] = data_df["station_speed"].astype(float)
+        data_df["station_course"] = data_df["station_course"].astype(float)
+        data_df["report_quality"] = data_df["report_quality"].astype(int)
+        data_df["location_quality"] = data_df["location_quality"].astype(int)
+        data_df["report_time_quality"] = data_df["report_time_quality"].astype(int)
     else:
-        data["observation_value"] = data["observation_value"].astype(float)
-        data["latitude"] = data["latitude"].astype(float)
-        data["longitude"] = data["longitude"].astype(float)
-        data["date_time"] = pd.to_datetime(
-            data["date_time"],
+        data_df["observation_value"] = data_df["observation_value"].astype(float)
+        data_df["latitude"] = data_df["latitude"].astype(float)
+        data_df["longitude"] = data_df["longitude"].astype(float)
+        data_df["date_time"] = pd.to_datetime(
+            data_df["date_time"],
             format="%Y-%m-%d %H:%M:%S",
             errors="coerce",
         )
-        data["quality_flag"] = data["quality_flag"].astype(int)
+        data_df["quality_flag"] = data_df["quality_flag"].astype(int)
 
 # DO THE DATA PROCESSING ------------------------------------------------------
 
 # 1. Observational checks
 logging.info("1. Do individual checks")
+qc_dict_ind = params.qc_settings.get("individual_reports")
+
 # 1.1. Header
 logging.info("1.1. Do header checks")
+qc_dict_ind_h = qc_dict_ind.get("header", {})
+
 header_df = data_dict["header"].copy()
 idx_blck = header_df[header_df["report_quality"] == 6].index
 idx_gnrc = header_df[header_df["report_quality"] == 88].index
@@ -307,13 +335,14 @@ data_pos = data[~location_quality.isin([2])]
 idx_pos = data_pos.index
 
 # Do position check
-qc_dict = params.qc_settings.get("position_check", {}).get("header", {})
+qc_dict_pos = qc_dict_ind_h.get("position_check", {})
 pos_qc = do_multiple_row_check(
     data=data_pos,
-    qc_dict=qc_dict,
+    qc_dict=qc_dict_pos,
     return_method=return_method,
 )
 pos_qc = get_single_qc_flag(pos_qc)
+pos_qc = pos_qc.replace({1: 2, 2: 3})
 location_quality.loc[idx_pos] = pos_qc
 
 # 1.1.2. Time check
@@ -323,18 +352,19 @@ data_time = data[~report_time_quality.isin([4, 5])]
 idx_time = data_time.index
 
 # Do time check
-qc_dict = params.qc_settings.get("time_check", {}).get("header", {})
+qc_dict_tme = qc_dict_ind_h.get("time_check", {})
 time_qc = do_multiple_row_check(
     data=data_time,
-    qc_dict=qc_dict,
+    qc_dict=qc_dict_tme,
     return_method=return_method,
 )
 time_qc = get_single_qc_flag(time_qc)
-report_time_quality.loc[idx_time] = time_qc
+time_qc = time_qc.replace({1: 5, 2: 4, 3: 4})
+report_time_quality.loc[idx_time][time_qc != 0] = time_qc[time_qc != 0]
 
 # 1.1.3. Report quality
 logging.info("1.1.3. Set report quality")
-report_quality = compare_quality_checks(report_time_quality)
+report_quality = compare_quality_checks(report_quality)
 
 # 1.2. Observations
 logging.info("1.2. Do observations checks")
@@ -346,31 +376,35 @@ for obs_table in obs_tables:
     logging.info(f"1.2.1. Do {obs_table} check")
     data = data_dict[obs_table].copy()
     # Select observation quality_flag
-    quality_flag = data["quality_flag"]
-    quality_flag.loc[idx_blck] = 6
+    quality_flag = data["quality_flag"].copy()
+    idx_blck_obs = idx_blck.intersection(quality_flag.index)
+    quality_flag.loc[idx_blck_obs] = 6
 
     # Deselect rows on blacklist
-    data = data.drop(index=idx_blck)
+    data = data.drop(index=idx_blck_obs)
 
     # Deselect already failed quality_flags
-    data_qc = data[~quality_flag.isin([1])]
+    data_qc = data.loc[~quality_flag.isin([1])]
     # Deselect already failed report_qualities
-    data_qc = data_qc[~report_quality.isin([1])]
+    data_qc = data_qc.loc[~report_quality.isin([1])]
     idx_qc = data_qc.index
 
-    preproc_dict = params.qc_settings.get("preprocessing", {}).get(obs_table, {})
-    qc_dict = params.qc_settings.get("observations_check", {}).get(obs_table, {})
+    preproc_dict = qc_dict_ind.get("preprocessing", {}).get(obs_table, {})
+    qc_dict_obs = qc_dict_ind.get("observations", {}).get(obs_table, {})
+    update_filenames(preproc_dict)
+    open_netcdffiles(preproc_dict)
     obs_qc = do_multiple_row_check(
         data=data_qc,
         preproc_dict=preproc_dict,
-        qc_dict=qc_dict,
+        qc_dict=qc_dict_obs,
         return_method=return_method,
     )
     obs_qc = get_single_qc_flag(obs_qc)
 
     # Flag quality_flag
-    quality_flag.loc[idx_qc] = obs_qc["QC_FLAG"]
+    quality_flag.loc[idx_qc] = obs_qc
     quality_flags[obs_table] = compare_quality_checks(quality_flag)
+
 
 # 1.2.2. Do combined observation check
 qc_dict = params.qc_settings.get("observations_check", {}).get("combined", {})
@@ -389,6 +423,7 @@ for qc_name in qc_dict.keys():
     for table in tables.values():
         quality_flags[table].loc[idx_failed] = qc_flag.loc[idx_failed]
 
+print(quality_flags)
 exit()
 # 2. Track check
 # 2.1. Header
