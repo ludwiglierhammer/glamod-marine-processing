@@ -308,7 +308,7 @@ for table in tables_in:
 
 # DO THE DATA PROCESSING ------------------------------------------------------
 
-# 1. Observational checks
+# 1 Individual checks
 logging.info("1. Do individual checks")
 qc_dict_ind = params.qc_settings.get("individual_reports")
 
@@ -370,10 +370,11 @@ report_quality = compare_quality_checks(report_quality)
 logging.info("1.2. Do observations checks")
 quality_flags = {}
 # 1.2.1. Do observation check
+i = 1
 for obs_table in obs_tables:
     if obs_table not in data_dict.keys():
         continue
-    logging.info(f"1.2.1. Do {obs_table} check")
+    logging.info(f"1.2.{i}. Do {obs_table} check")
     data = data_dict[obs_table].copy()
     # Select observation quality_flag
     quality_flag = data["quality_flag"].copy()
@@ -404,88 +405,137 @@ for obs_table in obs_tables:
     # Flag quality_flag
     quality_flag.loc[idx_qc] = obs_qc
     quality_flags[obs_table] = compare_quality_checks(quality_flag)
-
+    i += 1
 
 # 1.2.2. Do combined observation check
-qc_dict = params.qc_settings.get("observations_check", {}).get("combined", {})
-for qc_name in qc_dict.keys():
-    logging.info(f"1.2.2. Do {qc_name} check")
-    func = getattr(qc_individual_reports, qc_dict[qc_name]["func"])
-    tables = qc_dict[qc_name]["tables"]
-    names = qc_dict[qc_name]["names"]
+qc_dict_comb = qc_dict_ind.get("observations", {}).get("combined", {})
+for qc_name in qc_dict_comb.keys():
+    logging.info(f"1.2.{i}. Do combined {qc_name} check")
+    func = getattr(qc_individual_reports, qc_dict_comb[qc_name]["func"])
+    tables = qc_dict_comb[qc_name]["tables"]
+    names = qc_dict_comb[qc_name]["names"]
     inputs = {}
     for ivar, table in tables.items():
         data = data_dict[table].copy()
         column = names[ivar]
         inputs[ivar] = data[column]
+    series_list = list(inputs.values())
+    common_indexes = set(series_list[0].index).intersection(
+        *(s.index for s in series_list[1:])
+    )
+    common_indexes = list(common_indexes)
+    for ivar, series in inputs.items():
+        inputs[ivar] = inputs[ivar].loc[common_indexes]
     qc_flag = func(**inputs)
     idx_failed = qc_flag[qc_flag.isin([1])].index
     for table in tables.values():
         quality_flags[table].loc[idx_failed] = qc_flag.loc[idx_failed]
+    i += 1
 
-print(quality_flags)
-exit()
-# 2. Track check
+# 2. Sequential checks
+logging.info("2. Do sequential checks")
+qc_dict_seq = params.qc_settings.get("sequential_reports")
 # 2.1. Header
+logging.info("2.1. Do header checks")
+qc_dict_seq_h = qc_dict_seq.get("header", {})
 # Deselect rows on blacklist
-data = header_df.drop(index=idx_blck)
-# Deselect already failed report_qualities
-data = data[~report_quality.isin([[1]])]
+data_h = header_df.drop(index=idx_blck)
 # Deselect rows containing generic ids
-data = data.drop(index=idx_gnrc)
+data_h = data_h.drop(index=idx_gnrc)
+i = 1
+for qc_name in qc_dict_seq_h.keys():
+    logging.info(f"2.1.{i}. Do {qc_name} check.")
+    # Deselect already failed report_qualities
+    data_h_check = data_h[~report_quality.loc[data_h.index].isin([1])]
+    qc_dict_check = qc_dict_seq_h[qc_name]
+    func = getattr(qc_sequential_reports, qc_dict_check["func"])
+    names = qc_dict_check.get("names", {})
+    kwargs = qc_dict_check.get("arguments", {})
+    idx_list = []
+    for ps_id, subset in data_h_check.groupby("primary_station_id"):
+        inputs = {k: subset[v] for k, v in names.items()}
+        track_qc = func(**inputs, **kwargs)
+        idx_failed = track_qc.index[track_qc == 1]
+        if not idx_failed.empty:
+            idx_list.extend(idx_failed)
 
-qc_dict = params.qc_settings.get("track_check", {}).get("header", {})
-for qc_name in qc_dict.keys():
-    func = getattr(qc_sequential_reports, qc_dict[qc_name]["func"])
-    names = qc_dict[qc_name].get("names", {})
-    inputs = {k: data[v] for k, v in names.items()}
-    kwargs = qc_dict[qc_name].get("arguments", {})
-    track_qc = func(**inputs, **kwargs)
-    idx_failed = track_qc[track_qc.isin([1])].index
-    report_quality.loc[idx_failed] = track_qc.loc[idx_failed]
+    location_quality.loc[idx_list] = 1
+    report_quality.loc[idx_list] = 1
+
+    i += 1
 
 # 2.2. Observations
+logging.info("2.2. Do observation checks")
 # 2.2.1. Do observation track check
-qc_dict = params.qc_settings.get("track_check", {}).get("observations", {})
+qc_dict_seq_o = qc_dict_seq.get("observations", {})
+i = 1
 for obs_table in obs_tables:
     if obs_table not in data_dict.keys():
         continue
-    quality_flag = quality_flags[obs_table]
-    data = data_dict[obs_table].copy()
-    # Deselect already failed quality_flags
-    data = data[~quality_flag.isin([1])]
+    logging.info(f"2.2.{i}. Do {obs_table} checks")
+    quality_flag = quality_flags[obs_table].copy()
+    data_obs = data_dict[obs_table].copy()
     # Deselect rows on blacklist
-    data = data.drop(index=idx_blck)
-    # Deselect rows containing generic ids
-    data = data.drop(index=idx_gnrc)
+    idx_blck_obs = idx_blck.intersection(quality_flag.index)
+    data_obs = data_obs.drop(index=idx_blck_obs)
 
-    for qc_name in qc_dict.keys():
-        func = getattr(qc_sequential_reports, qc_dict[qc_name]["func"])
-        names = qc_dict[qc_name].get("names", {})
-        inputs = {k: data[v] for k, v in names.items()}
-        kwargs = qc_dict[qc_name].get("arguments", {})
-        qc_flag = func(**inputs, **kwargs)
-        idx_failed = qc_flag[qc_flag.isin([1])].index
-        quality_flag.loc[idx_failed] = qc_flag.loc[idx_failed]
-    quality_flags[obs_table] = quality_flag
-    print(quality_flag)
-    exit()
+    # Deselect rows containing generic ids
+    idx_gnrc_obs = idx_gnrc.intersection(quality_flag.index)
+    data_obs = data_obs.drop(index=idx_gnrc_obs)
+
+    j = 1
+    for qc_name in qc_dict_seq_o.keys():
+        logging.info(f"2.2.{i}.{j}. Do {qc_name} check")
+        # Deselect already failed quality flags
+        data_obs = data_obs[~quality_flag.loc[data_obs.index].isin([1])]
+        # Do the sequential check
+        qc_dict_check = qc_dict_seq_o[qc_name]
+        func = getattr(qc_sequential_reports, qc_dict_check["func"])
+        names = qc_dict_check.get("names", {})
+        kwargs = qc_dict_check.get("arguments", {})
+        idx_list = []
+        for ps_id, subset in data_h.groupby("primary_station_id"):
+            indexes = data_obs.index.intersection(subset.index)
+            subset_obs = data_obs.loc[indexes]
+            if subset_obs.empty:
+                continue
+            inputs = {k: subset_obs[v] for k, v in names.items()}
+            track_qc = func(**inputs, **kwargs)
+            idx_failed = track_qc.index[track_qc == 1]
+            if not idx_failed.empty:
+                idx_list.extend(idx_failed)
+
+        quality_flags[obs_table].loc[idx_list] = 1
+
+        j += 1
+
+    i += 1
+
 # 2.2.2. Do combined observations track check
-qc_dict = params.qc_settings.get("track_check", {}).get("combined", {})
-for qc_name in qc_dict.keys():
-    func = getattr(qc_sequential_reports, qc_dict[qc_name]["func"])
-    tables = qc_dict[qc_name]["tables"]
-    names = qc_dict[qc_name]["names"]
-    kwargs = qc_dict[qc_name]["arguments"]
+qc_dict_comb = qc_dict_seq.get("combined", {})
+for qc_name in qc_dict_comb.keys():
+    logging.info(f"2.2.{i}. Do {qc_name} check")
+    func = getattr(qc_sequential_reports, qc_dict_comb[qc_name]["func"])
+    tables = qc_dict_comb[qc_name]["tables"]
+    names = qc_dict_comb[qc_name]["names"]
+    kwargs = qc_dict_comb[qc_name]["arguments"]
     inputs = {}
     for ivar, table in tables.items():
         data = data_dict[table].copy()
         column = names[ivar]
         inputs[ivar] = data[column]
-    # qc_flag = func(**inputs, **kwargs)
-    # idx_failed = qc_flag[qc_flag.isin([1])].index
-    # for table in tables.values():
-    #    quality_flags[table].loc[idx_failed] = qc_flag.loc[idx_failed]
+    series_list = list(inputs.values())
+    common_indexes = set(series_list[0].index).intersection(
+        *(s.index for s in series_list[1:])
+    )
+    common_indexes = list(common_indexes)
+    for ivar, series in inputs.items():
+        inputs[ivar] = inputs[ivar].loc[common_indexes]
+    qc_flag = func(**inputs, **kwargs)
+    idx_failed = qc_flag[qc_flag.isin([1])].index
+    for table in tables.values():
+        quality_flags[table].loc[idx_failed] = qc_flag.loc[idx_failed]
+    i += 1
 
 # 3. Buddy check
 qc_dict = params.qc_settings.get("buddy_check", {}).get("observations", {})
@@ -538,20 +588,6 @@ for obs_table in obs_tables:
         obs_df["quality_flag"].value_counts(dropna=False).to_dict()
     )
     write_cdm_tables(params, obs_df, tables=obs_table)
-
-# ?. PROCESS QC FLAGS ---------------------------------------------------------
-# Replace QC flags in C-RAID data; other approach needed!!!
-# pass_time = None
-# if params.no_qc_suite:
-#    qc_avail = True
-#    # Set report_quality to passed if report_quality is not checked
-#    qc_df["report_quality"] = header_db["report_quality"]
-#    qc_df["report_quality"] = qc_df["report_quality"].mask(
-#        qc_df["report_quality"] == "2", "0"
-#    )
-#    pass_time = header_db["report_time_quality"]
-#
-# qc_df = qc_df[qc_df.index.isin(report_ids)]
 
 # CHECKOUT --------------------------------------------------------------------
 logging.info("Saving json quicklook")
