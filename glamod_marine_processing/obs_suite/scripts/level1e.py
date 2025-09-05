@@ -122,6 +122,7 @@ from __future__ import annotations
 
 import datetime
 import logging
+import operator
 import os
 import sys
 from importlib import reload
@@ -185,6 +186,16 @@ def open_netcdffiles(d):
             elif isinstance(v, dict):
                 open_netcdffiles(v)
 
+
+op_map = {
+    "+": operator.add,
+    "-": operator.sub,
+    "*": operator.mul,
+    "/": operator.truediv,
+    "//": operator.floordiv,
+    "%": operator.mod,
+    "**": operator.pow,
+}
 
 # Some other parameters -------------------------------------------------------
 cdm_atts = get_cdm_atts()
@@ -486,13 +497,23 @@ for obs_table in obs_tables:
     j = 1
     for qc_name in qc_dict_seq_o.keys():
         logging.info(f"2.2.{i}.{j}. Do {qc_name} check")
-        # Deselect already failed quality flags
-        data_obs = data_obs[~quality_flag.loc[data_obs.index].isin([1])]
         # Do the sequential check
         qc_dict_check = qc_dict_seq_o[qc_name]
         func = getattr(qc_sequential_reports, qc_dict_check["func"])
         names = qc_dict_check.get("names", {})
         kwargs = qc_dict_check.get("arguments", {})
+        preproc = qc_dict_check.get("preproc", {})
+        tables = qc_dict_check.get("tables", None)
+        if isinstance(tables, list) and obs_table not in tables:
+            continue
+        # Deselect already failed quality flags
+        data_obs = data_obs[~quality_flag.loc[data_obs.index].isin([1])]
+        # Optionally, preprocess data
+        if obs_table in preproc.keys():
+            op_str = preproc[obs_table]
+            op_symbol, operand = op_str.strip().split()
+            operand = float(operand)
+            data_obs = op_map[op_symbol](data_obs, operand)
         idx_list = []
         for ps_id, subset in data_h.groupby("primary_station_id"):
             indexes = data_obs.index.intersection(subset.index)
@@ -538,27 +559,49 @@ for qc_name in qc_dict_comb.keys():
     i += 1
 
 # 3. Buddy check
-qc_dict = params.qc_settings.get("buddy_check", {}).get("observations", {})
+logging.info("3. Do buddy checks")
+qc_dict_grp = params.qc_settings.get("grouped_reports")
+# 3.1. Do observation buddy check
+pre_proc_dict = qc_dict_grp.get("preprocessing", {})
+qc_dict_grp_obs = qc_dict_grp.get("observations")
+i = 1
 for obs_table in obs_tables:
     if obs_table not in data_dict.keys():
         continue
-    quality_flag = quality_flags[obs_table]
-    data = data_dict[obs_table].copy()
-    # Deselect already failed quality_flags
-    data = data[~quality_flag.isin([1])]
-    # Deselect on blacklist
-    data = data.drop(index=idx_blck)
+    logging.info(f"3.{i}. Do {obs_table} checks")
+    quality_flag = quality_flags[obs_table].copy()
+    data_obs = data_dict[obs_table].copy()
+    # Deselect rows on blacklist
+    idx_blck_obs = idx_blck.intersection(quality_flag.index)
+    data_obs = data_obs.drop(index=idx_blck_obs)
+
     # Deselect rows containing generic ids
-    data = data.drop(index=idx_gnrc)
-    for qc_name in qc_dict.keys():
-        func = getattr(qc_grouped_reports, qc_dict[qc_name]["func"])
-        names = qc_dict[qc_name].get("names", {})
+    idx_gnrc_obs = idx_gnrc.intersection(quality_flag.index)
+    data_obs = data_obs.drop(index=idx_gnrc_obs)
+
+    # Pre-processing
+    # !!!!!!!!!!!!!!!!!!!!!
+
+    j = 1
+    for qc_name in qc_dict_grp_obs.keys():
+        logging.info(f"3.{i}.{j}. Do {qc_name} check")
+        # do the buddy check
+        qc_dict_check = qc_dict_grp_obs[qc_name]
+        func = getattr(qc_grouped_reports, qc_dict_check["func"])
+        names = qc_dict_check.get("names", {})
         inputs = {k: data[v] for k, v in names.items()}
-        kwargs = qc_dict[qc_name].get("arguments", {})
+        kwargs = qc_dict_check.get("arguments", {})
+        # Deselect already failed quality flags
+        data_obs = data_obs[~quality_flag.loc[data_obs.index].isin([1])]
         qc_flag = func(**inputs, **kwargs)
         idx_failed = qc_flag[qc_flag.isin([1])].index
         quality_flag.loc[idx_failed] = qc_flag.loc[idx_failed]
+
+        j += 1
+
     quality_flags[obs_table] = quality_flag
+
+    i += 1
 
 # WRITE QC FLAGS TO DATA ------------------------------------------------------
 history_add = f";{history_tstmp}. {params.history_explain}"
