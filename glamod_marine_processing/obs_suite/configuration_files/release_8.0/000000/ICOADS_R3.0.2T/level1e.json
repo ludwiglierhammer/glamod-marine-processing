@@ -447,9 +447,20 @@
           "arguments": {
             "min_count": 20,
             "threshold": 0.5
+          },
+          "preproc": {
+            "observations-at": "- 273.15",
+            "observations-sst": "- 273.15",
+            "observations-dpt": "- 273.15"
           }
         },
         "REPEATED": {
+          "tables": [
+            "observations-at",
+            "observations-dpt",
+            "observations-sst",
+            "observations-slp"
+          ],
           "func": "find_repeated_values",
           "names": {
             "value": "observation_value"
@@ -490,6 +501,7 @@
           "climatology": {
             "inputs": "__individual_reports__"
           },
+          "standard_deviation": "__individual_reports__",
           "stdev1": {
             "inputs": {
               "file_name": "SST_buddy_one_ob_to_box_avg.nc",
@@ -513,6 +525,7 @@
           "climatology": {
             "inputs": "__individual_reports__"
           },
+          "standard_deviation": "__individual_reports__",
           "stdev1": {
             "inputs": {
               "file_name": "SST_buddy_one_ob_to_box_avg.nc",
@@ -531,10 +544,22 @@
               "clim_name": "SST"
             }
           }
+        },
+        "observations-dpt": {
+          "climatology": "__individual_reports__",
+          "standard_deviation": "__individual_reports__"
+        },
+        "observations-slp": {
+          "climatology": "__individual_reports__",
+          "standard_deviation": "__individual_reports__"
         }
       },
       "observations": {
         "BAYESIAN": {
+          "tables": [
+            "observations-at",
+            "observations-sst"
+          ],
           "func": "do_bayesian_buddy_check",
           "names": {
             "lat": "latitude",
@@ -561,6 +586,12 @@
           }
         },
         "MDS": {
+          "tables": [
+            "observations-at",
+            "observations-dpt",
+            "observations-slp",
+            "observations-sst"
+          ],
           "func": "do_mds_buddy_check",
           "names": {
             "lat": "latitude",
