@@ -504,19 +504,19 @@
           "standard_deviation": "__individual_reports__",
           "stdev1": {
             "inputs": {
-              "file_name": "SST_buddy_one_ob_to_box_avg.nc",
+              "file_name": "SST/OSTIA_compare_1x1x5box_to_buddy_average.nc",
               "clim_name": "SST"
             }
           },
           "stdev2": {
             "inputs": {
-              "file_name": "SST_buddy_one_ob_to_box_avg.nc",
+              "file_name": "SST/OSTIA_compare_one_ob_to_1x1x5box.nc",
               "clim_name": "SST"
             }
           },
           "stdev3": {
             "inputs": {
-              "file_name": "SST_buddy_avg_sampling",
+              "file_name": "SST/OSTIA_buddy_range_sampling_error.nc",
               "clim_name": "SST"
             }
           }
@@ -528,19 +528,19 @@
           "standard_deviation": "__individual_reports__",
           "stdev1": {
             "inputs": {
-              "file_name": "SST_buddy_one_ob_to_box_avg.nc",
+              "file_name": "SST/OSTIA_compare_1x1x5box_to_buddy_average.nc",
               "clim_name": "SST"
             }
           },
           "stdev2": {
             "inputs": {
-              "file_name": "SST_buddy_one_ob_to_box_avg.nc",
+              "file_name": "SST/OSTIA_compare_one_ob_to_1x1x5box.nc",
               "clim_name": "SST"
             }
           },
           "stdev3": {
             "inputs": {
-              "file_name": "SST_buddy_avg_sampling",
+              "file_name": "SST/OSTIA_buddy_range_sampling_error.nc",
               "clim_name": "SST"
             }
           }
