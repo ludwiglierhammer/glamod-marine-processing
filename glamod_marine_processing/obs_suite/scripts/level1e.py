@@ -562,8 +562,12 @@ for qc_name in qc_dict_comb.keys():
 logging.info("3. Do buddy checks")
 qc_dict_grp = params.qc_settings.get("grouped_reports")
 # 3.1. Do observation buddy check
-pre_proc_dict = qc_dict_grp.get("preprocessing", {})
+preproc_dict_grp = qc_dict_grp.get("preprocessing", {})
 qc_dict_grp_obs = qc_dict_grp.get("observations")
+
+qc_dict_ind = params.qc_settings.get("individual_reports")
+preproc_dict_ind = qc_dict_ind.get("preprocessing", {})
+
 i = 1
 for obs_table in obs_tables:
     if obs_table not in data_dict.keys():
@@ -580,7 +584,17 @@ for obs_table in obs_tables:
     data_obs = data_obs.drop(index=idx_gnrc_obs)
 
     # Pre-processing
-    # !!!!!!!!!!!!!!!!!!!!!
+    preproc_dict_grp_obs = preproc_dict_grp.get(obs_table, {})
+    preproc_dict_ind_obs = preproc_dict_ind.get(obs_table, {})
+
+    for var_name in preproc_dict_grp_obs.keys():
+        if preproc_dict_grp_obs[var_name]["inputs"] == "__individual_reports__":
+            preproc_dict_grp_obs[var_name]["inputs"] = preproc_dict_ind_obs.get(
+                var_name, {}
+            ).get("inputs", {})
+
+    update_filenames(preproc_dict_grp_obs)
+    open_netcdffiles(preproc_dict_grp_obs)
 
     j = 1
     for qc_name in qc_dict_grp_obs.keys():
@@ -591,6 +605,9 @@ for obs_table in obs_tables:
         names = qc_dict_check.get("names", {})
         inputs = {k: data[v] for k, v in names.items()}
         kwargs = qc_dict_check.get("arguments", {})
+        for var_name, value in kwargs.items():
+            if value == "__preprocessed__":
+                kwargs[var_name] = preproc_dict_grp_obs[var_name]
         # Deselect already failed quality flags
         data_obs = data_obs[~quality_flag.loc[data_obs.index].isin([1])]
         qc_flag = func(**inputs, **kwargs)
