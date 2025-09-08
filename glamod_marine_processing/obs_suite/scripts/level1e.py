@@ -624,7 +624,7 @@ for obs_table in obs_tables:
             )
 
     update_filenames(preproc_dict_grp_obs)
-    # open_netcdffiles(preproc_dict_grp_obs)
+    open_netcdffiles(preproc_dict_grp_obs)
 
     # Get table-specific arguments
     qc_dict_grp_obs_sp = qc_dict_grp.get(obs_table, {})
