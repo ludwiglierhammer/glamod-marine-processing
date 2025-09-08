@@ -498,50 +498,46 @@
     "grouped_reports": {
       "preprocessing": {
         "observations-at": {
-          "climatology": {
-            "inputs": "__individual_reports__"
-          },
+          "climatology": "__individual_reports__",
           "standard_deviation": "__individual_reports__",
           "stdev1": {
             "inputs": {
               "file_name": "SST/OSTIA_compare_1x1x5box_to_buddy_average.nc",
-              "clim_name": "SST"
+              "clim_name": "sst"
             }
           },
           "stdev2": {
             "inputs": {
               "file_name": "SST/OSTIA_compare_one_ob_to_1x1x5box.nc",
-              "clim_name": "SST"
+              "clim_name": "sst"
             }
           },
           "stdev3": {
             "inputs": {
               "file_name": "SST/OSTIA_buddy_range_sampling_error.nc",
-              "clim_name": "SST"
+              "clim_name": "sst"
             }
           }
         },
         "observations-sst": {
-          "climatology": {
-            "inputs": "__individual_reports__"
-          },
+          "climatology": "__individual_reports__",
           "standard_deviation": "__individual_reports__",
           "stdev1": {
             "inputs": {
               "file_name": "SST/OSTIA_compare_1x1x5box_to_buddy_average.nc",
-              "clim_name": "SST"
+              "clim_name": "sst"
             }
           },
           "stdev2": {
             "inputs": {
               "file_name": "SST/OSTIA_compare_one_ob_to_1x1x5box.nc",
-              "clim_name": "SST"
+              "clim_name": "sst"
             }
           },
           "stdev3": {
             "inputs": {
               "file_name": "SST/OSTIA_buddy_range_sampling_error.nc",
-              "clim_name": "SST"
+              "clim_name": "sst"
             }
           }
         },
@@ -624,7 +620,7 @@
                 4
               ]
             ],
-            "number_of_obs_threshold": [
+            "number_of_obs_thresholds": [
               [
                 0,
                 5,
