@@ -183,6 +183,8 @@ def open_netcdffiles(d):
     if isinstance(d, dict):
         for k, v in d.items():
             if k == "inputs":
+                if not isinstance(v, dict):
+                    continue
                 d[k] = Climatology.open_netcdf_file(**v)
             elif isinstance(v, dict):
                 open_netcdffiles(v)
@@ -577,8 +579,11 @@ preproc_dict_ind = qc_dict_ind.get("preprocessing", {})
 
 # Copy params for C-RAID
 params_craid = copy.deepcopy(params)
-params_craid.pre_level_path = params.pre_level_path.replace(
-    {params.dataset: "C-RAID_1.2", params.sid_dck: "202412"}
+params_craid.prev_level_path = params.prev_level_path.replace(
+    params.dataset, "C-RAID_1.2"
+)
+params_craid.prev_level_path = params_craid.prev_level_path.replace(
+    params.sid_dck, "202412"
 )
 
 i = 1
@@ -598,40 +603,62 @@ for obs_table in obs_tables:
 
     # Add C-RAID data
     db_craid = read_cdm_tables(params_craid, obs_table)
-    data_craid = db_craid[obs_table]
-    craid_indexes = data_craid.index
-    data_obs = pd.concat([data_obs, data_craid])
-    ignore_indexes = data_obs.get_indexer([data_craid.index])
+    if not db_craid.empty:
+        data_craid = db_craid[obs_table]
+        data_obs = pd.concat([data_obs, data_craid])
+        ignore_indexes = data_obs.index.get_indexer([data_craid.index])
+    else:
+        logging.warning(
+            f"Could not find any {obs_table} C-RAID_1.2 data for {params_craid.prev_fileID}: {params_craid.prev_level_path}"
+        )
+        ignore_indexes = None
 
     # Pre-processing
     preproc_dict_grp_obs = preproc_dict_grp.get(obs_table, {})
     preproc_dict_ind_obs = preproc_dict_ind.get(obs_table, {})
 
     for var_name in preproc_dict_grp_obs.keys():
-        if preproc_dict_grp_obs[var_name]["inputs"] == "__individual_reports__":
-            preproc_dict_grp_obs[var_name]["inputs"] = preproc_dict_ind_obs.get(
-                var_name, {}
-            ).get("inputs", {})
+        if preproc_dict_grp_obs[var_name] == "__individual_reports__":
+            preproc_dict_grp_obs[var_name] = preproc_dict_ind_obs.get(var_name, {}).get(
+                "inputs"
+            )
 
     update_filenames(preproc_dict_grp_obs)
-    open_netcdffiles(preproc_dict_grp_obs)
+    # open_netcdffiles(preproc_dict_grp_obs)
+
+    # Get table-specific arguments
+    qc_dict_grp_obs_sp = qc_dict_grp.get(obs_table, {})
+
+    for var_name in preproc_dict_grp_obs.keys():
+        if not isinstance(preproc_dict_grp_obs[var_name], dict):
+            continue
+        if "inputs" in preproc_dict_grp_obs[var_name].keys():
+            preproc_dict_grp_obs[var_name] = preproc_dict_grp_obs[var_name]["inputs"]
 
     j = 1
     for qc_name in qc_dict_grp_obs.keys():
+        if qc_name == "BAYESIAN":
+            continue
+        if obs_table not in qc_dict_grp_obs[qc_name]["tables"]:
+            continue
         logging.info(f"3.{i}.{j}. Do {qc_name} check")
         # do the buddy check
         qc_dict_check = qc_dict_grp_obs[qc_name]
         func = getattr(qc_grouped_reports, qc_dict_check["func"])
         names = qc_dict_check.get("names", {})
-        inputs = {k: data[v] for k, v in names.items()}
+        inputs = {k: data_obs[v] for k, v in names.items()}
         kwargs = qc_dict_check.get("arguments", {})
         for var_name, value in kwargs.items():
-            if value == "__preprocessed__":
+            if isinstance(value, str) and value == "__preprocessed__":
                 kwargs[var_name] = preproc_dict_grp_obs[var_name]
+        kwargs["ignore_indexes"] = ignore_indexes
+
+        for arg_name, arg_value in qc_dict_grp_obs_sp.get(qc_name, {}).items():
+            kwargs[arg_name] = arg_value
+
         # Deselect already failed quality flags
         data_obs = data_obs[~quality_flag.loc[data_obs.index].isin([1])]
-        qc_flag = func(**inputs, **kwargs, ignore_indexes=ignore_indexes)
-        qc_flag.drop(craid_indexes, inplace=True)
+        qc_flag = func(**inputs, **kwargs)
         idx_failed = qc_flag[qc_flag.isin([1])].index
         quality_flag.loc[idx_failed] = qc_flag.loc[idx_failed]
 
