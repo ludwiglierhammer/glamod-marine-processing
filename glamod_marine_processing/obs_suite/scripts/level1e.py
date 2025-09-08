@@ -120,6 +120,7 @@ of the QC files relative to a set path (i.e. informing of the QC version)
 
 from __future__ import annotations
 
+import copy
 import datetime
 import logging
 import operator
@@ -185,6 +186,35 @@ def open_netcdffiles(d):
                 d[k] = Climatology.open_netcdf_file(**v)
             elif isinstance(v, dict):
                 open_netcdffiles(v)
+
+
+def update_dtypes(data_df, table):
+    """Update dtypes in DataFrame."""
+    if table == "header":
+        data_df["platform_type"] = data_df["platform_type"].astype(int)
+        data_df["latitude"] = data_df["latitude"].astype(float)
+        data_df["longitude"] = data_df["longitude"].astype(float)
+        data_df["report_timestamp"] = pd.to_datetime(
+            data_df["report_timestamp"],
+            format="%Y-%m-%d %H:%M:%S",
+            errors="coerce",
+        )
+        data_df["station_speed"] = data_df["station_speed"].astype(float)
+        data_df["station_course"] = data_df["station_course"].astype(float)
+        data_df["report_quality"] = data_df["report_quality"].astype(int)
+        data_df["location_quality"] = data_df["location_quality"].astype(int)
+        data_df["report_time_quality"] = data_df["report_time_quality"].astype(int)
+    else:
+        data_df["observation_value"] = data_df["observation_value"].astype(float)
+        data_df["latitude"] = data_df["latitude"].astype(float)
+        data_df["longitude"] = data_df["longitude"].astype(float)
+        data_df["date_time"] = pd.to_datetime(
+            data_df["date_time"],
+            format="%Y-%m-%d %H:%M:%S",
+            errors="coerce",
+        )
+        data_df["quality_flag"] = data_df["quality_flag"].astype(int)
+    return data_df
 
 
 op_map = {
@@ -292,30 +322,7 @@ for table in tables_in:
     if table not in data_dict.keys():
         continue
     data_df = data_dict[table]
-    if table == "header":
-        data_df["platform_type"] = data_df["platform_type"].astype(int)
-        data_df["latitude"] = data_df["latitude"].astype(float)
-        data_df["longitude"] = data_df["longitude"].astype(float)
-        data_df["report_timestamp"] = pd.to_datetime(
-            data_df["report_timestamp"],
-            format="%Y-%m-%d %H:%M:%S",
-            errors="coerce",
-        )
-        data_df["station_speed"] = data_df["station_speed"].astype(float)
-        data_df["station_course"] = data_df["station_course"].astype(float)
-        data_df["report_quality"] = data_df["report_quality"].astype(int)
-        data_df["location_quality"] = data_df["location_quality"].astype(int)
-        data_df["report_time_quality"] = data_df["report_time_quality"].astype(int)
-    else:
-        data_df["observation_value"] = data_df["observation_value"].astype(float)
-        data_df["latitude"] = data_df["latitude"].astype(float)
-        data_df["longitude"] = data_df["longitude"].astype(float)
-        data_df["date_time"] = pd.to_datetime(
-            data_df["date_time"],
-            format="%Y-%m-%d %H:%M:%S",
-            errors="coerce",
-        )
-        data_df["quality_flag"] = data_df["quality_flag"].astype(int)
+    update_dtypes(data_df, table)
 
 # DO THE DATA PROCESSING ------------------------------------------------------
 
@@ -568,6 +575,12 @@ qc_dict_grp_obs = qc_dict_grp.get("observations")
 qc_dict_ind = params.qc_settings.get("individual_reports")
 preproc_dict_ind = qc_dict_ind.get("preprocessing", {})
 
+# Copy params for C-RAID
+params_craid = copy.deepcopy(params)
+params_craid.pre_level_path = params.pre_level_path.replace(
+    {params.dataset: "C-RAID_1.2", params.sid_dck: "202412"}
+)
+
 i = 1
 for obs_table in obs_tables:
     if obs_table not in data_dict.keys():
@@ -582,6 +595,13 @@ for obs_table in obs_tables:
     # Deselect rows containing generic ids
     idx_gnrc_obs = idx_gnrc.intersection(quality_flag.index)
     data_obs = data_obs.drop(index=idx_gnrc_obs)
+
+    # Add C-RAID data
+    db_craid = read_cdm_tables(params_craid, obs_table)
+    data_craid = db_craid[obs_table]
+    craid_indexes = data_craid.index
+    data_obs = pd.concat([data_obs, data_craid])
+    ignore_indexes = data_obs.get_indexer([data_craid.index])
 
     # Pre-processing
     preproc_dict_grp_obs = preproc_dict_grp.get(obs_table, {})
@@ -610,7 +630,8 @@ for obs_table in obs_tables:
                 kwargs[var_name] = preproc_dict_grp_obs[var_name]
         # Deselect already failed quality flags
         data_obs = data_obs[~quality_flag.loc[data_obs.index].isin([1])]
-        qc_flag = func(**inputs, **kwargs)
+        qc_flag = func(**inputs, **kwargs, ignore_indexes=ignore_indexes)
+        qc_flag.drop(craid_indexes, inplace=True)
         idx_failed = qc_flag[qc_flag.isin([1])].index
         quality_flag.loc[idx_failed] = qc_flag.loc[idx_failed]
 
