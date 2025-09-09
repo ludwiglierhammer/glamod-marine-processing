@@ -517,6 +517,7 @@ for obs_table in obs_tables:
             continue
         # Deselect already failed quality flags
         data_obs = data_obs[~quality_flag.loc[data_obs.index].isin([1])]
+
         # Optionally, preprocess data
         data_obs_cp = data_obs.copy()
         if obs_table in preproc.keys():
@@ -525,6 +526,7 @@ for obs_table in obs_tables:
             op_symbol, operand = op_str.strip().split()
             operand = float(operand)
             data_obs_cp[col] = op_map[op_symbol](data_obs_cp[col], operand)
+
         idx_list = []
         for ps_id, subset in data_h.groupby("primary_station_id"):
             indexes = data_obs_cp.index.intersection(subset.index)
@@ -537,9 +539,11 @@ for obs_table in obs_tables:
             if not idx_failed.empty:
                 idx_list.extend(idx_failed)
 
-        quality_flags[obs_table].loc[idx_list] = 1
+        quality_flag.loc[idx_list] = 1
 
         j += 1
+
+    quality_flags[obs_table] = quality_flag
 
     i += 1
 
@@ -606,13 +610,16 @@ for obs_table in obs_tables:
     # Add C-RAID data
     db_craid = read_cdm_tables(params_craid, obs_table)
     if not db_craid.empty:
-        data_craid = db_craid[obs_table]
+        data_craid = db_craid[obs_table].set_index("report_id", drop=False)
+        update_dtypes(data_craid, obs_table)
         data_obs = pd.concat([data_obs, data_craid])
-        ignore_indexes = data_obs.index.get_indexer([data_craid.index])
+        indexes_craid = data_craid.index
+        ignore_indexes = data_obs.index.get_indexer(indexes_craid)
     else:
         logging.warning(
             f"Could not find any {obs_table} C-RAID_1.2 data for {params_craid.prev_fileID}: {params_craid.prev_level_path}"
         )
+        indexes_craid = []
         ignore_indexes = None
 
     # Pre-processing
@@ -639,12 +646,14 @@ for obs_table in obs_tables:
 
     j = 1
     for qc_name in qc_dict_grp_obs.keys():
-        if qc_name == "BAYESIAN":
-            continue
         if obs_table not in qc_dict_grp_obs[qc_name]["tables"]:
             continue
         logging.info(f"3.{i}.{j}. Do {qc_name} check")
-        # do the buddy check
+        # Deselect already  failed quality flags
+        obs_indexes = data_obs.index.difference(indexes_craid)
+        failed_indexes = quality_flag.loc[obs_indexes].isin([1]).index
+        data_obs = data_obs.drop(failed_indexes)
+        # Do the buddy check
         qc_dict_check = qc_dict_grp_obs[qc_name]
         func = getattr(qc_grouped_reports, qc_dict_check["func"])
         names = qc_dict_check.get("names", {})
@@ -654,12 +663,9 @@ for obs_table in obs_tables:
             if isinstance(value, str) and value == "__preprocessed__":
                 kwargs[var_name] = preproc_dict_grp_obs[var_name]
         kwargs["ignore_indexes"] = ignore_indexes
-
         for arg_name, arg_value in qc_dict_grp_obs_sp.get(qc_name, {}).items():
             kwargs[arg_name] = arg_value
 
-        # Deselect already failed quality flags
-        data_obs = data_obs[~quality_flag.loc[data_obs.index].isin([1])]
         qc_flag = func(**inputs, **kwargs)
         idx_failed = qc_flag[qc_flag.isin([1])].index
         quality_flag.loc[idx_failed] = qc_flag.loc[idx_failed]
