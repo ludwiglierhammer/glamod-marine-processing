@@ -518,15 +518,17 @@ for obs_table in obs_tables:
         # Deselect already failed quality flags
         data_obs = data_obs[~quality_flag.loc[data_obs.index].isin([1])]
         # Optionally, preprocess data
+        data_obs_cp = data_obs.copy()
         if obs_table in preproc.keys():
-            op_str = preproc[obs_table]
+            col = preproc[obs_table]["column"]
+            op_str = preproc[obs_table]["operation"]
             op_symbol, operand = op_str.strip().split()
             operand = float(operand)
-            data_obs = op_map[op_symbol](data_obs, operand)
+            data_obs_cp[col] = op_map[op_symbol](data_obs_cp[col], operand)
         idx_list = []
         for ps_id, subset in data_h.groupby("primary_station_id"):
-            indexes = data_obs.index.intersection(subset.index)
-            subset_obs = data_obs.loc[indexes]
+            indexes = data_obs_cp.index.intersection(subset.index)
+            subset_obs = data_obs_cp.loc[indexes]
             if subset_obs.empty:
                 continue
             inputs = {k: subset_obs[v] for k, v in names.items()}

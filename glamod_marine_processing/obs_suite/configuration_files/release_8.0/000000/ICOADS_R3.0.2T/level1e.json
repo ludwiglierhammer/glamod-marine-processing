@@ -449,9 +449,18 @@
             "threshold": 0.5
           },
           "preproc": {
-            "observations-at": "- 273.15",
-            "observations-sst": "- 273.15",
-            "observations-dpt": "- 273.15"
+            "observations-at": {
+              "operation": "- 273.15",
+              "column": "observation_value"
+            },
+            "observations-sst": {
+              "operation": "- 273.15",
+              "column": "observation_value"
+            },
+            "observations-dpt": {
+              "operation": "- 273.15",
+              "column": "observation_value"
+            }
           }
         },
         "REPEATED": {
