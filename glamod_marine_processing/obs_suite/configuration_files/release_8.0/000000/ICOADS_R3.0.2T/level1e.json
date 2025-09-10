@@ -153,19 +153,15 @@
         }
       },
       "observations": {
-        "observations-at": {
+        "missing_values": {
           "MISSVAL": {
             "func": "do_missing_value_check",
             "names": {
               "value": "observation_value"
             }
-          },
-          "MISSCLIM": {
-            "func": "do_missing_value_clim_check",
-            "arguments": {
-              "climatology": "__preprocessed__"
-            }
-          },
+          }
+        },
+        "observations-at": {
           "HLIMITS": {
             "func": "do_hard_limit_check",
             "names": {
@@ -178,8 +174,8 @@
               ]
             }
           },
-          "DAY": {
-            "func": "do_day_check",
+          "NIGHT": {
+            "func": "do_night_check",
             "names": {
               "date": "date_time",
               "lat": "latitude",
@@ -216,18 +212,6 @@
           }
         },
         "observations-dpt": {
-          "MISSVAL": {
-            "func": "do_missing_value_check",
-            "names": {
-              "value": "observation_value"
-            }
-          },
-          "MISSCLIM": {
-            "func": "do_missing_value_clim_check",
-            "arguments": {
-              "climatology": "__preprocessed__"
-            }
-          },
           "CLIM2": {
             "func": "do_climatology_check",
             "names": {
@@ -245,18 +229,6 @@
           }
         },
         "observations-slp": {
-          "MISSVAL": {
-            "func": "do_missing_value_check",
-            "names": {
-              "value": "observation_value"
-            }
-          },
-          "MISSCLIM": {
-            "func": "do_missing_value_clim_check",
-            "arguments": {
-              "climatology": "__preprocessed__"
-            }
-          },
           "CLIM3": {
             "func": "do_climatology_check",
             "names": {
@@ -271,18 +243,6 @@
           }
         },
         "observations-sst": {
-          "MISSVAL": {
-            "func": "do_missing_value_check",
-            "names": {
-              "value": "observation_value"
-            }
-          },
-          "MISSCLIM": {
-            "func": "do_missing_value_clim_check",
-            "arguments": {
-              "climatology": "__preprocessed__"
-            }
-          },
           "HLIMITS": {
             "func": "do_hard_limit_check",
             "names": {
@@ -316,21 +276,7 @@
             }
           }
         },
-        "observations-wbt": {
-          "MISSVAL": {
-            "func": "do_missing_value_check",
-            "names": {
-              "value": "observation_value"
-            }
-          }
-        },
         "observations-wd": {
-          "MISSVAL": {
-            "func": "do_missing_value_check",
-            "names": {
-              "value": "observation_value"
-            }
-          },
           "HLIMITS": {
             "func": "do_hard_limit_check",
             "names": {
@@ -345,12 +291,6 @@
           }
         },
         "observations-ws": {
-          "MISSVAL": {
-            "func": "do_missing_value_check",
-            "names": {
-              "value": "observation_value"
-            }
-          },
           "HLIMITS": {
             "func": "do_hard_limit_check",
             "names": {
