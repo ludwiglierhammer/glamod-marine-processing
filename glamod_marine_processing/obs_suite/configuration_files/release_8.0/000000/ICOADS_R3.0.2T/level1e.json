@@ -7,6 +7,7 @@
   "history_explain": "Position, tracking and parameter QC flags added",
   "qc_settings": {
     "individual_reports": {
+      "return_method": "failed",
       "preprocessing": {
         "observations-at": {
           "climatology": {
@@ -445,6 +446,8 @@
       }
     },
     "grouped_reports": {
+      "buoy_dataset": "C-RAID_1.2",
+      "buoy_dck": "202412",
       "preprocessing": {
         "observations-at": {
           "climatology": "__individual_reports__",
