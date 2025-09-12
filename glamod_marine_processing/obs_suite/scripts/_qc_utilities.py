@@ -12,6 +12,7 @@ import numpy as np
 import pandas as pd
 from _utilities import read_cdm_tables
 from marine_qc import qc_grouped_reports, qc_individual_reports, qc_sequential_reports
+from marine_qc.auxiliary import isvalid
 from marine_qc.external_clim import Climatology
 from marine_qc.multiple_row_checks import do_multiple_row_check
 
@@ -224,6 +225,13 @@ def add_buoy_data_and_get_buoy_indexes(
         if not db_buoy.empty:
             data_buoy = db_buoy[obs_table].set_index("report_id", drop=False)
             update_dtypes(data_buoy, obs_table)
+            valid_indexes = (
+                isvalid(data_buoy["observation_value"])
+                & isvalid(data_buoy["latitude"])
+                & isvalid(data_buoy["longitude"])
+                & isvalid(data_buoy["date_time"])
+            )
+            data_buoy = data_buoy[valid_indexes]
             data = pd.concat([data, data_buoy])
         else:
             logging.warning(
