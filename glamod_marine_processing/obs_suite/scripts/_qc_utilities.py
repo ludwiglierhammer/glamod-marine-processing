@@ -214,11 +214,11 @@ def get_qc_function_and_inputs(qc_dict, data, table_name, qc_module):
     return parameters.func, inputs, parameters.kwargs
 
 
-def add_buoy_data_and_get_ignore_indexes(
+def add_buoy_data_and_get_buoy_indexes(
     data, params_buoy, obs_table, buoy_dataset, buoy_dck
 ):
     """Attempts to read buoy data and append it to the main data."""
-    db_buoy = pd.DataFrame()
+    data_buoy = pd.DataFrame()
     if buoy_dataset != "None" and buoy_dck != "None":
         db_buoy = read_cdm_tables(params_buoy, obs_table)
         if not db_buoy.empty:
@@ -234,29 +234,8 @@ def add_buoy_data_and_get_ignore_indexes(
             f"Buoy dataset or deck not specified for {obs_table} (dataset={buoy_dataset}, dck={buoy_dck})"
         )
 
-    indexes_buoy = db_buoy.index if not db_buoy.empty else []
-    ignore_indexes = data.index.get_indexer(indexes_buoy) if db_buoy.empty else None
-
-    return data, ignore_indexes
-
-
-def update_preproc_dict(preproc_dict, preproc_dict_ind, obs_table, ext_path):
-    """Update preprocessing dictionary for a given obs_table."""
-    preproc_obs = preproc_dict.get(obs_table, {}).copy()
-    preproc_ind_obs = preproc_dict_ind.get(obs_table, {})
-
-    for var_name, val in preproc_obs.items():
-        if val == "__individual_reports__":
-            preproc_obs[var_name] = preproc_ind_obs.get(var_name, {}).get("inputs")
-
-    update_filenames(preproc_obs, ext_path)
-    open_netcdffiles(preproc_obs)
-
-    for var_name, val in preproc_obs.items():
-        if isinstance(val, dict) and "inputs" in val:
-            preproc_obs[var_name] = val["inputs"]
-
-    return preproc_obs
+    buoy_indexes = data_buoy.index if not data_buoy.empty else pd.Index([])
+    return data, buoy_indexes  # ignore_indexes
 
 
 def do_qc_individual(
@@ -433,7 +412,8 @@ def do_qc_sequential(
         data = data_dict_qc["header"].copy()
 
         # Deselect rows containing generic ids
-        data.drop(index=idx_gnrc, inplace=True)
+        invalid_indexes = idx_gnrc.intersection(data.index)
+        data.drop(index=invalid_indexes, inplace=True)
 
         i = 1
         for qc_name in qc_dict.keys():
@@ -477,7 +457,7 @@ def do_qc_sequential(
             data = data_dict_qc[obs_table].copy()
 
             # Deselect rows containing generic ids
-            idx_gnrc_obs = idx_gnrc.intersection(quality_flag.index)
+            idx_gnrc_obs = idx_gnrc.intersection(data.index)
             data = data.drop(index=idx_gnrc_obs)
 
             j = 1
@@ -579,14 +559,26 @@ def do_qc_grouped(data_dict_qc, quality_flags, params, ext_path):
         data = data_dict_qc[obs_table].copy()
 
         # Add buoy data
-        data, ignore_indexes = add_buoy_data_and_get_ignore_indexes(
+        data, buoy_indexes = add_buoy_data_and_get_buoy_indexes(
             data, params_buoy, obs_table, buoy_dataset, buoy_dck
         )
 
         # Pre-processing
-        preproc_dict_obs = update_preproc_dict(
-            preproc_dict, preproc_dict_ind, obs_table, ext_path
-        )
+        preproc_dict_obs = preproc_dict.get(obs_table, {})
+        preproc_dict_ind_obs = preproc_dict_ind.get(obs_table, {})
+
+        for var_name, val in preproc_dict_obs.items():
+            if val == "__individual_reports__":
+                preproc_dict_obs[var_name] = {
+                    "inputs": preproc_dict_ind_obs.get(var_name, {}).get("inputs")
+                }
+
+        update_filenames(preproc_dict_obs, ext_path)
+        open_netcdffiles(preproc_dict_obs)
+
+        for var_name, val in preproc_dict_obs.items():
+            if isinstance(val, dict) and "inputs" in val:
+                preproc_dict_obs[var_name] = val["inputs"]
 
         j = 1
 
@@ -613,7 +605,7 @@ def do_qc_grouped(data_dict_qc, quality_flags, params, ext_path):
                 if isinstance(value, str) and value == "__preprocessed__":
                     kwargs[var_name] = preproc_dict_obs[var_name]
 
-            kwargs["ignore_indexes"] = ignore_indexes
+            kwargs["ignore_indexes"] = data.index.get_indexer(buoy_indexes)
             for arg_name, arg_value in qc_dict_obs_sp.get(qc_name, {}).items():
                 kwargs[arg_name] = arg_value
 
