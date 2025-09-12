@@ -120,7 +120,6 @@ of the QC files relative to a set path (i.e. informing of the QC version)
 
 from __future__ import annotations
 
-import datetime
 import logging
 import os
 import sys
@@ -172,11 +171,6 @@ def value_counts(series):
 # Some other parameters -------------------------------------------------------
 cdm_atts = get_cdm_atts()
 obs_tables = [x for x in cdm_atts.keys() if x != "header"]
-
-try:
-    history_tstmp = datetime.datetime.now(datetime.UTC).strftime("%Y-%m-%d %H:%M:%S")
-except AttributeError:  # for python < 3.11
-    history_tstmp = datetime.datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S")
 
 # -----------------------------------------------------------------------------
 
@@ -282,7 +276,6 @@ if params.no_qc_suite is not True:
             report_time_quality=report_time_quality,
             quality_flags=quality_flags,
             history=history,
-            history_add=f";{history_tstmp}. {params.history_explain}",
             params=params,
             ext_path=ext_path,
         )
