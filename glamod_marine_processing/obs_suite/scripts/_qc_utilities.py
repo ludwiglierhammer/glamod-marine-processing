@@ -644,6 +644,7 @@ def do_qc(
 ):
     """QC."""
     # Set observation quality_flag on blacklist and deselect them
+    # Set quality_flag of generic IDs to passed
     try:
         history_tstmp = datetime.datetime.now(datetime.UTC).strftime(
             "%Y-%m-%d %H:%M:%S"
@@ -652,6 +653,8 @@ def do_qc(
         history_tstmp = datetime.datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S")
     history_add = f";{history_tstmp}. {params.history_explain}"
     idx_blck = report_quality[report_quality == 6].index
+    idx_gnrc = report_quality[report_quality == 88].index
+
     for table in data_dict_qc.keys():
         if table == "header":
             data_dict_qc[table].drop(index=idx_blck, inplace=True)
@@ -659,14 +662,14 @@ def do_qc(
             history.loc[idx_not_blck] = history.loc[idx_not_blck].apply(
                 lambda x: x + history_add
             )
+            report_quality.loc[idx_gnrc] = 0
             continue
 
         idx_blck_obs = idx_blck.intersection(quality_flags[table].index)
         quality_flags[table].loc[idx_blck_obs] = 6
+        idx_gnrc_obs = idx_gnrc.intersection(quality_flags[table].index)
+        quality_flags[table].loc[idx_gnrc_obs] = 0
         data_dict_qc[table].drop(index=idx_blck_obs, inplace=True)
-
-    # Set indexes of generic ID reports
-    idx_gnrc = report_quality[report_quality == 88].index
 
     # Do the quality control
     report_quality, location_quality, report_time_quality, quality_flags = (
