@@ -190,10 +190,10 @@ class Parameters:
 
     def __init__(self, qc_dict, qc_module):
         self.func = getattr(qc_module, qc_dict["func"])
-        self.names = qc_dict.get("names", {})
-        self.kwargs = qc_dict.get("arguments", {})
-        self.preproc = qc_dict.get("preproc", {})
-        self.tables = qc_dict.get("tables", None)
+        self.names = copy.deepcopy(qc_dict.get("names", {}))
+        self.kwargs = copy.deepcopy(qc_dict.get("arguments", {}))
+        self.preproc = copy.deepcopy(qc_dict.get("preproc", {}))
+        self.tables = copy.deepcopy(qc_dict.get("tables", None))
 
 
 def get_qc_function_and_inputs(qc_dict, data, table_name, qc_module):
@@ -260,7 +260,7 @@ def do_qc_individual(
     def do_qc_individual_header():
         # 1.1. Header
         logging.info("1.1. Do header checks")
-        qc_dict_header = qc_dict.get("header", {})
+        qc_dict_header = copy.deepcopy(qc_dict.get("header", {}))
         data = data_dict_qc["header"]
 
         # 1.1.1. Position check
@@ -271,7 +271,7 @@ def do_qc_individual(
         idx_pos = data_pos.index
 
         # Do position check
-        qc_dict_pos = qc_dict_header.get("position_check", {})
+        qc_dict_pos = copy.deepcopy(qc_dict_header.get("position_check", {}))
         pos_qc = do_multiple_row_check(
             data=data_pos,
             qc_dict=qc_dict_pos,
@@ -291,7 +291,7 @@ def do_qc_individual(
         ]
 
         # Do time check
-        qc_dict_tme = qc_dict_header.get("time_check", {})
+        qc_dict_tme = copy.deepcopy(qc_dict_header.get("time_check", {}))
         time_qc = do_multiple_row_check(
             data=data_time,
             qc_dict=qc_dict_tme,
@@ -328,7 +328,9 @@ def do_qc_individual(
             drop_invalid_indexes(data, report_quality, 1)
 
             # Deselect missing values
-            qc_dict_miss = qc_dict.get("observations", {}).get("missing_values")
+            qc_dict_miss = copy.deepcopy(
+                qc_dict.get("observations", {}).get("missing_values")
+            )
             miss_qc = do_multiple_row_check(
                 data=data,
                 qc_dict=qc_dict_miss,
@@ -339,8 +341,12 @@ def do_qc_individual(
             drop_invalid_indexes(data, quality_flag, 3)
 
             # Do QC
-            preproc_dict = qc_dict.get("preprocessing", {}).get(obs_table, {})
-            qc_dict_obs = qc_dict.get("observations", {}).get(obs_table, {})
+            preproc_dict = copy.deepcopy(
+                qc_dict.get("preprocessing", {}).get(obs_table, {})
+            )
+            qc_dict_obs = copy.deepcopy(
+                qc_dict.get("observations", {}).get(obs_table, {})
+            )
             update_filenames(preproc_dict, ext_path)
             open_netcdffiles(preproc_dict)
             obs_qc = do_multiple_row_check(
@@ -359,7 +365,9 @@ def do_qc_individual(
 
     def do_qc_individual_combined():
         # 1.2.2. Do combined observation check
-        qc_dict_comb = qc_dict.get("observations", {}).get("combined", {})
+        qc_dict_comb = copy.deepcopy(
+            qc_dict.get("observations", {}).get("combined", {})
+        )
         i = 1
         for qc_name in qc_dict_comb.keys():
             parameters = Parameters(qc_dict_comb[qc_name], qc_individual_reports)
@@ -384,7 +392,7 @@ def do_qc_individual(
 
     # Get QC settings for individual reports
     logging.info("1. Do individual checks")
-    qc_dict = params.qc_settings.get("individual_reports")
+    qc_dict = copy.deepcopy(params.qc_settings.get("individual_reports"))
     return_method = qc_dict["return_method"]
 
     # Do header QC
@@ -413,7 +421,9 @@ def do_qc_sequential(
     def do_qc_sequential_header():
         # 2.1. Header
         logging.info("2.1. Do header checks")
-        qc_dict = params.qc_settings.get("sequential_reports", {}).get("header", {})
+        qc_dict = copy.deepcopy(
+            params.qc_settings.get("sequential_reports", {}).get("header", {})
+        )
         data = data_dict_qc["header"].copy()
 
         # Deselect rows containing generic ids
@@ -449,8 +459,8 @@ def do_qc_sequential(
         logging.info("2.2. Do observation checks")
 
         # 2.2.1. Do observation track check
-        qc_dict = params.qc_settings.get("sequential_reports", {}).get(
-            "observations", {}
+        qc_dict = copy.deepcopy(
+            params.qc_settings.get("sequential_reports", {}).get("observations", {})
         )
         i = 1
         for obs_table in data_dict_qc.keys():
@@ -497,7 +507,9 @@ def do_qc_sequential(
 
     def do_qc_sequential_combined():
         # 2.2.2. Do combined observations track check
-        qc_dict = params.qc_settings.get("sequential_reports", {}).get("combined", {})
+        qc_dict = copy.deepcopy(
+            params.qc_settings.get("sequential_reports", {}).get("combined", {})
+        )
 
         i = 1
         for qc_name in qc_dict.keys():
@@ -537,19 +549,19 @@ def do_qc_grouped(data_dict_qc, quality_flags, params, ext_path):
     """Grouped QC."""
     # 3. Buddy check
     logging.info("3. Do buddy checks")
-    qc_dict = params.qc_settings.get("grouped_reports")
+    qc_dict = copy.deepcopy(params.qc_settings.get("grouped_reports"))
 
     # 3.1. Do observation buddy check
-    preproc_dict = qc_dict.get("preprocessing", {})
-    qc_dict_obs = qc_dict.get("observations")
+    preproc_dict = copy.deepcopy(qc_dict.get("preprocessing", {}))
+    qc_dict_obs = copy.deepcopy(qc_dict.get("observations"))
 
-    qc_dict_ind = params.qc_settings.get("individual_reports")
+    qc_dict_ind = copy.deepcopy(params.qc_settings.get("individual_reports"))
     preproc_dict_ind = qc_dict_ind.get("preprocessing", {})
 
     # Copy params for external buoy data
     params_buoy = copy.deepcopy(params)
-    buoy_dataset = qc_dict.get("buoy_dataset", "None")
-    buoy_dck = qc_dict.get("buoy_dck", "None")
+    buoy_dataset = copy.deepcopy(qc_dict.get("buoy_dataset", "None"))
+    buoy_dck = copy.deepcopy(qc_dict.get("buoy_dck", "None"))
 
     params_buoy.prev_level_path = params_buoy.prev_level_path.replace(
         params.dataset, buoy_dataset
@@ -572,13 +584,15 @@ def do_qc_grouped(data_dict_qc, quality_flags, params, ext_path):
         )
 
         # Pre-processing
-        preproc_dict_obs = preproc_dict.get(obs_table, {})
-        preproc_dict_ind_obs = preproc_dict_ind.get(obs_table, {})
+        preproc_dict_obs = copy.deepcopy(preproc_dict.get(obs_table, {}))
+        preproc_dict_ind_obs = copy.deepcopy(preproc_dict_ind.get(obs_table, {}))
 
         for var_name, val in preproc_dict_obs.items():
             if val == "__individual_reports__":
                 preproc_dict_obs[var_name] = {
-                    "inputs": preproc_dict_ind_obs.get(var_name, {}).get("inputs")
+                    "inputs": copy.deepcopy(
+                        preproc_dict_ind_obs.get(var_name, {}).get("inputs")
+                    )
                 }
 
         update_filenames(preproc_dict_obs, ext_path)
@@ -591,7 +605,10 @@ def do_qc_grouped(data_dict_qc, quality_flags, params, ext_path):
         j = 1
 
         # Get table-specific arguments
-        qc_dict_obs_sp = qc_dict.get(obs_table, {})
+        if obs_table == "observations-attt":
+            qc_dict_obs_sp = copy.deepcopy(qc_dict.get("observations-slp", {}))
+        else:
+            qc_dict_obs_sp = copy.deepcopy(qc_dict.get(obs_table, {}))
 
         for qc_name in qc_dict_obs.keys():
             if obs_table not in qc_dict_obs[qc_name]["tables"]:
@@ -617,7 +634,9 @@ def do_qc_grouped(data_dict_qc, quality_flags, params, ext_path):
             for arg_name, arg_value in qc_dict_obs_sp.get(qc_name, {}).items():
                 kwargs[arg_name] = arg_value
 
+            # print(kwargs)
             qc_flag = func(**inputs, **kwargs)
+            # print(qc_flag)
             idx_failed = qc_flag[qc_flag == 1].index
             quality_flag.loc[idx_failed] = 1
 
@@ -668,7 +687,7 @@ def do_qc(
             report_quality.loc[idx_gnrc] = 0
             continue
 
-        idx_fld_obs = quality_flags[table][quality_flags[table] == 1]
+        idx_fld_obs = quality_flags[table][quality_flags[table] == 1].index
         data_dict_qc[table].drop(index=idx_fld_obs, inplace=True)
         idx_blck_obs = idx_blck.intersection(quality_flags[table].index)
         quality_flags[table].loc[idx_blck_obs] = 6
@@ -720,7 +739,7 @@ def do_qc(
         "report_time_quality", report_time_quality.value_counts(dropna=False).to_dict()
     )
     for table in quality_flags.keys():
-        print(quality_flags[table].value_counts(dropna=False).to_dict())
+        print(table, quality_flags[table].value_counts(dropna=False).to_dict())
 
     quality_flags = do_qc_grouped(
         data_dict_qc=data_dict_qc,
@@ -735,14 +754,18 @@ def do_qc(
         "report_time_quality", report_time_quality.value_counts(dropna=False).to_dict()
     )
     for table in quality_flags.keys():
-        print(quality_flags[table].value_counts(dropna=False).to_dict())
+        print(table, quality_flags[table].value_counts(dropna=False).to_dict())
 
     # Set observational quality_flags to failed if report_quality failed
     failed_reports = report_quality[report_quality == 1].index
     for table, quality_flag in quality_flags.items():
-        intersec = quality_flag.index.intersection(failed_reports)
-        invalid_indexes = quality_flag[quality_flag != 2] and quality_flag.loc[intersec]
-        quality_flag.loc[invalid_indexes] = 1
+        # intersec = quality_flag.index.intersection(failed_reports)
+        # print(intersec)
+        # pritn()
+        # invalid_indexes = quality_flag[quality_flag != 2] and quality_flag.loc[intersec]
+        checked = quality_flag[quality_flag != 2].index
+        intersec = failed_reports.intersection(checked)
+        quality_flag.loc[intersec] = 1
 
     print("---------------------------------------------------------")
     print("report_quality", report_quality.value_counts(dropna=False).to_dict())
@@ -751,6 +774,6 @@ def do_qc(
         "report_time_quality", report_time_quality.value_counts(dropna=False).to_dict()
     )
     for table in quality_flags.keys():
-        print(quality_flags[table].value_counts(dropna=False).to_dict())
+        print(table, quality_flags[table].value_counts(dropna=False).to_dict())
 
     return report_quality, location_quality, report_time_quality, quality_flags, history
