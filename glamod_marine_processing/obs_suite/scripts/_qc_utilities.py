@@ -350,12 +350,9 @@ def do_qc_individual(
                 return_method=return_method,
             )
             obs_qc = get_single_qc_flag(obs_qc)
-            invalid_indexes = obs_qc[obs_qc != 0].index
 
             # Flag quality_flag
-            quality_flag.loc[invalid_indexes] = obs_qc[invalid_indexes]
-            compare_quality_checks(quality_flag, location_quality, report_time_quality)
-
+            quality_flag.loc[obs_qc.index] = obs_qc
             drop_invalid_indexes(data, quality_flag, 1)
 
             i += 1
@@ -467,6 +464,9 @@ def do_qc_sequential(
             # Deselect rows containing generic ids
             idx_gnrc_obs = idx_gnrc.intersection(data.index)
             data = data.drop(index=idx_gnrc_obs)
+
+            # Deselect already failed report_qualities
+            drop_invalid_indexes(data, report_quality, 1)
 
             j = 1
             for qc_name in qc_dict.keys():
@@ -645,6 +645,7 @@ def do_qc(
     """QC."""
     # Set observation quality_flag on blacklist and deselect them
     # Set quality_flag of generic IDs to passed
+    # Deselect quality flags that are mapped as already failed
     try:
         history_tstmp = datetime.datetime.now(datetime.UTC).strftime(
             "%Y-%m-%d %H:%M:%S"
@@ -654,9 +655,11 @@ def do_qc(
     history_add = f";{history_tstmp}. {params.history_explain}"
     idx_blck = report_quality[report_quality == 6].index
     idx_gnrc = report_quality[report_quality == 88].index
+    idx_fld = report_quality[report_quality == 1].index
 
     for table in data_dict_qc.keys():
         if table == "header":
+            data_dict_qc[table].drop(index=idx_fld, inplace=True)
             data_dict_qc[table].drop(index=idx_blck, inplace=True)
             idx_not_blck = data_dict_qc[table].index
             history.loc[idx_not_blck] = history.loc[idx_not_blck].apply(
@@ -665,13 +668,23 @@ def do_qc(
             report_quality.loc[idx_gnrc] = 0
             continue
 
+        idx_fld_obs = quality_flags[table][quality_flags[table] == 1]
+        data_dict_qc[table].drop(index=idx_fld_obs, inplace=True)
         idx_blck_obs = idx_blck.intersection(quality_flags[table].index)
         quality_flags[table].loc[idx_blck_obs] = 6
-        idx_gnrc_obs = idx_gnrc.intersection(quality_flags[table].index)
-        quality_flags[table].loc[idx_gnrc_obs] = 0
+        idx_blck_obs = quality_flags[table][quality_flags[table] == 6].index
+        # idx_gnrc_obs = idx_gnrc.intersection(quality_flags[table].index)
+        # quality_flags[table].loc[idx_gnrc_obs] = 0
         data_dict_qc[table].drop(index=idx_blck_obs, inplace=True)
 
     # Do the quality control
+    print("report_quality", report_quality.value_counts(dropna=False).to_dict())
+    print("location_quality", location_quality.value_counts(dropna=False).to_dict())
+    print(
+        "report_time_quality", report_time_quality.value_counts(dropna=False).to_dict()
+    )
+    for table in quality_flags.keys():
+        print(table, quality_flags[table].value_counts(dropna=False).to_dict())
     report_quality, location_quality, report_time_quality, quality_flags = (
         do_qc_individual(
             data_dict_qc=data_dict_qc,
@@ -683,6 +696,14 @@ def do_qc(
             ext_path=ext_path,
         )
     )
+    print("---------------------------------------------------------")
+    print("report_quality", report_quality.value_counts(dropna=False).to_dict())
+    print("location_quality", location_quality.value_counts(dropna=False).to_dict())
+    print(
+        "report_time_quality", report_time_quality.value_counts(dropna=False).to_dict()
+    )
+    for table in quality_flags.keys():
+        print(table, quality_flags[table].value_counts(dropna=False).to_dict())
 
     report_quality, location_quality, quality_flags = do_qc_sequential(
         data_dict_qc=data_dict_qc,
@@ -692,6 +713,14 @@ def do_qc(
         idx_gnrc=idx_gnrc,
         params=params,
     )
+    print("---------------------------------------------------------")
+    print("report_quality", report_quality.value_counts(dropna=False).to_dict())
+    print("location_quality", location_quality.value_counts(dropna=False).to_dict())
+    print(
+        "report_time_quality", report_time_quality.value_counts(dropna=False).to_dict()
+    )
+    for table in quality_flags.keys():
+        print(quality_flags[table].value_counts(dropna=False).to_dict())
 
     quality_flags = do_qc_grouped(
         data_dict_qc=data_dict_qc,
@@ -699,5 +728,29 @@ def do_qc(
         params=params,
         ext_path=ext_path,
     )
+    print("---------------------------------------------------------")
+    print("report_quality", report_quality.value_counts(dropna=False).to_dict())
+    print("location_quality", location_quality.value_counts(dropna=False).to_dict())
+    print(
+        "report_time_quality", report_time_quality.value_counts(dropna=False).to_dict()
+    )
+    for table in quality_flags.keys():
+        print(quality_flags[table].value_counts(dropna=False).to_dict())
+
+    # Set observational quality_flags to failed if report_quality failed
+    failed_reports = report_quality[report_quality == 1].index
+    for table, quality_flag in quality_flags.items():
+        intersec = quality_flag.index.intersection(failed_reports)
+        invalid_indexes = quality_flag[quality_flag != 2] and quality_flag.loc[intersec]
+        quality_flag.loc[invalid_indexes] = 1
+
+    print("---------------------------------------------------------")
+    print("report_quality", report_quality.value_counts(dropna=False).to_dict())
+    print("location_quality", location_quality.value_counts(dropna=False).to_dict())
+    print(
+        "report_time_quality", report_time_quality.value_counts(dropna=False).to_dict()
+    )
+    for table in quality_flags.keys():
+        print(quality_flags[table].value_counts(dropna=False).to_dict())
 
     return report_quality, location_quality, report_time_quality, quality_flags, history
