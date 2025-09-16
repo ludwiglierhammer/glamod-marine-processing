@@ -605,10 +605,7 @@ def do_qc_grouped(data_dict_qc, quality_flags, params, ext_path):
         j = 1
 
         # Get table-specific arguments
-        if obs_table == "observations-attt":
-            qc_dict_obs_sp = copy.deepcopy(qc_dict.get("observations-slp", {}))
-        else:
-            qc_dict_obs_sp = copy.deepcopy(qc_dict.get(obs_table, {}))
+        qc_dict_obs_sp = copy.deepcopy(qc_dict.get(obs_table, {}))
 
         for qc_name in qc_dict_obs.keys():
             if obs_table not in qc_dict_obs[qc_name]["tables"]:
@@ -634,9 +631,7 @@ def do_qc_grouped(data_dict_qc, quality_flags, params, ext_path):
             for arg_name, arg_value in qc_dict_obs_sp.get(qc_name, {}).items():
                 kwargs[arg_name] = arg_value
 
-            # print(kwargs)
             qc_flag = func(**inputs, **kwargs)
-            # print(qc_flag)
             idx_failed = qc_flag[qc_flag == 1].index
             quality_flag.loc[idx_failed] = 1
 
