@@ -246,306 +246,271 @@ def add_buoy_data_and_get_buoy_indexes(
     return data, buoy_indexes  # ignore_indexes
 
 
-def do_qc_individual(
-    data_dict_qc,
+def do_qc_individual_header(
+    data,
     report_quality,
     location_quality,
     report_time_quality,
+    params,
+    ext_path,
+):
+
+    qc_dict = copy.deepcopy(params.qc_settings.get("individual_reports"))
+    return_method = qc_dict["return_method"]
+
+    # 1.1. Header
+    logging.info("1.1. Do header checks")
+    qc_dict_header = copy.deepcopy(qc_dict.get("header", {}))
+
+    # 1.1.1. Position check
+    logging.info("1.1.1. Do positional checks")
+
+    # Deselect already failed location_qualities
+    data_pos = data[location_quality.loc[data.index] != 2]
+    idx_pos = data_pos.index
+
+    # Do position check
+    qc_dict_pos = copy.deepcopy(qc_dict_header.get("position_check", {}))
+    pos_qc = do_multiple_row_check(
+        data=data_pos,
+        qc_dict=qc_dict_pos,
+        return_method=return_method,
+    )
+    pos_qc = get_single_qc_flag(pos_qc)
+    pos_qc = pos_qc.replace({1: 2, 2: 3})
+    location_quality.loc[idx_pos] = pos_qc
+
+    # 1.1.2. Time check
+    logging.info("1.1.2. Do time checks")
+
+    # Deselect already failed report_time_qualities
+    data_time = data[
+        (report_time_quality.loc[data.index] != 4)
+        & (report_time_quality.loc[data.index] != 5)
+    ]
+
+    # Do time check
+    qc_dict_tme = copy.deepcopy(qc_dict_header.get("time_check", {}))
+    time_qc = do_multiple_row_check(
+        data=data_time,
+        qc_dict=qc_dict_tme,
+        return_method=return_method,
+    )
+    time_qc = get_single_qc_flag(time_qc)
+    time_qc = time_qc.replace({1: 5, 2: 4, 3: 4})
+    invalid_indexes = time_qc[time_qc != 0].index
+    report_time_quality.loc[invalid_indexes] = time_qc[invalid_indexes]
+
+    # 1.1.3. Report quality
+    logging.info("1.1.3. Set report quality")
+    compare_quality_checks(report_quality, location_quality, report_time_quality)
+
+    return report_quality, location_quality, report_time_quality
+
+
+def do_qc_individual_observation(
+    data,
+    table,
+    quality_flag,
+    params,
+    ext_path,
+):
+    logging.info(f"1.2. Do {table} check")
+    qc_dict = copy.deepcopy(params.qc_settings.get("individual_reports"))
+    return_method = qc_dict["return_method"]
+
+    # Deselect missing values
+    qc_dict_miss = copy.deepcopy(qc_dict.get("observations", {}).get("missing_values"))
+    miss_qc = do_multiple_row_check(
+        data=data,
+        qc_dict=qc_dict_miss,
+        return_method=return_method,
+    )
+    miss_qc = get_single_qc_flag(miss_qc)
+    quality_flag.loc[miss_qc[miss_qc == 1].index] = 3
+    drop_invalid_indexes(data, quality_flag, 3)
+
+    # Do QC
+    preproc_dict = copy.deepcopy(qc_dict.get("preprocessing", {}).get(table, {}))
+    qc_dict_obs = copy.deepcopy(qc_dict.get("observations", {}).get(table, {}))
+    update_filenames(preproc_dict, ext_path)
+    open_netcdffiles(preproc_dict)
+    obs_qc = do_multiple_row_check(
+        data=data,
+        preproc_dict=preproc_dict,
+        qc_dict=qc_dict_obs,
+        return_method=return_method,
+    )
+    obs_qc = get_single_qc_flag(obs_qc)
+
+    # Flag quality_flag
+    quality_flag.loc[obs_qc.index] = obs_qc
+    return quality_flag
+
+
+def do_qc_individual_combined(
+    data_dict_qc,
     quality_flags,
     params,
     ext_path,
 ):
-    """Individual QC."""
-
-    def do_qc_individual_header():
-        # 1.1. Header
-        logging.info("1.1. Do header checks")
-        qc_dict_header = copy.deepcopy(qc_dict.get("header", {}))
-        data = data_dict_qc["header"]
-
-        # 1.1.1. Position check
-        logging.info("1.1.1. Do positional checks")
-
-        # Deselect already failed location_qualities
-        data_pos = data[location_quality.loc[data.index] != 2]
-        idx_pos = data_pos.index
-
-        # Do position check
-        qc_dict_pos = copy.deepcopy(qc_dict_header.get("position_check", {}))
-        pos_qc = do_multiple_row_check(
-            data=data_pos,
-            qc_dict=qc_dict_pos,
-            return_method=return_method,
-        )
-        pos_qc = get_single_qc_flag(pos_qc)
-        pos_qc = pos_qc.replace({1: 2, 2: 3})
-        location_quality.loc[idx_pos] = pos_qc
-
-        # 1.1.2. Time check
-        logging.info("1.1.2. Do time checks")
-
-        # Deselect already failed report_time_qualities
-        data_time = data[
-            (report_time_quality.loc[data.index] != 4)
-            & (report_time_quality.loc[data.index] != 5)
-        ]
-
-        # Do time check
-        qc_dict_tme = copy.deepcopy(qc_dict_header.get("time_check", {}))
-        time_qc = do_multiple_row_check(
-            data=data_time,
-            qc_dict=qc_dict_tme,
-            return_method=return_method,
-        )
-        time_qc = get_single_qc_flag(time_qc)
-        time_qc = time_qc.replace({1: 5, 2: 4, 3: 4})
-        invalid_indexes = time_qc[time_qc != 0].index
-        report_time_quality.loc[invalid_indexes] = time_qc[invalid_indexes]
-
-        # 1.1.3. Report quality
-        logging.info("1.1.3. Set report quality")
-        compare_quality_checks(report_quality, location_quality, report_time_quality)
-
-        drop_invalid_indexes(data, report_quality, 1)
-
-    def do_qc_individual_observations():
-        # 1.2. Observations
-        logging.info("1.2. Do observations checks")
-
-        # 1.2.1. Do observation check
-        i = 1
-        for obs_table in data_dict_qc.keys():
-            if obs_table == "header":
-                continue
-            logging.info(f"1.2.{i}. Do {obs_table} check")
-            data = data_dict_qc[obs_table]
-            quality_flag = quality_flags[obs_table]
-
-            # Deselect already failed quality_flags
-            drop_invalid_indexes(data, quality_flag, 1)
-
-            # Deselect already failed report_qualities
-            drop_invalid_indexes(data, report_quality, 1)
-
-            # Deselect missing values
-            qc_dict_miss = copy.deepcopy(
-                qc_dict.get("observations", {}).get("missing_values")
-            )
-            miss_qc = do_multiple_row_check(
-                data=data,
-                qc_dict=qc_dict_miss,
-                return_method=return_method,
-            )
-            miss_qc = get_single_qc_flag(miss_qc)
-            quality_flag.loc[miss_qc[miss_qc == 1].index] = 3
-            drop_invalid_indexes(data, quality_flag, 3)
-
-            # Do QC
-            preproc_dict = copy.deepcopy(
-                qc_dict.get("preprocessing", {}).get(obs_table, {})
-            )
-            qc_dict_obs = copy.deepcopy(
-                qc_dict.get("observations", {}).get(obs_table, {})
-            )
-            update_filenames(preproc_dict, ext_path)
-            open_netcdffiles(preproc_dict)
-            obs_qc = do_multiple_row_check(
-                data=data,
-                preproc_dict=preproc_dict,
-                qc_dict=qc_dict_obs,
-                return_method=return_method,
-            )
-            obs_qc = get_single_qc_flag(obs_qc)
-
-            # Flag quality_flag
-            quality_flag.loc[obs_qc.index] = obs_qc
-            drop_invalid_indexes(data, quality_flag, 1)
-
-            i += 1
-
-    def do_qc_individual_combined():
-        # 1.2.2. Do combined observation check
-        qc_dict_comb = copy.deepcopy(
-            qc_dict.get("observations", {}).get("combined", {})
-        )
-        i = 1
-        for qc_name in qc_dict_comb.keys():
-            parameters = Parameters(qc_dict_comb[qc_name], qc_individual_reports)
-
-            obs_tables = set(parameters.tables.values())
-            if all_tables_available(obs_tables, data_dict_qc) is False:
-                continue
-
-            logging.info(f"1.2.{i}. Do combined {qc_name} check")
-
-            inputs = get_combined_input_values(
-                parameters.tables, parameters.names, data_dict_qc
-            )
-
-            qc_flag = parameters.func(**inputs)
-            idx_failed = qc_flag[qc_flag == 1].index
-            for table in obs_tables:
-                quality_flags[table].loc[idx_failed] = qc_flag.loc[idx_failed]
-                drop_invalid_indexes(data_dict_qc[table], qc_flag, 1)
-
-            i += 1
-
-    # Get QC settings for individual reports
-    logging.info("1. Do individual checks")
     qc_dict = copy.deepcopy(params.qc_settings.get("individual_reports"))
-    return_method = qc_dict["return_method"]
 
-    # Do header QC
-    do_qc_individual_header()
+    # 1.2.2. Do combined observation check
+    qc_dict_comb = copy.deepcopy(qc_dict.get("observations", {}).get("combined", {}))
+    i = 1
+    for qc_name in qc_dict_comb.keys():
+        parameters = Parameters(qc_dict_comb[qc_name], qc_individual_reports)
 
-    # Do observations QC
-    do_qc_individual_observations()
+        obs_tables = set(parameters.tables.values())
+        if all_tables_available(obs_tables, data_dict_qc) is False:
+            continue
 
-    # Do combined QC
-    do_qc_individual_combined()
+        logging.info(f"1.2.{i}. Do combined {qc_name} check")
 
-    # Return updated quality flags
-    return report_quality, location_quality, report_time_quality, quality_flags
+        inputs = get_combined_input_values(
+            parameters.tables, parameters.names, data_dict_qc
+        )
+
+        qc_flag = parameters.func(**inputs)
+        idx_failed = qc_flag[qc_flag == 1].index
+        for table in obs_tables:
+            quality_flags[table].loc[idx_failed] = qc_flag.loc[idx_failed]
+            drop_invalid_indexes(data_dict_qc[table], qc_flag, 1)
+
+        i += 1
+
+    return quality_flags
 
 
-def do_qc_sequential(
-    data_dict_qc,
+def do_qc_sequential_header(
+    data,
     report_quality,
     location_quality,
+    idx_gnrc,
+    params,
+):
+    # 2.1. Header
+    logging.info("2.1. Do header checks")
+    qc_dict = copy.deepcopy(
+        params.qc_settings.get("sequential_reports", {}).get("header", {})
+    )
+    data = data.copy()
+
+    # Deselect rows containing generic ids
+    invalid_indexes = idx_gnrc.intersection(data.index)
+    data.drop(index=invalid_indexes, inplace=True)
+
+    i = 1
+    for qc_name in qc_dict.keys():
+        logging.info(f"2.1.{i}. Do {qc_name} check.")
+
+        # Deselect already failed report_qualities
+        drop_invalid_indexes(data, report_quality, 1)
+
+        # Get parameters
+        func, inputs, kwargs = get_qc_function_and_inputs(
+            qc_dict[qc_name], data, "header", qc_sequential_reports
+        )
+        if func is None:
+            continue
+
+        # Do QC
+        indexes_failed = run_qc_by_group(inputs, data, func, kwargs)
+
+        location_quality.loc[indexes_failed] = 2
+        report_quality.loc[indexes_failed] = 1
+
+        i += 1
+
+    return report_quality, location_quality
+
+
+def do_qc_sequential_observation(
+    data,
+    table,
+    quality_flag,
+    idx_gnrc,
+    data_group,
+    params,
+):
+    """Sequential QC."""
+    # 2.2.1. Do observation track check
+    qc_dict = copy.deepcopy(
+        params.qc_settings.get("sequential_reports", {}).get("observations", {})
+    )
+
+    logging.info(f"2.2. Do {table} checks")
+    data = data.copy()
+
+    # Deselect rows containing generic ids
+    idx_gnrc_obs = idx_gnrc.intersection(data.index)
+    data = data.drop(index=idx_gnrc_obs)
+
+    i = 1
+    for qc_name in qc_dict.keys():
+        logging.info(f"2.2.{i}. Do {qc_name} check")
+
+        # Deselect already failed report_qualities
+        drop_invalid_indexes(data, quality_flag, 1)
+
+        # Get parameter
+        func, inputs, kwargs = get_qc_function_and_inputs(
+            qc_dict[qc_name], data, table, qc_sequential_reports
+        )
+        if func is None:
+            return
+
+        # Do QC
+        indexes_failed = run_qc_by_group(inputs, data_group, func, kwargs)
+
+        quality_flag.loc[indexes_failed] = 1
+
+        i += 1
+
+    return quality_flag
+
+
+def do_qc_sequential_combined(
+    data_dict_qc,
     quality_flags,
     idx_gnrc,
     params,
 ):
     """Sequential QC."""
+    # 2.2.2. Do combined observations track check
+    qc_dict = copy.deepcopy(
+        params.qc_settings.get("sequential_reports", {}).get("combined", {})
+    )
 
-    def do_qc_sequential_header():
-        # 2.1. Header
-        logging.info("2.1. Do header checks")
-        qc_dict = copy.deepcopy(
-            params.qc_settings.get("sequential_reports", {}).get("header", {})
-        )
-        data = data_dict_qc["header"].copy()
+    i = 1
+    for qc_name in qc_dict.keys():
+        # Get parameters
+        parameters = Parameters(qc_dict[qc_name], qc_sequential_reports)
 
-        # Deselect rows containing generic ids
-        invalid_indexes = idx_gnrc.intersection(data.index)
-        data.drop(index=invalid_indexes, inplace=True)
+        obs_tables = set(parameters.tables.values())
+        if all_tables_available(obs_tables, data_dict_qc) is False:
+            continue
 
-        i = 1
-        for qc_name in qc_dict.keys():
-            logging.info(f"2.1.{i}. Do {qc_name} check.")
-
-            # Deselect already failed report_qualities
-            drop_invalid_indexes(data, report_quality, 1)
-
-            # Get parameters
-            func, inputs, kwargs = get_qc_function_and_inputs(
-                qc_dict[qc_name], data, "header", qc_sequential_reports
-            )
-            if func is None:
-                continue
-
-            # Do QC
-            indexes_failed = run_qc_by_group(inputs, data, func, kwargs)
-
-            location_quality.loc[indexes_failed] = 2
-            report_quality.loc[indexes_failed] = 1
-
-            i += 1
-
-        drop_invalid_indexes(data_dict_qc["header"], report_quality, 1)
-
-    def do_qc_sequential_observations():
-        # 2.2. Observations
-        logging.info("2.2. Do observation checks")
-
-        # 2.2.1. Do observation track check
-        qc_dict = copy.deepcopy(
-            params.qc_settings.get("sequential_reports", {}).get("observations", {})
-        )
-        i = 1
-        for obs_table in data_dict_qc.keys():
-            if obs_table == "header":
-                continue
-
-            logging.info(f"2.2.{i}. Do {obs_table} checks")
-            quality_flag = quality_flags[obs_table]
-            data = data_dict_qc[obs_table].copy()
-
-            # Deselect rows containing generic ids
-            idx_gnrc_obs = idx_gnrc.intersection(data.index)
-            data = data.drop(index=idx_gnrc_obs)
-
-            # Deselect already failed report_qualities
-            drop_invalid_indexes(data, report_quality, 1)
-
-            j = 1
-            for qc_name in qc_dict.keys():
-                logging.info(f"2.2.{i}.{j}. Do {qc_name} check")
-
-                # Deselect already failed report_qualities
-                drop_invalid_indexes(data, quality_flag, 1)
-
-                # Get parameter
-                func, inputs, kwargs = get_qc_function_and_inputs(
-                    qc_dict[qc_name], data, obs_table, qc_sequential_reports
-                )
-                if func is None:
-                    return
-
-                # Do QC
-                indexes_failed = run_qc_by_group(
-                    inputs, data_dict_qc["header"], func, kwargs
-                )
-
-                quality_flag.loc[indexes_failed] = 1
-
-                j += 1
-
-            drop_invalid_indexes(data_dict_qc[obs_table], quality_flag, 1)
-
-            i += 1
-
-    def do_qc_sequential_combined():
-        # 2.2.2. Do combined observations track check
-        qc_dict = copy.deepcopy(
-            params.qc_settings.get("sequential_reports", {}).get("combined", {})
+        logging.info(f"2.2.{i}. Do {qc_name} check")
+        inputs = get_combined_input_values(
+            parameters.tables, parameters.names, data_dict_qc
         )
 
-        i = 1
-        for qc_name in qc_dict.keys():
-            # Get parameters
-            parameters = Parameters(qc_dict[qc_name], qc_sequential_reports)
+        indexes_failed = run_qc_by_group(
+            inputs, data_dict_qc["header"], parameters.func, parameters.kwargs
+        )
 
-            obs_tables = set(parameters.tables.values())
-            if all_tables_available(obs_tables, data_dict_qc) is False:
-                continue
+        for table in obs_tables:
+            quality_flags[table].loc[indexes_failed] = 1
+            drop_invalid_indexes(data_dict_qc[table], quality_flags[table], 1)
 
-            logging.info(f"2.2.{i}. Do {qc_name} check")
-            inputs = get_combined_input_values(
-                parameters.tables, parameters.names, data_dict_qc
-            )
+        i += 1
 
-            indexes_failed = run_qc_by_group(
-                inputs, data_dict_qc["header"], parameters.func, parameters.kwargs
-            )
-
-            for table in obs_tables:
-                quality_flags[table].loc[indexes_failed] = 1
-                drop_invalid_indexes(data_dict_qc[table], quality_flags[table], 1)
-
-            i += 1
-
-    logging.info("2. Do sequential checks")
-    do_qc_sequential_header()
-
-    do_qc_sequential_observations()
-
-    do_qc_sequential_combined()
-
-    return report_quality, location_quality, quality_flags
+    return quality_flags
 
 
-def do_qc_grouped(data_dict_qc, quality_flags, params, ext_path):
+def do_qc_grouped_observation(data, table, quality_flag, params, ext_path):
     """Grouped QC."""
     # 3. Buddy check
     logging.info("3. Do buddy checks")
@@ -570,80 +535,71 @@ def do_qc_grouped(data_dict_qc, quality_flags, params, ext_path):
         params.sid_dck, buoy_dck
     )
 
+    logging.info(f"3.. Do {table} checks")
+    data = data.copy()
+
+    # Add buoy data
+    data, buoy_indexes = add_buoy_data_and_get_buoy_indexes(
+        data, params_buoy, table, buoy_dataset, buoy_dck
+    )
+
+    # Pre-processing
+    preproc_dict_obs = copy.deepcopy(preproc_dict.get(table, {}))
+    preproc_dict_ind_obs = copy.deepcopy(preproc_dict_ind.get(table, {}))
+
+    for var_name, val in preproc_dict_obs.items():
+        if val == "__individual_reports__":
+            preproc_dict_obs[var_name] = {
+                "inputs": copy.deepcopy(
+                    preproc_dict_ind_obs.get(var_name, {}).get("inputs")
+                )
+            }
+
+    update_filenames(preproc_dict_obs, ext_path)
+    open_netcdffiles(preproc_dict_obs)
+
+    for var_name, val in preproc_dict_obs.items():
+        if isinstance(val, dict) and "inputs" in val:
+            preproc_dict_obs[var_name] = val["inputs"]
+
     i = 1
-    for obs_table in data_dict_qc:
-        if obs_table == "header":
+
+    # Get table-specific arguments
+    qc_dict_obs_sp = copy.deepcopy(qc_dict.get(table, {}))
+
+    for qc_name in qc_dict_obs.keys():
+        if table not in qc_dict_obs[qc_name]["tables"]:
             continue
-        logging.info(f"3.{i}. Do {obs_table} checks")
-        quality_flag = quality_flags[obs_table]
-        data = data_dict_qc[obs_table].copy()
 
-        # Add buoy data
-        data, buoy_indexes = add_buoy_data_and_get_buoy_indexes(
-            data, params_buoy, obs_table, buoy_dataset, buoy_dck
+        logging.info(f"3.{i}. Do {qc_name} check")
+
+        # Deselect already failed quality flags
+        drop_invalid_indexes(data, quality_flag, 1)
+
+        # Get parameters
+        func, inputs, kwargs = get_qc_function_and_inputs(
+            qc_dict_obs[qc_name], data, table, qc_grouped_reports
         )
+        if func is None:
+            continue
 
-        # Pre-processing
-        preproc_dict_obs = copy.deepcopy(preproc_dict.get(obs_table, {}))
-        preproc_dict_ind_obs = copy.deepcopy(preproc_dict_ind.get(obs_table, {}))
+        for var_name, value in kwargs.items():
+            if isinstance(value, str) and value == "__preprocessed__":
+                kwargs[var_name] = preproc_dict_obs[var_name]
 
-        for var_name, val in preproc_dict_obs.items():
-            if val == "__individual_reports__":
-                preproc_dict_obs[var_name] = {
-                    "inputs": copy.deepcopy(
-                        preproc_dict_ind_obs.get(var_name, {}).get("inputs")
-                    )
-                }
+        kwargs["ignore_indexes"] = data.index.get_indexer(buoy_indexes)
+        for arg_name, arg_value in qc_dict_obs_sp.get(qc_name, {}).items():
+            kwargs[arg_name] = arg_value
 
-        update_filenames(preproc_dict_obs, ext_path)
-        open_netcdffiles(preproc_dict_obs)
+        qc_flag = func(**inputs, **kwargs)
+        idx_failed = qc_flag[qc_flag == 1].index
+        quality_flag.loc[idx_failed] = 1
 
-        for var_name, val in preproc_dict_obs.items():
-            if isinstance(val, dict) and "inputs" in val:
-                preproc_dict_obs[var_name] = val["inputs"]
-
-        j = 1
-
-        # Get table-specific arguments
-        qc_dict_obs_sp = copy.deepcopy(qc_dict.get(obs_table, {}))
-
-        for qc_name in qc_dict_obs.keys():
-            if obs_table not in qc_dict_obs[qc_name]["tables"]:
-                continue
-
-            logging.info(f"3.{i}.{j}. Do {qc_name} check")
-
-            # Deselect already failed quality flags
-            drop_invalid_indexes(data, quality_flag, 1)
-
-            # Get parameters
-            func, inputs, kwargs = get_qc_function_and_inputs(
-                qc_dict_obs[qc_name], data, obs_table, qc_grouped_reports
-            )
-            if func is None:
-                continue
-
-            for var_name, value in kwargs.items():
-                if isinstance(value, str) and value == "__preprocessed__":
-                    kwargs[var_name] = preproc_dict_obs[var_name]
-
-            kwargs["ignore_indexes"] = data.index.get_indexer(buoy_indexes)
-            for arg_name, arg_value in qc_dict_obs_sp.get(qc_name, {}).items():
-                kwargs[arg_name] = arg_value
-
-            qc_flag = func(**inputs, **kwargs)
-            idx_failed = qc_flag[qc_flag == 1].index
-            quality_flag.loc[idx_failed] = 1
-
-            drop_invalid_indexes(data, quality_flag, 1)
-
-            j += 1
-
-        drop_invalid_indexes(data_dict_qc[obs_table], quality_flag, 1)
+        drop_invalid_indexes(data, quality_flag, 1)
 
         i += 1
 
-    return quality_flags
+    return quality_flag
 
 
 def do_qc(
@@ -656,119 +612,128 @@ def do_qc(
     params,
     ext_path,
 ):
-    """QC."""
-    # Set observation quality_flag on blacklist and deselect them
-    # Set quality_flag of generic IDs to passed
-    # Deselect quality flags that are mapped as already failed
+    # Update history
     try:
         history_tstmp = datetime.datetime.now(datetime.UTC).strftime(
             "%Y-%m-%d %H:%M:%S"
         )
     except AttributeError:  # for python < 3.11
         history_tstmp = datetime.datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S")
+
     history_add = f";{history_tstmp}. {params.history_explain}"
+
+    # Define indexes for both blacklist and generic IDs
     idx_blck = report_quality[report_quality == 6].index
     idx_gnrc = report_quality[report_quality == 88].index
     idx_fld = report_quality[report_quality == 1].index
 
-    for table in data_dict_qc.keys():
-        if table == "header":
-            data_dict_qc[table].drop(index=idx_fld, inplace=True)
-            data_dict_qc[table].drop(index=idx_blck, inplace=True)
-            idx_not_blck = data_dict_qc[table].index
-            history.loc[idx_not_blck] = history.loc[idx_not_blck].apply(
-                lambda x: x + history_add
-            )
-            report_quality.loc[idx_gnrc] = 0
-            continue
+    # DO QC
 
+    obs_tables = [table for table in data_dict_qc.keys() if table != "header"]
+
+    # Header
+
+    # Remove already failed report_qualities
+    data_dict_qc["header"].drop(index=idx_fld, inplace=True)
+
+    # Remove reports on blacklist and update history
+    data_dict_qc["header"].drop(index=idx_blck, inplace=True)
+    idx_not_blck = data_dict_qc["header"].index
+    history.loc[idx_not_blck] = history.loc[idx_not_blck].apply(
+        lambda x: x + history_add
+    )
+
+    # Set report_qualities for generic IDs to passed
+    report_quality.loc[idx_gnrc] = 0
+
+    # Do individual QC
+    report_quality, location_quality, report_time_quality = do_qc_individual_header(
+        data_dict_qc["header"],
+        report_quality,
+        location_quality,
+        report_time_quality,
+        params,
+        ext_path,
+    )
+
+    # Remove already failed report_qualities
+    drop_invalid_indexes(data_dict_qc["header"], report_quality, 1)
+
+    # Do sequential QC
+    report_quality, location_quality = do_qc_sequential_header(
+        data_dict_qc["header"],
+        report_quality,
+        location_quality,
+        idx_gnrc,
+        params,
+    )
+
+    # Remove already failed report_qualities
+    drop_invalid_indexes(data_dict_qc["header"], report_quality, 1)
+
+    # Observations
+
+    for table in obs_tables:
+
+        # Remove already failed quality_flags
         idx_fld_obs = quality_flags[table][quality_flags[table] == 1].index
         data_dict_qc[table].drop(index=idx_fld_obs, inplace=True)
+
+        # Remove observations on blacklist
         idx_blck_obs = idx_blck.intersection(quality_flags[table].index)
         quality_flags[table].loc[idx_blck_obs] = 6
         idx_blck_obs = quality_flags[table][quality_flags[table] == 6].index
-        # idx_gnrc_obs = idx_gnrc.intersection(quality_flags[table].index)
-        # quality_flags[table].loc[idx_gnrc_obs] = 0
         data_dict_qc[table].drop(index=idx_blck_obs, inplace=True)
 
-    # Do the quality control
-    print("report_quality", report_quality.value_counts(dropna=False).to_dict())
-    print("location_quality", location_quality.value_counts(dropna=False).to_dict())
-    print(
-        "report_time_quality", report_time_quality.value_counts(dropna=False).to_dict()
-    )
-    for table in quality_flags.keys():
-        print(table, quality_flags[table].value_counts(dropna=False).to_dict())
-    report_quality, location_quality, report_time_quality, quality_flags = (
-        do_qc_individual(
-            data_dict_qc=data_dict_qc,
-            report_quality=report_quality,
-            location_quality=location_quality,
-            report_time_quality=report_time_quality,
-            quality_flags=quality_flags,
-            params=params,
-            ext_path=ext_path,
+        # Remove already failed report_qualities
+        drop_invalid_indexes(data_dict_qc[table], report_quality, 1)
+
+        # Do individual QC
+        quality_flags[table] = do_qc_individual_observation(
+            data_dict_qc[table],
+            table,
+            quality_flags[table],
+            params,
+            ext_path,
         )
-    )
-    print("---------------------------------------------------------")
-    print("report_quality", report_quality.value_counts(dropna=False).to_dict())
-    print("location_quality", location_quality.value_counts(dropna=False).to_dict())
-    print(
-        "report_time_quality", report_time_quality.value_counts(dropna=False).to_dict()
-    )
-    for table in quality_flags.keys():
-        print(table, quality_flags[table].value_counts(dropna=False).to_dict())
 
-    report_quality, location_quality, quality_flags = do_qc_sequential(
-        data_dict_qc=data_dict_qc,
-        report_quality=report_quality,
-        location_quality=location_quality,
-        quality_flags=quality_flags,
-        idx_gnrc=idx_gnrc,
-        params=params,
-    )
-    print("---------------------------------------------------------")
-    print("report_quality", report_quality.value_counts(dropna=False).to_dict())
-    print("location_quality", location_quality.value_counts(dropna=False).to_dict())
-    print(
-        "report_time_quality", report_time_quality.value_counts(dropna=False).to_dict()
-    )
-    for table in quality_flags.keys():
-        print(table, quality_flags[table].value_counts(dropna=False).to_dict())
+        # Remove already failed quality_flags
+        drop_invalid_indexes(data_dict_qc[table], quality_flags[table], 1)
 
-    quality_flags = do_qc_grouped(
-        data_dict_qc=data_dict_qc,
-        quality_flags=quality_flags,
-        params=params,
-        ext_path=ext_path,
+    quality_flags = do_qc_individual_combined(
+        data_dict_qc,
+        quality_flags,
+        params,
+        ext_path,
     )
-    print("---------------------------------------------------------")
-    print("report_quality", report_quality.value_counts(dropna=False).to_dict())
-    print("location_quality", location_quality.value_counts(dropna=False).to_dict())
-    print(
-        "report_time_quality", report_time_quality.value_counts(dropna=False).to_dict()
-    )
-    for table in quality_flags.keys():
-        print(table, quality_flags[table].value_counts(dropna=False).to_dict())
 
-    # Set observational quality_flags to failed if report_quality failed
-    failed_reports = report_quality[report_quality == 1].index
-    for table, quality_flag in quality_flags.items():
-        # intersec = quality_flag.index.intersection(failed_reports)
-        # print(intersec)
-        # pritn()
-        # invalid_indexes = quality_flag[quality_flag != 2] and quality_flag.loc[intersec]
-        checked = quality_flag[quality_flag != 2].index
-        intersec = failed_reports.intersection(checked)
-        quality_flag.loc[intersec] = 1
+    for table in obs_tables:
 
-    print("---------------------------------------------------------")
-    print("report_quality", report_quality.value_counts(dropna=False).to_dict())
-    print("location_quality", location_quality.value_counts(dropna=False).to_dict())
-    print(
-        "report_time_quality", report_time_quality.value_counts(dropna=False).to_dict()
+        # Do sequential QC
+        quality_flags[table] = do_qc_sequential_observation(
+            data_dict_qc[table],
+            table,
+            quality_flags[table],
+            idx_gnrc,
+            data_dict_qc["header"],
+            params,
+        )
+
+    quality_flags = do_qc_sequential_combined(
+        data_dict_qc,
+        quality_flags,
+        idx_gnrc,
+        params,
     )
-    for table in quality_flags.keys():
-        print(table, quality_flags[table].value_counts(dropna=False).to_dict())
+
+    for table in obs_tables:
+
+        # Do grouped QC
+        quality_flags[table] = do_qc_grouped_observation(
+            data_dict_qc[table], table, quality_flags[table], params, ext_path
+        )
+
+        # Remove already failed quality_flags
+        drop_invalid_indexes(data_dict_qc[table], quality_flags[table], 1)
 
     return report_quality, location_quality, report_time_quality, quality_flags, history
