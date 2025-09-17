@@ -175,17 +175,6 @@
               ]
             }
           },
-          "NIGHT": {
-            "func": "do_night_check",
-            "names": {
-              "date": "date_time",
-              "lat": "latitude",
-              "lon": "longitude"
-            },
-            "arguments": {
-              "time_since_sun_above_horizon": 1.0
-            }
-          },
           "CLIM1": {
             "func": "do_climatology_check",
             "names": {
@@ -380,36 +369,9 @@
             "n_neighbours": 5
           }
         },
-        "ROUNDED": {
-          "func": "find_multiple_rounded_values",
-          "names": {
-            "value": "observation_value"
-          },
-          "arguments": {
-            "min_count": 20,
-            "threshold": 0.5
-          },
-          "preproc": {
-            "observations-at": {
-              "operation": "- 273.15",
-              "column": "observation_value"
-            },
-            "observations-sst": {
-              "operation": "- 273.15",
-              "column": "observation_value"
-            },
-            "observations-dpt": {
-              "operation": "- 273.15",
-              "column": "observation_value"
-            }
-          }
-        },
         "REPEATED": {
           "tables": [
-            "observations-at",
-            "observations-dpt",
-            "observations-sst",
-            "observations-slp"
+            "observations-dpt"
           ],
           "func": "find_repeated_values",
           "names": {
