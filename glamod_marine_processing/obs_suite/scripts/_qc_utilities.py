@@ -137,13 +137,17 @@ def drop_invalid_indexes(df, df_ref, failed_qc):
     df.drop(index=indexes_failed, inplace=True)
 
 
-def get_combined_input_values(tables, names, data_dict):
+def get_combined_input_values(tables, names, data_dict, drop_idx=None):
     """Get combined input values."""
     inputs = {}
     for ivar, table in tables.items():
         data = data_dict[table]
         column = names[ivar]
         inputs[ivar] = data[column]
+        if drop_idx is None:
+            continue
+        intersec = inputs[ivar].index.intersection(drop_idx)
+        inputs[ivar] = inputs[ivar].drop(index=intersec)
 
     series_list = list(inputs.values())
     common_indexes = set(series_list[0].index).intersection(
@@ -509,7 +513,10 @@ def do_qc_sequential_combined(
 
         logging.info(f"{i}.{j}.{k}. Do sequential combined {qc_name} check")
         inputs = get_combined_input_values(
-            parameters.tables, parameters.names, data_dict_qc
+            parameters.tables,
+            parameters.names,
+            data_dict_qc,
+            drop_idx=idx_gnrc,
         )
 
         indexes_failed = run_qc_by_group(
