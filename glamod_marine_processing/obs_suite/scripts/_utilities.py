@@ -153,7 +153,6 @@ class script_setup:
             clean_level(filenames)
 
 
-# This is for json to handle dates
 def date_handler(obj):
     """Handle date."""
     if isinstance(obj, (datetime.datetime, datetime.date)):
