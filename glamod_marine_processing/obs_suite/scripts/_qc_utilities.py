@@ -417,8 +417,6 @@ def do_qc_sequential_header(
 
     k = 1
     for qc_name in qc_dict.keys():
-        logging.info(f"{i}.{j}.{k}. Do sequential {qc_name} check.")
-
         # Deselect already failed report_qualities
         drop_invalid_indexes(data, report_quality, 1)
 
@@ -428,6 +426,8 @@ def do_qc_sequential_header(
         )
         if func is None:
             continue
+
+        logging.info(f"{i}.{j}.{k}. Do sequential {qc_name} check.")
 
         # Do QC
         indexes_failed = run_qc_by_group(inputs, data, func, kwargs)
