@@ -136,6 +136,7 @@ from _utilities import (
     write_cdm_tables,
 )
 from cdm_reader_mapper.cdm_mapper.tables.tables import get_cdm_atts
+from marine_qc import plot_qc_outcomes as pqo
 
 reload(logging)  # This is to override potential previous config of logging
 
@@ -299,6 +300,22 @@ for table, df in data_dict.items():
         )
     else:
         ql_dict[table]["quality_flag"] = value_counts(df["quality_flag"])
+        pqo.latitude_variable_plot(
+            df["latitude"],
+            df["observation_value"],
+            df["quality_flag"],
+            filename=os.path.join(
+                params.level_ql_path, f"{table}_{params.fileID}_lat_var.png"
+            ),
+        )
+        pqo.latitude_longitude_plot(
+            df["latitude"],
+            df["longitude"],
+            df["quality_flag"],
+            filename=os.path.join(
+                params.level_ql_path, f"{table}_{params.fileID}_lat_lon.png"
+            ),
+        )
 
     write_cdm_tables(params, df, tables=table)
 
