@@ -472,7 +472,7 @@ def do_qc_sequential_observation(
             qc_dict[qc_name], data, table, qc_sequential_reports
         )
         if func is None:
-            return
+            continue
 
         # Do QC
         indexes_failed = run_qc_by_group(inputs, data_group, func, kwargs)
@@ -530,6 +530,7 @@ def do_qc_grouped_observation(
 ):
     """Grouped QC."""
     logging.info(f"{i}.{j}.{k}. Do grouped {table} checks")
+
     # Buddy check
     qc_dict = copy.deepcopy(params.qc_settings.get("grouped_reports"))
 
@@ -795,6 +796,8 @@ def do_qc(
         )
 
         # Remove already failed quality_flags
+        print(data_dict_qc[table])
+        print(quality_flags[table])
         drop_invalid_indexes(data_dict_qc[table], quality_flags[table], 1)
 
         k += 1
