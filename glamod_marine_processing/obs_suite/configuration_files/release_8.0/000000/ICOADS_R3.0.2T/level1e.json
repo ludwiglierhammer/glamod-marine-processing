@@ -368,19 +368,6 @@
             "delta_t": 2.0,
             "n_neighbours": 5
           }
-        },
-        "REPEATED": {
-          "tables": [
-            "observations-dpt"
-          ],
-          "func": "find_repeated_values",
-          "names": {
-            "value": "observation_value"
-          },
-          "arguments": {
-            "min_count": 20,
-            "threshold": 0.7
-          }
         }
       },
       "combined": {
