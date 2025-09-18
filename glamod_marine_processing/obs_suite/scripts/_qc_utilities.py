@@ -493,9 +493,11 @@ def do_qc_sequential_observation(
         logging.info(f"{i}.{j}.{k}.{l}. Do {qc_name} check")
 
         # Do QC
-        indexes_passed, indexes_failed = run_qc_by_group(inputs, data_group, func, kwargs)
+        indexes_passed, indexes_failed = run_qc_by_group(
+            inputs, data_group, func, kwargs
+        )
 
-        quality_flag.loc[indexes_passed] = 0 
+        quality_flag.loc[indexes_passed] = 0
         quality_flag.loc[indexes_failed] = 1
 
         l += 1  # noqa: E741
