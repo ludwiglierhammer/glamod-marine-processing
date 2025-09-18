@@ -527,6 +527,8 @@ def do_qc_sequential_combined(
             inputs, data_dict_qc["header"], parameters.func, parameters.kwargs
         )
 
+        if parameters.get_flagged is not None:
+            obs_tables = parameters.get_flagged
         for table in obs_tables:
             quality_flags[table].loc[indexes_failed] = 1
             drop_invalid_indexes(data_dict_qc[table], quality_flags[table], 1)
