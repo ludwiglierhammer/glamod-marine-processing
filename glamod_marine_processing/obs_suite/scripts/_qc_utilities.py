@@ -171,6 +171,7 @@ def all_tables_available(tables, data_dict):
 
 def run_qc_by_group(inputs, group_df, func, kwargs):
     """Run QC function grouped by primary_station_id."""
+    passed_idxs = []
     failed_idxs = []
     sample_input = next(iter(inputs.values()))
 
@@ -182,11 +183,14 @@ def run_qc_by_group(inputs, group_df, func, kwargs):
         subset_inputs = {k: v.loc[idx] for k, v in inputs.items()}
         qc_flags = func(**subset_inputs, **kwargs)
 
+        passed = qc_flags[qc_flags == 0].index
         failed = qc_flags[qc_flags == 1].index
+        if not passed.empty:
+            passed_idxs.extend(passed)
         if not failed.empty:
             failed_idxs.extend(failed)
 
-    return failed_idxs
+    return passed_idxs, failed_idxs
 
 
 class Parameters:
@@ -354,7 +358,10 @@ def do_qc_individual_observation(
     obs_qc = get_single_qc_flag(obs_qc)
 
     # Flag quality_flag
-    quality_flag.loc[obs_qc.index] = obs_qc
+    passed = obs_qc[obs_qc == 0].index
+    failed = obs_qc[obs_qc == 1].index
+    quality_flag.loc[passed] = 0
+    quality_flag.loc[failed] = 1
     return quality_flag
 
 
@@ -386,12 +393,14 @@ def do_qc_individual_combined(
         )
 
         qc_flag = parameters.func(**inputs)
+        idx_passed = qc_flag[qc_flag == 0].index
         idx_failed = qc_flag[qc_flag == 1].index
 
         if parameters.get_flagged is not None:
             obs_tables = parameters.get_flagged
         for table in obs_tables:
-            quality_flags[table].loc[idx_failed] = qc_flag.loc[idx_failed]
+            quality_flags[table].loc[idx_passed] = 0
+            quality_flags[table].loc[idx_failed] = 1
             drop_invalid_indexes(data_dict_qc[table], qc_flag, 1)
 
         k += 1
@@ -434,8 +443,9 @@ def do_qc_sequential_header(
         logging.info(f"{i}.{j}.{k}. Do sequential {qc_name} check.")
 
         # Do QC
-        indexes_failed = run_qc_by_group(inputs, data, func, kwargs)
+        indexes_passed, indexes_failed = run_qc_by_group(inputs, data, func, kwargs)
 
+        location_quality.loc[indexes_passed] = 0
         location_quality.loc[indexes_failed] = 2
         report_quality.loc[indexes_failed] = 1
 
@@ -483,8 +493,9 @@ def do_qc_sequential_observation(
         logging.info(f"{i}.{j}.{k}.{l}. Do {qc_name} check")
 
         # Do QC
-        indexes_failed = run_qc_by_group(inputs, data_group, func, kwargs)
+        indexes_passed, indexes_failed = run_qc_by_group(inputs, data_group, func, kwargs)
 
+        quality_flag.loc[indexes_passed] = 0 
         quality_flag.loc[indexes_failed] = 1
 
         l += 1  # noqa: E741
@@ -523,12 +534,13 @@ def do_qc_sequential_combined(
             drop_idx=idx_gnrc,
         )
 
-        indexes_failed = run_qc_by_group(
+        indexes_passed, indexes_failed = run_qc_by_group(
             inputs, data_dict_qc["header"], parameters.func, parameters.kwargs
         )
         if parameters.get_flagged is not None:
             obs_tables = parameters.get_flagged
         for table in obs_tables:
+            quality_flags[table].loc[indexes_passed] = 0
             quality_flags[table].loc[indexes_failed] = 1
             drop_invalid_indexes(data_dict_qc[table], quality_flags[table], 1)
 
@@ -621,7 +633,9 @@ def do_qc_grouped_observation(
             kwargs[arg_name] = arg_value
 
         qc_flag = func(**inputs, **kwargs)
+        idx_passed = qc_flag[qc_flag == 0].index
         idx_failed = qc_flag[qc_flag == 1].index
+        quality_flag.loc[idx_passed] = 0
         quality_flag.loc[idx_failed] = 1
 
         drop_invalid_indexes(data, quality_flag, 1)
