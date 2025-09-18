@@ -355,6 +355,13 @@
       },
       "observations": {
         "SPIKE": {
+          "tables": [
+            "observations-at",
+            "observations-sst",
+            "observations-dpt",
+            "observations-wbt",
+            "observations-slp"
+          ],
           "func": "do_spike_check",
           "names": {
             "value": "observation_value",
