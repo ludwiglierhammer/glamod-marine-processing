@@ -470,8 +470,6 @@ def do_qc_sequential_observation(
 
     l = 1  # noqa: E741
     for qc_name in qc_dict.keys():
-        logging.info(f"{i}.{j}.{k}.{l}. Do {qc_name} check")
-
         # Deselect already failed report_qualities
         drop_invalid_indexes(data, quality_flag, 1)
 
@@ -481,6 +479,8 @@ def do_qc_sequential_observation(
         )
         if func is None:
             continue
+
+        logging.info(f"{i}.{j}.{k}.{l}. Do {qc_name} check")
 
         # Do QC
         indexes_failed = run_qc_by_group(inputs, data_group, func, kwargs)
