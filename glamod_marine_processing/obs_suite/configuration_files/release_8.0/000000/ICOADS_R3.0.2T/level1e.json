@@ -304,7 +304,10 @@
             "names": {
               "dpt": "observation_value",
               "at2": "observation_value"
-            }
+            },
+            "get_flagged": [
+              "observations-dpt"
+            ]
           },
           "WIND": {
             "func": "do_wind_consistency_check",

@@ -198,6 +198,7 @@ class Parameters:
         self.kwargs = copy.deepcopy(qc_dict.get("arguments", {}))
         self.preproc = copy.deepcopy(qc_dict.get("preproc", {}))
         self.tables = copy.deepcopy(qc_dict.get("tables", None))
+        self.get_flagged = copy.deepcopy(qc_dict.get("get_flagged", None))
 
 
 def get_qc_function_and_inputs(qc_dict, data, table_name, qc_module):
@@ -386,6 +387,9 @@ def do_qc_individual_combined(
 
         qc_flag = parameters.func(**inputs)
         idx_failed = qc_flag[qc_flag == 1].index
+
+        if parameters.get_flagged is not None:
+            obs_tables = parameters.get_flagged
         for table in obs_tables:
             quality_flags[table].loc[idx_failed] = qc_flag.loc[idx_failed]
             drop_invalid_indexes(data_dict_qc[table], qc_flag, 1)
