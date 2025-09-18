@@ -526,7 +526,6 @@ def do_qc_sequential_combined(
         indexes_failed = run_qc_by_group(
             inputs, data_dict_qc["header"], parameters.func, parameters.kwargs
         )
-
         if parameters.get_flagged is not None:
             obs_tables = parameters.get_flagged
         for table in obs_tables:

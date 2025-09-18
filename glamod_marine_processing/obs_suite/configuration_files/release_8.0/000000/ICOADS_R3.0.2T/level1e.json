@@ -377,10 +377,7 @@
             "max_gradient_time": 1.0,
             "delta_t": 2.0,
             "n_neighbours": 5
-          },
-          "get_flagged": [
-            "observations-dpt"
-          ]
+          }
         }
       },
       "combined": {
@@ -403,7 +400,10 @@
           "arguments": {
             "min_time_threshold": 48.0,
             "shortest_run": 4
-          }
+          },
+          "get_flagged": [
+            "observations-dpt"
+          ]
         }
       }
     },
