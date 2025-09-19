@@ -239,6 +239,7 @@ def add_buoy_data_and_get_buoy_indexes(
                 & isvalid(data_buoy["latitude"])
                 & isvalid(data_buoy["longitude"])
                 & isvalid(data_buoy["date_time"])
+                & (data_buoy["quality_flag"] == 0)
             )
             data_buoy = data_buoy[valid_indexes]
             data = pd.concat([data, data_buoy])
@@ -493,9 +494,11 @@ def do_qc_sequential_observation(
         logging.info(f"{i}.{j}.{k}.{l}. Do {qc_name} check")
 
         # Do QC
-        indexes_passed, indexes_failed = run_qc_by_group(inputs, data_group, func, kwargs)
+        indexes_passed, indexes_failed = run_qc_by_group(
+            inputs, data_group, func, kwargs
+        )
 
-        quality_flag.loc[indexes_passed] = 0 
+        quality_flag.loc[indexes_passed] = 0
         quality_flag.loc[indexes_failed] = 1
 
         l += 1  # noqa: E741
@@ -810,6 +813,9 @@ def do_qc(
             k=k,
         )
 
+        # Remove already failed quality_flags
+        drop_invalid_indexes(data_dict_qc[table], quality_flags[table], 1)
+
         k += 1
         print(f"After sequential {table} QC")
         print(table, ": ", quality_flags[table].value_counts().to_dict())
@@ -825,7 +831,6 @@ def do_qc(
     )
     for table in obs_tables:
         print(table, ": ", quality_flags[table].value_counts().to_dict())
-
     # Do grouped observations checks
     j += 1
     k = 1
@@ -833,7 +838,6 @@ def do_qc(
 
     for table in obs_tables:
 
-        # Do grouped QC
         quality_flags[table] = do_qc_grouped_observation(
             data_dict_qc[table],
             table,
