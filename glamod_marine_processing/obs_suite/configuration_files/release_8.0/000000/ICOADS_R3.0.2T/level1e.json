@@ -228,7 +228,7 @@
               "climatology": "__preprocessed__",
               "standard_deviation": "__preprocessed__",
               "maximum_anomaly": 3.0,
-              "lowbar": 10.0
+              "lowbar": 1000.0
             }
           }
         },
@@ -359,11 +359,7 @@
       "observations": {
         "SPIKE": {
           "tables": [
-            "observations-at",
-            "observations-sst",
-            "observations-dpt",
-            "observations-wbt",
-            "observations-slp"
+            "observations-sst"
           ],
           "func": "do_spike_check",
           "names": {
