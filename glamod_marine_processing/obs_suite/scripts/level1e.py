@@ -169,12 +169,6 @@ def value_counts(series):
     return series.value_counts(dropna=False).to_dict()
 
 
-# Some other parameters -------------------------------------------------------
-cdm_atts = get_cdm_atts()
-obs_tables = [x for x in cdm_atts.keys() if x != "header"]
-
-# -----------------------------------------------------------------------------
-
 # MAIN ------------------------------------------------------------------------
 
 # Process input, set up some things and make sure we can do something   -------
@@ -191,6 +185,12 @@ process_options = [
     "no_qc_suite",
 ]
 params = script_setup(process_options, sys.argv)
+
+# Some other parameters -------------------------------------------------------
+cdm_atts = get_cdm_atts()
+obs_tables = [x for x in cdm_atts.keys() if x != "header"]
+
+# -----------------------------------------------------------------------------
 
 # DO SOME PREPROCESSING ------------------------------------------------------
 
@@ -257,7 +257,7 @@ for table, df in data_dict.items():
         "total": c_length,
         "deleted": r_length,
     }
-
+data_dict["observations-wbt"] = data_dict["observations-dpt"].copy()
 # DO THE DATA PROCESSING ------------------------------------------------------
 if params.no_qc_suite is not True:
     (
@@ -281,6 +281,17 @@ if params.no_qc_suite is not True:
             ext_path=ext_path,
         )
     )
+
+    if params.qc_settings["copies"]:
+        for table, table_cp in params.qc_settings["copies"].items():
+            if table in data_dict.keys():
+                intersec = quality_flags[table].index.intersection(
+                    quality_flags[table_cp].index
+                )
+                quality_flags[table] = quality_flags[table_cp].loc[intersec]
+            else:
+                logging.warning(f"Could not copy {table}.")
+
     update_data_dict(
         data_dict,
         report_quality,
@@ -289,7 +300,7 @@ if params.no_qc_suite is not True:
         quality_flags,
         history,
     )
-
+exit()
 # WRITE QC FLAGS TO DATA ------------------------------------------------------
 print("After QC")
 for table, df in data_dict.items():

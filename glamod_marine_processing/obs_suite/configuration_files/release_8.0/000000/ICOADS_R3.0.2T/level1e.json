@@ -6,6 +6,9 @@
   "job_time_min": "59",
   "history_explain": "Position, tracking and parameter QC flags added",
   "qc_settings": {
+    "copies": {
+      "observations-wbt": "observations-dpt"
+    },
     "individual_reports": {
       "return_method": "failed",
       "preprocessing": {
