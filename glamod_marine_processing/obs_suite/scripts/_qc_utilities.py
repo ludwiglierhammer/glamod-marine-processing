@@ -853,7 +853,7 @@ def do_qc(
         drop_invalid_indexes(data_dict_qc[table], quality_flags[table], 1)
 
         k += 1
-        print(f"After individual {table} QC")
+        print(f"After grouped {table} QC")
         print(table, ": ", quality_flags[table].value_counts().to_dict())
 
     return report_quality, location_quality, report_time_quality, quality_flags, history
