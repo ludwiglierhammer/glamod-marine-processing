@@ -83,7 +83,7 @@ def concat_known_date_files(idir, odir, table, release, update, prev_deck_list):
                 i += 1
 
 
-def post_processing(
+def merge(
     idir,
     odir,
     release=None,
