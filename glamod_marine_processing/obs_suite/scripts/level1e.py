@@ -257,7 +257,7 @@ for table, df in data_dict.items():
         "total": c_length,
         "deleted": r_length,
     }
-data_dict["observations-wbt"] = data_dict["observations-dpt"].copy()
+
 # DO THE DATA PROCESSING ------------------------------------------------------
 if params.no_qc_suite is not True:
     (
@@ -288,7 +288,9 @@ if params.no_qc_suite is not True:
                 intersec = quality_flags[table].index.intersection(
                     quality_flags[table_cp].index
                 )
-                quality_flags[table] = quality_flags[table_cp].loc[intersec]
+                quality_flags[table].loc[intersec] = quality_flags[table_cp].loc[
+                    intersec
+                ]
             else:
                 logging.warning(f"Could not copy {table}.")
 
@@ -300,7 +302,7 @@ if params.no_qc_suite is not True:
         quality_flags,
         history,
     )
-exit()
+
 # WRITE QC FLAGS TO DATA ------------------------------------------------------
 print("After QC")
 for table, df in data_dict.items():
