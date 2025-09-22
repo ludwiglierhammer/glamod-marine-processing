@@ -54,7 +54,7 @@ def split_cli(
 
     future_deck = open_deck_list_file(p.config_files_path, f"{level}.json")
     prev_deck_list = open_deck_list_file(p.config_files_path, f"{level_source}.json")
-    input_dir = os.path.join(p.data_directory, release, dataset, "level1a")
+    input_dir = os.path.join(p.data_directory, release, dataset, level_source)
     output_dir = os.path.join(input_dir, future_deck[0])
     mkdir(output_dir)
     split(

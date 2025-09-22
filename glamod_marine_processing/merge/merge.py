@@ -34,6 +34,7 @@ def get_file_dict(file_list):
 
 def concat_unknow_date_files(idir, odir, table, release, update, prev_deck_list):
     """Open files and concat them."""
+    exit()
     if table == "header":
         time_axis = "report_timestamp"
     else:
