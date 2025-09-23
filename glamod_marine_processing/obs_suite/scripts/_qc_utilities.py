@@ -10,9 +10,7 @@ import os
 
 import numpy as np
 import pandas as pd
-from _utilities import read_cdm_tables
 from marine_qc import qc_grouped_reports, qc_individual_reports, qc_sequential_reports
-from marine_qc.auxiliary import isvalid
 from marine_qc.external_clim import Climatology
 from marine_qc.multiple_row_checks import do_multiple_row_check
 
@@ -25,67 +23,6 @@ op_map = {
     "%": operator.mod,
     "**": operator.pow,
 }
-
-
-def update_dtypes(data_df, table):
-    """Update dtypes in DataFrame."""
-    if table == "header":
-        data_df["platform_type"] = data_df["platform_type"].astype(int)
-        data_df["latitude"] = data_df["latitude"].astype(float)
-        data_df["longitude"] = data_df["longitude"].astype(float)
-        data_df["report_timestamp"] = pd.to_datetime(
-            data_df["report_timestamp"],
-            format="%Y-%m-%d %H:%M:%S",
-            errors="coerce",
-        )
-        data_df["station_speed"] = data_df["station_speed"].astype(float)
-        data_df["station_course"] = data_df["station_course"].astype(float)
-        data_df["report_quality"] = data_df["report_quality"].astype(int)
-        data_df["location_quality"] = data_df["location_quality"].astype(int)
-        data_df["report_time_quality"] = data_df["report_time_quality"].astype(int)
-    else:
-        data_df["observation_value"] = data_df["observation_value"].astype(float)
-        data_df["latitude"] = data_df["latitude"].astype(float)
-        data_df["longitude"] = data_df["longitude"].astype(float)
-        data_df["date_time"] = pd.to_datetime(
-            data_df["date_time"],
-            format="%Y-%m-%d %H:%M:%S",
-            errors="coerce",
-        )
-        data_df["quality_flag"] = data_df["quality_flag"].astype(int)
-    return data_df
-
-
-def get_qc_columns(data_dict):
-    """Copy data dictionary, convert values and get quality flags."""
-    quality_flags = {}
-    report_quality = pd.Series()
-    location_quality = pd.Series()
-    report_time_quality = pd.Series()
-    history = pd.Series()
-    data_dict_qc = {}
-
-    for table, df in data_dict.items():
-        update_dtypes(df, table)
-
-        data_dict_qc[table] = df.copy()
-
-        if table == "header":
-            report_quality = df["report_quality"].copy()
-            location_quality = df["location_quality"].copy()
-            report_time_quality = df["report_time_quality"].copy()
-            history = df["history"].copy()
-        else:
-            quality_flags[table] = df["quality_flag"].copy()
-
-    return (
-        data_dict_qc,
-        report_quality,
-        location_quality,
-        report_time_quality,
-        quality_flags,
-        history,
-    )
 
 
 def get_single_qc_flag(df):
@@ -222,38 +159,6 @@ def get_qc_function_and_inputs(qc_dict, data, table_name, qc_module):
     inputs = {k: data[v] for k, v in parameters.names.items()}
 
     return parameters.func, inputs, parameters.kwargs
-
-
-def add_buoy_data_and_get_buoy_indexes(
-    data, params_buoy, obs_table, buoy_dataset, buoy_dck
-):
-    """Attempts to read buoy data and append it to the main data."""
-    data_buoy = pd.DataFrame()
-    if buoy_dataset != "None" and buoy_dck != "None":
-        db_buoy = read_cdm_tables(params_buoy, obs_table)
-        if not db_buoy.empty:
-            data_buoy = db_buoy[obs_table].set_index("report_id", drop=False)
-            update_dtypes(data_buoy, obs_table)
-            valid_indexes = (
-                isvalid(data_buoy["observation_value"])
-                & isvalid(data_buoy["latitude"])
-                & isvalid(data_buoy["longitude"])
-                & isvalid(data_buoy["date_time"])
-                & (data_buoy["quality_flag"] == 0)
-            )
-            data_buoy = data_buoy[valid_indexes]
-            data = pd.concat([data, data_buoy])
-        else:
-            logging.warning(
-                f"Could not find any {obs_table} {buoy_dataset} data for {params_buoy.prev_fileID}: {params_buoy.prev_level_path}"
-            )
-    else:
-        logging.warning(
-            f"Buoy dataset or deck not specified for {obs_table} (dataset={buoy_dataset}, dck={buoy_dck})"
-        )
-
-    buoy_indexes = data_buoy.index if not data_buoy.empty else pd.Index([])
-    return data, buoy_indexes  # ignore_indexes
 
 
 def do_qc_individual_header(
@@ -415,6 +320,7 @@ def do_qc_sequential_header(
     location_quality,
     idx_gnrc,
     params,
+    data_add,
     i=1,
     j=1,
 ):
@@ -424,8 +330,10 @@ def do_qc_sequential_header(
         params.qc_settings.get("sequential_reports", {}).get("header", {})
     )
     data = data.copy()
+    data_add = data_add.copy()
 
     # Deselect rows containing generic ids
+    data = pd.concat([data, data_add])
     invalid_indexes = idx_gnrc.intersection(data.index)
     data.drop(index=invalid_indexes, inplace=True)
 
@@ -462,6 +370,7 @@ def do_qc_sequential_observation(
     idx_gnrc,
     data_group,
     params,
+    data_add,
     i=1,
     j=1,
     k=1,
@@ -474,10 +383,12 @@ def do_qc_sequential_observation(
 
     logging.info(f"{i}.{j}.{k}. Do sequential {table} checks")
     data = data.copy()
+    data_add = data_add.copy()
 
     # Deselect rows containing generic ids
-    idx_gnrc_obs = idx_gnrc.intersection(data.index)
-    data = data.drop(index=idx_gnrc_obs)
+    data = pd.concat([data, data_add])
+    invalid_indexes = idx_gnrc.intersection(data.index)
+    data.drop(index=invalid_indexes, inplace=True)
 
     l = 1  # noqa: E741
     for qc_name in qc_dict.keys():
@@ -511,6 +422,7 @@ def do_qc_sequential_combined(
     quality_flags,
     idx_gnrc,
     params,
+    data_dict_add,
     i=1,
     j=1,
     k=1,
@@ -530,12 +442,23 @@ def do_qc_sequential_combined(
             continue
 
         logging.info(f"{i}.{j}.{k}. Do sequential combined {qc_name} check")
-        inputs = get_combined_input_values(
+        inputs_dat = get_combined_input_values(
             parameters.tables,
             parameters.names,
             data_dict_qc,
             drop_idx=idx_gnrc,
         )
+        inputs_add = get_combined_input_values(
+            parameters.tables,
+            parameters.names,
+            data_dict_add,
+            drop_idx=idx_gnrc,
+        )
+
+        inputs = {
+            column: pd.concat([inputs_dat[column], inputs_add[column]])
+            for column in inputs_dat.keys()
+        }
 
         indexes_passed, indexes_failed = run_qc_by_group(
             inputs, data_dict_qc["header"], parameters.func, parameters.kwargs
@@ -553,7 +476,7 @@ def do_qc_sequential_combined(
 
 
 def do_qc_grouped_observation(
-    data, table, quality_flag, params, ext_path, i=1, j=1, k=1
+    data, table, quality_flag, params, ext_path, data_buoy, i=1, j=1, k=1
 ):
     """Grouped QC."""
     logging.info(f"{i}.{j}.{k}. Do grouped {table} checks")
@@ -568,24 +491,11 @@ def do_qc_grouped_observation(
     qc_dict_ind = copy.deepcopy(params.qc_settings.get("individual_reports"))
     preproc_dict_ind = qc_dict_ind.get("preprocessing", {})
 
-    # Copy params for external buoy data
-    params_buoy = copy.deepcopy(params)
-    buoy_dataset = copy.deepcopy(qc_dict.get("buoy_dataset", "None"))
-    buoy_dck = copy.deepcopy(qc_dict.get("buoy_dck", "None"))
-
-    params_buoy.prev_level_path = params_buoy.prev_level_path.replace(
-        params.dataset, buoy_dataset
-    )
-    params_buoy.prev_level_path = params_buoy.prev_level_path.replace(
-        params.sid_dck, buoy_dck
-    )
-
     data = data.copy()
 
     # Add buoy data
-    data, buoy_indexes = add_buoy_data_and_get_buoy_indexes(
-        data, params_buoy, table, buoy_dataset, buoy_dck
-    )
+    data = pd.concat([data, data_buoy])
+    buoy_indexes = data_buoy.index
 
     # Pre-processing
     preproc_dict_obs = copy.deepcopy(preproc_dict.get(table, {}))
@@ -657,6 +567,8 @@ def do_qc(
     history,
     params,
     ext_path,
+    data_dict_add,
+    data_dict_buoy,
 ):
     # Update history
     try:
@@ -670,7 +582,10 @@ def do_qc(
 
     # Define indexes for both blacklist and generic IDs
     idx_blck = report_quality[report_quality == 6].index
-    idx_gnrc = report_quality[report_quality == 88].index
+    idx_gnrc_dat = report_quality[report_quality == 88].index
+    report_quality_add = data_dict_add["header"]["report_quality"]
+    idx_gnrc_add = report_quality_add[report_quality_add == 88].index
+    idx_gnrc = idx_gnrc_dat.append(idx_gnrc_add)
     idx_fld = report_quality[report_quality == 1].index
 
     # DO QC
@@ -728,6 +643,7 @@ def do_qc(
         location_quality,
         idx_gnrc,
         params,
+        data_dict_add.get("header", pd.DataFrame()),
         i=i,
         j=j,
     )
@@ -808,6 +724,7 @@ def do_qc(
             idx_gnrc,
             data_dict_qc["header"],
             params,
+            data_dict_add[table],
             i=i,
             j=j,
             k=k,
@@ -825,6 +742,7 @@ def do_qc(
         quality_flags,
         idx_gnrc,
         params,
+        data_dict_add,
         i=i,
         j=j,
         k=k,
@@ -844,6 +762,7 @@ def do_qc(
             quality_flags[table],
             params,
             ext_path,
+            data_dict_buoy[table],
             i=i,
             j=j,
             k=k,

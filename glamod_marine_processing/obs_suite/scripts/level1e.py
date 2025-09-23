@@ -120,13 +120,14 @@ of the QC files relative to a set path (i.e. informing of the QC version)
 
 from __future__ import annotations
 
+import copy
 import logging
 import os
 import sys
 from importlib import reload
 
 import pandas as pd
-from _qc_utilities import do_qc, get_qc_columns
+from _qc_utilities import do_qc
 from _utilities import (
     date_handler,
     paths_exist,
@@ -137,6 +138,7 @@ from _utilities import (
 )
 from cdm_reader_mapper.cdm_mapper.tables.tables import get_cdm_atts
 from marine_qc import plot_qc_outcomes as pqo
+from marine_qc.auxiliary import isvalid
 
 reload(logging)  # This is to override potential previous config of logging
 
@@ -167,6 +169,179 @@ def update_data_dict(
 def value_counts(series):
     """Count values in pandas Series."""
     return series.value_counts(dropna=False).to_dict()
+
+
+def remove_no_obs(data_dict, tables_in, params):
+    """Remove report_ids without any observations."""
+    report_ids = pd.Series()
+    for table_in in tables_in:
+        if table_in not in data_dict.keys():
+            db_ = read_cdm_tables(params, table_in)
+            if db_.empty:
+                continue
+            data_dict[table_in] = db_[table_in]
+        report_ids = pd.concat(
+            [report_ids, data_dict[table_in]["report_id"]], ignore_index=True
+        )
+
+    report_ids = report_ids[report_ids.duplicated()]
+
+    ql_dict = {}
+    for table, df in data_dict.items():
+        df = df.set_index("report_id", drop=False)
+        p_length = len(df)
+        valid_indexes = df.index.intersection(report_ids)
+        df = df.loc[valid_indexes]
+
+        data_dict[table] = df
+
+        c_length = len(df)
+        r_length = p_length - c_length
+        ql_dict[table] = {
+            "total": c_length,
+            "deleted": r_length,
+        }
+    return data_dict, ql_dict
+
+
+def configure_month_params(params):
+    """Configure params for both previous and next months."""
+    year = int(params.year)
+    month = int(params.month)
+    if month == 12:
+        month_next = 1
+        year_next = year + 1
+    else:
+        month_next = month + 1
+        year_next = year
+    if month == 1:
+        month_prev = 12
+        year_prev = year - 1
+    else:
+        month_prev = month - 1
+        year_prev = year
+
+    params_prev = copy.deepcopy(params)
+    params_prev.prev_fileID = params_prev.prev_fileID.replace(
+        str(params.year), str(year_prev)
+    )
+    params_prev.prev_fileID = params_prev.prev_fileID.replace(
+        str(params.month), str(month_prev)
+    )
+    params_next = copy.deepcopy(params)
+    params_next.prev_fileID = params_next.prev_fileID.replace(
+        str(params.year), str(year_next)
+    )
+    params_next.prev_fileID = params_next.prev_fileID.replace(
+        str(params.month), str(month_next)
+    )
+    return params_prev, params_next
+
+
+def update_dtypes(data_df, table):
+    """Update dtypes in DataFrame."""
+    if data_df.empty:
+        pass
+    elif table == "header":
+        data_df["platform_type"] = data_df["platform_type"].astype(int)
+        data_df["latitude"] = data_df["latitude"].astype(float)
+        data_df["longitude"] = data_df["longitude"].astype(float)
+        data_df["report_timestamp"] = pd.to_datetime(
+            data_df["report_timestamp"],
+            format="%Y-%m-%d %H:%M:%S",
+            errors="coerce",
+        )
+        data_df["station_speed"] = data_df["station_speed"].astype(float)
+        data_df["station_course"] = data_df["station_course"].astype(float)
+        data_df["report_quality"] = data_df["report_quality"].astype(int)
+        data_df["location_quality"] = data_df["location_quality"].astype(int)
+        data_df["report_time_quality"] = data_df["report_time_quality"].astype(int)
+    else:
+        data_df["observation_value"] = data_df["observation_value"].astype(float)
+        data_df["latitude"] = data_df["latitude"].astype(float)
+        data_df["longitude"] = data_df["longitude"].astype(float)
+        data_df["date_time"] = pd.to_datetime(
+            data_df["date_time"],
+            format="%Y-%m-%d %H:%M:%S",
+            errors="coerce",
+        )
+        data_df["quality_flag"] = data_df["quality_flag"].astype(int)
+    return data_df
+
+
+def get_qc_columns(data_dict):
+    """Copy data dictionary, convert values and get quality flags."""
+    quality_flags = {}
+    report_quality = pd.Series()
+    location_quality = pd.Series()
+    report_time_quality = pd.Series()
+    history = pd.Series()
+    data_dict_qc = {}
+
+    for table, df in data_dict.items():
+        update_dtypes(df, table)
+
+        data_dict_qc[table] = df.copy()
+
+        if table == "header":
+            report_quality = df["report_quality"].copy()
+            location_quality = df["location_quality"].copy()
+            report_time_quality = df["report_time_quality"].copy()
+            history = df["history"].copy()
+        else:
+            quality_flags[table] = df["quality_flag"].copy()
+
+    return (
+        data_dict_qc,
+        report_quality,
+        location_quality,
+        report_time_quality,
+        quality_flags,
+        history,
+    )
+
+
+def get_valid_indexes(df, table):
+    """Get valid indexes."""
+    if df.empty:
+        return pd.Index([])
+    valid_indexes = isvalid(df["latitude"]) & isvalid(df["longitude"])
+    if table == "header":
+        valid_indexes = (
+            valid_indexes
+            & isvalid(df["report_timestamp"])
+            & (df["report_quality"] != 6)
+            & (df["report_quality"] != 1)
+        )
+    else:
+        valid_indexes = (
+            valid_indexes
+            & isvalid(df["date_time"])
+            & (df["quality_flag"] != 6)
+            & (df["quality_flag"] != 1)
+            & isvalid(df["observation_value"])
+        )
+    return valid_indexes
+
+
+def concat_data_dicts(dict1, dict2, dictref):
+    """Concatenate data dicts."""
+    dict3 = {}
+    for table in dictref.keys():
+        if table not in dict1.keys():
+            dict1[table] = pd.DataFrame()
+        if table not in dict2.keys():
+            dict2[table] = pd.DataFrame()
+        df = pd.concat([dict1[table], dict2[table]])
+        update_dtypes(df, table)
+        valid_indexes = get_valid_indexes(df, table)
+        df = df.loc[valid_indexes]
+        if table != "header":
+            valid_reports = dict3["header"].index
+            intersec = df.index.intersection(valid_reports)
+            df = df.loc[intersec]
+        dict3[table] = df
+    return dict3
 
 
 # MAIN ------------------------------------------------------------------------
@@ -229,37 +404,12 @@ if len(tables_in) == 1:
     sys.exit()
 
 # Remove report_ids without any observations
-report_ids = pd.Series()
-for table_in in tables_in:
-    if table_in not in data_dict.keys():
-        db_ = read_cdm_tables(params, table_in)
-        if db_.empty:
-            continue
-        data_dict[table_in] = db_[table_in]
-    report_ids = pd.concat(
-        [report_ids, data_dict[table_in]["report_id"]], ignore_index=True
-    )
-
-report_ids = report_ids[report_ids.duplicated()]
-
-ql_dict = {}
-for table, df in data_dict.items():
-    df = df.set_index("report_id", drop=False)
-    p_length = len(df)
-    valid_indexes = df.index.intersection(report_ids)
-    df = df.loc[valid_indexes]
-
-    data_dict[table] = df
-
-    c_length = len(df)
-    r_length = p_length - c_length
-    ql_dict[table] = {
-        "total": c_length,
-        "deleted": r_length,
-    }
+data_dict, ql_dict = remove_no_obs(data_dict, tables_in, params)
 
 # DO THE DATA PROCESSING ------------------------------------------------------
 if params.no_qc_suite is not True:
+
+    # Update dtypes and get QC columns
     (
         data_dict_qc,
         report_quality,
@@ -269,6 +419,35 @@ if params.no_qc_suite is not True:
         history,
     ) = get_qc_columns(data_dict)
 
+    # Get additional data: month +/-1
+    # SHIP
+    params_prev, params_next = configure_month_params(params)
+    data_dict_prev, _ = remove_no_obs({}, tables_in, params_prev)
+    data_dict_next, _ = remove_no_obs({}, tables_in, params_next)
+
+    data_dict_add = concat_data_dicts(data_dict_prev, data_dict_next, data_dict)
+
+    # BUOY
+    params_buoy = copy.deepcopy(params)
+    qc_dict = copy.deepcopy(params.qc_settings.get("grouped_reports"))
+    buoy_dataset = copy.deepcopy(qc_dict.get("buoy_dataset", "None"))
+    buoy_dck = copy.deepcopy(qc_dict.get("buoy_dck", "None"))
+
+    params_buoy.prev_level_path = params_buoy.prev_level_path.replace(
+        params.dataset, buoy_dataset
+    )
+    params_buoy.prev_level_path = params_buoy.prev_level_path.replace(
+        params.sid_dck, buoy_dck
+    )
+    params_buoy_prev, params_buoy_next = configure_month_params(params_buoy)
+    data_dict_buoy_prev, _ = remove_no_obs({}, tables_in, params_buoy_prev)
+    data_dict_buoy_next, _ = remove_no_obs({}, tables_in, params_buoy_next)
+
+    data_dict_buoy = concat_data_dicts(
+        data_dict_buoy_prev, data_dict_buoy_next, data_dict
+    )
+
+    # Perform QC
     report_quality, location_quality, report_time_quality, quality_flags, history = (
         do_qc(
             data_dict_qc=data_dict_qc,
@@ -279,9 +458,12 @@ if params.no_qc_suite is not True:
             history=history,
             params=params,
             ext_path=ext_path,
+            data_dict_add=data_dict_add,
+            data_dict_buoy=data_dict_buoy,
         )
     )
 
+    # Optionally, copy quality_flags
     if params.qc_settings["copies"]:
         for table, table_cp in params.qc_settings["copies"].items():
             if table in data_dict.keys():
@@ -294,6 +476,7 @@ if params.no_qc_suite is not True:
             else:
                 logging.warning(f"Could not copy {table}.")
 
+    # Update data_dict with reworked QC columns
     update_data_dict(
         data_dict,
         report_quality,
