@@ -324,23 +324,26 @@ def get_valid_indexes(df, table):
     return valid_indexes
 
 
-def concat_data_dicts(dict1, dict2, dictref):
+def concat_data_dicts(*dicts, dictref):
     """Concatenate data dicts."""
     dict3 = {}
     for table in dictref.keys():
-        if table not in dict1.keys():
-            dict1[table] = pd.DataFrame()
-        if table not in dict2.keys():
-            dict2[table] = pd.DataFrame()
-        df = pd.concat([dict1[table], dict2[table]])
+        dfs = []
+        for d in dicts:
+            dfs.append(d.get(table, pd.DataFrame()))
+        df = pd.concat(dfs)
+
         update_dtypes(df, table)
         valid_indexes = get_valid_indexes(df, table)
         df = df.loc[valid_indexes]
+
         if table != "header":
             valid_reports = dict3["header"].index
             intersec = df.index.intersection(valid_reports)
             df = df.loc[intersec]
+
         dict3[table] = df
+
     return dict3
 
 
@@ -425,7 +428,7 @@ if params.no_qc_suite is not True:
     data_dict_prev, _ = remove_no_obs({}, tables_in, params_prev)
     data_dict_next, _ = remove_no_obs({}, tables_in, params_next)
 
-    data_dict_add = concat_data_dicts(data_dict_prev, data_dict_next, data_dict)
+    data_dict_add = concat_data_dicts(data_dict_prev, data_dict_next, dictref=data_dict)
 
     # BUOY
     params_buoy = copy.deepcopy(params)
@@ -441,10 +444,11 @@ if params.no_qc_suite is not True:
     )
     params_buoy_prev, params_buoy_next = configure_month_params(params_buoy)
     data_dict_buoy_prev, _ = remove_no_obs({}, tables_in, params_buoy_prev)
+    data_dict_buoy_curr, _ = remove_no_obs({}, tables_in, params_buoy)
     data_dict_buoy_next, _ = remove_no_obs({}, tables_in, params_buoy_next)
 
     data_dict_buoy = concat_data_dicts(
-        data_dict_buoy_prev, data_dict_buoy_next, data_dict
+        data_dict_buoy_prev, data_dict_buoy_curr, data_dict_buoy_next, dictref=data_dict
     )
 
     # Perform QC

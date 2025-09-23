@@ -127,7 +127,7 @@ def run_qc_by_group(inputs, group_df, func, kwargs):
         if not failed.empty:
             failed_idxs.extend(failed)
 
-    return passed_idxs, failed_idxs
+    return pd.Index(passed_idxs), pd.Index(failed_idxs)
 
 
 class Parameters:
@@ -329,6 +329,7 @@ def do_qc_sequential_header(
     qc_dict = copy.deepcopy(
         params.qc_settings.get("sequential_reports", {}).get("header", {})
     )
+    indexes_orig = data.index
     data = data.copy()
     data_add = data_add.copy()
 
@@ -353,6 +354,8 @@ def do_qc_sequential_header(
 
         # Do QC
         indexes_passed, indexes_failed = run_qc_by_group(inputs, data, func, kwargs)
+        indexes_passed = indexes_passed.intersection(indexes_orig)
+        indexes_failed = indexes_failed.intersection(indexes_orig)
 
         location_quality.loc[indexes_passed] = 0
         location_quality.loc[indexes_failed] = 2
@@ -382,6 +385,7 @@ def do_qc_sequential_observation(
     )
 
     logging.info(f"{i}.{j}.{k}. Do sequential {table} checks")
+    indexes_orig = data.index
     data = data.copy()
     data_add = data_add.copy()
 
@@ -408,6 +412,8 @@ def do_qc_sequential_observation(
         indexes_passed, indexes_failed = run_qc_by_group(
             inputs, data_group, func, kwargs
         )
+        indexes_passed = indexes_passed.intersection(indexes_orig)
+        indexes_failed = indexes_failed.intersection(indexes_orig)
 
         quality_flag.loc[indexes_passed] = 0
         quality_flag.loc[indexes_failed] = 1
@@ -448,6 +454,8 @@ def do_qc_sequential_combined(
             data_dict_qc,
             drop_idx=idx_gnrc,
         )
+        indexes_orig = inputs_dat[list(inputs_dat.keys())[0]].index
+
         inputs_add = get_combined_input_values(
             parameters.tables,
             parameters.names,
@@ -463,6 +471,9 @@ def do_qc_sequential_combined(
         indexes_passed, indexes_failed = run_qc_by_group(
             inputs, data_dict_qc["header"], parameters.func, parameters.kwargs
         )
+        indexes_passed = indexes_passed.intersection(indexes_orig)
+        indexes_failed = indexes_failed.intersection(indexes_orig)
+
         if parameters.get_flagged is not None:
             obs_tables = parameters.get_flagged
         for table in obs_tables:
@@ -476,7 +487,7 @@ def do_qc_sequential_combined(
 
 
 def do_qc_grouped_observation(
-    data, table, quality_flag, params, ext_path, data_buoy, i=1, j=1, k=1
+    data, table, quality_flag, params, ext_path, data_add, data_buoy, i=1, j=1, k=1
 ):
     """Grouped QC."""
     logging.info(f"{i}.{j}.{k}. Do grouped {table} checks")
@@ -496,6 +507,10 @@ def do_qc_grouped_observation(
     # Add buoy data
     data = pd.concat([data, data_buoy])
     buoy_indexes = data_buoy.index
+
+    # Add additional data
+    data = pd.concat([data, data_add])
+    add_indexes = data_add.index
 
     # Pre-processing
     preproc_dict_obs = copy.deepcopy(preproc_dict.get(table, {}))
@@ -541,7 +556,9 @@ def do_qc_grouped_observation(
             if isinstance(value, str) and value == "__preprocessed__":
                 kwargs[var_name] = preproc_dict_obs[var_name]
 
-        kwargs["ignore_indexes"] = data.index.get_indexer(buoy_indexes)
+        kwargs["ignore_indexes"] = data.index.get_indexer(
+            buoy_indexes
+        ) + data.index.get_indexer(add_indexes)
         for arg_name, arg_value in qc_dict_obs_sp.get(qc_name, {}).items():
             kwargs[arg_name] = arg_value
 
@@ -762,6 +779,7 @@ def do_qc(
             quality_flags[table],
             params,
             ext_path,
+            data_dict_add[table],
             data_dict_buoy[table],
             i=i,
             j=j,
