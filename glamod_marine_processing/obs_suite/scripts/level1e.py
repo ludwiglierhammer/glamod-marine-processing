@@ -171,7 +171,63 @@ def value_counts(series):
     return series.value_counts(dropna=False).to_dict()
 
 
-def remove_no_obs(data_dict, tables_in, params):
+def update_dtypes(data_df, table):
+    """Update dtypes in DataFrame."""
+    if data_df.empty:
+        pass
+    elif table == "header":
+        data_df["platform_type"] = data_df["platform_type"].astype(int)
+        data_df["latitude"] = data_df["latitude"].astype(float)
+        data_df["longitude"] = data_df["longitude"].astype(float)
+        data_df["report_timestamp"] = pd.to_datetime(
+            data_df["report_timestamp"],
+            format="%Y-%m-%d %H:%M:%S",
+            errors="coerce",
+        )
+        data_df["station_speed"] = data_df["station_speed"].astype(float)
+        data_df["station_course"] = data_df["station_course"].astype(float)
+        data_df["report_quality"] = data_df["report_quality"].astype(int)
+        data_df["location_quality"] = data_df["location_quality"].astype(int)
+        data_df["report_time_quality"] = data_df["report_time_quality"].astype(int)
+    else:
+        data_df["observation_value"] = data_df["observation_value"].astype(float)
+        data_df["latitude"] = data_df["latitude"].astype(float)
+        data_df["longitude"] = data_df["longitude"].astype(float)
+        data_df["date_time"] = pd.to_datetime(
+            data_df["date_time"],
+            format="%Y-%m-%d %H:%M:%S",
+            errors="coerce",
+        )
+        data_df["quality_flag"] = data_df["quality_flag"].astype(int)
+    return data_df
+
+
+def get_valid_indexes(df, table):
+    """Get valid indexes."""
+    if df.empty:
+        return pd.Index([])
+    valid_indexes = isvalid(df["latitude"]) & isvalid(df["longitude"])
+    if table == "header":
+        valid_indexes = (
+            valid_indexes
+            & isvalid(df["report_timestamp"])
+            & (df["report_quality"] != 6)
+            & (df["report_quality"] != 1)
+        )
+    else:
+        valid_indexes = (
+            valid_indexes
+            & isvalid(df["date_time"])
+            & (df["quality_flag"] != 6)
+            & (df["quality_flag"] != 1)
+            & isvalid(df["observation_value"])
+        )
+    return valid_indexes
+
+
+def create_consistent_datadict(
+    data_dict, tables_in, params, convert_dtypes=True, remove_invalids=False
+):
     """Remove report_ids without any observations."""
     report_ids = pd.Series()
     for table_in in tables_in:
@@ -180,6 +236,11 @@ def remove_no_obs(data_dict, tables_in, params):
             if db_.empty:
                 continue
             data_dict[table_in] = db_[table_in]
+        if convert_dtypes is True:
+            update_dtypes(data_dict[table_in], table_in)
+        if remove_invalids is True:
+            valid_indexes = get_valid_indexes(data_dict[table_in], table_in)
+            data_dict[table_in] = data_dict[table_in].loc[valid_indexes]
         report_ids = pd.concat(
             [report_ids, data_dict[table_in]["report_id"]], ignore_index=True
         )
@@ -238,37 +299,6 @@ def configure_month_params(params):
     return params_prev, params_next
 
 
-def update_dtypes(data_df, table):
-    """Update dtypes in DataFrame."""
-    if data_df.empty:
-        pass
-    elif table == "header":
-        data_df["platform_type"] = data_df["platform_type"].astype(int)
-        data_df["latitude"] = data_df["latitude"].astype(float)
-        data_df["longitude"] = data_df["longitude"].astype(float)
-        data_df["report_timestamp"] = pd.to_datetime(
-            data_df["report_timestamp"],
-            format="%Y-%m-%d %H:%M:%S",
-            errors="coerce",
-        )
-        data_df["station_speed"] = data_df["station_speed"].astype(float)
-        data_df["station_course"] = data_df["station_course"].astype(float)
-        data_df["report_quality"] = data_df["report_quality"].astype(int)
-        data_df["location_quality"] = data_df["location_quality"].astype(int)
-        data_df["report_time_quality"] = data_df["report_time_quality"].astype(int)
-    else:
-        data_df["observation_value"] = data_df["observation_value"].astype(float)
-        data_df["latitude"] = data_df["latitude"].astype(float)
-        data_df["longitude"] = data_df["longitude"].astype(float)
-        data_df["date_time"] = pd.to_datetime(
-            data_df["date_time"],
-            format="%Y-%m-%d %H:%M:%S",
-            errors="coerce",
-        )
-        data_df["quality_flag"] = data_df["quality_flag"].astype(int)
-    return data_df
-
-
 def get_qc_columns(data_dict):
     """Copy data dictionary, convert values and get quality flags."""
     quality_flags = {}
@@ -279,8 +309,6 @@ def get_qc_columns(data_dict):
     data_dict_qc = {}
 
     for table, df in data_dict.items():
-        update_dtypes(df, table)
-
         data_dict_qc[table] = df.copy()
 
         if table == "header":
@@ -301,50 +329,19 @@ def get_qc_columns(data_dict):
     )
 
 
-def get_valid_indexes(df, table):
-    """Get valid indexes."""
-    if df.empty:
-        return pd.Index([])
-    valid_indexes = isvalid(df["latitude"]) & isvalid(df["longitude"])
-    if table == "header":
-        valid_indexes = (
-            valid_indexes
-            & isvalid(df["report_timestamp"])
-            & (df["report_quality"] != 6)
-            & (df["report_quality"] != 1)
-        )
-    else:
-        valid_indexes = (
-            valid_indexes
-            & isvalid(df["date_time"])
-            & (df["quality_flag"] != 6)
-            & (df["quality_flag"] != 1)
-            & isvalid(df["observation_value"])
-        )
-    return valid_indexes
-
-
 def concat_data_dicts(*dicts, dictref):
     """Concatenate data dicts."""
-    dict3 = {}
+    dictout = {}
+    dictref = {"header": {}, "observations-sst": {}}
     for table in dictref.keys():
         dfs = []
         for d in dicts:
             dfs.append(d.get(table, pd.DataFrame()))
         df = pd.concat(dfs)
 
-        update_dtypes(df, table)
-        valid_indexes = get_valid_indexes(df, table)
-        df = df.loc[valid_indexes]
+        dictout[table] = df
 
-        if table != "header":
-            valid_reports = dict3["header"].index
-            intersec = df.index.intersection(valid_reports)
-            df = df.loc[intersec]
-
-        dict3[table] = df
-
-    return dict3
+    return dictout
 
 
 def get_nearest_to_hour(series, groupby=None):
@@ -425,7 +422,7 @@ if len(tables_in) == 1:
     sys.exit()
 
 # Remove report_ids without any observations
-data_dict, ql_dict = remove_no_obs(data_dict, tables_in, params)
+data_dict, ql_dict = create_consistent_datadict(data_dict, tables_in, params)
 
 # DO THE DATA PROCESSING ------------------------------------------------------
 if params.no_qc_suite is not True:
@@ -443,8 +440,12 @@ if params.no_qc_suite is not True:
     # Get additional data: month +/-1
     # SHIP
     params_prev, params_next = configure_month_params(params)
-    data_dict_prev, _ = remove_no_obs({}, tables_in, params_prev)
-    data_dict_next, _ = remove_no_obs({}, tables_in, params_next)
+    data_dict_prev, _ = create_consistent_datadict(
+        {}, tables_in, params_prev, remove_invalids=True
+    )
+    data_dict_next, _ = create_consistent_datadict(
+        {}, tables_in, params_next, remove_invalids=True
+    )
 
     data_dict_add = concat_data_dicts(data_dict_prev, data_dict_next, dictref=data_dict)
 
@@ -461,23 +462,26 @@ if params.no_qc_suite is not True:
         params.sid_dck, buoy_dck
     )
     params_buoy_prev, params_buoy_next = configure_month_params(params_buoy)
-    data_dict_buoy_prev, _ = remove_no_obs({}, tables_in, params_buoy_prev)
-    data_dict_buoy_curr, _ = remove_no_obs({}, tables_in, params_buoy)
-    data_dict_buoy_next, _ = remove_no_obs({}, tables_in, params_buoy_next)
+    data_dict_buoy_prev, _ = create_consistent_datadict(
+        {}, tables_in, params_buoy_prev, remove_invalids=True
+    )
+    data_dict_buoy_curr, _ = create_consistent_datadict(
+        {}, tables_in, params_buoy, remove_invalids=True
+    )
+    data_dict_buoy_next, _ = create_consistent_datadict(
+        {}, tables_in, params_buoy_next, remove_invalids=True
+    )
 
     data_dict_buoy = concat_data_dicts(
         data_dict_buoy_prev, data_dict_buoy_curr, data_dict_buoy_next, dictref=data_dict
     )
+
     ids = data_dict_buoy["header"]["primary_station_id"]
+    time_axis = data_dict_buoy["header"]["report_timestamp"]
+    time_data = get_nearest_to_hour(time_axis, groupby=ids)
     for table, df in data_dict_buoy.items():
         if df.empty:
             continue
-        if table == "header":
-            time_axis = "report_timestamp"
-        else:
-            time_axis = "date_time"
-
-        time_data = get_nearest_to_hour(df[time_axis], groupby=ids)
         data_dict_buoy[table] = df.loc[time_data.index]
 
     # Perform QC
