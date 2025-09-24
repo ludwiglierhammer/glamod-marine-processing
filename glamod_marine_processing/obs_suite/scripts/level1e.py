@@ -347,6 +347,24 @@ def concat_data_dicts(*dicts, dictref):
     return dict3
 
 
+def get_nearest_to_hour(series, groupby=None):
+    """Get time stamps nearest to each whole hour."""
+    hours = series.dt.floor("H")
+    delta = (series - hours).abs()
+    df = pd.DataFrame({"timestamp": series, "hour": hours, "delta": delta})
+
+    group_keys = ["hour"]
+    if groupby is not None:
+        groupby_indexes = groupby.index
+        groupby = groupby.loc[groupby_indexes.intersection(series.index)]
+        df["group"] = groupby.values
+        group_keys = ["group"] + group_keys
+
+    nearest = df.loc[df.groupby(group_keys)["delta"].idxmin()]
+
+    return nearest[["timestamp"]]
+
+
 # MAIN ------------------------------------------------------------------------
 
 # Process input, set up some things and make sure we can do something   -------
@@ -450,6 +468,17 @@ if params.no_qc_suite is not True:
     data_dict_buoy = concat_data_dicts(
         data_dict_buoy_prev, data_dict_buoy_curr, data_dict_buoy_next, dictref=data_dict
     )
+    ids = data_dict_buoy["header"]["primary_station_id"]
+    for table, df in data_dict_buoy.items():
+        if df.empty:
+            continue
+        if table == "header":
+            time_axis = "report_timestamp"
+        else:
+            time_axis = "date_time"
+
+        time_data = get_nearest_to_hour(df[time_axis], groupby=ids)
+        data_dict_buoy[table] = df.loc[time_data.index]
 
     # Perform QC
     report_quality, location_quality, report_time_quality, quality_flags, history = (
