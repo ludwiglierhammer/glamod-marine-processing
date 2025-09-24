@@ -332,7 +332,6 @@ def do_qc_sequential_header(
     indexes_orig = data.index
     data = data.copy()
     print(data)
-    indexes_add = data_add.index
 
     # Deselect rows containing generic ids
     data = pd.concat([data, data_add])
@@ -358,12 +357,13 @@ def do_qc_sequential_header(
         indexes_passed, indexes_failed = run_qc_by_group(inputs, data, func, kwargs)
         indexes_passed_orig = indexes_passed.intersection(indexes_orig)
         indexes_failed_orig = indexes_failed.intersection(indexes_orig)
-        indexes_failed_add = indexes_failed.intersection(indexes_add)
+        indexes_failed_add = indexes_failed.intersection(data_add.index)
 
         location_quality.loc[indexes_passed_orig] = 0
         location_quality.loc[indexes_failed_orig] = 2
         report_quality.loc[indexes_failed_orig] = 1
 
+        drop_invalid_indexes(data, report_quality, 1)
         data_add.drop(index=indexes_failed_add, inplace=True)
 
         k += 1
@@ -395,7 +395,6 @@ def do_qc_sequential_observation(
     print(data)
 
     # Deselect rows containing generic ids
-    indexes_add = data_add.index
     data = pd.concat([data, data_add])
     print(data)
     invalid_indexes = idx_gnrc.intersection(data.index)
@@ -421,10 +420,12 @@ def do_qc_sequential_observation(
         )
         indexes_passed_orig = indexes_passed.intersection(indexes_orig)
         indexes_failed_orig = indexes_failed.intersection(indexes_orig)
-        indexes_failed_add = indexes_failed.intersection(indexes_add)
+        indexes_failed_add = indexes_failed.intersection(data_add.index)
 
         quality_flag.loc[indexes_passed_orig] = 0
         quality_flag.loc[indexes_failed_orig] = 1
+
+        drop_invalid_indexes(data, quality_flag, 1)
         data_add.drop(index=indexes_failed_add, inplace=True)
 
         l += 1  # noqa: E741
@@ -671,16 +672,16 @@ def do_qc(
 
     # Do sequential header QC
     j = 2
-    # report_quality, location_quality = do_qc_sequential_header(
-    #    data_dict_qc["header"],
-    #    report_quality,
-    #    location_quality,
-    #    idx_gnrc,
-    #    params,
-    #    data_dict_add.get("header", pd.DataFrame()),
-    #    i=i,
-    #    j=j,
-    # )
+    report_quality, location_quality = do_qc_sequential_header(
+        data_dict_qc["header"],
+        report_quality,
+        location_quality,
+        idx_gnrc,
+        params,
+        data_dict_add.get("header", pd.DataFrame()),
+        i=i,
+        j=j,
+    )
     print("After sequential header QC")
     print("report_quality: ", report_quality.value_counts().to_dict())
     print("location_quality: ", location_quality.value_counts().to_dict())
