@@ -79,6 +79,9 @@ def get_combined_input_values(tables, names, data_dict, drop_idx=None):
     inputs = {}
     for ivar, table in tables.items():
         data = data_dict[table]
+        if data.empty:
+            inputs[ivar] = pd.Series()
+            continue
         column = names[ivar]
         inputs[ivar] = data[column]
         if drop_idx is None:
@@ -331,11 +334,9 @@ def do_qc_sequential_header(
     )
     indexes_orig = data.index
     data = data.copy()
-    print(data)
 
     # Deselect rows containing generic ids
     data = pd.concat([data, data_add])
-    print(data)
     invalid_indexes = idx_gnrc.intersection(data.index)
     data.drop(index=invalid_indexes, inplace=True)
 
@@ -392,11 +393,9 @@ def do_qc_sequential_observation(
     logging.info(f"{i}.{j}.{k}. Do sequential {table} checks")
     indexes_orig = data.index
     data = data.copy()
-    print(data)
 
     # Deselect rows containing generic ids
     data = pd.concat([data, data_add])
-    print(data)
     invalid_indexes = idx_gnrc.intersection(data.index)
     data.drop(index=invalid_indexes, inplace=True)
 
@@ -465,7 +464,7 @@ def do_qc_sequential_combined(
             drop_idx=idx_gnrc,
         )
         indexes_orig = inputs_dat[list(inputs_dat.keys())[0]].index
-        print(inputs_dat[list(inputs_dat.keys())[0]])
+
         inputs_add = get_combined_input_values(
             parameters.tables,
             parameters.names,
@@ -478,7 +477,6 @@ def do_qc_sequential_combined(
             column: pd.concat([inputs_dat[column], inputs_add[column]])
             for column in inputs_dat.keys()
         }
-        print(inputs[list(inputs_dat.keys())[0]])
 
         indexes_passed, indexes_failed = run_qc_by_group(
             inputs, data_dict_qc["header"], parameters.func, parameters.kwargs
@@ -517,15 +515,13 @@ def do_qc_grouped_observation(
     preproc_dict_ind = qc_dict_ind.get("preprocessing", {})
 
     data = data.copy()
-    print(data)
+
     # Add buoy data
     data = pd.concat([data, data_buoy])
-    print(data)
     buoy_indexes = data_buoy.index
 
     # Add additional data
     data = pd.concat([data, data_add])
-    print(data)
     add_indexes = data_add.index
 
     ignore_indexes = buoy_indexes.append(add_indexes)

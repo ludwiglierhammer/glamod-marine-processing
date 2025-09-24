@@ -423,7 +423,7 @@ if len(tables_in) == 1:
 
 # Remove report_ids without any observations
 data_dict, ql_dict = create_consistent_datadict(data_dict, tables_in, params)
-
+print(data_dict)
 # DO THE DATA PROCESSING ------------------------------------------------------
 if params.no_qc_suite is not True:
 
@@ -476,13 +476,20 @@ if params.no_qc_suite is not True:
         data_dict_buoy_prev, data_dict_buoy_curr, data_dict_buoy_next, dictref=data_dict
     )
 
-    ids = data_dict_buoy["header"]["primary_station_id"]
-    time_axis = data_dict_buoy["header"]["report_timestamp"]
-    time_data = get_nearest_to_hour(time_axis, groupby=ids)
-    for table, df in data_dict_buoy.items():
-        if df.empty:
-            continue
-        data_dict_buoy[table] = df.loc[time_data.index]
+    if not data_dict_buoy["header"].empty:
+        ids = data_dict_buoy["header"]["primary_station_id"]
+        time_axis = data_dict_buoy["header"]["report_timestamp"]
+        time_data = get_nearest_to_hour(time_axis, groupby=ids)
+        for table, df in data_dict_buoy.items():
+            if df.empty:
+                continue
+            data_dict_buoy[table] = df.loc[time_data.index]
+
+    for table in data_dict_qc.keys():
+        if table not in data_dict_add.keys():
+            data_dict_add[table] = pd.DataFrame()
+        if table not in data_dict_buoy.keys():
+            data_dict_buoy[table] = pd.DataFrame()
 
     # Perform QC
     report_quality, location_quality, report_time_quality, quality_flags, history = (
