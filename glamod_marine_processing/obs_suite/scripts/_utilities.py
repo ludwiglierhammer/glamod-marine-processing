@@ -11,7 +11,7 @@ import os
 import sys
 
 import pandas as pd
-from cdm_reader_mapper import read_tables
+from cdm_reader_mapper import DataBundle, read_tables
 
 from glamod_marine_processing.utilities import save_simplejson
 
@@ -201,7 +201,18 @@ def read_cdm_tables(params, table, ifile=None):
         "na_values": "null",
     }
     if ifile is None:
+        ifile_pattern = os.path.join(
+            params.prev_level_path, f"{table}*{params.prev_fileID}*"
+        )
+        if len(glob.glob(ifile_pattern)) == 0:
+            logging.warning(f"CDM file pattern not found: {ifile_pattern}.")
+            return DataBundle()
         return read_tables(params.prev_level_path, suffix=params.prev_fileID, **kwargs)
+
+    if not os.path.isfile(ifile):
+        logging.warning(f"CDM file not found: {ifile}.")
+        return DataBundle()
+
     db = read_tables(ifile, **kwargs)
     db.data.columns = pd.MultiIndex.from_tuples([table, col] for col in db.data.columns)
     return db
