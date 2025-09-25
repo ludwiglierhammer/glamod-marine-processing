@@ -614,9 +614,12 @@ def do_qc(
     # Define indexes for both blacklist and generic IDs
     idx_blck = report_quality[report_quality == 6].index
     idx_gnrc_dat = report_quality[report_quality == 88].index
-    report_quality_add = data_dict_add["header"]["report_quality"]
-    idx_gnrc_add = report_quality_add[report_quality_add == 88].index
-    idx_gnrc = idx_gnrc_dat.append(idx_gnrc_add)
+    if not data_dict_add["header"].empty:
+        report_quality_add = data_dict_add["header"]["report_quality"]
+        idx_gnrc_add = report_quality_add[report_quality_add == 88].index
+        idx_gnrc = idx_gnrc_dat.append(idx_gnrc_add)
+    else:
+        idx_gnrc = idx_gnrc_dat.copy()
     idx_fld = report_quality[report_quality == 1].index
 
     # DO QC
