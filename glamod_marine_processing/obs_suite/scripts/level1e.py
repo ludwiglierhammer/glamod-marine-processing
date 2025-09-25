@@ -423,7 +423,7 @@ if len(tables_in) == 1:
 
 # Remove report_ids without any observations
 data_dict, ql_dict = create_consistent_datadict(data_dict, tables_in, params)
-print(data_dict)
+
 # DO THE DATA PROCESSING ------------------------------------------------------
 if params.no_qc_suite is not True:
 
@@ -478,11 +478,15 @@ if params.no_qc_suite is not True:
 
     if not data_dict_buoy["header"].empty:
         ids = data_dict_buoy["header"]["primary_station_id"]
-        time_axis = data_dict_buoy["header"]["report_timestamp"]
-        time_data = get_nearest_to_hour(time_axis, groupby=ids)
         for table, df in data_dict_buoy.items():
             if df.empty:
                 continue
+            if table == "header":
+                time_axis = "report_timestamp"
+            else:
+                time_axis = "date_time"
+
+            time_data = get_nearest_to_hour(df[time_axis], groupby=ids)
             data_dict_buoy[table] = df.loc[time_data.index]
 
     for table in data_dict_qc.keys():
