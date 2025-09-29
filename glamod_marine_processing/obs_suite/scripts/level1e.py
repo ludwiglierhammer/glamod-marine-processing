@@ -282,20 +282,19 @@ def configure_month_params(params):
         month_prev = month - 1
         year_prev = year
 
+    year_curr = f"{params.year:04}"
+    year_prev = f"{year_prev:04}"
+    year_next = f"{year_next:04}"
+    month_curr = f"{params.month:02}"
+    month_prev = f"{month_prev:02}"
+    month_next = f"{month_next:02}"
+
     params_prev = copy.deepcopy(params)
-    params_prev.prev_fileID = params_prev.prev_fileID.replace(
-        str(params.year), str(year_prev)
-    )
-    params_prev.prev_fileID = params_prev.prev_fileID.replace(
-        str(params.month), str(month_prev)
-    )
+    params_prev.prev_fileID = params_prev.prev_fileID.replace(year_curr, year_prev)
+    params_prev.prev_fileID = params_prev.prev_fileID.replace(month_curr, month_prev)
     params_next = copy.deepcopy(params)
-    params_next.prev_fileID = params_next.prev_fileID.replace(
-        str(params.year), str(year_next)
-    )
-    params_next.prev_fileID = params_next.prev_fileID.replace(
-        str(params.month), str(month_next)
-    )
+    params_next.prev_fileID = params_next.prev_fileID.replace(year_curr, year_next)
+    params_next.prev_fileID = params_next.prev_fileID.replace(month_curr, month_next)
     return params_prev, params_next
 
 
@@ -352,9 +351,8 @@ def get_nearest_to_hour(series, groupby=None):
 
     group_keys = ["hour"]
     if groupby is not None:
-        groupby_indexes = groupby.index
-        groupby = groupby.loc[groupby_indexes.intersection(series.index)]
-        df["group"] = groupby.values
+        aligned_group = groupby.reindex(series.index)
+        df["group"] = aligned_group.values
         group_keys = ["group"] + group_keys
 
     nearest = df.loc[df.groupby(group_keys)["delta"].idxmin()]
