@@ -1,4 +1,4 @@
-"""Split singel deck to deck list."""
+"""Split single deck to deck list."""
 
 from __future__ import annotations
 
@@ -94,7 +94,7 @@ def split(
     parallel=False,
     overwrite=False,
 ):
-    """Split decks from singel deck to new deck list.
+    """Split decks from single deck into new multiple deck list.
 
     Parameters
     ----------
