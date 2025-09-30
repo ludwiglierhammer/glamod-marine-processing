@@ -6,7 +6,7 @@ from cdm_reader_mapper.common.getting_files import load_file
 def load_noc_anc_info(**kwargs):
     """Load NOC ANC INFO data from cdm-testdata."""
     load_file(
-        "NOC_ANC_INFO/json_files/dck992.json",
+        "NOC_ANC_INFO/v2025/dck992.json",
         **kwargs,
     )
 
