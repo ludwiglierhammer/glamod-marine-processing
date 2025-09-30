@@ -141,7 +141,7 @@ manipulation = {
             "HULDRAFELTET",
             "null",
         ],
-        #("header", "platform_sub_type"): [
+        # ("header", "platform_sub_type"): [
         #    "null",
         #    "RV",
         #    "OT",
@@ -155,7 +155,7 @@ manipulation = {
         #    "null",
         #    "null",
         #    "null",
-        #],
+        # ],
         ("header", "station_record_number"): [
             "1",
             "1",
