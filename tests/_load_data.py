@@ -19,6 +19,28 @@ def load_pub47(**kwargs):
     )
 
 
+def load_metofficeqc(**kwargs):
+    """Load metoffice QC data."""
+    for efile in [
+        "AT_pentad_climatology",
+        "AT_pentad_stdev_climatology",
+        "DPT_pentad_climatology",
+        "DPT_pentad_stdev_climatology",
+        "HadSST2_pentad_climatology",
+        "HadSST2_pentad_stdev_climatology",
+        "OSTIA_buddy_range_sampling_error",
+        "OSTIA_compare_1x1x5box_to_buddy_average",
+        "OSTIA_compare_one_ob_to_1x1x5box",
+        "SLP_pentad_climatology",
+        "SLP_pentad_stdev_climatology",
+        "SST_daily_climatology_january",
+    ]:
+        load_file(
+            f"metoffice_qc/external_files/{efile}.nc",
+            **kwargs,
+        )
+
+
 def load_input(dataset, level, settings, cache_dir):
     """Load level input data data from cdm-testdata."""
     p_level = settings.prev_level[level]
