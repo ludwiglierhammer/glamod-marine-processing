@@ -188,7 +188,7 @@ manipulation = {
         ],
         ("observations-at", "sensor_id"): [
             "null",
-            "AT",
+            "null",
             np.nan,
             "null",
             np.nan,
@@ -203,7 +203,7 @@ manipulation = {
         ],
         ("observations-dpt", "sensor_id"): [
             np.nan,
-            "HUM",
+            "null",
             np.nan,
             "null",
             np.nan,
@@ -218,7 +218,7 @@ manipulation = {
         ],
         ("observations-slp", "sensor_id"): [
             "null",
-            "SLP",
+            "null",
             np.nan,
             "null",
             np.nan,
@@ -233,7 +233,7 @@ manipulation = {
         ],
         ("observations-sst", "sensor_id"): [
             "null",
-            "SST",
+            "null",
             np.nan,
             np.nan,
             np.nan,
@@ -248,7 +248,7 @@ manipulation = {
         ],
         ("observations-wd", "sensor_id"): [
             "null",
-            "WSPD",
+            "null",
             np.nan,
             "null",
             np.nan,
@@ -263,7 +263,7 @@ manipulation = {
         ],
         ("observations-ws", "sensor_id"): [
             "null",
-            "WSPD",
+            "null",
             np.nan,
             "null",
             np.nan,
@@ -278,7 +278,7 @@ manipulation = {
         ],
         ("observations-at", "sensor_automation_status"): [
             "5",
-            "3",
+            "5",
             np.nan,
             "5",
             np.nan,
@@ -293,7 +293,7 @@ manipulation = {
         ],
         ("observations-dpt", "sensor_automation_status"): [
             np.nan,
-            "3",
+            "5",
             np.nan,
             "5",
             np.nan,
@@ -308,7 +308,7 @@ manipulation = {
         ],
         ("observations-slp", "sensor_automation_status"): [
             "5",
-            "3",
+            "5",
             np.nan,
             "5",
             np.nan,
@@ -323,7 +323,7 @@ manipulation = {
         ],
         ("observations-sst", "sensor_automation_status"): [
             "5",
-            "3",
+            "5",
             np.nan,
             np.nan,
             np.nan,
@@ -338,7 +338,7 @@ manipulation = {
         ],
         ("observations-wd", "sensor_automation_status"): [
             "5",
-            "3",
+            "5",
             np.nan,
             "5",
             np.nan,
@@ -353,7 +353,7 @@ manipulation = {
         ],
         ("observations-ws", "sensor_automation_status"): [
             "5",
-            "3",
+            "5",
             np.nan,
             "5",
             np.nan,
