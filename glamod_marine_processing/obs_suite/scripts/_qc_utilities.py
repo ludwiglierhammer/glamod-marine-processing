@@ -337,6 +337,7 @@ def do_qc_sequential_header(
 
     # Deselect rows containing generic ids
     data = pd.concat([data, data_add])
+    data = data.drop_duplicates()
     invalid_indexes = idx_gnrc.intersection(data.index)
     data.drop(index=invalid_indexes, inplace=True)
 
@@ -396,6 +397,7 @@ def do_qc_sequential_observation(
 
     # Deselect rows containing generic ids
     data = pd.concat([data, data_add])
+    data = data.drop_duplicates()
     invalid_indexes = idx_gnrc.intersection(data.index)
     data.drop(index=invalid_indexes, inplace=True)
 
@@ -474,7 +476,9 @@ def do_qc_sequential_combined(
         indexes_add = inputs_add[list(inputs_add.keys())[0]].index
 
         inputs = {
-            column: pd.concat([inputs_dat[column], inputs_add[column]])
+            column: pd.concat(
+                [inputs_dat[column], inputs_add[column]]
+            ).drop_duplicates()
             for column in inputs_dat.keys()
         }
 
@@ -522,6 +526,7 @@ def do_qc_grouped_observation(
 
     # Add additional data
     data = pd.concat([data, data_add])
+    data = data.drop_duplicates()
     add_indexes = data_add.index
 
     ignore_indexes = buoy_indexes.append(add_indexes)
@@ -740,6 +745,7 @@ def do_qc(
         j=j,
         k=k,
     )
+
     print("After combined individual QC")
     for table in obs_tables:
         print(table, ": ", quality_flags[table].value_counts().to_dict())
@@ -788,6 +794,7 @@ def do_qc(
     )
     for table in obs_tables:
         print(table, ": ", quality_flags[table].value_counts().to_dict())
+
     # Do grouped observations checks
     j += 1
     k = 1
