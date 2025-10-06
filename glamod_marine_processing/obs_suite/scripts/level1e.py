@@ -423,18 +423,25 @@ if len(tables_in) == 1:
 data_dict, ql_dict = create_consistent_datadict(data_dict, tables_in, params)
 
 # DO THE DATA PROCESSING ------------------------------------------------------
-if params.no_qc_suite is not True:
 
-    # Update dtypes and get QC columns
-    (
-        data_dict_qc,
-        report_quality,
-        location_quality,
-        report_time_quality,
-        quality_flags,
-        history,
-    ) = get_qc_columns(data_dict)
+# Update dtypes and get QC columns
+(
+    data_dict_qc,
+    report_quality,
+    location_quality,
+    report_time_quality,
+    quality_flags,
+    history,
+) = get_qc_columns(data_dict)
 
+
+if params.no_qc_suite is True:
+    data_dict_add = {}
+    data_dict_buoy = {}
+    for table, df in data_dict.items():
+        data_dict_add[table] = pd.DataFrame(columns=df.columns)
+        data_dict_buoy[table] = pd.DataFrame(columns=df.columns)
+else:
     # Get additional data: month +/-1
     # SHIP
     params_prev, params_next = configure_month_params(params)
@@ -493,44 +500,41 @@ if params.no_qc_suite is not True:
         if table not in data_dict_buoy.keys():
             data_dict_buoy[table] = pd.DataFrame()
 
-    # Perform QC
-    report_quality, location_quality, report_time_quality, quality_flags, history = (
-        do_qc(
-            data_dict_qc=data_dict_qc,
-            report_quality=report_quality,
-            location_quality=location_quality,
-            report_time_quality=report_time_quality,
-            quality_flags=quality_flags,
-            history=history,
-            params=params,
-            ext_path=ext_path,
-            data_dict_add=data_dict_add,
-            data_dict_buoy=data_dict_buoy,
-        )
-    )
+# Perform QC
+report_quality, location_quality, report_time_quality, quality_flags, history = do_qc(
+    data_dict_qc=data_dict_qc,
+    report_quality=report_quality,
+    location_quality=location_quality,
+    report_time_quality=report_time_quality,
+    quality_flags=quality_flags,
+    history=history,
+    params=params,
+    ext_path=ext_path,
+    data_dict_add=data_dict_add,
+    data_dict_buoy=data_dict_buoy,
+    perform_qc=not params.no_qc_suite,
+)
 
-    # Optionally, copy quality_flags
-    if params.qc_settings["copies"]:
-        for table, table_cp in params.qc_settings["copies"].items():
-            if table in data_dict.keys():
-                intersec = quality_flags[table].index.intersection(
-                    quality_flags[table_cp].index
-                )
-                quality_flags[table].loc[intersec] = quality_flags[table_cp].loc[
-                    intersec
-                ]
-            else:
-                logging.warning(f"Could not copy {table}.")
+# Optionally, copy quality_flags
+if params.no_qc_suite is False and params.qc_settings["copies"]:
+    for table, table_cp in params.qc_settings["copies"].items():
+        if table in data_dict.keys():
+            intersec = quality_flags[table].index.intersection(
+                quality_flags[table_cp].index
+            )
+            quality_flags[table].loc[intersec] = quality_flags[table_cp].loc[intersec]
+        else:
+            logging.warning(f"Could not copy {table}.")
 
-    # Update data_dict with reworked QC columns
-    update_data_dict(
-        data_dict,
-        report_quality,
-        location_quality,
-        report_time_quality,
-        quality_flags,
-        history,
-    )
+# Update data_dict with reworked QC columns
+update_data_dict(
+    data_dict,
+    report_quality,
+    location_quality,
+    report_time_quality,
+    quality_flags,
+    history,
+)
 
 # WRITE QC FLAGS TO DATA ------------------------------------------------------
 print("After QC")

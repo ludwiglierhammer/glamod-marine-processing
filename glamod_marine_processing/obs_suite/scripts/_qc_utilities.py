@@ -11,6 +11,7 @@ import os
 import numpy as np
 import pandas as pd
 from marine_qc import qc_grouped_reports, qc_individual_reports, qc_sequential_reports
+from marine_qc.auxiliary import isvalid
 from marine_qc.external_clim import Climatology
 from marine_qc.multiple_row_checks import do_multiple_row_check
 
@@ -23,6 +24,13 @@ op_map = {
     "%": operator.mod,
     "**": operator.pow,
 }
+
+
+def update_history(history, history_add):
+    """Update history."""
+    if not isvalid(history):
+        return history_add
+    return f"{history}; {history_add}"
 
 
 def get_single_qc_flag(df):
@@ -605,6 +613,7 @@ def do_qc(
     ext_path,
     data_dict_add,
     data_dict_buoy,
+    perform_qc,
 ):
     # Update history
     try:
@@ -614,7 +623,21 @@ def do_qc(
     except AttributeError:  # for python < 3.11
         history_tstmp = datetime.datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S")
 
-    history_add = f";{history_tstmp}. {params.history_explain}"
+    history_add = f"{history_tstmp}. {params.history_explain}"
+    if perform_qc is False:
+        compare_quality_checks(report_quality, location_quality, report_time_quality)
+        report_quality[report_quality == 2] = 0
+        qc_indexes = report_quality[report_quality.isin([0, 1])].index
+        history.loc[qc_indexes] = history.loc[qc_indexes].apply(
+            lambda x: update_history(x, history_add)
+        )
+        return (
+            report_quality,
+            location_quality,
+            report_time_quality,
+            quality_flags,
+            history,
+        )
 
     # Define indexes for both blacklist and generic IDs
     idx_blck = report_quality[report_quality == 6].index
@@ -625,6 +648,7 @@ def do_qc(
         idx_gnrc = idx_gnrc_dat.append(idx_gnrc_add)
     else:
         idx_gnrc = idx_gnrc_dat.copy()
+
     idx_fld = report_quality[report_quality == 1].index
 
     # DO QC
@@ -641,7 +665,7 @@ def do_qc(
     data_dict_qc["header"].drop(index=idx_blck, inplace=True)
     idx_not_blck = data_dict_qc["header"].index
     history.loc[idx_not_blck] = history.loc[idx_not_blck].apply(
-        lambda x: x + history_add
+        lambda x: update_history(x, history_add)
     )
 
     # Set report_qualities for generic IDs to passed
