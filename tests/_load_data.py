@@ -36,7 +36,7 @@ def load_metofficeqc(**kwargs):
         "SST_daily_climatology_january",
     ]:
         load_file(
-            f"metoffice_qc/external_files/{efile}.nc",
+            f"external_files/{efile}.nc",
             **kwargs,
         )
 

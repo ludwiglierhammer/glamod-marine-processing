@@ -13,6 +13,7 @@ cache_dir = ".pytest_cache"
 add_data = {
     "level1c": _load_data.load_noc_anc_info,
     "level1d": _load_data.load_pub47,
+    "level1e": _load_data.load_metofficeqc,
 }
 
 
@@ -71,8 +72,8 @@ def _obs_testing(dataset, level, capsys):
         "-o "
         "-run"
     )
-
     os.system(s)
+
     captured = capsys.readouterr()
     assert captured.out == ""
 
