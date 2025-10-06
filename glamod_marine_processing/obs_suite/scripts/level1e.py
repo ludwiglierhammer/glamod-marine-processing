@@ -386,7 +386,7 @@ obs_tables = [x for x in cdm_atts.keys() if x != "header"]
 # DO SOME PREPROCESSING ------------------------------------------------------
 
 # Set file path to external files
-ext_path = os.path.join(params.data_path, "datasets", "external_files")
+ext_path = os.path.join(params.data_path, "external_files")
 paths_exist(ext_path)
 
 # Do some additional checks before clicking go, do we have a valid header?
