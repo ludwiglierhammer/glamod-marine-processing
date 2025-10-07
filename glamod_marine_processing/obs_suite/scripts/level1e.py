@@ -144,6 +144,11 @@ reload(logging)  # This is to override potential previous config of logging
 
 
 # Functions--------------------------------------------------------------------
+def remove_invalid_positions(df):
+    """Remove rows where latitude and/or longitude is None."""
+    df.dropna(subset=["latitude", "longitude"], inplace=True)
+
+
 def update_data_dict(
     data_dict,
     report_quality,
@@ -226,7 +231,12 @@ def get_valid_indexes(df, table):
 
 
 def create_consistent_datadict(
-    data_dict, tables_in, params, convert_dtypes=True, remove_invalids=False
+    data_dict,
+    tables_in,
+    params,
+    convert_dtypes=True,
+    remove_invalids=False,
+    drop_positions=True,
 ):
     """Remove report_ids without any observations."""
     report_ids = pd.Series()
@@ -236,6 +246,9 @@ def create_consistent_datadict(
             if db_.empty:
                 continue
             data_dict[table_in] = db_[table_in]
+
+        if drop_positions is True:
+            remove_invalid_positions(data_dict[table_in])
         if convert_dtypes is True:
             update_dtypes(data_dict[table_in], table_in)
         if remove_invalids is True:
