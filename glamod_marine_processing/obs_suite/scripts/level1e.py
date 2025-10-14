@@ -506,7 +506,7 @@ else:
 
             time_data = get_nearest_to_hour(df[time_axis], groupby=ids)
             data_dict_buoy[table] = df.loc[time_data.index]
-    
+
     for table in data_dict_qc.keys():
         if table not in data_dict_add.keys():
             data_dict_add[table] = pd.DataFrame()
