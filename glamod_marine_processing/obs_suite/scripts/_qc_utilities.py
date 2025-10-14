@@ -116,18 +116,21 @@ def all_tables_available(tables, data_dict):
             break
     return available
 
+def concat_dataframes(df1, df2):
+    """Concat dataframes."""
+    df = pd.concat([df1, df2])
+    return df[~df.index.duplicated(keep='first')]
 
 def run_qc_by_group(inputs, group_df, func, kwargs):
     """Run QC function grouped by primary_station_id."""
     passed_idxs = []
     failed_idxs = []
     sample_input = next(iter(inputs.values()))
-
     for ps_id, subset in group_df.groupby("primary_station_id"):
         idx = sample_input.index.intersection(subset.index)
         if idx.empty:
             continue
-
+        
         subset_inputs = {k: v.loc[idx] for k, v in inputs.items()}
         qc_flags = func(**subset_inputs, **kwargs)
 
@@ -484,9 +487,7 @@ def do_qc_sequential_combined(
         indexes_add = inputs_add[list(inputs_add.keys())[0]].index
 
         inputs = {
-            column: pd.concat(
-                [inputs_dat[column], inputs_add[column]]
-            ).drop_duplicates()
+            column: concat_dataframes(inputs_dat[column], inputs_add[column])
             for column in inputs_dat.keys()
         }
 

@@ -176,18 +176,6 @@ def value_counts(series):
     return series.value_counts(dropna=False).to_dict()
 
 
-def fill_missing_flags(data_df, table):
-    """Fill missing flags with unchecked."""
-    if data_df.empty:
-        pass
-    elif table == "header":
-        data_df["report_quality"] = data_df["report_quality"].fillna(2)
-        data_df["location_quality"] = data_df["location_quality"].fillna(3)
-    else:
-        data_df["quality_flag"] = data_df["quality_flag"].fillna(2)
-    return data_df
-
-
 def update_dtypes(data_df, table):
     """Update dtypes in DataFrame."""
     if data_df.empty:
@@ -249,7 +237,6 @@ def create_consistent_datadict(
     convert_dtypes=True,
     remove_invalids=False,
     drop_positions=True,
-    fill_missings=True,
 ):
     """Remove report_ids without any observations."""
     report_ids = pd.Series()
@@ -262,8 +249,6 @@ def create_consistent_datadict(
 
         if drop_positions is True:
             remove_invalid_positions(data_dict[table_in])
-        if fill_missings is True:
-            fill_missing_flags(data_dict[table_in], table_in)
         if convert_dtypes is True:
             update_dtypes(data_dict[table_in], table_in)
         if remove_invalids is True:
@@ -521,7 +506,7 @@ else:
 
             time_data = get_nearest_to_hour(df[time_axis], groupby=ids)
             data_dict_buoy[table] = df.loc[time_data.index]
-
+    
     for table in data_dict_qc.keys():
         if table not in data_dict_add.keys():
             data_dict_add[table] = pd.DataFrame()
