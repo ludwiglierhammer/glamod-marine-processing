@@ -3,14 +3,14 @@
    You can adapt this file completely to your liking, but it should at least
    contain the root `toctree` directive.
 
-Post-processing of level1a data
-===============================
+Merge multiple source-deck partitons
+====================================
 
-After performing your level1a suite, you can put your decks together into one new deck. See:
+Optionally, you can merge multiple source-deck partitions into one new source-deck_partition. See:
 
 .. code-block:: bash
 
-  post_proc
+  merge_suite
 
 Optionally, if date information is given in the file names, please run the command with option --date_avail.
 
@@ -26,4 +26,4 @@ For more details run:
 
 .. code-block:: bash
 
-  post_proc -h
+  merge_suite -h

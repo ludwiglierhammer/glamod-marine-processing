@@ -36,23 +36,20 @@ import glamod_marine_processing  # noqa
 # ones.
 extensions = [
     "sphinx.ext.autodoc",
+    "sphinx.ext.autosummary",
     "sphinx.ext.viewcode",
+    "sphinx.ext.extlinks",
     "sphinx.ext.mathjax",
     "sphinx.ext.napoleon",
     "sphinx.ext.coverage",
     "sphinx.ext.todo",
     "sphinx.ext.autosectionlabel",
     "sphinx.ext.intersphinx",
-    "sphinx.ext.extlinks",
     "nbsphinx",
     "IPython.sphinxext.ipython_console_highlighting",
-    # "sphinxcontrib.bibtex",
-    # "sphinxcontrib.cairosvgconverter",
-    # sphinx_autodoc_typehints must always be listed after sphinx.ext.napoleon
     "sphinx_autodoc_typehints",
-    "sphinx_codeautolink",
     "sphinx_copybutton",
-    "sphinx_rtd_theme",
+    "sphinx_book_theme",
 ]
 
 
@@ -62,6 +59,7 @@ extlinks = {
     "user": ("https://github.com/%s", "@%s"),
 }
 
+autosummary_generate = True
 autodoc_typehints = "description"
 autodoc_typehints_format = "fully-qualified"
 autodoc_typehints_description_target = "documented_params"
@@ -73,6 +71,7 @@ napoleon_numpy_docstring = True
 napoleon_use_rtype = False
 napoleon_use_param = False
 napoleon_use_ivar = True
+napoleon_preprocess_types = True
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ["_templates"]
@@ -86,9 +85,11 @@ source_suffix = {".rst": "restructuredtext"}
 # The master toctree document.
 master_doc = "index"
 
+remove_from_toctrees = ["generated/*"]
+
 # General information about the project.
 project = "glamod_marine_processing"
-copyright = "2019-2024, Ludwig Lierhammer, Axel Andersson, Tina Leiding, Richard Cornes, Elizabeth Kent and Joseph Siddons"
+copyright = "2019-2025, Ludwig Lierhammer, Axel Andersson, Tina Leiding, Richard Cornes, Elizabeth Kent and Joseph Siddons"
 
 # The version info for the project you're documenting, acts as replacement for
 # |version| and |release|, also used in various other places throughout the
@@ -142,7 +143,7 @@ pygments_style = "sphinx"
 
 # The theme to use for HTML and HTML Help pages.  See the documentation for
 # a list of builtin themes.
-html_theme = "sphinx_rtd_theme"
+html_theme = "sphinx_book_theme"
 
 # Theme options are theme-specific and customize the look and feel of a theme
 # further.  For a list of options available for each theme, see the
