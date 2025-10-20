@@ -50,7 +50,6 @@ concurrently to the overall scheme (see figure below).
    level1e
    level2
    merge
-   split
    contributing
    authors
    changes
@@ -64,7 +63,13 @@ About
 
 :License: |license|
 
-|logo_c3s| |logo_noc| |logo_copernicus|
+|newline|
+
+|newline|
+
+|tab| |tab| |tab| |tab| |tab| |tab| |tab| |tab| |tab| |tab| |tab| |tab| |tab| |tab| |tab| |tab| |tab| |tab| |logo_c3s| |logo_copernicus| |tab|
+
+|tab| |tab| |tab| |tab| |tab| |tab| |tab| |tab| |tab| |tab| |tab| |tab| |tab| |tab| |logo_dwd| |logo_noc| 
 
 .. |release| image:: https://img.shields.io/github/v/release/glamod/glamod-marine-processing.svg
         :target: https://github.com/glamod/glamod-marine-processing/releases
@@ -86,10 +91,22 @@ About
         :width: 25%
         :target: https://climate.copernicus.eu/
 
-.. |logo_noc| image:: figures/LOGO_2024_-_NOC_1_COLOUR.png
-        :width: 10%
+.. |logo_noc| image:: figures/LOGO_2025_NOC.png
+        :width: 25%
         :target: ttps://noc.ac.uk/
+        
+.. |logo_dwd| image:: figures/logo_DWD_RGB.png
+        :width: 35%
+        :target: https://www.dwd.de/
 
 .. |logo_copernicus| image:: figures/copernicus.png
         :width: 25%
         :target: https://www.copernicus.eu/en
+
+.. |newline| raw:: html
+
+   <br>
+
+.. |tab| raw:: html
+
+   &emsp;  <!-- HTML em-space -->
