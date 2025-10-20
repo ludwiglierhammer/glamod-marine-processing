@@ -69,7 +69,7 @@ About
 
 |tab| |tab| |tab| |tab| |tab| |tab| |tab| |tab| |tab| |tab| |tab| |tab| |tab| |tab| |tab| |tab| |tab| |tab| |logo_c3s| |logo_copernicus| |tab|
 
-|tab| |tab| |tab| |tab| |tab| |tab| |tab| |tab| |tab| |tab| |tab| |tab| |tab| |tab| |logo_dwd| |logo_noc| 
+|tab| |tab| |tab| |tab| |tab| |tab| |tab| |tab| |tab| |tab| |tab| |tab| |tab| |tab| |logo_dwd| |logo_noc|
 
 .. |release| image:: https://img.shields.io/github/v/release/glamod/glamod-marine-processing.svg
         :target: https://github.com/glamod/glamod-marine-processing/releases
@@ -94,7 +94,7 @@ About
 .. |logo_noc| image:: figures/LOGO_2025_NOC.png
         :width: 25%
         :target: ttps://noc.ac.uk/
-        
+
 .. |logo_dwd| image:: figures/logo_DWD_RGB.png
         :width: 35%
         :target: https://www.dwd.de/
