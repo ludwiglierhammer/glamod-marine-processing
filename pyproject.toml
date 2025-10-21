@@ -11,7 +11,8 @@ authors = [
   {name = "Tina Leiding", email = "tina.leiding@dwd.de"},
   {name = "Richard Cornes", email = "richard.cornes@noc.ac.uk"},
   {name = "Elizabeth Kent", email = "eck@noc.ac.uk"},
-  {name = "Joseph Siddons", email = "joseph.siddons@noc.ac.uk"}
+  {name = "Joseph Siddons", email = "joseph.siddons@noc.ac.uk"},
+  {name = "John Kennedy", email = "jjk8932@googlemail.com"}
 ]
 maintainers = [
   {name = "Ludwig Lierhammer", email = "ludwig.lierhammer@dwd.de"}
@@ -286,3 +287,4 @@ ignore_names = []
 min_confidence = 90
 paths = ["glamod_marine_processing", "tests"]
 sort_by_size = true
+
