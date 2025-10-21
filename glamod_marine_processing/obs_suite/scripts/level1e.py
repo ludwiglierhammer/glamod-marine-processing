@@ -550,7 +550,6 @@ update_data_dict(
 )
 
 # WRITE QC FLAGS TO DATA ------------------------------------------------------
-print("After QC")
 for table, df in data_dict.items():
     if table == "header":
         ql_dict[table]["report_quality_flag"] = value_counts(df["report_quality"])
@@ -558,12 +557,8 @@ for table, df in data_dict.items():
         ql_dict[table]["report_time_quality_flag"] = value_counts(
             df["report_time_quality"]
         )
-        print("report_quality: ", ql_dict[table]["report_quality_flag"])
-        print("location_quality: ", ql_dict[table]["location_quality_flag"])
-        print("report_time_quality: ", ql_dict[table]["report_time_quality_flag"])
     else:
         ql_dict[table]["quality_flag"] = value_counts(df["quality_flag"])
-        print(table, ": ", ql_dict[table]["quality_flag"])
         pqo.latitude_variable_plot(
             df["latitude"],
             df["observation_value"],
