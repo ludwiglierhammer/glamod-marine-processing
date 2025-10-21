@@ -51,4 +51,5 @@ dependencies:
     #from pypi
     - pip:
       - cdm_reader_mapper
+      - marine_qc
       - simplejson
