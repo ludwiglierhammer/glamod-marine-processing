@@ -98,18 +98,6 @@ manipulation = {
             "0",
             "0",
         ],
-        ("observations-slp", "observation_value"): [
-            "null",
-            "99990.0",
-            "null",
-            "99940.0",
-            "null",
-            "99920.0",
-            "null",
-            "99960.0",
-            "99990.0",
-            "100010.0",
-        ],
     },
     "level3": [
         ("header", "station_name"),

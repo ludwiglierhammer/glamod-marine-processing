@@ -461,6 +461,9 @@ def update_decimals(table_in, key):
         if dtype_conversion[key][col]["dtype"] == "datetime":
             continue
         for value in data_dict[table_in][col]:
+            if pd.isna(value):
+                continue
+            value = str(value)
             if value == "null":
                 continue
             if "." in value:
