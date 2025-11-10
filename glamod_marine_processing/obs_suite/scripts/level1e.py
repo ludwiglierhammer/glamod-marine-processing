@@ -144,31 +144,106 @@ reload(logging)  # This is to override potential previous config of logging
 
 
 # Functions--------------------------------------------------------------------
+dtype_conversion = {
+    "header": {
+        "platform_type": {
+            "dtype": int,
+        },
+        "latitude": {
+            "dtype": float,
+            "decimal_places": 2,
+        },
+        "longitude": {
+            "dtype": float,
+            "decimal_places": 2,
+        },
+        "report_timestamp": {
+            "dtype": "datetime",
+            "format": "%Y-%m-%d %H:%M:%S",
+        },
+        "station_speed": {
+            "dtype": float,
+            "decimal_places": 1,
+        },
+        "station_course": {
+            "dtype": float,
+            "decimal_places": 0,
+        },
+        "report_quality": {
+            "dtype": int,
+        },
+        "location_quality": {
+            "dtype": int,
+        },
+        "report_time_quality": {
+            "dtype": int,
+        },
+    },
+    "observations": {
+        "latitude": {
+            "dtype": float,
+            "decimal_places": 2,
+        },
+        "longitude": {
+            "dtype": float,
+            "decimal_places": 2,
+        },
+        "date_time": {
+            "dtype": "datetime",
+            "format": "%Y-%m-%d %H:%M:%S",
+        },
+        "quality_flag": {
+            "dtype": int,
+        },
+    },
+    "observations-at": {
+        "observation_value": {
+            "dtype": float,
+            "decimal_places": 2,
+        }
+    },
+    "observations-dpt": {
+        "observation_value": {
+            "dtype": float,
+            "decimal_places": 2,
+        }
+    },
+    "observations-slp": {
+        "observation_value": {
+            "dtype": float,
+            "decimal_places": 0,
+        }
+    },
+    "observations-sst": {
+        "observation_value": {
+            "dtype": float,
+            "decimal_places": 2,
+        }
+    },
+    "observations-wbt": {
+        "observation_value": {
+            "dtype": float,
+            "decimal_places": 2,
+        }
+    },
+    "observations-wd": {
+        "observation_value": {
+            "dtype": float,
+            "decimal_places": 0,
+        }
+    },
+    "observations-ws": {
+        "observation_value": {
+            "dtype": float,
+            "decimal_places": 1,
+        }
+    },
+}
+
+
 def remove_invalid_positions(df):
     """Remove rows where latitude and/or longitude is None."""
     df.dropna(subset=["latitude", "longitude"], inplace=True)
-
-
-def update_data_dict(
-    data_dict,
-    report_quality,
-    location_quality,
-    report_time_quality,
-    quality_flags,
-    history,
-):
-    """Update data_dict with new quality flags."""
-    for table in data_dict.keys():
-        df = data_dict[table]
-        if table == "header":
-            df = data_dict[table]
-            df["report_quality"] = report_quality
-            df["location_quality"] = location_quality
-            df["report_time_quality"] = report_time_quality
-            df["history"] = history
-            continue
-
-        df["quality_flag"] = quality_flags[table]
 
 
 def value_counts(series):
@@ -176,34 +251,38 @@ def value_counts(series):
     return series.value_counts(dropna=False).to_dict()
 
 
+def convert_dtypes(df, table, mode="qc"):
+    """Convert data type."""
+    if table == "header":
+        convert_dict = dtype_conversion["header"]
+    else:
+        convert_dict_general = dtype_conversion["observations"]
+        convert_dict_special = dtype_conversion[table]
+        convert_dict = {**convert_dict_general, **convert_dict_special}
+    for col, col_kwargs in convert_dict.items():
+        dtype = col_kwargs["dtype"]
+        if dtype == "datetime":
+            fmt = col_kwargs.get("format")
+            if mode == "qc":
+                df[col] = pd.to_datetime(df[col], format=fmt, errors="coerce")
+            elif mode == "orig":
+                df[col] = df[col].dt.strftime(fmt)
+        else:
+            if mode == "qc":
+                df[col] = df[col].astype(dtype)
+            elif mode == "orig":
+                decimals = col_kwargs.get("decimal_places", 0)
+                df[col] = df[col].map(lambda x: f"{x:.{decimals}f}")
+                df[col] = df[col].replace("nan", "null")
+    return df
+
+
 def update_dtypes(data_df, table):
     """Update dtypes in DataFrame."""
     if data_df.empty:
         pass
-    elif table == "header":
-        data_df["platform_type"] = data_df["platform_type"].astype(int)
-        data_df["latitude"] = data_df["latitude"].astype(float)
-        data_df["longitude"] = data_df["longitude"].astype(float)
-        data_df["report_timestamp"] = pd.to_datetime(
-            data_df["report_timestamp"],
-            format="%Y-%m-%d %H:%M:%S",
-            errors="coerce",
-        )
-        data_df["station_speed"] = data_df["station_speed"].astype(float)
-        data_df["station_course"] = data_df["station_course"].astype(float)
-        data_df["report_quality"] = data_df["report_quality"].astype(int)
-        data_df["location_quality"] = data_df["location_quality"].astype(int)
-        data_df["report_time_quality"] = data_df["report_time_quality"].astype(int)
     else:
-        data_df["observation_value"] = data_df["observation_value"].astype(float)
-        data_df["latitude"] = data_df["latitude"].astype(float)
-        data_df["longitude"] = data_df["longitude"].astype(float)
-        data_df["date_time"] = pd.to_datetime(
-            data_df["date_time"],
-            format="%Y-%m-%d %H:%M:%S",
-            errors="coerce",
-        )
-        data_df["quality_flag"] = data_df["quality_flag"].astype(int)
+        convert_dtypes(data_df, table)
     return data_df
 
 
@@ -276,6 +355,28 @@ def create_consistent_datadict(
             "deleted": r_length,
         }
     return data_dict, ql_dict
+
+
+def update_data_dict(
+    data_dict,
+    report_quality,
+    location_quality,
+    report_time_quality,
+    quality_flags,
+    history,
+):
+    """Update data_dict with new quality flags."""
+    for table in data_dict.keys():
+        df = data_dict[table]
+        if table == "header":
+            df = data_dict[table]
+            df["report_quality"] = report_quality
+            df["location_quality"] = location_quality
+            df["report_time_quality"] = report_time_quality
+            df["history"] = history
+        else:
+            df["quality_flag"] = quality_flags[table]
+        convert_dtypes(df, table, mode="orig")
 
 
 def configure_month_params(params):
@@ -430,7 +531,7 @@ if len(tables_in) == 1:
     logging.error(
         f"NO OBS TABLES AVAILABLE: {params.sid_dck}, period {params.year}-{params.month}"
     )
-    sys.exit()
+    sys.exit(1)
 
 # Remove report_ids without any observations
 data_dict, ql_dict = create_consistent_datadict(data_dict, tables_in, params)
