@@ -11,7 +11,8 @@ authors = [
   {name = "Tina Leiding", email = "tina.leiding@dwd.de"},
   {name = "Richard Cornes", email = "richard.cornes@noc.ac.uk"},
   {name = "Elizabeth Kent", email = "eck@noc.ac.uk"},
-  {name = "Joseph Siddons", email = "joseph.siddons@noc.ac.uk"}
+  {name = "Joseph Siddons", email = "joseph.siddons@noc.ac.uk"},
+  {name = "John Kennedy", email = "jjk8932@googlemail.com"}
 ]
 maintainers = [
   {name = "Ludwig Lierhammer", email = "ludwig.lierhammer@dwd.de"}
@@ -45,7 +46,7 @@ dependencies = [
 [project.optional-dependencies]
 dev = [
   "black[jupyter] ==25.9.0",
-  "blackdoc ==0.4.4",
+  "blackdoc ==0.4.5",
   "codespell ==2.4.1",
   "coverage >=7.5.0",
   "coveralls >=4.0.1",
