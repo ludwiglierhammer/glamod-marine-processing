@@ -144,6 +144,7 @@ reload(logging)  # This is to override potential previous config of logging
 
 
 # Functions--------------------------------------------------------------------
+
 dtype_conversion = {
     "header": {
         "platform_type": {
@@ -151,11 +152,9 @@ dtype_conversion = {
         },
         "latitude": {
             "dtype": float,
-            "decimal_places": 2,
         },
         "longitude": {
             "dtype": float,
-            "decimal_places": 2,
         },
         "report_timestamp": {
             "dtype": "datetime",
@@ -163,11 +162,9 @@ dtype_conversion = {
         },
         "station_speed": {
             "dtype": float,
-            "decimal_places": 1,
         },
         "station_course": {
             "dtype": float,
-            "decimal_places": 0,
         },
         "report_quality": {
             "dtype": int,
@@ -182,11 +179,9 @@ dtype_conversion = {
     "observations": {
         "latitude": {
             "dtype": float,
-            "decimal_places": 2,
         },
         "longitude": {
             "dtype": float,
-            "decimal_places": 2,
         },
         "date_time": {
             "dtype": "datetime",
@@ -199,43 +194,36 @@ dtype_conversion = {
     "observations-at": {
         "observation_value": {
             "dtype": float,
-            "decimal_places": 2,
         }
     },
     "observations-dpt": {
         "observation_value": {
             "dtype": float,
-            "decimal_places": 2,
         }
     },
     "observations-slp": {
         "observation_value": {
             "dtype": float,
-            "decimal_places": 0,
         }
     },
     "observations-sst": {
         "observation_value": {
             "dtype": float,
-            "decimal_places": 2,
         }
     },
     "observations-wbt": {
         "observation_value": {
             "dtype": float,
-            "decimal_places": 2,
         }
     },
     "observations-wd": {
         "observation_value": {
             "dtype": float,
-            "decimal_places": 0,
         }
     },
     "observations-ws": {
         "observation_value": {
             "dtype": float,
-            "decimal_places": 1,
         }
     },
 }
@@ -311,21 +299,13 @@ def get_valid_indexes(df, table):
 
 def create_consistent_datadict(
     data_dict,
-    tables_in,
-    params,
     convert_dtypes=True,
     remove_invalids=False,
     drop_positions=True,
 ):
     """Remove report_ids without any observations."""
     report_ids = pd.Series()
-    for table_in in tables_in:
-        if table_in not in data_dict.keys():
-            db_ = read_cdm_tables(params, table_in)
-            if db_.empty:
-                continue
-            data_dict[table_in] = db_[table_in]
-
+    for table_in in data_dict.keys():
         if drop_positions is True:
             remove_invalid_positions(data_dict[table_in])
         if convert_dtypes is True:
@@ -474,6 +454,44 @@ def get_nearest_to_hour(series, groupby=None):
     return nearest[["timestamp"]]
 
 
+def update_decimals(table_in, key):
+    """Update decimal places."""
+    columns = list(dtype_conversion[key].keys())
+    for col in columns:
+        if dtype_conversion[key][col]["dtype"] == "datetime":
+            continue
+        for value in data_dict[table_in][col]:
+            if value == "null":
+                continue
+            if "." in value:
+                decimals = len(value.split(".")[-1])
+            else:
+                decimals = 0
+            dtype_conversion[key][col]["decimal_places"] = decimals
+            break
+
+
+def create_data_dict(data_dict, tables_in, params, get_decimals=False):
+    """Create data dictionary."""
+    obs = False
+    for table_in in tables_in:
+        if table_in not in data_dict.keys():
+            db_ = read_cdm_tables(params, table_in)
+            if db_.empty:
+                continue
+            data_dict[table_in] = db_[table_in]
+
+        if get_decimals is False:
+            continue
+
+        update_decimals(table_in, table_in)
+        if table_in != "header" and obs is False:
+            update_decimals(table_in, "observations")
+            obs = True
+
+    return data_dict
+
+
 # MAIN ------------------------------------------------------------------------
 
 # Process input, set up some things and make sure we can do something   -------
@@ -533,8 +551,10 @@ if len(tables_in) == 1:
     )
     sys.exit(1)
 
+data_dict = create_data_dict(data_dict, tables_in, params, get_decimals=True)
+
 # Remove report_ids without any observations
-data_dict, ql_dict = create_consistent_datadict(data_dict, tables_in, params)
+data_dict, ql_dict = create_consistent_datadict(data_dict)
 
 # DO THE DATA PROCESSING ------------------------------------------------------
 
@@ -559,12 +579,10 @@ else:
     # Get additional data: month +/-1
     # SHIP
     params_prev, params_next = configure_month_params(params)
-    data_dict_prev, _ = create_consistent_datadict(
-        {}, tables_in, params_prev, remove_invalids=True
-    )
-    data_dict_next, _ = create_consistent_datadict(
-        {}, tables_in, params_next, remove_invalids=True
-    )
+    data_dict_prev = create_data_dict({}, tables_in, params_prev)
+    data_dict_prev, _ = create_consistent_datadict(data_dict_prev, remove_invalids=True)
+    data_dict_next = create_data_dict({}, tables_in, params_prev)
+    data_dict_next, _ = create_consistent_datadict(data_dict_next, remove_invalids=True)
 
     data_dict_add = concat_data_dicts(data_dict_prev, data_dict_next, dictref=data_dict)
 
@@ -581,14 +599,17 @@ else:
         params.sid_dck, buoy_dck
     )
     params_buoy_prev, params_buoy_next = configure_month_params(params_buoy)
+    data_dict_buoy_prev = create_data_dict({}, tables_in, params_buoy_prev)
     data_dict_buoy_prev, _ = create_consistent_datadict(
-        {}, tables_in, params_buoy_prev, remove_invalids=True
+        data_dict_buoy_prev, remove_invalids=True
     )
+    data_dict_buoy_curr = create_data_dict({}, tables_in, params_buoy)
     data_dict_buoy_curr, _ = create_consistent_datadict(
-        {}, tables_in, params_buoy, remove_invalids=True
+        data_dict_buoy_curr, remove_invalids=True
     )
+    data_dict_buoy_next = create_data_dict({}, tables_in, params_buoy_next)
     data_dict_buoy_next, _ = create_consistent_datadict(
-        {}, tables_in, params_buoy_next, remove_invalids=True
+        data_dict_buoy_next, remove_invalids=True
     )
 
     data_dict_buoy = concat_data_dicts(
