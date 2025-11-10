@@ -3,6 +3,19 @@
 Changelog
 =========
 
+v8.0.1 (unreleased)
+-------------------
+Contributors to this version: Ludwig Lierhammer (:user:`ludwiglierhammer`)
+
+Bug fixes
+^^^^^^^^^
+* ``obs_suite``: level1e the data output format is equal to the data input format again (:issue:`189`, :pull:`210`)
+
+Internal changes
+^^^^^^^^^^^^^^^^
+
+* ``pyproject.toml``: pytest expects python_files to be a list (:pull:`210`)
+
 v8.0.0 (2025-10-21)
 -------------------
 Contributors to this version: Ludwig Lierhammer (:user:`ludwiglierhammer`) and John Kennedy (:user:`jjk-code-otter`).
