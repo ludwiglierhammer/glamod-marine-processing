@@ -79,9 +79,9 @@ def _obs_testing(dataset, level, capsys):
         "-o "
         "-run"
     )
-    #print(s)
-    #exit()
-    #os.system(s)
+    # print(s)
+    # exit()
+    # os.system(s)
 
     captured = capsys.readouterr()
     assert captured.out == ""
@@ -115,8 +115,8 @@ def _obs_testing(dataset, level, capsys):
             del results[deletion]
             del expected[deletion]
 
-    #print(results)
-    #print(expected)
-    #exit()
+    # print(results)
+    # print(expected)
+    # exit()
 
     pd.testing.assert_frame_equal(results, expected)
