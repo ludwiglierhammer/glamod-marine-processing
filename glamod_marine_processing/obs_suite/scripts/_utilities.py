@@ -36,6 +36,12 @@ chunksizes = {
     "ICOADS_R3.0.0T": 200000,
 }
 
+level3_source_ids = {
+    "ICOADS-3-0-0T": 1,
+    "ICOADS-3-0-2T": 2,
+    "CRAID-1.2": 3,
+}
+
 level3_columns = [
     "station_name",
     "primary_station_id",
@@ -117,6 +123,13 @@ def get_integer_source_id(series):
     return series.rank(method="dense").astype(int)
 
 
+def set_default_source_id(series):
+    """Set default source_id (dataset-specific)."""
+    pattern = "|".join(level3_source_ids.keys())
+    s = series.str.extract(rf"({pattern})")[0]
+    return s.map(level3_source_ids)
+
+
 def set_default_report_duration(series):
     """Set default report_duration 8 (10 minutes)."""
     s = series[:].copy()
@@ -126,7 +139,7 @@ def set_default_report_duration(series):
 
 level3_conversions = {
     "report_timestamp": add_utc_offset,
-    "source_id": get_integer_source_id,
+    "source_id": set_default_source_id,
     "report_duration": set_default_report_duration,
 }
 
@@ -348,3 +361,4 @@ def write_cdm_tables(
                 compression="snappy",
                 **kwargs,
             )
+        logging.info(f"Output file written: {outname}.")
