@@ -108,10 +108,10 @@ class Cli:
         make_release_source_tree(
             data_path=config["paths"]["data_directory"],
             config_path=config["paths"]["config_directory"],
-            release_source=self.release_source,
+            release_source=self.release,
             release_destination=self.release_destination,
             update=self.update,
-            dataset_source=self.dataset_source,
+            dataset_source=self.dataset,
             dataset_destination=self.dataset_destination,
             level=self.level,
             level_destination=self.level_destination,
