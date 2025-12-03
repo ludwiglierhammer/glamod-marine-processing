@@ -675,13 +675,6 @@ def do_qc(
     report_quality.loc[idx_gnrc_dat] = 0
 
     # Do individual header QC
-    print("Before QC")
-    print("report_quality: ", report_quality.value_counts().to_dict())
-    print("location_quality: ", location_quality.value_counts().to_dict())
-    print("report_time_quality: ", report_time_quality.value_counts().to_dict())
-    for table in obs_tables:
-        print(table, ": ", quality_flags[table].value_counts().to_dict())
-
     j = 1
     report_quality, location_quality, report_time_quality = do_qc_individual_header(
         data_dict_qc["header"],
@@ -693,10 +686,6 @@ def do_qc(
         i=i,
         j=j,
     )
-    print("After individual header QC")
-    print("report_quality: ", report_quality.value_counts().to_dict())
-    print("location_quality: ", location_quality.value_counts().to_dict())
-    print("report_time_quality: ", report_time_quality.value_counts().to_dict())
 
     # Remove already failed report_qualities
     drop_invalid_indexes(data_dict_qc["header"], report_quality, 1)
@@ -713,10 +702,6 @@ def do_qc(
         i=i,
         j=j,
     )
-    print("After sequential header QC")
-    print("report_quality: ", report_quality.value_counts().to_dict())
-    print("location_quality: ", location_quality.value_counts().to_dict())
-    print("report_time_quality: ", report_time_quality.value_counts().to_dict())
 
     # Remove already failed report_qualities
     drop_invalid_indexes(data_dict_qc["header"], report_quality, 1)
@@ -760,8 +745,6 @@ def do_qc(
         drop_invalid_indexes(data_dict_qc[table], quality_flags[table], 1)
 
         k += 1
-        print(f"After individual {table} QC")
-        print(table, ": ", quality_flags[table].value_counts().to_dict())
 
     quality_flags = do_qc_individual_combined(
         data_dict_qc,
@@ -772,10 +755,6 @@ def do_qc(
         j=j,
         k=k,
     )
-
-    print("After combined individual QC")
-    for table in obs_tables:
-        print(table, ": ", quality_flags[table].value_counts().to_dict())
 
     # Do sequential observations checks
     j += 1
@@ -806,8 +785,6 @@ def do_qc(
         drop_invalid_indexes(data_dict_qc[table], quality_flags[table], 1)
 
         k += 1
-        print(f"After sequential {table} QC")
-        print(table, ": ", quality_flags[table].value_counts().to_dict())
 
     quality_flags = do_qc_sequential_combined(
         data_dict_qc,
@@ -819,8 +796,6 @@ def do_qc(
         j=j,
         k=k,
     )
-    for table in obs_tables:
-        print(table, ": ", quality_flags[table].value_counts().to_dict())
 
     # Do grouped observations checks
     j += 1
@@ -846,7 +821,5 @@ def do_qc(
         drop_invalid_indexes(data_dict_qc[table], quality_flags[table], 1)
 
         k += 1
-        print(f"After grouped {table} QC")
-        print(table, ": ", quality_flags[table].value_counts().to_dict())
 
     return report_quality, location_quality, report_time_quality, quality_flags, history

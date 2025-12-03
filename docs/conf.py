@@ -89,7 +89,7 @@ remove_from_toctrees = ["generated/*"]
 
 # General information about the project.
 project = "glamod_marine_processing"
-copyright = "2019-2025, Ludwig Lierhammer, Axel Andersson, Tina Leiding, Richard Cornes, Elizabeth Kent and Joseph Siddons"
+copyright = "2019-2025, Ludwig Lierhammer, Axel Andersson, Tina Leiding, Richard Cornes, Elizabeth Kent, Joseph Siddons and John Kennedy"
 
 # The version info for the project you're documenting, acts as replacement for
 # |version| and |release|, also used in various other places throughout the

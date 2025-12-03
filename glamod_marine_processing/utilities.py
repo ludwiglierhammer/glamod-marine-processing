@@ -62,6 +62,7 @@ def make_release_source_tree(
     if not level:
         warn("No level selected. Skip making release source tree.")
         return
+
     if not deck_list:
         path_ = os.path.join(config_path, release_source, update, dataset_source)
         json_file = os.path.join(path_, f"{level}.json")
