@@ -75,7 +75,7 @@ pattern = {
     "level2": "header-icoads_r???_d???_????-??-??_subset.psv",
     "level3": "header-icoads_r???_d???_????-??-??_subset.psv",
 }
-pattern_out = {"level3": f"pressure-data-2022-01-{release}-000000.psv"}
+pattern_out = {"level3": "insitu-surface-marine_2022-01.psv"}
 
 manipulation = {
     "level1b": {

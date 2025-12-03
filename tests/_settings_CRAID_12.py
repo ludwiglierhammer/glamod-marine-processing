@@ -68,7 +68,7 @@ pattern = {
     "level3": "header-craid_????-??-??_subset.psv",
 }
 
-pattern_out = {"level3": f"pressure-data-2004-12-{release}-000000.psv"}
+pattern_out = {"level3": "insitu-surface-marine_2004-12.psv"}
 
 manipulation = {
     "level1b": {
