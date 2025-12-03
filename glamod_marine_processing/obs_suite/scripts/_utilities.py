@@ -19,6 +19,8 @@ from glamod_marine_processing.utilities import save_simplejson
 delimiter = "|"
 FFS = "-"
 
+allowed_extensions = {".pq", ".csv", ".psv"}
+
 add_data_paths = {
     "level1a": ["level_excluded_path", "level_invalid_path"],
     "level1b": [],
@@ -153,11 +155,10 @@ level3_conversions = {
 def convert_dtypes(df, dtypes):
     """Convert data types."""
     for col, dtype in dtypes.items():
-        if dtype.startswith("datetime64[ns]"):
+        if dtype.startswith("datetime"):
             df[col] = pd.to_datetime(df[col], errors="coerce").dt.tz_convert("UTC")
         else:
             df[col] = df[col].astype(dtype)
-
     return df
 
 
@@ -344,7 +345,8 @@ def write_cdm_tables(
                 params.level_path, f"{FFS.join([table, params.fileID])}"
             )
         p = Path(outname)
-        if p.suffix == "":
+        suffix = p.suffix if p.suffix in allowed_extensions else ""
+        if suffix == "":
             outname = f"{outname}.{ext}"
         try:
             df = df[table]
