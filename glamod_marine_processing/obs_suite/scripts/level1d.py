@@ -93,6 +93,7 @@ def map_to_cdm(md_model, meta_df, log_level="INFO"):
         meta_db[table] = meta_db[table].astype(
             "object"
         )  # meta_cdm[meta_cdm_columns] = meta_cdm_dict[table]["data"].astype("object")
+
     return meta_db
 
 

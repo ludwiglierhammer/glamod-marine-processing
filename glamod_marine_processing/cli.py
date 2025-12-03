@@ -91,6 +91,8 @@ class Cli:
         self.config_file = config_file
         self.suite = suite
         self.release_update = f"{release}-{update}"
+        self.release_update_source = f"{release_source}-{update}"
+        self.release_update_destination = f"{release_destination}-{update}"
         self.deck_list = deck_list
         self.overwrite = overwrite
 
@@ -106,10 +108,10 @@ class Cli:
         make_release_source_tree(
             data_path=config["paths"]["data_directory"],
             config_path=config["paths"]["config_directory"],
-            release_source=self.release_source,
+            release_source=self.release,
             release_destination=self.release_destination,
             update=self.update,
-            dataset_source=self.dataset_source,
+            dataset_source=self.dataset,
             dataset_destination=self.dataset_destination,
             level=self.level,
             level_destination=self.level_destination,
@@ -128,6 +130,18 @@ class Cli:
             "update": self.update,
             "dataset": self.dataset,
             "release_tag": self.release_update,
+        }
+        config["abbreviations_source"] = {
+            "release": self.release_source,
+            "update": self.update,
+            "dataset": self.dataset_source,
+            "release_tag": self.release_update_source,
+        }
+        config["abbreviations_destination"] = {
+            "release": self.release_destination,
+            "update": self.update,
+            "dataset": self.dataset_destination,
+            "release_tag": self.release_update_destination,
         }
         config["level_source"] = self.level_source
         config["level_destination"] = self.level_destination
