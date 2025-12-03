@@ -56,6 +56,8 @@ def process_table(table_df):
     header_mappings = level3_mappings["header"]
     observations_mappings = level3_mappings["observations"]
 
+    insitu_df = pd.DataFrame(columns=level3_columns)
+
     header_df = table_df["header"][list(header_mappings.values())].copy()
     header_df.columns = [c for c in header_mappings.keys()]
 
@@ -72,30 +74,28 @@ def process_table(table_df):
         obs_df = obs_df[level3_columns]
         obs_df = obs_df.dropna(subset=["observation_value"], ignore_index=True)
 
-        # for column, func in level3_conversions.items():
-        #    obs_df[column] = func(obs_df[column])
+        insitu_df = pd.concat([insitu_df, obs_df], axis=0)
 
-        # params.fileID = (
-        #    f"insitu-observations-surface-marine_{params.year}-{params.month}"
-        # )
-        outname = os.path.join(
-            params.level_path,
-            f"insitu-{table}-surface-marine_{params.year}-{params.month}",
-        )
-        write_cdm_tables(
-            params,
-            obs_df,
-            tables=table,
-            outname=outname,
-            dtypes=level3_dtypes,
-            mode="parquet",
-        )
-        write_cdm_tables(
-            params,
-            obs_df,
-            tables=table,
-            outname=outname,
-        )
+    outname = os.path.join(
+        params.level_path,
+        f"insitu-surface-marine_{params.year}-{params.month}",
+    )
+
+    write_cdm_tables(
+        params,
+        insitu_df,
+        tables="all_observations",
+        outname=outname,
+        dtypes=level3_dtypes,
+        mode="parquet",
+    )
+
+    write_cdm_tables(
+        params,
+        insitu_df,
+        tables="all_observations",
+        outname=outname,
+    )
 
 
 # MAIN ------------------------------------------------------------------------
