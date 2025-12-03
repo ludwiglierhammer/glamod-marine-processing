@@ -7,6 +7,11 @@ v8.0.1 (unreleased)
 -------------------
 Contributors to this version: Ludwig Lierhammer (:user:`ludwiglierhammer`)
 
+New features and enhancements
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+* ``obs_suite``: adding release8.1 configuration files (:pull:`226`)
+* ``obs_suite``: run level skripts in arbitrary order (:pull:`226`)
+
 Bug fixes
 ^^^^^^^^^
 * ``obs_suite``: level1e the data output format is equal to the data input format again (:issue:`189`, :pull:`210`)
