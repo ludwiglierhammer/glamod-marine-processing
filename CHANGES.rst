@@ -3,9 +3,28 @@
 Changelog
 =========
 
-v8.0.0 (unreleased)
+v8.0.1 (unreleased)
 -------------------
 Contributors to this version: Ludwig Lierhammer (:user:`ludwiglierhammer`)
+
+New features and enhancements
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+* ``obs_suite``: adding release8.1 configuration files (:pull:`226`)
+* ``obs_suite``: run level skripts in arbitrary order (:pull:`226`)
+
+Bug fixes
+^^^^^^^^^
+* ``obs_suite``: level1e the data output format is equal to the data input format again (:issue:`189`, :pull:`210`)
+* ``obs_suite``: level1d Pub47 mapping is working again with cdm_reader_mapper.map_model(..., drop_duplicates=False, drop_missing_obs=False) (:issue:`187`, :pull:`215`)
+
+Internal changes
+^^^^^^^^^^^^^^^^
+
+* ``pyproject.toml``: pytest expects python_files to be a list (:pull:`210`)
+
+v8.0.0 (2025-10-21)
+-------------------
+Contributors to this version: Ludwig Lierhammer (:user:`ludwiglierhammer`) and John Kennedy (:user:`jjk-code-otter`).
 
 Announcements
 ^^^^^^^^^^^^^
@@ -49,7 +68,7 @@ Breaking changes
 ^^^^^^^^^^^^^^^^
 * ``obs_suite``: rename level3 output from <YYYY>-<MM>-<RELEASE>-<UPDATE>-pressure_data.psv to pressure-data-<YYYY>-<MM>-<RELEASE>-<UPDATE>.psv (:pull:`79`)
 * command-line interface: set default release from "release_7.0" to "release_8.0" (:issue:`113`, :pull:`102`)
-* extract blacklisting and some ICOADS specific functions from ``qc_suite```to ``obs_suite`` (:issue:`131`, :pull:`137`)
+* extract blacklisting and some ICOADS specific functions from ``qc_suite`` to ``obs_suite`` (:issue:`131`, :pull:`137`)
 * refactor ``qc_suite`` and move to https://github.com/glamod/marine_qc (:issue:`108`, :pull:`117`)
 * rename module ``post_processing`` to ``merge`` and CLI ``post_proc`` to ``merge_suite`` (:pull:`140`)
 

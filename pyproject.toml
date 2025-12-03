@@ -11,7 +11,8 @@ authors = [
   {name = "Tina Leiding", email = "tina.leiding@dwd.de"},
   {name = "Richard Cornes", email = "richard.cornes@noc.ac.uk"},
   {name = "Elizabeth Kent", email = "eck@noc.ac.uk"},
-  {name = "Joseph Siddons", email = "joseph.siddons@noc.ac.uk"}
+  {name = "Joseph Siddons", email = "joseph.siddons@noc.ac.uk"},
+  {name = "John Kennedy", email = "jjk8932@googlemail.com"}
 ]
 maintainers = [
   {name = "Ludwig Lierhammer", email = "ludwig.lierhammer@dwd.de"}
@@ -33,9 +34,10 @@ classifiers = [
   "Programming Language :: Python :: 3.12",
   "Programming Language :: Python :: 3.13"
 ]
-version = "7.1.0"
+version = "8.0.0"
 dependencies = [
   "cdm_reader_mapper",
+  "marine_qc",
   "simplejson",
   "cf_xarray",
   "xclim"
@@ -43,12 +45,12 @@ dependencies = [
 
 [project.optional-dependencies]
 dev = [
-  "black[jupyter] ==25.9.0",
-  "blackdoc ==0.4.4",
+  "black[jupyter] ==25.11.0",
+  "blackdoc ==0.4.6",
   "codespell ==2.4.1",
   "coverage >=7.5.0",
   "coveralls >=4.0.1",
-  "deptry ==0.23.1",
+  "deptry ==0.24.0",
   "distributed >=2.0",
   "flake8 >=7.1.1",
   "flake8-rst-docstrings >=0.3.0",
@@ -202,7 +204,7 @@ module = [
 ignore_missing_imports = true
 
 [tool.pytest]
-python_files = "test_*.py"
+python_files = ["test_*.py"]
 testpaths = ["./tests"]
 
 [tool.ruff]

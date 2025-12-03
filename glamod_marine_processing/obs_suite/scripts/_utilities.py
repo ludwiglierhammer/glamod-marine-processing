@@ -178,7 +178,6 @@ class script_setup:
         except Exception:
             logging.error(f"Opening configuration file: {configfile}", exc_info=True)
             sys.exit(1)
-
         if len(sys.argv) >= 8:
             logging.warning(
                 "Removed option to provide sid_dck, year and month as arguments. Use config file instead"
@@ -218,13 +217,16 @@ class script_setup:
         self.filename = config.get("filename")
         self.level2_list = config.get("cmd_add_file")
         self.prev_fileID = config.get("prev_fileID")
-        self.release_id = config["abbreviations"].get("release_tag")
+        self.release_id = config["abbreviations_destination"].get("release_tag")
+        self.release_id_source = config["abbreviations_source"].get("release_tag")
         self.fileID = FFS.join(
             [str(self.year), str(self.month).zfill(2), self.release_id]
         )
         self.fileID_date = FFS.join([str(self.year), str(self.month)])
         if self.prev_fileID is None:
-            self.prev_fileID = self.fileID
+            self.prev_fileID = FFS.join(
+                [str(self.year), str(self.month).zfill(2), self.release_id_source]
+            )
 
         self.prev_level_path = os.path.join(
             config["paths"]["source_directory"], sid_dck

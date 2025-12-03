@@ -3,8 +3,8 @@
    You can adapt this file completely to your liking, but it should at least
    contain the root `toctree` directive.
 
-Merge multiple source-deck partitons
-====================================
+Merge multiple source-deck partitions
+=====================================
 
 Optionally, you can merge multiple source-deck partitions into one new source-deck_partition. See:
 
