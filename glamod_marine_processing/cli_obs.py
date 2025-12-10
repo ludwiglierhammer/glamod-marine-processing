@@ -64,6 +64,7 @@ def obs_cli(
         dataset=dataset,
         dataset_source=dataset_source,
         dataset_destination=dataset_destination,
+        cdm_tables=cdm_tables,
         data_directory=data_directory,
         work_directory=work_directory,
         config_file=config_file,
