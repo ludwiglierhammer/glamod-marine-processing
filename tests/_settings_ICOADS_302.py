@@ -63,7 +63,7 @@ which_tables = {
     "level1d": table_names_next,
     "level1e": table_names_next,
     "level2": table_names_next,
-    "level3": "observations-slp",
+    "level3": ["header", "observations-slp"],
 }
 
 pattern = {
