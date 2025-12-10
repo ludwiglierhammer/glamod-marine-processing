@@ -64,11 +64,13 @@ def _obs_testing(dataset, level, capsys):
         )
 
     _load_data.load_input(dataset, level, _settings, cache_dir_t)
+    click_tables = " ".join(f"-tables {t}" for t in tables)
 
     s = (
         "obs_suite "
         f"-l {level} "
         f"-d {dataset} "
+        f"{click_tables} "
         f"-data_dir {cache_dir_t} "
         f"-work_dir {cache_dir_t} "
         f"-sp {_settings.pattern[level]} "

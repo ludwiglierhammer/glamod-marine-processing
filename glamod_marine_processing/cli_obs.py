@@ -31,6 +31,7 @@ def obs_cli(
     dataset,
     dataset_source,
     dataset_destination,
+    cdm_tables,
     process_list,
     year_init,
     year_end,

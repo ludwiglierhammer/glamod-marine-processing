@@ -13,6 +13,7 @@ from pathlib import Path
 
 import pandas as pd
 from cdm_reader_mapper import DataBundle, read_tables
+from cdm_reader_mapper.cdm_mapper.properties import cdm_tables
 
 from glamod_marine_processing.utilities import save_simplejson
 
@@ -214,6 +215,7 @@ class script_setup:
 
         self.data_path = config["paths"].get("data_directory")
         self.release = config["abbreviations"].get("release")
+        self.cdm_tables = config["cdm_tables"] or cdm_tables
 
         self.filename = config.get("filename")
         self.level2_list = config.get("cmd_add_file")

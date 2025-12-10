@@ -44,7 +44,6 @@ from _utilities import (
     script_setup,
     write_cdm_tables,
 )
-from cdm_reader_mapper.cdm_mapper import properties
 
 reload(logging)  # This is to override potential previous config of logging
 
@@ -117,7 +116,7 @@ try:
 except AttributeError:  # for python < 3.11
     history_tstmp = datetime.datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S")
 
-table_df = read_cdm_tables(params, properties.cdm_tables)
+table_df = read_cdm_tables(params, params.cdm_tables)
 
 if not table_df.empty:
     process_table(table_df)
