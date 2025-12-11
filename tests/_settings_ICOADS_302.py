@@ -489,6 +489,28 @@ manipulation = {
             "1",
         ],
     },
+    "level3": {
+        ("header", "report_timestamp"): [
+            "null",
+            "2022-01-01 00:00:00+00",
+            "null",
+            "2022-01-01 00:00:00+00",
+            "null" "null",
+            "2022-01-02 00:00:00+00",
+            "2022-01-03 00:00:00+00",
+            "2022-01-04 00:00:00+00",
+            "2022-01-05 00:00:00+00",
+            "2022-01-06 00:00:00+00",
+            "2022-01-06 00:00:00+00",
+            "2022-01-06 00:00:00+00",
+            "2022-01-05 00:00:00+00",
+        ],
+        ("header", "report_duration"): "8",
+        ("header", "source_id"): "2",
+    },
+}
+
+selection = {
     "level3": [
         ("header", "station_name"),
         ("header", "primary_station_id"),
@@ -523,3 +545,9 @@ drops = {
 }
 
 reindex = ["level1b"]
+
+renames = {
+    "level3": {
+        "report_meaning_of_timestamp": "report_meaning_of_time_stamp",
+    }
+}

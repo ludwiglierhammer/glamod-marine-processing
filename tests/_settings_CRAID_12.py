@@ -99,6 +99,25 @@ manipulation = {
             "0",
         ],
     },
+    "level3": {
+        ("header", "report_timestamp"): [
+            "null",
+            "2004-12-20 14:31:33+00",
+            "null",
+            "2004-12-20 15:31:03+00",
+            "null",
+            "2004-12-20 16:31:09+00",
+            "null",
+            "2004-12-20 17:31:48+00",
+            "2004-12-20 18:31:21+00",
+            "2004-12-20 19:31:50+00",
+        ],
+        ("header", "report_duration"): "8",
+        ("header", "source_id"): "3",
+    },
+}
+
+selection = {
     "level3": [
         ("header", "station_name"),
         ("header", "primary_station_id"),
@@ -131,3 +150,9 @@ drops = {
 }
 
 reindex = ["level1b"]
+
+renames = {
+    "level3": {
+        "report_meaning_of_timestamp": "report_meaning_of_time_stamp",
+    }
+}
