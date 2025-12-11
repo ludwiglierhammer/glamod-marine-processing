@@ -124,7 +124,10 @@ level3_dtypes = {
 
 def add_utc_offset(series):
     """Add utc offset +00 to datetime object string."""
-    return series.astype(str) + "+00"
+    s = pd.to_datetime(series, errors="coerce")
+    s = s.dt.tz_localize("UTC")
+    s = s.dt.strftime("%Y-%m-%d %H:%M:%S+00")
+    return s.where(series.notna(), "null")
 
 
 def get_integer_source_id(series):
