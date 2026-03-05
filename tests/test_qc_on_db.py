@@ -1886,7 +1886,7 @@ def test_multiple_sequential_check_header(testdata_track, return_method):
     if return_method == "failed":
         base = passed
         correction = untested
-    elif return_method == "passed":
+    else:
         base = untested
         correction = failed
 
@@ -1963,7 +1963,7 @@ def test_multiple_sequential_check_obs(testdata_track, return_method):
         base = passed
         correction = untested
         second = failed
-    elif return_method == "passed":
+    else:
         base = untested
         correction = passed
         second = untested
@@ -2170,7 +2170,7 @@ def test_multiple_grouped_check(
         base = passed
         correction = untested
         second = untested
-    if return_method == "passed":
+    else:
         base = untested
         correction = failed
         second = passed
