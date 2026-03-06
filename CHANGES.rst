@@ -3,6 +3,15 @@
 Changelog
 =========
 
+v8.2.0 (unreleased)
+-------------------
+Contributors to this version: Ludwig Lierhammer (:user:`ludwiglierhammer`)
+
+Internal changes
+^^^^^^^^^^^^^^^^
+
+* implement QC tsts on DataBundle objects (:issue:`253`, :pull:`257`)
+
 v8.1.0 (2026-01-26)
 -------------------
 Contributors to this version: Ludwig Lierhammer (:user:`ludwiglierhammer`)
