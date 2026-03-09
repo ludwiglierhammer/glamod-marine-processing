@@ -161,8 +161,10 @@ def convert_dtypes(df, dtypes):
     for col, dtype in dtypes.items():
         if dtype.startswith("datetime"):
             df[col] = pd.to_datetime(df[col], errors="coerce").dt.tz_convert("UTC")
-        else:
+        elif dtype == "string":
             df[col] = df[col].astype(dtype)
+        else:
+            df[col] = pd.to_numeric(df[col], errors="coerce").astype(dtype)
     return df
 
 
@@ -312,6 +314,7 @@ def read_cdm_tables(params, table, ifile=None):
         "cdm_subset": table,
         "na_values": "null",
         "data_format": "parquet",
+        "extension": "pq",
     }
     if ifile is None:
         ifile_pattern = os.path.join(
@@ -320,7 +323,14 @@ def read_cdm_tables(params, table, ifile=None):
         if len(glob.glob(ifile_pattern)) == 0:
             logging.warning(f"CDM file pattern not found: {ifile_pattern}.")
             return DataBundle()
-        return read_tables(params.prev_level_path, suffix=params.prev_fileID, **kwargs)
+
+        try:
+            return read_tables(
+                params.prev_level_path, suffix=params.prev_fileID, **kwargs
+            )
+        except ValueError:
+            logging.warning(f"CDM file {table} is empty.")
+            return DataBundle()
 
     if not os.path.isfile(ifile):
         logging.warning(f"CDM file not found: {ifile}.")
@@ -358,6 +368,7 @@ def write_cdm_tables(
             df = df[table]
         except KeyError:
             logging.info(f"Table {table} is already selected.")
+
         df = convert_dtypes(df, dtypes)
         if mode == "csv":
             df.to_csv(

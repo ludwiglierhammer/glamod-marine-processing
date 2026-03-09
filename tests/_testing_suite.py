@@ -98,12 +98,12 @@ def _obs_testing(dataset, level, capsys):
             cdm_subset=tables,
             data_format="parquet",
             extension="pq",
-            suffix="release_8.0-000000",
+            suffix="*",
         ).data
 
     for table_name in tables:
         load_file(
-            f"{_settings.input_dir}/cdm_tables/{table_name}-{_settings.cdm}.parquet",
+            f"{_settings.input_dir}/cdm_tables/{table_name}-{_settings.cdm}.pq",
             cache_dir=f"{cache_dir_e}/{dataset}/{level}/{_settings.deck}",
             within_drs=False,
         )
@@ -111,6 +111,7 @@ def _obs_testing(dataset, level, capsys):
     expected = read_tables(
         os.path.join(cache_dir_e, dataset, level, _settings.deck),
         data_format="parquet",
+        extension="pq",
         cdm_subset=tables,
         suffix="subset",
     )
@@ -120,5 +121,5 @@ def _obs_testing(dataset, level, capsys):
         for deletion in [("header", "record_timestamp"), ("header", "history")]:
             del results[deletion]
             del expected[deletion]
-
+    expected = expected.astype(str)
     pd.testing.assert_frame_equal(results, expected)

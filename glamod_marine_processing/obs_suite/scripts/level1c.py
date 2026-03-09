@@ -219,7 +219,6 @@ logging.basicConfig(
     datefmt="%Y%m%d %H:%M:%S",
     filename=None,
 )
-
 params = script_setup(["noc_version"], sys.argv)
 paths_exist(params.level_invalid_path)
 if params.noc_version:

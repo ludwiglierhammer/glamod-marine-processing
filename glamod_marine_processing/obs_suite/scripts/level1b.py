@@ -280,6 +280,8 @@ for table in tables:
     table_db["monthly_period"].fillna(source_mon_period, inplace=True)
     table_db.set_index("monthly_period", inplace=True, drop=True)
     len_db = len(table_db)
+    table_db = table_db.astype(str)
+
     if source_mon_period in monthly_periods:
         logging.info(
             "Writing {} data to {} table file".format(

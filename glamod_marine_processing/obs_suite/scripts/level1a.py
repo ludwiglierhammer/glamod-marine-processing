@@ -340,6 +340,7 @@ if process:
         out_dir=params.level_path,
         suffix=params.fileID,
         data_format="parquet",
+        extension="pq",
     )
 
     for table in tables:
@@ -355,17 +356,17 @@ if params.filter_reports_by:
         if inspect.get_length(data_excluded["data"][k]) > 0:
             excluded_filename = os.path.join(
                 params.level_excluded_path,
-                params.fileID + FFS + "_".join(k.split(".")) + ".psv",
+                params.fileID + FFS + "_".join(k.split(".")) + ".pq",
             )
             logging.info(f"Writing {k} excluded data to file {excluded_filename}")
             write_out_junk(v, excluded_filename)
 
 if inspect.get_length(data_invalid["data"]) > 0:
     invalid_data_filename = os.path.join(
-        params.level_invalid_path, params.fileID + FFS + "data.psv"
+        params.level_invalid_path, params.fileID + FFS + "data.pq"
     )
     invalid_mask_filename = os.path.join(
-        params.level_invalid_path, params.fileID + FFS + "mask.psv"
+        params.level_invalid_path, params.fileID + FFS + "mask.pq"
     )
     logging.info(f"Writing invalid data to file {invalid_data_filename}")
     write_out_junk(data_invalid["data"], invalid_data_filename)
