@@ -313,7 +313,8 @@ if process:
     logging.debug(f"Mapping attributes: {data_in.dtypes}")
     data_in.map_model(log_level="INFO", inplace=True)
 
-    data_in.data = data_in.data.read()
+    if not isinstance(data_in.data, pd.DataFrame):
+        data_in.data = data_in.data.read()
 
     for cdm_table, gnrc_mask in gnrc_dict.items():
         if cdm_table == "header":
