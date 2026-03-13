@@ -335,7 +335,7 @@ logging.info("Cleaning table header")
 process_table(table_db, table)
 obs_tables = [x for x in params.cdm_tables if x != "header"]
 for table in obs_tables:
-    table_pattern = FFS.join([table, params.prev_fileID]) + "*.psv"
+    table_pattern = FFS.join([table, params.prev_fileID]) + "*.pq"
     table_files = glob.glob(os.path.join(params.prev_level_path, table_pattern))
     if len(table_files) > 0:
         logging.info(f"Cleaning table {table}")

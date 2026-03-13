@@ -98,10 +98,10 @@ level3_mappings = {
 }
 
 level3_dtypes = {
-    "station_name": "string",
-    "primary_station_id": "string",
-    "report_id": "string",
-    "observation_id": "string",
+    "station_name": object,
+    "primary_station_id": object,
+    "report_id": object,
+    "observation_id": object,
     "longitude": "float64",
     "latitude": "float64",
     "height_of_station_above_sea_level": "float64",
@@ -159,10 +159,12 @@ level3_conversions = {
 def convert_dtypes(df, dtypes):
     """Convert data types."""
     for col, dtype in dtypes.items():
-        if dtype.startswith("datetime"):
-            df[col] = pd.to_datetime(df[col], errors="coerce").dt.tz_convert("UTC")
-        elif dtype == "string":
+        if isinstance(dtype, object):
             df[col] = df[col].astype(dtype)
+        elif dtype.startswith("datetime"):
+            df[col] = pd.to_datetime(df[col], errors="coerce").dt.tz_convert("UTC")
+        # elif dtype == "string" or dtype == "object" or dtype == object:
+        #    df[col] = df[col].astype(dtype)
         else:
             df[col] = pd.to_numeric(df[col], errors="coerce").astype(dtype)
     return df
