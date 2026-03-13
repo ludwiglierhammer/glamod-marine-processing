@@ -85,6 +85,7 @@ def process_table(table_df):
         insitu_df,
         tables="all_observations",
         outname=outname,
+        dtype_conversion=True,
     )
 
     write_cdm_tables(
@@ -94,6 +95,7 @@ def process_table(table_df):
         outname=outname,
         dtypes=level3_dtypes,
         mode="parquet",
+        dtype_conversion=True,
     )
 
 

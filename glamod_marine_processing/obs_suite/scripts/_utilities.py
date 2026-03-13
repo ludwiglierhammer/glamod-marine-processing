@@ -344,7 +344,14 @@ def read_cdm_tables(params, table, ifile=None):
 
 
 def write_cdm_tables(
-    params, df, tables=[], outname=None, mode="parquet", dtypes={}, **kwargs
+    params,
+    df,
+    tables=[],
+    outname=None,
+    mode="parquet",
+    dtypes={},
+    dtype_conversion=False,
+    **kwargs,
 ):
     """Write table to disk."""
     if df.empty:
@@ -371,7 +378,9 @@ def write_cdm_tables(
         except KeyError:
             logging.info(f"Table {table} is already selected.")
 
-        df = convert_dtypes(df, dtypes)
+        if dtype_conversion is True:
+            df = convert_dtypes(df, dtypes)
+
         if mode == "csv":
             df.to_csv(
                 outname,
