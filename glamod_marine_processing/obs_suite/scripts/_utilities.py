@@ -11,6 +11,7 @@ import os
 import sys
 from pathlib import Path
 
+import numpy as np
 import pandas as pd
 from cdm_reader_mapper import DataBundle, read_tables
 from cdm_reader_mapper.cdm_mapper.properties import cdm_tables
@@ -156,15 +157,14 @@ level3_conversions = {
 }
 
 
-def convert_dtypes(df, dtypes):
+def convert_dtypes(df, dtypes, null_label="null"):
     """Convert data types."""
+    df = df.replace(null_label, np.nan)
     for col, dtype in dtypes.items():
         if isinstance(dtype, object):
             df[col] = df[col].astype(dtype)
         elif dtype.startswith("datetime"):
             df[col] = pd.to_datetime(df[col], errors="coerce").dt.tz_convert("UTC")
-        # elif dtype == "string" or dtype == "object" or dtype == object:
-        #    df[col] = df[col].astype(dtype)
         else:
             df[col] = pd.to_numeric(df[col], errors="coerce").astype(dtype)
     return df
