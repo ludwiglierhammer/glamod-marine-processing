@@ -354,7 +354,12 @@ def do_qc_sequential_header(
 
     # Deselect rows containing generic ids
     data = pd.concat([data, data_add])
-    data = data.drop_duplicates()
+
+    data_str = data.astype(str)
+    data_str_no_dup = data_str.drop_duplicates()
+    indexes_no_dup = data_str_no_dup.index
+    data = data.loc[indexes_no_dup]
+
     invalid_indexes = idx_gnrc.intersection(data.index)
     data.drop(index=invalid_indexes, inplace=True)
 
