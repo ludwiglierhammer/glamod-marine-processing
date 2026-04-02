@@ -128,10 +128,6 @@ read_kwargs = {
 }
 
 data_in = read_mdf(L0_filename, **read_kwargs)
-# data_in.map_model(log_level="INFO", inplace=True)
-# data_in.data = data_in.data.read()
-# data_in.write()
-# exit()
 io_dict["read"] = {"total": len(data_in)}
 # 2. PT fixing, filtering and invalid rejectionselect_true
 # 2.1. Fix platform type
@@ -340,7 +336,6 @@ if process:
     data_in.write(
         out_dir=params.level_path,
         suffix=params.fileID,
-        data_format="parquet",
         extension="pq",
     )
 

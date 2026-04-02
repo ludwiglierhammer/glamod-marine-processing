@@ -314,8 +314,7 @@ def read_cdm_tables(params, table, ifile=None):
     """Read CDM tables."""
     kwargs = {
         "cdm_subset": table,
-        "na_values": "null",
-        "data_format": "parquet",
+        # "na_values": "null",
         "extension": "pq",
     }
     if ifile is None:
