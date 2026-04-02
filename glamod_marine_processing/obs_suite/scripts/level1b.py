@@ -248,6 +248,7 @@ for table in tables:
                 table_db.data = drop_qualities(table_db, params.drop_qualities)
             table_db.duplicate_check(**params.duplicates, inplace=True)
             table_db.flag_duplicates(inplace=True)
+
         contains_info = table_db["duplicate_status"] != dupNotEval
         logging.info("Logging duplicate status info")
         if len(np.where(contains_info)[0]) > 0:
@@ -258,6 +259,7 @@ for table in tables:
                 )  # otherwise prints null to json!!!
         else:
             ql_dict["duplicates"][dupNotEval] = ql_dict[table]["read"]
+
     # Now get ready to write out, extracting eventual leaks of data to a different monthly table
     # cdm_columns = cdm_tables.get(table).keys()
     # BECAUSE LIZ'S datetimes have UTC info:
@@ -280,7 +282,6 @@ for table in tables:
     table_db["monthly_period"].fillna(source_mon_period, inplace=True)
     table_db.set_index("monthly_period", inplace=True, drop=True)
     len_db = len(table_db)
-    table_db = table_db.astype(str)
 
     if source_mon_period in monthly_periods:
         logging.info(
