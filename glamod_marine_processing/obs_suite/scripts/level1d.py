@@ -61,7 +61,6 @@ import sys
 from collections import Counter
 from importlib import reload
 
-import numpy as np
 import pandas as pd
 from _utilities import (
     date_handler,
@@ -89,9 +88,7 @@ def map_to_cdm(md_model, meta_df, log_level="INFO"):
         log_level=log_level,
     )
     for table in params.cdm_tables:
-        meta_db[table] = meta_db[table].astype(
-            "object"
-        )  # meta_cdm[meta_cdm_columns] = meta_cdm_dict[table]["data"].astype("object")
+        meta_db[table] = meta_db[table].astype("object")
 
     return meta_db
 
@@ -137,7 +134,6 @@ def process_table(table_db, table):
             meta_table.columns = [x[1] for x in meta_table]
 
         meta_table.set_index("primary_station_id", drop=False, inplace=True)
-        meta_table = meta_table.replace("null", np.nan)
         table_db.data.update(meta_table[~meta_table.index.duplicated()])
 
         updated_locs = [x for x in table_db.index if x in meta_table.index]
