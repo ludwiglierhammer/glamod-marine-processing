@@ -97,7 +97,6 @@ def _obs_testing(dataset, level, capsys):
         results = read_tables(
             result_dir,
             cdm_subset=tables,
-            data_format="parquet",
             extension="pq",
             suffix="*",
         ).data
@@ -111,7 +110,6 @@ def _obs_testing(dataset, level, capsys):
 
     expected = read_tables(
         os.path.join(cache_dir_e, dataset, level, _settings.deck),
-        data_format="parquet",
         extension="pq",
         cdm_subset=tables,
         suffix="subset",
