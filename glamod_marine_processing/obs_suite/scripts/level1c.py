@@ -195,6 +195,7 @@ def process_table(table_df, table):
 
     table_df = table_df[table_df.index.isin(mask_df.index)]
     table_mask = mask_df[mask_df.index.isin(table_df.index)]
+
     if table == "header":
         table_df["history"] = table_df["history"] + f";{history_tstmp}. {history}"
         ql_dict["unique_ids"] = (
@@ -202,6 +203,7 @@ def process_table(table_df, table):
             .value_counts(dropna=False)
             .to_dict()
         )
+
     if not table_df[table_mask["all"]].empty:
         write_cdm_tables(params, table_df[table_mask["all"]], tables=table)
     else:
@@ -275,8 +277,9 @@ ql_dict["id_validation_rules"] = {}
 logging.info("Applying callsign id validation")
 p_id_scheme = "primary_station_id_scheme"
 pt = "platform_type"
-callsigns = table_db[p_id_scheme].isin(["5"]) & table_db[pt].isin(["2", "33"])
+callsigns = table_db[p_id_scheme].isin([5]) & table_db[pt].isin([2, 33])
 nocallsigns = ~callsigns
+
 relist = ["^([0-9]{1}[A-Z]{1}|^[A-Z]{1}[0-9]{1}|^[A-Z]{2})[A-Z0-9]{1,}$", "^[0-9]{5}$"]
 callre = re.compile("|".join(relist))
 mask_df.loc[callsigns, field] = (
