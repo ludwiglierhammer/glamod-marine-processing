@@ -31,6 +31,7 @@ def _obs_testing(dataset, level, capsys):
 
     def manipulate_expected(expected, level):
         """Manipulate expected result data."""
+        dtypes = expected.dtypes
         if (
             hasattr(_settings, "manipulation")
             and level in _settings.manipulation.keys()
@@ -51,7 +52,7 @@ def _obs_testing(dataset, level, capsys):
             )
         if hasattr(_settings, "dtypes") and level in _settings.dtypes.keys():
             expected = convert_dtypes(expected, _settings.dtypes[level])
-        return expected
+        return expected.astype(dtypes)
 
     cache_dir_t = f"{cache_dir}/T{level}"
     cache_dir_e = f"{cache_dir}/E{level}"
@@ -114,7 +115,6 @@ def _obs_testing(dataset, level, capsys):
         cdm_subset=tables,
         suffix="subset",
     )
-
     expected = manipulate_expected(expected.data, level)
 
     if "header" in results.columns:
