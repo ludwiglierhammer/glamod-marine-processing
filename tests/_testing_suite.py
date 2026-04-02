@@ -8,8 +8,6 @@ from _settings import get_settings
 from cdm_reader_mapper import read_tables
 from cdm_reader_mapper.common.getting_files import load_file
 
-from glamod_marine_processing.obs_suite.scripts._utilities import convert_dtypes
-
 cache_dir = ".pytest_cache"
 
 add_data = {
@@ -31,7 +29,6 @@ def _obs_testing(dataset, level, capsys):
 
     def manipulate_expected(expected, level):
         """Manipulate expected result data."""
-        dtypes = expected.dtypes
         if (
             hasattr(_settings, "manipulation")
             and level in _settings.manipulation.keys()
@@ -50,9 +47,13 @@ def _obs_testing(dataset, level, capsys):
             expected = expected.sort_values(by=("header", "report_id")).reset_index(
                 drop=True
             )
-        if hasattr(_settings, "dtypes") and level in _settings.dtypes.keys():
-            expected = convert_dtypes(expected, _settings.dtypes[level])
-        return expected.astype(dtypes)
+        expected[expected.select_dtypes("int").columns] = expected.select_dtypes(
+            "int"
+        ).astype("Int64")
+        expected[expected.select_dtypes("float").columns] = expected.select_dtypes(
+            "float"
+        ).astype("Float64")
+        return expected
 
     cache_dir_t = f"{cache_dir}/T{level}"
     cache_dir_e = f"{cache_dir}/E{level}"

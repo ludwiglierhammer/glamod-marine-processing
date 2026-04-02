@@ -11,7 +11,6 @@ import os
 import sys
 from pathlib import Path
 
-import numpy as np
 import pandas as pd
 from cdm_reader_mapper import DataBundle, read_tables
 from cdm_reader_mapper.cdm_mapper.properties import cdm_tables
@@ -98,42 +97,15 @@ level3_mappings = {
     },
 }
 
-level3_dtypes = {
-    "station_name": object,
-    "primary_station_id": object,
-    "report_id": object,
-    "observation_id": object,
-    "longitude": "float64",
-    "latitude": "float64",
-    "height_of_station_above_sea_level": "float64",
-    "observation_height_above_station_surface": "float64",
-    "z_coordinate": "float64",
-    "report_timestamp": "datetime64[ns, UTC]",
-    "report_meaning_of_time_stamp": "Int64",
-    "report_duration": "Int64",
-    "observed_variable": "Int64",
-    "units": "Int64",
-    "observation_value": "float64",
-    "quality_flag": "Int64",
-    "source_id": "Int64",
-    "data_policy_licence": "Int64",
-    "platform_type": "Int64",
-    "report_type": "Int64",
-    "value_significance": "Int64",
-}
-
 
 def add_utc_offset(series):
     """Add utc offset +00 to datetime object string."""
-    s = pd.to_datetime(series, errors="coerce")
-    s = s.dt.tz_localize("UTC")
-    s = s.dt.strftime("%Y-%m-%d %H:%M:%S+00")
-    return s.where(series.notna(), "null")
+    return series.dt.tz_localize("UTC")
 
 
 def get_integer_source_id(series):
     """Rank source id as integer value."""
-    return series.rank(method="dense").astype(int)
+    return series.rank(method="dense")  # .astype(int)
 
 
 def set_default_source_id(series):
@@ -146,7 +118,7 @@ def set_default_source_id(series):
 def set_default_report_duration(series):
     """Set default report_duration 8 (10 minutes)."""
     s = series[:].copy()
-    s[:] = "8"
+    s[:] = 8
     return s
 
 
@@ -155,19 +127,6 @@ level3_conversions = {
     "source_id": set_default_source_id,
     "report_duration": set_default_report_duration,
 }
-
-
-def convert_dtypes(df, dtypes, null_label="null"):
-    """Convert data types."""
-    df = df.replace(null_label, np.nan)
-    for col, dtype in dtypes.items():
-        if isinstance(dtype, object):
-            df[col] = df[col].astype(dtype)
-        elif dtype.startswith("datetime"):
-            df[col] = pd.to_datetime(df[col], errors="coerce").dt.tz_convert("UTC")
-        else:
-            df[col] = pd.to_numeric(df[col], errors="coerce").astype(dtype)
-    return df
 
 
 # Functions--------------------------------------------------------------------
@@ -348,8 +307,6 @@ def write_cdm_tables(
     tables=[],
     outname=None,
     mode="parquet",
-    dtypes={},
-    dtype_conversion=False,
     **kwargs,
 ):
     """Write table to disk."""
@@ -376,9 +333,6 @@ def write_cdm_tables(
             df = df[table]
         except KeyError:
             logging.info(f"Table {table} is already selected.")
-
-        if dtype_conversion is True:
-            df = convert_dtypes(df, dtypes)
 
         if mode == "csv":
             df.to_csv(

@@ -38,7 +38,6 @@ import pandas as pd
 from _utilities import (
     level3_columns,
     level3_conversions,
-    level3_dtypes,
     level3_mappings,
     read_cdm_tables,
     script_setup,
@@ -55,7 +54,7 @@ def process_table(table_df):
     header_mappings = level3_mappings["header"]
     observations_mappings = level3_mappings["observations"]
 
-    insitu_df = pd.DataFrame(columns=level3_columns)
+    insitu_df = None
 
     header_df = table_df["header"][list(header_mappings.values())].copy()
     header_df.columns = [c for c in header_mappings.keys()]
@@ -73,7 +72,17 @@ def process_table(table_df):
         obs_df = obs_df[level3_columns]
         obs_df = obs_df.dropna(subset=["observation_value"], ignore_index=True)
 
-        insitu_df = pd.concat([insitu_df, obs_df], axis=0)
+        if insitu_df is None:
+            insitu_df = obs_df
+        else:
+            insitu_df = pd.concat([insitu_df, obs_df], axis=0)
+
+    insitu_df[insitu_df.select_dtypes("int").columns] = insitu_df.select_dtypes(
+        "int"
+    ).astype("Int64")
+    insitu_df[insitu_df.select_dtypes("float").columns] = insitu_df.select_dtypes(
+        "float"
+    ).astype("Float64")
 
     outname = os.path.join(
         params.level_path,
@@ -85,17 +94,6 @@ def process_table(table_df):
         insitu_df,
         tables="all_observations",
         outname=outname,
-        dtype_conversion=True,
-    )
-
-    write_cdm_tables(
-        params,
-        insitu_df,
-        tables="all_observations",
-        outname=outname,
-        dtypes=level3_dtypes,
-        mode="parquet",
-        dtype_conversion=True,
     )
 
 
