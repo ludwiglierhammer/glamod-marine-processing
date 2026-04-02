@@ -265,9 +265,7 @@ mask_df[validated] = True
 # 2. VALIDATE THE FIELDS-------------------------------------------------------
 # 2.1. Validate datetime
 field = "report_timestamp"
-mask_df[field] = pd.to_datetime(
-    table_db[field], format="mixed", errors="coerce"
-).notna()
+mask_df[field] = table_db[field].notna()
 
 # 2.2. Validate primary_station_id
 field = "primary_station_id"
