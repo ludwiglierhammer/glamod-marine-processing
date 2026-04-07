@@ -491,23 +491,25 @@ manipulation = {
         ],
     },
     "level3": {
-        ("header", "report_timestamp"): [
-            pd.NaT,
-            pd.to_datetime("2022-01-01 00:00:00+00", utc=True),
-            pd.NaT,
-            pd.to_datetime("2022-01-01 00:00:00+00", utc=True),
-            pd.NaT,
-            pd.to_datetime("2022-01-02 00:00:00+00", utc=True),
-            pd.to_datetime("2022-01-03 00:00:00+00", utc=True),
-            pd.to_datetime("2022-01-04 00:00:00+00", utc=True),
-            pd.to_datetime("2022-01-05 00:00:00+00", utc=True),
-            pd.to_datetime("2022-01-06 00:00:00+00", utc=True),
-            pd.to_datetime("2022-01-06 00:00:00+00", utc=True),
-            pd.to_datetime("2022-01-06 00:00:00+00", utc=True),
-            pd.to_datetime("2022-01-05 00:00:00+00", utc=True),
-        ],
-        ("header", "report_duration"): 8,
-        ("header", "source_id"): 2,
+        "report_timestamp": pd.Series(
+            [
+                pd.NaT,
+                pd.to_datetime("2022-01-01 00:00:00+00", utc=True),
+                pd.NaT,
+                pd.to_datetime("2022-01-01 00:00:00+00", utc=True),
+                pd.NaT,
+                pd.to_datetime("2022-01-02 00:00:00+00", utc=True),
+                pd.to_datetime("2022-01-03 00:00:00+00", utc=True),
+                pd.to_datetime("2022-01-04 00:00:00+00", utc=True),
+                pd.to_datetime("2022-01-05 00:00:00+00", utc=True),
+                pd.to_datetime("2022-01-06 00:00:00+00", utc=True),
+                pd.to_datetime("2022-01-06 00:00:00+00", utc=True),
+                pd.to_datetime("2022-01-06 00:00:00+00", utc=True),
+                pd.to_datetime("2022-01-05 00:00:00+00", utc=True),
+            ]
+        ),
+        "report_duration": 8,
+        "source_id": pd.Series([2] * 13, dtype="Int64"),
     },
 }
 
@@ -536,33 +538,6 @@ selection = {
         ("observations-slp", "value_significance"),
     ],
 }
-
-# dtypes = {
-#    "level3": {
-#        "station_name": object,
-#        "primary_station_id": object,
-#        "report_id": object,
-#        "observation_id": object,
-#        "longitude": "float64",
-#        "latitude": "float64",
-#        "height_of_station_above_sea_level": "float64",
-#        "observation_height_above_station_surface": "float64",
-#        "z_coordinate": "float64",
-#        "report_timestamp": "datetime64[ns, UTC]",
-#        "report_meaning_of_time_stamp": "Int64",
-#        "report_duration": "Int64",
-#        "observed_variable": "Int64",
-#        "units": "Int64",
-#        "observation_value": "float64",
-#        "quality_flag": "Int64",
-#        "source_id": "Int64",
-#        "data_policy_licence": "Int64",
-#        "platform_type": "Int64",
-#        "report_type": "Int64",
-#        "value_significance": "Int64",
-#   }
-# }
-
 
 drops = {
     "level1a": [0, 5, 6, 7, 9, 10, 11],

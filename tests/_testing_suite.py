@@ -29,30 +29,39 @@ def _obs_testing(dataset, level, capsys):
 
     def manipulate_expected(expected, level):
         """Manipulate expected result data."""
-        if (
-            hasattr(_settings, "manipulation")
-            and level in _settings.manipulation.keys()
-        ):
-            for index, values in _settings.manipulation[level].items():
-                expected[index] = values
         if hasattr(_settings, "selection") and level in _settings.selection.keys():
             expected = expected[_settings.selection[level]]
             new_cols = [col[1] for col in expected.columns]
             expected.columns = new_cols
         if hasattr(_settings, "renames") and level in _settings.renames.keys():
             expected = expected.rename(columns=_settings.renames[level])
+
+        int_dtypes = list(expected.select_dtypes("int").columns)
+        float_dtypes = list(expected.select_dtypes("float").columns)
+
+        if (
+            hasattr(_settings, "manipulation")
+            and level in _settings.manipulation.keys()
+        ):
+            for index, values in _settings.manipulation[level].items():
+                if not isinstance(values, pd.Series):
+                    dtype = expected[index].dtype
+                    idx = expected[index].index
+                    values = pd.Series(values, index=idx, dtype=dtype)
+                expected[index] = values
+
+        int_dtypes += list(expected.select_dtypes("int").columns)
+        float_dtypes += list(expected.select_dtypes("float").columns)
+        int_dtypes = list(dict.fromkeys(int_dtypes))
+        float_dtypes = list(dict.fromkeys(float_dtypes))
+
         if hasattr(_settings, "drops") and level in _settings.drops.keys():
             expected = expected.drop(_settings.drops[level]).reset_index(drop=True)
         if hasattr(_settings, "reindex") and level in _settings.reindex:
             expected = expected.sort_values(by=("header", "report_id")).reset_index(
                 drop=True
             )
-        expected[expected.select_dtypes("int").columns] = expected.select_dtypes(
-            "int"
-        ).astype("Int64")
-        expected[expected.select_dtypes("float").columns] = expected.select_dtypes(
-            "float"
-        ).astype("Float64")
+
         return expected
 
     cache_dir_t = f"{cache_dir}/T{level}"
