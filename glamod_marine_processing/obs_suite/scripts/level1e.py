@@ -334,7 +334,6 @@ def get_nearest_to_hour(series, groupby=None):
 
 def create_data_dict(data_dict, tables_in, params):
     """Create data dictionary."""
-    # obs = False
     for table_in in tables_in:
         if table_in not in data_dict.keys():
             db_ = read_cdm_tables(params, table_in)
