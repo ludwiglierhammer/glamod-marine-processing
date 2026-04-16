@@ -7,6 +7,11 @@ v8.2.0 (unreleased)
 -------------------
 Contributors to this version: Ludwig Lierhammer (:user:`ludwiglierhammer`)
 
+Announcements
+^^^^^^^^^^^^^
+
+* This release drops support for Python 3.10 and adds support for Python 3.14 (:pull:`299`)
+
 Breaking changes
 ^^^^^^^^^^^^^^^^
 
