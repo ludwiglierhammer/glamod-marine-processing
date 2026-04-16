@@ -23,7 +23,6 @@ Internal changes
 * implement QC tests on DataBundle objects (:issue:`253`, :pull:`257`)
 * update scripts to match `cdm_reader_mapper` == `v4.2.1` (:pull:`268`)
 * `obs_suite`: level3 no hard-coded data types needed when using parquet files instead of csv files (:issue:`254`, :pull:`268`)
-*
 
 v8.1.0 (2026-01-26)
 -------------------
