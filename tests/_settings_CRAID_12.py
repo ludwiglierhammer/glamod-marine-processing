@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+import pandas as pd
+
 data_model = "craid"
 deck = "1260810"
 input_dir = data_model
@@ -60,60 +62,62 @@ which_tables = {
 
 pattern = {
     "level1a": "craid_????-??-??_subset.nc",
-    "level1b": "header-craid_????-??-??_subset.psv",
-    "level1c": "header-craid_????-??-??_subset.psv",
-    "level1d": "header-craid_????-??-??_subset.psv",
-    "level1e": "header-craid_????-??-??_subset.psv",
-    "level2": "header-craid_????-??-??_subset.psv",
-    "level3": "header-craid_????-??-??_subset.psv",
+    "level1b": "header-craid_????-??-??_subset.pq",
+    "level1c": "header-craid_????-??-??_subset.pq",
+    "level1d": "header-craid_????-??-??_subset.pq",
+    "level1e": "header-craid_????-??-??_subset.pq",
+    "level2": "header-craid_????-??-??_subset.pq",
+    "level3": "header-craid_????-??-??_subset.pq",
 }
 
-pattern_out = {"level3": "insitu-surface-marine_2004-12.psv"}
+pattern_out = {"level3": "insitu-surface-marine_2004-12.pq"}
 
 manipulation = {
     "level1b": {
         ("header", "duplicate_status"): [
-            "0",
-            "0",
-            "0",
-            "0",
-            "0",
-            "0",
-            "0",
-            "0",
-            "0",
-            "0",
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
         ]
     },
     "level1e": {
         ("header", "report_quality"): [
-            "1",
-            "0",
-            "1",
-            "0",
-            "1",
-            "0",
-            "1",
-            "0",
-            "0",
-            "0",
+            1,
+            0,
+            1,
+            0,
+            1,
+            0,
+            1,
+            0,
+            0,
+            0,
         ],
     },
     "level3": {
-        ("header", "report_timestamp"): [
-            "null",
-            "2004-12-20 14:31:33+00",
-            "null",
-            "2004-12-20 15:31:03+00",
-            "null",
-            "2004-12-20 16:31:09+00",
-            "null",
-            "2004-12-20 17:31:48+00",
-            "2004-12-20 18:31:21+00",
-            "2004-12-20 19:31:50+00",
-        ],
-        ("header", "report_duration"): "8",
-        ("header", "source_id"): "3",
+        "report_timestamp": pd.Series(
+            [
+                pd.NaT,
+                pd.to_datetime("2004-12-20 14:31:33.000003840+00", utc=True),
+                pd.NaT,
+                pd.to_datetime("2004-12-20 15:31:03.000002304+00", utc=True),
+                pd.NaT,
+                pd.to_datetime("2004-12-20 16:31:09.000004608+00", utc=True),
+                pd.NaT,
+                pd.to_datetime("2004-12-20 17:31:48.000004352+00", utc=True),
+                pd.to_datetime("2004-12-20 18:31:21.000002048+00", utc=True),
+                pd.to_datetime("2004-12-20 19:31:50.000002816+00", utc=True),
+            ]
+        ),
+        "report_duration": 8,
+        "source_id": pd.Series([3] * 10, dtype="Int64"),
     },
 }
 

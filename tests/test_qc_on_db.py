@@ -57,40 +57,17 @@ def testdata():
     ]
     for table in tables:
         load_file(
-            f"{input_dir}/cdm_tables/{table}-{cdm_name}.psv",
+            f"{input_dir}/cdm_tables/{table}-{cdm_name}.pq",
             cache_dir=cache_dir,
             within_drs=False,
         )
 
     data_dict = {}
-    db_tables = read_tables(cache_dir, suffix=cdm_name, extension="psv")
+    db_tables = read_tables(cache_dir, suffix=cdm_name, extension="pq")
 
     for table in tables:
         db_table = DataBundle()
         db_table.data = db_tables[table].copy()
-        if table == "header":
-            db_table.data["platform_type"] = db_table["platform_type"].astype(int)
-            db_table.data["latitude"] = db_table["latitude"].astype(float)
-            db_table.data["longitude"] = db_table["longitude"].astype(float)
-            db_table.data["report_timestamp"] = pd.to_datetime(
-                db_table["report_timestamp"],
-                format="%Y-%m-%d %H:%M:%S",
-                errors="coerce",
-            )
-        else:
-            db_table.data["observation_value"] = db_table["observation_value"].astype(
-                float
-            )
-            db_table.data["latitude"] = db_table["latitude"].astype(float)
-            db_table.data["longitude"] = db_table["longitude"].astype(float)
-            db_table.data["date_time"] = pd.to_datetime(
-                db_table["date_time"],
-                format="%Y-%m-%d %H:%M:%S",
-                errors="coerce",
-            )
-        if table == "observations-slp":
-            db_table.data["observation_value"] = db_table.data["observation_value"]
-
         data_dict[table] = db_table
 
     return data_dict
@@ -155,42 +132,12 @@ def testdata_track():
     ]
     for table in tables:
         load_file(
-            f"{input_dir}/cdm_tables/{table}-{cdm_name}.psv",
+            f"{input_dir}/cdm_tables/{table}-{cdm_name}.pq",
             cache_dir=cache_dir,
             within_drs=False,
         )
 
-    db_tables = read_tables(cache_dir, suffix=cdm_name, extension="psv")
-    db_tables.data = db_tables.replace("null", None)
-    for table in tables:
-        db_tables.data[(table, "latitude")] = db_tables[(table, "latitude")].astype(
-            float
-        )
-        db_tables.data[(table, "longitude")] = db_tables[(table, "longitude")].astype(
-            float
-        )
-        if table == "header":
-            db_tables.data[(table, "report_timestamp")] = pd.to_datetime(
-                db_tables[(table, "report_timestamp")],
-                format="%Y-%m-%d %H:%M:%S",
-                errors="coerce",
-            )
-            db_tables.data[(table, "station_speed")] = db_tables[
-                (table, "station_speed")
-            ].astype(float)
-            db_tables.data[(table, "station_course")] = db_tables[
-                (table, "station_course")
-            ].astype(float)
-        else:
-            db_tables.data[(table, "observation_value")] = db_tables[
-                (table, "observation_value")
-            ].astype(float)
-            db_tables.data[(table, "date_time")] = pd.to_datetime(
-                db_tables[(table, "date_time")],
-                format="%Y-%m-%d %H:%M:%S",
-                errors="coerce",
-            )
-    return db_tables
+    return read_tables(cache_dir, suffix=cdm_name, extension="pq")
 
 
 @pytest.fixture(scope="session")

@@ -144,89 +144,6 @@ reload(logging)  # This is to override potential previous config of logging
 
 # Functions--------------------------------------------------------------------
 
-dtype_conversion = {
-    "header": {
-        "platform_type": {
-            "dtype": int,
-        },
-        "latitude": {
-            "dtype": float,
-        },
-        "longitude": {
-            "dtype": float,
-        },
-        "report_timestamp": {
-            "dtype": "datetime",
-            "format": "%Y-%m-%d %H:%M:%S",
-        },
-        "station_speed": {
-            "dtype": float,
-        },
-        "station_course": {
-            "dtype": float,
-        },
-        "report_quality": {
-            "dtype": int,
-        },
-        "location_quality": {
-            "dtype": int,
-        },
-        "report_time_quality": {
-            "dtype": int,
-        },
-    },
-    "observations": {
-        "latitude": {
-            "dtype": float,
-        },
-        "longitude": {
-            "dtype": float,
-        },
-        "date_time": {
-            "dtype": "datetime",
-            "format": "%Y-%m-%d %H:%M:%S",
-        },
-        "quality_flag": {
-            "dtype": int,
-        },
-    },
-    "observations-at": {
-        "observation_value": {
-            "dtype": float,
-        }
-    },
-    "observations-dpt": {
-        "observation_value": {
-            "dtype": float,
-        }
-    },
-    "observations-slp": {
-        "observation_value": {
-            "dtype": float,
-        }
-    },
-    "observations-sst": {
-        "observation_value": {
-            "dtype": float,
-        }
-    },
-    "observations-wbt": {
-        "observation_value": {
-            "dtype": float,
-        }
-    },
-    "observations-wd": {
-        "observation_value": {
-            "dtype": float,
-        }
-    },
-    "observations-ws": {
-        "observation_value": {
-            "dtype": float,
-        }
-    },
-}
-
 
 def remove_invalid_positions(df):
     """Remove rows where latitude and/or longitude is None."""
@@ -235,42 +152,8 @@ def remove_invalid_positions(df):
 
 def value_counts(series):
     """Count values in pandas Series."""
-    return series.value_counts(dropna=False).to_dict()
-
-
-def convert_dtypes(df, table, mode="qc"):
-    """Convert data type."""
-    if table == "header":
-        convert_dict = dtype_conversion["header"]
-    else:
-        convert_dict_general = dtype_conversion["observations"]
-        convert_dict_special = dtype_conversion[table]
-        convert_dict = {**convert_dict_general, **convert_dict_special}
-    for col, col_kwargs in convert_dict.items():
-        dtype = col_kwargs["dtype"]
-        if dtype == "datetime":
-            fmt = col_kwargs.get("format")
-            if mode == "qc":
-                df[col] = pd.to_datetime(df[col], format=fmt, errors="coerce")
-            elif mode == "orig":
-                df[col] = df[col].dt.strftime(fmt)
-        else:
-            if mode == "qc":
-                df[col] = df[col].astype(dtype)
-            elif mode == "orig":
-                decimals = col_kwargs.get("decimal_places", 0)
-                df[col] = df[col].map(lambda x: f"{x:.{decimals}f}")
-                df[col] = df[col].replace("nan", "null")
-    return df
-
-
-def update_dtypes(data_df, table):
-    """Update dtypes in DataFrame."""
-    if data_df.empty:
-        pass
-    else:
-        convert_dtypes(data_df, table)
-    return data_df
+    counts = series.value_counts(dropna=False).to_dict()
+    return {int(k): v for k, v in counts.items()}
 
 
 def get_valid_indexes(df, table):
@@ -298,7 +181,6 @@ def get_valid_indexes(df, table):
 
 def create_consistent_datadict(
     data_dict,
-    convert_dtypes=True,
     remove_invalids=False,
     drop_positions=True,
 ):
@@ -307,8 +189,6 @@ def create_consistent_datadict(
     for table_in in data_dict.keys():
         if drop_positions is True:
             remove_invalid_positions(data_dict[table_in])
-        if convert_dtypes is True:
-            update_dtypes(data_dict[table_in], table_in)
         if remove_invalids is True:
             valid_indexes = get_valid_indexes(data_dict[table_in], table_in)
             data_dict[table_in] = data_dict[table_in].loc[valid_indexes]
@@ -355,7 +235,6 @@ def update_data_dict(
             df["history"] = history
         else:
             df["quality_flag"] = quality_flags[table]
-        convert_dtypes(df, table, mode="orig")
 
 
 def configure_month_params(params):
@@ -453,43 +332,14 @@ def get_nearest_to_hour(series, groupby=None):
     return nearest[["timestamp"]]
 
 
-def update_decimals(table_in, key):
-    """Update decimal places."""
-    columns = list(dtype_conversion[key].keys())
-    for col in columns:
-        if dtype_conversion[key][col]["dtype"] == "datetime":
-            continue
-        for value in data_dict[table_in][col]:
-            if pd.isna(value):
-                continue
-            value = str(value)
-            if value == "null":
-                continue
-            if "." in value:
-                decimals = len(value.split(".")[-1])
-            else:
-                decimals = 0
-            dtype_conversion[key][col]["decimal_places"] = decimals
-            break
-
-
-def create_data_dict(data_dict, tables_in, params, get_decimals=False):
+def create_data_dict(data_dict, tables_in, params):
     """Create data dictionary."""
-    obs = False
     for table_in in tables_in:
         if table_in not in data_dict.keys():
             db_ = read_cdm_tables(params, table_in)
             if db_.empty:
                 continue
             data_dict[table_in] = db_[table_in]
-
-        if get_decimals is False:
-            continue
-
-        update_decimals(table_in, table_in)
-        if table_in != "header" and obs is False:
-            update_decimals(table_in, "observations")
-            obs = True
 
     return data_dict
 
@@ -552,7 +402,7 @@ if len(tables_in) == 1:
     )
     sys.exit(1)
 
-data_dict = create_data_dict(data_dict, tables_in, params, get_decimals=True)
+data_dict = create_data_dict(data_dict, tables_in, params)
 
 # Remove report_ids without any observations
 data_dict, ql_dict = create_consistent_datadict(data_dict)

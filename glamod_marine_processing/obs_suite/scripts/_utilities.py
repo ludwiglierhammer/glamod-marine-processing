@@ -97,42 +97,15 @@ level3_mappings = {
     },
 }
 
-level3_dtypes = {
-    "station_name": "string",
-    "primary_station_id": "string",
-    "report_id": "string",
-    "observation_id": "string",
-    "longitude": "float64",
-    "latitude": "float64",
-    "height_of_station_above_sea_level": "float64",
-    "observation_height_above_station_surface": "float64",
-    "z_coordinate": "float64",
-    "report_timestamp": "datetime64[ns, UTC]",
-    "report_meaning_of_time_stamp": "Int64",
-    "report_duration": "Int64",
-    "observed_variable": "Int64",
-    "units": "Int64",
-    "observation_value": "float64",
-    "quality_flag": "Int64",
-    "source_id": "Int64",
-    "data_policy_licence": "Int64",
-    "platform_type": "Int64",
-    "report_type": "Int64",
-    "value_significance": "Int64",
-}
-
 
 def add_utc_offset(series):
     """Add utc offset +00 to datetime object string."""
-    s = pd.to_datetime(series, errors="coerce")
-    s = s.dt.tz_localize("UTC")
-    s = s.dt.strftime("%Y-%m-%d %H:%M:%S+00")
-    return s.where(series.notna(), "null")
+    return series.dt.tz_localize("UTC")
 
 
 def get_integer_source_id(series):
     """Rank source id as integer value."""
-    return series.rank(method="dense").astype(int)
+    return series.rank(method="dense")
 
 
 def set_default_source_id(series):
@@ -145,7 +118,7 @@ def set_default_source_id(series):
 def set_default_report_duration(series):
     """Set default report_duration 8 (10 minutes)."""
     s = series[:].copy()
-    s[:] = "8"
+    s[:] = 8
     return s
 
 
@@ -154,16 +127,6 @@ level3_conversions = {
     "source_id": set_default_source_id,
     "report_duration": set_default_report_duration,
 }
-
-
-def convert_dtypes(df, dtypes):
-    """Convert data types."""
-    for col, dtype in dtypes.items():
-        if dtype.startswith("datetime"):
-            df[col] = pd.to_datetime(df[col], errors="coerce").dt.tz_convert("UTC")
-        else:
-            df[col] = df[col].astype(dtype)
-    return df
 
 
 # Functions--------------------------------------------------------------------
@@ -310,7 +273,7 @@ def read_cdm_tables(params, table, ifile=None):
     """Read CDM tables."""
     kwargs = {
         "cdm_subset": table,
-        "na_values": "null",
+        "extension": "pq",
     }
     if ifile is None:
         ifile_pattern = os.path.join(
@@ -319,7 +282,14 @@ def read_cdm_tables(params, table, ifile=None):
         if len(glob.glob(ifile_pattern)) == 0:
             logging.warning(f"CDM file pattern not found: {ifile_pattern}.")
             return DataBundle()
-        return read_tables(params.prev_level_path, suffix=params.prev_fileID, **kwargs)
+
+        try:
+            return read_tables(
+                params.prev_level_path, suffix=params.prev_fileID, **kwargs
+            )
+        except ValueError:
+            logging.warning(f"CDM file {table} is empty.")
+            return DataBundle()
 
     if not os.path.isfile(ifile):
         logging.warning(f"CDM file not found: {ifile}.")
@@ -331,7 +301,12 @@ def read_cdm_tables(params, table, ifile=None):
 
 
 def write_cdm_tables(
-    params, df, tables=[], outname=None, mode="csv", dtypes={}, **kwargs
+    params,
+    df,
+    tables=[],
+    outname=None,
+    mode="parquet",
+    **kwargs,
 ):
     """Write table to disk."""
     if df.empty:
@@ -357,7 +332,7 @@ def write_cdm_tables(
             df = df[table]
         except KeyError:
             logging.info(f"Table {table} is already selected.")
-        df = convert_dtypes(df, dtypes)
+
         if mode == "csv":
             df.to_csv(
                 outname,

@@ -2,11 +2,13 @@
 
 from __future__ import annotations
 
+import datetime
 import errno
 import json
 import os
 from warnings import warn
 
+import numpy as np
 import simplejson
 
 try:
@@ -100,6 +102,21 @@ def add_to_config(config, key=None, **kwargs):
     return config
 
 
+def make_json_safe(obj):
+    """Make json dump-able."""
+    if isinstance(obj, dict):
+        return {
+            (int(k) if isinstance(k, np.integer) else k): make_json_safe(v)
+            for k, v in obj.items()
+        }
+    elif isinstance(obj, list):
+        return [make_json_safe(i) for i in obj]
+    elif isinstance(obj, datetime.datetime):
+        return obj.isoformat()
+    else:
+        return obj
+
+
 def load_json(json_file):
     """Load json file from disk."""
     with open(json_file) as f:
@@ -114,6 +131,7 @@ def save_json(json_dict, json_file, **kwargs):
 
 def save_simplejson(json_dict, json_file, **kwargs):
     """Save json file with simplejson on disk."""
+    json_dict = make_json_safe(json_dict)
     with open(json_file, "w") as f:
         simplejson.dump(json_dict, f, **kwargs)
 

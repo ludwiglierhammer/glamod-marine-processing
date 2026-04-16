@@ -195,6 +195,7 @@ def process_table(table_df, table):
 
     table_df = table_df[table_df.index.isin(mask_df.index)]
     table_mask = mask_df[mask_df.index.isin(table_df.index)]
+
     if table == "header":
         table_df["history"] = table_df["history"] + f";{history_tstmp}. {history}"
         ql_dict["unique_ids"] = (
@@ -202,6 +203,7 @@ def process_table(table_df, table):
             .value_counts(dropna=False)
             .to_dict()
         )
+
     if not table_df[table_mask["all"]].empty:
         write_cdm_tables(params, table_df[table_mask["all"]], tables=table)
     else:
@@ -219,7 +221,6 @@ logging.basicConfig(
     datefmt="%Y%m%d %H:%M:%S",
     filename=None,
 )
-
 params = script_setup(["noc_version"], sys.argv)
 paths_exist(params.level_invalid_path)
 if params.noc_version:
@@ -264,9 +265,7 @@ mask_df[validated] = True
 # 2. VALIDATE THE FIELDS-------------------------------------------------------
 # 2.1. Validate datetime
 field = "report_timestamp"
-mask_df[field] = pd.to_datetime(
-    table_db[field], format="mixed", errors="coerce"
-).notna()
+mask_df[field] = table_db[field].notna()
 
 # 2.2. Validate primary_station_id
 field = "primary_station_id"
@@ -276,8 +275,9 @@ ql_dict["id_validation_rules"] = {}
 logging.info("Applying callsign id validation")
 p_id_scheme = "primary_station_id_scheme"
 pt = "platform_type"
-callsigns = table_db[p_id_scheme].isin(["5"]) & table_db[pt].isin(["2", "33"])
+callsigns = table_db[p_id_scheme].isin([5]) & table_db[pt].isin([2, 33])
 nocallsigns = ~callsigns
+
 relist = ["^([0-9]{1}[A-Z]{1}|^[A-Z]{1}[0-9]{1}|^[A-Z]{2})[A-Z0-9]{1,}$", "^[0-9]{5}$"]
 callre = re.compile("|".join(relist))
 mask_df.loc[callsigns, field] = (
@@ -336,7 +336,7 @@ logging.info("Cleaning table header")
 process_table(table_db, table)
 obs_tables = [x for x in params.cdm_tables if x != "header"]
 for table in obs_tables:
-    table_pattern = FFS.join([table, params.prev_fileID]) + "*.psv"
+    table_pattern = FFS.join([table, params.prev_fileID]) + "*.pq"
     table_files = glob.glob(os.path.join(params.prev_level_path, table_pattern))
     if len(table_files) > 0:
         logging.info(f"Cleaning table {table}")
