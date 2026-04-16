@@ -105,7 +105,7 @@ def add_utc_offset(series):
 
 def get_integer_source_id(series):
     """Rank source id as integer value."""
-    return series.rank(method="dense")  # .astype(int)
+    return series.rank(method="dense")
 
 
 def set_default_source_id(series):
