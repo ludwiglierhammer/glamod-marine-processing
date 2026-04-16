@@ -549,7 +549,6 @@ for table, df in data_dict.items():
             ),
         )
 
-    # df = df.fillna("null").astype(str)
     write_cdm_tables(params, df, tables=table)
 
 # CHECKOUT --------------------------------------------------------------------
